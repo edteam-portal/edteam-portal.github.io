@@ -155,17 +155,19 @@
             .title-row h1 { font-size: 1.3em; }
             .tab-btn { padding: 8px 15px; font-size: 0.9em; }
             
-            /* On réorganise la barre centrale : Hologramme en haut, Boutons côte à côte en dessous */
-            .fc-control-bar { flex-wrap: wrap; height: auto; padding: 15px; gap: 15px; }
-            .fc-holo-panel { min-width: 100%; height: 110px; order: 1; }
+            /* On réorganise la barre centrale et on justifie au début pour éviter les centragages fantômes */
+            .fc-control-bar { flex-wrap: wrap; height: auto; padding: 15px; gap: 15px; justify-content: flex-start; }
             
-            /* Le bouton Moyennes (CR) se place à gauche sur la 2ème ligne */
-            .settings-icons-col { flex-direction: row; width: auto; border: none; padding: 0; margin: 0; order: 2; height: 60px; }
-            .ui-icon-btn { width: 80px !important; height: 100% !important; }
+            /* L'Hologramme prend 100% de la largeur stricte (Ligne 1) */
+            .fc-holo-panel { min-width: 100%; flex: 0 0 100%; height: 110px; order: 1; }
             
-            /* Le bouton Scan prend tout le reste de la place à droite sur la 2ème ligne */
-            .scan-action-col { padding-left: 0; flex: 1; height: 60px; order: 3; }
-            .giant-scan-btn { font-size: 1.1em; } /* On réduit un peu le texte pour l'ajustement */
+            /* Le bouton Moyennes (CR) fait exactement 80px, pas un de plus (Ligne 2 - Gauche) */
+            .settings-icons-col { flex-direction: row; width: 80px; flex: 0 0 80px !important; border: none; padding: 0; margin: 0; order: 2; height: 60px; }
+            .ui-icon-btn { width: 100% !important; height: 100% !important; }
+            
+            /* Le bouton Scan absorbe tout le reste de la ligne mathématiquement (Ligne 2 - Droite) */
+            .scan-action-col { padding-left: 0; flex: 1 1 0%; height: 60px; order: 3; }
+            .giant-scan-btn { font-size: 1.1em; }
         }
 
         /* Pour les petits écrans (Tablettes classiques en mode portrait) */
