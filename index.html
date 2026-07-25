@@ -34,8 +34,27 @@
         .hud-header { display: flex; flex-direction: column; margin-bottom: 15px; flex-shrink: 0; }
         .hud-status { font-size: 0.8em; display: flex; gap: 20px; color: #888; margin-bottom: 5px; letter-spacing: 1px; justify-content: flex-start; }
         
-        .title-row { display: flex; align-items: center; gap: 25px; margin-bottom: 15px; }
+        .title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
         .title-row h1 { margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; line-height: 1; }
+        .app-logo { 
+        height: 45px; 
+        width: 45px; 
+        /* Bordures et fond retirés pour un rendu 100% HUD */
+        filter: drop-shadow(0 0 5px var(--ed-orange-glow));
+        transition: 0.3s;
+    }
+    .app-logo:hover {
+        filter: drop-shadow(0 0 10px var(--ed-orange));
+        transform: scale(1.05);
+    }
+    .boot-logo {
+        height: 120px;
+        width: 120px;
+        margin-bottom: 20px;
+        /* Bordures retirées */
+        filter: drop-shadow(0 0 15px var(--ed-orange-dim));
+        animation: pulse-boom 2s infinite;
+    }
         #fc-inventory-percent { font-size: 0.9em; color: #fff; letter-spacing: 2px; font-weight: bold; background: rgba(0, 240, 255, 0.08); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 
         .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; }
@@ -203,6 +222,18 @@
     <div id="holo-tooltip"></div>
 
     <div id="boot-screen" onclick="bootSystem()">
+        <!-- LOGO SVG VECTORIEL : AIGLE STELLAIRE (BOOT) -->
+        <svg class="boot-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <filter id="glowCyan"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="glowOrange"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <!-- Aigle Gauche (Cyan) -->
+            <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" filter="url(#glowCyan)" />
+            <!-- Aigle Droit (Orange) -->
+            <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" filter="url(#glowOrange)" />
+            <!-- Noyau central -->
+            <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+        </svg>
+        
         <h1 style="font-size: 3em; margin: 0; letter-spacing: 5px; text-align: center;">SYS.EDTEAM</h1>
         <p style="letter-spacing: 2px; color: #666; text-align: center;">COVAS - INTERFACE TACTIQUE</p>
         <button class="boot-btn" style="margin-top: 50px;">INITIALISER</button>
@@ -353,6 +384,16 @@
                 <span>LIAISON : <span id="status-indicator" style="color: #00FF00;">OK</span></span>
             </div>
             <div class="title-row">
+                <!-- LOGO SVG VECTORIEL : AIGLE STELLAIRE (MINIATURE) -->
+                <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Aigle Gauche (Cyan) -->
+                    <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                    <!-- Aigle Droit (Orange) -->
+                    <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                    <!-- Noyau central -->
+                    <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                </svg>
+                
                 <h1>COMMERCE FURTIF TACTIQUE</h1>
                 <div id="fc-inventory-percent"></div>
             </div>
