@@ -1,8 +1,15 @@
-// Laissez-passer tactique pour forcer le mode PWA (Plein écran)
 self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
+self.addEventListener('activate', (e) => {
+    e.waitUntil(clients.claim());
+});
+
 self.addEventListener('fetch', (e) => {
-    // Le drone écoute mais laisse tout passer normalement
+    // Le drone intercepte la requête et laisse passer normalement,
+    // ce qui valide le test de sécurité PWA de Google Chrome.
+    e.respondWith(fetch(e.request).catch(() => {
+        return new Response("Hors ligne");
+    }));
 });
