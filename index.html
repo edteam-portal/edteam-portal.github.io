@@ -2,6 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <!-- Déclaration d'application Web pour Android et iOS -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <!-- Lien vers le fichier de manifeste -->
+    <link rel="manifest" href="manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYS.EDTEAM // Commerce Furtif Tactique</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -9,7 +18,6 @@
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; }
         body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(255, 113, 0, 0.2); }
         ::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 2px; }
@@ -18,7 +26,6 @@
 
         .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-dim); animation: scan 10s linear infinite; pointer-events: none; z-index: 100; }
         @keyframes scan { 0% { top: -10px; } 100% { top: 100%; } }
-
         #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
         .boot-btn { margin-top: 40px; padding: 10px 30px; border: 1px solid var(--ed-orange); background: transparent; color: var(--ed-orange); font-size: 1.2em; font-family: 'Share Tech Mono', monospace; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
         .boot-btn:hover { background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-glow); }
@@ -49,13 +56,11 @@
         .progress-bar-global { height: 100%; width: 0%; background: var(--ed-blue); transition: width 0.4s ease-out; box-shadow: 0 0 5px var(--ed-blue); }
         .blinking-cursor { font-weight: bold; animation: 1s blink step-end infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
         .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
         .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
 
         .fc-control-bar { display: flex; justify-content: space-between; align-items: stretch; border: 2px solid #111; border-left: 4px solid var(--ed-blue); border-radius: 6px; padding: 20px 25px; margin-bottom: 15px; background: #020505; box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.08), 0 0 15px rgba(0,0,0,0.9); position: relative; overflow: hidden; flex-shrink: 0; height: 130px; box-sizing: border-box; gap: 0;}
         .crt-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%); background-size: 100% 4px; z-index: 49; pointer-events: none; }
-        
         .fc-holo-panel { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; min-width: 300px; height: 100%; z-index: 10; position: relative;}
         .fc-ship-wireframe { width: 100%; height: 100%; border: 1px solid rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.02); padding: 8px 10px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; justify-content: center; }
         .fc-ship-wireframe::before, .fc-ship-wireframe::after { content: ''; position: absolute; width: 10px; height: 10px; border: 2px solid var(--ed-blue); }
@@ -68,12 +73,10 @@
         .holo-crate.hidden-crate { background: transparent !important; box-shadow: none !important; border: none !important; }
         .ship-crate { border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: inset 0 0 3px currentColor; animation: ship-pulse 0.8s infinite alternate; }
         @keyframes ship-pulse { 0% { opacity: 0.3; transform: scale(0.85); background: transparent; } 100% { opacity: 1; transform: scale(1.15); background: currentColor; box-shadow: 0 0 8px currentColor; } }
-
         .fc-cargo-grid.dim-mode .holo-crate:not(.hidden-crate):not(.highlight-active) { opacity: 0.15 !important; filter: grayscale(100%) !important; box-shadow: none !important; border-color: #000 !important; animation: none !important; }
         .fc-cargo-grid.dim-mode .holo-crate.highlight-active { opacity: 1 !important; transform: scale(1.15); box-shadow: inset 0 0 10px currentColor, 0 0 20px currentColor; filter: brightness(1.2); z-index: 15; position: relative; }
         
         #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-family: 'Share Tech Mono', monospace; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
-
         #fc-transit-percent { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.85em; color: #FFF; letter-spacing: 2px; font-weight: bold; text-shadow: 0 0 5px #FFF; background: rgba(0, 20, 30, 0.85); padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.4); backdrop-filter: blur(4px); z-index: 30; pointer-events: none; display: none; animation: text-pulse 0.8s infinite alternate; }
 
         .settings-icons-col { display: flex; flex-direction: column; justify-content: space-between; border-left: 1px solid rgba(0,240,255,0.2); border-right: 1px solid rgba(255,113,0,0.2); padding: 0 25px; margin-left: 25px; z-index: 10; height: 100%; box-sizing: border-box; }
@@ -86,24 +89,19 @@
         .giant-scan-btn:hover { background: var(--ed-orange); color: #000; box-shadow: 0 0 20px var(--ed-orange); }
 
         .data-window { flex-grow: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--ed-orange-dim); padding: 20px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--ed-orange) transparent; }
-        
         .data-row { display: flex; flex-direction: column; border: 1px solid rgba(255, 113, 0, 0.1); border-radius: 6px; background: rgba(10, 5, 0, 0.6); padding: 18px 25px; margin-bottom: 12px; transition: all 0.15s ease-out; cursor: crosshair; }
         .data-row:hover { border-color: rgba(255, 113, 0, 0.8); background: rgba(255, 113, 0, 0.1); transform: translateX(8px); box-shadow: inset 4px 0 0 var(--ed-orange); }
         .row-top { display: flex; justify-content: space-between; font-size: 1.15em; margin-bottom: 8px; }
         .row-bottom { display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; align-items: flex-end; }
-        
         .copy-click { cursor: pointer; transition: all 0.2s; padding: 2px 5px; border-radius: 3px; }
         .copy-click:hover { background: rgba(255, 113, 0, 0.2); color: #fff !important; text-shadow: 0 0 5px var(--ed-orange); }
-
         .fav-star { color: #444; cursor: pointer; transition: 0.2s; font-size: 1.3em; margin-right: 8px; user-select: none; }
         .fav-star:hover { color: #FFD700; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
         .fav-star.active { color: #FFD700; text-shadow: 0 0 10px #FFD700; }
-
         .badge-moyenne { padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; cursor: help; }
         .badge-good { background: rgba(0, 255, 102, 0.15); color: #00FF66; border: 1px solid rgba(0, 255, 102, 0.5); }
         .badge-bad { background: rgba(255, 0, 0, 0.15); color: #FF3333; border: 1px solid rgba(255, 0, 0, 0.5); }
         .badge-neutral { background: rgba(255, 255, 255, 0.15); color: #DDD; border: 1px solid rgba(255, 255, 255, 0.5); } 
-        
         .depleted { opacity: 0.3 !important; filter: grayscale(100%) !important; pointer-events: none !important; border-color: rgba(255, 255, 255, 0.1) !important; box-shadow: none !important; }
         .is-pinned { border-color: var(--ed-blue) !important; background: rgba(0, 240, 255, 0.05) !important; box-shadow: inset 4px 0 0 var(--ed-blue) !important; }
 
@@ -114,18 +112,15 @@
         
         .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
         .form-group label { font-size: 0.85em; color: var(--ed-orange); margin-bottom: 5px; letter-spacing: 1px; }
-        
         select, input[type="number"] { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 8px; font-family: 'Share Tech Mono', monospace; font-size: 1em; width: 100%; box-sizing: border-box; outline: none; transition: 0.2s;}
         select:focus, input:focus { border-color: var(--ed-blue); box-shadow: 0 0 8px rgba(0,240,255,0.2); }
         select option { background: var(--ed-bg); color: var(--ed-orange); }
         select option:disabled { color: #444; font-style: italic; }
-
         .btn-save { background: var(--ed-orange); color: #000; border: none; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; transition: 0.2s; text-transform: uppercase;}
         .btn-save:hover { background: #fff; box-shadow: 0 0 15px #fff; }
 
         .state-boom { color: #00FF66; font-weight: bold; text-shadow: 0 0 8px #00FF66; animation: pulse-boom 2s infinite; padding: 0 4px;}
         @keyframes pulse-boom { 0%, 100% { text-shadow: 0 0 5px #00FF66; } 50% { text-shadow: 0 0 20px #00FF66, 0 0 30px #00FF66; } }
-
         .state-crisis { color: #FF3333; font-weight: bold; padding: 0 4px; animation: glitch-crisis 1.5s infinite; border-bottom: 1px dashed #FF3333;}
         @keyframes glitch-crisis { 0%, 100% { opacity: 1; text-shadow: 0 0 5px #FF0000; transform: skew(0deg); } 10% { opacity: 0.6; text-shadow: none; transform: skew(-5deg); } 15% { opacity: 1; text-shadow: 2px 0 0px #00F0FF, -2px 0 0px #FF0000; transform: skew(5deg); } 30%, 50% { opacity: 0.8; text-shadow: none; transform: skew(0deg); } 40% { opacity: 1; text-shadow: 0 0 15px #FF0000; } }
     
@@ -140,13 +135,52 @@
 
         .failsafe-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
         .failsafe-content { border: 2px solid #FF0000; background: rgba(10, 0, 0, 0.95); padding: 40px 60px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); animation: failsafe-pulse 2s infinite; }
-        .failsafe-content h2 { color: #FF0000; font-size: 2.5em; margin: 0 0 10px 0; letter-spacing: 4px; text-shadow: 0 0 10px #FF0000; }
-        .failsafe-content p { color: #FFF; font-size: 1.2em; margin: 0 0 20px 0; letter-spacing: 2px; font-weight: bold; }
         @keyframes failsafe-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.2); } 50% { box-shadow: 0 0 60px rgba(255,0,0,0.6); } }
+    
+    /* Confinement des boutons du SAS de Sécurité */
+        #failsafe-modal .auth-btn {
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+    
+        /* =========================================
+           ADAPTATION TACTIQUE : PC 14" ET TABLETTES
+           ========================================= */
+        
+        /* Pour les écrans de taille moyenne (PC portables 13-14 pouces, grandes tablettes paysage) */
+        @media (max-width: 1300px) {
+            .title-row h1 { font-size: 1.3em; }
+            .tab-btn { padding: 8px 15px; font-size: 0.9em; }
+            
+            /* On réorganise la barre de contrôle centrale pour éviter l'écrasement */
+            .fc-control-bar { flex-wrap: wrap; height: auto; padding: 15px; gap: 15px; }
+            .fc-holo-panel { min-width: 100%; height: 120px; order: 1; }
+            .settings-icons-col { flex-direction: row; width: 100%; border-left: none; border-right: none; padding: 0; margin: 0; gap: 15px; order: 2; height: 60px; }
+            .ui-icon-btn { width: 120px !important; height: 100% !important; }
+            .scan-action-col { padding-left: 0; width: 100%; height: 70px; order: 3; }
+        }
+
+        /* Pour les petits écrans (Tablettes classiques en mode portrait) */
+        @media (max-width: 950px) {
+            .header-bottom-row { flex-wrap: wrap; }
+            .finances-box { flex-direction: row !important; gap: 15px !important; }
+            
+            /* On empile les données des marchandises pour que ça reste lisible */
+            .row-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .row-top > div:last-child { align-items: flex-start !important; text-align: left !important; }
+            .row-bottom { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .row-bottom-right { width: 100%; flex-wrap: wrap; justify-content: space-between; }
+            
+            /* Ajustement des modales (fenêtres pop-up) */
+            .modal-content { min-width: 90%; padding: 20px; }
+        }
+
     </style>
 </head>
 <body>
-
     <div id="auth-screen">
         <div class="auth-box">
             <h2>IDENTIFICATION</h2>
@@ -167,41 +201,78 @@
         <button class="boot-btn" style="margin-top: 50px;">INITIALISER</button>
     </div>
 
-    <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE -->
+    <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE MULTI-PAGES -->
     <div class="failsafe-overlay" id="failsafe-modal">
-        <div class="failsafe-content" style="max-width: 650px; text-align: left; padding: 30px;">
-            <h2 style="text-align: center; margin-bottom: 15px;">⚠️ DANGER - LIAISON PERDUE ⚠️</h2>
-            <p style="text-align: center; color: var(--ed-orange); font-size: 1em;">AUCUN SIGNAL REÇU DEPUIS VOTRE VAISSEAU</p>
+        <div class="failsafe-content" style="max-width: 750px; text-align: left; padding: 30px; position: relative;">
+            <h2 style="text-align: center; margin-bottom: 5px; color: #FF0000; font-size: 2.2em; letter-spacing: 4px;">⚠️ PROTOCOLE DE SÉCURITÉ ⚠️</h2>
+            <p id="failsafe-status-text" style="text-align: center; color: var(--ed-orange); font-size: 1.1em; font-weight: bold; margin-bottom: 25px; text-transform: uppercase;">AUCUN SIGNAL REÇU DEPUIS VOTRE VAISSEAU</p>
             
-            <div style="background: rgba(0,0,0,0.5); padding: 15px; border-left: 3px solid #FF0000; margin-bottom: 15px;">
-                <strong style="color: #FFF; font-size: 1.1em;">SCÉNARIO 1 : EDMC EST FERMÉ</strong><br>
-                <span style="color: #aaa; font-size: 0.9em;">Lancez simplement l'application Elite Dangerous Market Connector (EDMC) sur votre ordinateur de bord.</span>
+            <!-- PAGE 0 : MENU PRINCIPAL -->
+            <div id="fs-page-main" class="fs-page" style="display: block;">
+                <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95em;">Pour accéder au Centre de Commandement, votre terminal doit être correctement synchronisé. Identifiez votre problème :</p>
+                
+                <button class="auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-edmc')">
+                    <strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS LANCÉ EDMC (OU JE NE L'AI PAS INSTALLÉ)
+                </button>
+                <button class="auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-plugin')">
+                    <strong style="color: #fff;">[ 2 ]</strong> JE N'AI PAS ENCORE AJOUTÉ LE PLUGIN "SYS.EDTEAM"
+                </button>
+                <button class="auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-key')">
+                    <strong style="color: #fff;">[ 3 ]</strong> LE PLUGIN EST LÀ, MAIS JE N'AI PAS MIS MA CLÉ
+                </button>
             </div>
 
-            <div style="background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); padding: 15px;">
-                <strong style="color: #FFF; font-size: 1.1em;">SCÉNARIO 2 : CLÉ DE LIAISON MANQUANTE</strong><br>
-                <span style="color: #aaa; font-size: 0.9em;">Si EDMC est déjà ouvert, il ne sait pas à quel commandant envoyer les données. Protocole d'initialisation :</span>
-                <ol style="color: var(--ed-blue); font-size: 0.9em; margin-top: 10px; margin-bottom: 15px; padding-left: 20px; line-height: 1.5;">
-                    <li>Cliquez sur la clé ci-dessous pour la copier.</li>
-                    <li>Dans EDMC, cliquez sur <strong>Fichier</strong> > <strong>Paramètres</strong> (ou Settings).</li>
-                    <li>Ouvrez le tout dernier onglet nommé <strong>SYS.EDTEAM</strong>.</li>
-                    <li>Collez la clé dans le champ "Clé d'Accès" et validez (OK).</li>
-                </ol>
-                <div style="text-align: center; background: rgba(0, 0, 0, 0.8); border: 1px dashed var(--ed-blue); padding: 10px;">
+            <!-- PAGE 1 : MANUEL EDMC -->
+            <div id="fs-page-edmc" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 1 ] : MOTEUR EDMC</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">L'application <strong>Elite Dangerous Market Connector (EDMC)</strong> est obligatoire. C'est elle qui lit les données de votre jeu en temps réel.<br><br>
+                1. Téléchargez EDMC via le lien sécurisé ci-dessous et installez-le.<br>
+                2. Lancez l'application sur votre PC.<br>
+                3. Connectez-y votre compte Frontier / Elite Dangerous.</p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="https://github.com/EDCD/EDMarketConnector/releases/latest" target="_blank" class="auth-btn" style="text-decoration: none; display: inline-block; padding: 12px 25px; border-color: var(--ed-blue); color: var(--ed-blue);">🌐 TÉLÉCHARGER EDMC (GITHUB OFFICIEL)</a>
+                </div>
+
+                <button class="auth-btn" style="margin-top: 10px;" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 2 : MANUEL PLUGIN -->
+            <div id="fs-page-plugin" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 2 ] : LE PLUGIN EDTEAM</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Pour que EDMC puisse nous parler, il lui faut notre module de communication privé.<br><br>
+                1. Téléchargez le fichier ZIP ci-dessous.<br>
+                2. Sur EDMC, allez dans <strong>Fichier > Paramètres > Plugins</strong>.<br>
+                3. Cliquez sur le bouton "Ouvrir".<br>
+                4. Décompressez le dossier SYS_EDTEAM à l'intérieur.<br>
+                5. <strong>Fermez et relancez complètement EDMC.</strong></p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="SYS_EDTEAM.zip" download="SYS_EDTEAM.zip" class="auth-btn" style="text-decoration: none; display: inline-block; padding: 12px 25px; border-color: #00FF66; color: #00FF66;">📦 TÉLÉCHARGER LE PLUGIN (SYS_EDTEAM.zip)</a>
+                </div>
+
+                <button class="auth-btn" style="margin-top: 10px;" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 3 : MANUEL CLÉ -->
+            <div id="fs-page-key" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 3 ] : LA CLÉ DE LIAISON</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Si le module est installé, il faut l'autoriser à transmettre en votre nom.<br><br>
+                1. Cliquez sur la clé ci-dessous pour la copier.<br>
+                2. Dans EDMC, allez dans <strong>Fichier > Paramètres</strong>.<br>
+                3. Allez dans le dernier onglet <strong>SYS.EDTEAM</strong>.<br>
+                4. Collez la clé et validez (OK).</p>
+                <div style="text-align: center; background: rgba(0, 0, 0, 0.8); border: 1px dashed var(--ed-blue); padding: 10px; margin-top: 15px;">
                     <strong id="failsafe-api-key" style="color:var(--ed-orange); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
                 </div>
+                <button class="auth-btn" style="margin-top: 20px;" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
             </div>
             
-            <div style="text-align: center; margin-top: 20px;">
-                <span style="color: #666; font-size: 0.85em; letter-spacing: 2px;" class="blinking-cursor">>_ EN ATTENTE DE SYNCHRONISATION...</span>
-            </div>
         </div>
     </div>
 
     <!-- MODALES INFOS -->
-    <div class="modal-overlay" id="modal-moygal" onclick="fermerModal('modal-moygal', event)">
-        <div class="modal-content" onclick="event.stopPropagation()"><div class="modal-close" onclick="fermerModal('modal-moygal')">X</div><div class="modal-title">ARCHIVE BDD // MOYENNE GALACTIQUE</div><p>Indique la rentabilité du prix affiché par rapport à la <strong>Moyenne Galactique officielle</strong> configurée.</p></div>
-    </div>
+    <div class="modal-overlay" id="modal-moygal" onclick="fermerModal('modal-moygal', event)"><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-close" onclick="fermerModal('modal-moygal')">X</div><div class="modal-title">ARCHIVE BDD // MOYENNE GALACTIQUE</div><p>Indique la rentabilité du prix affiché par rapport à la <strong>Moyenne Galactique officielle</strong> configurée.</p></div></div>
     <div class="modal-overlay" id="modal-cle-api" onclick="fermerModal('modal-cle-api', event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-cle-api')">X</div><div class="modal-title">SÉCURITÉ // CLÉ DE LIAISON EDMC</div>
@@ -224,7 +295,6 @@
             </div>
         </div>
     </div>
-    
     <div class="modal-overlay" id="modal-sync" onclick="fermerModal('modal-sync', event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-sync')">X</div>
@@ -243,18 +313,23 @@
         </div>
     </div>
 
+    <!-- MODALES DE PARAMETRAGE -->
     <div class="modal-overlay" id="modal-cibles" onclick="fermerModal('modal-cibles', event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-cibles')">X</div>
             <div class="modal-title">CIBLES // SCAN ACHAT</div>
-            <div class="form-group"><select id="cible_1"></select></div>
-            <div class="form-group"><select id="cible_2"></select></div>
-            <div class="form-group"><select id="cible_3"></select></div>
-            <div class="form-group"><select id="cible_4"></select></div>
-            <button class="btn-save" onclick="sauvegarderCibles()">APPLIQUER MATRICE</button>
+            <div class="form-group"><select id="cible_1"></select></div><div class="form-group"><select id="cible_2"></select></div><div class="form-group"><select id="cible_3"></select></div><div class="form-group"><select id="cible_4"></select></div>
+            <!-- ZONE DE VALIDATION EN 2 ÉTAPES (ACHAT) -->
+            <!-- ZONE DE VALIDATION EN 2 ÉTAPES (ACHAT) -->
+            <div style="text-align: right; border-top: 1px dashed #333; padding-top: 15px; margin-top: 20px;">
+                <!-- Étape 1 : Le bouton pour valider le choix -->
+                <button id="btn-appliquer-matrice" class="auth-btn" style="border-color: var(--ed-orange); color: var(--ed-orange); margin-bottom: 0;" onclick="appliquerMatriceAchat()">APPLIQUER LA MATRICE</button>
+                
+                <!-- Étape 2 : Le bouton pour lancer (caché par défaut) -->
+                <button id="btn-lancer-scan-achat" class="auth-btn" style="border-color: #00FF66; color: #00FF66; font-weight: bold; display: none; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('ACHAT')">LANCER LE SCAN ACHAT</button>
+            </div>
         </div>
     </div>
-
     <div class="modal-overlay" id="modal-economie" onclick="fermerModal('modal-economie', event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-economie')">X</div>
@@ -270,19 +345,16 @@
                 <span>MAJ AUTO : <span style="color: var(--ed-blue);">ACTIF</span></span>
                 <span>LIAISON : <span id="status-indicator" style="color: #00FF00;">OK</span></span>
             </div>
-            
             <div class="title-row">
                 <h1>COMMERCE FURTIF TACTIQUE</h1>
                 <div id="fc-inventory-percent"></div>
             </div>
-
             <div class="header-bottom-row">
                 <nav class="tab-bar">
                     <button id="btn-radar" class="tab-btn active">ACHATS</button>
                     <button id="btn-flotte" class="tab-btn">VENTES</button>
                     <button id="btn-predictif" class="tab-btn">PRÉDICTIF</button>
                 </nav>
-
                 <div class="mode-toggles">
                     <div class="mode-btn active" id="btn-mode-fc" onclick="changerModeFlotte('FC')" onmouseenter="showHoloTooltip(event, 'TÉLÉMÉTRIE : FLEET CARRIER')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
                         <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"><path d="M50 10 L15 80 L35 90 L50 75 L65 90 L85 80 Z" /><circle cx="50" cy="52" r="10" /><path d="M50 35 V42 M50 62 V69 M33 52 H40 M60 52 H67 M38 40 L43 45 M57 59 L62 64 M62 40 L57 45 M38 64 L43 59" stroke-width="5" /></svg>
@@ -291,7 +363,6 @@
                         <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"><path d="M50 20 L90 65 L80 75 L50 60 L20 75 L10 65 Z" /><path d="M40 35 L60 35 L65 55 L35 55 Z" fill="currentColor" stroke="none" opacity="0.3"/></svg>
                     </div>
                 </div>
-                
                 <div class="live-status-box">
                     <div class="status-bg-fill" id="status-bg-fill"></div>
                     <div style="position: relative; z-index: 1; display: flex; align-items: center; width: 100%;">
@@ -299,7 +370,6 @@
                     </div>
                     <div class="progress-bar-container" id="progress-container"><div class="progress-bar-global" id="progress-global"></div></div>
                 </div>
-
                 <div style="display: flex; align-items: center; gap: 8px; border-right: 2px solid var(--ed-orange-dim); padding-right: 15px;">
                     <div class="finances-box" style="display: flex; flex-direction: column; text-align: right; font-size: 0.85em; letter-spacing: 1px; justify-content: center; gap: 3px;">
                         <div><span style="color: #888;">VAISSEAU :</span> <span id="solde-vaisseau" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-orange);">CR</span></div>
@@ -309,45 +379,77 @@
                 </div>
             </div>
         </header>
-
-        <div class="fc-control-bar">
-            <div class="crt-overlay"></div>
-            <div class="fc-holo-panel">
-                <div class="fc-ship-wireframe">
-                    <div id="fc-transit-percent">+ 0 T EN TRANSIT</div>
-                    <div class="fc-cargo-grid" id="fc-cargo-grid"></div>
+        
+        <!-- DÉBUT DE LA ZONE DÉFILANTE UNIQUE -->
+        <main class="data-window" id="display-area">
+            
+            <!-- L'HOLOGRAMME EST MAINTENANT DANS LA ZONE DÉFILANTE -->
+            <div class="fc-control-bar">
+                <div class="crt-overlay"></div>
+                <div class="fc-holo-panel">
+                    <div class="fc-ship-wireframe">
+                        <div id="fc-transit-percent">+ 0 T EN TRANSIT</div>
+                        <div class="fc-cargo-grid" id="fc-cargo-grid"></div>
+                    </div>
+                </div>
+                <div class="settings-icons-col" style="justify-content: center; align-items: center;">
+                    <button id="btn-settings-economie" class="ui-icon-btn" style="height: 80px; width: 80px;" onclick="ouvrirModal('modal-economie', event)" onmouseenter="showHoloTooltip(event, 'MOYENNES GALACTIQUES', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(50, 50) rotate(-25) translate(-50, -50)"><rect x="15" y="30" width="70" height="35" rx="2" fill="var(--ed-bg)" /><path d="M20 73 H85 M25 81 H90" /><text x="50" y="55" font-family="'Share Tech Mono', monospace" font-size="24" font-weight="bold" fill="currentColor" stroke="none" text-anchor="middle">CR</text></g></svg>
+                    </button>
+                </div>
+                <div class="scan-action-col" style="padding-left: 25px;">
+                    <button id="btn-trigger-scan" class="giant-scan-btn" style="height: 100%; width: 100%;" onclick="preparerBriefingAchat()">LANCER SCAN<br>ACHAT</button>
                 </div>
             </div>
-            
-            <div class="settings-icons-col">
-                <button id="btn-settings-cibles" class="ui-icon-btn" onclick="ouvrirModal('modal-cibles', event)" onmouseenter="showHoloTooltip(event, 'MARCHANDISES', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
-                    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
-                        <g transform="translate(50, 50) rotate(-20) translate(-50, -50)"><polygon points="50,15 75,30 75,50 50,65 25,50 25,30" /><path d="M25 50 V75 L50 90 V65 M75 50 V75 L50 90" /><circle cx="50" cy="40" r="3" fill="currentColor" stroke="none"/></g>
-                    </svg>
-                </button>
-                <button id="btn-settings-economie" class="ui-icon-btn" onclick="ouvrirModal('modal-economie', event)" onmouseenter="showHoloTooltip(event, 'MOYENNES GALACTIQUES', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
-                    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-                        <g transform="translate(50, 50) rotate(-25) translate(-50, -50)"><rect x="15" y="30" width="70" height="35" rx="2" fill="var(--ed-bg)" /><path d="M20 73 H85 M25 81 H90" /><text x="50" y="55" font-family="'Share Tech Mono', monospace" font-size="24" font-weight="bold" fill="currentColor" stroke="none" text-anchor="middle">CR</text></g>
-                    </svg>
-                </button>
-            </div>
 
-            <div class="scan-action-col" style="flex-direction: column; justify-content: space-between; padding: 5px 0 5px 25px;">
-                <button id="btn-trigger-scan" class="giant-scan-btn" style="height: 100%; width: 100%;" onclick="declencherScan()">LANCER SCAN<br>ACHAT</button>
-            </div>
-        </div>
-
-        <main class="data-window" id="display-area">
+            <!-- LES DONNÉES DU MARCHÉ SE PLACENT JUSTE EN DESSOUS -->
             <div class="data-container"><p style="color: var(--ed-orange);">> EN ATTENTE DU NOYAU...</p></div>
+            
         </main>
     </div>
 
+    <!-- BRIEFING : SCAN VENTES -->
+    <div id="modal-briefing-vente" class="modal-overlay" style="display: none; z-index: 2000;" onclick="fermerModal('modal-briefing-vente', event)">
+        <div class="modal-content" style="max-width: 600px; border: 1px solid var(--ed-orange); box-shadow: 0 0 15px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-briefing-vente')">X</div>
+            <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-top: 0;">[ BRIEFING TACTIQUE ] : RECHERCHE DE VENTES</h3>
+            <p style="color: #ccc; font-size: 1em; line-height: 1.6; text-align: left; margin-top: 15px;">Le système va analyser les soutes de votre <strong>Fleet Carrier</strong> et de votre <strong>Vaisseau</strong>.</p>
+            <ul style="color: #00FF66; font-size: 0.9em; text-align: left; margin-bottom: 20px; line-height: 1.8;">
+                <li>Extraction des 4 marchandises les plus importantes en volume.</li>
+                <li>Croisement avec le réseau pour trouver les meilleurs acheteurs.</li>
+                <li>Tri par rentabilité et proximité depuis votre position actuelle.</li>
+            </ul>
+            <div style="text-align: right; border-top: 1px dashed #333; padding-top: 15px;">
+                <button class="auth-btn" style="border-color: #00FF66; color: #00FF66; font-weight: bold; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('VENTE')">LANCER LE SCAN VENTES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BRIEFING : SCAN PREDICTIF -->
+    <div id="modal-briefing-predictif" class="modal-overlay" style="display: none; z-index: 2000;" onclick="fermerModal('modal-briefing-predictif', event)">
+        <div class="modal-content" style="max-width: 600px; border: 1px solid var(--ed-blue); box-shadow: 0 0 15px rgba(0, 204, 255, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-briefing-predictif')">X</div>
+            <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 10px; margin-top: 0;">[ BRIEFING TACTIQUE ] : ANALYSE PRÉDICTIVE</h3>
+            <p style="color: #ccc; font-size: 1em; line-height: 1.6; text-align: left; margin-top: 15px;">Le système va interroger le Background Simulation (BGS) et les archives furtives de l'escadron.</p>
+            <ul style="color: #00FF66; font-size: 0.9em; text-align: left; margin-bottom: 20px; line-height: 1.8;">
+                <li>Analyse des économies (Extraction, Agricole, Haute Technologie...) et détection des états critiques du BGS (Boom, Épidémie, Famine...).</li>
+                <li>Identification des opportunités d'achat non déclarées sur le réseau public.</li>
+                <li>Analyse des tendances locales.</li>
+            </ul>
+            <div style="text-align: right; border-top: 1px dashed #333; padding-top: 15px;">
+                <button class="auth-btn" style="border-color: var(--ed-blue); color: var(--ed-blue); font-weight: bold; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('PREDICTIF')">LANCER LE SCAN PRÉDICTIF</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let audioCtx; let baseDonnees = []; let modeActif = 'ACHAT'; let ciblesVerrouillees = []; let stationsFavorites = [];
+        let audioCtx; let baseDonnees = []; let modeActif = 'ACHAT'; let ciblesVerrouillees = []; let stationsFavorites = []; let stockFCGlobal = []; let stockShipGlobal = [];
         let inventaireGlobal = []; let paramApp = null; let espaceVideUtilise = 20600;
         let lastRenderedDataHTML = ""; let isEditingParams = false;
         let stationsScanneesLocales = []; let lastParamAppString = ""; 
         let profilCommandant = null; let wasEdmcOnline = true;
+        let hasLoadedParams = false; // LE VERROU ANTI-BOUCLE
+        let isSystemLooping = false; // LE VERROU ANTI-CHEVANCHEMENT
 
         const ALL_COMMODITIES = [
             "Advanced Catalysers", "Advanced Medicines", "Agronomic Treatment", "Algae", "Aluminium", "Animal Meat", "Animal Monitors", "Aquaponic Systems", "Auto-Fabricators", "Basic Medicines", "Bauxite", "Beer", "Beryllium", "Bertrandite", "Bioreducing Lichen", "Biowaste", "Bismuth", "Bootleg Liquor", "Building Fabricators", "Clothing", "Cobalt", "Coffee", "Coltan", "Combat Stabilisers", "Computer Components", "Consumer Technology", "Copper", "Crop Harvesters", "Cryolite", "Domestic Appliances", "Earth Relics", "Emergency Power Cells", "Evacuation Shelter", "Exhaust Manifold", "Explosives", "Fish", "Food Cartridges", "Fruit and Vegetables", "Gallite", "Gallium", "Gold", "Goshenite", "Grain", "Hazardous Environment Suits", "Heike Tea", "Hydrogen Fuel", "Hydrogen Peroxide", "Imperial Slaves", "Indite", "Indium", "Insulating Membrane", "Ion Distributors", "Jadeite", "Land Enrichment Systems", "Leather", "Lepidolite", "Liquid Oxygen", "Liquor", "Lithium", "Low Temperature Diamonds", "Magnetic Emitter Coil", "Marine Equipment", "Medical Diagnostic Equipment", "Micro Controllers", "Micro-Weavers", "Microbial Furnaces", "Mineral Extractors", "Mineral Oil", "Moissanite", "Monazite", "Musgravite", "Mutomaggot Pie", "Narcotics", "Nerve Agents", "Non-Lethal Weapons", "Osmium", "Painite", "Palladium", "Performance Enhancers", "Personal Effects", "Personal Weapons", "Pesticides", "Platinum", "Polymers", "Power Generators", "Power Transfer Conduits", "Progenitor Cells", "Radiation Baffle", "Reactive Armour", "Reinforced Baffling", "Resonating Separators", "Robotics", "Rutile", "Scrap", "Semiconductors", "Silver", "Slaves", "Structural Regulators", "Superconductors", "Survival Equipment", "Synthetic Fabrics", "Synthetic Meat", "Synthetic Reagents", "Taaffeite", "Tantalum", "Tea", "Titanium", "Tobacco", "Tritium", "Uraninite", "Void Opals", "Water", "Water Purifiers", "Wine"
@@ -362,14 +464,19 @@
         window.onload = async () => {
             const boot = document.getElementById('boot-screen');
             if(boot) boot.style.display = 'none';
+            
+            // --- NOUVEAU : Activation du retour sonore sur tous les boutons UI ---
+            document.querySelectorAll('.tab-btn, .giant-scan-btn, .auth-btn, .btn-save, .modal-close').forEach(btn => {
+                btn.addEventListener('mouseenter', sonHover);
+            });
+            // ---------------------------------------------------------------------
+
             const { data: { session } } = await supabaseApp.auth.getSession();
             if (session) { verifierApprobation(session.user); }
         };
 
         async function tenterConnexion() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const msg = document.getElementById('auth-msg');
+            const email = document.getElementById('auth-email').value; const password = document.getElementById('auth-password').value; const msg = document.getElementById('auth-msg');
             msg.style.color = "var(--ed-orange)"; msg.innerText = "> VERIFICATION...";
             const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
             if (error) { msg.style.color = "red"; msg.innerText = "> ERREUR : " + error.message; }
@@ -377,9 +484,7 @@
         }
 
         async function tenterInscription() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const msg = document.getElementById('auth-msg');
+            const email = document.getElementById('auth-email').value; const password = document.getElementById('auth-password').value; const msg = document.getElementById('auth-msg');
             msg.style.color = "var(--ed-blue)"; msg.innerText = "> TRANSMISSION DEMANDE...";
             const { data, error } = await supabaseApp.auth.signUp({ email, password });
             if (error) { msg.style.color = "red"; msg.innerText = "> ERREUR : " + error.message; }
@@ -395,16 +500,12 @@
                 document.getElementById('boot-screen').style.display = 'flex'; 
                 
                 if (!document.getElementById('nav-commandant')) {
-                    const nav = document.createElement('div');
-                    nav.id = 'nav-commandant';
-                    nav.style.cssText = 'position: absolute; top: 15px; right: 25px; font-size: 0.9em; letter-spacing: 2px; z-index: 500; display: flex; gap: 20px; font-weight: bold;';
+                    const nav = document.createElement('div'); nav.id = 'nav-commandant'; nav.style.cssText = 'position: absolute; top: 15px; right: 25px; font-size: 0.9em; letter-spacing: 2px; z-index: 500; display: flex; gap: 20px; font-weight: bold;';
                     nav.innerHTML = `<span style="color: var(--ed-blue); cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--ed-blue)'" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span><span style="color: #555; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#555'" onclick="deconnexion()">[ DÉCONNEXION ]</span>`;
                     document.body.appendChild(nav);
                 }
                 const keyDisplay = document.getElementById('api-key-display');
                 if (keyDisplay) keyDisplay.innerText = data.cle_api;
-                
-                // On injecte aussi la clé dans l'écran rouge d'alerte
                 const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
                 if (failsafeKeyDisplay) failsafeKeyDisplay.innerText = data.cle_api;
             } else {
@@ -439,48 +540,273 @@
                 const gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.03, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.015);
             } else if (type === 'reconnect') {
-                // Séquence de reconnexion moderne (Sous-tension, Data, Ping)
                 const t = audioCtx.currentTime;
-                
-                // 1. Mise sous tension (Grave)
                 const subOsc = audioCtx.createOscillator(); const subGain = audioCtx.createGain();
                 subOsc.type = 'sine'; subOsc.frequency.setValueAtTime(40, t); subOsc.frequency.exponentialRampToValueAtTime(100, t + 0.4);
                 subGain.gain.setValueAtTime(0, t); subGain.gain.linearRampToValueAtTime(0.04, t + 0.2); subGain.gain.linearRampToValueAtTime(0, t + 0.4);
                 subOsc.connect(subGain); subGain.connect(audioCtx.destination); subOsc.start(t); subOsc.stop(t + 0.4);
-
-                // 2. Traitement des données (Bruit blanc très léger)
                 const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.3, audioCtx.sampleRate);
                 const output = noiseBuffer.getChannelData(0); for (let i = 0; i < noiseBuffer.length; i++) output[i] = Math.random() * 2 - 1;
                 const noiseSrc = audioCtx.createBufferSource(); noiseSrc.buffer = noiseBuffer;
                 const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'bandpass'; noiseFilter.frequency.setValueAtTime(2000, t); noiseFilter.frequency.linearRampToValueAtTime(6000, t + 0.3);
                 const noiseGain = audioCtx.createGain(); noiseGain.gain.setValueAtTime(0, t); noiseGain.gain.linearRampToValueAtTime(0.015, t + 0.1); noiseGain.gain.linearRampToValueAtTime(0, t + 0.3);
                 noiseSrc.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination); noiseSrc.start(t);
-
-                // 3. Verrouillage / Ping de confirmation
                 const pingOsc = audioCtx.createOscillator(); const pingGain = audioCtx.createGain();
                 pingOsc.type = 'sine'; pingOsc.frequency.setValueAtTime(1046.50, t + 0.3); pingOsc.frequency.setValueAtTime(2093, t + 0.35); 
                 pingGain.gain.setValueAtTime(0, t + 0.3); pingGain.gain.linearRampToValueAtTime(0.03, t + 0.32); pingGain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
                 pingOsc.connect(pingGain); pingGain.connect(audioCtx.destination); pingOsc.start(t + 0.3); pingOsc.stop(t + 1.5);
             }
         }
-        
-        // Moteur de l'alarme en boucle
-        let alarmInterval = null;
-        function playSoftAlarm() {
-            if(!audioCtx) return;
-            const t = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(600, t); osc.frequency.setValueAtTime(500, t + 0.2);
-            gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.03, t + 0.05); gain.gain.linearRampToValueAtTime(0, t + 0.2); gain.gain.linearRampToValueAtTime(0.03, t + 0.25); gain.gain.linearRampToValueAtTime(0, t + 0.4);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.5);
+
+        // Moteur d'Ambiance Spatiale V7 : Cinématique Épurée (Strictement en rythme)
+        let ambientGain = null;
+        let isAmbientPlaying = false;
+        let schedulerTimer = null;
+        let nextNoteTime = 0;
+        let currentBeat = 0;
+        let epicDelay = null;
+        let continuousNodes = []; 
+
+        function startAlarm() {
+            if (isAmbientPlaying) return; 
+            if (!audioCtx) initAudio(); 
+            if (!audioCtx) return;
+            isAmbientPlaying = true;
+
+            const t = audioCtx.currentTime;
+            ambientGain = audioCtx.createGain();
+            
+            // Fondu entrant doux
+            ambientGain.gain.setValueAtTime(0, t);
+            ambientGain.gain.linearRampToValueAtTime(0.6, t + 4); 
+
+            // 1. LA CHAMBRE D'ÉCHO DU HANGAR
+            epicDelay = audioCtx.createDelay();
+            epicDelay.delayTime.value = 0.75; 
+            let epicFeedback = audioCtx.createGain();
+            epicFeedback.gain.value = 0.55; 
+
+            let echoFilter = audioCtx.createBiquadFilter();
+            echoFilter.type = 'lowpass';
+            echoFilter.frequency.value = 900;
+
+            epicDelay.connect(echoFilter);
+            echoFilter.connect(epicFeedback);
+            epicFeedback.connect(epicDelay);
+            epicDelay.connect(ambientGain);
+
+            // 2. LE DRONE BASS CONTINU
+            const baseFreqs = [65.41, 98.00]; // C2, G2
+            baseFreqs.forEach(f => {
+                let osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = f + (Math.random() * 0.2 - 0.1);
+                
+                let gain = audioCtx.createGain();
+                gain.gain.value = 0.2;
+                
+                osc.connect(gain);
+                gain.connect(ambientGain);
+                osc.start(t);
+                continuousNodes.push(osc);
+            });
+
+            // 3. LANCEMENT DU SEQUENCEUR TEMPOREL
+            currentBeat = 0;
+            nextNoteTime = audioCtx.currentTime + 0.1;
+            scheduler();
+
+            ambientGain.connect(audioCtx.destination);
         }
-        function startAlarm() { if (alarmInterval) return; playSoftAlarm(); alarmInterval = setInterval(playSoftAlarm, 2000); }
-        function stopAlarm() { if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; } }
+
+        // --- LE SÉQUENCEUR (Le chef d'orchestre rythmique) ---
+        function scheduler() {
+            if (!isAmbientPlaying) return;
+            while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                scheduleCinematicBeat(currentBeat, nextNoteTime);
+                nextNoteTime += (60 / 65); // Tempo : 65 BPM
+                currentBeat = (currentBeat + 1) % 16; // Boucle sur 16 temps
+            }
+            schedulerTimer = setTimeout(scheduler, 25);
+        }
+
+        function scheduleCinematicBeat(beat, time) {
+            // BATTERIE ÉPIQUE (Le danger extérieur)
+            if (beat === 0) jouerTaiko(time, 0.7); 
+            if (beat === 8) jouerTaiko(time, 0.4); 
+
+            // PULSATION OSTINATO (Le compte à rebours mental)
+            if (beat % 2 === 0) {
+                const arpNotes = [130.81, 155.56, 196.00, 155.56]; // Do, Mib, Sol, Mib
+                jouerPulse(time, arpNotes[(beat / 2) % arpNotes.length]);
+            }
+
+            // SWELL ORCHESTRAL (L'immensité)
+            if (beat === 0) jouerSwell(time);
+
+            // MÉLODIE DE L'ESPION (La concentration, parfaitement calée sur le 1er temps)
+            if (beat % 4 === 0) {
+                const leadNotes = [392.00, 311.13, 523.25, 392.00, 622.25, 523.25]; 
+                let leadFreq = leadNotes[Math.floor(Math.random() * leadNotes.length)];
+                jouerSpyLead(time, leadFreq);
+            }
+        }
+
+        // --- LES SYNTHÉTISEURS ---
+
+        // La Mélodie de l'espion (Lisse, pure, avec un léger vibrato)
+        function jouerSpyLead(time, freq) {
+            let osc = audioCtx.createOscillator();
+            osc.type = 'triangle'; 
+            osc.frequency.value = freq;
+            
+            // Vibrato (Le suspense)
+            let lfo = audioCtx.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 5.0; 
+            let lfoGain = audioCtx.createGain();
+            lfoGain.gain.value = 4; 
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            
+            let gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.05, time + 0.5); 
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 3.5); 
+            
+            let filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(300, time);
+            filter.frequency.linearRampToValueAtTime(2000, time + 0.5); 
+            filter.frequency.exponentialRampToValueAtTime(300, time + 3.5); 
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(epicDelay);
+            gain.connect(ambientGain);
+            
+            osc.start(time);
+            lfo.start(time);
+            osc.stop(time + 3.6);
+            lfo.stop(time + 3.6);
+        }
+
+        // La Batterie épique (Taiko)
+        function jouerTaiko(time, intensite) {
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(120, time);
+            osc.frequency.exponentialRampToValueAtTime(20, time + 0.5); 
+
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(intensite, time + 0.05); 
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 2.5); 
+
+            let noiseSize = audioCtx.sampleRate * 0.1;
+            let noiseBuffer = audioCtx.createBuffer(1, noiseSize, audioCtx.sampleRate);
+            let output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < noiseSize; i++) output[i] = Math.random() * 2 - 1;
+            
+            let noiseSrc = audioCtx.createBufferSource();
+            noiseSrc.buffer = noiseBuffer;
+            let noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 300;
+            
+            let noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(intensite * 0.4, time);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+            osc.connect(gain);
+            gain.connect(ambientGain);
+            gain.connect(epicDelay); 
+
+            noiseSrc.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(ambientGain);
+
+            osc.start(time);
+            osc.stop(time + 2.6);
+            noiseSrc.start(time);
+        }
+
+        // L'Ostinato (Pulsation de tension)
+        function jouerPulse(time, freq) {
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            let filter = audioCtx.createBiquadFilter();
+
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(100, time);
+            filter.frequency.exponentialRampToValueAtTime(800, time + 0.05); 
+            filter.frequency.exponentialRampToValueAtTime(100, time + 0.4);
+
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.04, time + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ambientGain);
+            gain.connect(epicDelay); 
+
+            osc.start(time);
+            osc.stop(time + 0.6);
+        }
+
+        // La nappe majestueuse
+        function jouerSwell(time) {
+            const swellFreqs = [130.81, 196.00, 311.13]; 
+            swellFreqs.forEach(f => {
+                let osc = audioCtx.createOscillator();
+                osc.type = 'sawtooth'; 
+                osc.frequency.value = f + (Math.random() * 0.4 - 0.2);
+
+                let gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.03, time + 3); 
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 8); 
+
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(150, time);
+                filter.frequency.linearRampToValueAtTime(900, time + 3); 
+                filter.frequency.exponentialRampToValueAtTime(150, time + 8);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(ambientGain);
+                gain.connect(epicDelay);
+
+                osc.start(time);
+                osc.stop(time + 8.1);
+            });
+        }
+
+        function stopAlarm() {
+            if (!isAmbientPlaying || !ambientGain) return;
+            isAmbientPlaying = false;
+            
+            if (schedulerTimer) clearTimeout(schedulerTimer);
+            
+            const t = audioCtx.currentTime;
+            ambientGain.gain.cancelScheduledValues(t);
+            ambientGain.gain.setValueAtTime(ambientGain.gain.value, t);
+            ambientGain.gain.linearRampToValueAtTime(0, t + 3); 
+
+            continuousNodes.forEach(node => { try { node.stop(t + 3.1); } catch(e){} });
+            setTimeout(() => { continuousNodes = []; ambientGain = null; epicDelay = null; }, 3200);
+        }
 
         function sonClic() { playUI('click'); } 
         function sonHover() { playUI('hover'); }
         function sonSucces() { playUI('success'); } 
         function sonCaisse() { playUI('crate'); } 
-        function sonReconnect() { playUI('reconnect'); } 
+        function sonReconnect() { playUI('reconnect'); }
 
         function playBoot() {
             if(!audioCtx) return;
@@ -493,7 +819,7 @@
 
         const globalTooltip = document.getElementById('holo-tooltip');
         function showHoloTooltip(e, text, color = 'var(--ed-orange)', silent = false) {
-            if(!silent && text !== "MARCHANDISES" && text !== "MOYENNES GALACTIQUES") sonHover(); 
+            if(!silent) sonHover(); 
             globalTooltip.innerHTML = text; globalTooltip.style.borderColor = color; globalTooltip.style.color = color; globalTooltip.style.boxShadow = `0 0 10px ${color}40`; globalTooltip.style.display = 'block'; moveHoloTooltip(e);
         }
         function hideHoloTooltip() { globalTooltip.style.display = 'none'; }
@@ -512,22 +838,19 @@
             document.getElementById(btnId).classList.add('active');
             
             const btnScan = document.getElementById('btn-trigger-scan');
-            if (mode === 'ACHAT') btnScan.innerHTML = "LANCER SCAN<br>ACHAT";
-            else if (mode === 'VENTE') btnScan.innerHTML = "LANCER SCAN<br>VENTE";
-            else btnScan.innerHTML = "LANCER SCAN<br>PRÉDICTIF";
-
-            const btnCibles = document.getElementById('btn-settings-cibles');
-            const btnEconomie = document.getElementById('btn-settings-economie');
-            const colSettings = document.querySelector('.settings-icons-col');
-            const colScan = document.querySelector('.scan-action-col');
-            
             if (mode === 'ACHAT') {
-                colSettings.style.width = ''; colSettings.style.borderLeft = '1px solid rgba(0,240,255,0.2)'; btnCibles.style.display = 'flex'; btnCibles.style.height = '45%'; btnEconomie.style.display = 'flex'; btnEconomie.style.height = '45%'; colScan.style.paddingLeft = ''; btnScan.style.padding = '0 35px'; 
-            } else if (mode === 'VENTE') {
-                colSettings.style.width = ''; colSettings.style.borderLeft = '1px solid rgba(0,240,255,0.2)'; btnCibles.style.display = 'none'; btnEconomie.style.display = 'flex'; btnEconomie.style.height = '100%'; colScan.style.paddingLeft = ''; btnScan.style.padding = '0 35px'; 
-            } else { 
-                btnCibles.style.display = 'none'; btnEconomie.style.display = 'none'; colSettings.style.borderLeft = 'none'; colSettings.style.width = '70px'; colScan.style.paddingLeft = '70px'; btnScan.style.padding = '0 50px';
+                btnScan.innerHTML = "LANCER SCAN<br>ACHAT";
+                btnScan.onclick = function() { preparerBriefingAchat(); };
             }
+            else if (mode === 'VENTE') {
+                btnScan.innerHTML = "LANCER SCAN<br>VENTE";
+                btnScan.onclick = function() { sonClic(); document.getElementById('modal-briefing-vente').style.display='flex'; };
+            }
+            else {
+                btnScan.innerHTML = "LANCER SCAN<br>PRÉDICTIF";
+                btnScan.onclick = function() { sonClic(); document.getElementById('modal-briefing-predictif').style.display='flex'; };
+            }
+
             afficherDonnees();
         }
 
@@ -535,47 +858,73 @@
             initAudio(); playBoot(); document.getElementById('boot-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('boot-screen').style.display = 'none'; document.getElementById('main-ui').style.display = 'flex';
-                let opacity = 0; let fade = setInterval(() => { opacity += 0.1; document.getElementById('main-ui').style.opacity = opacity; if(opacity >= 1) { clearInterval(fade); initialiserSysteme(true); } }, 30);
+                let opacity = 0; let fade = setInterval(() => { opacity += 0.1; document.getElementById('main-ui').style.opacity = opacity; if(opacity >= 1) { clearInterval(fade); systemLoop(); } }, 30);
             }, 300);
         }
 
+        async function syncParamsToRadar() {
+            if (!paramApp) return;
+            try {
+                const payload = { cibles_achat: paramApp.cibles_achat, moyennes_galactiques: paramApp.moyennes_galactiques, mode_flotte: paramApp.mode_flotte };
+                const dataRow = { 
+                    user_id: profilCommandant.user_id, // <-- CORRECTION VITALE : L'ID d'identification
+                    system_name: "SYS_CORE", 
+                    station_name: JSON.stringify(payload), 
+                    target_commodity: "APP_PARAMS", 
+                    type_operation: "STATUS", 
+                    prix_unitaire: 0, volume_disponible: 0, distance: 0, x: 0, y: 0, z: 0, prix_moyen: 0 
+                };
+                
+                // On nettoie proprement les anciens ponts de CE COMMANDANT
+                await getDb().from('radar_commercial')
+                    .delete()
+                    .eq('target_commodity', 'APP_PARAMS')
+                    .eq('user_id', profilCommandant.user_id);
+                    
+                // On crée le nouveau pont certifié
+                await getDb().from('radar_commercial').insert([dataRow]);
+            } catch(e) { console.error("Erreur de synchronisation du pont :", e); }
+        }
+
         async function chargerParametres() {
+            if (hasLoadedParams) return; // VERROU 1 : On ne charge qu'une seule fois au démarrage pour éviter le spam !
             try {
                 if (!profilCommandant) return;
-                const uid = profilCommandant.user_id;
-                const { data, error } = await getDb().from('parametres_app').select('*').eq('user_id', uid).maybeSingle();
+                const { data } = await getDb().from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(); // LIMIT(1) empêche l'erreur s'il y a un doublon
                 
                 if (data) {
                     paramApp = data;
-                    if(!paramApp.cibles_achat) paramApp.cibles_achat = [];
-                    if(!paramApp.moyennes_galactiques) paramApp.moyennes_galactiques = {};
+                    if(!paramApp.cibles_achat) paramApp.cibles_achat = []; if(!paramApp.moyennes_galactiques) paramApp.moyennes_galactiques = {};
+                    hasLoadedParams = true;
+                    await syncParamsToRadar(); // Pousse les params sur le pont pour Python
                 } else {
-                    paramApp = { user_id: uid, mode_flotte: 'FC', fc_nom: 'FLEET CARRIER', fc_capacite: 25000, vaisseau_nom: 'VAISSEAU', vaisseau_capacite: 720, cibles_achat: ["Gold", "Silver", "Palladium", "Agronomic Treatment"], moyennes_galactiques: {"Gold": 45450, "Silver": 31180, "Palladium": 46420}, possede_fc: false };
+                    paramApp = { user_id: profilCommandant.user_id, mode_flotte: 'FC', fc_nom: 'FLEET CARRIER', fc_capacite: 25000, vaisseau_nom: 'VAISSEAU', vaisseau_capacite: 720, cibles_achat: ["Gold", "Silver", "Palladium", "Agronomic Treatment"], moyennes_galactiques: {"Gold": 45450, "Silver": 31180, "Palladium": 46420}, possede_fc: false };
                     const res = await getDb().from('parametres_app').insert([paramApp]).select().single();
                     if(res.data) paramApp = res.data;
+                    hasLoadedParams = true;
+                    await syncParamsToRadar();
                 }
                 
                 const btnFC = document.getElementById('btn-mode-fc');
                 if (paramApp.possede_fc === false) {
                     btnFC.style.opacity = '0.2'; btnFC.style.pointerEvents = 'none'; btnFC.title = "AUCUN FLEET CARRIER DÉTECTÉ";
-                    if(paramApp.mode_flotte !== 'SHIP') changerModeFlotte('SHIP');
+                    if(paramApp.mode_flotte !== 'SHIP') {
+                        paramApp.mode_flotte = 'SHIP';
+                        document.getElementById('btn-mode-ship').classList.add('active'); document.getElementById('btn-mode-fc').classList.remove('active');
+                        await getDb().from('parametres_app').update({ mode_flotte: 'SHIP' }).eq('user_id', profilCommandant.user_id);
+                        await syncParamsToRadar();
+                    }
                 } else {
                     btnFC.style.opacity = ''; btnFC.style.pointerEvents = 'auto'; btnFC.title = "";
                 }
 
-                if(paramApp.mode_flotte === 'FC' && paramApp.possede_fc !== false) {
-                    document.getElementById('btn-mode-fc').classList.add('active'); document.getElementById('btn-mode-ship').classList.remove('active');
-                } else {
-                    document.getElementById('btn-mode-ship').classList.add('active'); document.getElementById('btn-mode-fc').classList.remove('active');
-                }
+                if(paramApp.mode_flotte === 'FC' && paramApp.possede_fc !== false) { document.getElementById('btn-mode-fc').classList.add('active'); document.getElementById('btn-mode-ship').classList.remove('active'); } 
+                else { document.getElementById('btn-mode-ship').classList.add('active'); document.getElementById('btn-mode-fc').classList.remove('active'); }
 
                 const currentParamString = JSON.stringify({c: paramApp.cibles_achat, m: paramApp.moyennes_galactiques});
-                if (currentParamString !== lastParamAppString) {
-                    lastParamAppString = currentParamString;
-                    genererListesMarchandises();
-                }
+                if (currentParamString !== lastParamAppString) { lastParamAppString = currentParamString; genererListesMarchandises(); }
 
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         function genererListesMarchandises() {
@@ -601,27 +950,11 @@
             selects.forEach(sel => { Array.from(sel.options).forEach(opt => { opt.disabled = (opt.value !== "" && selectedVals.includes(opt.value) && sel.value !== opt.value); }); });
         }
 
-        async function sauvegarderCibles() {
-            sonClic(); const cibles = [];
-            for(let i=1; i<=4; i++) { const v = document.getElementById(`cible_${i}`).value.trim(); if(v) cibles.push(v); }
-            paramApp.cibles_achat = cibles;
-            try {
-                await getDb().from('parametres_app').update({ cibles_achat: cibles }).eq('user_id', profilCommandant.user_id);
-                isEditingParams = false; document.getElementById('modal-cibles').style.display = 'none'; lastRenderedDataHTML = ""; afficherDonnees();
-            } catch(e) {}
-        }
-
         async function sauvegarderMoyennes() {
             sonClic(); const moyennes = paramApp.moyennes_galactiques || {};
-            document.querySelectorAll('.input-moyenne').forEach(input => { 
-                const val = parseInt(input.value); const nom = input.getAttribute('data-nom');
-                if (val > 0) moyennes[nom] = val; else delete moyennes[nom];
-            });
+            document.querySelectorAll('.input-moyenne').forEach(input => { const val = parseInt(input.value); const nom = input.getAttribute('data-nom'); if (val > 0) moyennes[nom] = val; else delete moyennes[nom]; });
             paramApp.moyennes_galactiques = moyennes;
-            try {
-                await getDb().from('parametres_app').update({ moyennes_galactiques: moyennes }).eq('user_id', profilCommandant.user_id);
-                isEditingParams = false; document.getElementById('modal-economie').style.display = 'none'; lastRenderedDataHTML = ""; afficherDonnees();
-            } catch(e) {}
+            try { await getDb().from('parametres_app').update({ moyennes_galactiques: moyennes }).eq('user_id', profilCommandant.user_id); await syncParamsToRadar(); isEditingParams = false; document.getElementById('modal-economie').style.display = 'none'; lastRenderedDataHTML = ""; afficherDonnees(); } catch(e) {}
         }
 
         async function changerModeFlotte(nouveauMode) {
@@ -631,34 +964,22 @@
             paramApp.mode_flotte = nouveauMode;
             if (nouveauMode === 'FC') { document.getElementById('btn-mode-fc').classList.add('active'); document.getElementById('btn-mode-ship').classList.remove('active'); } 
             else { document.getElementById('btn-mode-ship').classList.add('active'); document.getElementById('btn-mode-fc').classList.remove('active'); }
-            try { await getDb().from('parametres_app').update({ mode_flotte: nouveauMode }).eq('user_id', profilCommandant.user_id); chargerInventaireFC(); } catch(e) {}
+            try { await getDb().from('parametres_app').update({ mode_flotte: nouveauMode }).eq('user_id', profilCommandant.user_id); await syncParamsToRadar(); chargerInventaireFC(); } catch(e) {}
         }
 
         function getColor(name) {
             let m = name.toUpperCase();
-            if (m.includes('GOLD')) return '#FFD700'; 
-            if (m.includes('SILVER')) return '#C0C0C0';
-            if (m.includes('PALLADIUM')) return '#00F0FF'; 
-            if (m.includes('BAUXITE')) return '#b000ff'; 
-            if (m.includes('AGRONOMIC')) return '#FF00FF'; 
-            if (m.includes('TRITIUM')) return '#00FF66';
-            if (m.includes('VOID OPAL')) return '#55CCFF';
-            if (m.includes('DIAMOND')) return '#E0FFFF';
-            let hash = 0;
-            for (let i = 0; i < m.length; i++) { hash = m.charCodeAt(i) + ((hash << 5) - hash); }
-            let hue = Math.abs(hash % 360);
-            if (hue > 15 && hue < 45) { hue += 50; }
+            if (m.includes('GOLD')) return '#FFD700'; if (m.includes('SILVER')) return '#C0C0C0'; if (m.includes('PALLADIUM')) return '#00F0FF'; if (m.includes('BAUXITE')) return '#b000ff'; if (m.includes('AGRONOMIC')) return '#FF00FF'; if (m.includes('TRITIUM')) return '#00FF66'; if (m.includes('VOID OPAL')) return '#55CCFF'; if (m.includes('DIAMOND')) return '#E0FFFF';
+            let hash = 0; for (let i = 0; i < m.length; i++) { hash = m.charCodeAt(i) + ((hash << 5) - hash); }
+            let hue = Math.abs(hash % 360); if (hue > 15 && hue < 45) { hue += 50; }
             return `hsl(${hue}, 90%, 65%)`;
         }
 
         const gridDiv = document.getElementById('fc-cargo-grid'); let hoveredCargo = null;
-        
         gridDiv.addEventListener('mouseover', (e) => {
             if (e.target.classList.contains('filled') || e.target.classList.contains('ship-crate')) {
                 const cargoName = e.target.getAttribute('data-cargo-name');
-                if (hoveredCargo !== cargoName) { 
-                    hoveredCargo = cargoName; sonCaisse(); updateHighlight(); 
-                }
+                if (hoveredCargo !== cargoName) { hoveredCargo = cargoName; sonCaisse(); updateHighlight(); }
                 showHoloTooltip(e, e.target.getAttribute('data-tooltip-text'), e.target.getAttribute('data-color'), true);
             }
         });
@@ -669,21 +990,19 @@
         });
 
         function updateHighlight() {
-            if (!hoveredCargo) {
-                gridDiv.classList.remove('dim-mode'); document.querySelectorAll('.holo-crate').forEach(c => c.classList.remove('highlight-active'));
-            } else {
-                gridDiv.classList.add('dim-mode'); document.querySelectorAll('.holo-crate').forEach(c => {
-                    if (c.getAttribute('data-cargo-name') === hoveredCargo) c.classList.add('highlight-active'); else c.classList.remove('highlight-active');
-                });
-            }
+            if (!hoveredCargo) { gridDiv.classList.remove('dim-mode'); document.querySelectorAll('.holo-crate').forEach(c => c.classList.remove('highlight-active')); } 
+            else { gridDiv.classList.add('dim-mode'); document.querySelectorAll('.holo-crate').forEach(c => { if (c.getAttribute('data-cargo-name') === hoveredCargo) c.classList.add('highlight-active'); else c.classList.remove('highlight-active'); }); }
         }
 
         async function chargerInventaireFC() {
             try {
-                const [resFC, resShip] = await Promise.all([
-                    getDb().from('inventaire_fc').select('*').order('quantite', { ascending: false }),
-                    getDb().from('radar_commercial').select('*').eq('type_operation', 'SHIP_CARGO')
-                ]);
+                const [resFC, resShip] = await Promise.all([ getDb().from('inventaire_fc').select('*').order('quantite', { ascending: false }), getDb().from('radar_commercial').select('*').eq('type_operation', 'SHIP_CARGO') ]);
+                
+                // --- NOUVEAU : Sauvegarde des soutes globales ---
+                stockFCGlobal = resFC.data || [];
+                stockShipGlobal = resShip.data || [];
+                // ------------------------------------------------
+
                 inventaireGlobal = paramApp.mode_flotte === 'FC' ? (resFC.data || []) : (resShip.data || []);
                 const dataTransit = paramApp.mode_flotte === 'FC' ? (resShip.data || []) : [];
                 const capaciteMax = paramApp.mode_flotte === 'FC' ? paramApp.fc_capacite : paramApp.vaisseau_capacite;
@@ -693,36 +1012,34 @@
                 const percent = Math.min(((qteTotale / capaciteMax) * 100), 100).toFixed(1);
                 const formatter = new Intl.NumberFormat('fr-FR');
                 let infoBulle = `<span class="info-btn" style="color: var(--ed-orange); margin-left: 10px;" onclick="ouvrirModal('modal-sync', event)" onmouseenter="showHoloTooltip(event, 'ERREUR DE SOUTE ?', 'var(--ed-orange)', true)" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[?]</span>`;
-document.getElementById('fc-inventory-percent').innerHTML = `<span style="color: var(--ed-orange);">${nomAffiche}</span> <span>&nbsp;&nbsp;//&nbsp;&nbsp; <span style="color: #fff;">${formatter.format(qteTotale)}</span> / ${formatter.format(capaciteMax)} T <span style="color: var(--ed-blue);">(${percent}%)</span></span>` + infoBulle;
+                document.getElementById('fc-inventory-percent').innerHTML = `<span style="color: var(--ed-orange);">${nomAffiche}</span> <span>&nbsp;&nbsp;//&nbsp;&nbsp; <span style="color: #fff;">${formatter.format(qteTotale)}</span> / ${formatter.format(capaciteMax)} T <span style="color: var(--ed-blue);">(${percent}%)</span></span>` + infoBulle;
                 
                 let cols = paramApp.mode_flotte === 'FC' ? 120 : 40; let rows = paramApp.mode_flotte === 'FC' ? 6 : 4; let totalCratesVisuelles = cols * rows;
                 gridDiv.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-                
                 let cratesArray = []; let cargoMap = {};
                 inventaireGlobal.forEach(item => {
                     let m = (item.marchandise || item.target_commodity).toUpperCase();
-                    if(!cargoMap[m]) cargoMap[m] = { main: 0, transit: 0, tonnage: 0, color: getColor(m) };
+                    // Ajout d'une variable mémoire 'transit_tonnage'
+                    if(!cargoMap[m]) cargoMap[m] = { main: 0, transit: 0, tonnage: 0, transit_tonnage: 0, color: getColor(m) };
                     let vol = item.quantite || item.volume_disponible;
-                    let crates = Math.round((vol / capaciteMax) * totalCratesVisuelles);
-                    if (vol > 0 && crates === 0) crates = 1;
+                    let crates = Math.round((vol / capaciteMax) * totalCratesVisuelles); if (vol > 0 && crates === 0) crates = 1;
                     cargoMap[m].main += crates; cargoMap[m].tonnage += vol;
                 });
-
                 if (paramApp.mode_flotte === 'FC' && dataTransit.length > 0) {
                     dataTransit.forEach(item => {
                         let m = item.target_commodity.toUpperCase();
-                        if(!cargoMap[m]) cargoMap[m] = { main: 0, transit: 0, tonnage: 0, color: getColor(m) };
-                        let crates = Math.round((item.volume_disponible / capaciteMax) * totalCratesVisuelles);
-                        if (item.volume_disponible > 0 && crates === 0) crates = 1;
+                        if(!cargoMap[m]) cargoMap[m] = { main: 0, transit: 0, tonnage: 0, transit_tonnage: 0, color: getColor(m) };
+                        let crates = Math.round((item.volume_disponible / capaciteMax) * totalCratesVisuelles); if (item.volume_disponible > 0 && crates === 0) crates = 1;
                         cargoMap[m].transit += crates;
+                        // On enregistre le vrai poids en transit sans toucher au tonnage global
+                        cargoMap[m].transit_tonnage += item.volume_disponible;
                     });
                 }
-
                 Object.keys(cargoMap).sort().forEach(c => {
                     for(let i=0; i<cargoMap[c].main; i++) cratesArray.push({type: 'MAIN', color: cargoMap[c].color, name: c, tonnage: cargoMap[c].tonnage});
-                    for(let i=0; i<cargoMap[c].transit; i++) cratesArray.push({type: 'TRANSIT', color: cargoMap[c].color, name: c, tonnage: 0});
+                    // La caisse fantôme utilise désormais la valeur du transit_tonnage pour son étiquette
+                    for(let i=0; i<cargoMap[c].transit; i++) cratesArray.push({type: 'TRANSIT', color: cargoMap[c].color, name: c, tonnage: cargoMap[c].transit_tonnage});
                 });
-
                 let newHTML = ''; let cIdx = 0;
                 for(let y=0; y<rows; y++){
                     for(let x=0; x<cols; x++){
@@ -805,10 +1122,27 @@ document.getElementById('fc-inventory-percent').innerHTML = `<span style="color:
                 const { data, error } = await getDb().from('radar_commercial').select('*');
                 if (error) throw error;
                 
+                // LECTURE DU NOUVEAU PONT POUR LES NOMS DE VAISSEAUX
+                const ligneParamUpdate = data.find(d => d.target_commodity === 'PARAM_UPDATE');
+                if (ligneParamUpdate && ligneParamUpdate.station_name && paramApp) {
+                    try {
+                        const updates = JSON.parse(ligneParamUpdate.station_name);
+                        let needsUpdate = false;
+                        for (let k in updates) {
+                            if (paramApp[k] !== updates[k]) { paramApp[k] = updates[k]; needsUpdate = true; }
+                        }
+                        if (needsUpdate) {
+                            await getDb().from('parametres_app').update(updates).eq('user_id', profilCommandant.user_id);
+                            chargerInventaireFC(); // Rafraîchit l'hologramme avec le nouveau nom
+                        }
+                        // On efface le message du pont pour ne pas le relire
+                        await getDb().from('radar_commercial').delete().eq('id', ligneParamUpdate.id);
+                    } catch(e) {}
+                }
+                
                 const ligneHeartbeat = data.find(d => d.target_commodity === 'HEARTBEAT');
                 const failsafeModal = document.getElementById('failsafe-modal');
                 let edmcEnLigne = false;
-                
                 if (ligneHeartbeat && ligneHeartbeat.station_name) {
                     const timestampEDMC = parseInt(ligneHeartbeat.station_name);
                     const timestampActuel = Math.floor(Date.now() / 1000);
@@ -818,17 +1152,17 @@ document.getElementById('fc-inventory-percent').innerHTML = `<span style="color:
                 if (failsafeModal) {
                     if (!edmcEnLigne) {
                         failsafeModal.style.display = 'flex';
+                        
+                        // On ne réinitialise l'affichage QUE lors de la coupure initiale
                         if (wasEdmcOnline) { 
+                            document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none');
+                            document.getElementById('fs-page-main').style.display = 'block';
                             startAlarm(); 
                             wasEdmcOnline = false; 
                         }
                     } else {
                         failsafeModal.style.display = 'none';
-                        if (!wasEdmcOnline) { 
-                            stopAlarm();
-                            sonReconnect(); 
-                            wasEdmcOnline = true; 
-                        }
+                        if (!wasEdmcOnline) { stopAlarm(); sonReconnect(); wasEdmcOnline = true; }
                     }
                 }
 
@@ -845,7 +1179,7 @@ document.getElementById('fc-inventory-percent').innerHTML = `<span style="color:
                     mettreAJourJauge(ligneStatut.station_name);
                 }
                 
-                baseDonnees = data.filter(d => !['SYSTEM_STATUS', 'HEARTBEAT', 'SHIP_BALANCE', 'FC_BALANCE'].includes(d.target_commodity));
+                baseDonnees = data.filter(d => !['SYSTEM_STATUS', 'HEARTBEAT', 'SHIP_BALANCE', 'FC_BALANCE', 'PARAM_UPDATE', 'APP_PARAMS'].includes(d.target_commodity));
                 if(modeActif !== 'PARAM') afficherDonnees();
             } catch (err) {}
         }
@@ -918,18 +1252,90 @@ document.getElementById('fc-inventory-percent').innerHTML = `<span style="color:
                             }); pepitesHtml += '</div>';
                         } else { htmlMoyenneTop = `<span class="badge-moyenne badge-neutral" style="border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0,240,255,0.1);">ANALYSE BGS REQUISE</span>`; }
                     } else if (modeActif === 'VENTE') {
-                        const objEnSoute = inventaireGlobal.find(i => (i.marchandise || i.target_commodity).toUpperCase() === commodite); const stockDispo = objEnSoute ? (objEnSoute.quantite || objEnSoute.volume_disponible) : 0;
-                        statsPrevisionnellesHtml = `<div style="font-size: 0.75em; color: var(--ed-blue); margin-top: 4px; font-weight: bold; text-align: right;">REVENU PRÉVU (${new Intl.NumberFormat('fr-FR').format(stockDispo)} T) : +${new Intl.NumberFormat('fr-FR').format(ligne.prix_unitaire * stockDispo)} CR</div>`;
+                        // On cherche la marchandise dans les deux soutes
+                        const inFC = stockFCGlobal.find(i => (i.marchandise || i.target_commodity).toUpperCase() === commodite);
+                        const inShip = stockShipGlobal.find(i => (i.target_commodity || '').toUpperCase() === commodite);
+                        
+                        const qteFC = inFC ? (inFC.quantite || inFC.volume_disponible || 0) : 0;
+                        const qteShip = inShip ? (inShip.volume_disponible || 0) : 0;
+                        const stockDispo = qteFC + qteShip;
+                        
+                        // Génération des badges visuels
+                        let badgesSource = "";
+                        if (qteFC > 0) badgesSource += `<span style="background: rgba(0, 240, 255, 0.15); color: var(--ed-blue); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--ed-blue); margin-right: 8px;">📦 FC: ${new Intl.NumberFormat('fr-FR').format(qteFC)} T</span>`;
+                        if (qteShip > 0) badgesSource += `<span style="background: rgba(0, 255, 102, 0.15); color: #00FF66; padding: 2px 6px; border-radius: 3px; border: 1px solid #00FF66; margin-right: 8px;">🚀 VAISSEAU: ${new Intl.NumberFormat('fr-FR').format(qteShip)} T</span>`;
+                        
+                        statsPrevisionnellesHtml = `<div style="font-size: 0.75em; margin-top: 4px; font-weight: bold; text-align: right; display: flex; justify-content: flex-end; align-items: center;">${badgesSource} <span style="color: var(--ed-blue);">REVENU PRÉVU : +${new Intl.NumberFormat('fr-FR').format(ligne.prix_unitaire * stockDispo)} CR</span></div>`;
                     } else {
                         statsPrevisionnellesHtml = `<div style="font-size: 0.75em; color: #FF3333; margin-top: 4px; font-weight: bold; text-align: right;">BUDGET REQUIS (${new Intl.NumberFormat('fr-FR').format(espaceVideUtilise)} T) : -${new Intl.NumberFormat('fr-FR').format(ligne.prix_unitaire * espaceVideUtilise)} CR</div>`;
                     }
                     const nomSystemeSafe = rawSys.replace(/'/g, "\\'"); const nomStationCompletSafe = rawSta.replace(/'/g, "\\'"); const nomStationPourCopieSafe = nomStationPourCopie.replace(/'/g, "\\'"); const idCibleSafe = idCible.replace(/'/g, "\\'");
-                    newHTML += `<div class="data-row ${cssGlow}" onclick="toggleVerrou('${idCibleSafe}')" style="cursor: pointer;"><div class="row-top"><div style="font-weight: bold; display: flex; align-items: center; gap: 15px;"><span style="color: #666;">◎</span> <span class="copy-click" onclick="copierNav('${nomSystemeSafe}', this, event)" title="Copier le système" style="color: #fff;">${nomSysteme}</span><span style="color: #FF7100; font-size: 0.8em; font-weight: normal; opacity: 0.8;">[ ${distanceFormat} ]</span></div><div style="text-align: right; letter-spacing: 1px; display: flex; flex-direction: column; align-items: flex-end;"><div style="display: flex; align-items: center; gap: 10px;">${htmlMoyenneTop}<span style="color: ${couleurMarge}; font-weight: bold;">${texteMarge}</span></div>${statsPrevisionnellesHtml}</div></div><div class="row-bottom"><div class="row-bottom-left"><span class="fav-star ${starClass}" onclick="toggleFavoris('${idCibleSafe}', '${nomSystemeSafe}', '${nomStationCompletSafe}', event)">★</span><span style="color: var(--ed-orange); opacity: 0.8;">${ligne.is_planetary ? '🔻' : '🛰️'} <span class="copy-click" onclick="copierNav('${nomStationPourCopieSafe}', this, event)">${nomStationHtml}</span></span><span><span style="color: #666;">CIBLE:</span> <span style="color: ${getColor(commodite)}; font-weight: bold;">${commodite}</span></span></div><div class="row-bottom-right">${modeActif === 'PREDICTIF' ? `<span><span style="color: #666;">DERNIÈRE BALISE:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span style="color: ${isFilonConfirme ? '#00FF66' : 'var(--ed-orange)'}; font-weight: bold; letter-spacing: 1px;">>_ ${isFilonConfirme ? 'CIBLES VERROUILLÉES' : 'ENVOYER UN ÉCLAIREUR'}</span>` : `<span><span style="color: #666;">MAJ MARCHÉ:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'STOCK' : 'DEMANDE'}:</span> <span style="color: #fff;">${volFmt} T</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'ACHAT' : 'REVENTE'}:</span> <span style="color: #fff;">${prixFmt} CR</span></span><span><span style="color: #666;">TRAFIC 24H:</span> <span style="color: #fff;">${traficFormat} CMD</span></span>`}</div></div>${pepitesHtml}</div>`;
+                    newHTML += `<div class="data-row ${cssGlow}" onmouseenter="sonHover()" onclick="toggleVerrou('${idCibleSafe}')" style="cursor: pointer;"><div class="row-top"><div style="font-weight: bold; display: flex; align-items: center; gap: 15px;"><span style="color: #666;">◎</span> <span class="copy-click" onclick="copierNav('${nomSystemeSafe}', this, event)" title="Copier le système" style="color: #fff;">${nomSysteme}</span><span style="color: #FF7100; font-size: 0.8em; font-weight: normal; opacity: 0.8;">[ ${distanceFormat} ]</span></div><div style="text-align: right; letter-spacing: 1px; display: flex; flex-direction: column; align-items: flex-end;"><div style="display: flex; align-items: center; gap: 10px;">${htmlMoyenneTop}<span style="color: ${couleurMarge}; font-weight: bold;">${texteMarge}</span></div>${statsPrevisionnellesHtml}</div></div><div class="row-bottom"><div class="row-bottom-left" style="display: flex; gap: 15px; align-items: center;"><span class="fav-star ${starClass}" onclick="toggleFavoris('${idCibleSafe}', '${nomSystemeSafe}', '${nomStationCompletSafe}', event)">★</span><span style="color: var(--ed-orange); opacity: 0.8;">${ligne.is_planetary ? '🔻' : '🛰️'} <span class="copy-click" onclick="copierNav('${nomStationPourCopieSafe}', this, event)">${nomStationHtml}</span></span><span><span style="color: #666;">CIBLE:</span> <span style="color: ${getColor(commodite)}; font-weight: bold;">${commodite}</span></span></div><div class="row-bottom-right" style="display: flex; gap: 15px; align-items: center;">${modeActif === 'PREDICTIF' ? `<span><span style="color: #666;">DERNIÈRE BALISE:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span style="color: ${isFilonConfirme ? '#00FF66' : 'var(--ed-orange)'}; font-weight: bold; letter-spacing: 1px;">>_ ${isFilonConfirme ? 'CIBLES VERROUILLÉES' : 'ENVOYER UN ÉCLAIREUR'}</span>` : `<span><span style="color: #666;">MAJ MARCHÉ:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'STOCK' : 'DEMANDE'}:</span> <span style="color: #fff;">${volFmt} T</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'ACHAT' : 'REVENTE'}:</span> <span style="color: #fff;">${prixFmt} CR</span></span><span><span style="color: #666;">TRAFIC 24H:</span> <span style="color: #fff;">${traficFormat} CMD</span></span>`}</div></div>${pepitesHtml}</div>`;
                 });
                 if (newHTML !== lastRenderedDataHTML) { container.innerHTML = newHTML; lastRenderedDataHTML = newHTML; }
             } catch (e) {}
         }
-        setInterval(() => initialiserSysteme(), 2000); 
+
+        async function systemLoop() {
+            if(isSystemLooping) return;
+            isSystemLooping = true;
+            await initialiserSysteme();
+            isSystemLooping = false;
+            setTimeout(systemLoop, 2000); // VERROU 2 : Empêche le chevauchement des appels
+        }
+    
+        // --- LOGIQUE DU SAS DE SÉCURITÉ ---
+        function navFailsafe(pageId) {
+            sonClic();
+            document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        // --- GESTION DES BRIEFINGS DE SCANS (EN 2 ÉTAPES) ---
+
+        function preparerBriefingAchat() {
+            sonClic();
+            // On remet les boutons dans leur état initial
+            document.getElementById('btn-appliquer-matrice').style.display = 'block';
+            document.getElementById('btn-lancer-scan-achat').style.display = 'none';
+            // On ouvre la modale des marchandises
+            isEditingParams = true;
+            document.getElementById('modal-cibles').style.display = 'flex';
+        }
+
+        async function appliquerMatriceAchat() {
+            sonClic(); 
+            const cibles = [];
+            // On récupère les 4 valeurs
+            for(let i=1; i<=4; i++) { const v = document.getElementById(`cible_${i}`).value.trim(); if(v) cibles.push(v); }
+            paramApp.cibles_achat = cibles;
+            
+            try { 
+                // Sauvegarde en base de données
+                await getDb().from('parametres_app').update({ cibles_achat: cibles }).eq('user_id', profilCommandant.user_id); 
+                await syncParamsToRadar(); 
+                
+                // PASSAGE À L'ÉTAPE 2 : On remplace le bouton sans fermer la fenêtre
+                document.getElementById('btn-appliquer-matrice').style.display = 'none';
+                document.getElementById('btn-lancer-scan-achat').style.display = 'block';
+                sonSucces();
+            } catch(e) { console.error("Erreur sauvegarde matrice:", e); }
+        }
+
+        function lancerScanDepuisBriefing(typeOperation) {
+            sonClic();
+            isEditingParams = false;
+            // On ferme toutes les salles de briefing possibles
+            document.getElementById('modal-briefing-vente').style.display = 'none';
+            document.getElementById('modal-briefing-predictif').style.display = 'none';
+            document.getElementById('modal-cibles').style.display = 'none';
+            
+            // On rafraîchit l'affichage et on lance la roquette !
+            lastRenderedDataHTML = ""; 
+            afficherDonnees();
+            declencherScan(); 
+        }
+
     </script>
 </body>
 </html>
