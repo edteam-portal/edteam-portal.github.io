@@ -1339,10 +1339,10 @@
     </script>
 
     <script>
-        // Lancement du drone de service pour le mode plein écran
+        // Lancement du drone de service avec périmètre strict
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => {
-                console.log("Drone de service PWA activé.");
+            navigator.serviceWorker.register('./sw.js', { scope: '/edteam/' }).then(() => {
+                console.log("Drone de service PWA activé et verrouillé sur /edteam/");
             }).catch((err) => {
                 console.error("Échec du déploiement du drone : ", err);
             });

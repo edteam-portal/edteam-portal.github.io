@@ -1,7 +1,7 @@
 {
   "name": "Commerce Furtif Tactique",
   "short_name": "Terminal FC",
-  "start_url": "/edteam/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#FF7100",
