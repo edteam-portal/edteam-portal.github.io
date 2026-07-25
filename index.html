@@ -155,12 +155,17 @@
             .title-row h1 { font-size: 1.3em; }
             .tab-btn { padding: 8px 15px; font-size: 0.9em; }
             
-            /* On réorganise la barre de contrôle centrale pour éviter l'écrasement */
+            /* On réorganise la barre centrale : Hologramme en haut, Boutons côte à côte en dessous */
             .fc-control-bar { flex-wrap: wrap; height: auto; padding: 15px; gap: 15px; }
-            .fc-holo-panel { min-width: 100%; height: 120px; order: 1; }
-            .settings-icons-col { flex-direction: row; width: 100%; border-left: none; border-right: none; padding: 0; margin: 0; gap: 15px; order: 2; height: 60px; }
-            .ui-icon-btn { width: 120px !important; height: 100% !important; }
-            .scan-action-col { padding-left: 0; width: 100%; height: 70px; order: 3; }
+            .fc-holo-panel { min-width: 100%; height: 110px; order: 1; }
+            
+            /* Le bouton Moyennes (CR) se place à gauche sur la 2ème ligne */
+            .settings-icons-col { flex-direction: row; width: auto; border: none; padding: 0; margin: 0; order: 2; height: 60px; }
+            .ui-icon-btn { width: 80px !important; height: 100% !important; }
+            
+            /* Le bouton Scan prend tout le reste de la place à droite sur la 2ème ligne */
+            .scan-action-col { padding-left: 0; flex: 1; height: 60px; order: 3; }
+            .giant-scan-btn { font-size: 1.1em; } /* On réduit un peu le texte pour l'ajustement */
         }
 
         /* Pour les petits écrans (Tablettes classiques en mode portrait) */
