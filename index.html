@@ -430,13 +430,15 @@
                     DERNIER SCAN: <span id="last-scan-time" style="color: var(--ed-orange); margin-left: 6px;">--:--:--</span>
                 </div>
                 
-                <!-- Bouton Registre Carré à l'extrême droite -->
-                <button class="ui-icon-btn" style="height: 38px; width: 42px; border-color: var(--ed-orange); color: var(--ed-orange); margin-left: 5px; flex-shrink: 0; background: rgba(255,113,0,0.05);" 
+                <!-- Bouton Registre Carré à l'extrême droite (Sécurisé hors media query) -->
+                <button style="height: 38px; width: 42px; min-width: 42px; border: 1px solid var(--ed-orange); color: var(--ed-orange); margin-left: 5px; flex-shrink: 0; background: rgba(255,113,0,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: 0.2s;" 
                         onclick="ouvrirRegistre()" 
                         onmouseenter="showHoloTooltip(event, 'REGISTRE D\'OPÉRATION<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Ce journal enregistre automatiquement chaque transaction<br>d\'achat et de vente effectuée en jeu et calcule<br>votre Profit Net en direct.<br><br><span style=&quot;color:var(--ed-orange);&quot;>> INFO :</span> Vous devez clôturer l\'opération manuellement<br>pour purger l\'historique avant un nouveau cycle.</span>', 'var(--ed-orange)')" 
                         onmouseleave="hideHoloTooltip()" 
-                        onmousemove="moveHoloTooltip(event)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5));">
+                        onmousemove="moveHoloTooltip(event)"
+                        onmouseover="this.style.background='var(--ed-orange)'; this.style.color='#000';"
+                        onmouseout="this.style.background='rgba(255,113,0,0.05)'; this.style.color='var(--ed-orange)';">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                         <line x1="10" y1="6" x2="16" y2="6"></line>
