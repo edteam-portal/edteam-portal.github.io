@@ -330,45 +330,6 @@
             </div>
         </div>
     </div>
-    <div class="modal-overlay" id="modal-finances" onclick="fermerModal('modal-finances', event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-close" onclick="fermerModal('modal-finances')">X</div>
-            <div class="modal-title">ARCHIVE BDD // SYNCHRONISATION BANCAIRE</div>
-            
-            <p><strong>VAISSEAU :</strong> <span style="color: #00FF66;">[ 100% AUTOMATIQUE ]</span><br>
-            <span style="color: #aaa; font-size: 0.9em;">Le réseau télémétrique de votre cockpit scanne et met à jour votre solde personnel en temps réel à la moindre transaction.</span></p>
-            
-            <p style="margin-top: 15px;"><strong>FLEET CARRIER :</strong> <span style="color: #FF7100;">[ ACTUALISATION MANUELLE ]</span><br>
-            <span style="color: #aaa; font-size: 0.9em;">Le réseau de la Fédération des Pilotes est lourdement crypté pour les transporteurs de classe Capitale. Le jeu refuse de diffuser vos fonds de structure en continu en arrière-plan.</span></p>
-            
-            <div style="background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); padding: 12px; margin-top: 10px; margin-bottom: 20px; color: #FFF; font-size: 0.9em;">
-                ℹ️ <strong>PROCÉDURE :</strong> Pour actualiser ce solde sur votre terminal holographique, <strong>vous devez ouvrir le menu "Gestion du Fleet Carrier" dans le jeu</strong>.
-            </div>
-
-            <!-- NOUVELLE SECTION : EXPLICATION DU REGISTRE -->
-            <h4 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange-dim); padding-bottom: 5px; margin-bottom: 10px; margin-top: 25px; letter-spacing: 1px;">[ REGISTRE D'OPÉRATION ]</h4>
-            <p style="margin-top: 0;"><strong>JOURNAL TACTIQUE :</strong> <span style="color: #00FF66;">[ SUIVI PERSISTANT ]</span><br>
-            <span style="color: #aaa; font-size: 0.9em;">Ce terminal enregistre automatiquement chaque transaction d'achat et de vente effectuée en jeu. Il calcule en direct votre <strong>Profit Net</strong> de mission.<br><br>
-            Les données sont sauvegardées en continu sur la base de données. Pour préparer une nouvelle boucle commerciale, vous devez cliquer manuellement sur le bouton <strong style="color: #FF3333;">[ CLÔTURER L'OPÉRATION ]</strong> dans le panneau du registre. Cela purgera l'historique et remettra le compteur à zéro.</span></p>
-        </div>
-    </div>
-    <div class="modal-overlay" id="modal-sync" onclick="fermerModal('modal-sync', event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-close" onclick="fermerModal('modal-sync')">X</div>
-            <div class="modal-title">PROTOCOLE // DÉSYNCHRONISATION ET RECALIBRAGE</div>
-            <p style="color: #FF3333; font-weight: bold; margin-bottom: 5px;">⚠️ RUPTURE DE LA CHAÎNE TÉLÉMÉTRIQUE</p>
-            <p style="margin-top: 0; font-size: 0.9em; color: #aaa;">Si vous jouez à Elite Dangerous <strong>sans allumer le module EDMC</strong>, vos actions dans le jeu ne sont plus transmises au Centre de Commandement. La base de données devient "aveugle". Votre position, vos crédits et l'état de votre soute sur ce terminal seront bloqués dans le passé (Vaisseau Fantôme).</p>
-            <div style="background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); padding: 12px; margin-top: 15px; margin-bottom: 15px;">
-                <strong style="color: #FFF; letter-spacing: 1px;">⚙️ PROCÉDURE DE RECALIBRAGE (Si EDMC était fermé) :</strong>
-                <ul style="color: #ccc; font-size: 0.9em; margin-bottom: 0;">
-                    <li><strong>L'Inventaire :</strong> Transférez 1 tonne entre votre FC et votre vaisseau (ou achetez 1 tonne d'eau). L'inventaire entier sera "flashé".</li>
-                    <li><strong>Le Vaisseau :</strong> Le nom et le tonnage maximum se réinitialiseront au prochain saut spatial ou reconnexion.</li>
-                    <li><strong>Les Finances :</strong> Ouvrez l'écran de gestion du Carrier en jeu pour actualiser son solde.</li>
-                </ul>
-            </div>
-            <p style="font-size: 0.8em; color: #666; text-align: right; margin: 0; letter-spacing: 1px;">>_ GARDEZ TOUJOURS EDMC ACTIF EN VOL.</p>
-        </div>
-    </div>
 
     <!-- MODALES DE PARAMETRAGE -->
     <div class="modal-overlay" id="modal-cibles" onclick="fermerModal('modal-cibles', event)">
@@ -397,24 +358,48 @@
     </div>
 
     <div class="hud-container" id="main-ui" style="display: none; opacity: 0;">
-        <header class="hud-header" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; flex-wrap: nowrap; gap: 30px; margin-bottom: 15px; width: 100%; overflow: hidden;">
+        <header class="hud-header" style="display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; flex-wrap: nowrap; gap: 15px; margin-bottom: 15px; width: 100%; border-bottom: 2px solid var(--ed-orange); padding-bottom: 15px;">
             
-            <!-- 1. Logo + EDTEAM -->
-            <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
-                <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 45px; height: 45px;">
-                    <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
-                    <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
-                    <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
-                </svg>
-                <div style="display: flex; flex-direction: column;">
-                    <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); white-space: nowrap; line-height: 1;">EDTEAM</h1>
-                    <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px;">CMDR [ EN ATTENTE ]</span>
+            <!-- BLOC GAUCHE : Logo + Soute + Finances -->
+            <div style="display: flex; align-items: stretch; gap: 15px; flex-shrink: 0;">
+                <!-- Logo + EDTEAM -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 45px; height: 45px;">
+                        <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                        <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                        <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                    </svg>
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); line-height: 1; white-space: nowrap;">EDTEAM</h1>
+                        <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
+                    </div>
+                </div>
+                
+                <!-- Zone Soute (Sans la boîte invisible, étirement parfait) -->
+                <div id="fc-inventory-percent" style="margin: 0; white-space: nowrap; display: flex; align-items: center; cursor: help; padding: 4px 15px; box-sizing: border-box;"
+                     onmouseenter="showHoloTooltip(event, '⚠️ PROTOCOLE DE RECALIBRAGE<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Si EDMC était fermé pendant votre jeu, cette soute est aveugle.</span><br><br><span style=&quot;color:var(--ed-blue);&quot;>⚙️ COMMENT FORCER LA MAJ :</span><br><span style=&quot;color:#ccc; font-size:0.8em; font-weight:normal;&quot;>Transférez ou achetez 1 tonne de n\'importe quelle marchandise.<br>Le radar va flasher et corriger l\'inventaire instantanément.</span>', 'var(--ed-orange)')" 
+                     onmouseleave="hideHoloTooltip()" 
+                     onmousemove="moveHoloTooltip(event)">
+                </div>
+                
+                <!-- Boîte Finances (Interactive avec Mouseover intégré) -->
+                <div class="finances-box" style="display: flex; flex-direction: column; text-align: right; font-size: 0.85em; letter-spacing: 1px; justify-content: center; gap: 3px; background: rgba(0, 240, 255, 0.05); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                     onmouseenter="showHoloTooltip(event, 'SYNCHRONISATION BANCAIRE<br><span style=&quot;color:#00FF66; font-size:0.85em;&quot;>> VAISSEAU : AUTOMATIQUE</span><br><span style=&quot;color:#ccc; font-size:0.8em; font-weight:normal;&quot;>Mise à jour en temps réel.</span><br><br><span style=&quot;color:#FF7100; font-size:0.85em;&quot;>> CARRIER : MANUELLE</span><br><span style=&quot;color:#ccc; font-size:0.8em; font-weight:normal;&quot;>Ouvrez la <strong>Gestion du Fleet Carrier</strong><br>en jeu pour rafraîchir ce solde.</span>', 'var(--ed-blue)')" 
+                     onmouseleave="hideHoloTooltip()" 
+                     onmousemove="moveHoloTooltip(event)"
+                     onmouseover="this.style.background='rgba(0, 240, 255, 0.15)'; this.style.borderColor='#fff';"
+                     onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.borderColor='rgba(0, 240, 255, 0.2)';">
+                    <div><span style="color: #888;">VAISSEAU :</span> <span id="solde-vaisseau" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-orange);">CR</span></div>
+                    <div><span style="color: #888;">CARRIER :</span> <span id="solde-fc" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-blue);">CR</span></div>
                 </div>
             </div>
-            
-            <!-- 2. Inventaire FC -->
-            <div id="fc-inventory-percent" style="margin: 0; white-space: nowrap; flex-shrink: 0;"></div>
 
+            <!-- BLOC DROIT : Menus Déconnexion & Sécurité (Sans fond ni bordure, aligné à droite) -->
+            <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; justify-content: flex-end; align-items: center; flex-grow: 1; white-space: nowrap; gap: 15px;">
+                <span class="info-btn" style="color: var(--ed-blue);" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
+                <span class="info-btn" style="color: #555;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#555'" onclick="deconnexion()">[ DÉCONNEXION ]</span>
+            </div>
+            
         </header>
             <div class="header-bottom-row">
                 <nav class="tab-bar">
@@ -430,6 +415,8 @@
                         <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"><path d="M50 20 L90 65 L80 75 L50 60 L20 75 L10 65 Z" /><path d="M40 35 L60 35 L65 55 L35 55 Z" fill="currentColor" stroke="none" opacity="0.3"/></svg>
                     </div>
                 </div>
+                
+                <!-- Barre d'état du Radar (Prend la largeur centrale) -->
                 <div class="live-status-box">
                     <div class="status-bg-fill" id="status-bg-fill"></div>
                     <div style="position: relative; z-index: 1; display: flex; align-items: center; width: 100%;">
@@ -437,16 +424,25 @@
                     </div>
                     <div class="progress-bar-container" id="progress-container"><div class="progress-bar-global" id="progress-global"></div></div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; border-right: 2px solid var(--ed-orange-dim); padding-right: 15px;">
-                    <div class="finances-box" style="display: flex; flex-direction: column; text-align: right; font-size: 0.85em; letter-spacing: 1px; justify-content: center; gap: 3px;">
-                        <div><span style="color: #888;">VAISSEAU :</span> <span id="solde-vaisseau" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-orange);">CR</span></div>
-                        <div><span style="color: #888;">CARRIER :</span> <span id="solde-fc" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-blue);">CR</span></div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                        <span class="info-btn" style="color: var(--ed-blue); font-size: 1.2em; line-height: 1;" onclick="ouvrirModal('modal-finances', event)">[?]</span>
-                        <span class="info-btn" style="color: var(--ed-orange); font-size: 0.7em; letter-spacing: 2px; border: 1px solid var(--ed-orange-dim); padding: 2px 6px; border-radius: 3px;" onclick="ouvrirRegistre()">REGISTRE</span>
-                    </div>
+                
+                <!-- L'Heure du dernier scan calée à droite du radar -->
+                <div style="font-size: 0.8em; color: #888; font-weight: bold; padding: 0 10px; white-space: nowrap; display: flex; align-items: center; flex-shrink: 0; letter-spacing: 1px;">
+                    DERNIER SCAN: <span id="last-scan-time" style="color: var(--ed-orange); margin-left: 6px;">--:--:--</span>
                 </div>
+                
+                <!-- Bouton Registre Carré à l'extrême droite -->
+                <button class="ui-icon-btn" style="height: 38px; width: 42px; border-color: var(--ed-orange); color: var(--ed-orange); margin-left: 5px; flex-shrink: 0; background: rgba(255,113,0,0.05);" 
+                        onclick="ouvrirRegistre()" 
+                        onmouseenter="showHoloTooltip(event, 'REGISTRE D\'OPÉRATION<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Ce journal enregistre automatiquement chaque transaction<br>d\'achat et de vente effectuée en jeu et calcule<br>votre Profit Net en direct.<br><br><span style=&quot;color:var(--ed-orange);&quot;>> INFO :</span> Vous devez clôturer l\'opération manuellement<br>pour purger l\'historique avant un nouveau cycle.</span>', 'var(--ed-orange)')" 
+                        onmouseleave="hideHoloTooltip()" 
+                        onmousemove="moveHoloTooltip(event)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5));">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <line x1="10" y1="6" x2="16" y2="6"></line>
+                        <line x1="10" y1="10" x2="16" y2="10"></line>
+                    </svg>
+                </button>
             </div>
         </header>
         
@@ -657,21 +653,8 @@
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('boot-screen').style.display = 'flex'; 
                 
-                if (!document.getElementById('nav-commandant')) {
-                    const nav = document.createElement('div'); nav.id = 'nav-commandant'; 
-                    nav.style.cssText = 'position: absolute; top: 15px; right: 25px; font-size: 0.9em; letter-spacing: 2px; z-index: 500; display: flex; gap: 20px; font-weight: bold; align-items: center;';
-                    
-                    nav.innerHTML = `
-                        <div class="hud-status" style="margin: 0; padding-right: 15px; border-right: 1px solid rgba(255,113,0,0.3); display: flex; gap: 15px; border-bottom: none;">
-                            <span>DERNIER SCAN : <span id="last-scan-time" style="color: var(--ed-orange);">--:--:--</span></span>
-                            <span>MAJ AUTO : <span style="color: var(--ed-blue);">ACTIF</span></span>
-                            <span>LIAISON : <span id="status-indicator" style="color: #00FF00;">OK</span></span>
-                        </div>
-                        <span style="color: var(--ed-blue); cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--ed-blue)'" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
-                        <span style="color: #555; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#555'" onclick="deconnexion()">[ DÉCONNEXION ]</span>
-                    `;
-                    document.body.appendChild(nav);
-                }
+                // SUPPRESSION DE LA GÉNÉRATION DYNAMIQUE ICI
+                
                 const keyDisplay = document.getElementById('api-key-display');
                 if (keyDisplay) keyDisplay.innerText = data.cle_api;
                 const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
@@ -1242,8 +1225,7 @@
                 espaceVideUtilise = Math.max(0, capaciteMax - qteTotale);
                 const percent = Math.min(((qteTotale / capaciteMax) * 100), 100).toFixed(1);
                 const formatter = new Intl.NumberFormat('fr-FR');
-                let infoBulle = `<span class="info-btn" style="color: var(--ed-orange); margin-left: 10px;" onclick="ouvrirModal('modal-sync', event)" onmouseenter="showHoloTooltip(event, 'ERREUR DE SOUTE ?', 'var(--ed-orange)', true)" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[?]</span>`;
-                document.getElementById('fc-inventory-percent').innerHTML = `<span style="color: var(--ed-orange);">${nomAffiche}</span> <span>&nbsp;&nbsp;//&nbsp;&nbsp; <span style="color: #fff;">${formatter.format(qteTotale)}</span> / ${formatter.format(capaciteMax)} T <span style="color: var(--ed-blue);">(${percent}%)</span></span>` + infoBulle;
+                document.getElementById('fc-inventory-percent').innerHTML = `<span style="color: var(--ed-orange);">${nomAffiche}</span> <span>&nbsp;&nbsp;//&nbsp;&nbsp; <span style="color: #fff;">${formatter.format(qteTotale)}</span> / ${formatter.format(capaciteMax)} T <span style="color: var(--ed-blue);">(${percent}%)</span></span>`;
                 
                 let cols = paramApp.mode_flotte === 'FC' ? 120 : 40; let rows = paramApp.mode_flotte === 'FC' ? 6 : 4; let totalCratesVisuelles = cols * rows;
                 gridDiv.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
