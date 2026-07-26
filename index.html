@@ -394,8 +394,8 @@
                 </div>
             </div>
 
-            <!-- BLOC DROIT : Menus Déconnexion & Sécurité (Sans fond ni bordure, aligné à droite) -->
-            <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; justify-content: flex-end; align-items: center; flex-grow: 1; white-space: nowrap; gap: 15px;">
+            <!-- BLOC DROIT : Menus Déconnexion & Sécurité (Empilés verticalement, alignés à droite) -->
+            <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; flex-grow: 1; white-space: nowrap; height: 100%; gap: 6px; padding-right: 5px; box-sizing: border-box;">
                 <span class="info-btn" style="color: var(--ed-blue);" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
                 <span class="info-btn" style="color: #555;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#555'" onclick="deconnexion()">[ DÉCONNEXION ]</span>
             </div>
