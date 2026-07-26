@@ -203,6 +203,17 @@
             .modal-content { min-width: 90%; padding: 20px; }
         }
 
+        /* PANNEAU REGISTRE TACTIQUE */
+        .registre-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: none; opacity: 0; transition: 0.3s; backdrop-filter: blur(3px); }
+        .registre-panel { position: fixed; top: 0; right: -500px; width: 450px; max-width: 90%; height: 100%; background: rgba(10,5,0,0.95); border-left: 2px solid var(--ed-orange); z-index: 3001; transition: 0.3s ease-in-out; display: flex; flex-direction: column; box-shadow: -5px 0 30px rgba(0,0,0,0.8); }
+        .registre-header { padding: 20px 25px; border-bottom: 1px solid var(--ed-orange-dim); display: flex; flex-direction: column; gap: 10px; }
+        .registre-content { flex-grow: 1; overflow-y: auto; padding: 20px 25px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+        .registre-footer { padding: 20px 25px; border-top: 1px solid var(--ed-orange-dim); }
+        .transac-row { font-size: 0.85em; display: flex; flex-direction: column; padding: 12px; background: rgba(255,255,255,0.03); border-left: 2px solid #555; transition: 0.2s; }
+        .transac-row:hover { background: rgba(255,255,255,0.08); }
+        .transac-row.achat { border-color: #FF3333; }
+        .transac-row.vente { border-color: #00FF66; }
+
     </style>
 </head>
 <body>
@@ -323,13 +334,22 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-finances')">X</div>
             <div class="modal-title">ARCHIVE BDD // SYNCHRONISATION BANCAIRE</div>
+            
             <p><strong>VAISSEAU :</strong> <span style="color: #00FF66;">[ 100% AUTOMATIQUE ]</span><br>
             <span style="color: #aaa; font-size: 0.9em;">Le réseau télémétrique de votre cockpit scanne et met à jour votre solde personnel en temps réel à la moindre transaction.</span></p>
-            <p style="margin-top: 20px;"><strong>FLEET CARRIER :</strong> <span style="color: #FF7100;">[ ACTUALISATION MANUELLE ]</span><br>
+            
+            <p style="margin-top: 15px;"><strong>FLEET CARRIER :</strong> <span style="color: #FF7100;">[ ACTUALISATION MANUELLE ]</span><br>
             <span style="color: #aaa; font-size: 0.9em;">Le réseau de la Fédération des Pilotes est lourdement crypté pour les transporteurs de classe Capitale. Le jeu refuse de diffuser vos fonds de structure en continu en arrière-plan.</span></p>
-            <div style="background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); padding: 12px; margin-top: 15px; color: #FFF; font-size: 0.9em;">
+            
+            <div style="background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); padding: 12px; margin-top: 10px; margin-bottom: 20px; color: #FFF; font-size: 0.9em;">
                 ℹ️ <strong>PROCÉDURE :</strong> Pour actualiser ce solde sur votre terminal holographique, <strong>vous devez ouvrir le menu "Gestion du Fleet Carrier" dans le jeu</strong>.
             </div>
+
+            <!-- NOUVELLE SECTION : EXPLICATION DU REGISTRE -->
+            <h4 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange-dim); padding-bottom: 5px; margin-bottom: 10px; margin-top: 25px; letter-spacing: 1px;">[ REGISTRE D'OPÉRATION ]</h4>
+            <p style="margin-top: 0;"><strong>JOURNAL TACTIQUE :</strong> <span style="color: #00FF66;">[ SUIVI PERSISTANT ]</span><br>
+            <span style="color: #aaa; font-size: 0.9em;">Ce terminal enregistre automatiquement chaque transaction d'achat et de vente effectuée en jeu. Il calcule en direct votre <strong>Profit Net</strong> de mission.<br><br>
+            Les données sont sauvegardées en continu sur la base de données. Pour préparer une nouvelle boucle commerciale, vous devez cliquer manuellement sur le bouton <strong style="color: #FF3333;">[ CLÔTURER L'OPÉRATION ]</strong> dans le panneau du registre. Cela purgera l'historique et remettra le compteur à zéro.</span></p>
         </div>
     </div>
     <div class="modal-overlay" id="modal-sync" onclick="fermerModal('modal-sync', event)">
@@ -422,7 +442,10 @@
                         <div><span style="color: #888;">VAISSEAU :</span> <span id="solde-vaisseau" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-orange);">CR</span></div>
                         <div><span style="color: #888;">CARRIER :</span> <span id="solde-fc" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-blue);">CR</span></div>
                     </div>
-                    <span class="info-btn" style="color: var(--ed-blue); font-size: 1.2em;" onclick="ouvrirModal('modal-finances', event)">[?]</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                        <span class="info-btn" style="color: var(--ed-blue); font-size: 1.2em; line-height: 1;" onclick="ouvrirModal('modal-finances', event)">[?]</span>
+                        <span class="info-btn" style="color: var(--ed-orange); font-size: 0.7em; letter-spacing: 2px; border: 1px solid var(--ed-orange-dim); padding: 2px 6px; border-radius: 3px;" onclick="ouvrirRegistre()">REGISTRE</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -497,6 +520,7 @@
         let profilCommandant = null; let wasEdmcOnline = true;
         let hasLoadedParams = false; // LE VERROU ANTI-BOUCLE
         let isSystemLooping = false; // LE VERROU ANTI-CHEVANCHEMENT
+        let previousScanState = false; // <-- LE FUSIBLE RÉPARÉ
 
         const ALL_COMMODITIES = [
             "Advanced Catalysers", "Advanced Medicines", "Agronomic Treatment", "Algae", "Aluminium", "Animal Meat", "Animal Monitors", "Aquaponic Systems", "Auto-Fabricators", "Basic Medicines", "Bauxite", "Beer", "Beryllium", "Bertrandite", "Bioreducing Lichen", "Biowaste", "Bismuth", "Bootleg Liquor", "Building Fabricators", "Clothing", "Cobalt", "Coffee", "Coltan", "Combat Stabilisers", "Computer Components", "Consumer Technology", "Copper", "Crop Harvesters", "Cryolite", "Domestic Appliances", "Earth Relics", "Emergency Power Cells", "Evacuation Shelter", "Exhaust Manifold", "Explosives", "Fish", "Food Cartridges", "Fruit and Vegetables", "Gallite", "Gallium", "Gold", "Goshenite", "Grain", "Hazardous Environment Suits", "Heike Tea", "Hydrogen Fuel", "Hydrogen Peroxide", "Imperial Slaves", "Indite", "Indium", "Insulating Membrane", "Ion Distributors", "Jadeite", "Land Enrichment Systems", "Leather", "Lepidolite", "Liquid Oxygen", "Liquor", "Lithium", "Low Temperature Diamonds", "Magnetic Emitter Coil", "Marine Equipment", "Medical Diagnostic Equipment", "Micro Controllers", "Micro-Weavers", "Microbial Furnaces", "Mineral Extractors", "Mineral Oil", "Moissanite", "Monazite", "Musgravite", "Mutomaggot Pie", "Narcotics", "Nerve Agents", "Non-Lethal Weapons", "Osmium", "Painite", "Palladium", "Performance Enhancers", "Personal Effects", "Personal Weapons", "Pesticides", "Platinum", "Polymers", "Power Generators", "Power Transfer Conduits", "Progenitor Cells", "Radiation Baffle", "Reactive Armour", "Reinforced Baffling", "Resonating Separators", "Robotics", "Rutile", "Scrap", "Semiconductors", "Silver", "Slaves", "Structural Regulators", "Superconductors", "Survival Equipment", "Synthetic Fabrics", "Synthetic Meat", "Synthetic Reagents", "Taaffeite", "Tantalum", "Tea", "Titanium", "Tobacco", "Tritium", "Uraninite", "Void Opals", "Water", "Water Purifiers", "Wine"
@@ -507,6 +531,93 @@
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         function getDb() { return supabaseApp; }
+
+        function ouvrirRegistre() {
+            sonClic();
+            document.getElementById('registre-overlay').style.display = 'block';
+            setTimeout(() => { 
+                document.getElementById('registre-overlay').style.opacity = '1';
+                document.getElementById('registre-panel').style.right = '0';
+            }, 10);
+            chargerRegistre();
+        }
+
+        function fermerRegistre() {
+            sonClic();
+            document.getElementById('registre-overlay').style.opacity = '0';
+            document.getElementById('registre-panel').style.right = '-500px';
+            setTimeout(() => { document.getElementById('registre-overlay').style.display = 'none'; }, 300);
+        }
+
+        async function chargerRegistre() {
+            if(!profilCommandant) return;
+            const liste = document.getElementById('registre-liste');
+            liste.innerHTML = '<div style="color: var(--ed-orange); text-align: center; margin-top: 20px;">> SYNCHRONISATION BANCAIRE...</div>';
+            
+            try {
+                const { data, error } = await getDb().from('journal_transactions')
+                    .select('*').eq('user_id', profilCommandant.user_id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                let profitNet = 0; let html = '';
+                
+                if(data.length === 0) {
+                    html = '<div style="color: #666; text-align: center; margin-top: 20px;">> AUCUNE TRANSACTION...</div>';
+                } else {
+                    data.forEach(t => {
+                        const isVente = t.type_operation === 'VENTE';
+                        if(isVente) profitNet += t.total; else profitNet -= t.total;
+                        const color = isVente ? '#00FF66' : '#FF3333';
+                        const signe = isVente ? '+' : '-';
+                        html += `
+                        <div class="transac-row ${t.type_operation.toLowerCase()}">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <strong style="color: ${color}; letter-spacing: 1px;">[ ${t.type_operation} ]</strong>
+                                <span style="color: #888;">${new Date(t.created_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <div style="color: #fff; margin-bottom: 6px; font-weight: bold;">${t.systeme} <span style="color: #666;">//</span> <span style="color: #ccc; font-weight: normal;">${t.station}</span></div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <span style="color: var(--ed-blue);">${new Intl.NumberFormat('fr-FR').format(t.quantite)} T <span style="color: #666;">de</span> ${t.marchandise}</span>
+                                <strong style="color: ${color}; font-size: 1.1em;">${signe} ${new Intl.NumberFormat('fr-FR').format(t.total)} CR</strong>
+                            </div>
+                        </div>`;
+                    });
+                }
+                liste.innerHTML = html;
+                
+                const profitEl = document.getElementById('registre-profit');
+                profitEl.innerText = (profitNet > 0 ? '+' : '') + new Intl.NumberFormat('fr-FR').format(profitNet) + ' CR';
+                profitEl.style.color = profitNet > 0 ? '#00FF66' : (profitNet < 0 ? '#FF3333' : '#fff');
+                profitEl.style.textShadow = profitNet > 0 ? '0 0 15px rgba(0,255,102,0.3)' : (profitNet < 0 ? '0 0 15px rgba(255,51,51,0.3)' : 'none');
+                
+            } catch(e) {
+                liste.innerHTML = '<div style="color: red; text-align: center; margin-top: 20px;">> ERREUR DE LIAISON BANCAIRE</div>';
+            }
+        }
+
+        async function purgerRegistre() {
+            if(!profilCommandant) return;
+            sonScanStart(); // On utilise le son furtif pour la purge
+            const btn = document.querySelector('.registre-footer .auth-btn');
+            btn.innerText = "> PURGE TACTIQUE EN COURS...";
+            btn.style.pointerEvents = "none";
+            
+            try {
+                await getDb().from('journal_transactions').delete().eq('user_id', profilCommandant.user_id);
+                setTimeout(() => {
+                    sonScanStop(); sonSucces();
+                    btn.innerText = "[ CLÔTURER L'OPÉRATION ]";
+                    btn.style.pointerEvents = "auto";
+                    chargerRegistre();
+                }, 1200);
+            } catch(e) {
+                sonScanStop();
+                btn.innerText = "ERREUR DE PURGE";
+                setTimeout(() => { btn.innerText = "[ CLÔTURER L'OPÉRATION ]"; btn.style.pointerEvents = "auto"; }, 2000);
+            }
+        }
 
         window.onload = async () => {
             const boot = document.getElementById('boot-screen');
@@ -924,7 +1035,26 @@
             globalTooltip.innerHTML = text; globalTooltip.style.borderColor = color; globalTooltip.style.color = color; globalTooltip.style.boxShadow = `0 0 10px ${color}40`; globalTooltip.style.display = 'block'; moveHoloTooltip(e);
         }
         function hideHoloTooltip() { globalTooltip.style.display = 'none'; }
-        function moveHoloTooltip(e) { if(globalTooltip.style.display === 'block') { globalTooltip.style.left = (e.clientX + 15) + 'px'; globalTooltip.style.top = (e.clientY + 15) + 'px'; } }
+        function moveHoloTooltip(e) { 
+            if(globalTooltip.style.display === 'block') { 
+                const marge = 15;
+                let posX = e.clientX + marge;
+                let posY = e.clientY + marge;
+                
+                // Correction si ça déborde à droite
+                if (posX + globalTooltip.offsetWidth > window.innerWidth - 20) {
+                    posX = e.clientX - globalTooltip.offsetWidth - marge;
+                }
+                
+                // Correction si ça déborde en bas
+                if (posY + globalTooltip.offsetHeight > window.innerHeight - 20) {
+                    posY = e.clientY - globalTooltip.offsetHeight - marge;
+                }
+                
+                globalTooltip.style.left = posX + 'px'; 
+                globalTooltip.style.top = posY + 'px'; 
+            } 
+        }
 
         function ouvrirModal(id, e) { if (e) e.stopPropagation(); hideHoloTooltip(); sonClic(); document.getElementById(id).style.display = 'flex'; if (id === 'modal-cibles' || id === 'modal-economie') isEditingParams = true; }
         function fermerModal(id, e) { if (e && e.target !== document.getElementById(id)) return; sonClic(); document.getElementById(id).style.display = 'none'; if (id === 'modal-cibles' || id === 'modal-economie') isEditingParams = false; }
@@ -1358,6 +1488,7 @@
                         texteMarge = `&nbsp;&nbsp;&nbsp;${ecartAbsolu > 0 ? "+" : ""}${new Intl.NumberFormat('fr-FR').format(ecartAbsolu)} CR/T`;
                     }
                     let statsPrevisionnellesHtml = ''; let pepitesHtml = ''; let isFilonConfirme = false;
+                    let badgesSourceHtml = ''; // Le nouveau conteneur pour les badges FC/Vaisseau
                     if (modeActif === 'PREDICTIF') {
                         texteMarge = "";
                         const pepitesStation = baseDonnees.filter(d => d.type_operation === 'PREDICTIF_LOCAL' && (d.system_name || '').toUpperCase().trim() === (nomSysteme || '').trim() && (d.station_name || '').toUpperCase().trim() === (nomStationPourCopie || '').trim());
@@ -1382,17 +1513,52 @@
                         const qteShip = inShip ? (inShip.volume_disponible || 0) : 0;
                         const stockDispo = qteFC + qteShip;
                         
-                        // Génération des badges visuels
-                        let badgesSource = "";
-                        if (qteFC > 0) badgesSource += `<span style="background: rgba(0, 240, 255, 0.15); color: var(--ed-blue); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--ed-blue); margin-right: 8px;">📦 FC: ${new Intl.NumberFormat('fr-FR').format(qteFC)} T</span>`;
-                        if (qteShip > 0) badgesSource += `<span style="background: rgba(0, 255, 102, 0.15); color: #00FF66; padding: 2px 6px; border-radius: 3px; border: 1px solid #00FF66; margin-right: 8px;">🚀 VAISSEAU: ${new Intl.NumberFormat('fr-FR').format(qteShip)} T</span>`;
+                        // Génération des badges visuels avec espacement calibré
+                        if (qteFC > 0) badgesSourceHtml += `<span style="background: rgba(0, 240, 255, 0.15); color: var(--ed-blue); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--ed-blue); font-size: 0.85em; letter-spacing: 0; margin-right: 12px;">📦 FC: ${new Intl.NumberFormat('fr-FR').format(qteFC)} T</span>`;
+                        if (qteShip > 0) badgesSourceHtml += `<span style="background: rgba(0, 255, 102, 0.15); color: #00FF66; padding: 2px 6px; border-radius: 3px; border: 1px solid #00FF66; font-size: 0.85em; letter-spacing: 0; margin-right: 12px;">🚀 VSO: ${new Intl.NumberFormat('fr-FR').format(qteShip)} T</span>`;
                         
-                        statsPrevisionnellesHtml = `<div style="font-size: 0.75em; margin-top: 4px; font-weight: bold; text-align: right; display: flex; justify-content: flex-end; align-items: center;">${badgesSource} <span style="color: var(--ed-blue);">REVENU PRÉVU : +${new Intl.NumberFormat('fr-FR').format(ligne.prix_unitaire * stockDispo)} CR</span></div>`;
+                        // Le revenu prévu reste seul sur la ligne inférieure
+                        statsPrevisionnellesHtml = `<div style="font-size: 0.75em; margin-top: 4px; font-weight: bold; text-align: right; color: var(--ed-blue);">REVENU PRÉVU : +${new Intl.NumberFormat('fr-FR').format(ligne.prix_unitaire * stockDispo)} CR</div>`;
                     } else {
                         statsPrevisionnellesHtml = `<div style="font-size: 0.75em; color: #FF3333; margin-top: 4px; font-weight: bold; text-align: right;">BUDGET REQUIS (${new Intl.NumberFormat('fr-FR').format(espaceVideUtilise)} T) : -${new Intl.NumberFormat('fr-FR').format(ligne.prix_unitaire * espaceVideUtilise)} CR</div>`;
                     }
                     const nomSystemeSafe = rawSys.replace(/'/g, "\\'"); const nomStationCompletSafe = rawSta.replace(/'/g, "\\'"); const nomStationPourCopieSafe = nomStationPourCopie.replace(/'/g, "\\'"); const idCibleSafe = idCible.replace(/'/g, "\\'");
-                    newHTML += `<div class="data-row ${cssGlow}" onmouseenter="sonHover()" onclick="toggleVerrou('${idCibleSafe}')" style="cursor: pointer;"><div class="row-top"><div style="font-weight: bold; display: flex; align-items: center; gap: 15px;"><span style="color: #666;">◎</span> <span class="copy-click" onclick="copierNav('${nomSystemeSafe}', this, event)" title="Copier le système" style="color: #fff;">${nomSysteme}</span><span style="color: #FF7100; font-size: 0.8em; font-weight: normal; opacity: 0.8;">[ ${distanceFormat} ]</span></div><div style="text-align: right; letter-spacing: 1px; display: flex; flex-direction: column; align-items: flex-end;"><div style="display: flex; align-items: center; gap: 10px;">${htmlMoyenneTop}<span style="color: ${couleurMarge}; font-weight: bold;">${texteMarge}</span></div>${statsPrevisionnellesHtml}</div></div><div class="row-bottom"><div class="row-bottom-left" style="display: flex; gap: 15px; align-items: center;"><span class="fav-star ${starClass}" onclick="toggleFavoris('${idCibleSafe}', '${nomSystemeSafe}', '${nomStationCompletSafe}', event)">★</span><span style="color: var(--ed-orange); opacity: 0.8;">${ligne.is_planetary ? '🔻' : '🛰️'} <span class="copy-click" onclick="copierNav('${nomStationPourCopieSafe}', this, event)">${nomStationHtml}</span></span><span><span style="color: #666;">CIBLE:</span> <span style="color: ${getColor(commodite)}; font-weight: bold;">${commodite}</span></span></div><div class="row-bottom-right" style="display: flex; gap: 15px; align-items: center;">${modeActif === 'PREDICTIF' ? `<span><span style="color: #666;">DERNIÈRE BALISE:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span style="color: ${isFilonConfirme ? '#00FF66' : 'var(--ed-orange)'}; font-weight: bold; letter-spacing: 1px;">>_ ${isFilonConfirme ? 'CIBLES VERROUILLÉES' : 'ENVOYER UN ÉCLAIREUR'}</span>` : `<span><span style="color: #666;">MAJ MARCHÉ:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'STOCK' : 'DEMANDE'}:</span> <span style="color: #fff;">${volFmt} T</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'ACHAT' : 'REVENTE'}:</span> <span style="color: #fff;">${prixFmt} CR</span></span><span><span style="color: #666;">TRAFIC 24H:</span> <span style="color: #fff;">${traficFormat} CMD</span></span>`}</div></div>${pepitesHtml}</div>`;
+                    newHTML += `<div class="data-row ${cssGlow}" onmouseenter="sonHover()" onclick="toggleVerrou('${idCibleSafe}')" style="cursor: pointer; flex-direction: row; align-items: center;">
+                        
+                        <!-- BLOC GAUCHE : LES DONNÉES (Prend tout l'espace disponible) -->
+                        <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                            <div class="row-top">
+                                <div style="font-weight: bold; display: flex; align-items: center; gap: 15px;">
+                                    <span style="color: #666;">◎</span> <span class="copy-click" onclick="copierNav('${nomSystemeSafe}', this, event)" title="Copier le système" style="color: #fff;">${nomSysteme}</span><span style="color: #FF7100; font-size: 0.8em; font-weight: normal; opacity: 0.8;">[ ${distanceFormat} ]</span>
+                                </div>
+                                <div style="text-align: right; letter-spacing: 1px; display: flex; flex-direction: column; align-items: flex-end;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">${badgesSourceHtml}${htmlMoyenneTop}<span style="color: ${couleurMarge}; font-weight: bold;">${texteMarge}</span></div>
+                                    ${statsPrevisionnellesHtml}
+                                </div>
+                            </div>
+                            
+                            <div class="row-bottom">
+                                <div class="row-bottom-left" style="display: flex; gap: 15px; align-items: center;">
+                                    <span style="color: var(--ed-orange); opacity: 0.8;">${ligne.is_planetary ? '🔻' : '🛰️'} <span class="copy-click" onclick="copierNav('${nomStationPourCopieSafe}', this, event)">${nomStationHtml}</span></span>
+                                    <span><span style="color: #666;">CIBLE:</span> <span style="color: ${getColor(commodite)}; font-weight: bold;">${commodite}</span></span>
+                                </div>
+                                <div class="row-bottom-right" style="display: flex; gap: 15px; align-items: center;">
+                                    ${modeActif === 'PREDICTIF' ? `<span><span style="color: #666;">DERNIÈRE BALISE:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span style="color: ${isFilonConfirme ? '#00FF66' : 'var(--ed-orange)'}; font-weight: bold; letter-spacing: 1px;">>_ ${isFilonConfirme ? 'CIBLES VERROUILLÉES' : 'ENVOYER UN ÉCLAIREUR'}</span>` : `<span><span style="color: #666;">MAJ MARCHÉ:</span> <span style="color: ${couleurAge}; font-weight: bold;">[ ${ageTexte} ]</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'STOCK' : 'DEMANDE'}:</span> <span style="color: #fff;">${volFmt} T</span></span><span><span style="color: #666;">${modeActif === 'ACHAT' ? 'ACHAT' : 'REVENTE'}:</span> <span style="color: #fff;">${prixFmt} CR</span></span><span><span style="color: #666;">TRAFIC 24H:</span> <span style="color: #fff;">${traficFormat} CMD</span></span>`}
+                                </div>
+                            </div>
+                            ${pepitesHtml}
+                        </div>
+
+                        <!-- BLOC DROIT : L'ÉTOILE FAVORIS (Isolée et grossie) -->
+                        <div style="padding-left: 20px; margin-left: 15px; border-left: 1px solid rgba(255, 113, 0, 0.2); display: flex; align-items: center; justify-content: center; height: 100%;">
+                            <span class="fav-star ${starClass}" style="font-size: 3em; margin: 0; line-height: 1;" 
+                                onclick="toggleFavoris('${idCibleSafe}', '${nomSystemeSafe}', '${nomStationCompletSafe}', event)" 
+                                onmouseenter="showHoloTooltip(event, 'MARQUER LA CIBLE<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Ajoute ou retire cette station de votre registre tactique.<br><br><span style=&quot;color:var(--ed-orange);&quot;>> INFO :</span> Lors de vos futurs scans, cette icône restera<br>allumée pour vous signaler une opportunité déjà connue.</span>', '#FFD700')" 
+                                onmouseleave="hideHoloTooltip()" 
+                                onmousemove="moveHoloTooltip(event)">★
+                            </span>
+                        </div>
+                    </div>`;
                 });
                 if (newHTML !== lastRenderedDataHTML) { container.innerHTML = newHTML; lastRenderedDataHTML = newHTML; }
             } catch (e) {}
@@ -1470,6 +1636,25 @@
             });
         }
     </script>
+
+    <!-- PANNEAU COULISSANT DU REGISTRE -->
+    <div class="registre-overlay" id="registre-overlay" onclick="fermerRegistre()"></div>
+    <div class="registre-panel" id="registre-panel">
+        <div class="registre-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; color: var(--ed-orange); font-size: 1.3em; letter-spacing: 2px;">JOURNAL D'OPÉRATION</h2>
+                <div class="modal-close" style="position: static;" onclick="fermerRegistre()">X</div>
+            </div>
+            <div style="font-size: 0.8em; color: #aaa; margin-top: 10px;">PROFIT NET DE MISSION :</div>
+            <div id="registre-profit" style="font-size: 2em; font-weight: bold; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3);">0 CR</div>
+        </div>
+        <div class="registre-content" id="registre-liste">
+            <div style="color: #666; text-align: center; margin-top: 20px;">> AUCUNE TRANSACTION...</div>
+        </div>
+        <div class="registre-footer">
+            <button class="auth-btn" style="border-color: #FF3333; color: #FF3333; margin: 0; font-weight: bold;" onclick="purgerRegistre()">[ CLÔTURER L'OPÉRATION ]</button>
+        </div>
+    </div>
 
 </body>
 </html>
