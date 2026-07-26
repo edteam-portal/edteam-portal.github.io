@@ -37,23 +37,22 @@
         .title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
         .title-row h1 { margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; line-height: 1; }
         .app-logo { 
-        height: 45px; 
-        width: 45px; 
-        /* Bordures et fond retirés pour un rendu 100% HUD */
-        filter: drop-shadow(0 0 5px var(--ed-orange-glow));
-        transition: 0.3s;
-    }
-    .app-logo:hover {
-        filter: drop-shadow(0 0 10px var(--ed-orange));
-        transform: scale(1.05);
-    }
-    .boot-logo {
-        height: 120px;
-        width: 120px;
-        margin-bottom: 20px;
-        /* Bordures retirées */
-        filter: drop-shadow(0 0 15px var(--ed-orange-dim));
-        animation: pulse-boom 2s infinite;
+            height: 45px; 
+            width: 45px; 
+            filter: drop-shadow(0 0 5px var(--ed-orange-glow));
+            transition: 0.3s;
+        }
+        .app-logo:hover {
+            filter: drop-shadow(0 0 10px var(--ed-orange));
+            transform: scale(1.05);
+        }
+        .boot-logo {
+            height: 120px;
+            width: 120px;
+            margin-bottom: 20px;
+            /* Bordures retirées */
+            filter: drop-shadow(0 0 15px var(--ed-orange-dim));
+            animation: pulse-boom 2s infinite;
     }
         #fc-inventory-percent { font-size: 0.9em; color: #fff; letter-spacing: 2px; font-weight: bold; background: rgba(0, 240, 255, 0.08); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 
@@ -378,25 +377,25 @@
     </div>
 
     <div class="hud-container" id="main-ui" style="display: none; opacity: 0;">
-        <header class="hud-header">
-            <div class="hud-status">
-                <span>MAJ AUTO : <span style="color: var(--ed-blue);">ACTIF</span></span>
-                <span>LIAISON : <span id="status-indicator" style="color: #00FF00;">OK</span></span>
-            </div>
-            <div class="title-row">
-                <!-- LOGO SVG VECTORIEL : AIGLE STELLAIRE (MINIATURE) -->
-                <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Aigle Gauche (Cyan) -->
+        <header class="hud-header" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; flex-wrap: nowrap; gap: 30px; margin-bottom: 15px; width: 100%; overflow: hidden;">
+            
+            <!-- 1. Logo + EDTEAM -->
+            <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+                <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 45px; height: 45px;">
                     <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
-                    <!-- Aigle Droit (Orange) -->
                     <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
-                    <!-- Noyau central -->
                     <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
                 </svg>
-                
-                <h1>COMMERCE FURTIF TACTIQUE</h1>
-                <div id="fc-inventory-percent"></div>
+                <div style="display: flex; flex-direction: column;">
+                    <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); white-space: nowrap; line-height: 1;">EDTEAM</h1>
+                    <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px;">CMDR [ EN ATTENTE ]</span>
+                </div>
             </div>
+            
+            <!-- 2. Inventaire FC -->
+            <div id="fc-inventory-percent" style="margin: 0; white-space: nowrap; flex-shrink: 0;"></div>
+
+        </header>
             <div class="header-bottom-row">
                 <nav class="tab-bar">
                     <button id="btn-radar" class="tab-btn active">ACHATS</button>
@@ -491,7 +490,7 @@
     </div>
 
     <script>
-        let audioCtx; let baseDonnees = []; let modeActif = 'ACHAT'; let ciblesVerrouillees = []; let stationsFavorites = []; let stockFCGlobal = []; let stockShipGlobal = [];
+        let audioCtx; let scanAudioNodes = []; let scanInterval = null; let baseDonnees = []; let modeActif = 'ACHAT'; let ciblesVerrouillees = []; let stationsFavorites = []; let stockFCGlobal = []; let stockShipGlobal = [];
         let inventaireGlobal = []; let paramApp = null; let espaceVideUtilise = 20600;
         let lastRenderedDataHTML = ""; let isEditingParams = false;
         let stationsScanneesLocales = []; let lastParamAppString = ""; 
@@ -548,8 +547,18 @@
                 document.getElementById('boot-screen').style.display = 'flex'; 
                 
                 if (!document.getElementById('nav-commandant')) {
-                    const nav = document.createElement('div'); nav.id = 'nav-commandant'; nav.style.cssText = 'position: absolute; top: 15px; right: 25px; font-size: 0.9em; letter-spacing: 2px; z-index: 500; display: flex; gap: 20px; font-weight: bold;';
-                    nav.innerHTML = `<span style="color: var(--ed-blue); cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--ed-blue)'" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span><span style="color: #555; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#555'" onclick="deconnexion()">[ DÉCONNEXION ]</span>`;
+                    const nav = document.createElement('div'); nav.id = 'nav-commandant'; 
+                    nav.style.cssText = 'position: absolute; top: 15px; right: 25px; font-size: 0.9em; letter-spacing: 2px; z-index: 500; display: flex; gap: 20px; font-weight: bold; align-items: center;';
+                    
+                    nav.innerHTML = `
+                        <div class="hud-status" style="margin: 0; padding-right: 15px; border-right: 1px solid rgba(255,113,0,0.3); display: flex; gap: 15px; border-bottom: none;">
+                            <span>DERNIER SCAN : <span id="last-scan-time" style="color: var(--ed-orange);">--:--:--</span></span>
+                            <span>MAJ AUTO : <span style="color: var(--ed-blue);">ACTIF</span></span>
+                            <span>LIAISON : <span id="status-indicator" style="color: #00FF00;">OK</span></span>
+                        </div>
+                        <span style="color: var(--ed-blue); cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--ed-blue)'" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
+                        <span style="color: #555; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#555'" onclick="deconnexion()">[ DÉCONNEXION ]</span>
+                    `;
                     document.body.appendChild(nav);
                 }
                 const keyDisplay = document.getElementById('api-key-display');
@@ -603,6 +612,47 @@
                 pingOsc.type = 'sine'; pingOsc.frequency.setValueAtTime(1046.50, t + 0.3); pingOsc.frequency.setValueAtTime(2093, t + 0.35); 
                 pingGain.gain.setValueAtTime(0, t + 0.3); pingGain.gain.linearRampToValueAtTime(0.03, t + 0.32); pingGain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
                 pingOsc.connect(pingGain); pingGain.connect(audioCtx.destination); pingOsc.start(t + 0.3); pingOsc.stop(t + 1.5);
+            } else if (type === 'scan_start') {
+                if (scanInterval) return;
+                const t = audioCtx.currentTime;
+                
+                // 1. Le crépitement métallique (Volume drastiquement réduit à 0.0015)
+                const noiseSize = audioCtx.sampleRate * 2;
+                const noiseBuffer = audioCtx.createBuffer(1, noiseSize, audioCtx.sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseSize; i++) { data[i] = Math.random() > 0.85 ? (Math.random() * 2 - 1) : 0; }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = noiseBuffer; noise.loop = true;
+                const filter = audioCtx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 5000;
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, t); 
+                gain.gain.linearRampToValueAtTime(0.0015, t + 0.1); // <-- VOLUME RÉDUIT ICI
+                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+                noise.start(t);
+                scanAudioNodes.push({ source: noise, gain: gain });
+                
+                // 2. Les bips de transfert de paquets (Volume drastiquement réduit à 0.001)
+                scanInterval = setInterval(() => {
+                    if(!audioCtx) return;
+                    const osc = audioCtx.createOscillator(); osc.type = 'square';
+                    const oscGain = audioCtx.createGain();
+                    const now = audioCtx.currentTime;
+                    osc.frequency.setValueAtTime(1500 + Math.random() * 3000, now);
+                    oscGain.gain.setValueAtTime(0.001, now); // <-- VOLUME RÉDUIT ICI
+                    oscGain.gain.setValueAtTime(0, now + 0.03);
+                    osc.connect(oscGain); oscGain.connect(audioCtx.destination);
+                    osc.start(now); osc.stop(now + 0.03);
+                }, 90);
+
+            } else if (type === 'scan_stop') {
+                // Arrêt brutal de la boucle
+                if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+                const t = audioCtx.currentTime;
+                scanAudioNodes.forEach(node => {
+                    node.gain.gain.linearRampToValueAtTime(0, t + 0.3); // Fondu de sortie (fade out)
+                    setTimeout(() => { try { node.source.stop(); } catch(e){} }, 350);
+                });
+                scanAudioNodes = [];
             }
         }
 
@@ -851,6 +901,9 @@
         }
 
         function sonClic() { playUI('click'); } 
+        function sonScanStart() { playUI('scan_start'); }
+        function sonScanStop() { playUI('scan_stop'); }
+        function sonHover() { playUI('hover'); }
         function sonHover() { playUI('hover'); }
         function sonSucces() { playUI('success'); } 
         function sonCaisse() { playUI('crate'); } 
@@ -1113,14 +1166,16 @@
         };
 
         window.declencherScan = async function() {
-            sonClic(); const btn = document.getElementById('btn-trigger-scan');
+            sonScanStart(); const btn = document.getElementById('btn-trigger-scan');
             btn.innerHTML = "TRANSMISSION..."; btn.style.backgroundColor = "var(--ed-orange)"; btn.style.color = "#000"; btn.style.boxShadow = "0 0 15px var(--ed-orange)"; btn.style.pointerEvents = "none";
             let commande_type = modeActif === 'ACHAT' ? 'SCAN_ACHAT' : (modeActif === 'VENTE' ? 'SCAN_VENTE' : 'SCAN_PREDICTIF');
             try {
                 const { error } = await getDb().from('commandes_terminal').insert([{ type_commande: commande_type, user_id: profilCommandant.user_id, statut: 'EN_ATTENTE' }]);
                 if (error) throw error; 
             } catch (err) {
+                sonScanStop(); // <--- ARRÊT DU SON EN CAS D'ÉCHEC
                 btn.innerHTML = "ÉCHEC<br>TRANSMISSION"; btn.style.backgroundColor = "red"; btn.style.color = "#fff";
+                // ... suite normale ...
                 setTimeout(() => {
                     btn.innerHTML = modeActif === 'ACHAT' ? "LANCER SCAN<br>ACHAT" : (modeActif === 'VENTE' ? "LANCER SCAN<br>VENTE" : "LANCER SCAN<br>PRÉDICTIF");
                     btn.style.backgroundColor = "rgba(255, 113, 0, 0.1)"; btn.style.color = "var(--ed-orange)"; btn.style.boxShadow = "none"; btn.style.pointerEvents = "auto";
@@ -1147,9 +1202,23 @@
             if (isScanning) {
                 btnScan.innerHTML = "SCAN EN<br>COURS..."; btnScan.style.backgroundColor = "var(--ed-orange)"; btnScan.style.color = "#000"; btnScan.style.boxShadow = "0 0 15px var(--ed-orange)"; btnScan.style.pointerEvents = "none"; previousScanState = true;
             } else if (isFinished) {
-                btnScan.innerHTML = "SCAN<br>TERMINÉ"; btnScan.style.backgroundColor = "#00FF66"; btnScan.style.color = "#000"; btnScan.style.boxShadow = "0 0 15px #00FF66"; btnScan.style.pointerEvents = "none"; if (previousScanState === true) { sonSucces(); previousScanState = false; }
+                btnScan.innerHTML = "SCAN<br>TERMINÉ"; btnScan.style.backgroundColor = "#00FF66"; btnScan.style.color = "#000"; btnScan.style.boxShadow = "0 0 15px #00FF66"; btnScan.style.pointerEvents = "none"; 
+                if (previousScanState === true) { 
+                    sonSucces();
+                    sonScanStop();
+                    previousScanState = false; 
+                    
+                    // -- HORODATAGE DU DERNIER SCAN --
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const scanEl = document.getElementById('last-scan-time');
+                    if (scanEl) scanEl.innerText = timeString;
+                }
             } else {
-                previousScanState = false;
+                if (previousScanState === true) {
+                    sonScanStop(); // <--- SÉCURITÉ SI LE SCAN S'ANNULE
+                    previousScanState = false;
+                }
                 if (!btnScan.innerHTML.includes("TRANSMISSION")) {
                     btnScan.innerHTML = modeActif === 'ACHAT' ? "LANCER SCAN<br>ACHAT" : (modeActif === 'VENTE' ? "LANCER SCAN<br>VENTE" : "LANCER SCAN<br>PRÉDICTIF");
                     btnScan.style.backgroundColor = "rgba(255, 113, 0, 0.1)"; btnScan.style.color = "var(--ed-orange)"; btnScan.style.boxShadow = "none"; btnScan.style.pointerEvents = "auto";
@@ -1216,6 +1285,11 @@
 
                 const ligneShip = data.find(d => d.target_commodity === 'SHIP_BALANCE'); if (ligneShip) document.getElementById('solde-vaisseau').innerText = new Intl.NumberFormat('fr-FR').format(ligneShip.prix_unitaire);
                 const ligneFC = data.find(d => d.target_commodity === 'FC_BALANCE'); if (ligneFC) document.getElementById('solde-fc').innerText = new Intl.NumberFormat('fr-FR').format(ligneFC.prix_unitaire);
+                // Interception du nom du Pilote
+                const ligneCmdr = data.find(d => d.target_commodity === 'CMDR_NAME');
+                if (ligneCmdr && ligneCmdr.station_name) {
+                    document.getElementById('cmdr-name-display').innerText = 'CMDR ' + ligneCmdr.station_name.toUpperCase();
+                }
                 const ligneStatut = data.find(d => d.target_commodity === 'SYSTEM_STATUS');
                 
                 if (ligneStatut && ligneStatut.station_name) {
@@ -1227,7 +1301,7 @@
                     mettreAJourJauge(ligneStatut.station_name);
                 }
                 
-                baseDonnees = data.filter(d => !['SYSTEM_STATUS', 'HEARTBEAT', 'SHIP_BALANCE', 'FC_BALANCE', 'PARAM_UPDATE', 'APP_PARAMS'].includes(d.target_commodity));
+                baseDonnees = data.filter(d => !['SYSTEM_STATUS', 'HEARTBEAT', 'SHIP_BALANCE', 'FC_BALANCE', 'PARAM_UPDATE', 'APP_PARAMS', 'CMDR_NAME'].includes(d.target_commodity));
                 if(modeActif !== 'PARAM') afficherDonnees();
             } catch (err) {}
         }
