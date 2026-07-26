@@ -104,7 +104,37 @@
 
         .scan-action-col { display: flex; align-items: center; padding-left: 25px; z-index: 10; height: 100%; }
         .giant-scan-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); cursor: pointer; padding: 0 35px; font-family: 'Share Tech Mono', monospace; font-weight: bold; font-size: 1.3em; letter-spacing: 2px; transition: 0.2s; text-transform: uppercase; height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.4; border-radius: 4px; }
-        .giant-scan-btn:hover { background: var(--ed-orange); color: #000; box-shadow: 0 0 20px var(--ed-orange); }
+        .giant-scan-btn { 
+                background: rgba(255, 113, 0, 0.1); 
+                border: 1px solid var(--ed-orange); 
+                color: var(--ed-orange); 
+                cursor: pointer; 
+                padding: 0 35px; 
+                font-family: 'Share Tech Mono', monospace; 
+                font-weight: bold; 
+                font-size: 1.3em; 
+                letter-spacing: 2px; 
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+                text-transform: uppercase; 
+                height: 100%; 
+                box-sizing: border-box; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                text-align: center; 
+                line-height: 1.4; 
+                border-radius: 4px; 
+            }
+
+            /* EFFET MOUSEOVER SPÉCIAL TACTIQUE */
+            .giant-scan-btn:hover { 
+                background: var(--ed-orange) !important; 
+                color: #000 !important; 
+                box-shadow: 0 0 25px var(--ed-orange), inset 0 0 15px rgba(255, 255, 255, 0.6) !important; 
+                transform: scale(1.02); 
+                letter-spacing: 4px; 
+                text-shadow: 0 0 2px #000; 
+            }
 
         .data-window { flex-grow: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--ed-orange-dim); padding: 20px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--ed-orange) transparent; }
         .data-row { display: flex; flex-direction: column; border: 1px solid rgba(255, 113, 0, 0.1); border-radius: 6px; background: rgba(10, 5, 0, 0.6); padding: 18px 25px; margin-bottom: 12px; transition: all 0.15s ease-out; cursor: crosshair; }
@@ -344,7 +374,7 @@
                 <button id="btn-appliquer-matrice" class="auth-btn" style="border-color: var(--ed-orange); color: var(--ed-orange); margin-bottom: 0;" onclick="appliquerMatriceAchat()">APPLIQUER LA MATRICE</button>
                 
                 <!-- Étape 2 : Le bouton pour lancer (caché par défaut) -->
-                <button id="btn-lancer-scan-achat" class="auth-btn" style="border-color: #00FF66; color: #00FF66; font-weight: bold; display: none; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('ACHAT')">LANCER LE SCAN ACHAT</button>
+                <button id="btn-lancer-scan-achat" class="auth-btn" style="border-color: #00FF66; color: #00FF66; font-weight: bold; display: none; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('ACHAT')" onmouseenter="sonHover()">LANCER LE SCAN ACHAT</button>
             </div>
         </div>
     </div>
@@ -466,7 +496,7 @@
                     </button>
                 </div>
                 <div class="scan-action-col" style="padding-left: 25px;">
-                    <button id="btn-trigger-scan" class="giant-scan-btn" style="height: 100%; width: 100%;" onclick="preparerBriefingAchat()">LANCER SCAN<br>ACHAT</button>
+                    <button id="btn-trigger-scan" class="giant-scan-btn" style="height: 100%; width: 100%;" onclick="preparerBriefingAchat()" onmouseenter="sonHover()">LANCER SCAN<br>ACHAT</button>
                 </div>
             </div>
 
@@ -488,7 +518,7 @@
                 <li>Tri par rentabilité et proximité depuis votre position actuelle.</li>
             </ul>
             <div style="text-align: right; border-top: 1px dashed #333; padding-top: 15px;">
-                <button class="auth-btn" style="border-color: #00FF66; color: #00FF66; font-weight: bold; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('VENTE')">LANCER LE SCAN VENTES</button>
+                <button class="auth-btn" style="border-color: #00FF66; color: #00FF66; font-weight: bold; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('VENTE')" onmouseenter="sonHover()">LANCER LE SCAN VENTES</button>
             </div>
         </div>
     </div>
@@ -505,7 +535,7 @@
                 <li>Analyse des tendances locales.</li>
             </ul>
             <div style="text-align: right; border-top: 1px dashed #333; padding-top: 15px;">
-                <button class="auth-btn" style="border-color: var(--ed-blue); color: var(--ed-blue); font-weight: bold; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('PREDICTIF')">LANCER LE SCAN PRÉDICTIF</button>
+                <button class="auth-btn" style="border-color: var(--ed-blue); color: var(--ed-blue); font-weight: bold; margin-bottom: 0;" onclick="lancerScanDepuisBriefing('PREDICTIF')" onmouseenter="sonHover()">LANCER LE SCAN PRÉDICTIF</button>
             </div>
         </div>
     </div>
@@ -519,6 +549,7 @@
         let hasLoadedParams = false; // LE VERROU ANTI-BOUCLE
         let isSystemLooping = false; // LE VERROU ANTI-CHEVANCHEMENT
         let previousScanState = false; // <-- LE FUSIBLE RÉPARÉ
+        let dernierScanTypeEnCLic = "ACHAT"; // Mémorise le mode lancé au clic
 
         const ALL_COMMODITIES = [
             "Advanced Catalysers", "Advanced Medicines", "Agronomic Treatment", "Algae", "Aluminium", "Animal Meat", "Animal Monitors", "Aquaponic Systems", "Auto-Fabricators", "Basic Medicines", "Bauxite", "Beer", "Beryllium", "Bertrandite", "Bioreducing Lichen", "Biowaste", "Bismuth", "Bootleg Liquor", "Building Fabricators", "Clothing", "Cobalt", "Coffee", "Coltan", "Combat Stabilisers", "Computer Components", "Consumer Technology", "Copper", "Crop Harvesters", "Cryolite", "Domestic Appliances", "Earth Relics", "Emergency Power Cells", "Evacuation Shelter", "Exhaust Manifold", "Explosives", "Fish", "Food Cartridges", "Fruit and Vegetables", "Gallite", "Gallium", "Gold", "Goshenite", "Grain", "Hazardous Environment Suits", "Heike Tea", "Hydrogen Fuel", "Hydrogen Peroxide", "Imperial Slaves", "Indite", "Indium", "Insulating Membrane", "Ion Distributors", "Jadeite", "Land Enrichment Systems", "Leather", "Lepidolite", "Liquid Oxygen", "Liquor", "Lithium", "Low Temperature Diamonds", "Magnetic Emitter Coil", "Marine Equipment", "Medical Diagnostic Equipment", "Micro Controllers", "Micro-Weavers", "Microbial Furnaces", "Mineral Extractors", "Mineral Oil", "Moissanite", "Monazite", "Musgravite", "Mutomaggot Pie", "Narcotics", "Nerve Agents", "Non-Lethal Weapons", "Osmium", "Painite", "Palladium", "Performance Enhancers", "Personal Effects", "Personal Weapons", "Pesticides", "Platinum", "Polymers", "Power Generators", "Power Transfer Conduits", "Progenitor Cells", "Radiation Baffle", "Reactive Armour", "Reinforced Baffling", "Resonating Separators", "Robotics", "Rutile", "Scrap", "Semiconductors", "Silver", "Slaves", "Structural Regulators", "Superconductors", "Survival Equipment", "Synthetic Fabrics", "Synthetic Meat", "Synthetic Reagents", "Taaffeite", "Tantalum", "Tea", "Titanium", "Tobacco", "Tritium", "Uraninite", "Void Opals", "Water", "Water Purifiers", "Wine"
@@ -621,11 +652,16 @@
             const boot = document.getElementById('boot-screen');
             if(boot) boot.style.display = 'none';
             
-            // --- NOUVEAU : Activation du retour sonore sur tous les boutons UI ---
+            // Restauration de l'historique du dernier scan
+            const lastScanSaved = localStorage.getItem('edteam_last_scan_info');
+            if (lastScanSaved) {
+                const scanEl = document.getElementById('last-scan-time');
+                if (scanEl) scanEl.innerText = lastScanSaved;
+            }
+
             document.querySelectorAll('.tab-btn, .giant-scan-btn, .auth-btn, .btn-save, .modal-close').forEach(btn => {
                 btn.addEventListener('mouseenter', sonHover);
             });
-            // ---------------------------------------------------------------------
 
             const { data: { session } } = await supabaseApp.auth.getSession();
             if (session) { verifierApprobation(session.user); }
@@ -1280,68 +1316,163 @@
         };
 
         window.declencherScan = async function() {
-            sonScanStart(); const btn = document.getElementById('btn-trigger-scan');
-            btn.innerHTML = "TRANSMISSION..."; btn.style.backgroundColor = "var(--ed-orange)"; btn.style.color = "#000"; btn.style.boxShadow = "0 0 15px var(--ed-orange)"; btn.style.pointerEvents = "none";
+            sonScanStart(); 
+            const btn = document.getElementById('btn-trigger-scan');
+            
+            // Verrouillage immédiat du type de scan lancé
+            dernierScanTypeEnCLic = modeActif;
+            
+            btn.innerHTML = "TRANSMISSION..."; 
+            btn.style.backgroundColor = "var(--ed-orange)"; 
+            btn.style.color = "#000"; 
+            btn.style.boxShadow = "0 0 15px var(--ed-orange)"; 
+            btn.style.pointerEvents = "none";
+            
             let commande_type = modeActif === 'ACHAT' ? 'SCAN_ACHAT' : (modeActif === 'VENTE' ? 'SCAN_VENTE' : 'SCAN_PREDICTIF');
             try {
                 const { error } = await getDb().from('commandes_terminal').insert([{ type_commande: commande_type, user_id: profilCommandant.user_id, statut: 'EN_ATTENTE' }]);
                 if (error) throw error; 
             } catch (err) {
-                sonScanStop(); // <--- ARRÊT DU SON EN CAS D'ÉCHEC
-                btn.innerHTML = "ÉCHEC<br>TRANSMISSION"; btn.style.backgroundColor = "red"; btn.style.color = "#fff";
-                // ... suite normale ...
+                sonScanStop();
+                btn.innerHTML = "ÉCHEC<br>TRANSMISSION"; 
+                btn.style.backgroundColor = "red"; 
+                btn.style.color = "#fff";
                 setTimeout(() => {
                     btn.innerHTML = modeActif === 'ACHAT' ? "LANCER SCAN<br>ACHAT" : (modeActif === 'VENTE' ? "LANCER SCAN<br>VENTE" : "LANCER SCAN<br>PRÉDICTIF");
-                    btn.style.backgroundColor = "rgba(255, 113, 0, 0.1)"; btn.style.color = "var(--ed-orange)"; btn.style.boxShadow = "none"; btn.style.pointerEvents = "auto";
+                    btn.style.backgroundColor = "rgba(255, 113, 0, 0.1)"; 
+                    btn.style.color = "var(--ed-orange)"; 
+                    btn.style.boxShadow = "none"; 
+                    btn.style.pointerEvents = "auto";
                 }, 3000);
             }
         };
 
         function mettreAJourJauge(texteStatus) {
-            const pContainer = document.getElementById('progress-container'); const pGlobal = document.getElementById('progress-global'); const pLocal = document.getElementById('status-bg-fill'); const btnScan = document.getElementById('btn-trigger-scan');
+            const pContainer = document.getElementById('progress-container'); 
+            const pGlobal = document.getElementById('progress-global'); 
+            const pLocal = document.getElementById('status-bg-fill'); 
+            const btnScan = document.getElementById('btn-trigger-scan');
+            
             let progGlobal = 0; let progLocal = 0; let showBar = true; let isScanning = false; let isFinished = false;
-            if (texteStatus.includes("VEILLE") || texteStatus.includes("Soute FC vide") || texteStatus.includes("Soute vide")) { showBar = false; } 
-            else if (texteStatus.includes("Amorçage")) { progGlobal = 5; progLocal = 5; isScanning = true; } 
+            
+            if (texteStatus.includes("VEILLE") || texteStatus.includes("Soute FC vide") || texteStatus.includes("Soute vide")) { 
+                showBar = false; 
+            } 
+            else if (texteStatus.includes("Amorçage")) { 
+                progGlobal = 5; progLocal = 5; isScanning = true; 
+            } 
             else if (texteStatus.includes("Scan ACHAT") || texteStatus.includes("Scan VENTE")) {
-                isScanning = true; const matchItem = texteStatus.match(/\[(\d+)\/(\d+)\]/); const matchDist = texteStatus.match(/(\d+)-(\d+) AL/);
-                if (matchItem && matchDist) { const currentItem = parseInt(matchItem[1]); const totalItems = parseInt(matchItem[2]); const maxD = parseInt(matchDist[2]); const sliceWidth = 100 / totalItems; const baseProg = (currentItem - 1) * sliceWidth; progLocal = (maxD / 1200) * 100; progGlobal = baseProg + (progLocal * (sliceWidth / 100)); } else { progLocal = 50; progGlobal = 50; }
+                isScanning = true; 
+                const matchItem = texteStatus.match(/\[(\d+)\/(\d+)\]/); 
+                const matchDist = texteStatus.match(/(\d+)-(\d+) AL/);
+                if (matchItem && matchDist) { 
+                    const currentItem = parseInt(matchItem[1]); 
+                    const totalItems = parseInt(matchItem[2]); 
+                    const maxD = parseInt(matchDist[2]); 
+                    const sliceWidth = 100 / totalItems; 
+                    const baseProg = (currentItem - 1) * sliceWidth; 
+                    progLocal = (maxD / 1200) * 100; 
+                    progGlobal = baseProg + (progLocal * (sliceWidth / 100)); 
+                } else { 
+                    progLocal = 50; progGlobal = 50; 
+                }
             } else if (texteStatus.includes("Scan PRÉDICTIF")) { 
-                isScanning = true; const matchDist = texteStatus.match(/(\d+)-(\d+) AL/); if (matchDist) { const maxD = parseInt(matchDist[2]); progLocal = (maxD / 2000) * 100; progGlobal = (maxD / 2000) * 100; } else { progLocal = 50; progGlobal = 50; }
-            } else if (texteStatus.includes("EDSM")) { progGlobal = 90; progLocal = 100; isScanning = true; } 
-            else if (texteStatus.includes("Purge")) { progGlobal = 95; progLocal = 100; isScanning = true; } 
-            else if (texteStatus.includes("Mise à jour") || texteStatus.includes("cibles") || texteStatus.includes("terminé")) { progGlobal = 100; progLocal = 100; isFinished = true; } 
-            else if (texteStatus.includes("Erreur") || texteStatus.includes("annulé")) { progGlobal = 100; progLocal = 100; } 
-            else { showBar = false; }
+                isScanning = true; 
+                const matchDist = texteStatus.match(/(\d+)-(\d+) AL/); 
+                if (matchDist) { 
+                    const maxD = parseInt(matchDist[2]); 
+                    progLocal = (maxD / 2000) * 100; 
+                    progGlobal = (maxD / 2000) * 100; 
+                } else { 
+                    progLocal = 50; progGlobal = 50; 
+                }
+            } else if (texteStatus.includes("EDSM")) { 
+                progGlobal = 90; progLocal = 100; isScanning = true; 
+            } 
+            else if (texteStatus.includes("Purge")) { 
+                progGlobal = 95; progLocal = 100; isScanning = true; 
+            } 
+            else if (texteStatus.includes("Mise à jour") || texteStatus.includes("cibles") || texteStatus.includes("terminé") || texteStatus.includes("Liaison BDD")) { 
+                progGlobal = 100; progLocal = 100; isFinished = true; 
+            } 
+            else if (texteStatus.includes("Erreur") || texteStatus.includes("annulé")) { 
+                progGlobal = 100; progLocal = 100; 
+            } 
+            else { 
+                showBar = false; 
+            }
+
+            // Déduction stricte du nom du scan à partir du statut COVAS (et non de l'onglet actif)
+            let typeScanEnCours = "ACHAT";
+            if (texteStatus.includes("VENTE")) typeScanEnCours = "VENTE";
+            else if (texteStatus.includes("PRÉDICTIF")) typeScanEnCours = "PRÉDICTIF";
+            else if (texteStatus.includes("ACHAT")) typeScanEnCours = "ACHAT";
 
             if (isScanning) {
-                btnScan.innerHTML = "SCAN EN<br>COURS..."; btnScan.style.backgroundColor = "var(--ed-orange)"; btnScan.style.color = "#000"; btnScan.style.boxShadow = "0 0 15px var(--ed-orange)"; btnScan.style.pointerEvents = "none"; previousScanState = true;
+                // S'AFFICHE DE MANIÈRE IDENTIQUE PEU IMPORTE L'ONGLET OÙ VOUS NAVIGUEZ !
+                btnScan.innerHTML = `SCAN ${typeScanEnCours}<br>EN COURS...`; 
+                btnScan.style.backgroundColor = "var(--ed-orange)"; 
+                btnScan.style.color = "#000"; 
+                btnScan.style.boxShadow = "0 0 15px var(--ed-orange)"; 
+                btnScan.style.pointerEvents = "none"; 
+                previousScanState = true;
             } else if (isFinished) {
-                btnScan.innerHTML = "SCAN<br>TERMINÉ"; btnScan.style.backgroundColor = "#00FF66"; btnScan.style.color = "#000"; btnScan.style.boxShadow = "0 0 15px #00FF66"; btnScan.style.pointerEvents = "none"; 
+                btnScan.innerHTML = `SCAN ${dernierScanTypeEnCLic}<br>TERMINÉ`; 
+                btnScan.style.backgroundColor = "#00FF66"; 
+                btnScan.style.color = "#000"; 
+                btnScan.style.boxShadow = "0 0 15px #00FF66"; 
+                btnScan.style.pointerEvents = "none"; 
+                
                 if (previousScanState === true) { 
                     sonSucces();
                     sonScanStop();
                     previousScanState = false; 
                     
-                    // -- HORODATAGE DU DERNIER SCAN --
                     const now = new Date();
-                    const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                    const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const scanInfoText = `${dernierScanTypeEnCLic} - ${dateStr} ${timeStr}`;
+                    
                     const scanEl = document.getElementById('last-scan-time');
-                    if (scanEl) scanEl.innerText = timeString;
+                    if (scanEl) {
+                        scanEl.innerText = scanInfoText;
+                    }
+                    
+                    localStorage.setItem('edteam_last_scan_info', scanInfoText);
                 }
             } else {
                 if (previousScanState === true) {
-                    sonScanStop(); // <--- SÉCURITÉ SI LE SCAN S'ANNULE
+                    sonScanStop();
                     previousScanState = false;
                 }
                 if (!btnScan.innerHTML.includes("TRANSMISSION")) {
+                    // C'est SEULEMENT au repos que le bouton reprend le nom de l'onglet courant
                     btnScan.innerHTML = modeActif === 'ACHAT' ? "LANCER SCAN<br>ACHAT" : (modeActif === 'VENTE' ? "LANCER SCAN<br>VENTE" : "LANCER SCAN<br>PRÉDICTIF");
-                    btnScan.style.backgroundColor = "rgba(255, 113, 0, 0.1)"; btnScan.style.color = "var(--ed-orange)"; btnScan.style.boxShadow = "none"; btnScan.style.pointerEvents = "auto";
+                    btnScan.style.backgroundColor = "rgba(255, 113, 0, 0.1)"; 
+                    btnScan.style.color = "var(--ed-orange)"; 
+                    btnScan.style.boxShadow = "none"; 
+                    btnScan.style.pointerEvents = "auto";
                 }
             }
+
             if (showBar) {
-                pContainer.style.display = 'block'; pGlobal.style.width = progGlobal + '%'; pLocal.style.width = progLocal + '%';
-                if (texteStatus.includes("Erreur") || texteStatus.includes("annulé")) { pGlobal.style.backgroundColor = 'red'; pLocal.style.backgroundColor = 'rgba(255, 0, 0, 0.3)'; } else if (progGlobal === 100) { pGlobal.style.backgroundColor = '#00FF00'; pLocal.style.backgroundColor = 'rgba(0, 255, 0, 0.2)'; } else { pGlobal.style.backgroundColor = 'var(--ed-blue)'; pLocal.style.backgroundColor = 'rgba(255, 113, 0, 0.25)'; }
-            } else { pContainer.style.display = 'none'; pGlobal.style.width = '0%'; pLocal.style.width = '0%'; pLocal.style.backgroundColor = 'transparent'; }
+                pContainer.style.display = 'block'; 
+                pGlobal.style.width = progGlobal + '%'; 
+                pLocal.style.width = progLocal + '%';
+                if (texteStatus.includes("Erreur") || texteStatus.includes("annulé")) { 
+                    pGlobal.style.backgroundColor = 'red'; pLocal.style.backgroundColor = 'rgba(255, 0, 0, 0.3)'; 
+                } else if (progGlobal === 100) { 
+                    pGlobal.style.backgroundColor = '#00FF00'; pLocal.style.backgroundColor = 'rgba(0, 255, 0, 0.2)'; 
+                } else { 
+                    pGlobal.style.backgroundColor = 'var(--ed-blue)'; pLocal.style.backgroundColor = 'rgba(255, 113, 0, 0.25)'; 
+                }
+            } else { 
+                pContainer.style.display = 'none'; 
+                pGlobal.style.width = '0%'; 
+                pLocal.style.width = '0%'; 
+                pLocal.style.backgroundColor = 'transparent'; 
+            }
         }
 
         async function initialiserSysteme() {
