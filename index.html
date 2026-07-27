@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <!-- DÉTECTION TACTIQUE : Redirection vers le PADD mobile -->
-    <script>
-        if (/Mobi|Android|iPhone/i.test(navigator.userAgent) || window.innerWidth <= 768) {
-            window.location.replace("mobile.html");
-        }
-    </script>
+    <meta charset="UTF-8"
     <!-- Déclaration d'application Web pour Android et iOS -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,6 +13,17 @@
     <link rel="manifest" href="manifest.json?v=2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYS.EDTEAM // Commerce Furtif Tactique</title>
+    
+    <!-- DÉTECTION TACTIQUE : Redirection Mobile -->
+    <script>
+        // On utilise matchMedia qui est plus fiable que innerWidth sur mobile
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmallScreen = window.matchMedia("(max-width: 800px)").matches;
+        
+        if (isMobileDevice || isSmallScreen) {
+            window.location.replace("mobile.html");
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>

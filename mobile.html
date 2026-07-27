@@ -2,15 +2,20 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <!-- DÉTECTION TACTIQUE : Redirection vers l'ordinateur de bord PC -->
+    <!-- Balise vitale pour application mobile : bloque le zoom et adapte la largeur -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>EDTEAM - PADD Mobile</title>
+    
+    <!-- DÉTECTION TACTIQUE : Redirection PC -->
     <script>
-        if (!/Mobi|Android|iPhone/i.test(navigator.userAgent) && window.innerWidth > 768) {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmall = window.matchMedia("(max-width: 800px)").matches;
+        
+        if (!isMobile && !isSmall) {
             window.location.replace("index.html");
         }
     </script>
-    <!-- Balise vitale pour application mobile : bloque le zoom et adapte la largeur -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EDTEAM - PADD Mobile</title>
     
     <!-- Polices et Supabase -->
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
