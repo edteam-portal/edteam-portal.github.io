@@ -2,6 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <!-- DÉTECTION TACTIQUE : Redirection vers l'ordinateur de bord PC -->
+    <script>
+        if (!/Mobi|Android|iPhone/i.test(navigator.userAgent) && window.innerWidth > 768) {
+            window.location.replace("index.html");
+        }
+    </script>
     <!-- Balise vitale pour application mobile : bloque le zoom et adapte la largeur -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>EDTEAM - PADD Mobile</title>

@@ -2,6 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <!-- DÉTECTION TACTIQUE : Redirection vers le PADD mobile -->
+    <script>
+        if (/Mobi|Android|iPhone/i.test(navigator.userAgent) || window.innerWidth <= 768) {
+            window.location.replace("mobile.html");
+        }
+    </script>
     <!-- Déclaration d'application Web pour Android et iOS -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
