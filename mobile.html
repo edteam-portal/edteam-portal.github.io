@@ -314,11 +314,24 @@
         // 6. RÉCUPÉRATION DES DONNÉES SUR SUPABASE
         async function chargerDonneesCommandant(userId) {
             try {
-                // A. Profil : Déduction du nom via l'email
-                const { data: profil } = await supabaseApp.from('profils').select('email').eq('user_id', userId).single();
-                if (profil && profil.email) {
-                    const cmdrName = profil.email.split('@')[0].toUpperCase();
-                    document.getElementById('header-cmdr-name').innerText = "CMDR " + cmdrName;
+                // A. Profil : Récupération du vrai nom de Commandant via le pont radar
+                const { data: cmdrData } = await supabaseApp.from('radar_commercial')
+                    .select('station_name')
+                    .eq('target_commodity', 'CMDR_NAME')
+                    .eq('user_id', userId)
+                    .limit(1)
+                    .single();
+
+                if (cmdrData && cmdrData.station_name) {
+                    // Si le radar connaît le vrai nom, on l'affiche
+                    document.getElementById('header-cmdr-name').innerText = "CMDR " + cmdrData.station_name.toUpperCase();
+                } else {
+                    // Sécurité (Fallback) : Si EDMC n'a pas encore transmis le nom, on utilise l'email
+                    const { data: profil } = await supabaseApp.from('profils').select('email').eq('user_id', userId).single();
+                    if (profil && profil.email) {
+                        const cmdrName = profil.email.split('@')[0].toUpperCase();
+                        document.getElementById('header-cmdr-name').innerText = "CMDR " + cmdrName;
+                    }
                 }
 
                 // B. Paramètres : Noms et Capacités
@@ -394,11 +407,34 @@
                     document.getElementById('transactions-container').innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Aucune transaction détectée</div>';
                 }
 
-                // E. Initialisation des données manquantes en Base
-                document.getElementById('finance-vaisseau').innerText = "NON TRAQUÉ";
-                document.getElementById('finance-carrier').innerText = "NON TRAQUÉ";
-                document.getElementById('finance-vaisseau-devise').innerText = "";
-                document.getElementById('finance-carrier-devise').innerText = "";
+                // E. Finances (Récupération via le pont radar)
+                const { data: finances } = await supabaseApp.from('radar_commercial')
+                    .select('target_commodity, prix_unitaire')
+                    .in('target_commodity', ['SHIP_BALANCE', 'FC_BALANCE']);
+
+                if (finances && finances.length > 0) {
+                    let soldeVaisseau = "NON TRAQUÉ";
+                    let soldeFC = "NON TRAQUÉ";
+
+                    finances.forEach(f => {
+                        if (f.target_commodity === 'SHIP_BALANCE') {
+                            soldeVaisseau = f.prix_unitaire.toLocaleString('fr-FR');
+                        }
+                        if (f.target_commodity === 'FC_BALANCE') {
+                            soldeFC = f.prix_unitaire.toLocaleString('fr-FR');
+                        }
+                    });
+
+                    document.getElementById('finance-vaisseau').innerText = soldeVaisseau;
+                    document.getElementById('finance-carrier').innerText = soldeFC;
+                    
+                    // On s'assure que les devises "CR" sont bien affichées
+                    document.getElementById('finance-vaisseau-devise').innerText = "CR";
+                    document.getElementById('finance-carrier-devise').innerText = "CR";
+                } else {
+                    document.getElementById('finance-vaisseau').innerText = "NON TRAQUÉ";
+                    document.getElementById('finance-carrier').innerText = "NON TRAQUÉ";
+                }
                 
                 const txtVaisseauEl = document.getElementById('soute-vaisseau-texte');
                 if(txtVaisseauEl) txtVaisseauEl.innerHTML = `0 <span style="color: #666;">/ ${capaVaisseau} T</span>`;
@@ -461,20 +497,14 @@
                     }
                 }
 
-                // H. Position actuelle - Version Blindée
+                // H. Position actuelle - Lecture de la balise de relais
                 const elPos = document.getElementById('telemetrie-position');
                 if (elPos) {
-                    try {
-                        // On vérifie que la variable transactions existe bien et qu'elle n'est pas vide
-                        if (typeof transactions !== 'undefined' && transactions && transactions.length > 0 && transactions[0].systeme) {
-                            elPos.innerText = transactions[0].systeme.toUpperCase();
-                        } else {
-                            elPos.innerText = "COORDONNÉES INCONNUES";
-                        }
-                    } catch (errPos) {
-                        // En cas de bug de la variable, on affiche une alerte au lieu de rester en attente
-                        elPos.innerText = "ERREUR CAPTEUR";
-                        console.error("Défaut capteur position :", errPos);
+                    // On utilise la variable "params" déjà récupérée à l'étape B
+                    if (typeof params !== 'undefined' && params && params.position_actuelle) {
+                        elPos.innerText = params.position_actuelle.toUpperCase();
+                    } else {
+                        elPos.innerText = "SYSTÈME INCONNU";
                     }
                 }
         }
