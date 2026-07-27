@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     
     <!-- Lien vers le fichier de manifeste -->
-    <link rel="manifest" href="manifest.json?v=2">
+    <link rel="manifest" href="manifest.json?v=3">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYS.EDTEAM // Commerce Furtif Tactique</title>
     
@@ -1781,6 +1781,17 @@
             <button class="auth-btn" style="border-color: #FF3333; color: #FF3333; margin: 0; font-weight: bold;" onclick="purgerRegistre()">[ CLÔTURER L'OPÉRATION ]</button>
         </div>
     </div>
+
+    <!-- DÉPLOIEMENT DU DRONE PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(() => {
+                console.log("Drone de service PWA activé à la racine.");
+            }).catch((err) => {
+                console.error("Échec du déploiement du drone : ", err);
+            });
+        }
+    </script>
 
 </body>
 </html>

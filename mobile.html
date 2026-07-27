@@ -6,7 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>EDTEAM - PADD Mobile</title>
+    <!-- DÉCLARATION D'APPLICATION WEB (PWA) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#050505">
     
+    <!-- LIAISON AVEC LE MANIFESTE -->
+    <link rel="manifest" href="manifest.json?v=3">
     <!-- DÉTECTION TACTIQUE : Redirection PC -->
     <script>
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -591,5 +598,18 @@
             }
         };
     </script>
+
+    <!-- DÉPLOIEMENT DU DRONE PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            // Retrait de la restriction { scope: '/edteam/' }
+            navigator.serviceWorker.register('./sw.js').then(() => {
+                console.log("Drone de service PWA activé à la racine.");
+            }).catch((err) => {
+                console.error("Échec du déploiement du drone : ", err);
+            });
+        }
+    </script>
+
 </body>
 </html>
