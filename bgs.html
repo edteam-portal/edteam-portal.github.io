@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <title>SYS.EDTEAM // BGS & Faction</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(255, 113, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-orange); }
+
+        /* =========================================
+           MENU LATÉRAL TACTIQUE
+           ========================================= */
+        #side-menu {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 60px;
+            background: rgba(10, 10, 10, 0.95); border-right: 1px solid var(--ed-orange-dim);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px;
+        }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-orange); }
+        
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); border-left: 3px solid var(--ed-orange); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }
+
+        /* =========================================
+           CONTENEUR CENTRAL DYNAMIQUE
+           ========================================= */
+        .hud-container { 
+            width: calc(100% - 60px); max-width: 1500px; height: 95vh; display: flex; flex-direction: column; 
+            margin-left: 60px; padding: 20px 30px; box-sizing: border-box;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        .hud-header { display: flex; flex-direction: column; margin-bottom: 15px; flex-shrink: 0; border-bottom: 2px solid var(--ed-orange); padding-bottom: 15px; }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
+        
+        .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px; }
+        .tab-bar { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
+        .tab-btn:hover { background: rgba(255, 113, 0, 0.1); opacity: 0.8; }
+        .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
+
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .data-row { border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 4px; background: rgba(10, 5, 0, 0.6); padding: 20px; margin-bottom: 15px; }
+        
+        /* BGS SPECIFIC CSS */
+        .bgs-bar-bg { width: 100%; height: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); position: relative; margin-top: 5px; }
+        .bgs-bar-fill { height: 100%; transition: width 0.3s; }
+        .cap-marker { position: absolute; top: -3px; height: calc(100% + 6px); width: 2px; background: #FFF; z-index: 2; box-shadow: 0 0 5px #FFF; }
+        .cap-zone { position: absolute; right: 0; top: 0; height: 100%; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255, 51, 51, 0.2) 5px, rgba(255, 51, 51, 0.2) 10px); z-index: 1; }
+
+        .rank-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,113,0,0.1); transition: 0.2s; }
+        .rank-row:hover { background: rgba(255,113,0,0.05); }
+        .rank-1 { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 1.2em; font-weight: bold; }
+        .rank-2 { color: #C0C0C0; font-size: 1.1em; font-weight: bold; }
+        .rank-3 { color: #CD7F32; font-size: 1.1em; font-weight: bold; }
+
+        /* NOUVEAU CSS SUIVI BGS */
+        .search-input { background: rgba(0, 0, 0, 0.6); border: 1px solid var(--ed-orange); color: #fff; padding: 10px 15px; font-family: 'Share Tech Mono', monospace; font-size: 1em; outline: none; transition: 0.2s; box-sizing: border-box; }
+        .search-input:focus { border-color: var(--ed-blue); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+        .tracker-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--ed-blue); padding: 15px; border-radius: 4px; position: relative; transition: 0.2s; }
+        .tracker-card:hover { background: rgba(0, 240, 255, 0.05); border-left-color: var(--ed-orange); }
+        .tracker-remove { position: absolute; top: 10px; right: 10px; color: #666; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .tracker-remove:hover { color: #FF3333; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes alertPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body onload="document.getElementById('main-ui').style.display='flex'; document.getElementById('main-ui').style.opacity='1';">
+
+    <div class="scanline"></div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu">
+        <div class="nav-link hamburger-btn" onclick="toggleMenu()" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div>
+            <span class="nav-text">MENU COVAS</span>
+        </div>
+        <a href="qg.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+            <span class="nav-text">QUARTIER GÉNÉRAL</span>
+        </a>
+        <a href="index.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
+            <span class="nav-text">COMMERCE FURTIF</span>
+        </a>
+        <a href="missions.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 9.36l-7.1 7.1a1 1 0 0 1-1.41 0l-1.42-1.42a1 1 0 0 1 0-1.41l7.1-7.1a6 6 0 0 1 9.36-7.94l-3.77 3.77z"></path></svg></div>
+            <span class="nav-text">MISSIONS & SÉCURITÉ</span>
+        </a>
+        <a href="bgs.html" class="nav-link active" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+            <span class="nav-text">BGS & FACTIONS</span>
+        </a>
+    </nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+        
+        <!-- BARRE SUPÉRIEURE INTACTE -->
+        <header class="hud-header" style="display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; flex-wrap: nowrap; gap: 15px;">
+            <div style="display: flex; align-items: stretch; gap: 15px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 45px; height: 45px;">
+                        <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                        <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                        <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                    </svg>
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); line-height: 1; white-space: nowrap;">EDTEAM</h1>
+                        <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR VINKILL</span>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 0.75em; letter-spacing: 1px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; flex-grow: 1; white-space: nowrap; height: 100%; gap: 6px; padding-right: 5px;">
+                <span style="color: #555; cursor: pointer;">[ DÉCONNEXION ]</span>
+            </div>
+        </header>
+
+        <!-- ONGLETS DU MODULE BGS -->
+        <div class="header-bottom-row">
+            <nav class="tab-bar">
+                <button class="tab-btn active" onclick="switchBgsTab('ordres', this)" onmouseenter="sonHover()">ORDRES DE L'AMIRAUTÉ</button>
+                <button class="tab-btn" onclick="switchBgsTab('suivi', this)" onmouseenter="sonHover()">SUIVI D'INFLUENCE</button>
+                <button class="tab-btn" onclick="switchBgsTab('classement', this)" onmouseenter="sonHover()">CLASSEMENT D'EFFORT</button>
+            </nav>
+        </div>
+
+        <!-- ZONE D'AFFICHAGE DU CONTENU -->
+        <main class="data-window" id="display-area">
+            
+            <!-- ONGLET 1 : ORDRES (BGS CAP TRACKER) -->
+            <div id="bgs-tab-ordres" style="display: flex; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                <!-- CARTE ORDRE 1 : AUGMENTER L'INFLUENCE -->
+                <div class="data-row" style="border-color: var(--ed-green); box-shadow: inset 4px 0 0 var(--ed-green); background: rgba(0, 255, 102, 0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed rgba(0, 255, 102, 0.3); padding-bottom: 12px; margin-bottom: 15px;">
+                        <div>
+                            <span style="color: var(--ed-green); font-size: 1.3em; font-weight: bold; letter-spacing: 2px; display: block;">[ OPÉRATION ] : AUGMENTER L'INFLUENCE</span>
+                            <div style="margin-top: 5px; display: flex; gap: 15px; font-size: 0.9em;">
+                                <span><span style="color: #666;">CIBLE :</span> <span style="color: #fff; font-weight: bold;">EdTeam Foundation</span></span>
+                                <span><span style="color: #666;">SYSTÈME :</span> <span style="color: #fff; font-weight: bold;">WREDGUIA DT-Q B32-2</span></span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="display: block; font-size: 0.8em; color: #888; margin-bottom: 5px;">VOTRE IMPACT QUOTIDIEN</span>
+                            <span style="font-size: 1.5em; font-weight: bold; color: var(--ed-blue); text-shadow: 0 0 10px var(--ed-blue);">24%</span>
+                        </div>
+                    </div>
+                    <p style="color: #ccc; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px;">
+                        ⚠️ <strong style="color: var(--ed-orange);">RAPPEL TACTIQUE :</strong> Le système BGS applique une dépréciation stricte. Ne dépassez pas la zone de rendement optimal. Si une jauge clignote en orange, <strong>changez d'activité</strong>.
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <!-- JAUGE 1 : MISSIONS -->
+                        <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px;">
+                                <span style="color: #fff; font-weight: bold;">📝 MISSIONS RENDUES (+INF)</span>
+                                <span style="color: var(--ed-orange); font-weight: bold;">12 / 15 INF</span>
+                            </div>
+                            <div class="bgs-bar-bg">
+                                <div class="cap-zone" style="width: 20%;"></div>
+                                <div class="cap-marker" style="left: 80%;"></div>
+                                <div class="bgs-bar-fill" style="width: 80%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange); animation: alertPulse 1.5s infinite;"></div>
+                            </div>
+                            <span style="display: block; text-align: right; color: var(--ed-orange); font-size: 0.75em; margin-top: 5px; font-weight: bold;">SEUIL CRITIQUE ATTEINT.</span>
+                        </div>
+                        <!-- JAUGE 2 : PRIMES -->
+                        <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px;">
+                                <span style="color: #fff; font-weight: bold;">💥 PRIMES ENCAISSÉES (CR)</span>
+                                <span style="color: #00FF66;">1.5M / 5.0M</span>
+                            </div>
+                            <div class="bgs-bar-bg">
+                                <div class="cap-zone" style="width: 20%;"></div>
+                                <div class="cap-marker" style="left: 80%;"></div>
+                                <div class="bgs-bar-fill" style="width: 30%; background: #00FF66;"></div>
+                            </div>
+                            <span style="display: block; text-align: right; color: #666; font-size: 0.75em; margin-top: 5px;">RENDEMENT OPTIMAL. CONTINUEZ.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARTE ORDRE 2 : BAISSER L'INFLUENCE -->
+                <div class="data-row" style="border-color: var(--ed-red); box-shadow: inset 4px 0 0 var(--ed-red); background: rgba(255, 51, 51, 0.02); opacity: 0.8;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed rgba(255, 51, 51, 0.3); padding-bottom: 12px; margin-bottom: 15px;">
+                        <div>
+                            <span style="color: var(--ed-red); font-size: 1.3em; font-weight: bold; letter-spacing: 2px; display: block;">[ OPÉRATION ] : RÉDUIRE L'INFLUENCE</span>
+                            <div style="margin-top: 5px; display: flex; gap: 15px; font-size: 0.9em;">
+                                <span><span style="color: #666;">CIBLE :</span> <span style="color: #fff; font-weight: bold;">Crimson Boys</span></span>
+                                <span><span style="color: #666;">SYSTÈME :</span> <span style="color: #fff; font-weight: bold;">LHS 317</span></span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="display: block; font-size: 0.8em; color: #888; margin-bottom: 5px;">VOTRE IMPACT QUOTIDIEN</span>
+                            <span style="font-size: 1.5em; font-weight: bold; color: var(--ed-red); text-shadow: 0 0 10px var(--ed-red);">0%</span>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px;">
+                                <span style="color: #fff; font-weight: bold;">☠️ PRIMES SUR VOTRE TÊTE (CRIMES)</span>
+                                <span style="color: #666;">0 / 2.0M</span>
+                            </div>
+                            <div class="bgs-bar-bg">
+                                <div class="cap-zone" style="width: 20%;"></div>
+                                <div class="cap-marker" style="left: 80%;"></div>
+                                <div class="bgs-bar-fill" style="width: 0%; background: var(--ed-red);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET 2 : SUIVI D'INFLUENCE (NOUVEAU) -->
+            <div id="bgs-tab-suivi" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                
+                <!-- OUTIL DE CIBLAGE (Ajout aux favoris) -->
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px;">
+                    <div style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px; margin-bottom: 15px; font-weight: bold;">
+                        > CIBLAGE TACTIQUE (AJOUTER AU RADAR)
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        
+                        <div style="flex: 1; min-width: 250px;">
+                            <label style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">SOUS-FACTION CIBLE</label>
+                            <input list="factions-bgs-list" class="search-input" placeholder="Saisir ou sélectionner..." style="width: 100%;">
+                            <datalist id="factions-bgs-list">
+                                <option value="EdTeam Foundation">
+                                <option value="Crimson Boys">
+                                <option value="LHS 20 Blue Mafia">
+                                <option value="Zemina Torval Corp">
+                            </datalist>
+                        </div>
+
+                        <div style="flex: 1; min-width: 250px;">
+                            <label style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">SYSTÈME LOCALISÉ</label>
+                            <input list="systems-bgs-list" class="search-input" placeholder="Saisir ou sélectionner..." style="width: 100%; border-color: var(--ed-blue);">
+                            <datalist id="systems-bgs-list">
+                                <option value="WREDGUIA DT-Q B32-2">
+                                <option value="LHS 317">
+                                <option value="LHS 20">
+                                <option value="SHINRARTA DEZHRA">
+                            </datalist>
+                        </div>
+
+                        <button style="background: var(--ed-blue); color: #000; border: none; padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; border-radius: 3px; white-space: nowrap;" onmouseenter="sonHover()">
+                            [+ ÉPINGLER]
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABLEAU DE BORD DES FAVORIS -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+                    
+                    <!-- FAVORIS 1 : EdTeam Foundation -->
+                    <div class="tracker-card">
+                        <div class="tracker-remove" title="Retirer du suivi">✖</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em; display: block;">EdTeam Foundation</span>
+                                <span style="color: #888; font-size: 0.9em;">📍 WREDGUIA DT-Q B32-2</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="color: #666; font-size: 0.8em; margin-bottom: 2px;">INFLUENCE ACTUELLE</span>
+                                <div style="display: flex; align-items: baseline; gap: 10px;">
+                                    <span style="color: var(--ed-blue); font-size: 2.2em; font-weight: bold; line-height: 1;">68.4%</span>
+                                    <span style="color: #00FF66; font-weight: bold; font-size: 1em;" title="Tendance positive">↗ +1.2%</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #666; font-size: 0.8em; margin-bottom: 2px; display: block;">ÉTAT POLITIQUE</span>
+                                <span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; padding: 2px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold;">BOOM ÉCONOMIQUE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAVORIS 2 : Crimson Boys -->
+                    <div class="tracker-card" style="border-left-color: #FF3333;">
+                        <div class="tracker-remove" title="Retirer du suivi">✖</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em; display: block;">Crimson Boys</span>
+                                <span style="color: #888; font-size: 0.9em;">📍 LHS 317</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="color: #666; font-size: 0.8em; margin-bottom: 2px;">INFLUENCE ACTUELLE</span>
+                                <div style="display: flex; align-items: baseline; gap: 10px;">
+                                    <span style="color: #FF3333; font-size: 2.2em; font-weight: bold; line-height: 1;">12.1%</span>
+                                    <span style="color: #FF3333; font-weight: bold; font-size: 1em;" title="Tendance négative">↘ -2.4%</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #666; font-size: 0.8em; margin-bottom: 2px; display: block;">ÉTAT POLITIQUE</span>
+                                <span style="background: rgba(255,51,51,0.1); color: #FF3333; border: 1px solid #FF3333; padding: 2px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold;">RETRAITE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAVORIS 3 : Zemina Torval Corp -->
+                    <div class="tracker-card" style="border-left-color: #888;">
+                        <div class="tracker-remove" title="Retirer du suivi">✖</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em; display: block;">Zemina Torval Corp</span>
+                                <span style="color: #888; font-size: 0.9em;">📍 SHINRARTA DEZHRA</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="color: #666; font-size: 0.8em; margin-bottom: 2px;">INFLUENCE ACTUELLE</span>
+                                <div style="display: flex; align-items: baseline; gap: 10px;">
+                                    <span style="color: #fff; font-size: 2.2em; font-weight: bold; line-height: 1;">45.0%</span>
+                                    <span style="color: #888; font-weight: bold; font-size: 1em;" title="Stable">— 0.0%</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #666; font-size: 0.8em; margin-bottom: 2px; display: block;">ÉTAT POLITIQUE</span>
+                                <span style="color: #888; font-size: 0.85em; font-weight: bold;">AUCUN</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ONGLET 3 : CLASSEMENT D'EFFORT (LEADERBOARD) -->
+            <div id="bgs-tab-classement" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 0; overflow: hidden;">
+                    
+                    <div style="padding: 20px; border-bottom: 2px solid var(--ed-orange-dim); background: rgba(0,0,0,0.4);">
+                        <h2 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.4em;">> CLASSEMENT D'EFFORT D'ESCADRON (JOURNALIER)</h2>
+                        <span style="color: #888; font-size: 0.85em;">Calcul basé sur la valeur absolue de l'impact BGS généré.</span>
+                    </div>
+
+                    <!-- LIGNES DE CLASSEMENT -->
+                    <div style="display: flex; flex-direction: column;">
+                        
+                        <!-- RANG 1 -->
+                        <div class="rank-row">
+                            <div style="width: 50px; text-align: center; font-size: 1.5em;">🥇</div>
+                            <div style="flex-grow: 1;">
+                                <span class="rank-1">CMDR SHADOW</span>
+                                <div style="font-size: 0.8em; color: #888; margin-top: 2px;">OPÉRATION : SOUVERAINETÉ (WREDGUIA)</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em;">35.2 %</span>
+                                <span style="color: #666; font-size: 0.8em; display: block;">IMPACT GLOBAL</span>
+                            </div>
+                        </div>
+
+                        <!-- RANG 2 -->
+                        <div class="rank-row">
+                            <div style="width: 50px; text-align: center; font-size: 1.5em;">🥈</div>
+                            <div style="flex-grow: 1;">
+                                <span class="rank-2">CMDR VINKILL <span style="color: var(--ed-blue); font-size: 0.7em; border: 1px solid var(--ed-blue); padding: 2px 5px; border-radius: 3px; margin-left: 5px;">VOUS</span></span>
+                                <div style="font-size: 0.8em; color: #888; margin-top: 2px;">OPÉRATION : SOUVERAINETÉ (WREDGUIA)</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em;">24.0 %</span>
+                                <span style="color: #666; font-size: 0.8em; display: block;">IMPACT GLOBAL</span>
+                            </div>
+                        </div>
+
+                        <!-- RANG 3 -->
+                        <div class="rank-row">
+                            <div style="width: 50px; text-align: center; font-size: 1.5em;">🥉</div>
+                            <div style="flex-grow: 1;">
+                                <span class="rank-3">CMDR REDACTED</span>
+                                <div style="font-size: 0.8em; color: #888; margin-top: 2px;">OPÉRATION : DESTRUCTION (LHS 317)</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em;">12.5 %</span>
+                                <span style="color: #666; font-size: 0.8em; display: block;">IMPACT GLOBAL</span>
+                            </div>
+                        </div>
+
+                        <!-- RANG 4 -->
+                        <div class="rank-row">
+                            <div style="width: 50px; text-align: center; font-size: 1.2em; color: #666; font-weight: bold;">#4</div>
+                            <div style="flex-grow: 1;">
+                                <span style="color: #ccc; font-weight: bold; font-size: 1.1em;">CMDR NOMAD</span>
+                                <div style="font-size: 0.8em; color: #888; margin-top: 2px;">EN ATTENTE DE DÉPLOIEMENT...</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #fff; font-weight: bold; font-size: 1.2em;">4.1 %</span>
+                                <span style="color: #666; font-size: 0.8em; display: block;">IMPACT GLOBAL</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    <script>
+        // --- AUDIO ENGINE ---
+        let audioCtx; 
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playUI(type) {
+            if(!audioCtx) return;
+            if (type === 'hover') {
+                const bufferSize = audioCtx.sampleRate * 0.015; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 6000;
+                const gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
+                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start();
+            } else if (type === 'click') {
+                const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.setValueAtTime(3000, audioCtx.currentTime); osc1.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.02);
+                const gain1 = audioCtx.createGain(); gain1.gain.setValueAtTime(0.02, audioCtx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+                osc1.connect(gain1); gain1.connect(audioCtx.destination); osc1.start(); osc1.stop(audioCtx.currentTime + 0.02);
+            }
+        }
+        function sonClic() { playUI('click'); } 
+        function sonHover() { playUI('hover'); }
+
+        // --- NAVIGATION TABS ---
+        function toggleMenu() {
+            sonClic();
+            const menu = document.getElementById('side-menu');
+            const body = document.body;
+            menu.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
+        function switchBgsTab(tabId, btnElement) {
+            sonClic();
+            document.getElementById('bgs-tab-ordres').style.display = 'none';
+            document.getElementById('bgs-tab-suivi').style.display = 'none';
+            document.getElementById('bgs-tab-classement').style.display = 'none';
+            
+            document.getElementById('bgs-tab-' + tabId).style.display = 'flex';
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        // Configuration Audio au premier clic
+        document.body.addEventListener('click', initAudio, { once: true });
+    </script>
+</body>
+</html>
