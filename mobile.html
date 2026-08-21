@@ -488,8 +488,8 @@
             <div id="tab-comms" style="display: none; flex-direction: column; gap: 10px; height: calc(100vh - 160px);">
                 
                 <div style="display: flex; gap: 6px;">
-                    <button id="btn-chan-squad" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
                     <button id="btn-chan-global" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('GLOBAL')">GLOBAL</button>
+                    <button id="btn-chan-squad" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
                     <button id="btn-chan-prive" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('PRIVE')">PRIVÉ</button>
                 </div>
 
@@ -509,7 +509,7 @@
                 </div>
 
                 <div style="display: flex; gap: 8px;">
-                    <input type="text" id="m-chat-input" class="m-input" placeholder="Transmission..." style="padding: 10px; font-size: 0.9em; border-color: var(--ed-blue-dim);" onkeydown="if(event.key === 'Enter') envoyerMessageMobile()">
+                    <input type="text" id="m-chat-input" class="m-input" placeholder="Transmission..." style="padding: 10px; font-size: 0.9em; border-color: var(--ed-blue-dim);" oninput="sonType()" onkeydown="if(event.key === 'Enter') envoyerMessageMobile()">
                     <button class="m-btn" style="padding: 0 16px; white-space: nowrap; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="envoyerMessageMobile()">➤</button>
                 </div>
             </div>
@@ -617,12 +617,94 @@
 
     <!-- SCRIPT APPLICATION -->
     <script>
+
+        // --- MOTEUR AUDIO (EFFETS TACTIQUES) ---
+        let audioCtx;
+        function initAudio() { 
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        }
+
+        function playUI(type) {
+            if (!audioCtx) return;
+            const t = audioCtx.currentTime;
+            
+            if (type === 'hover') {
+                const bufferSize = audioCtx.sampleRate * 0.015;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 6000;
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.02, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+            } else if (type === 'click') {
+                const osc1 = audioCtx.createOscillator();
+                osc1.type = 'square';
+                osc1.frequency.setValueAtTime(3000, t);
+                osc1.frequency.exponentialRampToValueAtTime(1500, t + 0.02);
+                const gain1 = audioCtx.createGain();
+                gain1.gain.setValueAtTime(0.02, t);
+                gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start(t);
+                osc1.stop(t + 0.02);
+            } else if (type === 'type') {
+                // Cliquetis mécanique holographique pour la saisie clavier
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800 + Math.random() * 250, t);
+                gain.gain.setValueAtTime(0.02, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.015);
+            } else if (type === 'success') {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, t);
+                osc.frequency.setValueAtTime(1318.51, t + 0.1); 
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.05, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.3);
+            }
+        }
+
+        function sonClic() { playUI('click'); }
+        function sonHover() { playUI('hover'); }
+        function sonSucces() { playUI('success'); }
+        function sonType() { playUI('type'); }
+
+        function sonClic() { playUI('click'); }
+        function sonHover() { playUI('hover'); }
+        function sonSucces() { playUI('success'); }
+
+        // Déverrouillage audio obligatoire au premier toucher de l'écran
+        document.body.addEventListener('click', initAudio, { once: true });
+        document.body.addEventListener('touchstart', initAudio, { once: true });
+
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let profilCommandant = null;
-        let canalActif = 'ESCADRON';
+        let canalActif = 'GLOBAL';
 
         window.addEventListener('load', async () => {
             const { data: { session } } = await supabaseApp.auth.getSession();
@@ -678,6 +760,7 @@
         }
 
         function switchMobileTab(tabId) {
+            sonClic();
             document.getElementById('tab-qg').style.display = 'none';
             document.getElementById('tab-bgs').style.display = 'none';
             document.getElementById('tab-comms').style.display = 'none';
@@ -1220,6 +1303,7 @@
         }
 
         function changerCanalComms(canal) {
+            sonClic();
             canalActif = canal;
             const btnSquad = document.getElementById('btn-chan-squad');
             const btnGlobal = document.getElementById('btn-chan-global');
@@ -1313,6 +1397,8 @@
             const input = document.getElementById('m-chat-input');
             const txt = input.value.trim();
             if (!txt || !profilCommandant) return;
+            
+            sonClic(); // <-- Retour sonore de transmission
 
             let payload = {
                 expediteur_id: profilCommandant.user_id,
@@ -1375,8 +1461,9 @@
         }
 
         function ouvrirModalPilotes() { document.getElementById('modal-pilotes').style.display = 'flex'; }
+        sonClic();
         function fermerModalPilotes(e) { if (e && e.target.id !== 'modal-pilotes' && !e.target.innerText.includes('✕')) return; document.getElementById('modal-pilotes').style.display = 'none'; }
-    
+        sonClic();
         // --- MODULE BUREAU DU DIRECTEUR ---
         async function ouvrirBureauDirecteur() {
             if (!profilCommandant || !profilCommandant.est_directeur) return;
@@ -1387,6 +1474,7 @@
         }
 
         function fermerBureauDirecteur(e) {
+            sonClic();
             if (e && e.target.id !== 'modal-bureau-directeur') return;
             document.getElementById('modal-bureau-directeur').style.display = 'none';
         }
