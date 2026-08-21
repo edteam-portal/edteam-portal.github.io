@@ -211,7 +211,7 @@
             background-color: #4CAF50 !important; /* Vert succès */
             box-shadow: 0 0 8px #4CAF50; /* Petit effet de halo (Optionnel) */
         }
-
+pp
     </style>
 </head>
 <body>
@@ -265,15 +265,31 @@
                         <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
                         <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
                     </svg>
-                    <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); line-height: 1; white-space: nowrap;">EDTEAM</h1>
+
+                    <<div style="display: flex; flex-direction: column; justify-content: center;">
+                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
                         <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
                     </div>
                 </div>
+
+                <!-- ENCADRÉ HUD : PILOTES EN JEU (FORMAT CARRÉ / COMPACT) -->
+                    <div id="online-counter" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-online-pilots', event)"
+                        style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: pointer; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                        onmouseover="this.style.background='rgba(0, 255, 102, 0.15)'; this.style.borderColor='#00FF66'; this.style.boxShadow='0 0 10px rgba(0,255,102,0.3)';"
+                        onmouseout="this.style.background='rgba(0, 255, 102, 0.05)'; this.style.borderColor='rgba(0, 255, 102, 0.3)'; this.style.boxShadow='none';"
+                        title="Consulter les pilotes connectés">
+                        <div style="color: #888; font-size: 0.75em; font-weight: bold;">PILOTES</div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="online-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #00FF66; box-shadow: 0 0 6px #00FF66;"></span>
+                            <span id="online-count-val" style="color: #fff; font-size: 1.25em; font-weight: bold; line-height: 1;">--</span>
+                        </div>
+                    </div>
+
                 <div id="fc-inventory-percent" style="margin: 0; white-space: nowrap; display: flex; align-items: center; cursor: help; padding: 4px 15px; box-sizing: border-box;"
                      onmouseenter="showHoloTooltip(event, '⚠️ DONNÉES EN ATTENTE...', 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
                      <span style="color: var(--ed-orange);">EN ATTENTE EDMC...</span>
                 </div>
+
                 <div class="finances-box" style="display: flex; flex-direction: column; text-align: right; font-size: 0.85em; letter-spacing: 1px; justify-content: center; gap: 3px; background: rgba(0, 240, 255, 0.05); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
                      onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'SYNCHRONISATION BANCAIRE<br><span style=\'color:#00FF66; font-size:0.85em;\'>> VAISSEAU : AUTOMATIQUE</span><br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Mise à jour en temps réel.</span><br><br><span style=\'color:#FF7100; font-size:0.85em;\'>> CARRIER : MANUELLE</span><br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Ouvrez la <strong>Gestion du Fleet Carrier</strong><br>en jeu pour rafraîchir ce solde.</span>', 'var(--ed-blue)')" 
                      onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
@@ -323,12 +339,6 @@
             
             <!-- ONGLET 0 : MEMBRES DE L'ESCADRON -->
             <div id="bgs-tab-effectifs" style="display: flex; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
-                
-                <!-- ZONE DE RECRUTEMENT (Amirauté Uniquement) -->
-                <div id="zone-recrues" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 10px;">
-                    <h4 style="color: #FF3333; margin: 0 0 5px 0; letter-spacing: 2px; border-bottom: 1px dashed #FF3333; padding-bottom: 5px;">⚠️ CANDIDATURES EN ATTENTE</h4>
-                    <div id="liste-recrues" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
 
                 <!-- EFFECTIFS ACTIFS -->
                 <h4 style="color: var(--ed-orange); margin: 0 0 5px 0; letter-spacing: 2px; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 5px;">> EFFECTIFS ACTIFS</h4>
@@ -778,18 +788,6 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMATION TACTIQUE -->
-    <div class="modal-overlay" id="modal-confirmation" style="z-index: 3000;">
-        <div class="modal-content" style="max-width: 500px; text-align: center; border: 1px solid var(--ed-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.2);">
-            <div id="confirm-titre" style="color: var(--ed-red); font-size: 1.4em; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px;">⚠️ ATTENTION</div>
-            <p id="confirm-message" style="color: #ccc; font-size: 0.95em; line-height: 1.5; margin-bottom: 30px;">Êtes-vous sûr ?</p>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button id="btn-confirm-cancel" style="background: rgba(255, 255, 255, 0.05); border: 1px solid #666; color: #aaa; padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1;">[ ANNULER ]</button>
-                <button id="btn-confirm-ok" style="background: rgba(255, 51, 51, 0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1; box-shadow: inset 0 0 10px rgba(255, 51, 51, 0.2);">[ CONFIRMER ]</button>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL : RATIFIER UN TRAITÉ -->
     <div class="modal-overlay" id="modal-traite" onclick="fermerModal('modal-traite', event)">
         <div class="modal-content" style="max-width: 600px; width: 95%; display: flex; flex-direction: column; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
@@ -896,7 +894,7 @@
             <div id="fs-page-game" class="fs-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
                 <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
@@ -949,6 +947,18 @@
     <div id="reboot-screen">
         <div id="boot-lines-container"></div>
     </div>
+
+    <!-- MODAL PILOTES EN JEU -->
+<div class="modal-overlay" id="modal-online-pilots" onclick="fermerModal('modal-online-pilots', event)" style="z-index: 4000;">
+    <div class="modal-content" style="max-width: 550px; width: 95%; max-height: 80vh; display: flex; flex-direction: column; border-color: #00FF66; box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);" onclick="event.stopPropagation()">
+        <div class="modal-close" style="color: #00FF66;" onclick="fermerModal('modal-online-pilots')">X</div>
+        <div class="modal-title" style="color: #00FF66; border-bottom: 1px solid #00FF66; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">🟢 RADAR : PILOTES EN JEU (AVEC EDMC)</div>
+        
+        <div id="liste-pilotes-online" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 5px;">
+            <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Balayage des fréquences galactiques...</div>
+        </div>
+    </div>
+</div>
 
     <script>
         // --- AUDIO ENGINE ---
@@ -1164,6 +1174,9 @@
             } else if (tabId === 'diplomatie') {
                 chargerDiplomatie();
             }
+            if (tabId === 'ordres') enregistrerTelemetrie('action', 'onglets_bgs_missions');
+            if (tabId === 'classement') enregistrerTelemetrie('action', 'onglets_bgs_journal');
+            synchroniserTelemetrie();
         }
 
         document.body.addEventListener('click', initAudio, { once: true });
@@ -1172,101 +1185,58 @@
         // ONGLET 0 : MEMBRES DE L'ESCADRON & RECRUTEMENT
         // ==========================================
         async function chargerEffectifsEscadron() {
-            const containerEffectifs = document.getElementById('liste-effectifs');
-            const zoneRecrues = document.getElementById('zone-recrues');
-            const containerRecrues = document.getElementById('liste-recrues');
+    const containerEffectifs = document.getElementById('liste-effectifs');
+    if (!containerEffectifs) return;
+
+    try {
+        const { data: effectifs, error } = await supabaseApp.from('profils')
+            .select('*')
+            .eq('escadron_id', profilCommandant.escadron_id)
+            .eq('est_approuve', true)
+            .order('est_amiral', { ascending: false });
+
+        if (error) throw error;
+
+        let htmlEff = '';
+        effectifs.forEach(p => {
+            const gradeStr = p.est_amiral ? 'AMIRAL' : 'PILOTE';
+            const color = p.est_amiral ? '#FF3333' : 'var(--ed-orange)';
             
-            if(!containerEffectifs) return;
+            let badges = '';
+            if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
+            if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
 
-            try {
-                // 1. REQUÊTE PARE-BALLES : On télécharge tous ceux liés à l'escadron
-                const { data: tousProfils, error: errEff } = await supabaseApp.from('profils')
-                    .select('*')
-                    .or(`escadron_id.eq.${profilCommandant.escadron_id},demande_escadron.eq.${profilCommandant.escadron_id}`)
-                    .order('est_amiral', { ascending: false });
+            const nomPilote = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
 
-                if (errEff) throw errEff;
-
-                // 2. SÉPARATION LOCALE (Actifs vs Attente)
-                // Pour être actif, il faut OFFICIELLEMENT le tag de l'escadron
-                const effectifs = tousProfils.filter(p => p.escadron_id === profilCommandant.escadron_id && p.est_approuve === true);
-                
-                // Pour être recrue, il faut avoir fait la demande, mais ne pas encore avoir le tag
-                const recrues = tousProfils.filter(p => p.demande_escadron === profilCommandant.escadron_id && p.escadron_id !== profilCommandant.escadron_id);
-
-                // --- AFFICHAGE DES EFFECTIFS ---
-                let htmlEff = '';
-                effectifs.forEach(p => {
-                    const gradeStr = p.est_amiral ? 'AMIRAL' : 'PILOTE';
-                    const color = p.est_amiral ? '#FF3333' : 'var(--ed-orange)';
-                    
-                    let badges = '';
-                    if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
-                    if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
-
-                    // Le formatage du nom
-                    const nomPilote = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
-
-                    // --- NOUVEAU : MISE EN ÉVIDENCE DU JOUEUR CONNECTÉ ---
-                    let cardStyle = '';
-                    let textCouleur = '#fff';
-                    let indicateurMoi = '';
-                    let infoIconColor = 'var(--ed-orange)';
-                    
-                    if (p.user_id === profilCommandant.user_id) {
-                        // Style personnalisé Cyan pour le commandant actif
-                        cardStyle = 'border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue), 0 0 15px rgba(0, 240, 255, 0.1); background: rgba(0, 240, 255, 0.05);';
-                        textCouleur = 'var(--ed-blue)';
-                        indicateurMoi = '<span style="color: var(--ed-blue); font-size: 0.7em; margin-left: 10px; letter-spacing: 1px;">[ VOUS ]</span>';
-                        infoIconColor = 'var(--ed-blue)';
-                    }
-
-                    htmlEff += `
-                    <div class="pilot-card" style="${cardStyle}" onclick="ouvrirProfilPilote('${p.user_id}')">
-                        <div style="display: flex; align-items: center;">
-                            <span style="color: ${color}; font-weight: bold; border: 1px solid ${color}; padding: 3px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 15px;">${gradeStr}</span>
-                            <span style="color: ${textCouleur}; font-size: 1.2em; font-weight: bold; letter-spacing: 1px;">CMDR ${nomPilote} ${indicateurMoi}</span>
-                            ${badges}
-                        </div>
-                        <div style="color: ${infoIconColor}; font-size: 1.5em; opacity: 0.5;">🛈</div>
-                    </div>`;
-                });
-                containerEffectifs.innerHTML = htmlEff || '<div style="color: #666; font-style: italic; text-align: center;">Aucun pilote actif.</div>';
-
-                // --- AFFICHAGE DES RECRUES (Si Amiral) ---
-                if (profilCommandant.est_amiral) {
-                    if (recrues.length > 0) {
-                        zoneRecrues.style.display = 'flex';
-                        let htmlRec = '';
-                        recrues.forEach(r => {
-                            // Le nouveau formatage du nom pour les recrues
-                            const nomRecrue = r.cmdr_nom ? r.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
-
-                            htmlRec += `
-                            <div style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <span style="color: #fff; font-weight: bold; font-size: 1.1em;">CMDR ${nomRecrue}</span>
-                                    <div style="color: #ccc; font-size: 0.85em; margin-top: 4px;">Souhaite rejoindre l'escadron</div>
-                                </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <button style="background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66; padding: 6px 15px; cursor: pointer; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';" onclick="traiterRecrue('${r.user_id}', true)">ACCEPTER</button>
-                                    <button style="background: transparent; border: 1px solid #888; color: #888; padding: 6px 15px; cursor: pointer; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#888';" onclick="traiterRecrue('${r.user_id}', false)">REJETER</button>
-                                </div>
-                            </div>`;
-                        });
-                        containerRecrues.innerHTML = htmlRec;
-                    } else {
-                        zoneRecrues.style.display = 'none';
-                    }
-                }
-
-                if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
-
-            } catch (e) {
-                console.error("Erreur effectifs:", e);
-                containerEffectifs.innerHTML = '<div style="color: red; text-align: center;">Erreur de chargement des effectifs.</div>';
+            let cardStyle = '';
+            let textCouleur = '#fff';
+            let indicateurMoi = '';
+            let infoIconColor = 'var(--ed-orange)';
+            
+            if (p.user_id === profilCommandant.user_id) {
+                cardStyle = 'border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue), 0 0 15px rgba(0, 240, 255, 0.1); background: rgba(0, 240, 255, 0.05);';
+                textCouleur = 'var(--ed-blue)';
+                indicateurMoi = '<span style="color: var(--ed-blue); font-size: 0.7em; margin-left: 10px; letter-spacing: 1px;">[ VOUS ]</span>';
+                infoIconColor = 'var(--ed-blue)';
             }
-        }
+
+            htmlEff += `
+            <div class="pilot-card" style="${cardStyle}" onclick="ouvrirProfilPilote('${p.user_id}')">
+                <div style="display: flex; align-items: center;">
+                    <span style="color: ${color}; font-weight: bold; border: 1px solid ${color}; padding: 3px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 15px;">${gradeStr}</span>
+                    <span style="color: ${textCouleur}; font-size: 1.2em; font-weight: bold; letter-spacing: 1px;">CMDR ${nomPilote} ${indicateurMoi}</span>
+                    ${badges}
+                </div>
+                <div style="color: ${infoIconColor}; font-size: 1.5em; opacity: 0.5;">🛈</div>
+            </div>`;
+        });
+        containerEffectifs.innerHTML = htmlEff || '<div style="color: #666; font-style: italic; text-align: center;">Aucun pilote actif.</div>';
+
+    } catch (e) {
+        console.error("Erreur effectifs:", e);
+        containerEffectifs.innerHTML = '<div style="color: red; text-align: center;">Erreur de chargement des effectifs.</div>';
+    }
+}
 
         const ranksCombat = ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
         const ranksTrade = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
@@ -1313,7 +1283,7 @@
                 const adminButtons = document.getElementById('modal-admin-buttons');
                 
                 // L'Amiral voit le panneau, mais on lui interdit de se rétrograder lui-même !
-                if (profilCommandant.est_amiral && userId !== profilCommandant.user_id) {
+                if (profilCommandant.est_amiral || profilCommandant.est_directeur) {
                     adminPanel.style.display = 'block';
                     
                     let btnOfficier = profil.est_officier 
@@ -1333,28 +1303,6 @@
 
             } catch(e) { console.error("Erreur chargement profil pilote", e); }
         }
-
-        window.traiterRecrue = async function(userId, accepter) {
-            if(typeof sonClic === 'function') sonClic();
-            try {
-                let updateData = {};
-                if (accepter) {
-                    updateData = { 
-                        est_approuve: true, 
-                        escadron_id: profilCommandant.escadron_id, 
-                        demande_escadron: null 
-                    };
-                } else {
-                    updateData = { demande_escadron: null, escadron_id: null, est_approuve: false };
-                }
-
-                const { error } = await supabaseApp.from('profils').update(updateData).eq('user_id', userId);
-                if (error) throw error;
-
-                if(typeof sonSucces === 'function') sonSucces();
-                chargerEffectifsEscadron(); // Rafraîchit l'interface
-            } catch(e) { console.error(e); }
-        };
 
         window.modifierRoleMembre = async function(userId, role, valeur) {
             if(typeof sonClic === 'function') sonClic();
@@ -1481,6 +1429,8 @@
             
             if (data && data.est_approuve) {
                 profilCommandant = data;
+                enregistrerTelemetrie('page', 'bgs');
+                synchroniserTelemetrie();
 
                 // AFFICHAGE DU BOUTON AMIRAUTÉ (Si Officier ou Directeur)
                 if (data.est_amiral || data.est_directeur) {
@@ -1560,6 +1510,8 @@
                 if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                 chargerEffectifsEscadron(); // <- NOUVELLE LIGNE
 
+                actualiserPilotesEnLigne();
+                setInterval(actualiserPilotesEnLigne, 15000); // Balayage toutes les 15 secondes
             } else {
                 // SI CONNECTÉ MAIS NON APPROUVÉ -> ÉJECTION
                 await supabaseApp.auth.signOut();
@@ -3002,6 +2954,8 @@
 
         // --- 4. RECHERCHE DÉTAILLÉE (MICRO) ---
         async function lancerAnalyseBGS(sysNameInput) {
+            enregistrerTelemetrie('action', 'scans_systeme_bgs');
+            synchroniserTelemetrie();
             if (!sysNameInput) return;
             if(typeof sonClic === 'function') sonClic();
             
@@ -4373,6 +4327,109 @@
                 afficherAlerte("ÉCHEC SYSTÈME", "Erreur lors du protocole de destruction.", "#FF3333");
             }
         }
+
+        window.actualiserPilotesEnLigne = async function() {
+            const countVal = document.getElementById('online-count-val');
+            const dotEl = document.getElementById('online-dot');
+            const listeEl = document.getElementById('liste-pilotes-online');
+            if (!countVal || !profilCommandant) return;
+
+            try {
+                const timestampActuel = Math.floor(Date.now() / 1000);
+                const limite = timestampActuel - 30;
+
+                const { data: actifs, error: err1 } = await supabaseApp.from('parametres_app')
+                    .select('user_id')
+                    .gte('last_heartbeat', limite);
+
+                if (err1) throw err1;
+
+                if (actifs && actifs.length > 0) {
+                    const userIds = actifs.map(a => a.user_id);
+                    
+                    const { data: profils, error: err2 } = await supabaseApp.from('profils')
+                        .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate')
+                        .in('user_id', userIds)
+                        .eq('est_approuve', true)
+                        .order('cmdr_nom');
+                        
+                    if (err2) throw err2;
+
+                    countVal.innerText = profils.length;
+                    countVal.style.color = '#fff';
+                    if (dotEl) {
+                        dotEl.style.background = '#00FF66';
+                        dotEl.style.boxShadow = '0 0 6px #00FF66';
+                    }
+
+                    if (listeEl) {
+                        let html = '';
+                        profils.forEach(p => {
+                            let badges = '';
+                            if (p.est_amiral) badges += '<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
+                            if (p.est_officier) badges += '<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER</span>';
+                            if (p.est_diplomate) badges += '<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
+                            
+                            const squad = p.escadron_id ? `<span style="color: var(--ed-orange); font-weight: bold;">[ ${p.escadron_id} ]</span>` : `<span style="color: #888;">[ INDÉPENDANT ]</span>`;
+                            const indicateurVous = (p.user_id === profilCommandant.user_id) ? '<span style="color: var(--ed-blue); font-size: 0.75em; margin-left: 8px; font-weight: bold; letter-spacing: 1px;">[ VOUS ]</span>' : '';
+
+                            html += `
+                            <div style="background: rgba(0, 0, 0, 0.6); border-left: 3px solid #00FF66; padding: 12px 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div>
+                                        <span style="color: #fff; font-weight: bold; font-size: 1.1em;">CMDR ${p.cmdr_nom.toUpperCase()}</span>
+                                        ${indicateurVous}
+                                    </div>
+                                    <div style="font-size: 0.85em;">${squad}</div>
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    ${badges}
+                                </div>
+                            </div>`;
+                        });
+                        listeEl.innerHTML = html;
+                    }
+                } else {
+                    countVal.innerText = '0';
+                    countVal.style.color = '#888';
+                    if (dotEl) {
+                        dotEl.style.background = '#FF3333';
+                        dotEl.style.boxShadow = '0 0 6px #FF3333';
+                    }
+                    if (listeEl) listeEl.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucun pilote détecté dans la galaxie.</div>';
+                }
+            } catch(e) {
+                console.error("Erreur actualisation joueurs en ligne", e);
+            }
+        };
+
+        window.enregistrerTelemetrie = function(type, cle) {
+            try {
+                let tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
+                if (!tel.visites_pages) tel.visites_pages = { qg: 0, bgs: 0, comms: 0, commerce: 0 };
+                if (!tel.interactions) tel.interactions = { onglets_bgs_missions: 0, onglets_bgs_journal: 0, scans_systeme_bgs: 0, scans_commerce: 0 };
+                
+                tel.derniere_visite_web = new Date().toISOString();
+
+                if (type === 'page' && tel.visites_pages[cle] !== undefined) tel.visites_pages[cle]++;
+                if (type === 'action' && tel.interactions[cle] !== undefined) tel.interactions[cle]++;
+
+                localStorage.setItem('edteam_telemetrie', JSON.stringify(tel));
+                window.telemetrieDirty = true;
+            } catch(e) {}
+        };
+
+        // Synchronisation automatique de la télémétrie vers Supabase
+        window.synchroniserTelemetrie = async function() {
+            if (!window.telemetrieDirty || !profilCommandant) return;
+            try {
+                const tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
+                await supabaseApp.from('parametres_app')
+                    .update({ telemetrie_usage: tel })
+                    .eq('user_id', profilCommandant.user_id);
+                window.telemetrieDirty = false;
+            } catch(e) {}
+        };
 
     </script>
     <!-- ========================================== -->

@@ -108,21 +108,130 @@
 <body>
 
     <!-- SAS D'AUTHENTIFICATION ÉPURÉ -->
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h2>IDENTIFICATION</h2>
+    <div id="auth-screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background-color: var(--ed-bg); z-index: 10000;">
+        <div class="auth-box" style="border: 2px solid var(--ed-orange); padding: 40px; background: rgba(10, 5, 0, 0.9); width: 100%; max-width: 400px; text-align: center;">
+            
+            <!-- LOGO EDTEAM -->
+            <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 80px; width: 80px; filter: drop-shadow(0 0 10px var(--ed-orange-glow)); margin: 0 auto 15px auto; display: block;">
+                <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+            </svg>
+            
+            <h2 style="margin-top: 0; color: var(--ed-orange); letter-spacing: 2px;">IDENTIFICATION</h2>
             <input type="email" id="auth-email" class="auth-input" placeholder="EMAIL COMMANDANT">
             <input type="password" id="auth-password" class="auth-input" placeholder="MOT DE PASSE">
             
-            <button class="auth-btn" id="btn-login" onclick="tenterConnexion()">CONNEXION</button>
-            <button class="auth-btn" id="btn-register" style="border-color: #555; color: #aaa;" onclick="tenterInscription()">DEMANDER UN ACCÈS</button>
+            <button class="auth-btn" id="btn-login" onclick="tenterConnexion()">CONNEXION (PILOTES ACCRÉDITÉS)</button>
+            <button class="auth-btn" id="btn-register" style="border-color: #555; color: #aaa;" onclick="tenterInscription()">DEMANDE D'ACCES</button>
             
-            <div id="auth-msg"></div>
+            <div id="auth-msg" style="margin-top: 15px; font-weight: bold;"></div>
         </div>
         <div style="text-align: center; margin-top: 15px;">
             <span style="color: #888; font-size: 0.8em; cursor: pointer; text-decoration: underline; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#888'" onclick="recupererMotDePasse()" onmouseenter="if(typeof sonHover==='function') sonHover()">
                 [ MOT DE PASSE OUBLIÉ ? ]
             </span>
+        </div>
+    </div>
+
+    <!-- NOUVEAU SAS DE SÉCURITÉ (STYLE MINISITE) -->
+    <div id="sas-screen" class="failsafe-overlay" style="display: none; z-index: 10005; background: rgba(20, 10, 0, 0.95);">
+        <div class="failsafe-content" style="max-width: 750px; border-color: var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.15); animation: none; padding: 40px;">
+            
+            <!-- LOGO EDTEAM -->
+            <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 70px; width: 70px; filter: drop-shadow(0 0 10px var(--ed-orange-glow)); margin: 0 auto 15px auto; display: block;">
+                <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+            </svg>
+
+            <h2 style="text-align: center; margin-bottom: 5px; color: var(--ed-orange); font-size: 2.2em; letter-spacing: 4px; margin-top: 0;">SAS DE SÉCURITÉ</h2>
+            <p style="text-align: center; color: #ccc; font-size: 1.1em; margin-bottom: 30px;">Identité en attente de certification par la télémétrie navale.</p>
+
+            <!-- PAGE 0 : RADAR PRINCIPAL -->
+            <div id="sas-page-main" class="sas-page" style="display: block;">
+                
+                <!-- RADAR -->
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #555; padding-bottom: 10px; margin-bottom: 10px; font-size: 1.1em;">
+                    <span style="color: #888;">NOM DE COMMANDANT :</span>
+                    <span id="sas-cmdr-name" style="color: #FF3333; font-weight: bold;">RECHERCHE DU SIGNAL...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #555; padding-bottom: 10px; margin-bottom: 25px; font-size: 1.1em;">
+                    <span style="color: #888;">ESCADRON DÉTECTÉ :</span>
+                    <span id="sas-squad-name" style="color: #FF3333; font-weight: bold;">RECHERCHE DU SIGNAL...</span>
+                </div>
+
+                <button id="btn-sas-demande" class="fs-auth-btn" style="border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5;" disabled onclick="soumettreDossier()">TRANSMETTRE LE DOSSIER À L'AMIRAUTÉ</button>
+
+                <!-- SECTION AIDE -->
+                <div style="margin-top: 35px; border-top: 1px solid rgba(255,113,0,0.3); padding-top: 20px;">
+                    <p style="color: #888; font-size: 0.9em; text-align: left; margin-bottom: 15px;">LE SIGNAL NE VIENT PAS ? IDENTIFIEZ LE PROBLÈME :</p>
+                    
+                    <button class="fs-auth-btn" style="text-align: left; padding: 12px 15px; margin-bottom: 10px; font-size: 0.95em; border-color: rgba(255,113,0,0.4);" onclick="navSas('sas-page-edmc')" onmouseenter="if(typeof sonHover==='function') sonHover()"><strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS LANCÉ EDMC (OU PAS INSTALLÉ)</button>
+                    <button class="fs-auth-btn" style="text-align: left; padding: 12px 15px; margin-bottom: 10px; font-size: 0.95em; border-color: rgba(255,113,0,0.4);" onclick="navSas('sas-page-plugin')" onmouseenter="if(typeof sonHover==='function') sonHover()"><strong style="color: #fff;">[ 2 ]</strong> JE N'AI PAS AJOUTÉ LE PLUGIN "SYS.EDTEAM"</button>
+                    <button class="fs-auth-btn" style="text-align: left; padding: 12px 15px; margin-bottom: 10px; font-size: 0.95em; border-color: rgba(255,113,0,0.4);" onclick="navSas('sas-page-key')" onmouseenter="if(typeof sonHover==='function') sonHover()"><strong style="color: #fff;">[ 3 ]</strong> LE PLUGIN EST LÀ, MAIS JE N'AI PAS MIS MA CLÉ</button>
+                    <button class="fs-auth-btn" style="text-align: left; padding: 12px 15px; margin-bottom: 10px; font-size: 0.95em; border-color: rgba(255,113,0,0.4);" onclick="navSas('sas-page-game')" onmouseenter="if(typeof sonHover==='function') sonHover()"><strong style="color: #fff;">[ 4 ]</strong> TOUT EST LÀ, MAIS JE N'AI PAS ENCORE LANCÉ LE JEU</button>
+                </div>
+
+                <button class="fs-auth-btn" style="text-align: center; padding: 10px; margin-top: 20px; font-size: 0.85em; border-color: #555; color: #aaa; background: transparent;" onclick="if(typeof deconnexion==='function') deconnexion()" onmouseenter="if(typeof sonHover==='function') sonHover()">[ ANNULER ET SE DÉCONNECTER ]</button>
+            </div>
+
+            <!-- PAGE 1 : MANUEL EDMC -->
+            <div id="sas-page-edmc" class="sas-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 1 ] : MOTEUR EDMC</h3>
+                <p style="color: #ccc; font-size: 0.95em; line-height: 1.6; text-align: left;">L'application <strong>Elite Dangerous Market Connector (EDMC)</strong> est obligatoire.<br><br>
+                1. Téléchargez EDMC via le lien sécurisé ci-dessous et installez-le.<br>
+                2. Lancez l'application sur votre PC.<br>
+                3. Connectez-y votre compte Frontier / Elite Dangerous.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://github.com/EDCD/EDMarketConnector/releases/latest" target="_blank" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">🌐 TÉLÉCHARGER EDMC</a>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="navSas('sas-page-main')" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">< RETOUR AU RADAR</button>
+            </div>
+
+            <!-- PAGE 2 : MANUEL PLUGIN -->
+            <div id="sas-page-plugin" class="sas-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 2 ] : LE PLUGIN EDTEAM</h3>
+                <p style="color: #ccc; font-size: 0.95em; line-height: 1.6; text-align: left;">Pour que EDMC puisse nous parler, il lui faut notre module de communication privé.<br><br>
+                1. Téléchargez le fichier ZIP ci-dessous.<br>
+                2. Sur EDMC, allez dans <strong>Fichier > Paramètres > Plugins</strong>.<br>
+                3. Cliquez sur "Ouvrir".<br>
+                4. Décompressez le dossier SYS_EDTEAM à l'intérieur.<br>
+                5. <strong>Fermez et relancez complètement EDMC.</strong></p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="SYS_EDTEAM.zip" download="SYS_EDTEAM.zip" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: #00FF66; color: #00FF66; background: rgba(0, 255, 102, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';">📦 TÉLÉCHARGER LE PLUGIN</a>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="navSas('sas-page-main')" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">< RETOUR AU RADAR</button>
+            </div>
+
+            <!-- PAGE 3 : MANUEL CLÉ -->
+            <div id="sas-page-key" class="sas-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 3 ] : LA CLÉ DE LIAISON</h3>
+                <p style="color: #ccc; font-size: 0.95em; line-height: 1.6; text-align: left;">Si le module est installé, il faut l'autoriser à transmettre en votre nom.<br><br>
+                1. Copiez la clé ci-dessous.<br>
+                2. Dans EDMC, allez dans <strong>Fichier > Paramètres</strong>.<br>
+                3. Allez dans l'onglet <strong>SYS.EDTEAM</strong>.<br>
+                4. Collez la clé et validez (OK).</p>
+                
+                <!-- BOÎTE CLÉ API DÉPLACÉE ICI -->
+                <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); padding: 15px; margin: 25px 0; text-align: center;">
+                    <span style="color: #888; font-size: 0.85em; display: block; margin-bottom: 8px;">CLÉ DE LIAISON (À COPIER DANS EDMC) :</span>
+                    <strong id="sas-api-key" style="color: var(--ed-orange); font-size: 1.4em; cursor: pointer; letter-spacing: 2px;" onclick="copierNav(this.innerText, this, event)">[ CHARGEMENT... ]</strong>
+                </div>
+
+                <button class="fs-auth-btn" style="margin-top: 30px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="navSas('sas-page-main')" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">< RETOUR AU RADAR</button>
+            </div>
+
+            <!-- PAGE 4 : MANUEL LANCEMENT JEU -->
+            <div id="sas-page-game" class="sas-page" style="display: none;">
+                <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
+                <p style="color: #ccc; font-size: 0.95em; line-height: 1.6; text-align: left;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
+                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
+                2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
+                3. Le radar devrait détecter le signal automatiquement en quelques secondes.</p>
+                <button class="fs-auth-btn" style="margin-top: 30px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="navSas('sas-page-main')" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">< RETOUR AU RADAR</button>
+            </div>
+
         </div>
     </div>
 
@@ -185,10 +294,24 @@
                         <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
                     </svg>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); line-height: 1; white-space: nowrap;">EDTEAM</h1>
+                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
                         <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
                     </div>
                 </div>
+
+                <!-- ENCADRÉ HUD : PILOTES EN JEU (FORMAT CARRÉ / COMPACT) -->
+                <div id="online-counter" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-online-pilots', event)"
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: pointer; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                    onmouseover="this.style.background='rgba(0, 255, 102, 0.15)'; this.style.borderColor='#00FF66'; this.style.boxShadow='0 0 10px rgba(0,255,102,0.3)';"
+                    onmouseout="this.style.background='rgba(0, 255, 102, 0.05)'; this.style.borderColor='rgba(0, 255, 102, 0.3)'; this.style.boxShadow='none';"
+                    title="Consulter les pilotes connectés">
+                    <div style="color: #888; font-size: 0.75em; font-weight: bold;">PILOTES</div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span id="online-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #00FF66; box-shadow: 0 0 6px #00FF66;"></span>
+                        <span id="online-count-val" style="color: #fff; font-size: 1.25em; font-weight: bold; line-height: 1;">--</span>
+                    </div>
+                </div>
+
                 <div id="fc-inventory-percent" style="margin: 0; white-space: nowrap; display: flex; align-items: center; cursor: help; padding: 4px 15px; box-sizing: border-box;"
                      onmouseenter="showHoloTooltip(event, '⚠️ TONNAGE', 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
                      <span style="color: var(--ed-orange);">EN ATTENTE EDMC...</span>
@@ -216,7 +339,6 @@
                 <button id="btn-tab-dossier" class="tab-btn active" onclick="switchQgTab('dossier', this)" onmouseenter="sonHover()">DOSSIER COMMANDANT</button>
                 <button id="btn-tab-flotte" class="tab-btn" onclick="switchQgTab('flotte', this)" onmouseenter="sonHover()">GESTION FLOTTE</button>
                 <button id="btn-tab-carrier" class="tab-btn" onclick="switchQgTab('carrier', this)" onmouseenter="sonHover()">LOGISTIQUE CARRIER</button>
-                <button id="tab-btn-parametres" class="tab-btn" style="display: none; border-color: #FF3333; color: #FF3333;" onclick="switchQgTab('parametres', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">PARAMÈTRES ESCADRON</button>
                 
                 <!-- NOUVEAU BOUTON DIRECTEUR -->
                 <button id="tab-btn-directeur" class="tab-btn" style="display: none; border-color: #00FF66; color: #00FF66;" onclick="switchQgTab('directeur', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">
@@ -231,12 +353,6 @@
             
             <!-- ONGLET 1 : DOSSIER COMMANDANT -->
             <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 15px;">
-
-                <!-- ZONE DE RECRUTEMENT (Amirauté Uniquement) -->
-                <div id="zone-recrues" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 10px;">
-                    <h4 style="color: #FF3333; margin: 0 0 5px 0; letter-spacing: 2px; border-bottom: 1px dashed #FF3333; padding-bottom: 5px;">⚠️ CANDIDATURES EN ATTENTE</h4>
-                    <div id="liste-recrues" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
 
                 <!-- BLOC 4 : CARRIÈRE MILITAIRE (RECRUTEMENT) -->
                     <div class="data-row" style="cursor: default; border-color: #555; background: rgba(0, 0, 0, 0.4);">
@@ -260,81 +376,14 @@
                         </div>
 
                         <!-- Si le pilote est mercenaire indépendant -->
-                        <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 20px;">
-                            
-                            <!-- CHOIX DES OPÉRATIONS -->
-                            <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;" id="choix-mercenaire-btns">
-                                <button class="tab-btn active" style="opacity: 1; flex: 1; margin: 0; padding: 10px;" onclick="switchMercenaireMode('REJOINDRE', this)" onmouseenter="sonHover()">S'ENRÔLER DANS UNE FLOTTE</button>
-                                <button class="tab-btn" style="opacity: 0.5; flex: 1; margin: 0; padding: 10px; border-color: var(--ed-orange);" onclick="switchMercenaireMode('CREER', this)" onmouseenter="sonHover()">FONDER UN ESCADRON</button>
-                            </div>
+                <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 15px; text-align: center; padding: 20px; background: rgba(255, 113, 0, 0.05); border: 1px dashed var(--ed-orange-dim);">
+                    <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">STATUT : PILOTE INDÉPENDANT</span>
+                    <span style="color: #ccc; font-size: 0.9em; line-height: 1.5;">
+                        Aucune affiliation militaire n'a été détectée dans la télémétrie de votre vaisseau.<br><br>
+                        <span style="color: #888; font-size: 0.9em; font-style: italic;">Pour rejoindre ou fonder une flotte, veuillez utiliser le panneau de communication droit de votre cockpit (en jeu) puis redémarrez la liaison EDMC.</span>
+                    </span>
+                </div>
 
-                            <!-- MODE 1 : REJOINDRE -->
-                            <div id="mode-rejoindre" style="display: flex; align-items: flex-end; gap: 15px;">
-                                <div style="flex-grow: 1;">
-                                    <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">CANDIDATURE (SÉLECTIONNER UN ESCADRON)</span>
-                                    <select id="input-nouveau-squad" style="background: rgba(0,0,0,0.5); border: 1px solid #555; color: #fff; padding: 10px 15px; font-family: inherit; font-size: 1.1em; width: 100%; box-sizing: border-box; outline: none; cursor: pointer;">
-                                        <option value="">-- RECHERCHE DES ESCADRONS... --</option>
-                                    </select>
-                                </div>
-                                <button id="btn-soumettre-candidature" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';" onclick="postulerEscadron()" onmouseenter="sonHover()">SOUMETTRE CANDIDATURE</button>
-                            </div>
-
-                            <!-- MODE 2 : CRÉER -->
-                        <div id="mode-creer" style="display: none; flex-direction: column; gap: 15px; background: rgba(255, 113, 0, 0.05); border: 1px solid var(--ed-orange-dim); padding: 15px; border-radius: 4px;">
-                            <div style="display: flex; gap: 15px;">
-                                <div style="flex: 1;">
-                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">TAG (4 LETTRES MAX)</span>
-                                    <input type="text" id="creer-tag" maxlength="4" placeholder="EX: NOVA" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; text-transform: uppercase; outline: none;">
-                                </div>
-                                <div style="flex: 3;">
-                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">NOM DE L'ESCADRON</span>
-                                    <input type="text" id="creer-nom" placeholder="EX: NOVA GALACTIC" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 15px;">
-                                <div style="flex: 1;">
-                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">ALLÉGEANCE</span>
-                                    <select id="creer-allegeance" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
-                                        <option value="Indépendant">Indépendant</option>
-                                        <option value="Fédération">Fédération</option>
-                                        <option value="Empire">Empire</option>
-                                        <option value="Alliance">Alliance</option>
-                                    </select>
-                                </div>
-                                <div style="flex: 1;">
-                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">PUISSANCE SOUTENUE</span>
-                                    <select id="creer-puissance" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
-                                        <option value="Aucune">Aucune</option>
-                                        <option value="Felicia Winters">Felicia Winters</option>
-                                        <option value="Zachary Hudson">Zachary Hudson</option>
-                                        <option value="Aisling Duval">Aisling Duval</option>
-                                        <option value="Arissa Lavigny-Duval">Arissa Lavigny-Duval</option>
-                                        <option value="Denton Patreus">Denton Patreus</option>
-                                        <option value="Zemina Torval">Zemina Torval</option>
-                                        <option value="Edmund Mahon">Edmund Mahon</option>
-                                        <option value="Li Yong-Rui">Li Yong-Rui</option>
-                                        <option value="Pranav Antal">Pranav Antal</option>
-                                        <option value="Archon Delaine">Archon Delaine</option>
-                                        <option value="Yuri Grom">Yuri Grom</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <!-- NOUVEAU BLOC : FACTION IN GAME -->
-                            <div style="display: flex; gap: 15px;">
-                                <div style="flex: 1;">
-                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">NOM EXACT DE LA FACTION EN JEU (POUR RADAR EDSM)</span>
-                                    <input type="text" id="creer-faction-ig" placeholder="Ex: Ice Storm Squadron" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
-                                </div>
-                            </div>
-
-                            <!-- LE BOUTON EST MAINTENANT BIEN À L'INTÉRIEUR DE LA BOÎTE -->
-                            <div style="text-align: right; margin-top: 5px;">
-                                <button style="background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 10px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--ed-orange)'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 113, 0, 0.1)'; this.style.color='var(--ed-orange)';" onclick="creerEscadron()" onmouseenter="sonHover()">BÂTIR L'ESCADRON</button>
-                            </div>
-                        </div> <!-- FIN DU BLOC mode-creer -->
-
-                    </div> <!-- FIN DU BLOC qg-squad-mercenaire -->
                 </div> <!-- FIN DU BLOC CARRIÈRE MILITAIRE -->
 
                 <!-- BLOC 1 : FÉDÉRATION DES PILOTES -->
@@ -560,60 +609,6 @@
 
             <!-- Div fantôme pour absorber l'ancien script d'affichage et éviter les erreurs -->
             <div class="data-container" style="display: none;"></div>
-           
-            <!-- ONGLET 4 : PARAMÈTRES ESCADRON (Amirauté Uniquement) -->
-            <div id="qg-tab-parametres" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
-                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); border-color: var(--ed-orange);">
-                    <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
-                        <span id="titre-registre-officiel" style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> REGISTRE OFFICIEL : [ ... ]</span>
-                    </div>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div>
-                            <label style="color: #888; font-size: 0.8em; letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase;">NOM DE LA FLOTTE</label>
-                            <input type="text" id="edit-esca-nom" class="search-input" style="background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; width: 100%; padding: 10px; font-family: inherit; box-sizing: border-box; outline: none;">
-                        </div>
-                        
-                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                            <div style="flex: 1;">
-                                <label style="color: #888; font-size: 0.8em; letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase;">ALLÉGEANCE</label>
-                                <select id="edit-esca-allegeance" class="search-input" style="background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; width: 100%; padding: 10px; font-family: inherit; box-sizing: border-box; outline: none;">
-                                    <option value="Indépendant">Indépendant</option>
-                                    <option value="Fédération">Fédération</option>
-                                    <option value="Empire">Empire</option>
-                                    <option value="Alliance">Alliance</option>
-                                </select>
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="color: #888; font-size: 0.8em; letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase;">PUISSANCE SOUTENUE</label>
-                                <select id="edit-esca-puissance" class="search-input" style="background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; width: 100%; padding: 10px; font-family: inherit; box-sizing: border-box; outline: none;">
-                                    <option value="Aucune">Aucune</option>
-                                    <option value="Felicia Winters">Felicia Winters</option>
-                                    <option value="Zachary Hudson">Zachary Hudson</option>
-                                    <option value="Aisling Duval">Aisling Duval</option>
-                                    <option value="Arissa Lavigny-Duval">Arissa Lavigny-Duval</option>
-                                    <option value="Denton Patreus">Denton Patreus</option>
-                                    <option value="Zemina Torval">Zemina Torval</option>
-                                    <option value="Edmund Mahon">Edmund Mahon</option>
-                                    <option value="Li Yong-Rui">Li Yong-Rui</option>
-                                    <option value="Pranav Antal">Pranav Antal</option>
-                                    <option value="Archon Delaine">Archon Delaine</option>
-                                    <option value="Yuri Grom">Yuri Grom</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="border-top: 1px dashed var(--ed-orange-dim); margin-top: 25px; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <button style="background: rgba(255, 51, 51, 0.05); border: 1px solid #FF3333; color: #FF3333; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.05)'; this.style.color='#FF3333';" onclick="quitterEscadron()" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                            DISSOUDRE L'ESCADRON
-                        </button>
-                        <button id="btn-save-parametres" style="background: rgba(0, 255, 102, 0.05); border: 1px solid #00FF66; color: #00FF66; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase;" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.05)'; this.style.color='#00FF66';" onclick="sauvegarderParametresEscadron()" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                            SAUVEGARDER LES MODIFICATIONS
-                        </button>
-                    </div>
-                </div>
-            </div>
 
             <!-- ONGLET 5 : BUREAU DIRECTEUR (Administrateur Uniquement) -->
             <div id="qg-tab-directeur" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
@@ -625,6 +620,60 @@
                     </div>
                     <div id="liste-attente-app" style="display: flex; flex-direction: column; gap: 10px;">
                         <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Recherche de nouvelles transmissions...</div>
+                    </div>
+                </div>
+
+                <!-- BLOC : AUDIT D'ADOPTION & ACTIVITÉ (6 INDICATEURS) -->
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); border-color: var(--ed-orange); box-shadow: inset 4px 0 0 var(--ed-orange); cursor: default;">
+                    <div class="row-top" style="border-bottom: 1px dashed rgba(255, 113, 0, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
+                        <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> AUDIT TACTIQUE D'ADOPTION & USAGE</span>
+                        <span style="color: #888; font-size: 0.8em; font-style: italic;">Cliquez sur un pilote dans le registre pour son profil détaillé</span>
+                    </div>
+                    
+                    <!-- STATS SYNTHÉTIQUES (GRILLE DE 6) -->
+                    <div id="telemetrie-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px;">
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 12px; border-radius: 4px;">
+                            <div style="color: #888; font-size: 0.75em; font-weight: bold;">1. PRÉSENCE WEB (7J)</div>
+                            <div id="stat-pilotes-web" style="color: #00FF66; font-size: 1.3em; font-weight: bold; margin-top: 4px;">-- / --</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 12px; border-radius: 4px;">
+                            <div style="color: #888; font-size: 0.75em; font-weight: bold;">2. COMMS & MESSAGES</div>
+                            <div id="stat-comms-usage" style="color: var(--ed-blue); font-size: 1.3em; font-weight: bold; margin-top: 4px;">-- ACCÈS</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 12px; border-radius: 4px;">
+                            <div style="color: #888; font-size: 0.75em; font-weight: bold;">3. RADAR BGS (FACTIONS)</div>
+                            <div id="stat-radars-actifs" style="color: var(--ed-orange); font-size: 1.3em; font-weight: bold; margin-top: 4px;">-- FACTIONS</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 12px; border-radius: 4px;">
+                            <div style="color: #888; font-size: 0.75em; font-weight: bold;">4. MISSIONS D'ESCADRON</div>
+                            <div id="stat-missions-bgs" style="color: #00FF66; font-size: 1.3em; font-weight: bold; margin-top: 4px;">-- CRÉÉES</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 12px; border-radius: 4px;">
+                            <div style="color: #888; font-size: 0.75em; font-weight: bold;">5. JOURNAL & HISTORIQUE</div>
+                            <div id="stat-journal-bgs" style="color: var(--ed-blue); font-size: 1.3em; font-weight: bold; margin-top: 4px;">-- CLICS</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 12px; border-radius: 4px;">
+                            <div style="color: #888; font-size: 0.75em; font-weight: bold;">6. COMMERCE FURTIF</div>
+                            <div id="stat-commerce-scans" style="color: var(--ed-orange); font-size: 1.3em; font-weight: bold; margin-top: 4px;">-- SCANS</div>
+                        </div>
+                    </div>
+
+                    <!-- DIAGNOSTIC RAPIDE -->
+                    <div id="telemetrie-alertes" style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); padding: 10px 15px; font-size: 0.85em; color: #ccc;">
+                        Calcul des tendances d'utilisation...
+                    </div>
+                </div>
+
+                <!-- MODALE : FICHE D'ACTIVITÉ INDIVIDUELLE -->
+                <div class="modal-overlay" id="modal-fiche-activite" onclick="fermerModal('modal-fiche-activite', event)" style="z-index: 4500;">
+                    <div class="modal-content" style="max-width: 550px; width: 95%; border-color: var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
+                        <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-fiche-activite')">X</div>
+                        <div id="fiche-activite-titre" class="modal-title" style="color: var(--ed-blue); border-bottom-color: rgba(0,240,255,0.3); font-size: 1.3em; letter-spacing: 2px;">
+                            DOSSIER D'ACTIVITÉ
+                        </div>
+                        <div id="fiche-activite-corps" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                            <!-- Contenu dynamique généré en JS -->
+                        </div>
                     </div>
                 </div>
 
@@ -718,7 +767,7 @@
             <div id="fs-page-game" class="fs-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
                 <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
@@ -813,6 +862,18 @@
         </div>
     </div>
 
+    <!-- MODAL PILOTES EN JEU -->
+    <div class="modal-overlay" id="modal-online-pilots" onclick="fermerModal('modal-online-pilots', event)" style="z-index: 4000;">
+        <div class="modal-content" style="max-width: 550px; width: 95%; max-height: 80vh; display: flex; flex-direction: column; border-color: #00FF66; box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: #00FF66;" onclick="fermerModal('modal-online-pilots')">X</div>
+            <div class="modal-title" style="color: #00FF66; border-bottom: 1px solid #00FF66; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">🟢 RADAR : PILOTES EN JEU (AVEC EDMC)</div>
+            
+            <div id="liste-pilotes-online" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 5px;">
+                <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Balayage des fréquences galactiques...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- =========================================
          MOTEUR JAVASCRIPT ET SUPABASE
          ========================================= -->
@@ -827,34 +888,27 @@
         }
 
         function switchQgTab(tabId, btnElement) {
-            sonClic();
-            // Masquer tous les onglets
-            document.getElementById('qg-tab-dossier').style.display = 'none';
-            document.getElementById('qg-tab-flotte').style.display = 'none';
-            document.getElementById('qg-tab-carrier').style.display = 'none';
-            document.getElementById('qg-tab-parametres').style.display = 'none';
-            const tabDir = document.getElementById('qg-tab-directeur');
-            if(tabDir) tabDir.style.display = 'none';
-            
-            // Afficher l'onglet ciblé
-            document.getElementById('qg-tab-' + tabId).style.display = 'flex';
-            
-            // Mise à jour visuelle du bouton
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btnElement.classList.add('active');
+        sonClic();
+        // Masquer tous les onglets
+        document.getElementById('qg-tab-dossier').style.display = 'none';
+        document.getElementById('qg-tab-flotte').style.display = 'none';
+        document.getElementById('qg-tab-carrier').style.display = 'none';
+        const tabDir = document.getElementById('qg-tab-directeur');
+        if(tabDir) tabDir.style.display = 'none';
 
-            // Chargement des données
-            if (tabId === 'parametres') chargerParametresEscadron();
-            if (tabId === 'directeur') chargerDemandesDirecteur();
+        // Afficher l'onglet ciblé
+        document.getElementById('qg-tab-' + tabId).style.display = 'flex';
 
-            // Chargement des données si on ouvre les paramètres ou le bureau
-            if (tabId === 'parametres') chargerParametresEscadron();
-            if (tabId === 'directeur') {
-                chargerDemandesDirecteur();
-                chargerPersonnelDirecteur(); // <--- LA NOUVELLE LIGNE
-            }
+        // Mise à jour visuelle du bouton
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
 
+        // Chargement des données
+        if (tabId === 'directeur') {
+            chargerDemandesDirecteur();
+            chargerPersonnelDirecteur();
         }
+    }
 
         function toggleShipDetails(headerElement) {
             sonClic();
@@ -925,6 +979,242 @@
             osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.6);
         }
 
+        // --- MOTEUR AUDIO : MUSIQUE ÉPIQUE ÉVOLUTIVE (128 TEMPS) ---
+        let sasMusicGain = null;
+        let isSasMusicPlaying = false;
+        let sasTimerID = null;
+        let sasNextNoteTime = 0;
+        let sasBeat = 0;
+        let sasDelayNode = null;
+
+        // Progression Harmonique (Fm, Db, Ab, Eb)
+        const sasChords = [
+            { bass: 87.31, pad: [174.61, 207.65, 261.63, 311.13] },  // Fm9
+            { bass: 69.30, pad: [138.59, 174.61, 207.65, 277.18] },  // Dbmaj7
+            { bass: 103.83, pad: [155.56, 207.65, 259.57, 311.13] }, // Ab
+            { bass: 77.78, pad: [155.56, 196.00, 233.08, 311.13] }   // Eb
+        ];
+
+        // Grande mélodie Lead évolutive sur 128 temps
+        const sasMelody = [
+            { b: 0, f: 349.23, d: 2 },   // F4
+            { b: 16, f: 523.25, d: 2 },  // C5
+            { b: 32, f: 554.37, d: 2 },  // Db5
+            { b: 48, f: 415.30, d: 2 },  // Ab4
+            { b: 64, f: 622.25, d: 2 },  // Eb5
+            { b: 80, f: 523.25, d: 2 },  // C5
+            { b: 96, f: 554.37, d: 1 },  // Db5
+            { b: 104, f: 622.25, d: 1 }, // Eb5
+            { b: 112, f: 523.25, d: 2 }  // C5
+        ];
+
+        function startSasMusic() {
+            if (isSasMusicPlaying) return;
+            if (!audioCtx) { if (typeof initAudio === 'function') initAudio(); else return; }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            isSasMusicPlaying = true;
+
+            const t = audioCtx.currentTime;
+            
+            sasMusicGain = audioCtx.createGain();
+            sasMusicGain.gain.setValueAtTime(0, t);
+            sasMusicGain.gain.linearRampToValueAtTime(0.12, t + 4);
+
+            sasDelayNode = audioCtx.createDelay();
+            sasDelayNode.delayTime.value = 0.52; // Écho spatial long
+            const feedback = audioCtx.createGain();
+            feedback.gain.value = 0.55;
+            const delayFilter = audioCtx.createBiquadFilter();
+            delayFilter.type = 'lowpass';
+            delayFilter.frequency.value = 1200;
+
+            sasDelayNode.connect(delayFilter);
+            delayFilter.connect(feedback);
+            feedback.connect(sasDelayNode);
+            sasDelayNode.connect(sasMusicGain);
+            sasMusicGain.connect(audioCtx.destination);
+
+            sasBeat = 0;
+            sasNextNoteTime = audioCtx.currentTime + 0.1;
+            sasScheduler();
+        }
+
+        // Le séquenceur avancé
+        function sasScheduler() {
+            if (!isSasMusicPlaying) return;
+            
+            while (sasNextNoteTime < audioCtx.currentTime + 0.1) {
+                let cycle128 = sasBeat % 128;
+                let chordIdx = Math.floor(cycle128 / 32); // Change d'accord tous les 32 temps
+                let currentChord = sasChords[chordIdx];
+
+                // 1. BASSE PULSATIVE
+                if (sasBeat % 2 === 0) {
+                    playSasPulse(sasNextNoteTime, currentChord.bass, 0.25);
+                }
+                // Contre-temps à l'octave pour donner du groove
+                if (sasBeat % 8 === 3 || sasBeat % 8 === 6) {
+                    playSasPulse(sasNextNoteTime, currentChord.bass * 2, 0.1); 
+                }
+
+                // 2. PERCUSSIONS & NAPPES D'ACCORDS
+                if (sasBeat % 32 === 0) {
+                    playSasDrum(sasNextNoteTime, 1.0); // Gros Taiko
+                    playSasPad(sasNextNoteTime, currentChord.pad); // Changement d'accord majestueux
+                } else if (sasBeat % 32 === 16) {
+                    playSasDrum(sasNextNoteTime, 0.35); // Impact secondaire
+                }
+
+                // 3. LA GRANDE MÉLODIE LEAD
+                let melNote = sasMelody.find(m => m.b === cycle128);
+                if (melNote) {
+                    playSasLead(sasNextNoteTime, melNote.f, melNote.d * 1.5);
+                }
+
+                // 4. ARPÉGIATEUR TECHNOLOGIQUE (Calcul de données)
+                if (sasBeat % 4 === 1 || sasBeat % 4 === 2) {
+                    // Sélectionne une note aléatoire dans l'accord en cours et la joue 2 octaves plus haut
+                    let arpFreq = currentChord.pad[Math.floor(Math.random() * currentChord.pad.length)] * 2;
+                    playSasArp(sasNextNoteTime, arpFreq);
+                }
+
+                sasNextNoteTime += 0.13; // Vitesse de lecture (BPM = env 115)
+                sasBeat++;
+            }
+            sasTimerID = setTimeout(sasScheduler, 25);
+        }
+
+        function playSasPulse(time, freq, vol) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(200, time);
+            filter.frequency.exponentialRampToValueAtTime(1800, time + 0.05);
+            filter.frequency.exponentialRampToValueAtTime(100, time + 0.25);
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(vol, time + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+            
+            osc.connect(filter); filter.connect(gain);
+            gain.connect(sasMusicGain); gain.connect(sasDelayNode);
+            osc.start(time); osc.stop(time + 0.3);
+        }
+
+        function playSasDrum(time, intensity) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(120, time);
+            osc.frequency.exponentialRampToValueAtTime(20, time + 0.5); 
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.8 * intensity, time + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 1.5);
+            
+            osc.connect(gain); gain.connect(sasMusicGain);
+            
+            const bufferSize = audioCtx.sampleRate * 0.3;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            
+            const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(1500 * intensity, time);
+            noiseFilter.frequency.exponentialRampToValueAtTime(100, time + 0.5);
+            
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.3 * intensity, time);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+            
+            noise.connect(noiseFilter); noiseFilter.connect(noiseGain);
+            noiseGain.connect(sasMusicGain); noiseGain.connect(sasDelayNode); 
+            
+            osc.start(time); osc.stop(time + 1.6); noise.start(time);
+        }
+
+        function playSasPad(time, freqs) {
+            freqs.forEach((f) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.value = f + (Math.random() * 0.8 - 0.4); 
+                
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(150, time);
+                filter.frequency.linearRampToValueAtTime(1800, time + 2); 
+                filter.frequency.exponentialRampToValueAtTime(150, time + 4.5); 
+                
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.1, time + 2); 
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 4.5);
+                
+                osc.connect(filter); filter.connect(gain);
+                gain.connect(sasMusicGain); gain.connect(sasDelayNode);
+                osc.start(time); osc.stop(time + 4.6);
+            });
+        }
+
+        function playSasLead(time, freq, dur) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            
+            osc.type = 'sawtooth';
+            // Léger glissement de la note vers le haut pour donner de l'émotion
+            osc.frequency.setValueAtTime(freq * 0.95, time); 
+            osc.frequency.exponentialRampToValueAtTime(freq, time + 0.15);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(400, time);
+            filter.frequency.linearRampToValueAtTime(3000, time + dur * 0.4);
+            filter.frequency.linearRampToValueAtTime(400, time + dur);
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.12, time + dur * 0.2);
+            gain.gain.linearRampToValueAtTime(0.001, time + dur);
+            
+            osc.connect(filter); filter.connect(gain);
+            gain.connect(sasDelayNode); gain.connect(sasMusicGain);
+            
+            osc.start(time); osc.stop(time + dur + 0.1);
+        }
+
+        function playSasArp(time, freq) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, time); 
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.03, time + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+            
+            osc.connect(gain); gain.connect(sasDelayNode); 
+            osc.start(time); osc.stop(time + 0.2);
+        }
+
+        function stopSasMusic() {
+            if (!isSasMusicPlaying || !sasMusicGain) return;
+            isSasMusicPlaying = false;
+            clearTimeout(sasTimerID); 
+            
+            const t = audioCtx.currentTime;
+            sasMusicGain.gain.cancelScheduledValues(t);
+            sasMusicGain.gain.setValueAtTime(sasMusicGain.gain.value, t);
+            sasMusicGain.gain.linearRampToValueAtTime(0, t + 2); 
+            setTimeout(() => { sasMusicGain = null; }, 2100);
+        }
+
         // --- SUPABASE & DATA SYNC (GARDE VOTRE BARRE À JOUR) ---
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
@@ -956,25 +1246,53 @@
             const msg = document.getElementById('auth-msg');
 
             msg.style.color = "var(--ed-blue)"; 
-            msg.innerText = "> TRANSMISSION DEMANDE...";
+            msg.innerText = "> ENRÔLEMENT EN COURS...";
             
-            // Création du compte (Supabase gère l'auth)
             const { data, error } = await supabaseApp.auth.signUp({ email, password });
             
             if (error) { 
-                msg.style.color = "red"; msg.innerText = "> ERREUR : " + error.message; 
+                // Si l'erreur vient du fait que le compte existe déjà
+                if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already exists')) {
+                    msg.style.color = "var(--ed-orange)";
+                    msg.innerText = "> COMPTE DÉTECTÉ. REPRISE DE LA PROCÉDURE...";
+                    
+                    // On connecte le pilote automatiquement avec les identifiants saisis
+                    const { data: loginData, error: loginError } = await supabaseApp.auth.signInWithPassword({ email, password });
+                    
+                    if (loginError) {
+                        msg.style.color = "red"; 
+                        msg.innerText = "> ERREUR : MOT DE PASSE INCORRECT POUR CE COMPTE.";
+                    } else {
+                        // Connexion réussie, on l'envoie vers le vérificateur (qui le remettra dans le Sas)
+                        setTimeout(() => { verifierApprobation(loginData.user); }, 1000);
+                    }
+                } else {
+                    // Si c'est une autre erreur (mot de passe trop court, email invalide...)
+                    msg.style.color = "red"; 
+                    msg.innerText = "> ERREUR : " + error.message; 
+                }
             } else { 
-                // Inscription réussie. Le joueur devra attendre que le Directeur l'approuve.
+                // Nouveau compte créé avec succès
                 msg.style.color = "#00FF66"; 
-                msg.innerText = "> DEMANDE ENVOYÉE. ATTENTE DE VALIDATION PAR LE DIRECTEUR."; 
+                msg.innerText = "> SUCCÈS. OUVERTURE DU SAS..."; 
+                setTimeout(() => { verifierApprobation(data.user); }, 1500);
             }
         }
 
         async function verifierApprobation(user) {
             const msg = document.getElementById('auth-msg');
             const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', user.id).single();
+            
+            // Sécurité : Si le profil n'a pas encore eu le temps d'être généré par la BDD, on retente dans 1 seconde
+            if (error || !data) {
+                setTimeout(() => verifierApprobation(user), 1000);
+                return;
+            }
+
             if (data && data.est_approuve) {
                 profilCommandant = data;
+                enregistrerTelemetrie('page', 'qg');
+                synchroniserTelemetrie();
                 actualiserAffichageRH();
                 
                 // 👉 LA FAMEUSE LIGNE EST À AJOUTER ICI :
@@ -994,12 +1312,6 @@
                 if (data.solde_fc !== null && data.solde_fc !== undefined) {
                     const elFc = document.getElementById('solde-fc');
                     if (elFc) elFc.innerText = fmt.format(data.solde_fc);
-                }
-
-                        // AFFICHAGE DE L'ONGLET PARAMÈTRES (Amirauté Uniquement)
-                if (data.est_amiral) {
-                    const btnParam = document.getElementById('tab-btn-parametres');
-                    if (btnParam) btnParam.style.display = 'inline-block';
                 }
 
                 // AFFICHAGE DE LA PASTILLE D'ALERTE (Amirauté & Directeur)
@@ -1033,14 +1345,48 @@
                 // 5. Affichage de la clé API
                 const keyDisplay = document.getElementById('api-key-display');
                 if (keyDisplay) keyDisplay.innerText = data.cle_api;
-                
+
                 // Ajout pour l'écran Failsafe !
                 const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
                 if (failsafeKeyDisplay) failsafeKeyDisplay.innerText = data.cle_api;
+
+                // Radar des pilotes en ligne
+                actualiserPilotesEnLigne();
+                setInterval(actualiserPilotesEnLigne, 15000);
                 
             } else {
-                msg.style.color = "red"; msg.innerText = "> ACCÈS REFUSÉ : COMPTE NON APPROUVÉ PAR L'AMIRAUTÉ.";
-                await supabaseApp.auth.signOut();
+                // Le pilote n'est pas encore approuvé par le Directeur.
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('sas-screen').style.display = 'flex';
+                document.getElementById('sas-api-key').innerText = data.cle_api;
+                
+                // 👉 DÉMARRAGE DE LA MUSIQUE CINÉMATOGRAPHIQUE
+                if(typeof startSasMusic === 'function') startSasMusic();
+                
+                // VÉRIFICATION : Le dossier a-t-il déjà été transmis ?
+                if (data.cmdr_nom) {
+                    // Oui, les données sont déjà en base. On verrouille l'interface.
+                    const btn = document.getElementById('btn-sas-demande');
+                    btn.innerText = "DOSSIER TRANSMIS. ATTENTE VALIDATION...";
+                    btn.style.borderColor = "#00FF66";
+                    btn.style.color = "#00FF66";
+                    btn.disabled = true;
+                    
+                    // On réaffiche les données sauvegardées
+                    document.getElementById('sas-cmdr-name').innerText = data.cmdr_nom.toUpperCase();
+                    document.getElementById('sas-cmdr-name').style.color = "#00FF66";
+                    
+                    if (data.escadron_id) {
+                        document.getElementById('sas-squad-name').innerText = data.escadron_id.toUpperCase();
+                        document.getElementById('sas-squad-name').style.color = "#00FF66";
+                    } else {
+                        document.getElementById('sas-squad-name').innerText = "INCONNU / INDÉPENDANT";
+                        document.getElementById('sas-squad-name').style.color = "var(--ed-orange)";
+                    }
+                } else {
+                    // Non, le dossier est vide. On lance le radar pour écouter EDMC.
+                    sasLoop(user.id);
+                }
             }
         }
         
@@ -1235,6 +1581,27 @@
                 processLatest('FC_BALANCE', item => { profilUpdates.solde_fc = item.prix_unitaire; profilModifie = true; });
                 processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });
                 processLatest('PARAM_UPDATE', item => { try { Object.assign(paramUpdates, JSON.parse(item.station_name)); paramModifie = true; } catch(e){} });
+                processLatest('SQUADRON_INFO', item => { 
+                    try { 
+                        const sInfo = JSON.parse(item.station_name); 
+                        if (profilData.escadron_id !== sInfo.nom) {
+                            profilUpdates.escadron_id = sInfo.nom;
+                            // Détection automatique selon le rang Elite Dangerous (0 = Leader, 1-2 = Officiers)
+                            // Ton compte Directeur conserve les droits même si ton rang en jeu est inférieur
+                            profilUpdates.est_amiral = (sInfo.rank === 0);
+                            profilUpdates.est_officier = (sInfo.rank <= 2);
+                            profilModifie = true;
+                            
+                            // Si le joueur est le chef absolu in-game (0), on auto-crée l'escadron
+                            if (sInfo.rank === 0) {
+                                supabaseApp.from('escadrons').upsert({ tag: sInfo.nom, nom: sInfo.nom, fondateur_id: profilCommandant.user_id }, { onConflict: 'tag' }).then();
+                            }
+                            
+                            // Rafraîchir l'interface visuelle après l'enregistrement
+                            setTimeout(actualiserAffichageRH, 1500); 
+                        }
+                    } catch(e){} 
+                });
 
                 // B. Rangs et Progressions
                 const rankMapping = {
@@ -1586,69 +1953,6 @@
         }
         
         window.copierNav = function(texte, element, event) { if (event) event.stopPropagation(); navigator.clipboard.writeText(texte).then(() => { sonClic(); const texteOriginal = element.innerHTML; element.innerHTML = "[ COPIÉ ]"; element.style.color = "#00FF00"; setTimeout(() => { element.innerHTML = texteOriginal; element.style.color = ""; }, 1500); }); };
-    
-        // ==========================================
-        // PARAMÈTRES ESCADRON (AMIRAUTÉ)
-        // ==========================================
-        async function chargerParametresEscadron() {
-            if (!profilCommandant || !profilCommandant.escadron_id) return;
-            try {
-                const { data, error } = await supabaseApp.from('escadrons')
-                    .select('*')
-                    .eq('tag', profilCommandant.escadron_id)
-                    .single();
-                
-                if (error) throw error;
-                
-                if (data) {
-                    document.getElementById('titre-registre-officiel').innerText = `> REGISTRE OFFICIEL : [ ${data.tag} ]`;
-                    document.getElementById('edit-esca-nom').value = data.nom || '';
-                    if (data.allegeance) document.getElementById('edit-esca-allegeance').value = data.allegeance;
-                    if (data.puissance) document.getElementById('edit-esca-puissance').value = data.puissance;
-                }
-            } catch(e) { console.error("Erreur chargement paramètres :", e); }
-        }
-
-        async function sauvegarderParametresEscadron() {
-            if(typeof sonClic === 'function') sonClic();
-            const btn = document.getElementById('btn-save-parametres');
-            btn.innerText = "TRANSMISSION...";
-            btn.style.pointerEvents = "none";
-            
-            try {
-                const updates = {
-                    nom: document.getElementById('edit-esca-nom').value.trim(),
-                    allegeance: document.getElementById('edit-esca-allegeance').value,
-                    puissance: document.getElementById('edit-esca-puissance').value
-                };
-
-                const { error } = await supabaseApp.from('escadrons')
-                    .update(updates)
-                    .eq('tag', profilCommandant.escadron_id);
-
-                if (error) throw error;
-
-                if(typeof sonSucces === 'function') sonSucces();
-                btn.innerText = "SAUVEGARDÉ";
-                btn.style.color = "#000";
-                btn.style.backgroundColor = "#00FF66";
-
-                setTimeout(() => { 
-                    btn.innerText = "SAUVEGARDER LES MODIFICATIONS"; 
-                    btn.style.color = "#00FF66"; 
-                    btn.style.backgroundColor = "rgba(0, 255, 102, 0.05)";
-                    btn.style.pointerEvents = "auto";
-                }, 2000);
-
-            } catch(e) {
-                console.error("Erreur sauvegarde paramètres :", e);
-                btn.innerText = "ÉCHEC DE SAUVEGARDE";
-                setTimeout(() => { 
-                    btn.innerText = "SAUVEGARDER LES MODIFICATIONS"; 
-                    btn.style.pointerEvents = "auto"; 
-                }, 2000);
-            }
-        }
 
         async function actualiserBadgeAmiraute() {
             if (!profilCommandant) return;
@@ -1825,16 +2129,11 @@
             }
         }, 1000);
 
-        // LOGIQUE RH (Recrutement et Fondation)
         async function actualiserAffichageRH() {
             if (!profilCommandant) return;
             const divActif = document.getElementById('qg-squad-actif');
             const divMercenaire = document.getElementById('qg-squad-mercenaire');
             const spanTag = document.getElementById('qg-squad-tag');
-            
-            const btnSoumettre = document.getElementById('btn-soumettre-candidature');
-            const inputSquad = document.getElementById('input-nouveau-squad');
-            const choixBtns = document.getElementById('choix-mercenaire-btns');
             
             if (profilCommandant.escadron_id) {
                 // Le pilote est dans un escadron
@@ -1842,7 +2141,7 @@
                 divMercenaire.style.display = 'none';
                 spanTag.innerText = '[ ' + profilCommandant.escadron_id + ' ]';
                 
-                // --- NOUVEAU : AFFICHAGE DES GRADES ET RÔLES AVEC INFOBULLES ---
+                // AFFICHAGE DES GRADES ET RÔLES AVEC INFOBULLES
                 const rolesDiv = document.getElementById('qg-squad-roles');
                 if (rolesDiv) {
                     let rolesHtml = '';
@@ -1875,43 +2174,10 @@
                 }
 
             } else {
-                // Le pilote est un mercenaire
+                // Le pilote est un mercenaire indépendant
                 divActif.style.display = 'none';
                 divMercenaire.style.display = 'flex';
-
-                // --- CHARGEMENT DES ESCADRONS DEPUIS LA NOUVELLE TABLE ---
-                try {
-                    const { data, error } = await supabaseApp.from('escadrons').select('tag, nom').order('tag');
-                    if (!error && data) {
-                        let optionsHtml = '<option value="">-- SÉLECTIONNEZ UN ESCADRON --</option>';
-                        data.forEach(e => { optionsHtml += `<option value="${e.tag}">[ ${e.tag} ] ${e.nom}</option>`; });
-                        if(data.length === 0) optionsHtml = '<option value="">-- AUCUN ESCADRON DANS LE REGISTRE --</option>';
-                        
-                        if (!profilCommandant.demande_escadron) {
-                            inputSquad.innerHTML = optionsHtml;
-                        } else {
-                            inputSquad.innerHTML = `<option value="${profilCommandant.demande_escadron}">[ ${profilCommandant.demande_escadron} ]</option>`;
-                        }
-                    }
-                } catch(e) { console.error(e); }
-                
-                // --- GESTION DES BOUTONS DE CHOIX ---
-                if (profilCommandant.demande_escadron) {
-                    // Candidature en cours : On verrouille et on cache le menu "Fonder"
-                    inputSquad.value = profilCommandant.demande_escadron;
-                    inputSquad.disabled = true;
-                    btnSoumettre.innerText = 'CANDIDATURE EN ATTENTE...';
-                    btnSoumettre.disabled = true;
-                    btnSoumettre.style.opacity = '0.5';
-                    choixBtns.style.display = 'none'; 
-                } else {
-                    // Libre de postuler ou créer
-                    inputSquad.disabled = false;
-                    btnSoumettre.innerText = 'SOUMETTRE CANDIDATURE';
-                    btnSoumettre.disabled = false;
-                    btnSoumettre.style.opacity = '1';
-                    choixBtns.style.display = 'flex';
-                }
+                // Tout le vieux code de recherche d'escadron de la base de données a été purgé ici.
             }
         }
 
@@ -2005,21 +2271,6 @@
             }
         }
 
-        async function postulerEscadron() {
-            sonClic();
-            const tag = document.getElementById('input-nouveau-squad').value.trim();
-            
-            if (!tag) { 
-                afficherAlerte("ATTENTION", "Veuillez sélectionner un escadron dans la liste déroulante.", "var(--ed-orange)"); 
-                return; 
-            }
-            
-            try {
-                await supabaseApp.from('profils').update({ demande_escadron: tag }).eq('user_id', profilCommandant.user_id);
-                afficherAlerte("TRANSMISSION RÉUSSIE", `Candidature transmise à l'Amirauté de l'escadron <strong>${tag}</strong>.<br><br>Veuillez patienter pendant l'étude de votre dossier.`, "#00FF66", () => location.reload());
-            } catch(e) {}
-        }
-
         // Alterner entre le formulaire d'enrôlement et de création
         function switchMercenaireMode(mode, btn) {
             sonClic();
@@ -2097,23 +2348,44 @@
             if (!listeAttente) return;
 
             try {
+                // On récupère TOUS les profils non approuvés (pour correspondre au badge)
                 const { data, error } = await supabaseApp.from('profils').select('*').eq('est_approuve', false);
                 if (error) throw error;
 
                 if (data && data.length > 0) {
                     let html = '';
                     data.forEach(p => {
-                        html += `
-                        <div style="background: rgba(0,0,0,0.6); border: 1px solid #00FF66; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <div>
-                                <span style="color: #fff; font-weight: bold; font-size: 1.1em;">DEMANDE D'ACCÈS AU TERMINAL</span>
-                                <div style="color: #888; font-size: 0.85em; margin-top: 4px;">ID Pilote : ${p.user_id.substring(0, 15)}...</div>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button style="background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';" onclick="gererAccesApp('${p.user_id}', true)" onmouseenter="if(typeof sonHover==='function') sonHover()">AUTORISER</button>
-                                <button style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#FF3333';" onclick="gererAccesApp('${p.user_id}', false)" onmouseenter="if(typeof sonHover==='function') sonHover()">REJETER</button>
-                            </div>
-                        </div>`;
+                        
+                        if (p.cmdr_nom) {
+                            // CAS 1 : LE DOSSIER EST COMPLET (Le pilote a transmis ses infos)
+                            const nomAffichage = `CMDR ${p.cmdr_nom.toUpperCase()}`;
+                            const squadAffichage = p.escadron_id ? `[ Escadron: ${p.escadron_id} ]` : `[ Pilote Indépendant ]`;
+
+                            html += `
+                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #00FF66; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <span style="color: #fff; font-weight: bold; font-size: 1.1em;">${nomAffichage}</span>
+                                    <div style="color: #888; font-size: 0.85em; margin-top: 4px;">${squadAffichage} - ID: ${p.user_id.substring(0, 8)}...</div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button style="background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';" onclick="gererAccesApp('${p.user_id}', true)" onmouseenter="if(typeof sonHover==='function') sonHover()">AUTORISER</button>
+                                    <button style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#FF3333';" onclick="gererAccesApp('${p.user_id}', false)" onmouseenter="if(typeof sonHover==='function') sonHover()">REJETER</button>
+                                </div>
+                            </div>`;
+                        } else {
+                            // CAS 2 : LE DOSSIER EST INCOMPLET (Le pilote est dans le Sas)
+                            html += `
+                            <div style="background: rgba(255, 113, 0, 0.05); border: 1px dashed var(--ed-orange); padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; opacity: 0.8;">
+                                <div>
+                                    <span style="color: var(--ed-orange); font-weight: bold; font-size: 1.1em;">RECRUE EN APPROCHE...</span>
+                                    <div style="color: #888; font-size: 0.85em; margin-top: 4px;">ID: ${p.user_id.substring(0, 8)}...</div>
+                                </div>
+                                <div style="display: flex; gap: 15px; align-items: center;">
+                                    <span style="color: var(--ed-orange); font-size: 0.9em; font-style: italic; letter-spacing: 1px; animation: alertPulse 2s infinite;">> EN COURS DE PARAMÉTRAGE DANS LE SAS...</span>
+                                    <button style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#FF3333';" onclick="gererAccesApp('${p.user_id}', false)" onmouseenter="if(typeof sonHover==='function') sonHover()">PURGER</button>
+                                </div>
+                            </div>`;
+                        }
                     });
                     listeAttente.innerHTML = html;
                 } else {
@@ -2123,17 +2395,25 @@
         }
 
         window.gererAccesApp = async function(userId, accepter) {
-            if(typeof sonClic === 'function') sonClic();
+            if (typeof sonClic === 'function') sonClic();
             try {
                 if (accepter) {
                     await supabaseApp.from('profils').update({ est_approuve: true }).eq('user_id', userId);
                 } else {
-                    await supabaseApp.from('profils').delete().eq('user_id', userId);
+                    // Appel de la fonction serveur pour une destruction totale
+                    const { error } = await supabaseApp.rpc('purger_utilisateur', { target_user_id: userId });
+                    if (error) throw error;
                 }
                 chargerDemandesDirecteur();
-                if(typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute(); 
-            } catch(e) { console.error(e); }
+                if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute(); 
+            } catch (e) {
+                console.error("Erreur lors de l'opération :", e);
+            }
         };
+
+        // Cache local pour consultation instantanée sans requêtes supplémentaires
+        window.cacheParamsPersonnel = {};
+        window.cacheProfilsPersonnel = [];
 
         async function chargerPersonnelDirecteur() {
             if (!profilCommandant || !profilCommandant.est_directeur) return;
@@ -2141,86 +2421,193 @@
             if (!listePersonnel) return;
 
             try {
-                // On récupère tous les profils DEJA approuvés
-                const { data, error } = await supabaseApp.from('profils').select('*').eq('est_approuve', true).order('cmdr_nom');
-                if (error) throw error;
+                const [resProfils, resParams, resOrdres, resTransmissions] = await Promise.all([
+                    supabaseApp.from('profils').select('*').eq('est_approuve', true).order('cmdr_nom'),
+                    supabaseApp.from('parametres_app').select('user_id, last_heartbeat, factions_favorites, telemetrie_usage'),
+                    supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }),
+                    supabaseApp.from('transmissions').select('id', { count: 'exact', head: true })
+                ]);
 
-                if (data && data.length > 0) {
-                    let html = '';
-                    data.forEach(p => {
-                        // Sécurité : On empêche le Directeur de se révoquer lui-même
-                        const isMe = p.user_id === profilCommandant.user_id;
-                        
-                        // Protection du nom pour éviter les bugs si un joueur a une apostrophe
-                        const nomEchappe = p.cmdr_nom ? p.cmdr_nom.replace(/'/g, "\\'") : 'INCONNU';
-                        
-                        const btnRevoquer = isMe ? 
-                            `<span style="color: var(--ed-blue); font-weight: bold; font-size: 0.9em; padding-right: 15px; letter-spacing: 2px;">[ DIRECTEUR ]</span>` : 
-                            `<button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 6px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="revoquerAccesTerminal('${p.user_id}', '${nomEchappe}')" onmouseenter="if(typeof sonHover==='function') sonHover()">RÉVOQUER ACCÈS</button>`;
+                const profils = resProfils.data || [];
+                window.cacheProfilsPersonnel = profils;
+                window.cacheParamsPersonnel = {};
+                (resParams.data || []).forEach(p => window.cacheParamsPersonnel[p.user_id] = p);
 
-                        const cmdrName = p.cmdr_nom ? `CMDR ${p.cmdr_nom.toUpperCase()}` : `[ ID: ${p.user_id.substring(0, 8)}... ]`;
-                        const squadInfo = p.escadron_id ? `<span style="color: var(--ed-orange); font-size: 0.9em; font-weight: bold; min-width: 60px; text-align: center;">[ ${p.escadron_id} ]</span>` : `<span style="color: #888; font-size: 0.85em; min-width: 60px; text-align: center;">[ INDÉPENDANT ]</span>`;
+                // 1. CALCUL DES 6 INDICATEURS GLOBAUX
+                const now = Date.now() / 1000;
+                let pilotesWebActifs = 0;
+                let totalCommsVisites = 0;
+                let totalFactionsFavoris = 0;
+                let totalScansBgs = 0;
+                let totalJournalVisites = 0;
+                let totalCommerceScans = 0;
+                let totalCommerceVisites = 0;
 
-                        // --- GESTION DES BADGES D'ACCRÉDITATION ---
-                        let badgesHtml = '';
-                        const badgeStyle = "padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold; letter-spacing: 1px;";
-                        
-                        if (p.escadron_id) {
-                            if (p.est_amiral) {
-                                badgesHtml += `<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); ${badgeStyle}">AMIRAL</span>`;
-                            } else {
-                                badgesHtml += `<span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); ${badgeStyle}">PILOTE</span>`;
-                            }
-                            if (p.est_officier) {
-                                badgesHtml += `<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); ${badgeStyle}">OFFICIER BGS</span>`;
-                            }
-                            if (p.est_diplomate) {
-                                badgesHtml += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); ${badgeStyle}">DIPLOMATE</span>`;
-                            }
-                        }
+                profils.forEach(p => {
+                    const param = window.cacheParamsPersonnel[p.user_id] || {};
+                    const tel = param.telemetrie_usage || {};
+                    const pages = tel.visites_pages || {};
+                    const actions = tel.interactions || {};
 
-                        html += `
-                        <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 12px 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <span style="color: #fff; font-weight: bold; font-size: 1.1em; min-width: 200px;">${cmdrName}</span>
-                                ${squadInfo}
-                                <div style="display: flex; gap: 8px; margin-left: 10px;">
-                                    ${badgesHtml}
-                                </div>
-                            </div>
-                            <div>
-                                ${btnRevoquer}
-                            </div>
-                        </div>`;
-                    });
-                    listePersonnel.innerHTML = html;
-                } else {
-                    listePersonnel.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucun personnel dans le registre.</div>';
-                }
+                    if (tel.derniere_visite_web && (now - new Date(tel.derniere_visite_web).getTime()/1000) < 7 * 86400) {
+                        pilotesWebActifs++;
+                    }
+
+                    totalCommsVisites += pages.comms || 0;
+                    totalCommerceVisites += pages.commerce || 0;
+                    totalJournalVisites += actions.onglets_bgs_journal || 0;
+                    totalScansBgs += actions.scans_systeme_bgs || 0;
+                    totalCommerceScans += actions.scans_commerce || 0;
+
+                    if (param.factions_favorites && Array.isArray(param.factions_favorites)) {
+                        totalFactionsFavoris += param.factions_favorites.length;
+                    }
+                });
+
+                const totalMissionsBgs = resOrdres.count || 0;
+                const totalMessages = resTransmissions.count || 0;
+
+                // Mise à jour de la grille des 6 cartes
+                document.getElementById('stat-pilotes-web').innerText = `${pilotesWebActifs} / ${profils.length}`;
+                document.getElementById('stat-comms-usage').innerText = `${totalCommsVisites} ACCÈS (${totalMessages} MSG)`;
+                document.getElementById('stat-radars-actifs').innerText = `${totalFactionsFavoris} FACTIONS (${totalScansBgs} SCANS)`;
+                document.getElementById('stat-missions-bgs').innerText = `${totalMissionsBgs} ORDRES`;
+                document.getElementById('stat-journal-bgs').innerText = `${totalJournalVisites} LECTURES`;
+                document.getElementById('stat-commerce-scans').innerText = `${totalCommerceScans} SCANS (${totalCommerceVisites} VISITES)`;
+
+                // Diagnostic textuel
+                let alertesTxt = [];
+                if (totalCommerceVisites === 0 && totalCommerceScans === 0) alertesTxt.push("⚠️ Le module <strong>Commerce Furtif</strong> n'a enregistré aucune activité.");
+                if (totalFactionsFavoris === 0) alertesTxt.push("ℹ️ Aucune faction épinglée sur le Radar Tactique BGS.");
+                if (totalMissionsBgs === 0) alertesTxt.push("ℹ️ Aucun ordre d'escadron actif dans le module BGS.");
+                if (pilotesWebActifs === 0) alertesTxt.push("⚠️ Aucun pilote n'a ouvert l'application cette semaine.");
+                if (alertesTxt.length === 0) alertesTxt.push("🟢 Toutes les fonctionnalités de l'écosystème sont utilisées.");
+                document.getElementById('telemetrie-alertes').innerHTML = alertesTxt.join('<br>');
+
+                // 2. LISTE PAR PILOTE AVEC DÉCLENCHEUR DE FICHE
+                let html = '';
+                profils.forEach(p => {
+                    const isMe = p.user_id === profilCommandant.user_id;
+                    const param = window.cacheParamsPersonnel[p.user_id] || {};
+                    const tel = param.telemetrie_usage || {};
+                    const nomEchappe = p.cmdr_nom ? p.cmdr_nom.replace(/'/g, "\\'") : 'INCONNU';
+
+                    const edmcActif = param.last_heartbeat && (now - param.last_heartbeat < 30);
+                    const webActif = tel.derniere_visite_web && (now - new Date(tel.derniere_visite_web).getTime()/1000 < 7 * 86400);
+
+                    let badgeActivite = '<span style="color: #666; font-size: 0.75em; border: 1px solid #444; padding: 2px 6px; border-radius: 3px;">INACTIF</span>';
+                    if (edmcActif && webActif) {
+                        badgeActivite = '<span style="color: #00FF66; font-size: 0.75em; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); padding: 2px 6px; border-radius: 3px; font-weight: bold;">PILOTE ACTIF</span>';
+                    } else if (edmcActif && !webActif) {
+                        badgeActivite = '<span style="color: var(--ed-orange); font-size: 0.75em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 6px; border-radius: 3px;" title="Joue en jeu mais n\'ouvre pas le site">FANTÔME EDMC</span>';
+                    }
+
+                    const cmdrName = p.cmdr_nom ? `CMDR ${p.cmdr_nom.toUpperCase()}` : `[ ID: ${p.user_id.substring(0, 8)}... ]`;
+                    const squadInfo = p.escadron_id ? `<span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold;">[ ${p.escadron_id} ]</span>` : `<span style="color: #888; font-size: 0.8em;">[ INDÉPENDANT ]</span>`;
+
+                    const btnRevoquer = isMe ? 
+                        `<span style="color: var(--ed-blue); font-weight: bold; font-size: 0.9em; letter-spacing: 2px;">[ DIRECTEUR ]</span>` : 
+                        `<button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 6px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="event.stopPropagation(); revoquerAccesTerminal('${p.user_id}', '${nomEchappe}')">RÉVOQUER ACCÈS</button>`;
+
+                    html += `
+                    <div onclick="ouvrirFicheActivite('${p.user_id}')" style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 12px 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='var(--ed-blue)'; this.style.background='rgba(0,240,255,0.03)';" onmouseout="this.style.borderColor='#333'; this.style.background='rgba(0,0,0,0.6)';">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span style="color: #fff; font-weight: bold; font-size: 1.1em; min-width: 180px;">${cmdrName}</span>
+                            ${squadInfo}
+                            ${badgeActivite}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span style="color: var(--ed-blue); font-size: 0.8em; letter-spacing: 1px;">[ DOSSIER 🛈 ]</span>
+                            ${btnRevoquer}
+                        </div>
+                    </div>`;
+                });
+                listePersonnel.innerHTML = html;
+
             } catch (e) { console.error(e); }
         }
 
+        window.ouvrirFicheActivite = function(userId) {
+            if (typeof sonClic === 'function') sonClic();
+            const p = window.cacheProfilsPersonnel.find(x => x.user_id === userId);
+            const param = window.cacheParamsPersonnel[userId] || {};
+            if (!p) return;
+
+            const tel = param.telemetrie_usage || {};
+            const pages = tel.visites_pages || { qg: 0, bgs: 0, comms: 0, commerce: 0 };
+            const actions = tel.interactions || { onglets_bgs_missions: 0, onglets_bgs_journal: 0, scans_systeme_bgs: 0, scans_commerce: 0 };
+            const factionsFav = param.factions_favorites || [];
+
+            const dateVisite = tel.derniere_visite_web ? new Date(tel.derniere_visite_web).toLocaleString('fr-FR') : "JAMAIS CONNECTÉ SUR LE WEB";
+            const nomCmdr = p.cmdr_nom ? `CMDR ${p.cmdr_nom.toUpperCase()}` : `RECRUE (${p.user_id.substring(0, 8)})`;
+
+            document.getElementById('fiche-activite-titre').innerHTML = `FICHE D'ACTIVITÉ // ${nomCmdr}`;
+
+            const html = `
+                <div style="background: rgba(0,0,0,0.5); border-left: 3px solid var(--ed-blue); padding: 10px 15px; font-size: 0.9em;">
+                    <span style="color: #888;">DERNIÈRE CONNEXION WEB :</span>
+                    <span style="color: #fff; font-weight: bold; margin-left: 8px;">${dateVisite}</span>
+                </div>
+
+                <div style="border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px;">
+                    <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 10px; font-size: 0.85em;">RÉPARTITION DES VISITES PAR MODULE :</span>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85em;">
+                        <div><span style="color: #888;">QUARTIER GÉNÉRAL :</span> <strong style="color: #fff;">${pages.qg || 0}</strong></div>
+                        <div><span style="color: #888;">BGS & FACTIONS :</span> <strong style="color: #fff;">${pages.bgs || 0}</strong></div>
+                        <div><span style="color: #888;">COMMUNICATIONS :</span> <strong style="color: #fff;">${pages.comms || 0}</strong></div>
+                        <div><span style="color: #888;">COMMERCE FURTIF :</span> <strong style="color: #fff;">${pages.commerce || 0}</strong></div>
+                    </div>
+                </div>
+
+                <div style="border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px;">
+                    <span style="color: #00FF66; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 10px; font-size: 0.85em;">INTERACTIONS & USAGE PRÉCIS :</span>
+                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85em;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #888;">FACTIONS SURVEILLÉES (RADAR BGS) :</span>
+                            <strong style="color: var(--ed-orange);">${factionsFav.length}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #888;">SCANS DE SYSTÈMES BGS :</span>
+                            <strong style="color: #fff;">${actions.scans_systeme_bgs || 0}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #888;">CONSULTATIONS DU JOURNAL D'EFFORTS :</span>
+                            <strong style="color: #fff;">${actions.onglets_bgs_journal || 0}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #888;">CONSULTATIONS DES ORDRES BGS :</span>
+                            <strong style="color: #fff;">${actions.onglets_bgs_missions || 0}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #888;">SCANS COMMERCIAUX DÉCLENCHÉS :</span>
+                            <strong style="color: #fff;">${actions.scans_commerce || 0}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('fiche-activite-corps').innerHTML = html;
+            document.getElementById('modal-fiche-activite').style.display = 'flex';
+        };
+
         window.revoquerAccesTerminal = async function(userId, cmdrNom) {
-            if(typeof sonClic === 'function') sonClic();
-            
-            const confirmation = confirm(`⚠️ RUPTURE DE LIAISON : Vous allez révoquer l'accès au terminal pour le ${cmdrNom.toUpperCase()}.\n\nIl sera instantanément déconnecté et exclu de son éventuel escadron. Confirmez-vous cette action ?`);
+            if (typeof sonClic === 'function') sonClic();
+
+            const confirmation = confirm(`⚠️ BANNISSEMENT DÉFINITIF : Vous allez supprimer définitivement le compte du CMDR ${cmdrNom.toUpperCase()}.\n\nToutes ses données seront effacées.`);
             if (!confirmation) return;
 
             try {
-                // On passe le profil en "non approuvé" et on le sort de son escadron pour purger ses accès BGS
-                await supabaseApp.from('profils').update({ 
-                    est_approuve: false,
-                    escadron_id: null,
-                    est_amiral: false,
-                    est_officier: false,
-                    est_diplomate: false
-                }).eq('user_id', userId);
-                
-                // On rafraîchit immédiatement les deux tableaux du Bureau
+                // Appel de la procédure stockée pour détruire le compte (profils + auth.users)
+                const { error } = await supabaseApp.rpc('purger_utilisateur', { target_user_id: userId });
+                if (error) throw error;
+
+                // Rafraîchissement des registres du Bureau
                 chargerDemandesDirecteur();
                 chargerPersonnelDirecteur();
-                if(typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute(); 
-            } catch(e) { console.error(e); }
+                if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
+            } catch (e) {
+                console.error("Erreur lors de la révocation :", e);
+            }
         };
         
         // AUTO-DÉVERROUILLAGE DE L'ONGLET LORS DE LA CONNEXION
@@ -2455,6 +2842,189 @@
                 btnOk.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(true); };
                 btnCancel.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(false); };
             });
+        };
+
+        function navSas(pageId) {
+            if(typeof sonClic==='function') sonClic();
+            // On cache toutes les sous-pages du Sas
+            document.querySelectorAll('.sas-page').forEach(el => el.style.display = 'none');
+            // On affiche celle demandée
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        let isSasLooping = false;
+        async function sasLoop(userId) {
+            if(isSasLooping) return;
+            isSasLooping = true;
+            try {
+                const { data, error } = await supabaseApp.from('radar_commercial')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .in('target_commodity', ['CMDR_NAME', 'SQUADRON_INFO']);
+                
+                let nomCmdr = null;
+                let squadInfo = null;
+
+                if (data && data.length > 0) {
+                    const itemCmdr = data.sort((a,b) => b.id - a.id).find(d => d.target_commodity === 'CMDR_NAME');
+                    const itemSquad = data.sort((a,b) => b.id - a.id).find(d => d.target_commodity === 'SQUADRON_INFO');
+                    
+                    if (itemCmdr) nomCmdr = itemCmdr.station_name;
+                    if (itemSquad) { try { squadInfo = JSON.parse(itemSquad.station_name); } catch(e){} }
+                }
+
+                const elCmdr = document.getElementById('sas-cmdr-name');
+                const elSquad = document.getElementById('sas-squad-name');
+                const btn = document.getElementById('btn-sas-demande');
+
+                if (nomCmdr) { elCmdr.innerText = nomCmdr.toUpperCase(); elCmdr.style.color = "#00FF66"; }
+                if (squadInfo) {
+                    // La vraie hiérarchie Elite Dangerous (0 = Boss, 4 = Recrue)
+                    const rankText = ["Amiral", "Officier", "Officier", "Pilote", "Pilote"][squadInfo.rank] || "Pilote";
+                    elSquad.innerText = `${squadInfo.nom.toUpperCase()} (${rankText})`;
+                    elSquad.style.color = "#00FF66";
+                } else if (nomCmdr) {
+                    elSquad.innerText = "INCONNU / INDÉPENDANT";
+                    elSquad.style.color = "var(--ed-orange)";
+                }
+
+                if (nomCmdr) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.borderColor = "var(--ed-orange)";
+                    btn.style.color = "var(--ed-orange)";
+                    btn.style.cursor = "pointer";
+                    
+                    // ON STOCKE LES DONNÉES EN MÉMOIRE (Le pilote n'est pas encore sur le Bureau du Directeur)
+                    window.sasCacheCmdr = nomCmdr;
+                    window.sasCacheSquad = squadInfo ? squadInfo.nom : null;
+                    window.sasUserId = userId;
+                }
+            } catch(e) { console.error(e); }
+            isSasLooping = false;
+            
+            if (document.getElementById('sas-screen').style.display === 'flex') {
+                setTimeout(() => sasLoop(userId), 3000);
+            }
+        }
+
+        async function soumettreDossier() {
+            if(typeof sonClic === 'function') sonClic();
+            const btn = document.getElementById('btn-sas-demande');
+            
+            // C'EST LE CLIC QUI ÉCRIT LE NOM EN BASE DE DONNÉES
+            await supabaseApp.from('profils').update({
+                cmdr_nom: window.sasCacheCmdr,
+                escadron_id: window.sasCacheSquad
+            }).eq('user_id', window.sasUserId);
+
+            btn.innerText = "DOSSIER TRANSMIS. ATTENTE VALIDATION...";
+            btn.style.borderColor = "#00FF66";
+            btn.style.color = "#00FF66";
+            btn.disabled = true;
+        }
+
+        window.actualiserPilotesEnLigne = async function() {
+            const countVal = document.getElementById('online-count-val');
+            const dotEl = document.getElementById('online-dot');
+            const listeEl = document.getElementById('liste-pilotes-online');
+            if (!countVal || !profilCommandant) return;
+
+            try {
+                const timestampActuel = Math.floor(Date.now() / 1000);
+                const limite = timestampActuel - 30;
+
+                const { data: actifs, error: err1 } = await supabaseApp.from('parametres_app')
+                    .select('user_id')
+                    .gte('last_heartbeat', limite);
+
+                if (err1) throw err1;
+
+                if (actifs && actifs.length > 0) {
+                    const userIds = actifs.map(a => a.user_id);
+                    
+                    const { data: profils, error: err2 } = await supabaseApp.from('profils')
+                        .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate')
+                        .in('user_id', userIds)
+                        .eq('est_approuve', true)
+                        .order('cmdr_nom');
+                        
+                    if (err2) throw err2;
+
+                    countVal.innerText = profils.length;
+                    countVal.style.color = '#fff';
+                    if (dotEl) {
+                        dotEl.style.background = '#00FF66';
+                        dotEl.style.boxShadow = '0 0 6px #00FF66';
+                    }
+
+                    if (listeEl) {
+                        let html = '';
+                        profils.forEach(p => {
+                            let badges = '';
+                            if (p.est_amiral) badges += '<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
+                            if (p.est_officier) badges += '<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER</span>';
+                            if (p.est_diplomate) badges += '<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
+                            
+                            const squad = p.escadron_id ? `<span style="color: var(--ed-orange); font-weight: bold;">[ ${p.escadron_id} ]</span>` : `<span style="color: #888;">[ INDÉPENDANT ]</span>`;
+                            const indicateurVous = (p.user_id === profilCommandant.user_id) ? '<span style="color: var(--ed-blue); font-size: 0.75em; margin-left: 8px; font-weight: bold; letter-spacing: 1px;">[ VOUS ]</span>' : '';
+
+                            html += `
+                            <div style="background: rgba(0, 0, 0, 0.6); border-left: 3px solid #00FF66; padding: 12px 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div>
+                                        <span style="color: #fff; font-weight: bold; font-size: 1.1em;">CMDR ${p.cmdr_nom.toUpperCase()}</span>
+                                        ${indicateurVous}
+                                    </div>
+                                    <div style="font-size: 0.85em;">${squad}</div>
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    ${badges}
+                                </div>
+                            </div>`;
+                        });
+                        listeEl.innerHTML = html;
+                    }
+                } else {
+                    countVal.innerText = '0';
+                    countVal.style.color = '#888';
+                    if (dotEl) {
+                        dotEl.style.background = '#FF3333';
+                        dotEl.style.boxShadow = '0 0 6px #FF3333';
+                    }
+                    if (listeEl) listeEl.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucun pilote détecté dans la galaxie.</div>';
+                }
+            } catch(e) {
+                console.error("Erreur actualisation joueurs en ligne", e);
+            }
+        };
+
+        window.enregistrerTelemetrie = function(type, cle) {
+            try {
+                let tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
+                if (!tel.visites_pages) tel.visites_pages = { qg: 0, bgs: 0, comms: 0, commerce: 0 };
+                if (!tel.interactions) tel.interactions = { onglets_bgs_missions: 0, onglets_bgs_journal: 0, scans_systeme_bgs: 0, scans_commerce: 0 };
+                
+                tel.derniere_visite_web = new Date().toISOString();
+
+                if (type === 'page' && tel.visites_pages[cle] !== undefined) tel.visites_pages[cle]++;
+                if (type === 'action' && tel.interactions[cle] !== undefined) tel.interactions[cle]++;
+
+                localStorage.setItem('edteam_telemetrie', JSON.stringify(tel));
+                window.telemetrieDirty = true;
+            } catch(e) {}
+        };
+
+        // Synchronisation automatique de la télémétrie vers Supabase
+        window.synchroniserTelemetrie = async function() {
+            if (!window.telemetrieDirty || !profilCommandant) return;
+            try {
+                const tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
+                await supabaseApp.from('parametres_app')
+                    .update({ telemetrie_usage: tel })
+                    .eq('user_id', profilCommandant.user_id);
+                window.telemetrieDirty = false;
+            } catch(e) {}
         };
 
     </script>

@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <title>SYS.EDTEAM // Sénat Inter-Systèmes</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* --- STYLES DE BASE SYSTÈME --- */
+        :root { --ed-orange: #FF7100; --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; --ed-purple: #B026FF; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-blue); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(0, 240, 255, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-blue); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-blue); }
+
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-blue); box-shadow: 0 0 15px rgba(0,240,255,0.5), 0 0 5px var(--ed-blue); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 8s linear infinite; }
+        @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
+
+        /* --- MENU LATÉRAL --- */
+        #side-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 60px; background: rgba(10, 10, 10, 0.95); border-right: 1px solid rgba(0, 240, 255, 0.2); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px; }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-blue); }
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-blue); background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        .nav-link.active-purple { color: var(--ed-purple); background: rgba(176, 38, 255, 0.05); border-left: 3px solid var(--ed-purple); }
+        .nav-link.active-purple:hover { background: rgba(176, 38, 255, 0.1); }
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-blue); }
+
+        .hud-container { width: calc(100% - 60px); max-width: 1500px; height: 95vh; display: flex; flex-direction: column; margin-left: 60px; padding: 20px 30px; box-sizing: border-box; transition: margin-left 0.3s, width 0.3s; overflow-y: auto;}
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        /* --- HEADER --- */
+        .hud-header { display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; gap: 15px; margin-bottom: 15px; width: 100%; border-bottom: 2px solid var(--ed-purple); padding-bottom: 15px; }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px rgba(176, 38, 255, 0.5)); transition: 0.3s; }
+        .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
+        .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+
+        /* --- ÉLÉMENTS SÉNAT --- */
+        .btn-ed { background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 10px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 1px; text-transform: uppercase; }
+        .btn-ed:hover { background: var(--ed-blue); color: #000; box-shadow: 0 0 15px var(--ed-blue); }
+        .panneau-ed { background: rgba(0,0,0,0.6); border: 1px solid var(--ed-purple); box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.05); padding: 20px; }
+        
+        .grille-senat { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex-grow: 1; }
+        
+        /* --- MODALES & FAILSAFE (COPIE EXACTE) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(4px); }
+        .modal-content { background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-blue); padding: 30px; max-width: 600px; min-width: 400px; color: #ccc; line-height: 1.6; position: relative; box-shadow: 0 0 30px rgba(0, 240, 255, 0.1); }
+        .modal-title { color: var(--ed-blue); font-size: 1.5em; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px; letter-spacing: 2px; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-blue); cursor: pointer; font-size: 1.2em; font-weight: bold; transition: 0.2s; }
+        .modal-close:hover { color: #fff; transform: scale(1.2); }
+
+        .failsafe-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
+        .failsafe-content { border: 2px solid #FF0000; background: rgba(10, 0, 0, 0.95); padding: 40px 60px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); animation: failsafe-pulse 2s infinite; }
+        @keyframes failsafe-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.2); } 50% { box-shadow: 0 0 60px rgba(255,0,0,0.6); } }
+        .fs-page { display: none; }
+        .fs-auth-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; width: 100%; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; }
+        .fs-auth-btn:hover { background: var(--ed-orange) !important; color: #000 !important; box-shadow: 0 0 15px var(--ed-orange) !important; }
+    </style>
+</head>
+<body onload="document.getElementById('main-ui').style.opacity='1';">
+
+    <div class="scanline"></div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu">
+        <div class="nav-link hamburger-btn" onclick="toggleMenu()" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div>
+            <span class="nav-text">MENU</span>
+        </div>
+        <a href="index.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+            <span class="nav-text">QUARTIER GÉNÉRAL</span>
+        </a>
+        <a href="communications.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+            <span class="nav-text">COMMUNICATIONS</span>
+        </a>
+        <a href="bgs.html" id="nav-bgs-factions" class="nav-link" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <!-- LE BADGE D'ALERTE ESCADRON (Amiral) -->
+                <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; pointer-events: none; text-align: center;">0</span>
+            </div>
+            <span class="nav-text">BGS & FACTIONS</span>
+        </a>
+        <a href="commerce.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <span class="nav-text">COMMERCE FURTIF</span>
+        </a>
+        <!-- NOUVEL ONGLET SÉNAT -->
+        <a href="senat.html" class="nav-link active-purple" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-9a3 3 0 0 1 6 0v9"></path></svg></div>
+            <span class="nav-text">SÉNAT</span>
+        </a>
+    </nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="opacity: 0; transition: opacity 0.5s ease-out;">
+        
+        <!-- HEADER VIOLET POUR LE SÉNAT -->
+        <header class="hud-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="var(--ed-purple)" />
+                    <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="var(--ed-purple)" opacity="0.6"/>
+                    <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                </svg>
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
+                    <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
+                </div>
+
+                <!-- ENCADRÉ HUD : PILOTES EN JEU (FORMAT CARRÉ / COMPACT) -->
+                <div id="online-counter" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-online-pilots', event)"
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: pointer; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                    onmouseover="this.style.background='rgba(0, 255, 102, 0.15)'; this.style.borderColor='#00FF66'; this.style.boxShadow='0 0 10px rgba(0,255,102,0.3)';"
+                    onmouseout="this.style.background='rgba(0, 255, 102, 0.05)'; this.style.borderColor='rgba(0, 255, 102, 0.3)'; this.style.boxShadow='none';"
+                    title="Consulter les pilotes connectés">
+                    <div style="color: #888; font-size: 0.75em; font-weight: bold;">PILOTES</div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span id="online-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #00FF66; box-shadow: 0 0 6px #00FF66;"></span>
+                        <span id="online-count-val" style="color: #fff; font-size: 1.25em; font-weight: bold; line-height: 1;">--</span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; flex-grow: 1; white-space: nowrap; height: 100%; gap: 6px; padding-right: 5px; box-sizing: border-box;">
+                <span class="info-btn" style="color: var(--ed-blue);" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
+                <span class="info-btn" style="color: #aaa;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#aaa'" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-gestion-compte', event)">[ GESTION DU COMPTE ]</span>
+                <span class="info-btn" style="color: #555;" onmouseover="this.style.color='var(--ed-red)'" onmouseout="this.style.color='#555'" onclick="if(typeof deconnexion === 'function') deconnexion()">[ DÉCONNEXION ]</span>
+            </div>
+        </header>
+
+        <!-- =========================================================
+             ÉCRANS DU SÉNAT (Gérés par JS selon l'affiliation)
+             ========================================================= -->
+
+        <!-- ÉCRAN 1 : NEUTRE (Pas de coalition) -->
+        <div id="senat-ecran-neutre" style="display: none; text-align: center; margin-top: 10vh;">
+            <div id="bloc-actions-neutre">
+            <h2 style="color: var(--ed-purple); font-size: 2.5em; letter-spacing: 3px; margin-bottom: 10px;">L'UNION FAIT LA FORCE</h2>
+            <p style="color: #aaa; font-size: 1.1em; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.5;">
+                Votre escadron opère actuellement en toute indépendance.<br>
+                Rejoignez une puissance majeure pour faire entendre votre voix au Sénat, ou forgez votre propre Conseil Galactique.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 20px;">
+                <button onclick="ouvrirModaleCreationCoalition()" class="btn-ed" style="padding: 15px 30px; font-size: 1.1em; border-color: var(--ed-purple); color: var(--ed-purple); background: rgba(176, 38, 255, 0.1);">
+                    FONDER UNE COALITION
+                </button>
+                <button class="btn-ed" style="padding: 15px 30px; font-size: 1.1em; opacity: 0.5; cursor: not-allowed;" title="Fonctionnalité en cours de déploiement">
+                    REJOINDRE UNE ALLIANCE
+                </button>
+            </div>
+        </div>
+
+            <!-- PANNEAU DE SUIVI DU FONDATEUR (Masqué par défaut) -->
+        <div id="panel-fondateur" style="display: none; margin-top: 40px; border: 1px solid var(--ed-blue); background: rgba(0, 240, 255, 0.05); padding: 25px; max-width: 800px; margin-left: auto; margin-right: auto; text-align: left;">
+            <h3 style="color: var(--ed-blue); margin-top: 0; font-size: 1.4em; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 10px;">
+                <i class="fas fa-satellite-dish"></i> SUIVI DE RATIFICATION EN COURS
+            </h3>
+            <p style="color: #aaa; font-size: 0.9em;">Votre charte est en attente de signatures. Voici le statut de vos invitations. Si un escadron décline, un siège se libérera et vous pourrez envoyer un nouvel émissaire.</p>
+            
+            <div id="liste-suivi-signatures" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <!-- Injecté par JS -->
+            </div>
+
+            <!-- Zone d'invitation de remplacement (Affichée uniquement si sièges libres) -->
+            <div id="zone-remplacement" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #444;">
+                <label style="color: var(--ed-orange); font-size: 0.9em; font-weight: bold;">SIÈGE(S) VACANT(S) DÉTECTÉ(S) - ENVOYER UNE NOUVELLE INVITATION :</label>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <select id="select-remplacant" style="flex-grow: 1; padding: 10px; background: #000; color: #fff; border: 1px solid #444; font-family: inherit; outline: none;">
+                        <option value="">Chargement...</option>
+                    </select>
+                    <button onclick="envoyerNouvelleInvitation()" class="btn-ed" style="background: rgba(255, 113, 0, 0.1); border-color: var(--ed-orange); color: var(--ed-orange);">
+                        INVITER
+                    </button>
+                </div>
+            </div>
+            <!-- BOUTON D'AUTODESTRUCTION DU BROUILLON -->
+            <div style="margin-top: 30px; text-align: center; border-top: 1px solid rgba(255,51,51,0.3); padding-top: 20px;">
+                <button onclick="abandonnerBrouillon()" class="btn-ed" style="background: rgba(255, 51, 51, 0.1); border-color: var(--ed-red); color: var(--ed-red); font-size: 0.9em;">
+                    <i class="fas fa-trash-alt"></i> ABANDONNER LE PROJET ET DISSOUDRE LE BROUILLON
+                </button>
+            </div>
+        </div>
+
+                <!-- ZONE DES INVITATIONS EN ATTENTE (Masquée par défaut) -->
+            <div id="zone-invitations" style="display: none; margin-top: 40px; border-top: 1px dashed var(--ed-purple); padding-top: 30px;">
+                <h3 style="color: var(--ed-orange); font-size: 1.5em; letter-spacing: 2px;">
+                    <i class="fas fa-envelope-open-text"></i> TRAITÉS DIPLOMATIQUES EN ATTENTE
+                </h3>
+                <div id="liste-invitations" style="display: flex; flex-direction: column; gap: 15px; align-items: center; margin-top: 20px;">
+                    <!-- Les invitations seront injectées ici par JS -->
+                </div>
+        </div>
+        </div>
+
+        <!-- ÉCRAN 2 : L'HÉMICYCLE (Actif) -->
+        <div id="senat-ecran-actif" style="display: none; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+                <div>
+                    <h2 id="senat-titre-coalition" style="color: var(--ed-purple); margin: 0; font-size: 2em;">SÉNAT : [ CHARGEMENT ]</h2>
+                    <span id="senat-statut-escadron" style="color: var(--ed-orange); font-size: 1em; letter-spacing: 1px;">[ RÔLE : IDENTIFICATION... ]</span>
+                </div>
+                <button onclick="ouvrirModaleDecret()" class="btn-ed" style="border-color: #00FF66; color: #00FF66; background: rgba(0, 255, 102, 0.1);">+ PROPOSER UN DÉCRET</button>
+            </div>
+
+            <div class="grille-senat">
+                <div class="panneau-ed">
+                    <h3 style="margin-top: 0; color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px;">DÉCRETS EN COURS DE SCRUTIN</h3>
+                    <div id="liste-decrets" style="color: #666; font-style: italic; padding: 20px; text-align: center;">
+                        Aucun décret en cours...
+                    </div>
+                </div>
+                <div class="panneau-ed">
+                    <h3 style="margin-top: 0; color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px;">SIÈGES DU CONSEIL</h3>
+                    <div id="liste-membres-coalition" style="color: #666; font-style: italic; padding: 20px; text-align: center;">
+                        Chargement des signataires...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN 3 : URGENCE (Shutdown) -->
+        <div id="senat-ecran-urgence" style="display: none; text-align: center; margin-top: 10vh; border: 2px solid var(--ed-red); background: rgba(255, 0, 0, 0.05); padding: 40px; animation: failsafe-pulse 2s infinite;">
+            <h2 style="color: var(--ed-red); font-size: 3em; letter-spacing: 5px; margin-top: 0;">SHUTDOWN INSTITUTIONNEL</h2>
+            <p style="color: #ccc; font-size: 1.2em; line-height: 1.6;">Le Conseil des 5 a perdu un membre. Le Sénat est verrouillé.<br>L'élection d'un remplaçant est obligatoire pour rétablir les fonctions diplomatiques.</p>
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         MODALES
+         ========================================================= -->
+
+    <!-- MODAL GESTION DU COMPTE -->
+    <div class="modal-overlay" id="modal-gestion-compte" onclick="fermerModal('modal-gestion-compte', event)" style="z-index: 3500;">
+        <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-gestion-compte')">X</div>
+            <div style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">⚙️ GESTION DU COMPTE</div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- EMAIL -->
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                    <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">NOUVELLE ADRESSE E-MAIL :</label>
+                    <input type="email" id="input-nouveau-email" class="search-input" placeholder="nouvelle@adresse.com" style="width: 100%; border-color: #555; margin-bottom: 10px; box-sizing: border-box;">
+                    <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierEmailCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">METTRE À JOUR L'E-MAIL</button>
+                </div>
+
+                <!-- MOT DE PASSE -->
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                    <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">NOUVEAU MOT DE PASSE :</label>
+                    <input type="password" id="input-nouveau-mdp" class="search-input" placeholder="********" style="width: 100%; border-color: #555; margin-bottom: 10px; box-sizing: border-box;">
+                    <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierMdpCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">METTRE À JOUR LE MOT DE PASSE</button>
+                </div>
+
+                <!-- DESTRUCTION (BOUTON ROUGE) -->
+                <div style="margin-top: 10px; border-top: 1px solid #FF3333; padding-top: 20px;">
+                    <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 12px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 1em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 15px #FF3333';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';" onclick="autoDetruireCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">⚠️ SUPPRIMER DÉFINITIVEMENT MON COMPTE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CONFIRMATION TACTIQUE (Remplace le confirm() Windows) -->
+    <div class="modal-overlay" id="modal-confirmation" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 500px; text-align: center; border: 1px solid var(--ed-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.2);" onclick="event.stopPropagation()">
+            <div id="confirm-titre" style="color: var(--ed-red); font-size: 1.4em; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px;">⚠️ ATTENTION</div>
+            <p id="confirm-message" style="color: #ccc; font-size: 0.95em; line-height: 1.5; margin-bottom: 30px;">Êtes-vous sûr ?</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="btn-confirm-cancel" style="background: rgba(255, 255, 255, 0.05); border: 1px solid #666; color: #aaa; padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1;">[ ANNULER ]</button>
+                <button id="btn-confirm-ok" style="background: rgba(255, 51, 51, 0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1; box-shadow: inset 0 0 10px rgba(255, 51, 51, 0.2);">[ CONFIRMER ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CLÉ API (Du Header) -->
+    <div class="modal-overlay" id="modal-cle-api" onclick="fermerModal('modal-cle-api', event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-cle-api')">X</div>
+            <div class="modal-title">SÉCURITÉ // CLÉ DE LIAISON EDMC</div>
+            <p>Copiez cette clé dans les paramètres de votre plugin EDMC :</p>
+            <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); padding: 15px; text-align: center; margin: 20px 0;">
+                <strong id="api-key-display" style="color:var(--ed-blue); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CRÉATION COALITION -->
+    <div id="modale-creation-coalition" class="modal-overlay" onclick="fermerModaleCoalition(event)">
+        <div class="modal-content" style="max-width: 650px; border-color: var(--ed-purple); box-shadow: 0 0 30px rgba(176, 38, 255, 0.2);" onclick="event.stopPropagation()">
+            
+            <h2 style="color: var(--ed-purple); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; font-size: 1.5em; letter-spacing: 2px;">
+                FONDER UNE COALITION
+            </h2>
+            
+            <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">
+                Rédigez la Charte fondatrice. Elle restera au statut de BROUILLON jusqu'à ce que les 4 autres Amiraux invités aient apposé leur signature.
+            </p>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="color: #ccc; font-size: 0.9em;">NOM DE L'ALLIANCE :</label>
+                <input type="text" id="coalition-nom" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none; box-sizing: border-box;" placeholder="Ex: L'Axe Fédéral">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="color: #ccc; font-size: 0.9em;">TAG (3-4 caractères) :</label>
+                <input type="text" id="coalition-tag" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; text-transform: uppercase; font-family: inherit; outline: none; box-sizing: border-box;" placeholder="Ex: AXEF" maxlength="4">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color: #ccc; font-size: 0.9em;">MANIFESTE / OBJECTIFS :</label>
+                <textarea id="coalition-manifeste" rows="3" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none; box-sizing: border-box;" placeholder="Décrivez les ambitions stratégiques de votre alliance..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 25px; border: 1px solid var(--ed-purple); padding: 15px; background: rgba(176, 38, 255, 0.05);">
+                <label style="color: var(--ed-purple); font-size: 1.1em; font-weight: bold;">🏛️ LE CONSEIL DES 5 (Invitations)</label>
+                <p style="font-size: 0.85em; color: #aaa; margin-top: 5px; margin-bottom: 10px;">
+                    Sélectionnez <strong>exactement 4 escadrons</strong>. (Maintenez CTRL pour sélection multiple).
+                </p>
+                <select id="coalition-invites" multiple style="width: 100%; height: 130px; background: #000; color: #fff; border: 1px solid #444; padding: 5px; font-size: 1em; font-family: inherit; outline: none;">
+                    <option value="" disabled style="color: #666;">Chargement des données de la galaxie...</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                <button onclick="fermerModaleCoalition()" class="btn-ed" style="padding: 10px 20px; background: transparent; border: 1px solid var(--ed-red); color: var(--ed-red);">ANNULER</button>
+                <button onclick="soumettreBrouillonCoalition()" class="btn-ed" style="padding: 10px 20px; background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66;">SOUMETTRE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE -->
+    <div class="failsafe-overlay" id="failsafe-modal">
+        <div class="failsafe-content" style="max-width: 750px; text-align: left; padding: 30px; position: relative;">
+            <h2 style="text-align: center; margin-bottom: 5px; color: #FF0000; font-size: 2.2em; letter-spacing: 4px; margin-top: 0;">⚠️ PROTOCOLE DE SÉCURITÉ ⚠️</h2>
+            <p id="failsafe-status-text" style="text-align: center; color: var(--ed-orange); font-size: 1.1em; font-weight: bold; margin-bottom: 25px; text-transform: uppercase;">AUCUN SIGNAL REÇU DEPUIS VOTRE VAISSEAU</p>
+
+            <div id="fs-page-main" class="fs-page" style="display: block;">
+                <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95em;">Pour accéder au terminal, votre système doit être correctement synchronisé. Identifiez votre problème :</p>
+                <button class="fs-auth-btn" style="text-align: left;" onclick="navFailsafe('fs-page-game')" onmouseenter="sonHover()"><strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS ENCORE LANCÉ LE JEU</button>
+                <button class="fs-auth-btn" style="text-align: center; margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onclick="deconnexion()" onmouseenter="sonHover()">[ DÉCONNEXION DU TERMINAL ]</button>
+            </div>
+            <div id="fs-page-game" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC ] : INITIALISATION</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>2. Entrez dans votre vaisseau.<br>3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
+                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="sonHover()" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE PROPOSER UN DÉCRET -->
+<div id="modale-creation-decret" class="modal-overlay" onclick="fermerModaleDecret(event)">
+    <div class="modal-content" style="max-width: 650px; border-color: var(--ed-green); box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);" onclick="event.stopPropagation()">
+        
+        <h2 style="color: #00FF66; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; font-size: 1.4em; letter-spacing: 2px;">
+            <i class="fas fa-scroll"></i> PROPOSER UN DÉCRET
+        </h2>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="color: #ccc; font-size: 0.9em;">TITRE DU DÉCRET :</label>
+            <input type="text" id="decret-titre" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none; box-sizing: border-box;" placeholder="Ex: Directive BGS - Expansion vers Sol">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="color: #ccc; font-size: 0.9em;">TYPE DE DÉCRET :</label>
+            <select id="decret-type" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none;">
+                <option value="STANDARD">Directive Standard / Stratégie</option>
+                <option value="GUERRE">Déclaration d'Hostilité / Guerre</option>
+                <option value="ALLIANCE">Pacte Diplomatique Externe</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="color: #ccc; font-size: 0.9em;">MODE DE SCRUTIN :</label>
+            <select id="decret-mode-scrutin" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none;">
+                <option value="REPRESENTATIF">Suffrage Représentatif (1 Escadron = 1 Voix, vote réservé aux Amiraux)</option>
+                <option value="UNIVERSEL">Suffrage Universel (1 Pilote = 1 Voix, ouvert à tous les membres)</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="color: #ccc; font-size: 0.9em;">DURÉE DU SCRUTIN :</label>
+            <select id="decret-duree" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none;">
+                <option value="24">24 Heures</option>
+                <option value="48" selected>48 Heures</option>
+                <option value="72">72 Heures</option>
+                <option value="168">7 Jours</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="color: #ccc; font-size: 0.9em;">TEXTE DE LOI & DIRECTIVES :</label>
+            <textarea id="decret-description" rows="4" style="width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; margin-top: 5px; font-family: inherit; outline: none; box-sizing: border-box;" placeholder="Détaillez les obligations, ordres BGS ou objectifs attendus de la coalition..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 15px;">
+            <button onclick="fermerModaleDecret()" class="btn-ed" style="padding: 10px 20px; background: transparent; border: 1px solid var(--ed-red); color: var(--ed-red);">ANNULER</button>
+            <button onclick="soumettreNouveauDecret()" class="btn-ed" style="padding: 10px 20px; background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66;">SOUMETTRE LE DÉCRET</button>
+        </div>
+    </div>
+</div>
+
+    <!-- =========================================================
+         MOTEUR AUDIO & LOGIQUE
+         ========================================================= -->
+    <script>
+        // MOTEUR AUDIO
+        let audioCtx;
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playUI(type) {
+            if(!audioCtx) return; const t = audioCtx.currentTime;
+            if (type === 'hover') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(2000, t); osc.frequency.exponentialRampToValueAtTime(1000, t + 0.02);
+                gain.gain.setValueAtTime(0.01, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.02);
+            } else if (type === 'click') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(1500, t); osc.frequency.exponentialRampToValueAtTime(500, t + 0.03);
+                gain.gain.setValueAtTime(0.03, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.03);
+            }
+        }
+        function sonHover() { playUI('hover'); }
+        function sonClic() { playUI('click'); }
+
+        // NAVIGATION UI
+        function toggleMenu() { sonClic(); document.getElementById('side-menu').classList.toggle('open'); document.body.classList.toggle('menu-open'); }
+        function navFailsafe(pageId) { sonClic(); document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none'); document.getElementById(pageId).style.display = 'block'; }
+        
+        // MODALES
+        function ouvrirModal(id, e) { if (e) e.stopPropagation(); sonClic(); document.getElementById(id).style.display = 'flex'; }
+        function fermerModal(id, e) { if (e && e.target !== document.getElementById(id)) return; sonClic(); document.getElementById(id).style.display = 'none'; }
+        function ouvrirModaleCreationCoalition() { sonClic(); document.getElementById('modale-creation-coalition').style.display = 'flex'; chargerEscadronsPourInvitation(); }
+        function fermerModaleCoalition(e) { if (e && e.target !== document.getElementById('modale-creation-coalition')) return; sonClic(); document.getElementById('modale-creation-coalition').style.display = 'none'; }
+        window.copierNav = function(texte, element, event) { if (event) event.stopPropagation(); navigator.clipboard.writeText(texte).then(() => { sonClic(); const original = element.innerHTML; element.innerHTML = "[ COPIÉ ]"; element.style.color = "#00FF00"; setTimeout(() => { element.innerHTML = original; element.style.color = ""; }, 1500); }); };
+
+        document.body.addEventListener('click', initAudio, { once: true });
+
+        // SUPABASE INIT
+        const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
+        const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let profilCommandant = null;
+
+        // AUTHENTIFICATION & ROUTAGE SÉNAT
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            
+            const { data } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
+            if (data && data.est_approuve) {
+                
+                // FAILSAFE CADENAS
+                if (!data.cmdr_nom) {
+                    document.getElementById('failsafe-modal').style.display = 'flex';
+                    document.getElementById('failsafe-status-text').innerText = "IDENTIFICATION COMMANDANT MANQUANTE";
+                    document.getElementById('main-ui').style.display = 'none';
+                    return;
+                }
+
+                profilCommandant = data;
+
+                // AFFICHAGE HUD
+                document.getElementById('cmdr-name-display').innerText = 'CMDR ' + data.cmdr_nom.toUpperCase();
+                if (data.cle_api) document.getElementById('api-key-display').innerText = data.cle_api;
+                
+                if (data.escadron_id) {
+                    document.getElementById('nav-bgs-factions').style.display = 'flex';
+                }
+
+                // DÉMARRAGE DU MOTEUR SÉNAT
+                await initialiserSenat();
+
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function deconnexion() { await supabaseApp.auth.signOut(); location.href = 'index.html'; }
+
+        // ==========================================
+        // INITIALISATION ET ROUTAGE SÉNAT
+        // ==========================================
+        async function initialiserSenat() {
+            // 1. NETTOYAGE COMPLET DE L'ÉCRAN
+            document.getElementById('senat-ecran-neutre').style.display = 'none';
+            document.getElementById('senat-ecran-actif').style.display = 'none';
+            document.getElementById('senat-ecran-urgence').style.display = 'none';
+            document.getElementById('zone-invitations').style.display = 'none';
+            document.getElementById('panel-fondateur').style.display = 'none';
+            
+            // On s'assure que les boutons de création sont bien visibles par défaut
+            if (document.getElementById('bloc-actions-neutre')) {
+                document.getElementById('bloc-actions-neutre').style.display = 'block';
+            }
+
+            if (!profilCommandant || !profilCommandant.escadron_id) {
+                document.getElementById('senat-ecran-neutre').style.display = 'block';
+                return;
+            }
+
+            try {
+                // On récupère TOUTES les affiliations potentielles de l'escadron
+                const { data: affiliations, error } = await supabaseApp.from('coalition_membres')
+                    .select('id, role, statut_invitation, coalition_id, coalitions ( id, nom, tag, statut, manifeste, fondateur_id )')
+                    .eq('escadron_tag', profilCommandant.escadron_id);
+
+                let affiliationActive = null;
+                let invitationsEnAttente = [];
+
+                if (affiliations && affiliations.length > 0) {
+                    // On trie : y a-t-il une affiliation active (ou signée en attente) et des invitations ?
+                    affiliationActive = affiliations.find(a => a.statut_invitation === 'SIGNE' || a.statut_invitation === 'ACTIF');
+                    invitationsEnAttente = affiliations.filter(a => a.statut_invitation === 'INVITE');
+                }
+
+                // NOUVEAU : On s'assure que le bloc est visible par défaut
+                document.getElementById('bloc-actions-neutre').style.display = 'block';
+
+                if (affiliationActive) {
+                    // L'ESCADRON EST DÉJÀ ENGAGÉ
+                    // -> ON CACHE LES BOUTONS DE CRÉATION !
+                    document.getElementById('bloc-actions-neutre').style.display = 'none';
+                    
+                    const statutAlliance = affiliationActive.coalitions.statut;
+                    // ... (le reste du code de votre fonction reste identique) ...
+                    
+                    document.getElementById('senat-titre-coalition').innerText = "SÉNAT : " + affiliationActive.coalitions.nom.toUpperCase();
+                    let roleDisplay = affiliationActive.role;
+                    if (profilCommandant.est_amiral) roleDisplay += " (EXÉCUTIF)";
+                    document.getElementById('senat-statut-escadron').innerText = `[ RÔLE : ${roleDisplay} ]`;
+
+                    if (statutAlliance === 'URGENCE') {
+                        document.getElementById('senat-ecran-urgence').style.display = 'block';
+                    } else if (statutAlliance === 'BROUILLON') {
+                        
+                        document.getElementById('senat-ecran-neutre').style.display = 'block';
+                        
+                        // NOUVEAU : LE JOUEUR EST-IL LE FONDATEUR DE CE BROUILLON ?
+                        if (affiliationActive.coalitions.fondateur_id === profilCommandant.user_id) {
+                            // C'est le boss. On affiche le panneau de suivi.
+                            chargerPanelFondateur(affiliationActive.coalitions.id);
+                        } else {
+                            // Ce n'est qu'un invité qui a déjà signé. Message simple.
+                            document.getElementById('zone-invitations').style.display = 'block';
+                            document.getElementById('liste-invitations').innerHTML = `
+                                <div class="panneau-ed" style="width: 100%; max-width: 600px; text-align: left; border-color: #00FF66;">
+                                    <h4 style="color: #00FF66; margin-top: 0;">CHARTE SIGNÉE : [${affiliationActive.coalitions.tag}] ${affiliationActive.coalitions.nom}</h4>
+                                    <p style="color: #ccc; font-size: 0.9em;">Votre escadron a ratifié ce traité. En attente de la signature des autres Pères Fondateurs.</p>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        document.getElementById('senat-ecran-actif').style.display = 'block';
+                        chargerMembresCoalition(affiliationActive.coalitions.id); // <--- LIGNE À AJOUTER
+                        chargerDecretsCoalition(affiliationActive.coalitions.id);
+                    }
+                } else {
+                    // L'ESCADRON N'EST DANS AUCUNE COALITION ACTIVE
+                    document.getElementById('senat-ecran-neutre').style.display = 'block';
+                    
+                    if (invitationsEnAttente.length > 0) {
+                        afficherInvitations(invitationsEnAttente);
+                    }
+                }
+            } catch (err) {
+                console.error("Erreur lecture Sénat :", err);
+                document.getElementById('senat-ecran-neutre').style.display = 'block';
+            }
+        }
+
+        // ==========================================
+        // GESTION DES INVITATIONS
+        // ==========================================
+        function afficherInvitations(invitations) {
+            document.getElementById('zone-invitations').style.display = 'block';
+            const conteneur = document.getElementById('liste-invitations');
+            conteneur.innerHTML = '';
+
+            invitations.forEach(inv => {
+                const coal = inv.coalitions;
+                const div = document.createElement('div');
+                div.className = 'panneau-ed';
+                div.style.width = '100%';
+                div.style.maxWidth = '700px';
+                div.style.textAlign = 'left';
+                
+                // Si ce n'est pas un amiral, on grise les boutons et on affiche un avertissement
+                let boutonsHTML = '';
+                if (profilCommandant.est_amiral) {
+                    boutonsHTML = `
+                        <button onclick="signerCharte('${coal.id}')" class="btn-ed" style="background: rgba(0,255,102,0.1); border-color: #00FF66; color: #00FF66;">
+                            <i class="fas fa-file-signature"></i> SIGNER LA CHARTE
+                        </button>
+                        <button onclick="refuserCharte('${inv.id}')" class="btn-ed" style="background: transparent; border-color: var(--ed-red); color: var(--ed-red);">
+                            DÉCLINER
+                        </button>
+                    `;
+                } else {
+                    boutonsHTML = `
+                        <p style="color: var(--ed-red); font-size: 0.85em; font-weight: bold; border: 1px solid var(--ed-red); padding: 5px; text-align: center;">
+                            [ ACTION REQUISE ] : Seul l'Amiral de l'escadron possède l'autorité pour ratifier ce traité.
+                        </p>
+                    `;
+                }
+
+                div.innerHTML = `
+                    <h4 style="color: var(--ed-purple); font-size: 1.3em; margin-top: 0; margin-bottom: 5px;">
+                        INVITATION AU CONSEIL : [${coal.tag}] ${coal.nom}
+                    </h4>
+                    <p style="color: #aaa; font-size: 0.9em; margin-bottom: 15px; font-style: italic;">
+                        " ${coal.manifeste || 'Aucun manifeste fourni.'} "
+                    </p>
+                    <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
+                        ${boutonsHTML}
+                    </div>
+                `;
+                conteneur.appendChild(div);
+            });
+        }
+
+        async function signerCharte(coalitionId) {
+            sonClic();
+            if (!confirm("En signant cette charte, vous engagez l'intégralité de votre escadron dans cette coalition. Confirmez-vous ?")) return;
+
+            try {
+                // 1. On passe notre statut à 'SIGNE'
+                await supabaseApp.from('coalition_membres').update({ statut_invitation: 'SIGNE' })
+                    .eq('coalition_id', coalitionId)
+                    .eq('escadron_tag', profilCommandant.escadron_id);
+
+                // 2. On compte combien d'escadrons ont signé
+                const { count, error } = await supabaseApp.from('coalition_membres')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('coalition_id', coalitionId)
+                    .eq('statut_invitation', 'SIGNE');
+
+                if (count === 5) {
+                    // LA RÈGLE DES 5 EST ATTEINTE ! Activation de la Coalition !
+                    await supabaseApp.from('coalitions').update({ statut: 'ACTIVE' }).eq('id', coalitionId);
+                    alert("5ème SIGNATURE CONFIRMÉE ! Le Conseil est formé, la Coalition est désormais ACTIVE !");
+                } else {
+                    alert(`Signature enregistrée avec succès. En attente des autres Amiraux (${count}/5 signataires).`);
+                }
+
+                await initialiserSenat();
+            } catch(e) {
+                console.error("Erreur signature:", e);
+                alert("Échec de la signature des accords.");
+            }
+        }
+
+        async function refuserCharte(invitationId) {
+            sonClic();
+            if (!confirm("Voulez-vous vraiment décliner cette invitation ? Cette action est irréversible.")) return;
+
+            try {
+                await supabaseApp.from('coalition_membres').delete().eq('id', invitationId);
+                await initialiserSenat();
+            } catch(e) {
+                console.error("Erreur refus:", e);
+            }
+        }
+
+        async function chargerEscadronsPourInvitation() {
+            const selectBox = document.getElementById('coalition-invites');
+            if (!profilCommandant.escadron_id) return;
+
+            try {
+                const { data, error } = await supabaseApp.from('escadrons').select('tag, nom').order('nom');
+                if (error) throw error;
+
+                selectBox.innerHTML = '';
+                let count = 0;
+                data.forEach(escadron => {
+                    if (escadron.tag !== profilCommandant.escadron_id) {
+                        const option = document.createElement('option');
+                        option.value = escadron.tag;
+                        option.text = `[${escadron.tag}] ${escadron.nom}`;
+                        selectBox.appendChild(option);
+                        count++;
+                    }
+                });
+
+                if (count === 0) selectBox.innerHTML = '<option disabled>Aucun autre escadron disponible.</option>';
+
+            } catch (err) {
+                console.error("Erreur escadrons :", err);
+            }
+        }
+
+        // ==========================================
+        // SOUMISSION DE LA CHARTE (LE CONSEIL DES 5)
+        // ==========================================
+        async function soumettreBrouillonCoalition() {
+            // 1. Récupération des données du formulaire
+            const nom = document.getElementById('coalition-nom').value.trim();
+            const tag = document.getElementById('coalition-tag').value.trim().toUpperCase();
+            const manifeste = document.getElementById('coalition-manifeste').value.trim();
+            
+            const selectBox = document.getElementById('coalition-invites');
+            // Récupère uniquement les escadrons qui ont été sélectionnés
+            const invites = Array.from(selectBox.selectedOptions).map(opt => opt.value);
+
+            // 2. Protocoles de sécurité et vérification des lois
+            if (!nom || !tag) {
+                alert("ERREUR : Le nom et le tag de l'alliance sont obligatoires.");
+                return;
+            }
+            if (tag.length < 3 || tag.length > 4) {
+                alert("ERREUR : Le tag doit comporter entre 3 et 4 caractères.");
+                return;
+            }
+            if (invites.length !== 4) {
+                alert(`LOI DES 5 NON RESPECTÉE : Le Conseil doit être composé de 5 Amiraux. Vous devez inviter exactement 4 escadrons. (Actuellement sélectionnés : ${invites.length})`);
+                return;
+            }
+
+            sonClic();
+
+            // Vérification de sécurité BDD : L'escadron est-il déjà dans une coalition ?
+            const { data: verifAllégeance } = await supabaseApp.from('coalition_membres')
+                .select('id')
+                .eq('escadron_tag', profilCommandant.escadron_id)
+                .in('statut_invitation', ['SIGNE', 'ACTIF']);
+                
+            if (verifAllégeance && verifAllégeance.length > 0) {
+                alert("OPÉRATION ILLÉGALE : Votre escadron est déjà engagé dans une coalition ou un brouillon.");
+                return;
+            }
+
+            try {
+                // 3. Création de la Charte dans la table 'coalitions' (Statut: BROUILLON)
+                const payloadCoalition = {
+                    nom: nom,
+                    tag: tag,
+                    manifeste: manifeste,
+                    fondateur_id: profilCommandant.user_id,
+                    statut: 'BROUILLON'
+                };
+
+                const { data: newCoalition, error: errorCoalition } = await supabaseApp
+                    .from('coalitions')
+                    .insert([payloadCoalition])
+                    .select()
+                    .single();
+
+                if (errorCoalition) {
+                    if (errorCoalition.code === '23505') { 
+                        throw new Error("Ce Nom ou ce Tag est déjà utilisé par une autre alliance dans la galaxie.");
+                    }
+                    throw errorCoalition;
+                }
+
+                const coalitionId = newCoalition.id;
+
+                // 4. Préparation des affectations politiques
+                const membresAInserer = [];
+
+                // -> Le Fondateur (Vous)
+                membresAInserer.push({
+                    coalition_id: coalitionId,
+                    escadron_tag: profilCommandant.escadron_id,
+                    role: 'AMIRAL_CONSEIL',
+                    statut_invitation: 'SIGNE' // Le fondateur a signé par défaut
+                });
+
+                // -> Les 4 Invités
+                invites.forEach(tagInvite => {
+                    membresAInserer.push({
+                        coalition_id: coalitionId,
+                        escadron_tag: tagInvite,
+                        role: 'AMIRAL_CONSEIL',
+                        statut_invitation: 'INVITE' // En attente de leur signature
+                    });
+                });
+
+                // 5. Insertion groupée dans la base de données
+                const { error: errorMembres } = await supabaseApp
+                    .from('coalition_membres')
+                    .insert(membresAInserer);
+
+                if (errorMembres) throw errorMembres;
+
+                // 6. Succès de l'opération
+                alert("BROUILLON ENREGISTRÉ ! Les invitations ont été envoyées aux 4 escadrons.");
+                fermerModaleCoalition();
+                
+                // On recharge l'affichage du Sénat
+                await initialiserSenat(); 
+
+            } catch (err) {
+                console.error("Erreur création coalition :", err);
+                alert("ÉCHEC DE LA TRANSMISSION : " + err.message);
+            }
+        }
+
+        // ==========================================
+        // PANNEAU DU FONDATEUR (RATIFICATION)
+        // ==========================================
+        let charteEnCoursId = null; // Pour garder l'ID sous la main
+
+        async function chargerPanelFondateur(coalitionId) {
+            charteEnCoursId = coalitionId;
+            document.getElementById('panel-fondateur').style.display = 'block';
+            const conteneurListe = document.getElementById('liste-suivi-signatures');
+            conteneurListe.innerHTML = '<span style="color: gray;">Scan du réseau diplomatique en cours...</span>';
+
+            try {
+                // 1. On récupère tous les membres invités/signés pour cette charte
+                const { data: membres } = await supabaseApp.from('coalition_membres')
+                    .select('escadron_tag, statut_invitation')
+                    .eq('coalition_id', coalitionId);
+
+                conteneurListe.innerHTML = '';
+                const tagsDejaInvites = [];
+
+                membres.forEach(m => {
+                    tagsDejaInvites.push(m.escadron_tag);
+                    let icone = '', couleur = '', statut = '', boutonAction = '';
+                    
+                    if (m.statut_invitation === 'SIGNE' || m.statut_invitation === 'ACTIF') {
+                        icone = '<i class="fas fa-check-circle"></i>';
+                        couleur = '#00FF66';
+                        statut = 'SIGNATURE CONFIRMÉE';
+                    } else {
+                        icone = '<i class="fas fa-hourglass-half"></i>';
+                        couleur = '#FF7100';
+                        statut = 'EN ATTENTE DE RÉPONSE';
+                        // Bouton d'action (Sans margin-top, pour rester aligné)
+                        if (m.escadron_tag !== profilCommandant.escadron_id) {
+                            boutonAction = `
+                                <button onclick="revoquerInvitation('${m.escadron_tag}')" style="background: transparent; border: 1px solid var(--ed-red); color: var(--ed-red); font-size: 0.7em; padding: 3px 8px; cursor: pointer; font-family: inherit;">
+                                    [X] RÉVOQUER L'INVITATION
+                                </button>
+                            `;
+                        }
+                    }
+
+                    // Remplacement du flex-direction: column par align-items: center et ajout d'un gap: 15px
+                    conteneurListe.innerHTML += `
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <strong style="color: #fff;">ESCADRON [${m.escadron_tag}]</strong>
+                                ${boutonAction}
+                            </div>
+                            <span style="color: ${couleur}; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; text-align: right;">${icone} ${statut}</span>
+                        </div>
+                    `;
+                });
+
+                // 2. Si un escadron a refusé, la ligne a été supprimée. Le total sera < 5.
+                const placesRestantes = 5 - membres.length;
+                const zoneRemplacement = document.getElementById('zone-remplacement');
+
+                if (placesRestantes > 0) {
+                    zoneRemplacement.style.display = 'block';
+                    // On charge les escadrons pour le menu déroulant, en excluant ceux déjà dans la liste
+                    chargerEscadronsRemplacants(tagsDejaInvites);
+                } else {
+                    zoneRemplacement.style.display = 'none';
+                }
+
+            } catch (e) {
+                console.error("Erreur chargement panel fondateur :", e);
+            }
+        }
+
+        async function chargerEscadronsRemplacants(tagsExclus) {
+            const select = document.getElementById('select-remplacant');
+            try {
+                const { data } = await supabaseApp.from('escadrons').select('tag, nom').order('nom');
+                select.innerHTML = '<option value="">-- SÉLECTIONNEZ UN NOUVEL ESCADRON --</option>';
+                
+                data.forEach(esc => {
+                    if (!tagsExclus.includes(esc.tag)) {
+                        const opt = document.createElement('option');
+                        opt.value = esc.tag;
+                        opt.text = `[${esc.tag}] ${esc.nom}`;
+                        select.appendChild(opt);
+                    }
+                });
+            } catch (e) { console.error("Erreur remplacants:", e); }
+        }
+
+        async function envoyerNouvelleInvitation() {
+            const select = document.getElementById('select-remplacant');
+            const tagRemplacant = select.value;
+
+            if (!tagRemplacant) {
+                alert("Veuillez sélectionner un escadron.");
+                return;
+            }
+
+            sonClic();
+            try {
+                // On envoie la nouvelle invitation
+                const { error } = await supabaseApp.from('coalition_membres').insert([{
+                    coalition_id: charteEnCoursId,
+                    escadron_tag: tagRemplacant,
+                    role: 'AMIRAL_CONSEIL',
+                    statut_invitation: 'INVITE'
+                }]);
+
+                if (error) throw error;
+                
+                alert(`L'invitation a été envoyée à l'escadron ${tagRemplacant}.`);
+                
+                // On rafraîchit le panneau pour voir la nouvelle ligne "EN ATTENTE"
+                chargerPanelFondateur(charteEnCoursId);
+
+            } catch (e) {
+                console.error("Erreur envoi remplaçant :", e);
+                alert("Échec de la transmission de l'invitation.");
+            }
+        }
+
+        async function revoquerInvitation(tagCible) {
+            sonClic();
+            if (!confirm(`ATTENTION : Voulez-vous vraiment annuler l'invitation envoyée à l'escadron [${tagCible}] ? Cela libérera un siège au Conseil.`)) return;
+
+            try {
+                // On supprime la ligne d'invitation de la base de données
+                const { error } = await supabaseApp.from('coalition_membres')
+                    .delete()
+                    .eq('coalition_id', charteEnCoursId)
+                    .eq('escadron_tag', tagCible);
+
+                if (error) throw error;
+
+                // On rafraîchit le panneau. Le siège sera vu comme vacant, et la zone de remplacement apparaîtra.
+                chargerPanelFondateur(charteEnCoursId);
+
+            } catch (e) {
+                console.error("Erreur révocation :", e);
+                alert("Échec de l'annulation de l'invitation.");
+            }
+        }
+
+        // ==========================================
+        // DISSOLUTION PRÉMATURÉE (ABANDON DU BROUILLON)
+        // ==========================================
+        // ==========================================
+        // DISSOLUTION PRÉMATURÉE (ABANDON DU BROUILLON)
+        // ==========================================
+        async function abandonnerBrouillon() {
+            sonClic();
+            if (!confirm("ALERTE CRITIQUE : Voulez-vous vraiment abandonner la création de cette coalition ? La charte sera détruite et toutes les invitations seront annulées. Cette action est irréversible.")) return;
+
+            try {
+                // 1. FORCAGE VISUEL IMMÉDIAT (On tue le fantôme avant même de parler au serveur)
+                document.getElementById('panel-fondateur').style.display = 'none';
+                document.getElementById('bloc-actions-neutre').style.display = 'block';
+                
+                // 2. Nettoyage de la base de données
+                const { error: errMembres } = await supabaseApp.from('coalition_membres')
+                    .delete()
+                    .eq('coalition_id', charteEnCoursId);
+                if (errMembres) throw errMembres;
+
+                const { error: errCoalition } = await supabaseApp.from('coalitions')
+                    .delete()
+                    .eq('id', charteEnCoursId);
+                if (errCoalition) throw errCoalition;
+
+                alert("LE BROUILLON A ÉTÉ DÉTRUIT. Tous les protocoles diplomatiques ont été annulés.");
+                
+                // 3. Réinitialisation
+                charteEnCoursId = null;
+                await initialiserSenat();
+
+            } catch (e) {
+                console.error("Erreur destruction brouillon :", e);
+                alert("Échec de la procédure de dissolution du brouillon.");
+                // En cas d'erreur, on force le rafraîchissement complet de la page pour éviter le blocage
+                location.reload(); 
+            }
+        }
+
+       // ==========================================
+// PANNEAU DROIT : SIÈGES DU CONSEIL & MEMBRES
+// ==========================================
+async function chargerMembresCoalition(coalitionId) {
+    const conteneur = document.getElementById('liste-membres-coalition');
+    conteneur.innerHTML = '<span style="color: gray;">Scan des délégations...</span>';
+
+    try {
+        // 1. Récupération des escadrons membres avec leur rôle
+        const { data: membres, error } = await supabaseApp
+            .from('coalition_membres')
+            .select(`
+                id,
+                escadron_tag,
+                role,
+                statut_invitation,
+                escadrons:escadron_tag ( nom, allegeance )
+            `)
+            .eq('coalition_id', coalitionId)
+            .in('statut_invitation', ['SIGNE', 'ACTIF']);
+
+        if (error) throw error;
+
+        conteneur.innerHTML = '';
+
+        // 2. Séparation : Conseil des 5 vs Autres Membres
+        const conseil = membres.filter(m => m.role === 'AMIRAL_CONSEIL');
+        const diplomates = membres.filter(m => m.role === 'DIPLOMATE');
+        const citoyens = membres.filter(m => m.role === 'CITOYEN');
+
+        // Bloc du Conseil des 5
+        let html = `
+            <div style="margin-bottom: 20px;">
+                <div style="color: var(--ed-purple); font-weight: bold; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(176,38,255,0.3); padding-bottom: 5px;">
+                    👑 CONSEIL DES 5 (${conseil.length}/5)
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+        `;
+
+        conseil.forEach(m => {
+            const nomEscadron = m.escadrons?.nom || 'Escadron Inconnu';
+            const estMonEscadron = (m.escadron_tag === profilCommandant.escadron_id);
+            html += `
+                <div style="background: rgba(176,38,255,0.05); border: 1px solid var(--ed-purple); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #fff;">[${m.escadron_tag}]</strong>
+                        <span style="color: #aaa; font-size: 0.85em; margin-left: 6px;">${nomEscadron}</span>
+                    </div>
+                    ${estMonEscadron ? '<span style="color: var(--ed-blue); font-size: 0.75em; font-weight: bold;">(VOUS)</span>' : ''}
+                </div>
+            `;
+        });
+        html += `</div></div>`;
+
+        // Bloc Autres Membres (Diplomates / Citoyens)
+        if (diplomates.length > 0 || citoyens.length > 0) {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <div style="color: var(--ed-blue); font-weight: bold; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px;">
+                        🤝 DÉLÉGATIONS ALLIÉES
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+            `;
+
+            [...diplomates, ...citoyens].forEach(m => {
+                const nomEscadron = m.escadrons?.nom || 'Escadron Inconnu';
+                const estMonEscadron = (m.escadron_tag === profilCommandant.escadron_id);
+                const tagRole = m.role === 'DIPLOMATE' ? '<span style="color: #00FF66; font-size: 0.75em;">[DIPLOMATE]</span>' : '<span style="color: #888; font-size: 0.75em;">[CITOYEN]</span>';
+                
+                html += `
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #ccc;">[${m.escadron_tag}]</strong>
+                            <span style="color: #888; font-size: 0.85em; margin-left: 6px;">${nomEscadron}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            ${tagRole}
+                            ${estMonEscadron ? '<span style="color: var(--ed-blue); font-size: 0.75em;">(VOUS)</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+
+        // Bouton Quitter la Coalition (pour l'Amiral)
+        if (profilCommandant.est_amiral) {
+            html += `
+                <div style="margin-top: 25px; text-align: center; border-top: 1px dashed #333; padding-top: 15px;">
+                    <button onclick="quitterCoalition('${coalitionId}')" style="background: transparent; border: 1px solid var(--ed-red); color: var(--ed-red); font-family: inherit; font-size: 0.8em; padding: 6px 12px; cursor: pointer;">
+                        [!] QUITTER LA COALITION
+                    </button>
+                </div>
+            `;
+        }
+
+        conteneur.innerHTML = html;
+
+    } catch (err) {
+        console.error("Erreur chargement membres:", err);
+        conteneur.innerHTML = '<span style="color: red;">Erreur de liaison avec le registre des membres.</span>';
+    }
+}
+
+// Procédure de départ d'un escadron
+async function quitterCoalition(coalitionId) {
+    sonClic();
+    if (!confirm("ATTENTION : En quittant cette coalition, votre escadron perdra tous ses droits diplomatiques. Si vous êtes membre du Conseil des 5, la coalition passera en état d'URGENCE. Confirmer le départ ?")) return;
+
+    try {
+        // 1. Suppression de notre escadron
+        const { error } = await supabaseApp
+            .from('coalition_membres')
+            .delete()
+            .eq('coalition_id', coalitionId)
+            .eq('escadron_tag', profilCommandant.escadron_id);
+
+        if (error) throw error;
+
+        // 2. Vérification de l'état du Conseil des 5
+        const { count } = await supabaseApp
+            .from('coalition_membres')
+            .select('*', { count: 'exact', head: true })
+            .eq('coalition_id', coalitionId)
+            .eq('role', 'AMIRAL_CONSEIL');
+
+        // Si le Conseil n'est plus au complet, déclenchement de l'état d'urgence
+        if (count < 5) {
+            await supabaseApp.from('coalitions').update({ statut: 'URGENCE' }).eq('id', coalitionId);
+        }
+
+        alert("Votre escadron a quitté la coalition.");
+        await initialiserSenat();
+
+    } catch (e) {
+        console.error("Erreur départ coalition:", e);
+        alert("Impossible de traiter l'ordre de retrait.");
+    }
+} 
+
+let coalitionActiveId = null;
+
+// GESTION MODALE DÉCRET
+function ouvrirModaleDecret() {
+    sonClic();
+    document.getElementById('modale-creation-decret').style.display = 'flex';
+}
+
+function fermerModaleDecret(e) {
+    if (e && e.target !== document.getElementById('modale-creation-decret')) return;
+    sonClic();
+    document.getElementById('modale-creation-decret').style.display = 'none';
+    document.getElementById('decret-titre').value = '';
+    document.getElementById('decret-description').value = '';
+}
+
+// SOUMISSION D'UN NOUVEAU DÉCRET
+async function soumettreNouveauDecret() {
+    const titre = document.getElementById('decret-titre').value.trim();
+    const typeLoi = document.getElementById('decret-type').value;
+    const modeScrutin = document.getElementById('decret-mode-scrutin').value;
+    const heures = parseInt(document.getElementById('decret-duree').value, 10);
+    const description = document.getElementById('decret-description').value.trim();
+
+    if (!titre || !description) {
+        alert("Veuillez renseigner un titre et une description pour ce décret.");
+        return;
+    }
+
+    sonClic();
+    const dateCloture = new Date(Date.now() + heures * 3600 * 1000).toISOString();
+
+    try {
+        const { error } = await supabaseApp.from('coalition_decrets').insert([{
+            coalition_id: coalitionActiveId,
+            auteur_id: profilCommandant.user_id,
+            titre: titre,
+            description: description,
+            type_loi: typeLoi,
+            mode_scrutin: modeScrutin,
+            date_cloture: dateCloture,
+            statut: 'EN_VOTE'
+        }]);
+
+        if (error) throw error;
+
+        fermerModaleDecret();
+        await chargerDecretsCoalition(coalitionActiveId);
+    } catch (e) {
+        console.error("Erreur création décret :", e);
+        alert("Échec de la soumission du décret.");
+    }
+}
+
+// CHARGEMENT ET RENDU DES DÉCRETS
+async function chargerDecretsCoalition(coalitionId) {
+    coalitionActiveId = coalitionId;
+    const conteneur = document.getElementById('liste-decrets');
+    conteneur.innerHTML = '<span style="color: gray;">Récupération des décrets en séance...</span>';
+
+    try {
+        const { data: decrets, error } = await supabaseApp
+            .from('coalition_decrets')
+            .select(`
+                *,
+                coalition_votes (*)
+            `)
+            .eq('coalition_id', coalitionId)
+            .order('date_proposition', { ascending: false });
+
+        if (error) throw error;
+
+        if (!decrets || decrets.length === 0) {
+            conteneur.innerHTML = '<div style="color: #666; font-style: italic; padding: 20px; text-align: center;">Aucun décret soumis au vote pour le moment.</div>';
+            return;
+        }
+
+        conteneur.innerHTML = '';
+        decrets.forEach(d => {
+            const votes = d.coalition_votes || [];
+            const votesPour = votes.filter(v => v.choix === 'POUR').length;
+            const votesContre = votes.filter(v => v.choix === 'CONTRE').length;
+            const votesAbstention = votes.filter(v => v.choix === 'ABSTENTION').length;
+            const totalVotes = votesPour + votesContre + votesAbstention;
+
+            const pPour = totalVotes > 0 ? ((votesPour / totalVotes) * 100).toFixed(0) : 0;
+            const pContre = totalVotes > 0 ? ((votesContre / totalVotes) * 100).toFixed(0) : 0;
+            const pAbs = totalVotes > 0 ? ((votesAbstention / totalVotes) * 100).toFixed(0) : 0;
+
+            // Vérification de participation
+            const dejaVote = (d.mode_scrutin === 'REPRESENTATIF')
+                ? votes.some(v => v.escadron_tag === profilCommandant.escadron_id)
+                : votes.some(v => v.escadron_tag === profilCommandant.escadron_id && v.user_id === profilCommandant.user_id);
+
+            // Droits de vote selon les règles de gouvernance
+            const peutVoter = d.statut === 'EN_VOTE' && !dejaVote && (
+                d.mode_scrutin === 'UNIVERSEL' || 
+                (d.mode_scrutin === 'REPRESENTATIF' && profilCommandant.est_amiral)
+            );
+
+            let blocActions = '';
+            if (peutVoter) {
+                blocActions = `
+                    <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px dashed #333; padding-top: 10px;">
+                        <button onclick="enregistrerVote('${d.id}', 'POUR', '${d.mode_scrutin}')" style="flex: 1; padding: 6px; background: rgba(0,255,102,0.1); border: 1px solid #00FF66; color: #00FF66; cursor: pointer; font-family: inherit;">POUR</button>
+                        <button onclick="enregistrerVote('${d.id}', 'CONTRE', '${d.mode_scrutin}')" style="flex: 1; padding: 6px; background: rgba(255,51,51,0.1); border: 1px solid var(--ed-red); color: var(--ed-red); cursor: pointer; font-family: inherit;">CONTRE</button>
+                        <button onclick="enregistrerVote('${d.id}', 'ABSTENTION', '${d.mode_scrutin}')" style="flex: 1; padding: 6px; background: transparent; border: 1px solid #888; color: #888; cursor: pointer; font-family: inherit;">ABSTENTION</button>
+                    </div>
+                `;
+            } else if (dejaVote) {
+                blocActions = `<div style="color: #00FF66; font-size: 0.8em; margin-top: 10px; text-align: right;">[ VOTE ENREGISTRÉ ]</div>`;
+            } else if (d.mode_scrutin === 'REPRESENTATIF' && !profilCommandant.est_amiral) {
+                blocActions = `<div style="color: #666; font-size: 0.8em; margin-top: 10px; text-align: right;">[ SCRUTIN RÉSERVÉ AUX AMIRAUX ]</div>`;
+            }
+
+            const div = document.createElement('div');
+            div.style.cssText = "background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; margin-bottom: 15px; text-align: left;";
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;">
+                    <h4 style="color: var(--ed-orange); margin: 0; font-size: 1.1em;">${d.titre}</h4>
+                    <span style="color: #666; font-size: 0.75em; border: 1px solid #444; padding: 2px 6px;">${d.mode_scrutin}</span>
+                </div>
+                <p style="color: #bbb; font-size: 0.85em; margin: 8px 0;">${d.description}</p>
+                
+                <!-- Barres de progression des votes -->
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; height: 8px; background: #111; overflow: hidden; border: 1px solid #222;">
+                        <div style="width: ${pPour}%; background: #00FF66;"></div>
+                        <div style="width: ${pContre}%; background: var(--ed-red);"></div>
+                        <div style="width: ${pAbs}%; background: #888;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75em; color: #aaa; margin-top: 4px;">
+                        <span style="color: #00FF66;">Pour: ${votesPour} (${pPour}%)</span>
+                        <span style="color: var(--ed-red);">Contre: ${votesContre} (${pContre}%)</span>
+                        <span style="color: #888;">Abs: ${votesAbstention}</span>
+                    </div>
+                </div>
+
+                ${blocActions}
+            `;
+            conteneur.appendChild(div);
+        });
+
+    } catch (e) {
+        console.error("Erreur chargement décrets :", e);
+        conteneur.innerHTML = '<span style="color: red;">Erreur de liaison avec le registre des décrets.</span>';
+    }
+}
+
+// ENREGISTREMENT DU VOTE
+async function enregistrerVote(decretId, choix, modeScrutin) {
+    sonClic();
+    try {
+        const payload = {
+            decret_id: decretId,
+            escadron_tag: profilCommandant.escadron_id,
+            choix: choix
+        };
+
+        const { error } = await supabaseApp.from('coalition_votes').insert([payload]);
+        if (error) throw error;
+
+        await chargerDecretsCoalition(coalitionActiveId);
+    } catch (e) {
+        console.error("Erreur enregistrement vote :", e);
+        alert("Impossible d'enregistrer le vote.");
+    }
+}
+
+    // --- GESTION DU COMPTE PILOTE ---
+
+        async function modifierEmailCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            const nouvelEmail = document.getElementById('input-nouveau-email').value.trim();
+            if (!nouvelEmail) return;
+
+            try {
+                const { error } = await supabaseApp.auth.updateUser({ email: nouvelEmail });
+                if (error) throw error;
+                
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("REQUÊTE ENVOYÉE", "Un lien de confirmation a été expédié. Vérifiez votre boîte mail.<br><br>Le changement ne prendra effet qu'après validation.", "var(--ed-blue)");
+                } else {
+                    alert("Un lien de confirmation a été envoyé. Vérifiez vos emails.");
+                }
+                
+                document.getElementById('input-nouveau-email').value = "";
+                fermerModal('modal-gestion-compte');
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR", "Impossible de modifier l'adresse e-mail.", "#FF3333");
+            }
+        }
+
+        async function modifierMdpCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            const nouveauMdp = document.getElementById('input-nouveau-mdp').value.trim();
+            if (!nouveauMdp || nouveauMdp.length < 6) {
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR SÉCURITÉ", "La clé d'accès doit contenir au moins 6 caractères.", "#FF3333");
+                return;
+            }
+
+            try {
+                const { error } = await supabaseApp.auth.updateUser({ password: nouveauMdp });
+                if (error) throw error;
+                
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("SUCCÈS", "Vos codes d'accès ont été mis à jour avec succès.", "#00FF66");
+                } else {
+                    alert("Mot de passe mis à jour !");
+                }
+                
+                document.getElementById('input-nouveau-mdp').value = "";
+                fermerModal('modal-gestion-compte');
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR", "Impossible de modifier le mot de passe.", "#FF3333");
+            }
+        }
+
+        async function autoDetruireCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            
+            const messageAlerte = "⚠️ AVERTISSEMENT CRITIQUE : La destruction de votre compte est IMMÉDIATE et IRRÉVERSIBLE. Toutes vos données seront purgées des serveurs.<br><br>Confirmez-vous l'auto-destruction ?";
+            
+            // Appel propre au nouveau système de confirmation holographique
+            const confirmation = await demanderConfirmation("⚠️ AUTO-DESTRUCTION", messageAlerte, "#FF3333");
+
+            if (!confirmation) return;
+
+            try {
+                // On ferme la fenêtre de gestion pour faire propre pendant que la requête part
+                fermerModal('modal-gestion-compte');
+
+                const { error } = await supabaseApp.rpc('supprimer_mon_compte');
+                if (error) throw error;
+                
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+                
+            } catch(e) {
+                console.error(e);
+                afficherAlerte("ÉCHEC SYSTÈME", "Erreur lors du protocole de destruction.", "#FF3333");
+            }
+        }
+
+        // --- MOTEUR DE CONFIRMATION TACTIQUE (Remplace confirm) ---
+        window.demanderConfirmation = function(titre, message, couleurHex) {
+            return new Promise((resolve) => {
+                if (typeof sonClic === 'function') sonClic();
+                const modal = document.getElementById('modal-confirmation');
+                const titreEl = document.getElementById('confirm-titre');
+                const messageEl = document.getElementById('confirm-message');
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancel');
+                const contentEl = modal.querySelector('.modal-content');
+
+                // Stylisation dynamique (Rouge pour destruction, Orange pour démission, etc.)
+                titreEl.innerHTML = titre;
+                titreEl.style.color = couleurHex;
+                titreEl.style.borderColor = couleurHex;
+                messageEl.innerHTML = message;
+                
+                contentEl.style.borderColor = couleurHex;
+                contentEl.style.boxShadow = `0 0 30px ${couleurHex}40`;
+                
+                btnOk.style.color = couleurHex;
+                btnOk.style.borderColor = couleurHex;
+                btnOk.style.background = `${couleurHex}15`;
+                btnOk.style.boxShadow = `inset 0 0 10px ${couleurHex}30`;
+                
+                // Effets de survol
+                btnOk.onmouseover = () => { btnOk.style.background = couleurHex; btnOk.style.color = '#000'; };
+                btnOk.onmouseout = () => { btnOk.style.background = `${couleurHex}15`; btnOk.style.color = couleurHex; };
+                btnCancel.onmouseover = () => { btnCancel.style.background = '#333'; btnCancel.style.color = '#fff'; };
+                btnCancel.onmouseout = () => { btnCancel.style.background = 'rgba(255, 255, 255, 0.05)'; btnCancel.style.color = '#aaa'; };
+
+                modal.style.display = 'flex';
+
+                const nettoyage = () => {
+                    modal.style.display = 'none';
+                    btnOk.onclick = null;
+                    btnCancel.onclick = null;
+                };
+
+                btnOk.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(true); };
+                btnCancel.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(false); };
+            });
+        };
+
+    </script>
+
+</body>
+</html>

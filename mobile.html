@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SYS.EDTEAM // PADD Mobile Tactique</title>
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020100">
+    
+    <link rel="manifest" href="manifest.json?v=3">
+    
+    <!-- Redirection PC si écran large -->
+    <script>
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmall = window.matchMedia("(max-width: 800px)").matches;
+        if (!isMobile && !isSmall) {
+            window.location.replace("index.html");
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --ed-orange: #FF7100;
+            --ed-orange-dim: rgba(255, 113, 0, 0.25);
+            --ed-blue: #00F0FF;
+            --ed-blue-dim: rgba(0, 240, 255, 0.2);
+            --ed-green: #00FF66;
+            --ed-red: #FF3333;
+            --ed-bg: #030201;
+            --panel-bg: rgba(12, 8, 4, 0.94);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--ed-bg);
+            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #000000 100%);
+            color: #ddd;
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(5, 3, 1, 0.95);
+            border-bottom: 2px solid var(--ed-orange);
+            backdrop-filter: blur(8px);
+        }
+
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .app-logo { width: 32px; height: 32px; filter: drop-shadow(0 0 5px var(--ed-orange)); }
+
+        main {
+            flex: 1;
+            padding: 15px 15px 85px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--ed-orange-dim);
+            border-radius: 6px;
+            padding: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--ed-orange-dim);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            color: var(--ed-orange);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            background: rgba(8, 4, 1, 0.98);
+            border-top: 1px solid var(--ed-orange);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 300;
+            backdrop-filter: blur(10px);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-tab-btn {
+            flex: 1;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #777;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-tab-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+        
+        .nav-tab-btn.active {
+            color: var(--ed-orange);
+            background: rgba(255, 113, 0, 0.08);
+            box-shadow: inset 0 3px 0 var(--ed-orange);
+            font-weight: bold;
+        }
+
+        .nav-tab-btn#nav-btn-comms.active {
+            color: var(--ed-blue) !important;
+            background: rgba(0, 240, 255, 0.08) !important;
+            box-shadow: inset 0 3px 0 var(--ed-blue) !important;
+        }
+
+        .m-input {
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--ed-orange-dim);
+            color: #fff;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 1em;
+            border-radius: 4px;
+            outline: none;
+        }
+        .m-input:focus { border-color: var(--ed-blue); }
+
+        .m-btn {
+            background: rgba(255, 113, 0, 0.12);
+            border: 1px solid var(--ed-orange);
+            color: var(--ed-orange);
+            padding: 12px;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .m-btn:active { background: var(--ed-orange); color: #000; }
+
+        /* Rangs HUD */
+        .rank-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.8em;
+        }
+        .rank-item {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid #333;
+            padding: 6px 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        /* CRT Écran Comms */
+        .crt-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            border-radius: 6px;
+            border: 1px solid var(--ed-blue-dim);
+            overflow: hidden;
+            box-shadow: inset 0 0 25px rgba(0, 240, 255, 0.12), 0 4px 15px rgba(0,0,0,0.8);
+        }
+
+        .crt-screen {
+            background: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 50%, rgba(0, 0, 0, 0.55) 50%),
+                radial-gradient(circle at center, rgba(0, 30, 45, 0.4) 0%, rgba(3, 2, 1, 0.95) 100%) !important;
+            background-size: 100% 4px, 100% 100% !important;
+        }
+
+        .crt-scan-beam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 240, 255, 0.35);
+            box-shadow: 0 0 10px var(--ed-blue);
+            pointer-events: none;
+            z-index: 10;
+            animation: crtScanMove 7s linear infinite;
+        }
+
+        @keyframes crtScanMove {
+            0% { top: -5px; opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .chat-bubble {
+            padding: 10px 12px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid #555;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.85em;
+        }
+        .chat-bubble.squad { border-left-color: var(--ed-orange); background: rgba(255, 113, 0, 0.05); }
+        .chat-bubble.private { border-left-color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); }
+    </style>
+</head>
+<body>
+
+    <!-- AUTHENTIFICATION -->
+    <div id="auth-view" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 25px;">
+        <svg class="app-logo" viewBox="0 0 100 100" style="width: 70px; height: 70px; margin-bottom: 15px;">
+            <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+            <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+            <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+        </svg>
+        <h1 style="color: var(--ed-orange); letter-spacing: 4px; margin: 0 0 5px 0; font-size: 1.6em;">SYS.EDTEAM</h1>
+        <p style="color: #666; font-size: 0.85em; letter-spacing: 2px; margin-bottom: 30px;">PADD MOBILE TACTIQUE</p>
+
+        <div class="card" style="width: 100%; max-width: 360px;">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <input type="email" id="login-email" class="m-input" placeholder="EMAIL COMMANDANT">
+                <input type="password" id="login-pwd" class="m-input" placeholder="MOT DE PASSE">
+                <button class="m-btn" onclick="tenterConnexionMobile()">ÉTABLIR LA LIAISON</button>
+                <div id="login-msg" style="font-size: 0.8em; text-align: center; color: var(--ed-red); display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION PRINCIPALE -->
+    <div id="app-main" style="display: none; flex-direction: column; min-height: 100vh;">
+        
+        <!-- HEADER -->
+        <header>
+            <div class="header-brand">
+                <svg class="app-logo" viewBox="0 0 100 100">
+                    <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                    <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                    <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                </svg>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 1.1em; font-weight: bold; letter-spacing: 2px; color: #fff;">EDTEAM</span>
+                    <span id="m-cmdr-name" style="font-size: 0.7em; color: var(--ed-blue); letter-spacing: 1px;">CMDR ...</span>
+                </div>
+            </div>
+
+            <div id="m-online-btn" onclick="ouvrirModalPilotes()" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--ed-green); background: rgba(0,255,102,0.1); cursor: pointer;">
+                <span id="m-online-dot" style="width: 7px; height: 7px; border-radius: 50%; background: var(--ed-green); box-shadow: 0 0 6px var(--ed-green);"></span>
+                <span id="m-online-text" style="color: #fff; font-size: 0.75em; font-weight: bold;">-- EN JEU</span>
+            </div>
+        </header>
+
+        <!-- CONTENU -->
+        <main>
+            
+            <!-- ========================================== -->
+            <!-- ONGLET 1 : QG & ACTIFS                     -->
+            <!-- ========================================== -->
+            <div id="tab-qg" style="display: flex; flex-direction: column; gap: 14px;">
+                
+                <!-- DOSSIER & ALLÉGEANCE -->
+                <div class="card">
+                    <div class="card-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px dashed var(--ed-orange-dim);">
+                        <span id="m-qg-squad" style="color: var(--ed-orange); font-size: 1.05em; font-weight: bold; letter-spacing: 2px;">[ INDÉPENDANT ]</span>
+                        <span id="m-qg-squad-allegeance" style="color: var(--ed-blue); font-size: 0.75em; font-weight: bold; letter-spacing: 1px; text-align: center;">PUISSANCE : ---</span>
+                    </div>
+                    <div id="m-qg-badges" style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 12px; border-bottom: 1px dashed #333; padding-bottom: 10px;">
+                        <div>
+                            <span style="color: #888;">FÉDÉRATION :</span>
+                            <strong id="m-rank-fed" style="color: var(--ed-blue);">---</strong>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: #888;">EMPIRE :</span>
+                            <strong id="m-rank-emp" style="color: var(--ed-orange);">---</strong>
+                        </div>
+                    </div>
+
+                    <!-- RANGS OFFICIELS -->
+                    <span style="color: #888; font-size: 0.75em; letter-spacing: 1px; display: block; margin-bottom: 6px;">ÉVALUATION DE LA FÉDÉRATION DES PILOTES :</span>
+                    <div class="rank-grid">
+                        <div class="rank-item">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #888; font-size: 0.85em;">COMBAT</span>
+                                <span id="rank-combat-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                            </div>
+                            <strong id="rank-combat" style="color: #fff;">---</strong>
+                        </div>
+                        <div class="rank-item">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #888; font-size: 0.85em;">COMMERCE</span>
+                                <span id="rank-trade-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                            </div>
+                            <strong id="rank-trade" style="color: #fff;">---</strong>
+                        </div>
+                        <div class="rank-item">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #888; font-size: 0.85em;">EXPLORATION</span>
+                                <span id="rank-explore-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                            </div>
+                            <strong id="rank-explore" style="color: #fff;">---</strong>
+                        </div>
+                        <div class="rank-item">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #888; font-size: 0.85em;">EXOBIOLOGIE</span>
+                                <span id="rank-exo-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                            </div>
+                            <strong id="rank-exo" style="color: #fff;">---</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BILAN FINANCIER CONSOLIDÉ -->
+                <div class="card" style="border-color: var(--ed-blue-dim); box-shadow: inset 3px 0 0 var(--ed-blue);">
+                    <div class="card-header" style="color: var(--ed-blue); border-bottom-color: var(--ed-blue-dim);">
+                        <span>> RAPPORT FINANCIER CONSOLIDÉ</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px;">
+                            <span style="color: #888; font-size: 0.85em;">LIQUIDITÉS (VAISSEAU)</span>
+                            <span style="color: #fff; font-weight: bold;"><span id="m-solde-vaisseau">---</span> <span style="color: var(--ed-orange); font-size: 0.75em;">CR</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px;">
+                            <span style="color: #888; font-size: 0.85em;">IMMOBILISATIONS (CARRIER)</span>
+                            <span style="color: #fff; font-weight: bold;"><span id="m-solde-fc">---</span> <span style="color: var(--ed-blue); font-size: 0.75em;">CR</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px;">
+                            <span style="color: #888; font-size: 0.85em;">VALEUR FLOTTE & MODULES</span>
+                            <span style="color: #fff; font-weight: bold;"><span id="m-valeur-flotte">---</span> <span style="color: var(--ed-green); font-size: 0.75em;">CR</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 240, 255, 0.05); padding: 8px 12px; border-radius: 4px; border-left: 2px solid var(--ed-blue);">
+                            <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold;">PATRIMOINE TOTAL</span>
+                            <strong id="m-valeur-totale" style="color: #fff; font-size: 1.1em;">--- CR</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; font-size: 0.8em; color: #888;">
+                            <span>COÛT DE RACHAT (ASSURANCE) :</span>
+                            <span id="m-rebuy-cout" style="color: var(--ed-red); font-weight: bold;">--- CR</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FLEET CARRIER & TRITIUM -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>> LOGISTIQUE FC</span>
+                        <span id="m-fc-name" style="color: #fff; font-weight: normal; font-size: 0.85em;">---</span>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 4px;">
+                            <span style="color: #aaa;">DÉPÔT FSD</span>
+                            <strong id="m-tritium-depot-txt" style="color: var(--ed-blue);">-- / 1000 T</strong>
+                        </div>
+                        <div style="height: 8px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); border-radius: 2px;">
+                            <div id="m-tritium-depot-bar" style="height: 100%; width: 0%; background: var(--ed-blue);"></div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; padding: 6px 0; border-top: 1px dashed #333;">
+                        <span style="color: #aaa;">RÉSERVE TRITIUM EN SOUTE</span>
+                        <strong id="m-tritium-soute-txt" style="color: var(--ed-orange);">-- T</strong>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; padding: 6px 0; border-top: 1px dashed #333;">
+                        <span style="color: #aaa;">AUTONOMIE BANCAIRE FC</span>
+                        <strong id="m-fc-autonomie" style="color: var(--ed-green);">-- SEMAINES</strong>
+                    </div>
+                </div>
+
+                <!-- MEMBRES DE L'ESCADRON -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>> EFFECTIF ESCADRON</span>
+                        <span id="m-squad-count" style="color: var(--ed-green); font-size: 0.85em;">-- MEMBRES</span>
+                    </div>
+                    <div id="m-squad-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Chargement de l'équipage...</div>
+                    </div>
+                </div>
+                <!-- BOUTON ACCÈS DIRECTEUR (Affiché uniquement si est_directeur === true) -->
+                <button id="btn-bureau-directeur" class="m-btn" style="display: none; background: rgba(255, 51, 51, 0.15); border-color: var(--ed-red); color: var(--ed-red); margin-top: 5px;" onclick="ouvrirBureauDirecteur()">
+                    ⚙️ [ BUREAU DU DIRECTEUR ]
+                </button>
+                <button class="m-btn" style="background: transparent; border-color: #555; color: #888; font-size: 0.85em; margin-top: 5px;" onclick="deconnexionMobile()">[ DÉCONNEXION DU PADD ]</button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET 2 : BGS & DIRECTIVES                -->
+            <!-- ========================================== -->
+            <div id="tab-bgs" style="display: none; flex-direction: column; gap: 14px;">
+                
+                <!-- TICK BGS -->
+                <div class="card" style="border-color: var(--ed-orange); text-align: center; padding: 12px;">
+                    <span style="color: #888; font-size: 0.75em; letter-spacing: 2px; display: block;">PROCHAIN TICK GALACTIQUE (ESTIMATION)</span>
+                    <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px;">--H --M --S</span>
+                </div>
+
+                <!-- RADAR D'INFLUENCE -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>> RADAR D'INFLUENCES</span>
+                        <span style="color: var(--ed-blue); font-size: 0.8em;">FACTIONS CLÉS</span>
+                    </div>
+                    <div id="m-influence-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Analyse des influences galactiques...</div>
+                    </div>
+                </div>
+
+                <!-- TRAITÉS DIPLOMATIQUES -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>> DIPLOMATIE</span>
+                        <span style="color: var(--ed-orange); font-size: 0.8em;">ACCORDS</span>
+                    </div>
+                    <div id="m-diplomatie-container" style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Consultation des registres d'alliances...</div>
+                    </div>
+                </div>
+
+                <!-- DIRECTIVES DE L'AMIRAUTÉ -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>> ORDRES DU JOUR</span>
+                        <span style="color: var(--ed-green);">ACTIFS</span>
+                    </div>
+                    <div id="m-ordres-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Chargement des ordres tactiques...</div>
+                    </div>
+                </div>
+
+                <!-- JOURNAL DES EXPLOITS -->
+                <div class="card" style="border-color: var(--ed-blue-dim);">
+                    <div class="card-header" style="color: var(--ed-blue); border-bottom-color: var(--ed-blue-dim);">
+                        <span>> JOURNAL DES EXPLOITS</span>
+                        <span style="color: #888; font-size: 0.75em; font-weight: normal;">FLOTTE</span>
+                    </div>
+                    <div id="m-exploits-container" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Écoute des rapports de missions...</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET 3 : TRANSMISSIONS (COMMS CYAN)      -->
+            <!-- ========================================== -->
+            <div id="tab-comms" style="display: none; flex-direction: column; gap: 10px; height: calc(100vh - 160px);">
+                
+                <div style="display: flex; gap: 6px;">
+                    <button id="btn-chan-squad" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
+                    <button id="btn-chan-global" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('GLOBAL')">GLOBAL</button>
+                    <button id="btn-chan-prive" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('PRIVE')">PRIVÉ</button>
+                </div>
+
+                <div id="m-prive-selector-row" style="display: none; gap: 8px; align-items: center; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.3); padding: 6px 10px; border-radius: 4px;">
+                    <span style="color: var(--ed-blue); font-size: 0.75em; font-weight: bold; white-space: nowrap;">CMDR CIBLE :</span>
+                    <select id="m-select-destinataire" class="m-input" style="padding: 6px; font-size: 0.85em; border-color: var(--ed-blue); background: #000; color: #fff;" onchange="chargerMessagesComms()">
+                        <option value="">Sélectionner un pilote...</option>
+                    </select>
+                </div>
+
+                <!-- FLUX DES MESSAGES CRT -->
+                <div class="crt-container" id="m-crt-wrapper">
+                    <div class="crt-scan-beam"></div>
+                    <div id="m-chat-feed" class="crt-screen" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 12px; z-index: 1;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; margin: auto;">Connexion au relais subspace...</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="m-chat-input" class="m-input" placeholder="Transmission..." style="padding: 10px; font-size: 0.9em; border-color: var(--ed-blue-dim);" onkeydown="if(event.key === 'Enter') envoyerMessageMobile()">
+                    <button class="m-btn" style="padding: 0 16px; white-space: nowrap; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="envoyerMessageMobile()">➤</button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BARRE BASSE -->
+        <nav class="bottom-nav">
+            <button id="nav-btn-qg" class="nav-tab-btn active" onclick="switchMobileTab('qg')">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>QG</span>
+            </button>
+            <button id="nav-btn-bgs" class="nav-tab-btn" onclick="switchMobileTab('bgs')">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <span>BGS & ORDRES</span>
+            </button>
+            <button id="nav-btn-comms" class="nav-tab-btn" onclick="switchMobileTab('comms')">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>COMMS</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- MODAL PILOTES EN JEU -->
+    <div class="modal-overlay" id="modal-pilotes" onclick="fermerModalPilotes(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 500; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-green); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="color: var(--ed-green); font-weight: bold; letter-spacing: 2px;">🟢 PILOTES EN VOL</span>
+                <span style="color: var(--ed-green); font-weight: bold; cursor: pointer;" onclick="fermerModalPilotes()">✕</span>
+            </div>
+            <div id="m-pilotes-liste" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Balayage spatial...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BUREAU DU DIRECTEUR -->
+<div class="modal-overlay" id="modal-bureau-directeur" onclick="fermerBureauDirecteur(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 500; padding: 15px;">
+    <div class="card" style="width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; border-color: var(--ed-red); box-shadow: 0 0 25px rgba(255, 51, 51, 0.25);" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px; margin-bottom: 15px;">
+            <span style="color: var(--ed-red); font-weight: bold; letter-spacing: 2px;">⚙️ ADMINISTRATION DU TERMINAL</span>
+            <span style="color: var(--ed-red); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-bureau-directeur').style.display='none'">✕</span>
+        </div>
+
+        <!-- 1. APPROBATION DES COMPTES -->
+        <div style="margin-bottom: 20px;">
+            <div style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> COMPTES EN ATTENTE D'APPROBATION</div>
+            <div id="dir-liste-attente" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Vérification des demandes...</div>
+            </div>
+        </div>
+
+        <!-- 2. GESTION DES RÔLES -->
+        <div>
+            <div style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> GESTION DES RÔLES & ACCRÉDITATIONS</div>
+            <div id="dir-liste-membres" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;">
+                <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Chargement du personnel...</div>
+            </div>
+        </div>
+
+        <!-- 3. AUDIT TACTIQUE (KPI GLOBAUX & PAR JOUEUR) -->
+        <div style="margin-top: 20px; border-top: 1px dashed rgba(255, 113, 0, 0.3); padding-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">> AUDIT D'ADOPTION & USAGE</span>
+                <button class="m-btn" style="padding: 3px 10px; font-size: 0.7em; border-color: var(--ed-green); color: var(--ed-green); background: rgba(0,255,102,0.1);" onclick="window.chargerAuditDirecteur()">ACTUALISER</button>
+            </div>
+
+            <!-- GRILLE DES 6 INDICATEURS GLOBAUX -->
+            <div id="dir-stats-kpi-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 15px;">
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
+                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">1. PRÉSENCE WEB (7J)</div>
+                    <div id="kpi-presence" style="color: var(--ed-green); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- / --</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
+                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">2. COMMS & MESSAGES</div>
+                    <div id="kpi-comms" style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- ACCÈS (-- MSG)</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
+                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">3. RADAR BGS</div>
+                    <div id="kpi-radar" style="color: var(--ed-orange); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- FAC (-- SCANS)</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
+                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">4. MISSIONS ESCADRON</div>
+                    <div id="kpi-ordres" style="color: var(--ed-green); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- ORDRES</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
+                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">5. JOURNAL BGS</div>
+                    <div id="kpi-journal" style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- LECTURES</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
+                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">6. COMMERCE FURTIF</div>
+                    <div id="kpi-commerce" style="color: var(--ed-orange); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- SCANS (-- VIS)</div>
+                </div>
+            </div>
+
+            <!-- REGISTRE DÉTAILLÉ PAR PILOTE -->
+            <div style="color: #888; font-size: 0.75em; letter-spacing: 1px; margin-bottom: 6px;">> FRÉQUENTATION INDIVIDUELLE :</div>
+            <div id="dir-liste-audit" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
+                <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Génération de l'audit en cours...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- SCRIPT APPLICATION -->
+    <script>
+        const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
+        const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let profilCommandant = null;
+        let canalActif = 'ESCADRON';
+
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (session) {
+                verifierProfilMobile(session.user);
+            } else {
+                document.getElementById('auth-view').style.display = 'flex';
+                document.getElementById('app-main').style.display = 'none';
+            }
+        });
+
+        async function tenterConnexionMobile() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-pwd').value.trim();
+            const msg = document.getElementById('login-msg');
+
+            if (!email || !password) return;
+            msg.style.display = 'block'; msg.style.color = "var(--ed-orange)"; msg.innerText = "> VÉRIFICATION...";
+
+            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
+            if (error) {
+                msg.style.color = "var(--ed-red)"; msg.innerText = "Accès refusé : " + error.message;
+            } else {
+                verifierProfilMobile(data.user);
+            }
+        }
+
+        async function verifierProfilMobile(user) {
+            const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', user.id).single();
+            if (error || !data || !data.est_approuve) {
+                document.getElementById('auth-view').style.display = 'flex';
+                document.getElementById('app-main').style.display = 'none';
+                const msg = document.getElementById('login-msg');
+                msg.style.display = 'block'; msg.style.color = "var(--ed-orange)"; msg.innerText = "Compte en attente d'approbation.";
+                return;
+            }
+
+            profilCommandant = data;
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('app-main').style.display = 'flex';
+
+            chargerQGMobile();
+            chargerBGSMobile();
+            initialiserCommsMobile();
+            actualiserPilotesEnLigneMobile();
+            setInterval(actualiserPilotesEnLigneMobile, 15000);
+            demarrerTickTimer();
+        }
+
+        async function deconnexionMobile() {
+            await supabaseApp.auth.signOut();
+            location.reload();
+        }
+
+        function switchMobileTab(tabId) {
+            document.getElementById('tab-qg').style.display = 'none';
+            document.getElementById('tab-bgs').style.display = 'none';
+            document.getElementById('tab-comms').style.display = 'none';
+
+            document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('nav-btn-' + tabId).classList.add('active');
+
+            const target = document.getElementById('tab-' + tabId);
+            if (tabId === 'comms') {
+                target.style.display = 'flex';
+                const feed = document.getElementById('m-chat-feed');
+                feed.scrollTop = feed.scrollHeight;
+            } else {
+                target.style.display = 'flex';
+            }
+        }
+
+        // --- QG & ACTIFS ---
+        const TABLES_ED_RANGS = {
+            combat: ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            trade: ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            explore: ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            exobiologist: ["DIRECTIONLESS", "MOSTLY DIRECTIONLESS", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            federation: ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"],
+            empire: ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"]
+        };
+
+        async function chargerQGMobile() {
+            if (!profilCommandant) return;
+            const fmt = new Intl.NumberFormat('fr-FR');
+
+            // 1. Identité, Escadron & Powerplay
+            document.getElementById('m-cmdr-name').innerText = `CMDR ${profilCommandant.cmdr_nom ? profilCommandant.cmdr_nom.toUpperCase() : 'COMMANDANT'}`;
+            document.getElementById('m-qg-squad').innerText = profilCommandant.escadron_id ? `[ ${profilCommandant.escadron_id.toUpperCase()} ]` : `[ INDÉPENDANT ]`;
+
+            const elAllegeance = document.getElementById('m-qg-squad-allegeance');
+            const pNom = profilCommandant.power_nom;
+            const pRang = profilCommandant.power_rang || 0;
+
+            if (pNom && pNom.trim() !== '') {
+                const nomU = pNom.toUpperCase();
+                elAllegeance.innerText = pRang > 0 ? `PUISSANCE : ${nomU} (RANG ${pRang})` : `PUISSANCE : ${nomU}`;
+                
+                if (nomU.includes('WINTERS') || nomU.includes('HUDSON')) elAllegeance.style.color = 'var(--ed-blue)';
+                else if (nomU.includes('DUVAL') || nomU.includes('PATREUS') || nomU.includes('TORVAL')) elAllegeance.style.color = 'var(--ed-orange)';
+                else if (nomU.includes('MAHON')) elAllegeance.style.color = 'var(--ed-green)';
+                else elAllegeance.style.color = '#FFCC00';
+            } else {
+                elAllegeance.innerText = `PUISSANCE : AUCUNE`;
+                elAllegeance.style.color = '#888';
+            }
+
+            // Badges
+            let badgesHtml = '';
+            if (profilCommandant.est_amiral) badgesHtml += '<span style="color: var(--ed-red); border: 1px solid var(--ed-red); padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">AMIRAL</span>';
+            if (profilCommandant.est_officier) badgesHtml += '<span style="color: var(--ed-green); border: 1px solid var(--ed-green); padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">OFFICIER BGS</span>';
+            if (profilCommandant.est_diplomate) badgesHtml += '<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">DIPLOMATE</span>';
+            document.getElementById('m-qg-badges').innerHTML = badgesHtml;
+
+            // Affichage du bouton Bureau Directeur si vous avez les droits
+            const btnDir = document.getElementById('btn-bureau-directeur');
+            if (btnDir) btnDir.style.display = profilCommandant.est_directeur ? 'block' : 'none';
+
+            // 2. Traduction des rangs
+            function lireRang(index, table, pct) {
+                if (index === null || index === undefined) return { nom: '---', pct: '--%' };
+                const nom = table[index] ? table[index] : '---';
+                const p = (pct !== null && pct !== undefined) ? `${pct}%` : '--%';
+                return { nom, pct: p };
+            }
+
+            const rFed = lireRang(profilCommandant.rang_fed, TABLES_ED_RANGS.federation, profilCommandant.prog_fed);
+            const rEmp = lireRang(profilCommandant.rang_emp, TABLES_ED_RANGS.empire, profilCommandant.prog_emp);
+            document.getElementById('m-rank-fed').innerText = rFed.nom !== '---' ? `${rFed.nom} (${rFed.pct})` : '---';
+            document.getElementById('m-rank-emp').innerText = rEmp.nom !== '---' ? `${rEmp.nom} (${rEmp.pct})` : '---';
+
+            const rCombat = lireRang(profilCommandant.rang_combat, TABLES_ED_RANGS.combat, profilCommandant.prog_combat);
+            const rTrade  = lireRang(profilCommandant.rang_commerce, TABLES_ED_RANGS.trade, profilCommandant.prog_commerce);
+            const rExplore = lireRang(profilCommandant.rang_explo, TABLES_ED_RANGS.explore, profilCommandant.prog_explore);
+            const rExo    = lireRang(profilCommandant.rang_exobio, TABLES_ED_RANGS.exobiologist, profilCommandant.prog_exobio);
+
+            document.getElementById('rank-combat').innerText = rCombat.nom;
+            document.getElementById('rank-combat-pct').innerText = rCombat.pct;
+            document.getElementById('rank-trade').innerText = rTrade.nom;
+            document.getElementById('rank-trade-pct').innerText = rTrade.pct;
+            document.getElementById('rank-explore').innerText = rExplore.nom;
+            document.getElementById('rank-explore-pct').innerText = rExplore.pct;
+            document.getElementById('rank-exo').innerText = rExo.nom;
+            document.getElementById('rank-exo-pct').innerText = rExo.pct;
+
+            // 3. Finances réelles
+            const soldeV = profilCommandant.solde_vaisseau || 0;
+            const soldeF = profilCommandant.solde_fc || 0;
+            const valFlotte = profilCommandant.valeur_vaisseaux || 0;
+            const patTotal = profilCommandant.patrimoine_total || (soldeV + soldeF + valFlotte);
+            const rebuy = profilCommandant.cout_rachat || 0;
+
+            document.getElementById('m-solde-vaisseau').innerText = fmt.format(soldeV);
+            document.getElementById('m-solde-fc').innerText = fmt.format(soldeF);
+            document.getElementById('m-valeur-flotte').innerText = valFlotte > 0 ? fmt.format(valFlotte) : '---';
+            document.getElementById('m-valeur-totale').innerText = patTotal > 0 ? `${fmt.format(patTotal)} CR` : '--- CR';
+            document.getElementById('m-rebuy-cout').innerText = rebuy > 0 ? `${fmt.format(rebuy)} CR` : '--- CR';
+
+            // 4. Fleet Carrier
+            const { data: param } = await supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).single();
+            if (param) {
+                if (param.carrier_stats_json) {
+                    const stats = param.carrier_stats_json;
+                    document.getElementById('m-fc-name').innerText = stats.name || "FLEET CARRIER";
+                    const fuel = stats.fuel !== undefined ? stats.fuel : 0;
+                    document.getElementById('m-tritium-depot-txt').innerText = `${fuel} / 1000 T`;
+                    document.getElementById('m-tritium-depot-bar').style.width = `${(fuel / 1000) * 100}%`;
+                }
+
+                const upkeepHebdo = 25000000;
+                const semainesRestantes = soldeF > 0 ? Math.floor(soldeF / upkeepHebdo) : 0;
+                document.getElementById('m-fc-autonomie').innerText = `${semainesRestantes} SEMAINES`;
+
+                const { data: tritData } = await supabaseApp.from('inventaire_fc').select('quantite').eq('marchandise', 'Tritium').eq('user_id', profilCommandant.user_id).maybeSingle();
+                document.getElementById('m-tritium-soute-txt').innerText = `${fmt.format(tritData ? tritData.quantite : 0)} T`;
+            }
+
+            // 5. Effectif escadron
+            if (profilCommandant.escadron_id) {
+                const { data: membres } = await supabaseApp.from('profils')
+                    .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .eq('est_approuve', true)
+                    .order('cmdr_nom');
+
+                if (membres) {
+                    document.getElementById('m-squad-count').innerText = `${membres.length} PILOTES`;
+                    let htmlMembres = '';
+
+                    membres.forEach(m => {
+                        let badges = [];
+                        if (m.est_amiral) badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">AMIRAL</span>');
+                        else if (m.est_officier) badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">OFFICIER</span>');
+                        else badges.push('<span style="color:#888; border:1px solid #444; padding:1px 5px; border-radius:3px; font-size:0.7em;">PILOTE</span>');
+
+                        if (m.est_diplomate) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">DIPLOMATE</span>');
+
+                        htmlMembres += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; font-size:0.85em; margin-bottom:4px;">
+                                <span style="color:#fff; font-weight:bold;">CMDR ${(m.cmdr_nom || 'RECRUE').toUpperCase()}</span>
+                                <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
+                                    ${badges.join('')}
+                                </div>
+                            </div>`;
+                    });
+
+                    document.getElementById('m-squad-members-list').innerHTML = htmlMembres;
+                }
+            } else {
+                document.getElementById('m-squad-members-list').innerHTML = '<div style="color:#666; font-size:0.8em; text-align:center; padding:10px;">Pilote sans escadron rattaché.</div>';
+            }
+        }
+
+        // --- TICK GALACTIQUE VIA BGS.TOOLS (COMME DANS BGS.HTML) ---
+        let dernierTick = new Date();
+        let prochainTick = new Date();
+        let horlogeInterval = null;
+
+        async function demarrerTickTimer() {
+            const el = document.getElementById('m-tick-timer');
+            if (!el) return;
+
+            dernierTick = new Date();
+            dernierTick.setUTCHours(15, 0, 0, 0); 
+            if (Date.now() < dernierTick.getTime()) {
+                dernierTick.setUTCDate(dernierTick.getUTCDate() - 1);
+            }
+            prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
+
+            const maintenant = new Date();
+            while (maintenant >= prochainTick) {
+                dernierTick = new Date(prochainTick.getTime());
+                prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
+            }
+
+            if (horlogeInterval) clearInterval(horlogeInterval);
+            horlogeInterval = setInterval(mettreAJourCompteurMobile, 1000);
+
+            try {
+                const controleur = new AbortController();
+                const timeoutId = setTimeout(() => controleur.abort(), 3000);
+
+                const response = await fetch('https://api.bgs.tools/v1/tick', { 
+                    headers: { 'Accept': 'application/json' },
+                    signal: controleur.signal 
+                });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                if (data && (data.time || data.updated_at || data.timestamp)) {
+                    const rawTime = data.time || data.updated_at || data.timestamp;
+                    dernierTick = new Date(typeof rawTime === 'number' ? rawTime * 1000 : rawTime);
+                    prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
+
+                    const now = new Date();
+                    while (now >= prochainTick) {
+                        dernierTick = new Date(prochainTick.getTime());
+                        prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
+                    }
+                }
+            } catch (err) {
+                console.warn("API BGS.tools indisponible. Maintien de l'horloge locale.");
+            }
+        }
+
+        function mettreAJourCompteurMobile() {
+            const el = document.getElementById('m-tick-timer');
+            if (!el) return;
+            
+            const maintenant = new Date();
+            if (maintenant >= prochainTick) {
+                while (maintenant >= prochainTick) {
+                    dernierTick = new Date(prochainTick.getTime());
+                    prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
+                }
+            }
+
+            let diff = prochainTick - maintenant;
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+            const m = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+            const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+            
+            el.innerText = `${h}H ${m}M ${s}S`;
+        }
+
+        // --- BGS & DIRECTIVES (API EDSM + DELTA 24H + SUPABASE) ---
+        async function chargerBGSMobile() {
+            if (!profilCommandant) return;
+            const fmt = new Intl.NumberFormat('fr-FR');
+
+            // -------------------------------------------------------------
+            // 1. RADAR D'INFLUENCE VIA EDSM AVEC ÉVOLUTION 24H (DELTA & FLÈCHES)
+            // -------------------------------------------------------------
+            const infCont = document.getElementById('m-influence-container');
+            try {
+                const { data: param } = await supabaseApp.from('parametres_app')
+                    .select('factions_favorites')
+                    .eq('user_id', profilCommandant.user_id)
+                    .maybeSingle();
+
+                let favoris = [];
+                if (param && param.factions_favorites) {
+                    favoris = typeof param.factions_favorites === 'string' 
+                        ? JSON.parse(param.factions_favorites) 
+                        : param.factions_favorites;
+                }
+
+                if (Array.isArray(favoris) && favoris.length > 0) {
+                    const systemes = [...new Set(favoris.map(f => (f.systeme || f.system || '').trim()).filter(Boolean))];
+
+                    const systemDataMap = {};
+                    await Promise.allSettled(systemes.map(async sys => {
+                        try {
+                            const res = await fetch(`https://www.edsm.net/api-system-v1/factions?systemName=${encodeURIComponent(sys)}&showHistory=1`);
+                            const edsmData = await res.json();
+                            if (edsmData && edsmData.factions) {
+                                systemDataMap[sys.toUpperCase()] = edsmData.factions;
+                            }
+                        } catch (err) {}
+                    }));
+
+                    let htmlInf = '';
+                    favoris.forEach(fav => {
+                        const nomFaction = (fav.faction || fav.nom || fav.name || '').trim();
+                        const nomSysteme = (fav.systeme || fav.system || '').trim();
+
+                        let influencePct = 0;
+                        let etatBgs = 'STABLE';
+                        let deltaHtml = '';
+
+                        const factionsDuSysteme = systemDataMap[nomSysteme.toUpperCase()] || [];
+                        const facData = factionsDuSysteme.find(f => f.name.toUpperCase() === nomFaction.toUpperCase());
+
+                        if (facData) {
+                            influencePct = (facData.influence * 100).toFixed(1);
+                            
+                            // Calcul du Delta 24h (identique à bgs.html)
+                            let delta24h = 0;
+                            let couleurDelta = '#888';
+                            let fleche = '—';
+
+                            if (facData.influenceHistory) {
+                                const timestamps = Object.keys(facData.influenceHistory).map(Number).sort((a, b) => a - b);
+                                if (timestamps.length > 0) {
+                                    const latestHistoryTs = timestamps[timestamps.length - 1];
+                                    const latestDateStr = new Date(latestHistoryTs * 1000).toLocaleDateString('fr-FR');
+                                    
+                                    // Filtre anti-doublon journalier
+                                    const prevTimestamps = timestamps.filter(ts => new Date(ts * 1000).toLocaleDateString('fr-FR') !== latestDateStr);
+                                    let infHier = Number(influencePct);
+
+                                    if (prevTimestamps.length > 0) {
+                                        infHier = facData.influenceHistory[prevTimestamps[prevTimestamps.length - 1]] * 100;
+                                    } else if (timestamps.length > 1) {
+                                        infHier = facData.influenceHistory[timestamps[0]] * 100;
+                                    }
+
+                                    delta24h = (Number(influencePct) - infHier);
+                                    if (delta24h > 0.1) {
+                                        couleurDelta = '#00FF66';
+                                        fleche = '↗';
+                                    } else if (delta24h < -0.1) {
+                                        couleurDelta = '#FF3333';
+                                        fleche = '↘';
+                                    }
+                                }
+                            }
+
+                            deltaHtml = `<span style="color: ${couleurDelta}; font-size: 0.75em; font-weight: bold; margin-left: 6px;">${fleche} ${delta24h > 0 ? '+' : ''}${delta24h.toFixed(1)}%</span>`;
+
+                            if (facData.activeStates && facData.activeStates.length > 0) {
+                                etatBgs = facData.activeStates[0].state;
+                            } else if (facData.state && facData.state !== 'None') {
+                                etatBgs = facData.state;
+                            }
+                        }
+
+                        let colorEtat = 'var(--ed-orange)';
+                        let etatTraduit = etatBgs.toUpperCase();
+
+                        if (etatTraduit === 'WAR') etatTraduit = 'GUERRE';
+                        else if (etatTraduit === 'CIVIL WAR') etatTraduit = 'GUERRE CIVILE';
+                        else if (etatTraduit === 'ELECTION') etatTraduit = 'ÉLECTION';
+                        else if (etatTraduit === 'BOOM') etatTraduit = 'BOOM ÉCONOMIQUE';
+
+                        if (etatTraduit.includes('GUERRE') || etatTraduit.includes('ÉLECTION') || etatTraduit.includes('LOCKDOWN')) {
+                            colorEtat = 'var(--ed-red)';
+                        } else if (etatTraduit.includes('BOOM') || etatTraduit.includes('EXPANSION')) {
+                            colorEtat = 'var(--ed-green)';
+                        }
+
+                        htmlInf += `
+                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--ed-blue); padding: 8px 10px; border-radius: 0 4px 4px 0; margin-bottom: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">
+                                    <span style="color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;">${nomFaction.toUpperCase()}</span>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end;">
+                                        <span style="color: ${influencePct > 0 ? '#fff' : '#888'};">${influencePct > 0 ? influencePct + '%' : '---'}</span>
+                                        ${deltaHtml}
+                                    </div>
+                                </div>
+                                <div style="height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-bottom: 4px;">
+                                    <div style="width: ${Math.min(influencePct, 100)}%; height: 100%; background: var(--ed-blue);"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.7em; color: #888;">
+                                    <span>ÉTAT : <strong style="color: ${colorEtat};">${etatTraduit}</strong></span>
+                                    <span>${nomSysteme.toUpperCase()}</span>
+                                </div>
+                            </div>`;
+                    });
+
+                    infCont.innerHTML = htmlInf;
+                } else {
+                    infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune faction surveillée sur le radar tactique.</div>';
+                }
+            } catch (e) {
+                infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Données d\'influence non synchronisées.</div>';
+            }
+
+            // -------------------------------------------------------------
+            // 2. ORDRES DU JOUR
+            // -------------------------------------------------------------
+            const ordresCont = document.getElementById('m-ordres-container');
+            try {
+                const { data: ordres } = await supabaseApp.from('ordres_bgs')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
+                    .eq('statut', 'ACTIF')
+                    .order('date_emission', { ascending: false })
+                    .limit(5);
+
+                if (ordres && ordres.length > 0) {
+                    let htmlOrdres = '';
+                    ordres.forEach(o => {
+                        const sys = o.systeme_cible || 'SECTEUR OPÉRATIONNEL';
+                        const fac = o.faction_cible || 'FACTION CIBLE';
+                        const type = o.type_ordre || 'DIRECTIVE';
+                        const brief = o.briefing_amiral || '';
+                        
+                        let prioColor = 'var(--ed-orange)';
+                        if (type === 'HAUSSE') prioColor = 'var(--ed-green)';
+                        else if (type === 'BAISSE' || type === 'GUERRE') prioColor = 'var(--ed-red)';
+                        else if (type === 'ELECTION') prioColor = 'var(--ed-blue)';
+
+                        htmlOrdres += `
+                            <div style="background: rgba(0,0,0,0.5); border-left: 3px solid ${prioColor}; padding: 10px; border-radius: 0 4px 4px 0; margin-bottom: 6px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">
+                                    <span style="color: #fff;">${sys.toUpperCase()} // ${fac.toUpperCase()}</span>
+                                    <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 2px;">${type}</span>
+                                </div>
+                                <div style="color: #ccc; font-size: 0.8em; line-height: 1.4;">${brief ? brief : "Directive en cours d'exécution."}</div>
+                            </div>`;
+                    });
+                    ordresCont.innerHTML = htmlOrdres;
+                } else {
+                    ordresCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune directive active pour le moment.</div>';
+                }
+            } catch (e) {
+                ordresCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Flux des ordres indisponible.</div>';
+            }
+
+            // -------------------------------------------------------------
+            // 3. DIPLOMATIE DE L'ESCADRON
+            // -------------------------------------------------------------
+            const diploCont = document.getElementById('m-diplomatie-container');
+            try {
+                const { data: traites } = await supabaseApp.from('traites_diplomatiques')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .order('faction_cible', { ascending: true });
+
+                if (traites && traites.length > 0) {
+                    let htmlDiplo = '';
+                    traites.forEach(t => {
+                        const fac = t.faction_cible || 'ESCADRON';
+                        const rel = t.type_relation || 'PNA';
+
+                        let col = 'var(--ed-blue)';
+                        let bgCol = 'rgba(0, 240, 255, 0.05)';
+                        let label = 'P.N.A. ACTIF';
+
+                        if (rel === 'ALLIE') {
+                            col = 'var(--ed-green)';
+                            bgCol = 'rgba(0, 255, 102, 0.05)';
+                            label = 'ALLIÉ';
+                        } else if (rel === 'HOSTILE') {
+                            col = 'var(--ed-red)';
+                            bgCol = 'rgba(255, 51, 51, 0.05)';
+                            label = 'HOSTILE';
+                        }
+
+                        htmlDiplo += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: ${bgCol}; border-left: 3px solid ${col}; padding: 8px 10px; font-size: 0.8em; margin-bottom: 4px;">
+                                <strong style="color: #fff;">${fac.toUpperCase()}</strong>
+                                <span style="color: ${col}; font-weight: bold; font-size: 0.8em; letter-spacing: 1px;">${label}</span>
+                            </div>`;
+                    });
+                    diploCont.innerHTML = htmlDiplo;
+                } else {
+                    diploCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucun traité diplomatique enregistré.</div>';
+                }
+            } catch (e) {
+                diploCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Registre diplomatique inaccessible.</div>';
+            }
+
+            // -------------------------------------------------------------
+            // 4. JOURNAL DES EXPLOITS
+            // -------------------------------------------------------------
+            const exploitsCont = document.getElementById('m-exploits-container');
+            try {
+                const { data: efforts } = await supabaseApp.from('efforts_bgs')
+                    .select('*')
+                    .order('date_action', { ascending: false })
+                    .limit(6);
+
+                if (efforts && efforts.length > 0) {
+                    let htmlEx = '';
+                    efforts.forEach(e => {
+                        const act = e.type_action || 'ACTION';
+                        let col = 'var(--ed-orange)';
+                        let labelQte = e.valeur;
+
+                        if (['ECONOMIE', 'SECURITE', 'SCIENCE'].includes(act)) {
+                            labelQte = fmt.format(e.valeur) + ' CR';
+                            col = act === 'ECONOMIE' ? 'var(--ed-green)' : (act === 'SCIENCE' ? '#B026FF' : 'var(--ed-blue)');
+                        } else if (act === 'MISSIONS') {
+                            labelQte = `+${e.valeur} INF`;
+                            col = 'var(--ed-orange)';
+                        } else if (['ECHECS', 'MEURTRES'].includes(act)) {
+                            col = 'var(--ed-red)';
+                        }
+
+                        const d = e.date_action ? new Date(e.date_action) : new Date();
+                        const temps = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                        htmlEx += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.04); padding: 6px 0; font-size: 0.8em;">
+                                <div>
+                                    <span style="color: ${col}; font-weight: bold;">[${act}]</span>
+                                    <span style="color: #fff; margin-left: 4px;">${labelQte}</span>
+                                </div>
+                                <span style="color: #666; font-size: 0.75em;">${temps}</span>
+                            </div>`;
+                    });
+                    exploitsCont.innerHTML = htmlEx;
+                } else {
+                    exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">En attente de nouveaux rapports de vol.</div>';
+                }
+            } catch (e) {
+                exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Flux du journal indisponible.</div>';
+            }
+        }
+
+        // --- COMMS & CHAT (INTACTS) ---
+        async function initialiserCommsMobile() {
+            await chargerListePilotesPrives();
+            chargerMessagesComms();
+
+            supabaseApp.channel('mobile-transmissions')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
+                    const msg = payload.new;
+                    if (canalActif === 'ESCADRON' && msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) {
+                        ajouterBulleMessage(msg);
+                    } else if (canalActif === 'GLOBAL' && msg.canal === 'GLOBAL') {
+                        ajouterBulleMessage(msg);
+                    } else if (canalActif === 'PRIVE' && msg.canal === 'PRIVE') {
+                        const targetId = document.getElementById('m-select-destinataire').value;
+                        if ((msg.expediteur_id === targetId && msg.destinataire_id === profilCommandant.user_id) ||
+                            (msg.expediteur_id === profilCommandant.user_id && msg.destinataire_id === targetId)) {
+                            ajouterBulleMessage(msg);
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        async function chargerListePilotesPrives() {
+            const select = document.getElementById('m-select-destinataire');
+            if (!select) return;
+
+            try {
+                const { data: profils } = await supabaseApp.from('profils')
+                    .select('user_id, cmdr_nom')
+                    .eq('est_approuve', true)
+                    .neq('user_id', profilCommandant.user_id)
+                    .order('cmdr_nom');
+
+                if (profils && profils.length > 0) {
+                    let opts = '<option value="">-- CHOISIR UN DESTINATAIRE --</option>';
+                    profils.forEach(p => {
+                        opts += `<option value="${p.user_id}">CMDR ${(p.cmdr_nom || 'PILOTE').toUpperCase()}</option>`;
+                    });
+                    select.innerHTML = opts;
+                }
+            } catch (e) {}
+        }
+
+        function changerCanalComms(canal) {
+            canalActif = canal;
+            const btnSquad = document.getElementById('btn-chan-squad');
+            const btnGlobal = document.getElementById('btn-chan-global');
+            const btnPrive = document.getElementById('btn-chan-prive');
+            const rowPrive = document.getElementById('m-prive-selector-row');
+
+            [btnSquad, btnGlobal, btnPrive].forEach(b => {
+                b.style.borderColor = '#555';
+                b.style.color = '#888';
+                b.style.background = 'transparent';
+            });
+
+            const activeBtn = canal === 'ESCADRON' ? btnSquad : (canal === 'GLOBAL' ? btnGlobal : btnPrive);
+            activeBtn.style.borderColor = 'var(--ed-blue)';
+            activeBtn.style.color = 'var(--ed-blue)';
+            activeBtn.style.background = 'rgba(0, 240, 255, 0.12)';
+
+            rowPrive.style.display = (canal === 'PRIVE') ? 'flex' : 'none';
+            chargerMessagesComms();
+        }
+
+        async function chargerMessagesComms() {
+            const feed = document.getElementById('m-chat-feed');
+            feed.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; margin: auto;">Balayage de la fréquence...</div>';
+
+            if (canalActif === 'PRIVE') {
+                const targetId = document.getElementById('m-select-destinataire').value;
+                if (!targetId) {
+                    feed.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.85em; text-align: center; margin: auto; padding: 20px;">> SÉLECTIONNEZ UN PILOTE POUR ÉTABLIR LA LIAISON CRYPTÉE.</div>';
+                    return;
+                }
+
+                const { data: messages } = await supabaseApp.from('transmissions')
+                    .select('*')
+                    .eq('canal', 'PRIVE')
+                    .or(`and(expediteur_id.eq.${profilCommandant.user_id},destinataire_id.eq.${targetId}),and(expediteur_id.eq.${targetId},destinataire_id.eq.${profilCommandant.user_id})`)
+                    .order('created_at', { ascending: true })
+                    .limit(40);
+
+                afficherFluxComms(messages);
+            } else {
+                let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(40);
+                if (canalActif === 'ESCADRON') {
+                    query = query.eq('canal', 'ESCADRON').eq('escadron_id', profilCommandant.escadron_id);
+                } else {
+                    query = query.eq('canal', 'GLOBAL');
+                }
+
+                const { data: messages } = await query;
+                afficherFluxComms(messages);
+            }
+        }
+
+        function afficherFluxComms(messages) {
+            const feed = document.getElementById('m-chat-feed');
+            feed.innerHTML = '';
+            if (messages && messages.length > 0) {
+                messages.forEach(m => ajouterBulleMessage(m));
+            } else {
+                feed.innerHTML = '<div style="color: #555; font-size: 0.8em; text-align: center; margin: auto;">Aucune transmission sur ce canal.</div>';
+            }
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function ajouterBulleMessage(m) {
+            const feed = document.getElementById('m-chat-feed');
+            const isMe = m.expediteur_id === profilCommandant.user_id;
+            const temps = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+            let typeClass = 'global';
+            if (m.canal === 'ESCADRON') typeClass = 'squad';
+            if (m.canal === 'PRIVE') typeClass = 'private';
+
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${typeClass}`;
+            const nomAffiche = isMe ? 'VOUS' : (m.expediteur_nom ? m.expediteur_nom.toUpperCase() : 'PILOTE');
+            const couleurNom = isMe ? 'var(--ed-blue)' : (m.canal === 'PRIVE' ? 'var(--ed-green)' : 'var(--ed-orange)');
+
+            bubble.innerHTML = `
+                <div style="display: flex; justify-content: space-between; font-size: 0.8em;">
+                    <strong style="color: ${couleurNom};">CMDR ${nomAffiche}</strong>
+                    <span style="color: #666;">${temps}</span>
+                </div>
+                <div style="color: #eee; line-height: 1.4; word-break: break-word;">${m.message}</div>
+            `;
+            feed.appendChild(bubble);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function envoyerMessageMobile() {
+            const input = document.getElementById('m-chat-input');
+            const txt = input.value.trim();
+            if (!txt || !profilCommandant) return;
+
+            let payload = {
+                expediteur_id: profilCommandant.user_id,
+                expediteur_nom: profilCommandant.cmdr_nom || 'COMMANDANT',
+                canal: canalActif,
+                message: txt
+            };
+
+            if (canalActif === 'ESCADRON') {
+                payload.escadron_id = profilCommandant.escadron_id;
+            } else if (canalActif === 'PRIVE') {
+                const select = document.getElementById('m-select-destinataire');
+                const targetId = select.value;
+                const targetNom = select.options[select.selectedIndex]?.text?.replace('CMDR ', '') || 'PILOTE';
+
+                if (!targetId) {
+                    alert("Veuillez choisir un destinataire avant de transmettre.");
+                    return;
+                }
+                payload.destinataire_id = targetId;
+                payload.destinataire_nom = targetNom;
+            }
+
+            input.value = '';
+            await supabaseApp.from('transmissions').insert([payload]);
+        }
+
+        // --- PILOTES EN JEU ---
+        async function actualiserPilotesEnLigneMobile() {
+            const txt = document.getElementById('m-online-text');
+            const dot = document.getElementById('m-online-dot');
+            const liste = document.getElementById('m-pilotes-liste');
+
+            try {
+                const limite = Math.floor(Date.now() / 1000) - 30;
+                const { data: actifs } = await supabaseApp.from('parametres_app').select('user_id').gte('last_heartbeat', limite);
+
+                if (actifs && actifs.length > 0) {
+                    const ids = actifs.map(a => a.user_id);
+                    const { data: profils } = await supabaseApp.from('profils').select('cmdr_nom, escadron_id').in('user_id', ids).eq('est_approuve', true);
+
+                    txt.innerText = `${profils.length} EN JEU`;
+                    dot.style.background = 'var(--ed-green)';
+
+                    let html = '';
+                    profils.forEach(p => {
+                        html += `
+                            <div style="background: rgba(0,0,0,0.5); border-left: 2px solid var(--ed-green); padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85em;">
+                                <strong style="color: #fff;">CMDR ${(p.cmdr_nom || 'PILOTE').toUpperCase()}</strong>
+                                <span style="color: var(--ed-orange); font-size: 0.8em;">[ ${p.escadron_id || 'INDÉPENDANT'} ]</span>
+                            </div>`;
+                    });
+                    liste.innerHTML = html;
+                } else {
+                    txt.innerText = '0 EN JEU';
+                    dot.style.background = '#666';
+                    liste.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Aucun pilote détecté dans la galaxie.</div>';
+                }
+            } catch (e) {}
+        }
+
+        function ouvrirModalPilotes() { document.getElementById('modal-pilotes').style.display = 'flex'; }
+        function fermerModalPilotes(e) { if (e && e.target.id !== 'modal-pilotes' && !e.target.innerText.includes('✕')) return; document.getElementById('modal-pilotes').style.display = 'none'; }
+    
+        // --- MODULE BUREAU DU DIRECTEUR ---
+        async function ouvrirBureauDirecteur() {
+            if (!profilCommandant || !profilCommandant.est_directeur) return;
+            document.getElementById('modal-bureau-directeur').style.display = 'flex';
+            chargerAttenteDirecteur();
+            chargerMembresDirecteur();
+            chargerAuditDirecteur(); // <-- Ajout de cette ligne
+        }
+
+        function fermerBureauDirecteur(e) {
+            if (e && e.target.id !== 'modal-bureau-directeur') return;
+            document.getElementById('modal-bureau-directeur').style.display = 'none';
+        }
+
+        // 1. Charger les comptes en attente d'approbation
+        async function chargerAttenteDirecteur() {
+            const cont = document.getElementById('dir-liste-attente');
+            try {
+                const { data: attentes, error } = await supabaseApp.from('profils')
+                    .select('user_id, cmdr_nom, email, created_at')
+                    .eq('est_approuve', false)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (attentes && attentes.length > 0) {
+                    let html = '';
+                    attentes.forEach(p => {
+                        const nom = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : (p.email || 'NOUVELLE RECRUE');
+                        html += `
+                            <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange); padding: 8px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                <div>
+                                    <div style="color: #fff; font-weight: bold; font-size: 0.85em;">CMDR ${nom}</div>
+                                    <div style="color: #888; font-size: 0.7em;">${p.email || ''}</div>
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    <button class="m-btn" style="padding: 4px 8px; font-size: 0.75em; border-color: var(--ed-green); color: var(--ed-green); background: rgba(0,255,102,0.1);" onclick="validerPiloteDirecteur('${p.user_id}', true)">VALIDER</button>
+                                    <button class="m-btn" style="padding: 4px 8px; font-size: 0.75em; border-color: var(--ed-red); color: var(--ed-red); background: rgba(255,51,51,0.1);" onclick="validerPiloteDirecteur('${p.user_id}', false)">REFUSER</button>
+                                </div>
+                            </div>`;
+                    });
+                    cont.innerHTML = html;
+                } else {
+                    cont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Aucun pilote en attente d\'approbation.</div>';
+                }
+            } catch (e) {
+                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Erreur de synchronisation des demandes.</div>';
+            }
+        }
+
+        // 2. Valider ou refuser un pilote
+        async function validerPiloteDirecteur(userId, approuve) {
+            try {
+                if (approuve) {
+                    await supabaseApp.from('profils').update({ est_approuve: true }).eq('user_id', userId);
+                } else {
+                    await supabaseApp.from('profils').delete().eq('user_id', userId);
+                }
+                chargerAttenteDirecteur();
+                chargerMembresDirecteur();
+            } catch (e) {
+                alert("Erreur lors du traitement de la recrue.");
+            }
+        }
+
+        // 3. Liste du personnel avec gestion stricte des accréditations (Amiral en lecture seule)
+        async function chargerMembresDirecteur() {
+            const cont = document.getElementById('dir-liste-membres');
+            try {
+                const { data: membres, error } = await supabaseApp.from('profils')
+                    .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate, est_directeur')
+                    .eq('est_approuve', true)
+                    .order('cmdr_nom');
+
+                if (error) throw error;
+
+                if (membres && membres.length > 0) {
+                    let html = '';
+                    membres.forEach(m => {
+                        const nom = m.cmdr_nom ? m.cmdr_nom.toUpperCase() : 'PILOTE';
+                        const estMoi = m.user_id === profilCommandant.user_id;
+
+                        // Badge Amiral en lecture seule (géré uniquement par EDMC / le jeu)
+                        const badgeAmiral = m.est_amiral 
+                            ? '<span style="color: var(--ed-red); border: 1px solid var(--ed-red); background: rgba(255,51,51,0.15); padding: 2px 6px; border-radius: 2px; font-size: 0.7em; font-weight: bold;">AMIRAL</span>' 
+                            : '';
+
+                        // Bouton révoquer l'accès (impossible sur son propre compte)
+                        const btnRevoquer = !estMoi 
+                            ? `<button style="background: rgba(255,51,51,0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 2px 6px; font-size: 0.7em; font-weight: bold; border-radius: 2px; margin-left: auto; cursor: pointer;" onclick="revoquerMembreDirecteur('${m.user_id}')">RÉVOQUER ACCÈS</button>` 
+                            : '';
+
+                        html += `
+                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--ed-blue); padding: 8px 10px; border-radius: 0 4px 4px 0; display: flex; flex-direction: column; gap: 6px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #fff; font-weight: bold; font-size: 0.85em;">CMDR ${nom} ${estMoi ? '<span style="color:var(--ed-blue); font-size:0.75em;">[VOUS]</span>' : ''}</span>
+                                    ${badgeAmiral}
+                                </div>
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                    <button style="padding: 2px 6px; font-size: 0.7em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_officier ? 'var(--ed-green)' : '#444'}; background: ${m.est_officier ? 'rgba(0,255,102,0.2)' : 'transparent'}; color: ${m.est_officier ? 'var(--ed-green)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_officier', ${!m.est_officier})">OFFICIER</button>
+                                    <button style="padding: 2px 6px; font-size: 0.7em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_diplomate ? 'var(--ed-blue)' : '#444'}; background: ${m.est_diplomate ? 'rgba(0,240,255,0.2)' : 'transparent'}; color: ${m.est_diplomate ? 'var(--ed-blue)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_diplomate', ${!m.est_diplomate})">DIPLOMATE</button>
+                                    ${btnRevoquer}
+                                </div>
+                            </div>`;
+                    });
+                    cont.innerHTML = html;
+                }
+            } catch (e) {
+                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Impossible de charger le personnel.</div>';
+            }
+        }
+
+        // 4. Modifier uniquement Officier ou Diplomate (Amiral est bloqué)
+        async function basculerRoleMembre(userId, champ, nouvelleValeur) {
+            if (champ !== 'est_officier' && champ !== 'est_diplomate') return;
+            try {
+                const updateObj = {};
+                updateObj[champ] = nouvelleValeur;
+                await supabaseApp.from('profils').update(updateObj).eq('user_id', userId);
+                chargerMembresDirecteur();
+                chargerQGMobile();
+            } catch (e) {
+                alert("Erreur lors de la mise à jour des accréditations.");
+            }
+        }
+
+        // 5. Révocation complète de l'accès d'un pilote
+        async function revoquerMembreDirecteur(userId) {
+            if (!confirm("Confirmez-vous la révocation des accès de ce pilote au terminal ?")) return;
+            try {
+                await supabaseApp.from('profils').update({
+                    est_approuve: false,
+                    est_officier: false,
+                    est_diplomate: false,
+                    demande_escadron: null
+                }).eq('user_id', userId);
+
+                chargerMembresDirecteur();
+                if (typeof window.chargerAuditDirecteur === 'function') window.chargerAuditDirecteur();
+            } catch (e) {
+                alert("Erreur lors de la révocation de l'accès.");
+            }
+        }
+
+        // 5. Audit Tactique des activités et télémétrie des pilotes
+        window.chargerAuditDirecteur = async function() {
+        const cont = document.getElementById('dir-liste-audit');
+        if (!cont) return;
+        cont.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.8em; text-align: center; padding: 10px;">Interrogation du réseau télémétrique...</div>';
+
+        try {
+            // Requêtes simultanées sur toutes les tables d'activité
+            const [resProfils, resParams, resTransmissions, resOrdres] = await Promise.all([
+                supabaseApp.from('profils').select('user_id, cmdr_nom, email, created_at').eq('est_approuve', true).order('cmdr_nom'),
+                supabaseApp.from('parametres_app').select('user_id, last_heartbeat, telemetrie_usage, factions_favorites'),
+                supabaseApp.from('transmissions').select('id', { count: 'exact', head: true }),
+                supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }).eq('statut', 'ACTIF')
+            ]);
+
+            const profils = resProfils.data || [];
+            const params = resParams.data || [];
+            const nbMsg = resTransmissions.count || 0;
+            const nbOrdres = resOrdres.count || 0;
+
+            const paramsMap = {};
+            let totalPresence7J = 0;
+            let totalCommsAcces = 0;
+            let totalBgsScans = 0;
+            let totalJournalLectures = 0;
+            let totalCommerceScans = 0;
+            let totalCommerceVisites = 0;
+            const setFactions = new Set();
+
+            const nowMs = Date.now();
+            const nowSec = Math.floor(nowMs / 1000);
+            const septJoursMs = 7 * 24 * 3600 * 1000;
+
+            params.forEach(p => {
+                paramsMap[p.user_id] = p;
+                const tel = p.telemetrie_usage || {};
+                const vis = tel.visites_pages || {};
+                const act = tel.interactions || {};
+
+                // 1. Présence 7J
+                if (tel.derniere_visite_web && (nowMs - new Date(tel.derniere_visite_web).getTime() <= septJoursMs)) {
+                    totalPresence7J++;
+                }
+
+                // 2. Comms
+                totalCommsAcces += (vis.comms || 0);
+
+                // 3. Radar & Scans
+                totalBgsScans += (act.scans_systeme_bgs || 0);
+                if (p.factions_favorites) {
+                    let favs = typeof p.factions_favorites === 'string' ? JSON.parse(p.factions_favorites) : p.factions_favorites;
+                    if (Array.isArray(favs)) {
+                        favs.forEach(f => {
+                            const nom = f.faction || f.nom || f.name;
+                            if (nom) setFactions.add(nom.toUpperCase());
+                        });
+                    }
+                }
+
+                // 4. Journal
+                totalJournalLectures += (act.onglets_bgs_journal || 0);
+
+                // 5. Commerce
+                totalCommerceScans += (act.scans_commerce || 0);
+                totalCommerceVisites += (vis.commerce || 0);
+            });
+
+            // Injection dans les 6 cartes macro
+            document.getElementById('kpi-presence').innerText = `${totalPresence7J} / ${profils.length}`;
+            document.getElementById('kpi-comms').innerText = `${totalCommsAcces} ACCÈS (${nbMsg} MSG)`;
+            document.getElementById('kpi-radar').innerText = `${setFactions.size} FACTIONS (${totalBgsScans} SCANS)`;
+            document.getElementById('kpi-ordres').innerText = `${nbOrdres} ORDRES`;
+            document.getElementById('kpi-journal').innerText = `${totalJournalLectures} LECTURES`;
+            document.getElementById('kpi-commerce').innerText = `${totalCommerceScans} SCANS (${totalCommerceVisites} VIS)`;
+
+            // Injection du registre individuel
+            let html = '';
+            profils.forEach(p => {
+                const nom = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : 'INCONNU';
+                const param = paramsMap[p.user_id] || {};
+                const tel = param.telemetrie_usage || {};
+                const visites = tel.visites_pages || {};
+                const actions = tel.interactions || {};
+
+                const enJeu = param.last_heartbeat && (nowSec - param.last_heartbeat < 30);
+                const statutJeu = enJeu 
+                    ? '<span style="color: var(--ed-green); font-weight: bold; font-size: 0.85em;">🟢 EN VOL</span>' 
+                    : '<span style="color: #666; font-size: 0.85em;">⚪ HORS LIGNE</span>';
+
+                let derniereVisite = 'Jamais';
+                if (tel.derniere_visite_web) {
+                    const d = new Date(tel.derniere_visite_web);
+                    derniereVisite = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                }
+
+                const totalActions = (actions.onglets_bgs_missions || 0) + (actions.onglets_bgs_journal || 0) + (actions.scans_systeme_bgs || 0) + (actions.scans_commerce || 0);
+
+                html += `
+                    <div style="background: rgba(0,0,0,0.5); border-left: 3px solid var(--ed-green); padding: 8px 10px; border-radius: 0 4px 4px 0; font-size: 0.8em;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="color: #fff; font-weight: bold;">CMDR ${nom}</span>
+                            ${statutJeu}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #888; font-size: 0.9em; margin-bottom: 4px;">
+                            <span>Dernier accès Web : <strong style="color: var(--ed-blue);">${derniereVisite}</strong></span>
+                            <span>Actions : <strong style="color: var(--ed-orange);">${totalActions}</strong></span>
+                        </div>
+                        <div style="display: flex; gap: 8px; font-size: 0.85em; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 3px;">
+                            <span>QG: <strong style="color:#fff;">${visites.qg || 0}</strong></span>
+                            <span>BGS: <strong style="color:#fff;">${visites.bgs || 0}</strong></span>
+                            <span>COMMS: <strong style="color:#fff;">${visites.comms || 0}</strong></span>
+                            <span>COMMERCE: <strong style="color:#fff;">${visites.commerce || 0}</strong></span>
+                        </div>
+                    </div>`;
+            });
+
+            cont.innerHTML = html;
+
+        } catch (e) {
+            cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Erreur lors de la génération de l\'audit.</div>';
+        }
+    };
+
+    </script>
+</body>
+</html>
