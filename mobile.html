@@ -12,15 +12,6 @@
     
     <link rel="manifest" href="manifest.json?v=3">
     
-    <!-- Redirection PC si écran large -->
-    <script>
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isSmall = window.matchMedia("(max-width: 800px)").matches;
-        if (!isMobile && !isSmall) {
-            window.location.replace("index.html");
-        }
-    </script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
