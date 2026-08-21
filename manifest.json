@@ -1,6 +1,6 @@
 {
-  "name": "Commerce Furtif Tactique",
-  "short_name": "Terminal FC",
+  "name": "EDTEAM",
+  "short_name": "EDTEAM",
   "start_url": "/edteam/",
   "scope": "/edteam/",
   "display": "standalone",
@@ -8,13 +8,13 @@
   "theme_color": "#FF7100",
   "icons": [
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Elite_Dangerous_Logo.svg/192px-Elite_Dangerous_Logo.svg.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Elite_Dangerous_Logo.svg/512px-Elite_Dangerous_Logo.svg.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
