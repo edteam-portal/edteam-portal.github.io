@@ -1,23 +1,20 @@
 {
-  "name": "EDTEAM",
+  "name": "SYS.EDTEAM - Terminal Tactique",
   "short_name": "EDTEAM",
-  "start_url": "./mobile.html",
-  "scope": "./",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#FF7100",
+  "background_color": "#020100",
+  "theme_color": "#020100",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
