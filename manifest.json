@@ -1,7 +1,7 @@
 {
   "name": "EDTEAM",
   "short_name": "EDTEAM",
-  "start_url": "/edteam/",
+  "start_url": "mobile.html",
   "scope": "/edteam/",
   "display": "standalone",
   "background_color": "#000000",
