@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="edteam-elite-dangerous" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EDTEAM</title>
     
     <meta name="mobile-web-app-capable" content="yes">
@@ -1458,10 +1458,17 @@
             } catch (e) {}
         }
 
-        function ouvrirModalPilotes() { document.getElementById('modal-pilotes').style.display = 'flex'; }
-        sonClic();
-        function fermerModalPilotes(e) { if (e && e.target.id !== 'modal-pilotes' && !e.target.innerText.includes('✕')) return; document.getElementById('modal-pilotes').style.display = 'none'; }
-        sonClic();
+        // CE QU'IL FAUT METTRE À LA PLACE
+        function ouvrirModalPilotes() { 
+            sonClic();
+            document.getElementById('modal-pilotes').style.display = 'flex'; 
+        }
+        
+        function fermerModalPilotes(e) { 
+            if (e && e.target.id !== 'modal-pilotes' && !e.target.innerText.includes('✕')) return; 
+            sonClic();
+            document.getElementById('modal-pilotes').style.display = 'none'; 
+        }
         // --- MODULE BUREAU DU DIRECTEUR ---
         async function ouvrirBureauDirecteur() {
             if (!profilCommandant || !profilCommandant.est_directeur) return;
