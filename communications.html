@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <title>SYS.EDTEAM // Terminal de Communication</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root { --ed-orange: #FF7100; --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-blue); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(0, 240, 255, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-blue); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-blue); }
+
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-blue); box-shadow: 0 0 15px rgba(0,240,255,0.5), 0 0 5px var(--ed-blue); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 8s linear infinite; }
+        @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
+
+        /* MENU LATÉRAL */
+        #side-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 60px; background: rgba(10, 10, 10, 0.95); border-right: 1px solid rgba(0, 240, 255, 0.2); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px; }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-blue); }
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-blue); background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--ed-blue); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-blue); }
+
+        .hud-container { width: calc(100% - 60px); max-width: 1500px; height: 95vh; display: flex; flex-direction: column; margin-left: 60px; padding: 20px 30px; box-sizing: border-box; transition: margin-left 0.3s, width 0.3s; }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        /* HEADER CYAN ÉPURÉ */
+        .hud-header { display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; gap: 15px; margin-bottom: 15px; width: 100%; border-bottom: 2px solid var(--ed-blue); padding-bottom: 15px; }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); transition: 0.3s; }
+        .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
+        .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+
+        /* ONGLETS */
+        .tab-bar { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px; }
+        .tab-btn { background: transparent; border: 1px solid rgba(0, 240, 255, 0.2); border-bottom: none; color: var(--ed-blue); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
+        .tab-btn:hover { background: rgba(0, 240, 255, 0.1); opacity: 0.8; }
+        .tab-btn.active { opacity: 1; background: var(--ed-blue); color: #000; font-weight: bold; }
+
+        /* TERMINAL CRT */
+        .crt-terminal { flex-grow: 1; display: flex; flex-direction: column; background-color: #03080A; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 20px 20px; border: 1px solid var(--ed-blue); box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.1); position: relative; overflow: hidden; }
+        .crt-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; z-index: 10; pointer-events: none; }
+        
+        .message-feed { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 5; scroll-behavior: smooth; }
+        
+        .msg-line { display: flex; flex-wrap: wrap; align-items: baseline; font-size: 0.95em; line-height: 1.4; animation: typeIn 0.2s ease-out; position: relative; padding: 4px 8px; border-left: 2px solid transparent; }
+        .msg-line:hover { background: rgba(255,255,255,0.02); }
+        .msg-line.urgent { border-left-color: var(--ed-red); background: rgba(255,51,51,0.05); }
+        .msg-time { color: #555; margin-right: 10px; font-size: 0.85em; }
+        .msg-author { font-weight: bold; margin-right: 8px; }
+        .msg-channel { margin-right: 8px; font-size: 0.85em; letter-spacing: 1px; }
+        .msg-text { color: #ccc; word-break: break-word; flex-grow: 1; }
+        .msg-delete { color: #666; cursor: pointer; font-size: 0.8em; margin-left: 10px; opacity: 0; transition: 0.2s; }
+        .msg-line:hover .msg-delete { opacity: 1; }
+        .msg-delete:hover { color: var(--ed-red); }
+
+        @keyframes typeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* ZONE DE SAISIE */
+        .terminal-input-area { border-top: 1px dashed var(--ed-blue); padding: 15px 20px; display: flex; gap: 15px; background: rgba(0, 240, 255, 0.05); align-items: center; z-index: 5; }
+        .input-prompt { color: var(--ed-blue); font-weight: bold; font-size: 1.2em; animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        
+        .comms-input { flex-grow: 1; background: transparent; border: none; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; outline: none; caret-color: var(--ed-blue); }
+        .comms-input::placeholder { color: #444; }
+        
+        .char-counter { color: #666; font-size: 0.8em; min-width: 60px; text-align: right; }
+        
+        .btn-urgent { background: transparent; border: 1px solid #555; color: #555; padding: 8px 15px; font-family: inherit; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 1px; }
+        .btn-urgent.active { background: rgba(255, 51, 51, 0.1); border-color: var(--ed-red); color: var(--ed-red); box-shadow: inset 0 0 10px rgba(255,51,51,0.3), 0 0 10px rgba(255,51,51,0.2); animation: alertPulse 1.5s infinite; }
+        
+        .btn-send { background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 8px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 2px; }
+        .btn-send:hover { background: var(--ed-blue); color: #000; box-shadow: 0 0 15px var(--ed-blue); }
+        .btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* SÉLECTEUR DESTINATAIRE PRIVÉ */
+        #select-destinataire { background: rgba(0,0,0,0.8); border: 1px solid var(--ed-blue); color: var(--ed-blue); font-family: inherit; padding: 8px; outline: none; display: none; }
+        #select-destinataire option { background: #000; color: #fff; }
+
+        /* MODALES ET POPUPS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(4px); }
+        .modal-content { background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-blue); padding: 30px; max-width: 600px; min-width: 400px; color: #ccc; line-height: 1.6; position: relative; box-shadow: 0 0 30px rgba(0, 240, 255, 0.1); }
+        .modal-title { color: var(--ed-blue); font-size: 1.5em; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px; letter-spacing: 2px; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-blue); cursor: pointer; font-size: 1.2em; font-weight: bold; transition: 0.2s; }
+        .modal-close:hover { color: #fff; transform: scale(1.2); }
+
+        @keyframes alertPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* =========================================
+           PROTOCOLE FAILSAFE (UNIFIÉ)
+           ========================================= */
+        .failsafe-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
+        .failsafe-content { border: 2px solid #FF0000; background: rgba(10, 0, 0, 0.95); padding: 40px 60px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); animation: failsafe-pulse 2s infinite; }
+        @keyframes failsafe-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.2); } 50% { box-shadow: 0 0 60px rgba(255,0,0,0.6); } }
+        .fs-page { display: none; }
+        
+        .fs-auth-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; width: 100%; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; }
+        .fs-auth-btn:hover { background: var(--ed-orange) !important; color: #000 !important; box-shadow: 0 0 15px var(--ed-orange) !important; }
+
+    </style>
+</head>
+<body onload="document.getElementById('main-ui').style.opacity='1';">
+
+    <div class="scanline"></div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu">
+        <div class="nav-link hamburger-btn" onclick="toggleMenu()" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div>
+            <span class="nav-text">MENU</span>
+        </div>
+        <a href="index.html" class="nav-link" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <!-- LE BADGE D'ALERTE RH (Fixé sur l'icône) -->
+                <span id="badge-amiraute" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 10; pointer-events: none; text-align: center;">0</span>
+            </div>
+            <span class="nav-text">QUARTIER GÉNÉRAL</span>
+        </a>
+        <a href="communications.html" class="nav-link active" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+            <span class="nav-text">COMMUNICATIONS</span>
+        </a>
+        <a href="bgs.html" id="nav-bgs-factions" class="nav-link" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <!-- LE BADGE D'ALERTE ESCADRON (Amiral) -->
+                <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; pointer-events: none; text-align: center;">0</span>
+            </div>
+            <span class="nav-text">BGS & FACTIONS</span>
+        </a>
+        <a href="commerce.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <span class="nav-text">COMMERCE FURTIF</span>
+        </a>
+    </nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="opacity: 0; transition: opacity 0.5s ease-out;">
+        
+        <!-- HEADER CYAN ÉPURÉ -->
+        <header class="hud-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- Logo teinté pour garder l'identité mais ancrer le contexte bleu -->
+                <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                    <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#00F0FF" opacity="0.6"/>
+                    <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                </svg>
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-blue); line-height: 1;">TERMINAL DE COMMS</h1>
+                    <span id="cmdr-name-display" style="font-size: 0.6em; color: rgba(0, 240, 255, 0.7); letter-spacing: 3px; font-weight: bold; margin-top: 2px;">CMDR [ EN ATTENTE ]</span>
+                </div>
+            </div>
+            
+            <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; flex-grow: 1; white-space: nowrap; height: 100%; gap: 6px; padding-right: 5px; box-sizing: border-box;">
+                <span class="info-btn" style="color: var(--ed-blue);" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
+                <span class="info-btn" style="color: #aaa;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#aaa'" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-gestion-compte', event)">[ GESTION DU COMPTE ]</span>
+                <span class="info-btn" style="color: #555;" onmouseover="this.style.color='var(--ed-red)'" onmouseout="this.style.color='#555'" onclick="if(typeof deconnexion === 'function') deconnexion()">[ DÉCONNEXION ]</span>
+            </div>
+        </header>
+
+        <!-- ONGLETS -->
+        <nav class="tab-bar">
+            <button class="tab-btn active" onclick="changerCanal('GLOBAL', this)" onmouseenter="sonHover()">FRÉQUENCE OUVERTE</button>
+            <button class="tab-btn" id="btn-tab-escadron" style="display: none;" onclick="changerCanal('ESCADRON', this)" onmouseenter="sonHover()">CANAL ESCADRON</button>
+            <button class="tab-btn" id="btn-tab-coalition" onclick="changerCanal('COALITION', this)" onmouseenter="sonHover()" style="display: none; border-color: #B026FF; color: #B026FF;">RÉSEAU COALITION</button>
+            <button class="tab-btn" onclick="changerCanal('PRIVE', this)" onmouseenter="sonHover()">TRANSMISSIONS PRIVÉES <span id="badge-unread" style="color:#FF3333; display:none;">(•)</span></button>
+        </nav>
+
+        <!-- TERMINAL CRT -->
+        <div class="crt-terminal">
+            <div class="crt-overlay"></div>
+            
+            <div class="message-feed" id="message-feed">
+                <div style="color: #555; font-style: italic; text-align: center; margin-top: 40px;">Synchronisation des archives...</div>
+            </div>
+
+            <div class="terminal-input-area">
+                <span class="input-prompt">>_</span>
+                
+                <select id="select-destinataire">
+                    <option value="">-- SÉLECTIONNEZ UN DESTINATAIRE --</option>
+                </select>
+
+                <input type="text" id="comms-input" class="comms-input" placeholder="Saisissez votre télégramme ici..." maxlength="140" autocomplete="off" onkeyup="updateCounter(event)">
+                
+                <span class="char-counter" id="char-counter">0/140</span>
+                
+                <button id="btn-urgent" class="btn-urgent" onclick="toggleUrgent()" onmouseenter="sonHover()" title="Marquer le message comme prioritaire (Alerte Visuelle)">[!] URGENT</button>
+                <button id="btn-send" class="btn-send" onclick="transmettreMessage()" onmouseenter="sonHover()">TRANSMETTRE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CLÉ API -->
+    <div class="modal-overlay" id="modal-cle-api" onclick="fermerModal('modal-cle-api', event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-cle-api')">X</div>
+            <div class="modal-title">SÉCURITÉ // CLÉ DE LIAISON EDMC</div>
+            <p>Copiez cette clé dans les paramètres de votre plugin EDMC :</p>
+            <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); padding: 15px; text-align: center; margin: 20px 0;">
+                <strong id="api-key-display" style="color:var(--ed-blue); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE (UNIFIÉ) -->
+    <div class="failsafe-overlay" id="failsafe-modal">
+        <div class="failsafe-content" style="max-width: 750px; text-align: left; padding: 30px; position: relative;">
+            <h2 style="text-align: center; margin-bottom: 5px; color: #FF0000; font-size: 2.2em; letter-spacing: 4px; margin-top: 0;">⚠️ PROTOCOLE DE SÉCURITÉ ⚠️</h2>
+            <p id="failsafe-status-text" style="text-align: center; color: var(--ed-orange); font-size: 1.1em; font-weight: bold; margin-bottom: 25px; text-transform: uppercase;">AUCUN SIGNAL REÇU DEPUIS VOTRE VAISSEAU</p>
+
+            <!-- PAGE 0 : MENU PRINCIPAL -->
+            <div id="fs-page-main" class="fs-page" style="display: block;">
+                <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95em;">Pour accéder au terminal, votre système doit être correctement synchronisé. Identifiez votre problème :</p>
+
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-edmc')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS LANCÉ EDMC (OU JE NE L'AI PAS INSTALLÉ)
+                </button>
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-plugin')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 2 ]</strong> JE N'AI PAS ENCORE AJOUTÉ LE PLUGIN "SYS.EDTEAM"
+                </button>
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-key')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 3 ]</strong> LE PLUGIN EST LÀ, MAIS JE N'AI PAS MIS MA CLÉ
+                </button>
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em; border-color: var(--ed-orange); color: var(--ed-orange);" onclick="navFailsafe('fs-page-game')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 4 ]</strong> TOUT EST LÀ, MAIS JE N'AI PAS ENCORE LANCÉ LE JEU
+                </button>
+                
+                <!-- BOUTON DÉCONNEXION URGENT ! -->
+                <button class="fs-auth-btn" style="text-align: center; padding: 10px; margin-top: 20px; font-size: 0.9em; border-color: #555; color: #aaa; background: transparent;" onclick="if(typeof deconnexion==='function') deconnexion()" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    [ DÉCONNEXION DU TERMINAL ]
+                </button>
+            </div>
+
+            <!-- PAGE 1 : MANUEL EDMC -->
+            <div id="fs-page-edmc" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 1 ] : MOTEUR EDMC</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">L'application <strong>Elite Dangerous Market Connector (EDMC)</strong> est obligatoire.<br><br>
+                1. Téléchargez EDMC via le lien sécurisé ci-dessous et installez-le.<br>
+                2. Lancez l'application sur votre PC.<br>
+                3. Connectez-y votre compte Frontier / Elite Dangerous.</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="https://github.com/EDCD/EDMarketConnector/releases/latest" target="_blank" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">🌐 TÉLÉCHARGER EDMC</a>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 2 : MANUEL PLUGIN -->
+            <div id="fs-page-plugin" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 2 ] : LE PLUGIN EDTEAM</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Pour que EDMC puisse nous parler, il lui faut notre module de communication privé.<br><br>
+                1. Téléchargez le fichier ZIP ci-dessous.<br>
+                2. Sur EDMC, allez dans <strong>Fichier > Paramètres > Plugins</strong>.<br>
+                3. Cliquez sur "Ouvrir".<br>
+                4. Décompressez le dossier SYS_EDTEAM à l'intérieur.<br>
+                5. <strong>Fermez et relancez complètement EDMC.</strong></p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="SYS_EDTEAM.zip" download="SYS_EDTEAM.zip" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: #00FF66; color: #00FF66; background: rgba(0, 255, 102, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';">📦 TÉLÉCHARGER LE PLUGIN</a>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 3 : MANUEL CLÉ -->
+            <div id="fs-page-key" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 3 ] : LA CLÉ DE LIAISON</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Si le module est installé, il faut l'autoriser à transmettre en votre nom.<br><br>
+                1. Copiez la clé ci-dessous.<br>
+                2. Dans EDMC, allez dans <strong>Fichier > Paramètres</strong>.<br>
+                3. Allez dans l'onglet <strong>SYS.EDTEAM</strong>.<br>
+                4. Collez la clé et validez (OK).</p>
+                <div style="text-align: center; background: rgba(0, 0, 0, 0.8); border: 1px dashed var(--ed-blue); padding: 10px; margin-top: 15px;">
+                    <strong id="failsafe-api-key" style="color:var(--ed-orange); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="if(typeof copierNav==='function') copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 4 : MANUEL LANCEMENT JEU -->
+            <div id="fs-page-game" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
+                1. Lancez <strong>Elite Dangerous</strong>.<br>
+                2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
+                3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
+                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GESTION DU COMPTE -->
+    <div class="modal-overlay" id="modal-gestion-compte" onclick="fermerModal('modal-gestion-compte', event)" style="z-index: 3500;">
+        <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-gestion-compte')">X</div>
+            <div style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">⚙️ GESTION DU COMPTE</div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- EMAIL -->
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                    <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">NOUVELLE ADRESSE E-MAIL :</label>
+                    <input type="email" id="input-nouveau-email" class="search-input" placeholder="nouvelle@adresse.com" style="width: 100%; border-color: #555; margin-bottom: 10px; box-sizing: border-box;">
+                    <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierEmailCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">METTRE À JOUR L'E-MAIL</button>
+                </div>
+
+                <!-- MOT DE PASSE -->
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                    <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">NOUVEAU MOT DE PASSE :</label>
+                    <input type="password" id="input-nouveau-mdp" class="search-input" placeholder="********" style="width: 100%; border-color: #555; margin-bottom: 10px; box-sizing: border-box;">
+                    <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierMdpCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">METTRE À JOUR LE MOT DE PASSE</button>
+                </div>
+
+                <!-- DESTRUCTION (BOUTON ROUGE) -->
+                <div style="margin-top: 10px; border-top: 1px solid #FF3333; padding-top: 20px;">
+                    <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 12px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 1em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 15px #FF3333';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';" onclick="autoDetruireCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">⚠️ SUPPRIMER DÉFINITIVEMENT MON COMPTE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CONFIRMATION TACTIQUE (Remplace le confirm() Windows) -->
+    <div class="modal-overlay" id="modal-confirmation" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 500px; text-align: center; border: 1px solid var(--ed-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.2);" onclick="event.stopPropagation()">
+            <div id="confirm-titre" style="color: var(--ed-red); font-size: 1.4em; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px;">⚠️ ATTENTION</div>
+            <p id="confirm-message" style="color: #ccc; font-size: 0.95em; line-height: 1.5; margin-bottom: 30px;">Êtes-vous sûr ?</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="btn-confirm-cancel" style="background: rgba(255, 255, 255, 0.05); border: 1px solid #666; color: #aaa; padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1;">[ ANNULER ]</button>
+                <button id="btn-confirm-ok" style="background: rgba(255, 51, 51, 0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1; box-shadow: inset 0 0 10px rgba(255, 51, 51, 0.2);">[ CONFIRMER ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO ENGINE & LOGIC -->
+    <script>
+        let audioCtx;
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playUI(type) {
+            if(!audioCtx) return;
+            const t = audioCtx.currentTime;
+            if (type === 'hover') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(2000, t); osc.frequency.exponentialRampToValueAtTime(1000, t + 0.02);
+                gain.gain.setValueAtTime(0.01, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.02);
+            } else if (type === 'click') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(1500, t); osc.frequency.exponentialRampToValueAtTime(500, t + 0.03);
+                gain.gain.setValueAtTime(0.03, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.03);
+            } else if (type === 'type') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(800 + Math.random()*200, t);
+                gain.gain.setValueAtTime(0.02, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.01);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.01);
+            } else if (type === 'receive') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, t); osc.frequency.setValueAtTime(1318.51, t + 0.1); 
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.05, t + 0.02); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+        function sonHover() { playUI('hover'); }
+        function sonClic() { playUI('click'); }
+        function sonType() { playUI('type'); }
+
+        function toggleMenu() {
+            sonClic();
+            document.getElementById('side-menu').classList.toggle('open');
+            document.body.classList.toggle('menu-open');
+        }
+
+        function navFailsafe(pageId) {
+            sonClic();
+            document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        // Gestion de la Modale de Sécurité
+        function ouvrirModal(id, e) { if (e) e.stopPropagation(); sonClic(); document.getElementById(id).style.display = 'flex'; }
+        function fermerModal(id, e) { if (e && e.target !== document.getElementById(id)) return; sonClic(); document.getElementById(id).style.display = 'none'; }
+        window.copierNav = function(texte, element, event) { if (event) event.stopPropagation(); navigator.clipboard.writeText(texte).then(() => { sonClic(); const original = element.innerHTML; element.innerHTML = "[ COPIÉ ]"; element.style.color = "#00FF00"; setTimeout(() => { element.innerHTML = original; element.style.color = ""; }, 1500); }); };
+
+        document.body.addEventListener('click', initAudio, { once: true });
+
+        // SUPABASE INIT
+        const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
+        const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let profilCommandant = null;
+        let canalActif = 'GLOBAL';
+        let isUrgent = false;
+        let listePilotes = [];
+        let maCoalitionId = null; // NOUVELLE VARIABLE
+
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            
+            const { data } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
+            if (data && data.est_approuve) {
+                
+                // 🛑 NOUVEAU : LE CADENAS FAILSAFE
+                if (!data.cmdr_nom) {
+                    document.getElementById('failsafe-modal').style.display = 'flex';
+                    document.getElementById('failsafe-status-text').innerText = "IDENTIFICATION COMMANDANT MANQUANTE";
+                    document.getElementById('main-ui').style.display = 'none'; // On cache l'interface en arrière-plan
+                    return; // On coupe le moteur ici, la page ne chargera pas plus loin !
+                }
+
+                profilCommandant = data;
+
+                // AFFICHAGE DU BOUTON AMIRAUTÉ (Si Officier ou Directeur)
+                if (data.est_amiral || data.est_directeur) {
+                    const navAmiraute = document.getElementById('nav-bureau-amiraute');
+                    if (navAmiraute) navAmiraute.style.display = 'flex';
+                    actualiserBadgeAmiraute();
+                }
+
+                // AFFICHAGE DU BGS ET DES COMMS ESCADRON (Si le pilote fait partie d'un escadron)
+                if (data.escadron_id) {
+                    const navBgs = document.getElementById('nav-bgs-factions');
+                    if (navBgs) navBgs.style.display = 'flex';
+                    
+                    // >>> LIGNES À AJOUTER <<<
+                    const btnEscadron = document.getElementById('btn-tab-escadron');
+                    if (btnEscadron) btnEscadron.style.display = 'inline-block';
+                    
+                    // --- NOUVEAU : VÉRIFICATION COALITION ---
+                    const { data: coalData } = await supabaseApp.from('coalition_membres')
+                        .select('coalition_id')
+                        .eq('escadron_tag', data.escadron_id)
+                        .maybeSingle();
+                        
+                    if (coalData) {
+                        maCoalitionId = coalData.coalition_id;
+                        document.getElementById('btn-tab-coalition').style.display = 'inline-block';
+                    }
+                }
+
+                // PROTECTION CMDR_NOM
+                if (data.cmdr_nom) {
+                    document.getElementById('cmdr-name-display').innerText = 'CMDR ' + data.cmdr_nom.toUpperCase();
+                }
+                if (data.cle_api) {
+                    document.getElementById('api-key-display').innerText = data.cle_api;
+                }
+                
+                chargerListePilotes();
+                chargerHistorique();
+                ecouterTransmissions();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function deconnexion() { await supabaseApp.auth.signOut(); location.href = 'index.html'; }
+
+        // --- GESTION DE L'INTERFACE ---
+        function changerCanal(nouveauCanal, btn) {
+            if (canalActif === nouveauCanal) return;
+            sonClic();
+            canalActif = nouveauCanal;
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const selectDest = document.getElementById('select-destinataire');
+            const inputField = document.getElementById('comms-input');
+
+            if (nouveauCanal === 'PRIVE') {
+                selectDest.style.display = 'block';
+                inputField.placeholder = "Saisissez votre message privé...";
+                document.getElementById('badge-unread').style.display = 'none';
+            } else {
+                selectDest.style.display = 'none';
+                inputField.placeholder = "Saisissez votre télégramme public...";
+            }
+
+            chargerHistorique();
+        }
+
+        function toggleUrgent() {
+            sonClic();
+            isUrgent = !isUrgent;
+            const btn = document.getElementById('btn-urgent');
+            if (isUrgent) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+
+        function updateCounter(e) {
+            if (e.key !== 'Enter' && e.key !== 'Backspace') sonType();
+            const input = document.getElementById('comms-input');
+            document.getElementById('char-counter').innerText = `${input.value.length}/140`;
+            if (e.key === 'Enter') transmettreMessage();
+        }
+
+        // --- LOGIQUE SUPABASE ---
+        async function chargerListePilotes() {
+            const { data } = await supabaseApp.from('profils').select('user_id, cmdr_nom');
+            if (data) {
+                listePilotes = data;
+                const select = document.getElementById('select-destinataire');
+                data.forEach(p => {
+                    if (p.user_id !== profilCommandant.user_id && p.cmdr_nom) {
+                        const opt = document.createElement('option');
+                        opt.value = p.user_id;
+                        opt.innerText = `CMDR ${p.cmdr_nom.toUpperCase()}`;
+                        select.appendChild(opt);
+                    }
+                });
+            }
+        }
+
+        async function chargerHistorique() {
+            const feed = document.getElementById('message-feed');
+            feed.innerHTML = '<div style="color: var(--ed-blue); text-align: center; margin-top: 40px;">> DECRYPTAGE EN COURS...</div>';
+            
+            try {
+                let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(50);
+                
+                if (canalActif === 'GLOBAL') {
+                    query = query.eq('canal', 'GLOBAL');
+                } else if (canalActif === 'ESCADRON') {
+                    query = query.eq('canal', 'ESCADRON').eq('escadron_id', profilCommandant.escadron_id);
+                } else if (canalActif === 'COALITION') {
+                    query = query.eq('canal', 'COALITION').eq('coalition_id', maCoalitionId);
+                } else if (canalActif === 'PRIVE') {
+                    query = query.eq('canal', 'PRIVE').or(`destinataire_id.eq.${profilCommandant.user_id},expediteur_id.eq.${profilCommandant.user_id}`);
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                feed.innerHTML = '';
+                if (data.length === 0) {
+                    feed.innerHTML = '<div style="color: #555; text-align: center; margin-top: 40px;">> AUCUN SIGNAL DÉTECTÉ SUR CETTE FRÉQUENCE.</div>';
+                } else {
+                    data.forEach(msg => afficherMessage(msg, false));
+                    if (canalActif === 'PRIVE') {
+                        const unreadIds = data.filter(m => m.destinataire_id === profilCommandant.user_id && !m.lu).map(m => m.id);
+                        if (unreadIds.length > 0) {
+                            supabaseApp.from('transmissions').update({ lu: true }).in('id', unreadIds).then();
+                        }
+                    }
+                }
+                feed.scrollTop = feed.scrollHeight;
+            } catch (e) {
+                feed.innerHTML = '<div style="color: red; text-align: center; margin-top: 40px;">> ERREUR DE SYNCHRONISATION.</div>';
+            }
+        }
+
+        function afficherMessage(msg, animate = true) {
+            const feed = document.getElementById('message-feed');
+            
+            if (feed.innerHTML.includes('DECRYPTAGE') || feed.innerHTML.includes('AUCUN SIGNAL')) {
+                feed.innerHTML = '';
+            }
+
+            const d = new Date(msg.created_at);
+            const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+            
+            let auteurColor = (msg.expediteur_id === profilCommandant.user_id) ? 'var(--ed-blue)' : '#fff';
+            let canalTag = "";
+            let deleteBtn = "";
+
+            if (msg.canal === 'GLOBAL') canalTag = `<span style="color:#888;">[GLOBAL] :</span>`;
+            else if (msg.canal === 'ESCADRON') canalTag = `<span style="color:var(--ed-orange);">[ESCADRON] :</span>`;
+            else if (msg.canal === 'COALITION') canalTag = `<span style="color:#B026FF; font-weight:bold;">[${msg.escadron_id || 'ALLIÉ'}] :</span>`;
+            else if (msg.canal === 'PRIVE') {
+                if (msg.expediteur_id === profilCommandant.user_id) {
+                    const nomDest = listePilotes.find(p => p.user_id === msg.destinataire_id)?.cmdr_nom || 'INCONNU';
+                    canalTag = `<span style="color:var(--ed-green);">[À: ${nomDest.toUpperCase()}] :</span>`;
+                } else {
+                    canalTag = `<span style="color:var(--ed-green);">[PRIVÉ] :</span>`;
+                }
+                deleteBtn = `<span class="msg-delete" onclick="supprimerMessage('${msg.id}', this)" title="Effacer l'archive">[x]</span>`;
+            }
+
+            const urgentClass = msg.est_urgent ? 'urgent' : '';
+            const urgentTag = msg.est_urgent ? '<span style="color:var(--ed-red); font-weight:bold; margin-right:5px;">[!]</span>' : '';
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg-line ${urgentClass}`;
+            if (!animate) msgDiv.style.animation = 'none';
+            msgDiv.innerHTML = `
+                <span class="msg-time">[${timeStr}]</span>
+                <span class="msg-author" style="color: ${auteurColor};">CMDR ${msg.expediteur_nom} ></span>
+                <span class="msg-channel">${canalTag}</span>
+                <span class="msg-text">${urgentTag}${msg.message}</span>
+                ${deleteBtn}
+            `;
+            
+            feed.appendChild(msgDiv);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function transmettreMessage() {
+            const input = document.getElementById('comms-input');
+            const texte = input.value.trim();
+            const destId = document.getElementById('select-destinataire').value;
+            const btn = document.getElementById('btn-send');
+
+            if (!texte) return;
+            if (canalActif === 'PRIVE' && !destId) {
+                alert("Sélectionnez un destinataire."); return;
+            }
+
+            sonClic();
+            btn.disabled = true;
+            btn.innerText = "ENVOI...";
+
+            const payload = {
+                expediteur_id: profilCommandant.user_id,
+                expediteur_nom: profilCommandant.cmdr_nom || 'INCONNU', // <-- AJOUT DE LA SÉCURITÉ ICI
+                canal: canalActif,
+                message: texte,
+                est_urgent: isUrgent
+            };
+
+            if (canalActif === 'ESCADRON' || canalActif === 'COALITION') payload.escadron_id = profilCommandant.escadron_id;
+            if (canalActif === 'COALITION') payload.coalition_id = maCoalitionId;
+            if (canalActif === 'PRIVE') payload.destinataire_id = destId;
+
+            try {
+                const { error } = await supabaseApp.from('transmissions').insert([payload]);
+                if (error) throw error;
+                
+                input.value = '';
+                document.getElementById('char-counter').innerText = `0/140`;
+                
+                if (isUrgent) toggleUrgent();
+
+            } catch (e) {
+                console.error(e);
+                alert("Échec de la transmission.");
+            }
+            
+            btn.disabled = false;
+            btn.innerText = "TRANSMETTRE";
+            input.focus();
+        }
+
+        async function supprimerMessage(id, btnElement) {
+            sonClic();
+            try {
+                const { error } = await supabaseApp.from('transmissions').delete().eq('id', id);
+                if (error) throw error;
+                btnElement.parentElement.style.display = 'none';
+            } catch(e) { console.error("Erreur suppression:", e); }
+        }
+
+        // --- ECOUTE TEMPS RÉEL SUR CETTE PAGE ---
+        function ecouterTransmissions() {
+            supabaseApp.channel('page:transmissions')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
+                    const msg = payload.new;
+                    
+                    let afficherDirectement = false;
+                    if (canalActif === 'GLOBAL' && msg.canal === 'GLOBAL') afficherDirectement = true;
+                    if (canalActif === 'ESCADRON' && msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) afficherDirectement = true;
+                    if (canalActif === 'COALITION' && msg.canal === 'COALITION' && msg.coalition_id === maCoalitionId) afficherDirectement = true;
+                    if (canalActif === 'PRIVE' && msg.canal === 'PRIVE' && (msg.destinataire_id === profilCommandant.user_id || msg.expediteur_id === profilCommandant.user_id)) afficherDirectement = true;
+
+                    if (afficherDirectement) {
+                        playUI('receive');
+                        afficherMessage(msg, true);
+                        
+                        if (canalActif === 'PRIVE' && msg.destinataire_id === profilCommandant.user_id) {
+                            supabaseApp.from('transmissions').update({ lu: true }).eq('id', msg.id).then();
+                        }
+                    } else if (msg.destinataire_id === profilCommandant.user_id && msg.canal === 'PRIVE') {
+                        document.getElementById('badge-unread').style.display = 'inline';
+                        playUI('receive');
+                    }
+                })
+                .subscribe();
+        }
+
+        async function actualiserBadgeAmiraute() {
+            if (!profilCommandant) return;
+            
+            // Les deux icônes du menu latéral
+            const badgeDirecteur = document.getElementById('badge-amiraute'); // Sur l'icône QG
+            const badgeEscadron = document.getElementById('badge-escadron'); // Sur l'icône BGS
+            
+            let totalDirecteur = 0;
+            let totalEscadron = 0;
+
+            try {
+                // 1. STATUT DIRECTEUR : Les attentes d'accès au terminal
+                if (profilCommandant.est_directeur) {
+                    const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).neq('est_approuve', true);
+                    if (!error && count) totalDirecteur = count;
+                }
+                
+                // 2. STATUT AMIRAL : Les candidatures pour rejoindre l'escadron
+                if (profilCommandant.est_amiral && profilCommandant.escadron_id) {
+                    const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).eq('demande_escadron', profilCommandant.escadron_id);
+                    if (!error && count) totalEscadron = count;
+                }
+
+                // --- MISE À JOUR VISUELLE ---
+
+                // A. Pastille du QG (Rôle Directeur)
+                if (badgeDirecteur) {
+                    if (totalDirecteur > 0) {
+                        badgeDirecteur.innerText = totalDirecteur;
+                        badgeDirecteur.style.display = 'inline-block';
+                    } else {
+                        badgeDirecteur.style.display = 'none';
+                    }
+                }
+
+                // B. Pastille du BGS (Rôle Amiral)
+                if (badgeEscadron) {
+                    if (totalEscadron > 0) {
+                        badgeEscadron.innerText = totalEscadron;
+                        badgeEscadron.style.display = 'inline-block';
+                    } else {
+                        badgeEscadron.style.display = 'none';
+                    }
+                }
+
+                // C. Pastille de l'onglet spécifique (Uniquement dans index.html)
+                const badgeOngletDir = document.getElementById('badge-onglet-directeur');
+                if (badgeOngletDir) {
+                    if (totalDirecteur > 0) {
+                        badgeOngletDir.innerText = totalDirecteur;
+                        badgeOngletDir.style.display = 'inline-block';
+                    } else {
+                        badgeOngletDir.style.display = 'none';
+                    }
+                }
+
+            } catch (e) { console.error("Erreur calcul des badges", e); }
+        }
+
+        // --- GESTION DU COMPTE PILOTE ---
+
+        async function modifierEmailCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            const nouvelEmail = document.getElementById('input-nouveau-email').value.trim();
+            if (!nouvelEmail) return;
+
+            try {
+                const { error } = await supabaseApp.auth.updateUser({ email: nouvelEmail });
+                if (error) throw error;
+                
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("REQUÊTE ENVOYÉE", "Un lien de confirmation a été expédié. Vérifiez votre boîte mail.<br><br>Le changement ne prendra effet qu'après validation.", "var(--ed-blue)");
+                } else {
+                    alert("Un lien de confirmation a été envoyé. Vérifiez vos emails.");
+                }
+                
+                document.getElementById('input-nouveau-email').value = "";
+                fermerModal('modal-gestion-compte');
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR", "Impossible de modifier l'adresse e-mail.", "#FF3333");
+            }
+        }
+
+        async function modifierMdpCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            const nouveauMdp = document.getElementById('input-nouveau-mdp').value.trim();
+            if (!nouveauMdp || nouveauMdp.length < 6) {
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR SÉCURITÉ", "La clé d'accès doit contenir au moins 6 caractères.", "#FF3333");
+                return;
+            }
+
+            try {
+                const { error } = await supabaseApp.auth.updateUser({ password: nouveauMdp });
+                if (error) throw error;
+                
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("SUCCÈS", "Vos codes d'accès ont été mis à jour avec succès.", "#00FF66");
+                } else {
+                    alert("Mot de passe mis à jour !");
+                }
+                
+                document.getElementById('input-nouveau-mdp').value = "";
+                fermerModal('modal-gestion-compte');
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR", "Impossible de modifier le mot de passe.", "#FF3333");
+            }
+        }
+
+        async function autoDetruireCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            
+            const messageAlerte = "⚠️ AVERTISSEMENT CRITIQUE : La destruction de votre compte est IMMÉDIATE et IRRÉVERSIBLE. Toutes vos données seront purgées des serveurs.<br><br>Confirmez-vous l'auto-destruction ?";
+            
+            // Appel propre au nouveau système de confirmation holographique
+            const confirmation = await demanderConfirmation("⚠️ AUTO-DESTRUCTION", messageAlerte, "#FF3333");
+
+            if (!confirmation) return;
+
+            try {
+                // On ferme la fenêtre de gestion pour faire propre pendant que la requête part
+                fermerModal('modal-gestion-compte');
+
+                const { error } = await supabaseApp.rpc('supprimer_mon_compte');
+                if (error) throw error;
+                
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+                
+            } catch(e) {
+                console.error(e);
+                afficherAlerte("ÉCHEC SYSTÈME", "Erreur lors du protocole de destruction.", "#FF3333");
+            }
+        }
+
+        // --- MOTEUR DE CONFIRMATION TACTIQUE (Remplace confirm) ---
+        window.demanderConfirmation = function(titre, message, couleurHex) {
+            return new Promise((resolve) => {
+                if (typeof sonClic === 'function') sonClic();
+                const modal = document.getElementById('modal-confirmation');
+                const titreEl = document.getElementById('confirm-titre');
+                const messageEl = document.getElementById('confirm-message');
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancel');
+                const contentEl = modal.querySelector('.modal-content');
+
+                // Stylisation dynamique (Rouge pour destruction, Orange pour démission, etc.)
+                titreEl.innerHTML = titre;
+                titreEl.style.color = couleurHex;
+                titreEl.style.borderColor = couleurHex;
+                messageEl.innerHTML = message;
+                
+                contentEl.style.borderColor = couleurHex;
+                contentEl.style.boxShadow = `0 0 30px ${couleurHex}40`;
+                
+                btnOk.style.color = couleurHex;
+                btnOk.style.borderColor = couleurHex;
+                btnOk.style.background = `${couleurHex}15`;
+                btnOk.style.boxShadow = `inset 0 0 10px ${couleurHex}30`;
+                
+                // Effets de survol
+                btnOk.onmouseover = () => { btnOk.style.background = couleurHex; btnOk.style.color = '#000'; };
+                btnOk.onmouseout = () => { btnOk.style.background = `${couleurHex}15`; btnOk.style.color = couleurHex; };
+                btnCancel.onmouseover = () => { btnCancel.style.background = '#333'; btnCancel.style.color = '#fff'; };
+                btnCancel.onmouseout = () => { btnCancel.style.background = 'rgba(255, 255, 255, 0.05)'; btnCancel.style.color = '#aaa'; };
+
+                modal.style.display = 'flex';
+
+                const nettoyage = () => {
+                    modal.style.display = 'none';
+                    btnOk.onclick = null;
+                    btnCancel.onclick = null;
+                };
+
+                btnOk.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(true); };
+                btnCancel.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(false); };
+            });
+        };
+
+    </script>
+</body>
+</html>

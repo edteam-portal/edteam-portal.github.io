@@ -1,0 +1,2464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <link rel="manifest" href="manifest.json?v=3">
+    <title>SYS.EDTEAM // Quartier Général</title>
+    
+    <script>
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmallScreen = window.matchMedia("(max-width: 800px)").matches;
+        if (isMobileDevice || isSmallScreen) { window.location.replace("mobile.html"); }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(255, 113, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-orange); }
+        * { scrollbar-width: thin; scrollbar-color: var(--ed-orange) rgba(0,0,0,0.6); }
+
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-dim); animation: scan 10s linear infinite; pointer-events: none; z-index: 100; }
+        @keyframes scan { 0% { top: -10px; } 100% { top: 100%; } }
+        
+        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
+        .boot-btn { margin-top: 40px; padding: 10px 30px; border: 1px solid var(--ed-orange); background: transparent; color: var(--ed-orange); font-size: 1.2em; font-family: 'Share Tech Mono', monospace; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .boot-btn:hover { background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-glow); }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
+
+        /* =========================================
+           MENU LATÉRAL TACTIQUE (HAMBURGER)
+           ========================================= */
+        #side-menu {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 60px;
+            background: rgba(10, 10, 10, 0.95); border-right: 1px solid var(--ed-orange-dim);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px;
+        }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-orange); }
+        
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); border-left: 3px solid var(--ed-orange); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }
+
+        /* =========================================
+           CONTENEUR CENTRAL DYNAMIQUE
+           ========================================= */
+        .hud-container { 
+            width: calc(100% - 60px); max-width: 1500px; height: 95vh; display: flex; flex-direction: column; 
+            margin-left: 60px; padding: 20px 30px; box-sizing: border-box;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        .hud-header { display: flex; flex-direction: column; margin-bottom: 15px; flex-shrink: 0; }
+        #fc-inventory-percent { font-size: 0.9em; color: #fff; letter-spacing: 2px; font-weight: bold; background: rgba(0, 240, 255, 0.08); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
+        .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+
+        /* ONGLETS QG */
+        .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px; }
+        .tab-bar { display: flex; gap: 5px; }
+        .tab-btn { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
+        .tab-btn:hover { background: rgba(255, 113, 0, 0.1); opacity: 0.8; }
+        .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
+
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .data-row { display: flex; flex-direction: column; border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 6px; background: rgba(10, 5, 0, 0.6); padding: 18px 25px; margin-bottom: 12px; transition: all 0.15s ease-out; }
+        .row-top { display: flex; justify-content: space-between; font-size: 1.15em; margin-bottom: 8px; }
+        .row-bottom { display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; align-items: flex-end; }
+        
+        #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-family: 'Share Tech Mono', monospace; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
+        
+        /* Modal, Auth et Failsafe (Raccourcis pour lisibilité) */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--ed-bg); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .auth-box { border: 2px solid var(--ed-orange); padding: 40px; background: rgba(10, 5, 0, 0.9); width: 100%; max-width: 400px; text-align: center; }
+        .auth-input { width: 100%; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 12px; margin-bottom: 15px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; outline: none;}
+        .auth-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; cursor: pointer; margin-bottom: 10px;}
+        /* =========================================
+           PROTOCOLE FAILSAFE (UNIFIÉ)
+           ========================================= */
+        .failsafe-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
+        .failsafe-content { border: 2px solid #FF0000; background: rgba(10, 0, 0, 0.95); padding: 40px 60px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); animation: failsafe-pulse 2s infinite; }
+        @keyframes failsafe-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.2); } 50% { box-shadow: 0 0 60px rgba(255,0,0,0.6); } }
+        .fs-page { display: none; }
+        
+        .fs-auth-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; width: 100%; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; }
+        .fs-auth-btn:hover { background: var(--ed-orange) !important; color: #000 !important; box-shadow: 0 0 15px var(--ed-orange) !important; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;}
+        .modal-content { background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; max-width: 600px; color: #ccc; position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- SAS D'AUTHENTIFICATION ÉPURÉ -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2>IDENTIFICATION</h2>
+            <input type="email" id="auth-email" class="auth-input" placeholder="EMAIL COMMANDANT">
+            <input type="password" id="auth-password" class="auth-input" placeholder="MOT DE PASSE">
+            
+            <button class="auth-btn" id="btn-login" onclick="tenterConnexion()">CONNEXION</button>
+            <button class="auth-btn" id="btn-register" style="border-color: #555; color: #aaa;" onclick="tenterInscription()">DEMANDER UN ACCÈS</button>
+            
+            <div id="auth-msg"></div>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <span style="color: #888; font-size: 0.8em; cursor: pointer; text-decoration: underline; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#888'" onclick="recupererMotDePasse()" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                [ MOT DE PASSE OUBLIÉ ? ]
+            </span>
+        </div>
+    </div>
+
+    <!-- BOOT SCREEN -->
+    <div class="scanline"></div>
+    <div id="holo-tooltip"></div>
+    <div id="boot-screen" onclick="bootSystem()">
+        <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 120px; width: 120px; filter: drop-shadow(0 0 15px var(--ed-orange-dim));">
+            <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+            <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+            <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+        </svg>
+        <h1 style="font-size: 3em; margin: 20px 0 0 0; letter-spacing: 5px; text-align: center;">SYS.EDTEAM</h1>
+        <p style="letter-spacing: 2px; color: #666; text-align: center;">TERMINAL DU QUARTIER GÉNÉRAL</p>
+        <button class="boot-btn" style="margin-top: 50px;">INITIALISER</button>
+    </div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu">
+        <div class="nav-link hamburger-btn" onclick="toggleMenu()" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div>
+            <span class="nav-text">MENU</span>
+        </div>
+        <a href="index.html" class="nav-link active" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <!-- LE BADGE D'ALERTE RH (Fixé sur l'icône) -->
+                <span id="badge-amiraute" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; pointer-events: none; text-align: center; opacity: 1 !important; visibility: visible !important;">0</span>
+            </div>
+            <span class="nav-text">QUARTIER GÉNÉRAL</span>
+        </a>
+        <a href="communications.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+            <span class="nav-text">COMMUNICATIONS</span>
+        </a>
+        <a href="bgs.html" id="nav-bgs-factions" class="nav-link" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <!-- LE BADGE D'ALERTE ESCADRON (Amiral) -->
+                <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; pointer-events: none; text-align: center;">0</span>
+            </div>
+            <span class="nav-text">BGS & FACTIONS</span>
+        </a>
+        <a href="commerce.html" class="nav-link" onmouseenter="sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <span class="nav-text">COMMERCE FURTIF</span>
+        </a>
+    </nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0;">
+        
+        <!-- VOTRE BARRE SUPÉRIEURE INTACTE -->
+        <header class="hud-header" style="display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; flex-wrap: nowrap; gap: 15px; margin-bottom: 15px; width: 100%; border-bottom: 2px solid var(--ed-orange); padding-bottom: 15px;">
+            <div style="display: flex; align-items: stretch; gap: 15px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 45px; height: 45px;">
+                        <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                        <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                        <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                    </svg>
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: var(--ed-orange); line-height: 1; white-space: nowrap;">EDTEAM</h1>
+                        <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
+                    </div>
+                </div>
+                <div id="fc-inventory-percent" style="margin: 0; white-space: nowrap; display: flex; align-items: center; cursor: help; padding: 4px 15px; box-sizing: border-box;"
+                     onmouseenter="showHoloTooltip(event, '⚠️ TONNAGE', 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
+                     <span style="color: var(--ed-orange);">EN ATTENTE EDMC...</span>
+                </div>
+                <div class="finances-box" style="display: flex; flex-direction: column; text-align: right; font-size: 0.85em; letter-spacing: 1px; justify-content: center; gap: 3px; background: rgba(0, 240, 255, 0.05); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                     onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'SYNCHRONISATION BANCAIRE<br><span style=\'color:#00FF66; font-size:0.85em;\'>> VAISSEAU : AUTOMATIQUE</span><br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Mise à jour en temps réel.</span><br><br><span style=\'color:#FF7100; font-size:0.85em;\'>> CARRIER : MANUELLE</span><br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Ouvrez la <strong>Gestion du Fleet Carrier</strong><br>en jeu pour rafraîchir ce solde.</span>', 'var(--ed-blue)')" 
+                     onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
+                     onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
+                     onmouseover="this.style.background='rgba(0, 240, 255, 0.15)'; this.style.borderColor='#fff';"
+                     onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.borderColor='rgba(0, 240, 255, 0.2)';">
+                    <div><span style="color: #888;">VAISSEAU :</span> <span id="solde-vaisseau" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-orange);">CR</span></div>
+                    <div><span style="color: #888;">CARRIER :</span> <span id="solde-fc" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-blue);">CR</span></div>
+                </div>
+            </div>
+            <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; flex-grow: 1; white-space: nowrap; height: 100%; gap: 6px; padding-right: 5px; box-sizing: border-box;">
+                <span class="info-btn" style="color: var(--ed-blue);" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
+                <span class="info-btn" style="color: #aaa;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#aaa'" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-gestion-compte', event)">[ GESTION DU COMPTE ]</span>
+                <span class="info-btn" style="color: #555;" onmouseover="this.style.color='var(--ed-red)'" onmouseout="this.style.color='#555'" onclick="if(typeof deconnexion === 'function') deconnexion()">[ DÉCONNEXION ]</span>
+            </div>
+        </header>
+
+        <!-- NOUVEAUX ONGLETS DU QG -->
+        <div class="header-bottom-row">
+            <nav class="tab-bar">
+                <button id="btn-tab-dossier" class="tab-btn active" onclick="switchQgTab('dossier', this)" onmouseenter="sonHover()">DOSSIER COMMANDANT</button>
+                <button id="btn-tab-flotte" class="tab-btn" onclick="switchQgTab('flotte', this)" onmouseenter="sonHover()">GESTION FLOTTE</button>
+                <button id="btn-tab-carrier" class="tab-btn" onclick="switchQgTab('carrier', this)" onmouseenter="sonHover()">LOGISTIQUE CARRIER</button>
+                <button id="tab-btn-parametres" class="tab-btn" style="display: none; border-color: #FF3333; color: #FF3333;" onclick="switchQgTab('parametres', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">PARAMÈTRES ESCADRON</button>
+                
+                <!-- NOUVEAU BOUTON DIRECTEUR -->
+                <button id="tab-btn-directeur" class="tab-btn" style="display: none; border-color: #00FF66; color: #00FF66;" onclick="switchQgTab('directeur', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">
+                    BUREAU DIRECTEUR
+                    <span id="badge-onglet-directeur" style="display: none; background: #FF3333; color: #fff; border-radius: 10px; padding: 2px 6px; font-size: 0.8em; margin-left: 8px; box-shadow: 0 0 8px #FF3333; vertical-align: middle;">0</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- ZONE D'AFFICHAGE DU CONTENU -->
+        <main class="data-window" id="display-area">
+            
+            <!-- ONGLET 1 : DOSSIER COMMANDANT -->
+            <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 15px;">
+
+                <!-- ZONE DE RECRUTEMENT (Amirauté Uniquement) -->
+                <div id="zone-recrues" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+                    <h4 style="color: #FF3333; margin: 0 0 5px 0; letter-spacing: 2px; border-bottom: 1px dashed #FF3333; padding-bottom: 5px;">⚠️ CANDIDATURES EN ATTENTE</h4>
+                    <div id="liste-recrues" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                </div>
+
+                <!-- BLOC 4 : CARRIÈRE MILITAIRE (RECRUTEMENT) -->
+                    <div class="data-row" style="cursor: default; border-color: #555; background: rgba(0, 0, 0, 0.4);">
+                        <div class="row-top" style="border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 15px;">
+                            <span style="color: #aaa; font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> CARRIÈRE MILITAIRE</span>
+                        </div>
+
+                        <!-- Si le pilote a un escadron -->
+                        <div id="qg-squad-actif" style="display: none; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 40px;">
+                                <div>
+                                    <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">TAG ESCADRON</span>
+                                    <span id="qg-squad-tag" style="color: var(--ed-orange); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;">[ ... ]</span>
+                                </div>
+                                <div>
+                                    <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">ACCRÉDITATIONS</span>
+                                    <div id="qg-squad-roles" style="display: flex; gap: 10px;"></div>
+                                </div>
+                            </div>
+                            <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 10px 20px; font-family: inherit; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="quitterEscadron()" onmouseenter="sonHover()">DÉMISSIONNER DE L'ESCADRON</button>
+                        </div>
+
+                        <!-- Si le pilote est mercenaire indépendant -->
+                        <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 20px;">
+                            
+                            <!-- CHOIX DES OPÉRATIONS -->
+                            <div style="display: flex; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;" id="choix-mercenaire-btns">
+                                <button class="tab-btn active" style="opacity: 1; flex: 1; margin: 0; padding: 10px;" onclick="switchMercenaireMode('REJOINDRE', this)" onmouseenter="sonHover()">S'ENRÔLER DANS UNE FLOTTE</button>
+                                <button class="tab-btn" style="opacity: 0.5; flex: 1; margin: 0; padding: 10px; border-color: var(--ed-orange);" onclick="switchMercenaireMode('CREER', this)" onmouseenter="sonHover()">FONDER UN ESCADRON</button>
+                            </div>
+
+                            <!-- MODE 1 : REJOINDRE -->
+                            <div id="mode-rejoindre" style="display: flex; align-items: flex-end; gap: 15px;">
+                                <div style="flex-grow: 1;">
+                                    <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">CANDIDATURE (SÉLECTIONNER UN ESCADRON)</span>
+                                    <select id="input-nouveau-squad" style="background: rgba(0,0,0,0.5); border: 1px solid #555; color: #fff; padding: 10px 15px; font-family: inherit; font-size: 1.1em; width: 100%; box-sizing: border-box; outline: none; cursor: pointer;">
+                                        <option value="">-- RECHERCHE DES ESCADRONS... --</option>
+                                    </select>
+                                </div>
+                                <button id="btn-soumettre-candidature" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';" onclick="postulerEscadron()" onmouseenter="sonHover()">SOUMETTRE CANDIDATURE</button>
+                            </div>
+
+                            <!-- MODE 2 : CRÉER -->
+                        <div id="mode-creer" style="display: none; flex-direction: column; gap: 15px; background: rgba(255, 113, 0, 0.05); border: 1px solid var(--ed-orange-dim); padding: 15px; border-radius: 4px;">
+                            <div style="display: flex; gap: 15px;">
+                                <div style="flex: 1;">
+                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">TAG (4 LETTRES MAX)</span>
+                                    <input type="text" id="creer-tag" maxlength="4" placeholder="EX: NOVA" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; text-transform: uppercase; outline: none;">
+                                </div>
+                                <div style="flex: 3;">
+                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">NOM DE L'ESCADRON</span>
+                                    <input type="text" id="creer-nom" placeholder="EX: NOVA GALACTIC" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 15px;">
+                                <div style="flex: 1;">
+                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">ALLÉGEANCE</span>
+                                    <select id="creer-allegeance" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
+                                        <option value="Indépendant">Indépendant</option>
+                                        <option value="Fédération">Fédération</option>
+                                        <option value="Empire">Empire</option>
+                                        <option value="Alliance">Alliance</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 1;">
+                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">PUISSANCE SOUTENUE</span>
+                                    <select id="creer-puissance" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
+                                        <option value="Aucune">Aucune</option>
+                                        <option value="Felicia Winters">Felicia Winters</option>
+                                        <option value="Zachary Hudson">Zachary Hudson</option>
+                                        <option value="Aisling Duval">Aisling Duval</option>
+                                        <option value="Arissa Lavigny-Duval">Arissa Lavigny-Duval</option>
+                                        <option value="Denton Patreus">Denton Patreus</option>
+                                        <option value="Zemina Torval">Zemina Torval</option>
+                                        <option value="Edmund Mahon">Edmund Mahon</option>
+                                        <option value="Li Yong-Rui">Li Yong-Rui</option>
+                                        <option value="Pranav Antal">Pranav Antal</option>
+                                        <option value="Archon Delaine">Archon Delaine</option>
+                                        <option value="Yuri Grom">Yuri Grom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- NOUVEAU BLOC : FACTION IN GAME -->
+                            <div style="display: flex; gap: 15px;">
+                                <div style="flex: 1;">
+                                    <span style="color: var(--ed-orange); font-size: 0.85em; display: block; margin-bottom: 5px;">NOM EXACT DE LA FACTION EN JEU (POUR RADAR EDSM)</span>
+                                    <input type="text" id="creer-faction-ig" placeholder="Ex: Ice Storm Squadron" style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; outline: none;">
+                                </div>
+                            </div>
+
+                            <!-- LE BOUTON EST MAINTENANT BIEN À L'INTÉRIEUR DE LA BOÎTE -->
+                            <div style="text-align: right; margin-top: 5px;">
+                                <button style="background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 10px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--ed-orange)'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 113, 0, 0.1)'; this.style.color='var(--ed-orange)';" onclick="creerEscadron()" onmouseenter="sonHover()">BÂTIR L'ESCADRON</button>
+                            </div>
+                        </div> <!-- FIN DU BLOC mode-creer -->
+
+                    </div> <!-- FIN DU BLOC qg-squad-mercenaire -->
+                </div> <!-- FIN DU BLOC CARRIÈRE MILITAIRE -->
+
+                <!-- BLOC 1 : FÉDÉRATION DES PILOTES -->
+                <div class="data-row" style="cursor: default;">
+                    <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
+                        <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px;">> ÉVALUATION DE LA FÉDÉRATION DES PILOTES</span>
+                        <span style="color: #888; font-size: 0.8em; font-style: italic;">Cliquez sur un rang pour consulter la hiérarchie</span>
+                    </div>
+                    
+                    <!-- COMBAT -->
+                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('combat')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
+                        <span style="color: #ccc; width: 150px;">COMBAT</span>
+                        <span id="qg-combat-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
+                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
+                            <div id="qg-combat-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                        </div>
+                        <span id="qg-combat-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
+                    </div>
+
+                    <!-- COMMERCE -->
+                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('trade')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
+                        <span style="color: #ccc; width: 150px;">COMMERCE</span>
+                        <span id="qg-trade-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
+                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
+                            <div id="qg-trade-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                        </div>
+                        <span id="qg-trade-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
+                    </div>
+
+                    <!-- EXPLORATION -->
+                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('explore')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
+                        <span style="color: #ccc; width: 150px;">EXPLORATION</span>
+                        <span id="qg-explore-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
+                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
+                            <div id="qg-explore-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                        </div>
+                        <span id="qg-explore-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
+                    </div>
+
+                    <!-- EXOBIOLOGIE -->
+                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('exobio')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
+                        <span style="color: #ccc; width: 150px;">EXOBIOLOGIE</span>
+                        <span id="qg-exobio-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
+                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
+                            <div id="qg-exobio-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                        </div>
+                        <span id="qg-exobio-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
+                    </div>
+                </div>
+
+                <!-- BLOC 2 : PUISSANCES ET FACTIONS -->
+                <div style="display: flex; gap: 15px;">
+                    <div class="data-row" style="flex: 1; cursor: default;">
+                        <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
+                            <span style="color: var(--ed-blue); font-size: 1.1em; letter-spacing: 2px;">> RANGS AUXILIAIRES</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="color: #ccc;">FÉDÉRATION</span>
+                                    <span style="color: #fff; font-weight: bold;"><span id="qg-fed-rank">INCONNU</span> <span id="qg-fed-prog" style="color: var(--ed-blue);">(0%)</span></span>
+                                </div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1);">
+                                    <div id="qg-fed-bar" style="height: 100%; width: 0%; background: #fff; box-shadow: 0 0 5px #fff; transition: 0.5s;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="color: #ccc;">EMPIRE</span>
+                                    <span style="color: #fff; font-weight: bold;"><span id="qg-emp-rank">INCONNU</span> <span id="qg-emp-prog" style="color: #FF3333;">(0%)</span></span>
+                                </div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,51,51,0.1);">
+                                    <div id="qg-emp-bar" style="height: 100%; width: 0%; background: #FF3333; box-shadow: 0 0 5px #FF3333; transition: 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-row" style="flex: 1; cursor: default;">
+                        <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
+                            <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px;">> ALLÉGEANCE GALACTIQUE</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <!-- Ajout de "overflow: hidden" et d'une balise <img> cachée par défaut -->
+                            <div style="width: 80px; height: 80px; border: 2px solid var(--ed-orange); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 15px rgba(255,113,0,0.3); overflow: hidden; background: rgba(0,0,0,0.4);">
+                                <span id="qg-power-emoji" style="font-size: 2em;">✊</span>
+                                <img id="qg-power-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none; opacity: 0.9;" referrerpolicy="no-referrer">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1;">
+                                <span style="color: #ccc; font-size: 0.9em;">PUISSANCE SOUTENUE :</span>
+                                <span id="qg-power-name" style="color: #fff; font-weight: bold; font-size: 1.2em;">INCONNUE</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                                    <span id="qg-power-rank" style="color: var(--ed-orange); font-weight: bold; font-size: 0.9em;">RANG : 0 / 5</span>
+                                </div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,113,0,0.1); border-radius: 2px;">
+                                    <div id="qg-power-bar" style="height: 100%; width: 0%; background: var(--ed-orange); box-shadow: 0 0 5px var(--ed-orange); transition: 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOC 3 : RAPPORTS FINANCIERS AVANCÉS -->
+                <div class="data-row" style="cursor: default; border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue); background: rgba(0, 240, 255, 0.05);">
+                    <div class="row-top" style="border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
+                        <span style="color: var(--ed-blue); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> RAPPORTS FINANCIERS AVANCÉS</span>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9em;">
+                            <span style="color: #ccc;">DISTRIBUTION DES ACTIFS</span>
+                            <span style="color: #888;">PATRIMOINE TOTAL : <span id="qg-wealth-total" style="color: #fff; font-weight: bold;">--- CR</span></span>
+                        </div>
+                        <div style="width: 100%; height: 12px; display: flex; gap: 3px; background: rgba(255,255,255,0.05);">
+                            <!-- Inversion des couleurs : Liquidité en Orange, FC en Bleu -->
+                            <div id="qg-bar-liquid" style="width: 0%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange); transition: 0.5s;"></div>
+                            <div id="qg-bar-fc" style="width: 0%; background: var(--ed-blue); box-shadow: 0 0 8px var(--ed-blue); transition: 0.5s;"></div>
+                            <div id="qg-bar-ships" style="width: 0%; background: #00FF66; box-shadow: 0 0 8px #00FF66; transition: 0.5s;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.75em; color: #888; font-weight: bold;">
+                            <span id="qg-pct-liquid"><span style="color: var(--ed-orange);">■</span> LIQUIDITÉS (0%)</span>
+                            <span id="qg-pct-fc"><span style="color: var(--ed-blue);">■</span> FLEET CARRIER (0%)</span>
+                            <span id="qg-pct-ships"><span style="color: #00FF66;">■</span> VAISSEAUX & MODULES (0%)</span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-left: 2px solid var(--ed-orange); border-radius: 0 4px 4px 0;">
+                            <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">SOLDE BANCAIRE (LIQUIDE)</span>
+                            <span id="qg-wealth-liquid" style="color: #fff; font-weight: bold; font-size: 1.1em;">--- <span style="color: var(--ed-orange); font-size: 0.8em;">CR</span></span>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-left: 2px solid var(--ed-blue); border-radius: 0 4px 4px 0;">
+                            <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">IMMOBILISATIONS (CARRIER)</span>
+                            <span id="qg-wealth-fc" style="color: #fff; font-weight: bold; font-size: 1.1em;">--- <span style="color: var(--ed-blue); font-size: 0.8em;">CR</span></span>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-left: 2px solid #00FF66; border-radius: 0 4px 4px 0;">
+                            <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">VALEUR FLOTTE (NAVIRES)</span>
+                            <span id="qg-wealth-ships" style="color: #fff; font-weight: bold; font-size: 1.1em;">--- <span style="color: #00FF66; font-size: 0.8em;">CR</span></span>
+                        </div>
+                        
+                        <div style="background: rgba(255, 51, 51, 0.05); padding: 12px; border-left: 2px solid #FF3333; border-radius: 0 4px 4px 0;">
+                            <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">COÛT DE RACHAT (ASSURANCE)</span>
+                            <span id="qg-rebuy" style="color: #FF3333; font-weight: bold; font-size: 1.1em; text-shadow: 0 0 5px rgba(255, 51, 51, 0.3);">--- <span style="color: #FF3333; font-size: 0.8em;">CR</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN DE L'ONGLET DOSSIER COMMANDANT -->
+
+            <!-- ONGLET 2 : GESTION DE LA FLOTTE -->
+            <div id="qg-tab-flotte" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                <!-- Les vaisseaux seront générés ici automatiquement par le système -->
+            </div>
+
+            <!-- ONGLET 3 : LOGISTIQUE CARRIER -->
+            <div id="qg-tab-carrier" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                
+                <!-- LIGNE 1 : TÉLÉMÉTRIE ET CARBURANT -->
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    
+                    <!-- Panneau d'Information du Carrier -->
+                    <div class="data-row" style="flex: 1; min-width: 300px; cursor: default; border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue); background: rgba(0, 240, 255, 0.05);">
+                        <div class="row-top" style="border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 10px; margin-bottom: 10px;">
+                            <span id="qg-fc-nom-logistique" style="color: var(--ed-blue); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> CARRIER INCONNU</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; margin-bottom: 5px;">
+                                <span style="color: #ccc; font-size: 0.9em;">POSITION ACTUELLE :</span>
+                                <span id="qg-fc-pos-logistique" class="copy-click" onclick="copierNav(this.innerText, this, event)" style="color: #fff; font-weight: bold; cursor: pointer;">SYSTÈME INCONNU</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding-bottom: 5px;">
+                                <span style="color: #ccc; font-size: 0.9em;">FRAIS HEBDOMADAIRES :</span>
+                                <span id="qg-fc-upkeep" style="color: #FF3333; font-weight: bold; text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);">--- CR</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jauge de Tritium -->
+                    <div class="data-row" style="flex: 1.5; min-width: 350px; cursor: default;">
+                        <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
+                            <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px;">> RÉSERVES DE TRITIUM</span>
+                        </div>
+                        
+                        <!-- Dépôt Principal (Prêt au saut) -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="color: #ccc; font-size: 0.9em;">DÉPÔT FSD (Carburant injecté)</span>
+                                <span id="qg-fc-tritium-depot-text" style="color: var(--ed-blue); font-weight: bold;">--- / 1000 T</span>
+                            </div>
+                            <div style="width: 100%; height: 16px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative;">
+                                <div id="qg-fc-tritium-depot-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                                <div style="position: absolute; top: -2px; left: 20%; height: calc(100% + 4px); width: 2px; background: #FF3333; z-index: 2;" title="Seuil d'alerte"></div>
+                            </div>
+                        </div>
+
+                        <!-- Soute de réserve -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="color: #ccc; font-size: 0.9em;">SOUTE COMMERCIALE (Réserve transférable)</span>
+                                <span id="qg-fc-tritium-soute-text" style="color: var(--ed-orange); font-weight: bold;">--- T</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(255, 113, 0, 0.05); border: 1px solid var(--ed-orange); position: relative;">
+                                <div id="qg-fc-tritium-soute-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-orange); box-shadow: 0 0 5px var(--ed-orange); transition: 0.5s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIGNE 2 : MATRICE DES SERVICES -->
+                <div class="data-row" style="cursor: default; background: rgba(10, 5, 0, 0.4);">
+                    <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 20px;">
+                        <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px;">> MATRICE DES SERVICES (MODULES INSTALLÉS)</span>
+                    </div>
+                    
+                    <div id="qg-fc-services-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                        <!-- Les services générés s'afficheront ici -->
+                        <div style="color: #666; font-style: italic; grid-column: 1 / -1; text-align: center; padding: 20px;">> EN ATTENTE DE LA TÉLÉMÉTRIE DU CARRIER...<br><span style="font-size: 0.8em;">(Ouvrez le panneau de gestion de votre Fleet Carrier en jeu)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Div fantôme pour absorber l'ancien script d'affichage et éviter les erreurs -->
+            <div class="data-container" style="display: none;"></div>
+           
+            <!-- ONGLET 4 : PARAMÈTRES ESCADRON (Amirauté Uniquement) -->
+            <div id="qg-tab-parametres" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); border-color: var(--ed-orange);">
+                    <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
+                        <span id="titre-registre-officiel" style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> REGISTRE OFFICIEL : [ ... ]</span>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <label style="color: #888; font-size: 0.8em; letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase;">NOM DE LA FLOTTE</label>
+                            <input type="text" id="edit-esca-nom" class="search-input" style="background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; width: 100%; padding: 10px; font-family: inherit; box-sizing: border-box; outline: none;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div style="flex: 1;">
+                                <label style="color: #888; font-size: 0.8em; letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase;">ALLÉGEANCE</label>
+                                <select id="edit-esca-allegeance" class="search-input" style="background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; width: 100%; padding: 10px; font-family: inherit; box-sizing: border-box; outline: none;">
+                                    <option value="Indépendant">Indépendant</option>
+                                    <option value="Fédération">Fédération</option>
+                                    <option value="Empire">Empire</option>
+                                    <option value="Alliance">Alliance</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="color: #888; font-size: 0.8em; letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase;">PUISSANCE SOUTENUE</label>
+                                <select id="edit-esca-puissance" class="search-input" style="background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; width: 100%; padding: 10px; font-family: inherit; box-sizing: border-box; outline: none;">
+                                    <option value="Aucune">Aucune</option>
+                                    <option value="Felicia Winters">Felicia Winters</option>
+                                    <option value="Zachary Hudson">Zachary Hudson</option>
+                                    <option value="Aisling Duval">Aisling Duval</option>
+                                    <option value="Arissa Lavigny-Duval">Arissa Lavigny-Duval</option>
+                                    <option value="Denton Patreus">Denton Patreus</option>
+                                    <option value="Zemina Torval">Zemina Torval</option>
+                                    <option value="Edmund Mahon">Edmund Mahon</option>
+                                    <option value="Li Yong-Rui">Li Yong-Rui</option>
+                                    <option value="Pranav Antal">Pranav Antal</option>
+                                    <option value="Archon Delaine">Archon Delaine</option>
+                                    <option value="Yuri Grom">Yuri Grom</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px dashed var(--ed-orange-dim); margin-top: 25px; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <button style="background: rgba(255, 51, 51, 0.05); border: 1px solid #FF3333; color: #FF3333; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.05)'; this.style.color='#FF3333';" onclick="quitterEscadron()" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                            DISSOUDRE L'ESCADRON
+                        </button>
+                        <button id="btn-save-parametres" style="background: rgba(0, 255, 102, 0.05); border: 1px solid #00FF66; color: #00FF66; padding: 10px 20px; font-family: 'Share Tech Mono', monospace; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase;" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.05)'; this.style.color='#00FF66';" onclick="sauvegarderParametresEscadron()" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                            SAUVEGARDER LES MODIFICATIONS
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET 5 : BUREAU DIRECTEUR (Administrateur Uniquement) -->
+            <div id="qg-tab-directeur" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+                
+                <!-- BLOC 1 : DEMANDES EN ATTENTE (Déjà existant) -->
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); border-color: #00FF66;">
+                    <div class="row-top" style="border-bottom: 1px dashed rgba(0, 255, 102, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
+                        <span style="color: #00FF66; font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> ACCÈS AU TERMINAL (ATTENTE D'APPROBATION)</span>
+                    </div>
+                    <div id="liste-attente-app" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Recherche de nouvelles transmissions...</div>
+                    </div>
+                </div>
+
+                <!-- BLOC 2 : PERSONNEL ACCRÉDITÉ (NOUVEAU) -->
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); border-color: var(--ed-blue);">
+                    <div class="row-top" style="border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
+                        <span style="color: var(--ed-blue); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> REGISTRE DU PERSONNEL ACCRÉDITÉ</span>
+                    </div>
+                    <div id="liste-personnel-app" style="display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
+                        <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Chargement du registre...</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE (UNIFIÉ) -->
+    <div class="failsafe-overlay" id="failsafe-modal">
+        <div class="failsafe-content" style="max-width: 750px; text-align: left; padding: 30px; position: relative;">
+            <h2 style="text-align: center; margin-bottom: 5px; color: #FF0000; font-size: 2.2em; letter-spacing: 4px; margin-top: 0;">⚠️ PROTOCOLE DE SÉCURITÉ ⚠️</h2>
+            <p id="failsafe-status-text" style="text-align: center; color: var(--ed-orange); font-size: 1.1em; font-weight: bold; margin-bottom: 25px; text-transform: uppercase;">AUCUN SIGNAL REÇU DEPUIS VOTRE VAISSEAU</p>
+
+            <!-- PAGE 0 : MENU PRINCIPAL -->
+            <div id="fs-page-main" class="fs-page" style="display: block;">
+                <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95em;">Pour accéder au terminal, votre système doit être correctement synchronisé. Identifiez votre problème :</p>
+
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-edmc')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS LANCÉ EDMC (OU JE NE L'AI PAS INSTALLÉ)
+                </button>
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-plugin')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 2 ]</strong> JE N'AI PAS ENCORE AJOUTÉ LE PLUGIN "SYS.EDTEAM"
+                </button>
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-key')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 3 ]</strong> LE PLUGIN EST LÀ, MAIS JE N'AI PAS MIS MA CLÉ
+                </button>
+                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em; border-color: var(--ed-orange); color: var(--ed-orange);" onclick="navFailsafe('fs-page-game')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <strong style="color: #fff;">[ 4 ]</strong> TOUT EST LÀ, MAIS JE N'AI PAS ENCORE LANCÉ LE JEU
+                </button>
+                
+                <!-- BOUTON DÉCONNEXION URGENT ! -->
+                <button class="fs-auth-btn" style="text-align: center; padding: 10px; margin-top: 20px; font-size: 0.9em; border-color: #555; color: #aaa; background: transparent;" onclick="if(typeof deconnexion==='function') deconnexion()" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    [ DÉCONNEXION DU TERMINAL ]
+                </button>
+            </div>
+
+            <!-- PAGE 1 : MANUEL EDMC -->
+            <div id="fs-page-edmc" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 1 ] : MOTEUR EDMC</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">L'application <strong>Elite Dangerous Market Connector (EDMC)</strong> est obligatoire.<br><br>
+                1. Téléchargez EDMC via le lien sécurisé ci-dessous et installez-le.<br>
+                2. Lancez l'application sur votre PC.<br>
+                3. Connectez-y votre compte Frontier / Elite Dangerous.</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="https://github.com/EDCD/EDMarketConnector/releases/latest" target="_blank" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">🌐 TÉLÉCHARGER EDMC</a>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 2 : MANUEL PLUGIN -->
+            <div id="fs-page-plugin" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 2 ] : LE PLUGIN EDTEAM</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Pour que EDMC puisse nous parler, il lui faut notre module de communication privé.<br><br>
+                1. Téléchargez le fichier ZIP ci-dessous.<br>
+                2. Sur EDMC, allez dans <strong>Fichier > Paramètres > Plugins</strong>.<br>
+                3. Cliquez sur "Ouvrir".<br>
+                4. Décompressez le dossier SYS_EDTEAM à l'intérieur.<br>
+                5. <strong>Fermez et relancez complètement EDMC.</strong></p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="SYS_EDTEAM.zip" download="SYS_EDTEAM.zip" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: #00FF66; color: #00FF66; background: rgba(0, 255, 102, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';">📦 TÉLÉCHARGER LE PLUGIN</a>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 3 : MANUEL CLÉ -->
+            <div id="fs-page-key" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 3 ] : LA CLÉ DE LIAISON</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Si le module est installé, il faut l'autoriser à transmettre en votre nom.<br><br>
+                1. Copiez la clé ci-dessous.<br>
+                2. Dans EDMC, allez dans <strong>Fichier > Paramètres</strong>.<br>
+                3. Allez dans l'onglet <strong>SYS.EDTEAM</strong>.<br>
+                4. Collez la clé et validez (OK).</p>
+                <div style="text-align: center; background: rgba(0, 0, 0, 0.8); border: 1px dashed var(--ed-blue); padding: 10px; margin-top: 15px;">
+                    <strong id="failsafe-api-key" style="color:var(--ed-orange); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="if(typeof copierNav==='function') copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
+                </div>
+                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+
+            <!-- PAGE 4 : MANUEL LANCEMENT JEU -->
+            <div id="fs-page-game" class="fs-page" style="display: none;">
+                <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
+                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
+                1. Lancez <strong>Elite Dangerous</strong>.<br>
+                2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
+                3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
+                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GESTION DU COMPTE -->
+    <div class="modal-overlay" id="modal-gestion-compte" onclick="fermerModal('modal-gestion-compte', event)" style="z-index: 3500;">
+        <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-gestion-compte')">X</div>
+            <div style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">⚙️ GESTION DU COMPTE</div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- EMAIL -->
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                    <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">NOUVELLE ADRESSE E-MAIL :</label>
+                    <input type="email" id="input-nouveau-email" class="search-input" placeholder="nouvelle@adresse.com" style="width: 100%; border-color: #555; margin-bottom: 10px; box-sizing: border-box;">
+                    <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierEmailCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">METTRE À JOUR L'E-MAIL</button>
+                </div>
+
+                <!-- MOT DE PASSE -->
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                    <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">NOUVEAU MOT DE PASSE :</label>
+                    <input type="password" id="input-nouveau-mdp" class="search-input" placeholder="********" style="width: 100%; border-color: #555; margin-bottom: 10px; box-sizing: border-box;">
+                    <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierMdpCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">METTRE À JOUR LE MOT DE PASSE</button>
+                </div>
+
+                <!-- DESTRUCTION (BOUTON ROUGE) -->
+                <div style="margin-top: 10px; border-top: 1px solid #FF3333; padding-top: 20px;">
+                    <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 12px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 1em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 15px #FF3333';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';" onclick="autoDetruireCompte()" onmouseenter="if(typeof sonHover==='function') sonHover()">⚠️ SUPPRIMER DÉFINITIVEMENT MON COMPTE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CONFIRMATION TACTIQUE (Remplace le confirm() Windows) -->
+    <div class="modal-overlay" id="modal-confirmation" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 500px; text-align: center; border: 1px solid var(--ed-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.2);" onclick="event.stopPropagation()">
+            <div id="confirm-titre" style="color: var(--ed-red); font-size: 1.4em; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px;">⚠️ ATTENTION</div>
+            <p id="confirm-message" style="color: #ccc; font-size: 0.95em; line-height: 1.5; margin-bottom: 30px;">Êtes-vous sûr ?</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="btn-confirm-cancel" style="background: rgba(255, 255, 255, 0.05); border: 1px solid #666; color: #aaa; padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1;">[ ANNULER ]</button>
+                <button id="btn-confirm-ok" style="background: rgba(255, 51, 51, 0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 12px 20px; font-family: inherit; font-size: 1em; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.2s; flex: 1; box-shadow: inset 0 0 10px rgba(255, 51, 51, 0.2);">[ CONFIRMER ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CLÉ API -->
+    <div class="modal-overlay" id="modal-cle-api" onclick="fermerModal('modal-cle-api', event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-cle-api')">X</div><div class="modal-title">SÉCURITÉ // CLÉ DE LIAISON EDMC</div>
+            <p>Copiez cette clé dans les paramètres de votre plugin EDMC :</p>
+            <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); padding: 15px; text-align: center; margin: 20px 0;">
+                <strong id="api-key-display" style="color:var(--ed-orange); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE HIÉRARCHIE DES GRADES -->
+    <div class="modal-overlay" id="modal-grades" onclick="fermerModal('modal-grades', event)">
+        <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-grades')">X</div>
+            <div class="modal-title" id="grades-modal-title" style="color: var(--ed-orange); font-size: 1.2em; border-bottom: 1px solid var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px; letter-spacing: 2px;">HIÉRARCHIE DES GRADES</div>
+            <div id="grades-list-container" style="display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+                <!-- Liste générée dynamiquement via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE ALERTE GÉNÉRIQUE (Remplacement du alert() Windows) -->
+    <div class="modal-overlay" id="modal-alerte" onclick="fermerAlerte(event)" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 500px; text-align: center; box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div id="alerte-titre" style="font-size: 1.5em; border-bottom: 1px dashed; padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px; font-weight: bold;">INFORMATION</div>
+            <p id="alerte-message" style="color: #ccc; font-size: 1.1em; margin-bottom: 30px; line-height: 1.5;"></p>
+            <button id="btn-alerte-ok" class="auth-btn" style="width: auto; padding: 10px 40px; font-weight: bold; margin: 0 auto;" onclick="fermerAlerte()" onmouseenter="if(typeof sonHover==='function') sonHover()">ACQUITTER</button>
+        </div>
+    </div>
+
+    <!-- MODALE CONFIRMATION DÉMISSION -->
+    <div class="modal-overlay" id="modal-confirm-demission" onclick="fermerModal('modal-confirm-demission', event)">
+        <div class="modal-content" style="max-width: 500px; text-align: center; border-color: #FF3333; box-shadow: 0 0 30px rgba(255, 51, 51, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-confirm-demission')">X</div>
+            <div class="modal-title" style="color: #FF3333; font-size: 1.5em; border-bottom: 1px dashed #FF3333; padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px;">⚠️ CONFIRMATION REQUISE</div>
+            <p style="color: #ccc; font-size: 1.1em; margin-bottom: 15px;">Voulez-vous vraiment démissionner de votre escadron ?</p>
+            <p style="color: #FF3333; font-size: 0.9em; font-weight: bold; margin-bottom: 30px; padding: 10px; background: rgba(255, 51, 51, 0.1); border: 1px solid rgba(255, 51, 51, 0.3);">VOUS PERDREZ IMMÉDIATEMENT L'ACCÈS AU BGS ET AUX OPÉRATIONS DE L'ESCADRON.</p>
+            
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <button class="auth-btn" style="border-color: #555; color: #aaa; width: auto; padding: 10px 30px;" onclick="fermerModal('modal-confirm-demission')" onmouseenter="sonHover()">ANNULER</button>
+                <button class="auth-btn" style="border-color: #FF3333; color: #000; background: #FF3333; width: auto; padding: 10px 30px; font-weight: bold;" onclick="executerDemission()" onmouseenter="sonHover()">CONFIRMER LA DÉMISSION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MOTEUR JAVASCRIPT ET SUPABASE
+         ========================================= -->
+    <script>
+        // --- MÉCANIQUES D'INTERFACE QG ---
+        function toggleMenu() {
+            sonClic();
+            const menu = document.getElementById('side-menu');
+            const body = document.body;
+            menu.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
+        function switchQgTab(tabId, btnElement) {
+            sonClic();
+            // Masquer tous les onglets
+            document.getElementById('qg-tab-dossier').style.display = 'none';
+            document.getElementById('qg-tab-flotte').style.display = 'none';
+            document.getElementById('qg-tab-carrier').style.display = 'none';
+            document.getElementById('qg-tab-parametres').style.display = 'none';
+            const tabDir = document.getElementById('qg-tab-directeur');
+            if(tabDir) tabDir.style.display = 'none';
+            
+            // Afficher l'onglet ciblé
+            document.getElementById('qg-tab-' + tabId).style.display = 'flex';
+            
+            // Mise à jour visuelle du bouton
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Chargement des données
+            if (tabId === 'parametres') chargerParametresEscadron();
+            if (tabId === 'directeur') chargerDemandesDirecteur();
+
+            // Chargement des données si on ouvre les paramètres ou le bureau
+            if (tabId === 'parametres') chargerParametresEscadron();
+            if (tabId === 'directeur') {
+                chargerDemandesDirecteur();
+                chargerPersonnelDirecteur(); // <--- LA NOUVELLE LIGNE
+            }
+
+        }
+
+        function toggleShipDetails(headerElement) {
+            sonClic();
+            const details = headerElement.nextElementSibling;
+            const icon = headerElement.querySelector('div:last-child');
+            
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                headerElement.style.background = 'rgba(0, 240, 255, 0.15)';
+                icon.innerText = '[-]';
+            } else {
+                details.style.display = 'none';
+                headerElement.style.background = headerElement.parentElement.style.opacity === '0.7' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 240, 255, 0.05)';
+                icon.innerText = '[+]';
+            }
+        }
+
+        function ouvrirModal(id, e) { if (e) e.stopPropagation(); hideHoloTooltip(); sonClic(); document.getElementById(id).style.display = 'flex'; }
+        function fermerModal(id, e) { if (e && e.target !== document.getElementById(id)) return; sonClic(); document.getElementById(id).style.display = 'none'; }
+
+        const globalTooltip = document.getElementById('holo-tooltip');
+        function showHoloTooltip(e, text, color = 'var(--ed-orange)', silent = false) {
+            if(!silent) sonHover(); 
+            globalTooltip.innerHTML = text; globalTooltip.style.borderColor = color; globalTooltip.style.color = color; globalTooltip.style.boxShadow = `0 0 10px ${color}40`; globalTooltip.style.display = 'block'; moveHoloTooltip(e);
+        }
+        function hideHoloTooltip() { globalTooltip.style.display = 'none'; }
+        function moveHoloTooltip(e) { 
+            if(globalTooltip.style.display === 'block') { 
+                globalTooltip.style.left = (e.clientX + 15) + 'px'; 
+                globalTooltip.style.top = (e.clientY + 15) + 'px'; 
+            } 
+        }
+
+        function bootSystem() {
+            initAudio(); playBoot(); document.getElementById('boot-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.display = 'none'; document.getElementById('main-ui').style.display = 'flex';
+                let opacity = 0; let fade = setInterval(() => { opacity += 0.1; document.getElementById('main-ui').style.opacity = opacity; if(opacity >= 1) { clearInterval(fade); systemLoop(); } }, 30);
+            }, 300);
+        }
+
+        // --- AUDIO ENGINE ---
+        let audioCtx; 
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playUI(type) {
+            if(!audioCtx) return;
+            if (type === 'hover') {
+                const bufferSize = audioCtx.sampleRate * 0.015; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 6000;
+                const gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
+                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start();
+            } else if (type === 'click') {
+                const osc1 = audioCtx.createOscillator(); osc1.type = 'square'; osc1.frequency.setValueAtTime(3000, audioCtx.currentTime); osc1.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.02);
+                const gain1 = audioCtx.createGain(); gain1.gain.setValueAtTime(0.02, audioCtx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+                osc1.connect(gain1); gain1.connect(audioCtx.destination); osc1.start(); osc1.stop(audioCtx.currentTime + 0.02);
+            }
+        }
+        function sonClic() { playUI('click'); } 
+        function sonHover() { playUI('hover'); }
+        function playBoot() {
+            if(!audioCtx) return;
+            const t = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); const filter = audioCtx.createBiquadFilter();
+            osc.type = 'square'; osc.frequency.setValueAtTime(1200, t); osc.frequency.setValueAtTime(1800, t + 0.05); osc.frequency.setValueAtTime(600, t + 0.1); 
+            gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.03, t + 0.01); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04); gain.gain.linearRampToValueAtTime(0.03, t + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09); gain.gain.linearRampToValueAtTime(0.02, t + 0.1); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+            filter.type = 'lowpass'; filter.frequency.setValueAtTime(3000, t); filter.frequency.exponentialRampToValueAtTime(500, t + 0.6);
+            osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.6);
+        }
+
+        // --- SUPABASE & DATA SYNC (GARDE VOTRE BARRE À JOUR) ---
+        const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
+        const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
+        let profilCommandant = null;
+        let isSystemLooping = false;
+        
+        window.onload = async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (session) { verifierApprobation(session.user); }
+        };
+
+        async function tenterConnexion() {
+            if(typeof sonClic === 'function') sonClic();
+            const email = document.getElementById('auth-email').value; 
+            const password = document.getElementById('auth-password').value; 
+            const msg = document.getElementById('auth-msg');
+            msg.style.color = "var(--ed-orange)"; msg.innerText = "> VÉRIFICATION...";
+            
+            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
+            if (error) { msg.style.color = "red"; msg.innerText = "> ERREUR : " + error.message; }
+            else { verifierApprobation(data.user); }
+        }
+
+        async function tenterInscription() {
+            if(typeof sonClic === 'function') sonClic();
+            const email = document.getElementById('auth-email').value; 
+            const password = document.getElementById('auth-password').value; 
+            const msg = document.getElementById('auth-msg');
+
+            msg.style.color = "var(--ed-blue)"; 
+            msg.innerText = "> TRANSMISSION DEMANDE...";
+            
+            // Création du compte (Supabase gère l'auth)
+            const { data, error } = await supabaseApp.auth.signUp({ email, password });
+            
+            if (error) { 
+                msg.style.color = "red"; msg.innerText = "> ERREUR : " + error.message; 
+            } else { 
+                // Inscription réussie. Le joueur devra attendre que le Directeur l'approuve.
+                msg.style.color = "#00FF66"; 
+                msg.innerText = "> DEMANDE ENVOYÉE. ATTENTE DE VALIDATION PAR LE DIRECTEUR."; 
+            }
+        }
+
+        async function verifierApprobation(user) {
+            const msg = document.getElementById('auth-msg');
+            const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', user.id).single();
+            if (data && data.est_approuve) {
+                profilCommandant = data;
+                actualiserAffichageRH();
+                
+                // 👉 LA FAMEUSE LIGNE EST À AJOUTER ICI :
+                actualiserAffichageRH();
+                
+                // --- CHARGEMENT IMMÉDIAT DU NOM ET DES FINANCES ---
+                if (data.cmdr_nom) {
+                    const elCmdr = document.getElementById('cmdr-name-display');
+                    if (elCmdr) elCmdr.innerText = 'CMDR ' + data.cmdr_nom.toUpperCase();
+                }
+                
+                const fmt = new Intl.NumberFormat('fr-FR');
+                if (data.solde_vaisseau !== null && data.solde_vaisseau !== undefined) {
+                    const elVaisseau = document.getElementById('solde-vaisseau');
+                    if (elVaisseau) elVaisseau.innerText = fmt.format(data.solde_vaisseau);
+                }
+                if (data.solde_fc !== null && data.solde_fc !== undefined) {
+                    const elFc = document.getElementById('solde-fc');
+                    if (elFc) elFc.innerText = fmt.format(data.solde_fc);
+                }
+
+                        // AFFICHAGE DE L'ONGLET PARAMÈTRES (Amirauté Uniquement)
+                if (data.est_amiral) {
+                    const btnParam = document.getElementById('tab-btn-parametres');
+                    if (btnParam) btnParam.style.display = 'inline-block';
+                }
+
+                // AFFICHAGE DE LA PASTILLE D'ALERTE (Amirauté & Directeur)
+                if (data.est_amiral || data.est_directeur) {
+                    if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
+                }
+
+                // AFFICHAGE DU BGS (Si le pilote fait partie d'un escadron)
+                if (data.escadron_id) {
+                    const navBgs = document.getElementById('nav-bgs-factions');
+                    if (navBgs) navBgs.style.display = 'flex';
+                }
+                
+                // 1. On cache l'écran de connexion (ou Cacher l'authentification)
+                document.getElementById('auth-screen').style.display = 'none';
+                
+                // 2. Zapper l'écran de Boot
+                const bootScreen = document.getElementById('boot-screen');
+                if (bootScreen) bootScreen.style.display = 'none';
+                
+                // 3. Afficher l'interface
+                const mainUi = document.getElementById('main-ui');
+                if (mainUi) {
+                    mainUi.style.display = 'flex';
+                    mainUi.style.opacity = '1';
+                }
+                
+                // 4. Lancer la boucle
+                if (!isSystemLooping) systemLoop();
+                
+                // 5. Affichage de la clé API
+                const keyDisplay = document.getElementById('api-key-display');
+                if (keyDisplay) keyDisplay.innerText = data.cle_api;
+                
+                // Ajout pour l'écran Failsafe !
+                const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
+                if (failsafeKeyDisplay) failsafeKeyDisplay.innerText = data.cle_api;
+                
+            } else {
+                msg.style.color = "red"; msg.innerText = "> ACCÈS REFUSÉ : COMPTE NON APPROUVÉ PAR L'AMIRAUTÉ.";
+                await supabaseApp.auth.signOut();
+            }
+        }
+        
+        async function deconnexion() { await supabaseApp.auth.signOut(); location.reload(); }
+
+        // =========================================
+        // VARIABLES GLOBALES DES RANGS
+        // =========================================
+        const currentRanks = { combat: 0, trade: 0, explore: 0, exobio: 0 };
+        const currentProgs = { combat: 0, trade: 0, explore: 0, exobio: 0 };
+
+        const tablesGrades = {
+            combat: ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            trade: ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            explore: ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            exobio: ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"]
+        };
+
+        function ouvrirModalGrades(domaine) {
+            sonClic();
+            const titrage = { combat: "COMBAT", trade: "COMMERCE", explore: "EXPLORATION", exobio: "EXOBIOLOGIE" };
+            document.getElementById("grades-modal-title").innerText = "HIÉRARCHIE // " + titrage[domaine];
+            
+            const liste = tablesGrades[domaine];
+            const monRang = currentRanks[domaine] || 0;
+            const maProg = currentProgs[domaine] || 0;
+            const container = document.getElementById("grades-list-container");
+            container.innerHTML = "";
+
+            liste.forEach((nomGrade, index) => {
+                const item = document.createElement("div");
+                item.style.padding = "8px 12px";
+                item.style.borderRadius = "4px";
+                item.style.display = "flex";
+                item.style.justifyContent = "space-between";
+                item.style.alignItems = "center";
+                item.style.fontSize = "0.9em";
+
+                if (index < monRang) {
+                    item.style.background = "rgba(0, 255, 102, 0.05)";
+                    item.style.border = "1px solid rgba(0, 255, 102, 0.2)";
+                    item.innerHTML = `<span style="color:#00FF66;">✔ ${nomGrade}</span><span style="color:#00FF66; font-size:0.8em;">ACQUIS</span>`;
+                } else if (index === monRang) {
+                    item.style.background = "rgba(0, 240, 255, 0.15)";
+                    item.style.border = "1px solid var(--ed-blue)";
+                    item.innerHTML = `<div><span style="color:#fff; font-weight:bold;">▶ ${nomGrade}</span> <span style="color:var(--ed-orange); font-weight:bold;">(${maProg}%)</span></div><span style="color:var(--ed-blue); font-size:0.8em; font-weight:bold;">RANG ACTUEL</span>`;
+                } else {
+                    item.style.background = "rgba(255, 255, 255, 0.02)";
+                    item.style.border = "1px solid rgba(255, 255, 255, 0.05)";
+                    item.style.opacity = "0.5";
+                    item.innerHTML = `<span style="color:#aaa;">🔒 ${nomGrade}</span>`;
+                }
+                container.appendChild(item);
+            });
+
+            document.getElementById("modal-grades").style.display = "flex";
+        }
+
+        // --- MÉCANIQUES DU FAILSAFE ET AUDIO ---
+        let wasEdmcOnline = true;
+        let ambientGain = null; let isAmbientPlaying = false; let schedulerTimer = null; 
+        let nextNoteTime = 0; let currentBeat = 0; let epicDelay = null; let continuousNodes = [];
+
+        function navFailsafe(pageId) {
+            sonClic();
+            document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function sonReconnect() {
+            if (!audioCtx) initAudio(); if (!audioCtx) return;
+            const t = audioCtx.currentTime;
+            const subOsc = audioCtx.createOscillator(); const subGain = audioCtx.createGain();
+            subOsc.type = 'sine'; subOsc.frequency.setValueAtTime(40, t); subOsc.frequency.exponentialRampToValueAtTime(100, t + 0.4);
+            subGain.gain.setValueAtTime(0, t); subGain.gain.linearRampToValueAtTime(0.04, t + 0.2); subGain.gain.linearRampToValueAtTime(0, t + 0.4);
+            subOsc.connect(subGain); subGain.connect(audioCtx.destination); subOsc.start(t); subOsc.stop(t + 0.4);
+            const pingOsc = audioCtx.createOscillator(); const pingGain = audioCtx.createGain();
+            pingOsc.type = 'sine'; pingOsc.frequency.setValueAtTime(1046.50, t + 0.3); pingOsc.frequency.setValueAtTime(2093, t + 0.35); 
+            pingGain.gain.setValueAtTime(0, t + 0.3); pingGain.gain.linearRampToValueAtTime(0.03, t + 0.32); pingGain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+            pingOsc.connect(pingGain); pingGain.connect(audioCtx.destination); pingOsc.start(t + 0.3); pingOsc.stop(t + 1.5);
+        }
+
+        function startAlarm() {
+            if (isAmbientPlaying) return; if (!audioCtx) initAudio(); if (!audioCtx) return;
+            isAmbientPlaying = true;
+            const t = audioCtx.currentTime; ambientGain = audioCtx.createGain();
+            ambientGain.gain.setValueAtTime(0, t); ambientGain.gain.linearRampToValueAtTime(0.6, t + 4); 
+            epicDelay = audioCtx.createDelay(); epicDelay.delayTime.value = 0.75; 
+            let epicFeedback = audioCtx.createGain(); epicFeedback.gain.value = 0.55; 
+            let echoFilter = audioCtx.createBiquadFilter(); echoFilter.type = 'lowpass'; echoFilter.frequency.value = 900;
+            epicDelay.connect(echoFilter); echoFilter.connect(epicFeedback); epicFeedback.connect(epicDelay); epicDelay.connect(ambientGain);
+            const baseFreqs = [65.41, 98.00]; 
+            baseFreqs.forEach(f => {
+                let osc = audioCtx.createOscillator(); osc.type = 'sine'; osc.frequency.value = f + (Math.random() * 0.2 - 0.1);
+                let gain = audioCtx.createGain(); gain.gain.value = 0.2; osc.connect(gain); gain.connect(ambientGain); osc.start(t); continuousNodes.push(osc);
+            });
+            currentBeat = 0; nextNoteTime = audioCtx.currentTime + 0.1; scheduler();
+            ambientGain.connect(audioCtx.destination);
+        }
+
+        function scheduler() {
+            if (!isAmbientPlaying) return;
+            while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                if (currentBeat === 0) jouerTaiko(nextNoteTime, 0.7); 
+                if (currentBeat === 8) jouerTaiko(nextNoteTime, 0.4); 
+                if (currentBeat % 2 === 0) { const arpNotes = [130.81, 155.56, 196.00, 155.56]; jouerPulse(nextNoteTime, arpNotes[(currentBeat / 2) % arpNotes.length]); }
+                if (currentBeat === 0) jouerSwell(nextNoteTime);
+                if (currentBeat % 4 === 0) { const leadNotes = [392.00, 311.13, 523.25, 392.00, 622.25, 523.25]; jouerSpyLead(nextNoteTime, leadNotes[Math.floor(Math.random() * leadNotes.length)]); }
+                nextNoteTime += (60 / 65); currentBeat = (currentBeat + 1) % 16; 
+            }
+            schedulerTimer = setTimeout(scheduler, 25);
+        }
+
+        function jouerSpyLead(time, freq) {
+            let osc = audioCtx.createOscillator(); osc.type = 'triangle'; osc.frequency.value = freq;
+            let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 5.0; 
+            let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 4; lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+            let gain = audioCtx.createGain(); gain.gain.setValueAtTime(0, time); gain.gain.linearRampToValueAtTime(0.05, time + 0.5); gain.gain.exponentialRampToValueAtTime(0.001, time + 3.5); 
+            let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(300, time); filter.frequency.linearRampToValueAtTime(2000, time + 0.5); filter.frequency.exponentialRampToValueAtTime(300, time + 3.5); 
+            osc.connect(filter); filter.connect(gain); gain.connect(epicDelay); gain.connect(ambientGain);
+            osc.start(time); lfo.start(time); osc.stop(time + 3.6); lfo.stop(time + 3.6);
+        }
+        function jouerTaiko(time, intensite) {
+            let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(120, time); osc.frequency.exponentialRampToValueAtTime(20, time + 0.5); 
+            gain.gain.setValueAtTime(0, time); gain.gain.linearRampToValueAtTime(intensite, time + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, time + 2.5); 
+            let noiseSize = audioCtx.sampleRate * 0.1; let noiseBuffer = audioCtx.createBuffer(1, noiseSize, audioCtx.sampleRate); let output = noiseBuffer.getChannelData(0); for (let i = 0; i < noiseSize; i++) output[i] = Math.random() * 2 - 1;
+            let noiseSrc = audioCtx.createBufferSource(); noiseSrc.buffer = noiseBuffer; let noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 300;
+            let noiseGain = audioCtx.createGain(); noiseGain.gain.setValueAtTime(intensite * 0.4, time); noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+            osc.connect(gain); gain.connect(ambientGain); gain.connect(epicDelay); noiseSrc.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(ambientGain);
+            osc.start(time); osc.stop(time + 2.6); noiseSrc.start(time);
+        }
+        function jouerPulse(time, freq) {
+            let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain(); let filter = audioCtx.createBiquadFilter(); osc.type = 'sawtooth'; osc.frequency.value = freq;
+            filter.type = 'lowpass'; filter.frequency.setValueAtTime(100, time); filter.frequency.exponentialRampToValueAtTime(800, time + 0.05); filter.frequency.exponentialRampToValueAtTime(100, time + 0.4);
+            gain.gain.setValueAtTime(0, time); gain.gain.linearRampToValueAtTime(0.04, time + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+            osc.connect(filter); filter.connect(gain); gain.connect(ambientGain); gain.connect(epicDelay); osc.start(time); osc.stop(time + 0.6);
+        }
+        function jouerSwell(time) {
+            const swellFreqs = [130.81, 196.00, 311.13]; 
+            swellFreqs.forEach(f => {
+                let osc = audioCtx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = f + (Math.random() * 0.4 - 0.2);
+                let gain = audioCtx.createGain(); gain.gain.setValueAtTime(0, time); gain.gain.linearRampToValueAtTime(0.03, time + 3); gain.gain.exponentialRampToValueAtTime(0.001, time + 8); 
+                let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(150, time); filter.frequency.linearRampToValueAtTime(900, time + 3); filter.frequency.exponentialRampToValueAtTime(150, time + 8);
+                osc.connect(filter); filter.connect(gain); gain.connect(ambientGain); gain.connect(epicDelay); osc.start(time); osc.stop(time + 8.1);
+            });
+        }
+        function stopAlarm() {
+            if (!isAmbientPlaying || !ambientGain) return; isAmbientPlaying = false;
+            if (schedulerTimer) clearTimeout(schedulerTimer);
+            const t = audioCtx.currentTime; ambientGain.gain.cancelScheduledValues(t); ambientGain.gain.setValueAtTime(ambientGain.gain.value, t); ambientGain.gain.linearRampToValueAtTime(0, t + 3); 
+            continuousNodes.forEach(node => { try { node.stop(t + 3.1); } catch(e){} });
+            setTimeout(() => { continuousNodes = []; ambientGain = null; epicDelay = null; }, 3200);
+        }
+
+        // =========================================
+        // BOUCLE SYSTÈME PRINCIPALE
+        // =========================================
+        async function systemLoop() {
+            if(isSystemLooping || !profilCommandant) return;
+            isSystemLooping = true;
+            
+            try {
+                // 1. TÉLÉCHARGEMENT DES DONNÉES
+                const [resParam, resProfil, resRadar] = await Promise.all([
+                    supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
+                    supabaseApp.from('profils').select('*').eq('user_id', profilCommandant.user_id).single(),
+                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id)
+                ]);
+
+                let paramData = resParam.data || {};
+                let profilData = resProfil.data || profilCommandant;
+                const radarData = resRadar.data || [];
+                
+                const idsToDelete = [];
+                const profilUpdates = {};
+                const paramUpdates = {};
+                let profilModifie = false;
+                let paramModifie = false;
+
+                // --- 2. LE TRIEUR ---
+                const processLatest = (target, callback) => {
+                    const items = radarData.filter(d => d.target_commodity === target).sort((a,b) => b.id - a.id);
+                    if (items.length > 0) {
+                        callback(items[0]);
+                        items.forEach(i => idsToDelete.push(i.id));
+                    }
+                };
+
+                // A. Failsafe et Finances
+                processLatest('HEARTBEAT', item => { paramUpdates.last_heartbeat = parseInt(item.station_name); paramModifie = true; });
+                processLatest('SHIP_BALANCE', item => { profilUpdates.solde_vaisseau = item.prix_unitaire; profilModifie = true; });
+                processLatest('FC_BALANCE', item => { profilUpdates.solde_fc = item.prix_unitaire; profilModifie = true; });
+                processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });
+                processLatest('PARAM_UPDATE', item => { try { Object.assign(paramUpdates, JSON.parse(item.station_name)); paramModifie = true; } catch(e){} });
+
+                // B. Rangs et Progressions
+                const rankMapping = {
+                    'QG_RANK_COMBAT': 'rang_combat', 'QG_RANK_TRADE': 'rang_commerce', 'QG_RANK_EXPLOR': 'rang_explo',
+                    'QG_RANK_FEDERA': 'rang_fed', 'QG_RANK_EMPIRE': 'rang_emp', 'QG_RANK_EXOBIO': 'rang_exobio',
+                    'QG_PROG_COMBAT': 'prog_combat', 'QG_PROG_TRADE': 'prog_commerce', 'QG_PROG_EXPLOR': 'prog_explore',
+                    'QG_PROG_FEDERA': 'prog_fed', 'QG_PROG_EMPIRE': 'prog_emp', 'QG_PROG_EXOBIO': 'prog_exobio',
+                    'QG_WEALTH': 'patrimoine_total', 'QG_SHIPS_VALUE': 'valeur_vaisseaux', 'QG_REBUY': 'cout_rachat'
+                };
+                for (const [target, col] of Object.entries(rankMapping)) {
+                    processLatest(target, item => { profilUpdates[col] = item.prix_unitaire; profilModifie = true; });
+                }
+
+                // C. Powerplay
+                processLatest('QG_POWERPLAY', item => { profilUpdates.power_nom = item.station_name; profilUpdates.power_rang = item.prix_unitaire; profilModifie = true; });
+
+                // D. Flotte et Carrier
+                processLatest('QG_FLEET', item => { try { paramUpdates.flotte_json = JSON.parse(item.station_name); paramModifie = true; } catch(e){} });
+                processLatest('QG_CARRIER_STATS', item => { try { paramUpdates.carrier_stats_json = JSON.parse(item.station_name); paramModifie = true; } catch(e){} });
+                processLatest('QG_ACTIVE_SHIP_ID', item => { paramUpdates.id_vaisseau_actif = item.station_name; paramModifie = true; });
+
+                // E. Modules 
+                const moduleItems = radarData.filter(d => d.target_commodity && d.target_commodity.startsWith('QG_MODULES_'));
+                if (moduleItems.length > 0) {
+                    let currentModules = paramData.modules_json || {};
+                    moduleItems.forEach(item => {
+                        const shipId = item.target_commodity.replace('QG_MODULES_', '');
+                        try { currentModules[shipId] = JSON.parse(item.station_name); paramUpdates.modules_json = currentModules; paramModifie = true; } catch(e){}
+                        idsToDelete.push(item.id);
+                    });
+                }
+                
+                // F. Statut COVAS & POSITION ACTUELLE (LECTURE SEULE - SANS DESTRUCTION)
+                const systemStatusItems = radarData.filter(d => d.target_commodity === 'SYSTEM_STATUS').sort((a,b) => b.id - a.id);
+                if (systemStatusItems.length > 0) {
+                    const item = systemStatusItems[0];
+                    paramUpdates.covas_status = item.station_name;
+                    if (item.system_name && item.system_name !== 'SYS_CORE') {
+                        paramUpdates.position_actuelle = item.system_name;
+                    }
+                    paramModifie = true;
+                }
+
+                // --- 3. SAUVEGARDE PERMANENTE ET LE NETTOYEUR ---
+                if (paramModifie) {
+                    if (resParam.data) {
+                        // Si le pilote a déjà un dossier de paramètres, on le met à jour
+                        await supabaseApp.from('parametres_app').update(paramUpdates).eq('user_id', profilCommandant.user_id);
+                    } else {
+                        // Si c'est un nouveau pilote, on crée son dossier initial
+                        paramUpdates.user_id = profilCommandant.user_id;
+                        await supabaseApp.from('parametres_app').insert(paramUpdates);
+                        resParam.data = paramUpdates; // On informe le système local que le dossier existe
+                    }
+                    Object.assign(paramData, paramUpdates);
+                }
+                if (profilModifie) {
+                    await supabaseApp.from('profils').update(profilUpdates).eq('user_id', profilCommandant.user_id);
+                    Object.assign(profilData, profilUpdates);
+                    profilCommandant = profilData; 
+                }
+                if (idsToDelete.length > 0) {
+                    await supabaseApp.from('radar_commercial').delete().in('id', idsToDelete.slice(0, 80));
+                }
+
+                // --- 4. AFFICHAGE DE L'INTERFACE ---
+                // Failsafe
+                const failsafeModal = document.getElementById('failsafe-modal');
+                let edmcEnLigne = false;
+                
+                // 🛑 NOUVELLE RÈGLE STRICTE : Heartbeat récent ET Nom de CMDR connu !
+                if (paramData.last_heartbeat && profilData.cmdr_nom) {
+                    if (Math.floor(Date.now() / 1000) - paramData.last_heartbeat < 25) { edmcEnLigne = true; }
+                }
+                
+                if (failsafeModal) {
+                    if (!edmcEnLigne) {
+                        failsafeModal.style.display = 'flex';
+                        if (wasEdmcOnline) { 
+                            document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none');
+                            document.getElementById('fs-page-main').style.display = 'block';
+                            if(typeof startAlarm === 'function') startAlarm(); 
+                            wasEdmcOnline = false; 
+                        }
+                    } else {
+                        failsafeModal.style.display = 'none';
+                        if (!wasEdmcOnline) { 
+                            if(typeof stopAlarm === 'function') stopAlarm(); 
+                            if(typeof sonReconnect === 'function') sonReconnect(); 
+                            wasEdmcOnline = true; 
+                        }
+                    }
+                }
+
+                // Header Général
+                const fmt = new Intl.NumberFormat('fr-FR');
+                if (profilData.solde_vaisseau) { const el = document.getElementById('solde-vaisseau'); if (el) el.innerText = fmt.format(profilData.solde_vaisseau); }
+                if (profilData.solde_fc) { const el = document.getElementById('solde-fc'); if (el) el.innerText = fmt.format(profilData.solde_fc); }
+                if (profilData.cmdr_nom) { const el = document.getElementById('cmdr-name-display'); if(el) el.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase(); }
+                
+                const headerInventory = document.getElementById('fc-inventory-percent');
+                if (headerInventory) {
+                    const nomAff = paramData.vaisseau_nom || 'VAISSEAU INCONNU';
+                    let modeleAff = paramData.vaisseau_modele || 'MODÈLE INCONNU'; 
+                    if (typeof dicoVaisseaux !== 'undefined' && dicoVaisseaux[modeleAff.toLowerCase()]) { modeleAff = dicoVaisseaux[modeleAff.toLowerCase()]; }
+                    headerInventory.innerHTML = `<span style="color: var(--ed-orange);">${nomAff}</span>`;
+                    headerInventory.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '⚙️ MODÈLE : <span style="color:#fff;">${modeleAff}</span>', 'var(--ed-orange)')`);
+                }
+
+                // POSITION ACTUELLE ET RANGS
+                const positionActuelle = paramData.position_actuelle || "SYSTÈME INCONNU";
+                const elFcPosLog = document.getElementById('qg-fc-pos-logistique');
+                if (elFcPosLog) elFcPosLog.innerText = positionActuelle.toUpperCase();
+
+                const ranksCombat = ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+                const ranksTrade = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+                const ranksExplore = ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+                const ranksExobio = ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+                const ranksFed = ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"];
+                const ranksEmp = ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"];
+
+                const updateRankUI = (idPrefix, rankVal, progVal, rankArray) => {
+                    const r = rankVal || 0; const p = progVal || 0;
+                    const elR = document.getElementById(`qg-${idPrefix}-rank`); if(elR) elR.innerText = rankArray[r] || "INCONNU";
+                    const elP = document.getElementById(`qg-${idPrefix}-prog`); if(elP) elP.innerText = (idPrefix==='fed'||idPrefix==='emp') ? `(${p}%)` : `${p}%`;
+                    const elB = document.getElementById(`qg-${idPrefix}-bar`); if(elB) elB.style.width = `${p}%`;
+                    if(idPrefix!=='fed'&&idPrefix!=='emp') { currentRanks[idPrefix=== 'explore' ? 'explore' : idPrefix] = r; currentProgs[idPrefix=== 'explore' ? 'explore' : idPrefix] = p; }
+                };
+
+                updateRankUI('combat', profilData.rang_combat, profilData.prog_combat, ranksCombat);
+                updateRankUI('trade', profilData.rang_commerce, profilData.prog_commerce, ranksTrade);
+                updateRankUI('explore', profilData.rang_explo, profilData.prog_explore, ranksExplore);
+                updateRankUI('exobio', profilData.rang_exobio, profilData.prog_exobio, ranksExobio);
+                updateRankUI('fed', profilData.rang_fed, profilData.prog_fed, ranksFed);
+                updateRankUI('emp', profilData.rang_emp, profilData.prog_emp, ranksEmp);
+
+                // Powerplay
+                const powerName = profilData.power_nom || 'AUCUNE';
+                const powerRank = profilData.power_rang || 0;
+                const elPwrName = document.getElementById("qg-power-name"); if(elPwrName) elPwrName.innerText = powerName.toUpperCase();
+                const elPwrRank = document.getElementById("qg-power-rank"); if(elPwrRank) elPwrRank.innerText = "RANG : " + powerRank + " / " + Math.max(100, powerRank);
+                const elPwrBar = document.getElementById("qg-power-bar"); if(elPwrBar) elPwrBar.style.width = ((powerRank / Math.max(100, powerRank)) * 100) + "%";
+
+                // Finances Avancées
+                const valFcExacte = profilData.solde_fc || 0;
+                const vraiPatrimoine = (profilData.solde_vaisseau||0) + (profilData.valeur_vaisseaux||0) + valFcExacte;
+                if (vraiPatrimoine > 0) {
+                    document.getElementById("qg-wealth-total").innerText = fmt.format(vraiPatrimoine) + " CR";
+                    document.getElementById("qg-wealth-liquid").innerHTML = fmt.format(profilData.solde_vaisseau||0) + " <span style='color: var(--ed-orange); font-size: 0.8em;'>CR</span>";
+                    document.getElementById("qg-wealth-fc").innerHTML = fmt.format(valFcExacte) + " <span style='color: var(--ed-blue); font-size: 0.8em;'>CR</span>";
+                    document.getElementById("qg-wealth-ships").innerHTML = fmt.format(profilData.valeur_vaisseaux||0) + " <span style='color: #00FF66; font-size: 0.8em;'>CR</span>";
+                    document.getElementById("qg-rebuy").innerHTML = fmt.format(profilData.cout_rachat||0) + " <span style='color: #FF3333; font-size: 0.8em;'>CR</span>";
+
+                    const pctLiq = (((profilData.solde_vaisseau||0) / vraiPatrimoine) * 100).toFixed(1);
+                    const pctFc = ((valFcExacte / vraiPatrimoine) * 100).toFixed(1);
+                    const pctShips = (((profilData.valeur_vaisseaux||0) / vraiPatrimoine) * 100).toFixed(1);
+
+                    document.getElementById("qg-bar-liquid").style.width = pctLiq + "%";
+                    document.getElementById("qg-bar-fc").style.width = pctFc + "%";
+                    document.getElementById("qg-bar-ships").style.width = pctShips + "%";
+                    document.getElementById("qg-pct-liquid").innerHTML = `<span style="color: var(--ed-orange);">■</span> LIQUIDITÉS (${pctLiq}%)`;
+                    document.getElementById("qg-pct-fc").innerHTML = `<span style="color: var(--ed-blue);">■</span> FLEET CARRIER (${pctFc}%)`;
+                    document.getElementById("qg-pct-ships").innerHTML = `<span style="color: #00FF66;">■</span> VAISSEAUX & MODULES (${pctShips}%)`;
+                }
+
+                // --- 5. LOGISTIQUE FLEET CARRIER ---
+                if (paramData.carrier_stats_json) {
+                    try {
+                        const stats = paramData.carrier_stats_json;
+                        const fuel = stats.fuel || 0;
+                        const elFuelText = document.getElementById('qg-fc-tritium-depot-text');
+                        const elFuelBar = document.getElementById('qg-fc-tritium-depot-bar');
+                        if(elFuelText) elFuelText.innerText = fuel + " / 1000 T";
+                        if(elFuelBar) elFuelBar.style.width = (fuel / 1000 * 100) + "%";
+
+                        const { data: tritData } = await supabaseApp.from('inventaire_fc').select('quantite').eq('marchandise', 'Tritium');
+                        const souteTritium = (tritData && tritData.length > 0) ? tritData[0].quantite : 0;
+                        
+                        const elSouteText = document.getElementById('qg-fc-tritium-soute-text');
+                        const elSouteBar = document.getElementById('qg-fc-tritium-soute-bar');
+                        if(elSouteText) elSouteText.innerText = new Intl.NumberFormat('fr-FR').format(souteTritium) + " T";
+                        if(elSouteBar) elSouteBar.style.width = Math.min((souteTritium / 25000 * 100), 100) + "%";
+
+                        if (stats.crew) {
+                            const masterServices = [
+                                { role: "captain", nom: "OPÉRATIONS DE VOL", cost: 5000000, core: true },
+                                { role: "commodities", nom: "MARCHANDISES", cost: 0, core: true },
+                                { role: "carrierfuel", nom: "DÉPÔT DE TRITIUM", cost: 0, core: true },
+                                { role: "refuel", nom: "RAVITAILLEMENT", cost: 1500000 },
+                                { role: "repair", nom: "RÉPARATION", cost: 1500000 },
+                                { role: "rearm", nom: "ARMURERIE", cost: 1500000 },
+                                { role: "shipyard", nom: "CHANTIER NAVAL", cost: 1750000 },
+                                { role: "outfitting", nom: "ÉQUIPEMENT", cost: 1750000 },
+                                { role: "blackmarket", nom: "MARCHÉ NOIR", cost: 1750000 },
+                                { role: "exploration", nom: "CARTOGRAPHIE", cost: 1875000 },
+                                { role: "voucherredemption", nom: "RÉCOMPENSES", cost: 1875000 },
+                                { role: "vistagenomics", nom: "VISTA GENOMICS", cost: 1500000 },
+                                { role: "pioneersupplies", nom: "PIONEER SUPPLIES", cost: 1500000 },
+                                { role: "frontlinesolutions", nom: "FRONTLINE SOLUTIONS", cost: 1500000 },
+                                { role: "bartender", nom: "BARTENDER", cost: 1750000 }
+                            ];
+                            
+                            let servicesHtml = "";
+                            let totalUpkeep = 0;
+                            
+                            masterServices.forEach(s => {
+                                const crewData = stats.crew.find(c => {
+                                    let r = c.CrewRole.toLowerCase();
+                                    return r === s.role || (s.role === 'voucherredemption' && r === 'bountybounty') || (s.role === 'frontlinesolutions' && r === 'mercenary');
+                                });
+                                
+                                let isActive = false; let isSuspended = false; let currentCost = 0;
+                                if (s.core) { isActive = true; currentCost = s.cost; } 
+                                else if (crewData && crewData.Activated) {
+                                    if (crewData.Enabled) { isActive = true; currentCost = s.cost; } 
+                                    else { isSuspended = true; currentCost = s.cost / 2; }
+                                }
+                                totalUpkeep += currentCost;
+
+                                let borderCol = isActive ? "#00FF66" : (isSuspended ? "#FF3333" : "#333");
+                                let bgCol = isActive ? "rgba(0, 255, 102, 0.05)" : (isSuspended ? "rgba(255, 51, 51, 0.05)" : "rgba(255, 255, 255, 0.01)");
+                                let titleCol = isActive ? "#fff" : (isSuspended ? "#ccc" : "#666");
+                                let badge = isActive ? `<span style="color: #000; font-size: 0.8em; font-weight: bold; padding: 2px 8px; background: #00FF66; border-radius: 3px; box-shadow: 0 0 8px #00FF66;">EN LIGNE</span>` : 
+                                            (isSuspended ? `<span style="color: #FF3333; font-size: 0.8em; font-weight: bold; padding: 2px 8px; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; border-radius: 3px;">SUSPENDU</span>` : 
+                                            `<span style="color: #666; font-size: 0.8em; font-weight: bold; padding: 2px 8px; border: 1px solid #444; border-radius: 3px;">NON INSTALLÉ</span>`);
+
+                                servicesHtml += `
+                                    <div style="border: 1px solid ${borderCol}; background: ${bgCol}; padding: 15px; border-radius: 4px; ${isActive ? 'box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.05);' : ''}">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid ${isActive ? 'rgba(0, 255, 102, 0.2)' : '#444'}; padding-bottom: 8px; margin-bottom: 10px;">
+                                            <span style="color: ${titleCol}; font-weight: bold; letter-spacing: 1px;">${s.nom}</span>
+                                            ${badge}
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.85em;">
+                                            <span style="color: #888;">COÛT ENTRETIEN :</span>
+                                            <span style="color: ${isActive || isSuspended ? '#ccc' : '#555'};">${currentCost > 0 ? fmt.format(currentCost) + ' CR' : '---'}</span>
+                                        </div>
+                                    </div>`;
+                            });
+                            
+                            const conteneurServices = document.getElementById('qg-fc-services-container');
+                            if(conteneurServices && servicesHtml !== "") conteneurServices.innerHTML = servicesHtml;
+                            const elUpkeep = document.getElementById('qg-fc-upkeep');
+                            if (elUpkeep) elUpkeep.innerText = "- " + fmt.format(totalUpkeep) + " CR";
+                        }
+                    } catch (e) {}
+                }
+
+                // --- 6. GESTION DE LA FLOTTE ---
+                const conteneurFlotte = document.getElementById('qg-tab-flotte');
+                if (conteneurFlotte && paramData.flotte_json) {
+                    const flotte = paramData.flotte_json;
+                    const modulesJson = paramData.modules_json || {};
+                    const activeShipId = paramData.id_vaisseau_actif;
+                    const nomVaisseauActif = paramData.vaisseau_nom || "";
+                    
+                    const signatureGlobale = JSON.stringify(flotte) + JSON.stringify(modulesJson) + nomVaisseauActif + activeShipId + positionActuelle;
+
+                    if (window.lastFleetHash !== signatureGlobale) {
+                        window.lastFleetHash = signatureGlobale;
+                        try {
+                            if (activeShipId && !flotte.find(v => String(v.id) === String(activeShipId))) {
+                                flotte.unshift({ id: activeShipId, nom: nomVaisseauActif, modele: paramData.vaisseau_modele || "INCONNU", systeme: positionActuelle });
+                            }
+
+                            let htmlFlotte = "";
+                            flotte.forEach(vaisseau => {
+                                const estActif = (nomVaisseauActif === vaisseau.nom.toUpperCase() || String(vaisseau.id) === String(activeShipId));
+                                let modeleTraduit = typeof dicoVaisseaux !== 'undefined' ? (dicoVaisseaux[(vaisseau.modele||"").toLowerCase()] || vaisseau.modele) : vaisseau.modele;
+
+                                const borderCol = estActif ? "var(--ed-blue)" : "rgba(255,255,255,0.2)";
+                                const bgCol = estActif ? "rgba(0, 240, 255, 0.05)" : "rgba(255, 255, 255, 0.02)";
+                                const titleCol = estActif ? "var(--ed-blue)" : "#aaa";
+                                const badgeActif = estActif ? `<span style="color: #00FF66; font-size: 0.7em; font-weight: bold; background: rgba(0, 255, 102, 0.1); padding: 2px 6px; border: 1px solid #00FF66; border-radius: 3px; margin-left: 10px;">ACTIF</span>` : "";
+                                
+                                // On utilise la position actuelle pour savoir si le vaisseau est avec nous
+                                const sysVaisseau = estActif ? positionActuelle : vaisseau.systeme;
+                                const estSurFC = (sysVaisseau === positionActuelle);
+                                const iconeLieu = estSurFC ? `🛸 <span style="color:var(--ed-blue); font-weight:bold;">${sysVaisseau} (Soute Carrier)</span>` : `📍 ${sysVaisseau}`;
+
+                                let htmlModules = "";
+                                if (modulesJson[vaisseau.id]) {
+                                    const modules = modulesJson[vaisseau.id];
+                                    let primaires="", optionnels="", emports="";
+                                    
+                                    modules.forEach(m => {
+                                        let nomPropre = m.nom.replace(/int_|hpt_|_[a-z0-9]+$/gi, '').replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+                                        let badgeG = m.grade > 0 ? `<span style="color: var(--ed-orange); font-weight: bold;">[G${m.grade}]</span>` : `<span style="color: #444;">[-]</span>`;
+                                        let slotL = m.slot.toLowerCase();
+                                        if (slotL.includes("hardpoint") || slotL.includes("tiny")) emports += `<div style="margin-bottom: 5px;"><span style="color: #ccc;">${nomPropre}</span> ${badgeG}</div>`;
+                                        else if (slotL.includes("powerplant") || slotL.includes("mainengine") || slotL.includes("frameshiftdrive") || slotL.includes("lifesupport") || slotL.includes("distributor") || slotL.includes("radar") || slotL.includes("fueltank") || slotL.includes("armor")) primaires += `<div style="margin-bottom: 5px;"><span style="color: #ccc;">${nomPropre}</span> ${badgeG}</div>`;
+                                        else optionnels += `<div style="margin-bottom: 5px;">${badgeG} <span style="color: #ccc;">${nomPropre}</span></div>`;
+                                    });
+
+                                    htmlModules = `
+                                        <div style="grid-column: 1 / -1; display: flex; align-items: stretch; justify-content: center; gap: 20px; position: relative; padding: 10px;">
+                                            <div style="flex: 1; text-align: right; display: flex; flex-direction: column; gap: 20px;">
+                                                <div style="border-right: 2px solid var(--ed-blue); padding-right: 15px;">
+                                                    <div style="color: var(--ed-blue); font-size: 0.9em; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid var(--ed-blue); margin-bottom: 10px; padding-bottom: 3px;">PRIMAIRES //</div>
+                                                    <div style="font-size: 0.8em; color: #888;">${primaires || '-'}</div>
+                                                </div>
+                                                <div style="border-right: 2px solid #FF3333; padding-right: 15px;">
+                                                    <div style="color: #FF3333; font-size: 0.9em; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid #FF3333; margin-bottom: 10px; padding-bottom: 3px;">EMPORTS //</div>
+                                                    <div style="font-size: 0.8em; color: #888;">${emports || '-'}</div>
+                                                </div>
+                                            </div>
+                                            <div style="flex: 0 0 150px; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));">
+                                                <svg viewBox="0 0 100 100" style="width: 100%; height: auto; opacity: 0.9;"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(0, 240, 255, 0.15)" stroke-width="0.5" stroke-dasharray="2,4"/><circle cx="50" cy="50" r="25" fill="none" stroke="rgba(0, 240, 255, 0.2)" stroke-width="0.5"/><line x1="50" y1="0" x2="50" y2="100" stroke="rgba(0, 240, 255, 0.15)" stroke-width="0.5"/><line x1="0" y1="50" x2="100" y2="50" stroke="rgba(0, 240, 255, 0.15)" stroke-width="0.5"/><polygon points="50,10 75,45 85,65 85,75 50,65 15,75 15,65 25,45" fill="rgba(0, 240, 255, 0.05)" stroke="var(--ed-blue)" stroke-width="1.5"/><polygon points="50,25 56,38 50,42 44,38" fill="rgba(0, 240, 255, 0.3)" stroke="var(--ed-blue)" stroke-width="1"/><line x1="50" y1="42" x2="50" y2="65" stroke="var(--ed-blue)" stroke-width="1" stroke-dasharray="2,2"/><polygon points="35,60 65,60 50,50" fill="none" stroke="var(--ed-orange)" stroke-width="0.5" opacity="0.5"/><rect x="35" y="67" width="8" height="5" fill="none" stroke="var(--ed-orange)" stroke-width="1"/><rect x="57" y="67" width="8" height="5" fill="none" stroke="var(--ed-orange)" stroke-width="1"/><polygon points="35,72 43,72 41,85 37,85" fill="var(--ed-orange)" opacity="0.6"/><polygon points="57,72 65,72 63,85 59,85" fill="var(--ed-orange)" opacity="0.6"/><circle cx="25" cy="55" r="3" fill="none" stroke="#FF3333" stroke-width="1"/><circle cx="25" cy="55" r="1" fill="#FF3333"/><circle cx="75" cy="55" r="3" fill="none" stroke="#FF3333" stroke-width="1"/><circle cx="75" cy="55" r="1" fill="#FF3333"/></svg>
+                                            </div>
+                                            <div style="flex: 1; text-align: left; display: flex; flex-direction: column; gap: 20px;">
+                                                <div style="border-left: 2px solid var(--ed-orange); padding-left: 15px; height: 100%;">
+                                                    <div style="color: var(--ed-orange); font-size: 0.9em; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid var(--ed-orange); margin-bottom: 10px; padding-bottom: 3px;">// OPTIONNELS</div>
+                                                    <div style="font-size: 0.8em; color: #888;">${optionnels || '-'}</div>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                                } else {
+                                    htmlModules = `<div style="text-align: center; color: #666; font-style: italic; padding: 20px;">> DONNÉES D'INGÉNIERIE NON SYNCHRONISÉES (Montez dans le vaisseau pour le scanner)</div>`;
+                                }
+
+                                htmlFlotte += `
+                                <div class="data-row" style="padding: 0; border-color: ${borderCol}; box-shadow: inset 4px 0 0 ${borderCol}; opacity: ${estActif ? '1' : '0.7'}; overflow: hidden; margin-bottom: 15px;">
+                                    <div onclick="toggleShipDetails(this)" onmouseenter="if(typeof sonHover === 'function') sonHover()" style="cursor: pointer; padding: 15px 25px; background: ${bgCol}; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;">
+                                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                                            <div style="font-weight: bold; display: flex; align-items: center; gap: 10px; color: ${titleCol};">
+                                                <span style="font-size: 1.5em; text-shadow: 0 0 10px ${borderCol};">🚀</span>
+                                                <span style="font-size: 1.2em; letter-spacing: 2px;">${vaisseau.nom.toUpperCase()}</span>
+                                                <span style="color: #666; font-weight: normal; font-size: 0.9em;">// ${modeleTraduit.toUpperCase()}</span>
+                                                ${badgeActif}
+                                            </div>
+                                            <div style="display: flex; gap: 15px; font-size: 0.85em;">
+                                                <span style="color: #888;">${iconeLieu}</span>
+                                            </div>
+                                        </div>
+                                        <div style="color: ${titleCol}; font-size: 1.5em; opacity: 0.5;">[+]</div>
+                                    </div>
+                                    <div class="ship-details" style="display: none; padding: 20px 25px; border-top: 1px dashed ${borderCol};">
+                                        <div style="display: grid; grid-template-columns: 1fr; background: rgba(0,0,0,0.4); border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">${htmlModules}</div>
+                                    </div>
+                                </div>`;
+                            });
+                            conteneurFlotte.innerHTML = htmlFlotte;
+                        } catch(e) {}
+                    }
+                }
+
+            } catch (err) { console.error(err); }
+            isSystemLooping = false;
+            setTimeout(systemLoop, 3000);
+        }
+        
+        window.copierNav = function(texte, element, event) { if (event) event.stopPropagation(); navigator.clipboard.writeText(texte).then(() => { sonClic(); const texteOriginal = element.innerHTML; element.innerHTML = "[ COPIÉ ]"; element.style.color = "#00FF00"; setTimeout(() => { element.innerHTML = texteOriginal; element.style.color = ""; }, 1500); }); };
+    
+        // ==========================================
+        // PARAMÈTRES ESCADRON (AMIRAUTÉ)
+        // ==========================================
+        async function chargerParametresEscadron() {
+            if (!profilCommandant || !profilCommandant.escadron_id) return;
+            try {
+                const { data, error } = await supabaseApp.from('escadrons')
+                    .select('*')
+                    .eq('tag', profilCommandant.escadron_id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (data) {
+                    document.getElementById('titre-registre-officiel').innerText = `> REGISTRE OFFICIEL : [ ${data.tag} ]`;
+                    document.getElementById('edit-esca-nom').value = data.nom || '';
+                    if (data.allegeance) document.getElementById('edit-esca-allegeance').value = data.allegeance;
+                    if (data.puissance) document.getElementById('edit-esca-puissance').value = data.puissance;
+                }
+            } catch(e) { console.error("Erreur chargement paramètres :", e); }
+        }
+
+        async function sauvegarderParametresEscadron() {
+            if(typeof sonClic === 'function') sonClic();
+            const btn = document.getElementById('btn-save-parametres');
+            btn.innerText = "TRANSMISSION...";
+            btn.style.pointerEvents = "none";
+            
+            try {
+                const updates = {
+                    nom: document.getElementById('edit-esca-nom').value.trim(),
+                    allegeance: document.getElementById('edit-esca-allegeance').value,
+                    puissance: document.getElementById('edit-esca-puissance').value
+                };
+
+                const { error } = await supabaseApp.from('escadrons')
+                    .update(updates)
+                    .eq('tag', profilCommandant.escadron_id);
+
+                if (error) throw error;
+
+                if(typeof sonSucces === 'function') sonSucces();
+                btn.innerText = "SAUVEGARDÉ";
+                btn.style.color = "#000";
+                btn.style.backgroundColor = "#00FF66";
+
+                setTimeout(() => { 
+                    btn.innerText = "SAUVEGARDER LES MODIFICATIONS"; 
+                    btn.style.color = "#00FF66"; 
+                    btn.style.backgroundColor = "rgba(0, 255, 102, 0.05)";
+                    btn.style.pointerEvents = "auto";
+                }, 2000);
+
+            } catch(e) {
+                console.error("Erreur sauvegarde paramètres :", e);
+                btn.innerText = "ÉCHEC DE SAUVEGARDE";
+                setTimeout(() => { 
+                    btn.innerText = "SAUVEGARDER LES MODIFICATIONS"; 
+                    btn.style.pointerEvents = "auto"; 
+                }, 2000);
+            }
+        }
+
+        async function actualiserBadgeAmiraute() {
+            if (!profilCommandant) return;
+            
+            // Les deux icônes du menu latéral
+            const badgeDirecteur = document.getElementById('badge-amiraute'); // Sur l'icône QG
+            const badgeEscadron = document.getElementById('badge-escadron'); // Sur l'icône BGS
+            
+            let totalDirecteur = 0;
+            let totalEscadron = 0;
+
+            try {
+                // 1. STATUT DIRECTEUR : Les attentes d'accès au terminal
+                if (profilCommandant.est_directeur) {
+                    const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).neq('est_approuve', true);
+                    if (!error && count) totalDirecteur = count;
+                }
+                
+                // 2. STATUT AMIRAL : Les candidatures pour rejoindre l'escadron
+                if (profilCommandant.est_amiral && profilCommandant.escadron_id) {
+                    const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).eq('demande_escadron', profilCommandant.escadron_id);
+                    if (!error && count) totalEscadron = count;
+                }
+
+                // --- MISE À JOUR VISUELLE ---
+
+                // A. Pastille du QG (Rôle Directeur)
+                if (badgeDirecteur) {
+                    if (totalDirecteur > 0) {
+                        badgeDirecteur.innerText = totalDirecteur;
+                        badgeDirecteur.style.display = 'inline-block';
+                    } else {
+                        badgeDirecteur.style.display = 'none';
+                    }
+                }
+
+                // B. Pastille du BGS (Rôle Amiral)
+                if (badgeEscadron) {
+                    if (totalEscadron > 0) {
+                        badgeEscadron.innerText = totalEscadron;
+                        badgeEscadron.style.display = 'inline-block';
+                    } else {
+                        badgeEscadron.style.display = 'none';
+                    }
+                }
+
+                // C. Pastille de l'onglet spécifique (Uniquement dans index.html)
+                const badgeOngletDir = document.getElementById('badge-onglet-directeur');
+                if (badgeOngletDir) {
+                    if (totalDirecteur > 0) {
+                        badgeOngletDir.innerText = totalDirecteur;
+                        badgeOngletDir.style.display = 'inline-block';
+                    } else {
+                        badgeOngletDir.style.display = 'none';
+                    }
+                }
+
+            } catch (e) { console.error("Erreur calcul des badges", e); }
+        }
+
+        // Réveil du moteur audio au premier clic sur l'interface
+        document.body.addEventListener('click', initAudio, { once: true });
+        
+    </script>
+
+    <!-- ========================================== -->
+    <!-- MODULE D'INTERCEPTION DES COMMUNICATIONS   -->
+    <!-- ========================================== -->
+    
+    <!-- 1. HTML DES ALERTES (Caché par défaut) -->
+    <!-- ALERTE MASSIVE (URGENCE) -->
+    <div id="comms-alert-massive" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.9); z-index: 100000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Share Tech Mono', monospace; cursor: pointer; animation: failsafe-pulse 1s infinite;" onclick="this.style.display='none'; if(typeof sonClic==='function') sonClic();">
+        <div style="border: 4px solid #fff; padding: 40px 60px; background: rgba(0,0,0,0.8); box-shadow: 0 0 50px #FF0000;">
+            <h1 style="color: #FF0000; font-size: 3.5em; margin: 0; letter-spacing: 5px; text-shadow: 0 0 20px #FF0000;">⚠️ TRANSMISSION URGENTE ⚠️</h1>
+            <p id="comms-massive-sender" style="color: #fff; font-size: 1.5em; letter-spacing: 2px; margin-top: 20px;">> EXPÉDITEUR : CMDR INCONNU</p>
+            <p id="comms-massive-text" style="color: var(--ed-orange); font-size: 1.3em; margin-top: 30px; max-width: 800px; line-height: 1.5; border-left: 5px solid #FF0000; padding-left: 20px; text-align: left;">Message text...</p>
+            <p style="color: #888; font-size: 0.9em; margin-top: 40px; animation: alertPulse 1.5s infinite;">[ CLIQUEZ N'IMPORTE OÙ POUR ACQUITTER ]</p>
+        </div>
+    </div>
+
+    <!-- ALERTE SUBTILE (MESSAGE PRIVÉ STANDARD) -->
+    <div id="comms-alert-toast" style="position: fixed; bottom: 30px; right: -400px; width: 350px; background: rgba(10,5,0,0.95); border: 1px solid var(--ed-blue); border-left: 4px solid var(--ed-blue); padding: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.2); z-index: 99999; font-family: 'Share Tech Mono', monospace; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;" onclick="this.style.right='-400px'; if(typeof sonClic==='function') sonClic(); window.location.href='communications.html';">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-blue); padding-bottom: 5px; margin-bottom: 10px;">
+            <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">> MESSAGE PRIVÉ ENTRANT</span>
+            <span style="color: #888; font-size: 0.8em;">MAINTENANT</span>
+        </div>
+        <div style="color: #fff; font-size: 0.95em; margin-bottom: 5px;">
+            De : <span id="comms-toast-sender" style="color: var(--ed-orange); font-weight: bold;">CMDR ...</span>
+        </div>
+        <div style="color: #888; font-size: 0.8em; font-style: italic;">[ Cliquez pour ouvrir le terminal ]</div>
+    </div>
+
+    <!-- 2. MOTEUR D'ÉCOUTE JAVASCRIPT -->
+    <script>
+        let commsRadarActif = false;
+
+        // Fonction sonore spécifique aux communications
+        function sonAlerteComms(urgent) {
+            try {
+                let ctx = typeof audioCtx !== 'undefined' ? audioCtx : new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                
+                const t = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                if (urgent) {
+                    // Alarme stridente
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, t);
+                    osc.frequency.setValueAtTime(1200, t + 0.2);
+                    osc.frequency.setValueAtTime(800, t + 0.4);
+                    gain.gain.setValueAtTime(0.1, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(t); osc.stop(t + 0.6);
+                } else {
+                    // Bip de notification discret
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1500, t);
+                    osc.frequency.exponentialRampToValueAtTime(800, t + 0.1);
+                    gain.gain.setValueAtTime(0.05, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(t); osc.stop(t + 0.2);
+                }
+            } catch(e) {}
+        }
+
+        function initialiserEcouteComms() {
+            if (!profilCommandant || commsRadarActif) return;
+            commsRadarActif = true;
+            console.log("> Radar de communications synchronisé.");
+
+            supabaseApp.channel('public:transmissions')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
+                    const msg = payload.new;
+                    
+                    // On ignore nos propres messages
+                    if (msg.expediteur_id === profilCommandant.user_id) return;
+
+                    const isForMe = (msg.destinataire_id === profilCommandant.user_id);
+                    const isEscadron = (msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id);
+                    const isGlobal = (msg.canal === 'GLOBAL');
+
+                    // Si le message me concerne (Privé, ou Escadron, ou Global)
+                    if (isForMe || isEscadron || isGlobal) {
+                        
+                        if (msg.est_urgent) {
+                            // DÉCLENCHEMENT ALERTE MASSIVE
+                            sonAlerteComms(true);
+                            document.getElementById('comms-massive-sender').innerText = `> EXPÉDITEUR : CMDR ${msg.expediteur_nom} [ Canal: ${msg.canal} ]`;
+                            document.getElementById('comms-massive-text').innerText = msg.message;
+                            document.getElementById('comms-alert-massive').style.display = 'flex';
+                        } 
+                        else if (isForMe) {
+                            // DÉCLENCHEMENT NOTIFICATION PRIVÉE SUBTILE
+                            sonAlerteComms(false);
+                            document.getElementById('comms-toast-sender').innerText = msg.expediteur_nom;
+                            document.getElementById('comms-alert-toast').style.right = '30px';
+                            // Disparition automatique après 8 secondes
+                            setTimeout(() => { document.getElementById('comms-alert-toast').style.right = '-400px'; }, 8000);
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        // Boucle de vérification légère pour attendre le chargement du profil
+        const commsCheckInterval = setInterval(() => {
+            if (typeof profilCommandant !== 'undefined' && profilCommandant !== null) {
+                initialiserEcouteComms();
+                clearInterval(commsCheckInterval);
+            }
+        }, 1000);
+
+        // LOGIQUE RH (Recrutement et Fondation)
+        async function actualiserAffichageRH() {
+            if (!profilCommandant) return;
+            const divActif = document.getElementById('qg-squad-actif');
+            const divMercenaire = document.getElementById('qg-squad-mercenaire');
+            const spanTag = document.getElementById('qg-squad-tag');
+            
+            const btnSoumettre = document.getElementById('btn-soumettre-candidature');
+            const inputSquad = document.getElementById('input-nouveau-squad');
+            const choixBtns = document.getElementById('choix-mercenaire-btns');
+            
+            if (profilCommandant.escadron_id) {
+                // Le pilote est dans un escadron
+                divActif.style.display = 'flex';
+                divMercenaire.style.display = 'none';
+                spanTag.innerText = '[ ' + profilCommandant.escadron_id + ' ]';
+                
+                // --- NOUVEAU : AFFICHAGE DES GRADES ET RÔLES AVEC INFOBULLES ---
+                const rolesDiv = document.getElementById('qg-squad-roles');
+                if (rolesDiv) {
+                    let rolesHtml = '';
+                    const styleBase = "padding: 3px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold; cursor: help;";
+                    
+                    // Grade Principal
+                    if (profilCommandant.est_amiral) {
+                        rolesHtml += `<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); ${styleBase}" 
+                            onmouseenter="showHoloTooltip(event, 'COMMANDANT SUPRÊME<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Gère les effectifs, accrédite les officiers<br>et administre l\\'escadron.</span>', '#FF3333')" 
+                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">AMIRAL</span>`;
+                    } else {
+                        rolesHtml += `<span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); ${styleBase}" 
+                            onmouseenter="showHoloTooltip(event, 'MEMBRE ACTIF<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Accès aux opérations de l\\'escadron<br>et au réseau de communication.</span>', 'var(--ed-orange)')" 
+                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">PILOTE</span>`;
+                    }
+                    
+                    // Accréditations supplémentaires
+                    if (profilCommandant.est_officier) {
+                        rolesHtml += `<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); ${styleBase}" 
+                            onmouseenter="showHoloTooltip(event, 'GESTION TACTIQUE BGS<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Autorisé à publier les Ordres de l\\'Amirauté<br>et à définir les cibles BGS.</span>', '#00FF66')" 
+                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">OFFICIER BGS</span>`;
+                    }
+                    if (profilCommandant.est_diplomate) {
+                        rolesHtml += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); ${styleBase}" 
+                            onmouseenter="showHoloTooltip(event, 'RELATIONS EXTÉRIEURES<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Administre la liste noire (KOS)<br>et les traités avec les alliés.</span>', 'var(--ed-blue)')" 
+                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">DIPLOMATE</span>`;
+                    }
+                    
+                    rolesDiv.innerHTML = rolesHtml;
+                }
+
+            } else {
+                // Le pilote est un mercenaire
+                divActif.style.display = 'none';
+                divMercenaire.style.display = 'flex';
+
+                // --- CHARGEMENT DES ESCADRONS DEPUIS LA NOUVELLE TABLE ---
+                try {
+                    const { data, error } = await supabaseApp.from('escadrons').select('tag, nom').order('tag');
+                    if (!error && data) {
+                        let optionsHtml = '<option value="">-- SÉLECTIONNEZ UN ESCADRON --</option>';
+                        data.forEach(e => { optionsHtml += `<option value="${e.tag}">[ ${e.tag} ] ${e.nom}</option>`; });
+                        if(data.length === 0) optionsHtml = '<option value="">-- AUCUN ESCADRON DANS LE REGISTRE --</option>';
+                        
+                        if (!profilCommandant.demande_escadron) {
+                            inputSquad.innerHTML = optionsHtml;
+                        } else {
+                            inputSquad.innerHTML = `<option value="${profilCommandant.demande_escadron}">[ ${profilCommandant.demande_escadron} ]</option>`;
+                        }
+                    }
+                } catch(e) { console.error(e); }
+                
+                // --- GESTION DES BOUTONS DE CHOIX ---
+                if (profilCommandant.demande_escadron) {
+                    // Candidature en cours : On verrouille et on cache le menu "Fonder"
+                    inputSquad.value = profilCommandant.demande_escadron;
+                    inputSquad.disabled = true;
+                    btnSoumettre.innerText = 'CANDIDATURE EN ATTENTE...';
+                    btnSoumettre.disabled = true;
+                    btnSoumettre.style.opacity = '0.5';
+                    choixBtns.style.display = 'none'; 
+                } else {
+                    // Libre de postuler ou créer
+                    inputSquad.disabled = false;
+                    btnSoumettre.innerText = 'SOUMETTRE CANDIDATURE';
+                    btnSoumettre.disabled = false;
+                    btnSoumettre.style.opacity = '1';
+                    choixBtns.style.display = 'flex';
+                }
+            }
+        }
+
+        // Étape 1 : Afficher la modale personnalisée ou Bloquer si Amiral
+        function quitterEscadron() {
+            if(typeof sonClic === 'function') sonClic();
+            
+            const modal = document.getElementById('modal-confirm-demission');
+            const titre = modal.querySelector('.modal-title');
+            const p1 = modal.querySelectorAll('p')[0];
+            const p2 = modal.querySelectorAll('p')[1];
+            const btnConfirmer = modal.querySelectorAll('button')[1]; // Le bouton rouge
+
+            // Si c'est l'Amiral qui clique, on adapte la fenêtre pour une dissolution
+            if (profilCommandant.est_amiral) {
+                titre.innerText = "⚠️ DISSOLUTION DE LA FLOTTE";
+                p1.innerText = "Êtes-vous ABSOLUMENT certain de vouloir dissoudre l'escadron ?";
+                p2.innerText = "TOUTES LES DONNÉES SERONT ORPHELINES. LE PERSONNEL SERA RÉVOQUÉ. ACTION IRRÉVERSIBLE.";
+                btnConfirmer.innerText = "CONFIRMER LA DISSOLUTION";
+                btnConfirmer.onclick = executerDissolution;
+            } 
+            // Si c'est un pilote, on reste sur une démission classique
+            else {
+                titre.innerText = "⚠️ CONFIRMATION REQUISE";
+                p1.innerText = "Voulez-vous vraiment démissionner de votre escadron ?";
+                p2.innerText = "VOUS PERDREZ IMMÉDIATEMENT L'ACCÈS AU BGS ET AUX OPÉRATIONS DE L'ESCADRON.";
+                btnConfirmer.innerText = "CONFIRMER LA DÉMISSION";
+                btnConfirmer.onclick = executerDemission;
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // Étape 2 : Exécuter l'action si confirmé
+        async function executerDissolution() {
+            if(typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-confirm-demission').style.display = 'none';
+            
+            try {
+                // 1. Rétrograder et libérer tous les membres de cet escadron
+                await supabaseApp.from('profils').update({ 
+                    escadron_id: null, 
+                    demande_escadron: null, 
+                    est_amiral: false, 
+                    est_officier: false, 
+                    est_diplomate: false 
+                }).eq('escadron_id', profilCommandant.escadron_id);
+                
+                // 2. Supprimer la ligne de l'escadron
+                await supabaseApp.from('escadrons').delete().eq('tag', profilCommandant.escadron_id);
+
+                // 3. Afficher l'alerte de confirmation immersive
+                afficherAlerte(
+                    "DISSOLUTION TERMINÉE", 
+                    "La flotte a été rayée des registres. Tout le personnel a été révoqué.<br><br>Vous êtes redevenu un pilote indépendant.", 
+                    "#FF3333", 
+                    () => location.reload()
+                );
+            } catch(e) {
+                console.error(e);
+                afficherAlerte("ERREUR SYSTÈME", "Une erreur est survenue lors du démantèlement de la flotte.", "#FF3333");
+            }
+        }
+
+        async function executerDemission() {
+            if(typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-confirm-demission').style.display = 'none';
+            
+            try {
+                // Le pilote quitte l'escadron. On révoque tous ses accès tactiques.
+                const { error } = await supabaseApp.from('profils').update({ 
+                    escadron_id: null, 
+                    demande_escadron: null,
+                    est_amiral: false, 
+                    est_officier: false, 
+                    est_diplomate: false 
+                }).eq('user_id', profilCommandant.user_id);
+                
+                if (error) throw error;
+
+                // On utilise notre nouvelle modale holographique pour confirmer
+                afficherAlerte(
+                    "DÉMISSION VALIDÉE", 
+                    "Vous avez quitté l'escadron avec succès.<br><br>Vos accréditations tactiques et diplomatiques ont été révoquées.", 
+                    "var(--ed-orange)", 
+                    () => location.reload()
+                );
+            } catch(e) {
+                console.error("Erreur démission :", e);
+                afficherAlerte("ERREUR SYSTÈME", "Impossible de traiter votre démission.", "#FF3333");
+            }
+        }
+
+        async function postulerEscadron() {
+            sonClic();
+            const tag = document.getElementById('input-nouveau-squad').value.trim();
+            
+            if (!tag) { 
+                afficherAlerte("ATTENTION", "Veuillez sélectionner un escadron dans la liste déroulante.", "var(--ed-orange)"); 
+                return; 
+            }
+            
+            try {
+                await supabaseApp.from('profils').update({ demande_escadron: tag }).eq('user_id', profilCommandant.user_id);
+                afficherAlerte("TRANSMISSION RÉUSSIE", `Candidature transmise à l'Amirauté de l'escadron <strong>${tag}</strong>.<br><br>Veuillez patienter pendant l'étude de votre dossier.`, "#00FF66", () => location.reload());
+            } catch(e) {}
+        }
+
+        // Alterner entre le formulaire d'enrôlement et de création
+        function switchMercenaireMode(mode, btn) {
+            sonClic();
+            document.getElementById('mode-rejoindre').style.display = 'none';
+            document.getElementById('mode-creer').style.display = 'none';
+            
+            document.querySelectorAll('#choix-mercenaire-btns button').forEach(b => {
+                b.classList.remove('active');
+                b.style.opacity = '0.5';
+            });
+            btn.classList.add('active');
+            btn.style.opacity = '1';
+
+            if (mode === 'REJOINDRE') document.getElementById('mode-rejoindre').style.display = 'flex';
+            if (mode === 'CREER') document.getElementById('mode-creer').style.display = 'flex';
+        }
+
+        // Fonder officiellement le nouvel escadron dans la galaxie
+        async function creerEscadron() {
+            sonClic();
+            const tag = document.getElementById('creer-tag').value.trim().toUpperCase();
+            const nom = document.getElementById('creer-nom').value.trim();
+            const allegeance = document.getElementById('creer-allegeance').value;
+            const puissance = document.getElementById('creer-puissance').value;
+            const factionInGame = document.getElementById('creer-faction-ig').value.trim(); 
+
+            if (!tag || tag.length > 4) { afficherAlerte("PARAMÈTRES INVALIDES", "Le TAG doit faire entre 1 et 4 caractères.", "#FF3333"); return; }
+            if (!nom) { afficherAlerte("PARAMÈTRES INVALIDES", "Veuillez saisir un nom pour l'escadron.", "#FF3333"); return; }
+
+            try {
+                // 1. Vérification Anti-Doublon du TAG
+                const { data: checkData } = await supabaseApp.from('escadrons').select('tag').eq('tag', tag);
+                if (checkData && checkData.length > 0) {
+                    afficherAlerte("CONFLIT D'IDENTIFICATION", "Ce TAG d'escadron est déjà utilisé par une autre flotte ! Veuillez en choisir un autre.", "#FF3333");
+                    return;
+                }
+
+                // 2. Fondation de l'Escadron
+                const { error: insertError } = await supabaseApp.from('escadrons').insert([{
+                    tag: tag,
+                    nom: nom,
+                    allegeance: allegeance,
+                    puissance: puissance,
+                    faction_in_game: factionInGame,
+                    fondateur_id: profilCommandant.user_id,
+                    medailles_json: [],
+                    diplomatie_json: []
+                }]);
+
+                if (insertError) throw insertError;
+
+                // 3. Promotion du Commandant au rang d'Amiral (et Officier/Diplomate)
+                const { error: updateError } = await supabaseApp.from('profils').update({
+                    escadron_id: tag,
+                    demande_escadron: null,
+                    est_amiral: true,
+                    est_officier: true,
+                    est_diplomate: true
+                }).eq('user_id', profilCommandant.user_id);
+
+                if (updateError) throw updateError;
+
+                // 4. L'ALERTE DE SUCCÈS (Qui recharge la page après clic sur OK)
+                afficherAlerte("SUCCÈS DE L'OPÉRATION", `FÉLICITATIONS AMIRAL !<br><br>L'Escadron <strong>${nom} [${tag}]</strong> est né !`, "#00FF66", () => location.reload());
+
+            } catch (e) {
+                console.error(e);
+                afficherAlerte("ERREUR SYSTÈME", "Impossible de fonder l'escadron. Vérifiez la liaison satellite.", "#FF3333");
+            }
+        }
+
+        async function chargerDemandesDirecteur() {
+            if (!profilCommandant || !profilCommandant.est_directeur) return;
+            const listeAttente = document.getElementById('liste-attente-app');
+            if (!listeAttente) return;
+
+            try {
+                const { data, error } = await supabaseApp.from('profils').select('*').eq('est_approuve', false);
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(p => {
+                        html += `
+                        <div style="background: rgba(0,0,0,0.6); border: 1px solid #00FF66; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <span style="color: #fff; font-weight: bold; font-size: 1.1em;">DEMANDE D'ACCÈS AU TERMINAL</span>
+                                <div style="color: #888; font-size: 0.85em; margin-top: 4px;">ID Pilote : ${p.user_id.substring(0, 15)}...</div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button style="background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';" onclick="gererAccesApp('${p.user_id}', true)" onmouseenter="if(typeof sonHover==='function') sonHover()">AUTORISER</button>
+                                <button style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 8px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#FF3333';" onclick="gererAccesApp('${p.user_id}', false)" onmouseenter="if(typeof sonHover==='function') sonHover()">REJETER</button>
+                            </div>
+                        </div>`;
+                    });
+                    listeAttente.innerHTML = html;
+                } else {
+                    listeAttente.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucune nouvelle demande en attente.</div>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        window.gererAccesApp = async function(userId, accepter) {
+            if(typeof sonClic === 'function') sonClic();
+            try {
+                if (accepter) {
+                    await supabaseApp.from('profils').update({ est_approuve: true }).eq('user_id', userId);
+                } else {
+                    await supabaseApp.from('profils').delete().eq('user_id', userId);
+                }
+                chargerDemandesDirecteur();
+                if(typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute(); 
+            } catch(e) { console.error(e); }
+        };
+
+        async function chargerPersonnelDirecteur() {
+            if (!profilCommandant || !profilCommandant.est_directeur) return;
+            const listePersonnel = document.getElementById('liste-personnel-app');
+            if (!listePersonnel) return;
+
+            try {
+                // On récupère tous les profils DEJA approuvés
+                const { data, error } = await supabaseApp.from('profils').select('*').eq('est_approuve', true).order('cmdr_nom');
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(p => {
+                        // Sécurité : On empêche le Directeur de se révoquer lui-même
+                        const isMe = p.user_id === profilCommandant.user_id;
+                        
+                        // Protection du nom pour éviter les bugs si un joueur a une apostrophe
+                        const nomEchappe = p.cmdr_nom ? p.cmdr_nom.replace(/'/g, "\\'") : 'INCONNU';
+                        
+                        const btnRevoquer = isMe ? 
+                            `<span style="color: var(--ed-blue); font-weight: bold; font-size: 0.9em; padding-right: 15px; letter-spacing: 2px;">[ DIRECTEUR ]</span>` : 
+                            `<button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 6px 15px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="revoquerAccesTerminal('${p.user_id}', '${nomEchappe}')" onmouseenter="if(typeof sonHover==='function') sonHover()">RÉVOQUER ACCÈS</button>`;
+
+                        const cmdrName = p.cmdr_nom ? `CMDR ${p.cmdr_nom.toUpperCase()}` : `[ ID: ${p.user_id.substring(0, 8)}... ]`;
+                        const squadInfo = p.escadron_id ? `<span style="color: var(--ed-orange); font-size: 0.9em; font-weight: bold; min-width: 60px; text-align: center;">[ ${p.escadron_id} ]</span>` : `<span style="color: #888; font-size: 0.85em; min-width: 60px; text-align: center;">[ INDÉPENDANT ]</span>`;
+
+                        // --- GESTION DES BADGES D'ACCRÉDITATION ---
+                        let badgesHtml = '';
+                        const badgeStyle = "padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold; letter-spacing: 1px;";
+                        
+                        if (p.escadron_id) {
+                            if (p.est_amiral) {
+                                badgesHtml += `<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); ${badgeStyle}">AMIRAL</span>`;
+                            } else {
+                                badgesHtml += `<span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); ${badgeStyle}">PILOTE</span>`;
+                            }
+                            if (p.est_officier) {
+                                badgesHtml += `<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); ${badgeStyle}">OFFICIER BGS</span>`;
+                            }
+                            if (p.est_diplomate) {
+                                badgesHtml += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); ${badgeStyle}">DIPLOMATE</span>`;
+                            }
+                        }
+
+                        html += `
+                        <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 12px 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span style="color: #fff; font-weight: bold; font-size: 1.1em; min-width: 200px;">${cmdrName}</span>
+                                ${squadInfo}
+                                <div style="display: flex; gap: 8px; margin-left: 10px;">
+                                    ${badgesHtml}
+                                </div>
+                            </div>
+                            <div>
+                                ${btnRevoquer}
+                            </div>
+                        </div>`;
+                    });
+                    listePersonnel.innerHTML = html;
+                } else {
+                    listePersonnel.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucun personnel dans le registre.</div>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        window.revoquerAccesTerminal = async function(userId, cmdrNom) {
+            if(typeof sonClic === 'function') sonClic();
+            
+            const confirmation = confirm(`⚠️ RUPTURE DE LIAISON : Vous allez révoquer l'accès au terminal pour le ${cmdrNom.toUpperCase()}.\n\nIl sera instantanément déconnecté et exclu de son éventuel escadron. Confirmez-vous cette action ?`);
+            if (!confirmation) return;
+
+            try {
+                // On passe le profil en "non approuvé" et on le sort de son escadron pour purger ses accès BGS
+                await supabaseApp.from('profils').update({ 
+                    est_approuve: false,
+                    escadron_id: null,
+                    est_amiral: false,
+                    est_officier: false,
+                    est_diplomate: false
+                }).eq('user_id', userId);
+                
+                // On rafraîchit immédiatement les deux tableaux du Bureau
+                chargerDemandesDirecteur();
+                chargerPersonnelDirecteur();
+                if(typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute(); 
+            } catch(e) { console.error(e); }
+        };
+        
+        // AUTO-DÉVERROUILLAGE DE L'ONGLET LORS DE LA CONNEXION
+        // (S'assure que le bouton s'affiche bien au démarrage si vous êtes directeur)
+        const checkDirecteurInterval = setInterval(() => {
+            if (profilCommandant && profilCommandant.est_directeur) {
+                const btnDir = document.getElementById('tab-btn-directeur');
+                if (btnDir) btnDir.style.display = 'inline-block';
+                clearInterval(checkDirecteurInterval);
+            }
+        }, 500);
+
+        // --- MOTEUR D'ALERTE TACTIQUE (Remplace alert) ---
+        let alerteCallback = null;
+        
+        window.afficherAlerte = function(titre, message, couleur, callback = null) {
+            if(typeof sonClic === 'function') sonClic();
+            const modal = document.getElementById('modal-alerte');
+            const titreEl = document.getElementById('alerte-titre');
+            const msgEl = document.getElementById('alerte-message');
+            const contentEl = modal.querySelector('.modal-content');
+            const btnOk = document.getElementById('btn-alerte-ok');
+
+            // Stylisation dynamique
+            titreEl.innerText = titre;
+            titreEl.style.color = couleur;
+            titreEl.style.borderBottomColor = couleur;
+            msgEl.innerHTML = message;
+            
+            contentEl.style.borderColor = couleur;
+            contentEl.style.boxShadow = `0 0 30px ${couleur}40`;
+            
+            btnOk.style.color = couleur;
+            btnOk.style.borderColor = couleur;
+            btnOk.style.background = `${couleur}15`;
+            
+            // Effets de survol du bouton
+            btnOk.onmouseover = () => { btnOk.style.background = couleur; btnOk.style.color = '#000'; };
+            btnOk.onmouseout = () => { btnOk.style.background = `${couleur}15`; btnOk.style.color = couleur; };
+
+            alerteCallback = callback;
+            modal.style.display = 'flex';
+        };
+
+        window.fermerAlerte = function(e) {
+            // Empêche la fermeture si on clique à l'intérieur de la fenêtre (sauf sur le bouton OK)
+            if (e && e.target.id !== 'modal-alerte' && e.target.id !== 'btn-alerte-ok' && !e.target.classList.contains('modal-close')) return;
+            
+            if(typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-alerte').style.display = 'none';
+            
+            // Si une action devait s'exécuter après la lecture (ex: recharger la page), on la lance
+            if (alerteCallback) {
+                alerteCallback();
+                alerteCallback = null;
+            }
+        };
+
+        // --- GESTION DU COMPTE PILOTE ---
+
+        async function modifierEmailCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            const nouvelEmail = document.getElementById('input-nouveau-email').value.trim();
+            if (!nouvelEmail) return;
+
+            try {
+                const { error } = await supabaseApp.auth.updateUser({ email: nouvelEmail });
+                if (error) throw error;
+                
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("REQUÊTE ENVOYÉE", "Un lien de confirmation a été expédié. Vérifiez votre boîte mail.<br><br>Le changement ne prendra effet qu'après validation.", "var(--ed-blue)");
+                } else {
+                    alert("Un lien de confirmation a été envoyé. Vérifiez vos emails.");
+                }
+                
+                document.getElementById('input-nouveau-email').value = "";
+                fermerModal('modal-gestion-compte');
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR", "Impossible de modifier l'adresse e-mail.", "#FF3333");
+            }
+        }
+
+        async function modifierMdpCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            const nouveauMdp = document.getElementById('input-nouveau-mdp').value.trim();
+            if (!nouveauMdp || nouveauMdp.length < 6) {
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR SÉCURITÉ", "La clé d'accès doit contenir au moins 6 caractères.", "#FF3333");
+                return;
+            }
+
+            try {
+                const { error } = await supabaseApp.auth.updateUser({ password: nouveauMdp });
+                if (error) throw error;
+                
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("SUCCÈS", "Vos codes d'accès ont été mis à jour avec succès.", "#00FF66");
+                } else {
+                    alert("Mot de passe mis à jour !");
+                }
+                
+                document.getElementById('input-nouveau-mdp').value = "";
+                fermerModal('modal-gestion-compte');
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') afficherAlerte("ERREUR", "Impossible de modifier le mot de passe.", "#FF3333");
+            }
+        }
+
+        async function autoDetruireCompte() {
+            if(typeof sonClic === 'function') sonClic();
+            
+            const messageAlerte = "⚠️ AVERTISSEMENT CRITIQUE : La destruction de votre compte est IMMÉDIATE et IRRÉVERSIBLE. Toutes vos données seront purgées des serveurs.<br><br>Confirmez-vous l'auto-destruction ?";
+            
+            // Appel propre au nouveau système de confirmation holographique
+            const confirmation = await demanderConfirmation("⚠️ AUTO-DESTRUCTION", messageAlerte, "#FF3333");
+
+            if (!confirmation) return;
+
+            try {
+                // On ferme la fenêtre de gestion pour faire propre pendant que la requête part
+                fermerModal('modal-gestion-compte');
+
+                const { error } = await supabaseApp.rpc('supprimer_mon_compte');
+                if (error) throw error;
+                
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+                
+            } catch(e) {
+                console.error(e);
+                afficherAlerte("ÉCHEC SYSTÈME", "Erreur lors du protocole de destruction.", "#FF3333");
+            }
+        }
+
+        window.recupererMotDePasse = async function() {
+            if(typeof sonClic === 'function') sonClic();
+            
+            // On cible l'ID exact de votre champ de connexion : 'auth-email'
+            const emailField = document.getElementById('auth-email');
+            
+            if (!emailField) {
+                alert("ERREUR SYSTÈME : Champ e-mail introuvable.");
+                return;
+            }
+
+            const emailInput = emailField.value.trim(); 
+
+            if (!emailInput) {
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("REQUÊTE REJETÉE", "Veuillez d'abord saisir votre adresse e-mail dans le champ de connexion pour demander une réinitialisation.", "#FF3333");
+                } else {
+                    alert("Veuillez saisir votre adresse e-mail dans le champ de connexion.");
+                }
+                return;
+            }
+
+            try {
+                // Supabase envoie un lien sécurisé par email
+                const { error } = await supabaseApp.auth.resetPasswordForEmail(emailInput, {
+                  redirectTo: window.location.href // Redirige exactement sur la page actuelle
+                });
+                
+                if (error) throw error;
+
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("LIAISON SÉCURISÉE ÉTABLIE", `
+                        Un lien d'accès temporaire a été transmis à votre adresse e-mail.<br><br>
+                        <strong>INSTRUCTIONS DE RÉCUPÉRATION :</strong>
+                        <ol style="text-align: left; display: inline-block; margin-top: 10px; margin-bottom: 0;">
+                            <li>Cliquez sur le lien reçu pour forcer l'accès.</li>
+                            <li>Ouvrez la <strong>Gestion de compte</strong>.</li>
+                            <li>Modifiez votre clé de sécurité et sauvegardez.</li>
+                        </ol>
+                        <br><br>
+                        <span style="font-size: 12px; opacity: 0.8;">(Vérifiez vos courriers indésirables si besoin).</span>
+                    `);
+                
+                } else {
+                    alert("Un lien de réinitialisation a été envoyé !");
+                }
+                
+            } catch (e) {
+                console.error(e);
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("ÉCHEC DE LA TRANSMISSION", "Impossible d'envoyer le lien. Vérifiez l'adresse e-mail saisie.", "#FF3333");
+                } else {
+                    alert("Erreur lors de l'envoi de l'e-mail.");
+                }
+            }
+        };
+
+        // --- MOTEUR DE CONFIRMATION TACTIQUE (Remplace confirm) ---
+        window.demanderConfirmation = function(titre, message, couleurHex) {
+            return new Promise((resolve) => {
+                if (typeof sonClic === 'function') sonClic();
+                const modal = document.getElementById('modal-confirmation');
+                const titreEl = document.getElementById('confirm-titre');
+                const messageEl = document.getElementById('confirm-message');
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancel');
+                const contentEl = modal.querySelector('.modal-content');
+
+                // Stylisation dynamique (Rouge pour destruction, Orange pour démission, etc.)
+                titreEl.innerHTML = titre;
+                titreEl.style.color = couleurHex;
+                titreEl.style.borderColor = couleurHex;
+                messageEl.innerHTML = message;
+                
+                contentEl.style.borderColor = couleurHex;
+                contentEl.style.boxShadow = `0 0 30px ${couleurHex}40`;
+                
+                btnOk.style.color = couleurHex;
+                btnOk.style.borderColor = couleurHex;
+                btnOk.style.background = `${couleurHex}15`;
+                btnOk.style.boxShadow = `inset 0 0 10px ${couleurHex}30`;
+                
+                // Effets de survol
+                btnOk.onmouseover = () => { btnOk.style.background = couleurHex; btnOk.style.color = '#000'; };
+                btnOk.onmouseout = () => { btnOk.style.background = `${couleurHex}15`; btnOk.style.color = couleurHex; };
+                btnCancel.onmouseover = () => { btnCancel.style.background = '#333'; btnCancel.style.color = '#fff'; };
+                btnCancel.onmouseout = () => { btnCancel.style.background = 'rgba(255, 255, 255, 0.05)'; btnCancel.style.color = '#aaa'; };
+
+                modal.style.display = 'flex';
+
+                const nettoyage = () => {
+                    modal.style.display = 'none';
+                    btnOk.onclick = null;
+                    btnCancel.onclick = null;
+                };
+
+                btnOk.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(true); };
+                btnCancel.onclick = () => { if (typeof sonClic === 'function') sonClic(); nettoyage(); resolve(false); };
+            });
+        };
+
+    </script>
+    <!-- ========================================== -->
+
+</body>
+</html>
