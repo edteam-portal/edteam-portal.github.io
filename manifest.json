@@ -1,8 +1,9 @@
 {
-  "name": "SYS.EDTEAM - Terminal Tactique",
+  "name": "EDTEAM",
   "short_name": "EDTEAM",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#020100",
   "theme_color": "#020100",
   "icons": [
