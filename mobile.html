@@ -1527,6 +1527,14 @@
         }
 
         // --- COMMS & CHAT (INTACTS) ---
+
+        function securiserTexte(str) {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag] || tag));
+}
+
         async function initialiserCommsMobile() {
             await chargerListePilotesPrives();
             chargerMessagesComms();
@@ -1652,10 +1660,10 @@
 
             bubble.innerHTML = `
                 <div style="display: flex; justify-content: space-between; font-size: 0.8em;">
-                    <strong style="color: ${couleurNom};">CMDR ${nomAffiche}</strong>
+                    <strong style="color: ${couleurNom};">CMDR ${securiserTexte(nomAffiche)}</strong>
                     <span style="color: #666;">${temps}</span>
                 </div>
-                <div style="color: #eee; line-height: 1.4; word-break: break-word;">${m.message}</div>
+                <div style="color: #eee; line-height: 1.4; word-break: break-word;">${securiserTexte(m.message)}</div>
             `;
             feed.appendChild(bubble);
             feed.scrollTop = feed.scrollHeight;
