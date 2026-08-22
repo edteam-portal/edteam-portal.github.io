@@ -2121,9 +2121,9 @@
                             const capMissQ = capsQuotidien['GUERRE_MISSIONS'] || capsQuotidien['MISSIONS'];
                             const capMissG = capsGlobaux['GUERRE_MISSIONS'] || capsGlobaux['MISSIONS'];
 
-                            const ratioBondsQ = Math.min(100, (totauxQ['SECURITE'] / capBondsQ) * 100);
+                            const ratioBondsQ = Math.min(100, (totauxMoiQ['SECURITE'] / capBondsQ) * 100);
                             const ratioBondsG = Math.min(100, (totauxG['SECURITE'] / capBondsG) * 100);
-                            const ratioMissQ = Math.min(100, (totauxQ['MISSIONS'] / capMissQ) * 100);
+                            const ratioMissQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capMissQ) * 100);
                             const ratioMissG = Math.min(100, (totauxG['MISSIONS'] / capMissG) * 100);
 
                             // On calcule désormais l'impact global sur 2 jauges au lieu de 3
@@ -2146,7 +2146,7 @@
                             const capElecQ = capsQuotidien['ELECTION_MISSIONS'] || capsQuotidien['MISSIONS'];
                             const capElecG = capsGlobaux['ELECTION_MISSIONS'] || capsGlobaux['MISSIONS'];
 
-                            const ratioElecQ = Math.min(100, (totauxQ['MISSIONS'] / capElecQ) * 100);
+                            const ratioElecQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capElecQ) * 100);
                             const ratioElecG = Math.min(100, (totauxG['MISSIONS'] / capElecG) * 100);
 
                             sommeRatiosQ = ratioElecQ;
