@@ -439,13 +439,18 @@
         let maCoalitionId = null; // NOUVELLE VARIABLE
 
         window.addEventListener('load', async () => {
-            const { data: { session } } = await supabaseApp.auth.getSession();
-            if (!session) { window.location.href = 'index.html'; return; }
-            
-            const { data } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
-            if (data && data.est_approuve) {
+            try {
+                const { data: { session } } = await supabaseApp.auth.getSession();
+                if (!session) { window.location.href = 'index.html'; return; }
                 
-                // 🛑 NOUVEAU : LE CADENAS FAILSAFE
+                const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
+                
+                if (error || !data || !data.est_approuve) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // 🛑 CADENAS FAILSAFE
                 if (!data.cmdr_nom) {
                     document.getElementById('failsafe-modal').style.display = 'flex';
                     document.getElementById('failsafe-status-text').innerText = "IDENTIFICATION COMMANDANT MANQUANTE";
@@ -454,8 +459,8 @@
                 }
 
                 profilCommandant = data;
-                enregistrerTelemetrie('page', 'comms');
-                synchroniserTelemetrie();
+                if (typeof enregistrerTelemetrie === 'function') enregistrerTelemetrie('page', 'comms');
+                if (typeof synchroniserTelemetrie === 'function') synchroniserTelemetrie();
 
                 // AFFICHAGE DU BOUTON AMIRAUTÉ
                 if (data.est_amiral || data.est_directeur) {
@@ -472,30 +477,35 @@
                     const btnEscadron = document.getElementById('btn-tab-escadron');
                     if (btnEscadron) btnEscadron.style.display = 'inline-block';
                     
-                    const { data: coalData } = await supabaseApp.from('coalition_membres')
-                        .select('coalition_id')
-                        .eq('escadron_tag', data.escadron_id)
-                        .maybeSingle();
-                        
-                    if (coalData) {
-                        maCoalitionId = coalData.coalition_id;
-                        document.getElementById('btn-tab-coalition').style.display = 'inline-block';
-                    }
+                    try {
+                        // VÉRIFICATION COALITION SÉCURISÉE
+                        const { data: coalData } = await supabaseApp.from('coalition_membres')
+                            .select('coalition_id')
+                            .eq('escadron_tag', data.escadron_id)
+                            .maybeSingle();
+                            
+                        if (coalData) {
+                            maCoalitionId = coalData.coalition_id;
+                            const btnCoalition = document.getElementById('btn-tab-coalition');
+                            if (btnCoalition) btnCoalition.style.display = 'inline-block';
+                        }
+                    } catch(err) { console.warn("Liaison coalition ignorée."); }
                 }
 
-                // PROTECTION CMDR_NOM
-                if (data.cmdr_nom) {
-                    document.getElementById('cmdr-name-display').innerText = 'CMDR ' + data.cmdr_nom.toUpperCase();
-                }
+                // MISE À JOUR DE L'INTERFACE
+                document.getElementById('cmdr-name-display').innerText = 'CMDR ' + data.cmdr_nom.toUpperCase();
+                
                 if (data.cle_api) {
-                    document.getElementById('api-key-display').innerText = data.cle_api;
+                    const keyDisplay = document.getElementById('api-key-display');
+                    if (keyDisplay) keyDisplay.innerText = data.cle_api;
                 }
                 
                 chargerListePilotes();
                 chargerHistorique();
                 ecouterTransmissions();
-            } else {
-                window.location.href = 'index.html';
+
+            } catch(e) {
+                console.error("Erreur critique au démarrage :", e);
             }
         });
 
