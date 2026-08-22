@@ -2151,7 +2151,7 @@
                                 
                                 <!-- Bloc Gauche : Infos -->
                                 <div style="flex-grow: 1; min-width: 300px;">
-                                    <span style="color: ${colorPrincipale}; font-size: 1.3em; font-weight: bold; letter-spacing: 2px; display: block;">[ OPÉRATION ] : ${titreOrdre}</span>
+                                    <span style="color: ${colorPrincipale}; font-size: 1.3em; font-weight: bold; letter-spacing: 2px; display: block;">[ OPÉRATION #${ordre.id} ] : ${titreOrdre}</span>
                                     <div style="margin-top: 5px; display: flex; gap: 15px; font-size: 0.9em; flex-wrap: wrap;">
                                         <span><span style="color: #666;">CIBLE :</span> <span style="color: #fff; font-weight: bold;">${ordre.faction_cible.toUpperCase()}</span></span>
                                         <span><span style="color: #666;">SYSTÈME :</span> <span class="copy-click" style="color: #fff; font-weight: bold;" onclick="copierNav('${ordre.systeme_cible.replace(/'/g, "\\'")}', this, event)" title="Cliquer pour copier le système">${ordre.systeme_cible.toUpperCase()}</span></span>
@@ -3484,7 +3484,7 @@
                     } else {
                         // En-tête des colonnes (Colonnes élargies et police agrandie)
                         let feedHtml = `
-                        <div style="display: grid; grid-template-columns: 125px 160px 105px 1fr 130px 120px; gap: 10px; padding: 10px 15px; color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
+                        <div style="display: grid; grid-template-columns: 125px 160px 145px 1fr 130px 120px; gap: 10px; padding: 10px 15px; color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
                             <span>HORODATAGE</span>
                             <span>COMMANDANT</span>
                             <span>ORDRE</span>
@@ -3549,7 +3549,7 @@
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                             
                             feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 125px 160px 105px 1fr 130px 120px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s;" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 125px 160px 145px 1fr 130px 120px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s;" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
                                 
                                 <!-- 1. DATE & HEURE -->
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
@@ -3558,8 +3558,8 @@
                                 <span style="color: #fff; font-weight: bold; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
                                 
                                 <!-- 3. TYPE D'ORDRE -->
-                                <div>
-                                    <span style="border: 1px solid ${colorOrdre}; color: ${colorOrdre}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">${typeOrdre}</span>
+                                <div style="white-space: nowrap;">
+                                    <span style="border: 1px solid ${colorOrdre}; color: ${colorOrdre}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">#${ordreConcerne ? ordreConcerne.id : '---'} | ${typeOrdre}</span>
                                 </div>
                                 
                                 <!-- 4. SYSTÈME // FACTION -->

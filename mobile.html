@@ -586,6 +586,9 @@
             <span style="color: #888; font-size: 0.8em;">TERMES & CONDITIONS :</span>
             <div id="diplo-modal-desc" style="color: #ccc; font-size: 0.9em; background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-top: 4px; min-height: 80px; line-height: 1.5; white-space: pre-wrap;">...</div>
         </div>
+        <div style="margin-top: 15px; font-size: 0.8em; color: #888; text-align: right; font-style: italic; letter-spacing: 1px;">
+            SIGNÉ PAR : <strong id="diplo-modal-signataire-container" style="color: var(--ed-blue);">CMDR <span id="diplo-modal-signataire">...</span></strong>
+        </div>
     </div>
 </div>
 
@@ -1372,7 +1375,7 @@
                             <div onclick="ouvrirModalOrdre(${index}, '${prioColor}')" style="cursor: pointer; background: rgba(0,0,0,0.5); border-left: 3px solid ${prioColor}; padding: 10px; border-radius: 0 4px 4px 0; margin-bottom: 6px; transition: 0.2s;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px; font-weight: bold;">
                                     <span style="color: #fff; display : block; font-weight: bold">${sys.toUpperCase()}</span>
-                                    <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 2px;">${type}</span>
+                                    <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 2px;">#${o.id} - ${type}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.85em; font-weight: normal;">
                                     <span style="color: #fff; display : block; font-weight: normal">${fac.toUpperCase()}</span>
@@ -1512,7 +1515,7 @@
                                     <span style="color: #888; font-size: 0.9em;">${dateJour} - ${heure}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: ${col}; font-weight: bold; font-size: 0.9em;">[ ${iconeType} ]</span>
+                                    <span style="color: ${col}; font-weight: bold; font-size: 0.9em;">[ OP.#${e.ordre_id} | ${iconeType} ]</span>
                                     <span style="color: #fff; font-weight: bold;">${labelQte}</span>
                                 </div>
                             </div>`;
@@ -2100,10 +2103,15 @@
         statutEl.style.color = couleur;
 
         // On s'adapte au nom de ta colonne (notes, description, ou termes)
-        const texteDescriptif = traite.notes || traite.description || traite.termes || "Aucun détail ou directive spécifique n'a été enregistré pour ce traité.";
+        const texteDescriptif = traite.directives || "Aucun détail ou directive spécifique n'a été enregistré pour ce traité.";
         document.getElementById('diplo-modal-desc').innerText = texteDescriptif;
 
-        // 4. On affiche la fenêtre
+        // 4. Affichage du nom du signataire avec couleur dynamique
+        const nomSignataire = traite.signataire_nom || "INCONNU";
+        document.getElementById('diplo-modal-signataire').innerText = nomSignataire.toUpperCase();
+        document.getElementById('diplo-modal-signataire-container').style.color = couleur;
+
+        // 5. On affiche la fenêtre
         document.getElementById('modal-diplo-details').style.display = 'flex';
     };
 
@@ -2124,6 +2132,8 @@
         document.getElementById('ordre-modal-title').style.color = couleur;
         document.getElementById('ordre-modal-close').style.color = couleur;
         document.getElementById('ordre-modal-type').style.color = couleur;
+
+        document.getElementById('ordre-modal-title').innerText = `DIRECTIVE TACTIQUE #${ordre.id}`;
 
         // 2. Textes standards
         document.getElementById('ordre-modal-faction').innerText = ordre.faction_cible.toUpperCase();
