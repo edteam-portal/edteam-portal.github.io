@@ -2726,8 +2726,9 @@
                         ${ribbonOperation}
                         <div class="tracker-remove" title="Retirer du radar" onclick="toggleFavoriBGS('${fav.systeme.replace(/'/g, "\\'")}', '${fav.faction.replace(/'/g, "\\'")}', event)">✖</div>
                         
-                        <div style="margin-bottom: 15px; display: flex; align-items: center;">
-                            <span style="color: #fff; font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 20px;">${fav.faction}</span>
+                        <div style="margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <span style="color: #fff; font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${fav.faction}</span>
+                            <span id="etat-fav-${i}" style="font-size: 0.75em; font-weight: bold; border: 1px solid transparent; padding: 2px 6px; border-radius: 3px; display: none; white-space: nowrap;"></span>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; flex-grow: 1;">
@@ -2832,13 +2833,51 @@
                 <span style="color: ${couleurDelta}; font-weight: bold; font-size: 1.1em;">${fleche} ${delta24h > 0 ? '+' : ''}${delta24h.toFixed(1)}%</span>
             `;
 
+            // --- GESTION DU BADGE D'ÉTAT POLITIQUE ---
+            let etatBgs = 'STABLE';
+            if (facData.activeStates && facData.activeStates.length > 0) {
+                etatBgs = facData.activeStates[0].state;
+            } else if (facData.state && facData.state !== 'None') {
+                etatBgs = facData.state;
+            }
+
+            let etatTraduit = etatBgs.toUpperCase();
+            let colorEtat = 'var(--ed-blue)';
+
+            if (etatTraduit === 'WAR') etatTraduit = 'GUERRE';
+            else if (etatTraduit === 'CIVIL WAR') etatTraduit = 'GUERRE CIVILE';
+            else if (etatTraduit === 'ELECTION') etatTraduit = 'ÉLECTION';
+            else if (etatTraduit === 'BOOM') etatTraduit = 'BOOM ÉCONOMIQUE';
+
+            if (etatTraduit.includes('GUERRE') || etatTraduit.includes('ÉLECTION') || etatTraduit.includes('LOCKDOWN')) {
+                colorEtat = 'var(--ed-red)';
+            } else if (etatTraduit.includes('BOOM') || etatTraduit.includes('EXPANSION')) {
+                colorEtat = 'var(--ed-green)';
+            }
+
+            const badgeEtat = document.getElementById(`etat-fav-${index}`);
+            if (badgeEtat) {
+                badgeEtat.innerText = etatTraduit;
+                badgeEtat.style.color = colorEtat;
+                badgeEtat.style.borderColor = colorEtat;
+                badgeEtat.style.backgroundColor = colorEtat.replace(')', ', 0.1)').replace('var(', '').replace(')', ''); // Petit fond transparent
+                badgeEtat.style.display = 'inline-block';
+            }
+
+            // --- GESTION DE LA COULEUR DE LA COURBE (ÉVOLUTION SUR 7 JOURS) ---
             const ctx = document.getElementById(`sparkline-${index}`).getContext('2d');
             if (sparklineInstances[index]) sparklineInstances[index].destroy();
             
-            let colorSpark = '#00F0FF';
-            if(facData.state === 'War' || facData.state === 'Civil War') colorSpark = '#FF3333';
-            else if(facData.state === 'Boom') colorSpark = '#00FF66';
-
+            let colorSpark = '#00F0FF'; // Cyan (Stable)
+            if (historique7j.length > 1) {
+                const pointLePlusAncien = historique7j[0];
+                const pointAujourdhui = historique7j[historique7j.length - 1];
+                const tendance7j = pointAujourdhui - pointLePlusAncien;
+                
+                if (tendance7j > 0.1) colorSpark = '#00FF66'; // Vert (Hausse)
+                else if (tendance7j < -0.1) colorSpark = '#FF3333'; // Rouge (Baisse)
+            }
+            
             // Courbe holographique fluide (Line chart)
             sparklineInstances[index] = new Chart(ctx, {
                 type: 'line',
@@ -2847,14 +2886,14 @@
                     datasets: [{ 
                         data: historique7j, 
                         borderColor: colorSpark, 
-                        // Le "+ '22'" ajoute une transparence hexadécimale pour créer un léger voile sous la courbe
                         backgroundColor: colorSpark + '22', 
                         borderWidth: 2,
-                        tension: 0.4, // Rend la courbe fluide et arrondie
-                        pointRadius: 1, // Rend les points de chaque jour très discrets
-                        fill: true // Active le remplissage sous la courbe
+                        tension: 0.4,
+                        pointRadius: 1,
+                        fill: true
                     }] 
                 },
+                // ... (le reste des options du chart ne change pas)
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 

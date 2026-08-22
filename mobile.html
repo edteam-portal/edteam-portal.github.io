@@ -14,6 +14,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -304,13 +305,13 @@
                     </div>
                     <div id="m-qg-badges" style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;"></div>
                     
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 12px; border-bottom: 1px dashed #333; padding-bottom: 10px;">
-                        <div>
-                            <span style="color: #888;">FÉDÉRATION :</span>
+                    <div style="display: flex; justify-content: space-around; font-size: 0.85em; margin-bottom: 12px; border-bottom: 1px dashed #333; padding-bottom: 10px;">
+                        <div style="text-align: center; flex: 1;">
+                            <span style="color: #888; display: block; margin-bottom: 6px; letter-spacing: 1px;">FÉDÉRATION</span>
                             <strong id="m-rank-fed" style="color: var(--ed-blue);">---</strong>
                         </div>
-                        <div style="text-align: right;">
-                            <span style="color: #888;">EMPIRE :</span>
+                        <div style="text-align: center; flex: 1; border-left: 1px dashed #333;">
+                            <span style="color: #888; display: block; margin-bottom: 6px; letter-spacing: 1px;">EMPIRE</span>
                             <strong id="m-rank-emp" style="color: var(--ed-orange);">---</strong>
                         </div>
                     </div>
@@ -406,6 +407,38 @@
                     </div>
                 </div>
 
+                <!-- BOUTON ACCÈS DIRECTEUR (Affiché uniquement si est_directeur === true) -->
+                <button id="btn-bureau-directeur" class="m-btn" style="display: none; background: rgba(255, 51, 51, 0.15); border-color: var(--ed-red); color: var(--ed-red); margin-top: 5px;" onclick="ouvrirBureauDirecteur()">
+                    ⚙️ [ BUREAU DU DIRECTEUR ]
+                </button>
+                <button class="m-btn" style="background: transparent; border-color: #555; color: #888; font-size: 0.85em; margin-top: 5px;" onclick="deconnexionMobile()">[ DÉCONNEXION DU PADD ]</button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET 2 : RADAR D'INFLUENCE               -->
+            <!-- ========================================== -->
+            <div id="tab-radar" style="display: none; flex-direction: column; gap: 14px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span>> INFLUENCES (FAVORIS)</span>
+                    </div>
+                    <div id="m-influence-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Analyse des influences galactiques...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET 3 : BGS, MISSIONS & DIPLOMATIE      -->
+            <!-- ========================================== -->
+            <div id="tab-bgs" style="display: none; flex-direction: column; gap: 14px;">
+                
+                <!-- TICK BGS -->
+                <div class="card" style="border-color: var(--ed-orange); text-align: center; padding: 12px;">
+                    <span style="color: #888; font-size: 0.75em; letter-spacing: 2px; display: block;">PROCHAIN TICK GALACTIQUE (ESTIMATION)</span>
+                    <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px;">--H --M --S</span>
+                </div>
+                
                 <!-- MEMBRES DE L'ESCADRON -->
                 <div class="card">
                     <div class="card-header">
@@ -416,42 +449,13 @@
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Chargement de l'équipage...</div>
                     </div>
                 </div>
-                <!-- BOUTON ACCÈS DIRECTEUR (Affiché uniquement si est_directeur === true) -->
-                <button id="btn-bureau-directeur" class="m-btn" style="display: none; background: rgba(255, 51, 51, 0.15); border-color: var(--ed-red); color: var(--ed-red); margin-top: 5px;" onclick="ouvrirBureauDirecteur()">
-                    ⚙️ [ BUREAU DU DIRECTEUR ]
-                </button>
-                <button class="m-btn" style="background: transparent; border-color: #555; color: #888; font-size: 0.85em; margin-top: 5px;" onclick="deconnexionMobile()">[ DÉCONNEXION DU PADD ]</button>
-            </div>
-
-            <!-- ========================================== -->
-            <!-- ONGLET 2 : BGS & DIRECTIVES                -->
-            <!-- ========================================== -->
-            <div id="tab-bgs" style="display: none; flex-direction: column; gap: 14px;">
-                
-                <!-- TICK BGS -->
-                <div class="card" style="border-color: var(--ed-orange); text-align: center; padding: 12px;">
-                    <span style="color: #888; font-size: 0.75em; letter-spacing: 2px; display: block;">PROCHAIN TICK GALACTIQUE (ESTIMATION)</span>
-                    <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px;">--H --M --S</span>
-                </div>
-
-                <!-- RADAR D'INFLUENCE -->
-                <div class="card">
-                    <div class="card-header">
-                        <span>> INFLUENCES</span>
-                        <span style="color: var(--ed-blue); font-size: 0.8em;">FACTIONS</span>
-                    </div>
-                    <div id="m-influence-container" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Analyse des influences galactiques...</div>
-                    </div>
-                </div>
 
                 <!-- TRAITÉS DIPLOMATIQUES -->
                 <div class="card">
                     <div class="card-header">
-                        <span>> DIPLOMATIE</span>
-                        <span style="color: var(--ed-orange); font-size: 0.8em;">ACCORDS</span>
+                        <span>> DIPLOMATIE (ACCORDS)</span>
                     </div>
-                    <div id="m-diplomatie-container" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div id="m-diplomatie-container" style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding-right: 5px;">
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Consultation des registres d'alliances...</div>
                     </div>
                 </div>
@@ -459,8 +463,7 @@
                 <!-- DIRECTIVES DE L'AMIRAUTÉ -->
                 <div class="card">
                     <div class="card-header">
-                        <span>> ORDRES DU JOUR</span>
-                        <span style="color: var(--ed-green);">ACTIFS</span>
+                        <span>> MISSIONS BGS (EN COURS)</span>
                     </div>
                     <div id="m-ordres-container" style="display: flex; flex-direction: column; gap: 10px;">
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Chargement des ordres tactiques...</div>
@@ -470,10 +473,9 @@
                 <!-- JOURNAL DES EXPLOITS -->
                 <div class="card" style="border-color: var(--ed-blue-dim);">
                     <div class="card-header" style="color: var(--ed-blue); border-bottom-color: var(--ed-blue-dim);">
-                        <span>> JOURNAL DES EXPLOITS</span>
-                        <span style="color: #888; font-size: 0.75em; font-weight: normal;">FLOTTE</span>
+                        <span>> JOURNAL DES MISSIONS</span>
                     </div>
-                    <div id="m-exploits-container" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div id="m-exploits-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Écoute des rapports de missions...</div>
                     </div>
                 </div>
@@ -481,7 +483,7 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- ONGLET 3 : TRANSMISSIONS (COMMS CYAN)      -->
+            <!-- ONGLET 4 : TRANSMISSIONS (COMMS CYAN)      -->
             <!-- ========================================== -->
             <div id="tab-comms" style="display: none; flex-direction: column; gap: 10px; height: calc(100vh - 160px);">
                 
@@ -520,9 +522,13 @@
                 <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 <span>QG</span>
             </button>
+            <button id="nav-btn-radar" class="nav-tab-btn" onclick="switchMobileTab('radar')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                <span>INFLUENCES</span>
+            </button>
             <button id="nav-btn-bgs" class="nav-tab-btn" onclick="switchMobileTab('bgs')">
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                <span>BGS & ORDRES</span>
+                <span>BGS</span>
             </button>
             <button id="nav-btn-comms" class="nav-tab-btn" onclick="switchMobileTab('comms')">
                 <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -591,27 +597,31 @@
             <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="fermerModalOrdre()" id="ordre-modal-close">✕</span>
         </div>
         
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85em;">
-            <div>
-                <span style="color: #888; font-size: 0.9em;">CIBLE OPÉRATIONNELLE :</span>
-                <div id="ordre-modal-cible" style="color: #fff; font-weight: bold; font-size: 1.1em; margin-top: 2px;">...</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85em; gap: 10px;">
+            <div style="flex-grow: 1; overflow: hidden;">
+                <span style="color: #888; font-size: 0.9em; display: block; margin-bottom: 2px;">CIBLE OPÉRATIONNELLE :</span>
+                <div id="ordre-modal-faction" style="color: #fff; font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">...</div>
+                <div id="ordre-modal-systeme" style="color: #ccc; font-weight: normal; font-size: 0.9em; margin-top: 2px;">...</div>
             </div>
-            <div style="text-align: right;">
-                <span style="color: #888; font-size: 0.9em;">TYPE :</span>
-                <div id="ordre-modal-type" style="font-weight: bold; font-size: 1.1em; margin-top: 2px;">...</div>
+            <div style="text-align: right; flex-shrink: 0;">
+                <span style="color: #888; font-size: 0.9em; display: block; margin-bottom: 2px;">TYPE :</span>
+                <div id="ordre-modal-type" style="font-weight: bold; font-size: 1.1em;">...</div>
             </div>
         </div>
 
         <!-- Analyse d'Effort & Participants -->
         <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85em;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; font-size: 0.85em;">
                 <span style="color: #888;">IMPACT GLOBAL ESCADRON :</span>
-                <strong id="ordre-modal-total" style="color: #fff;">0 PTS</strong>
+                <strong id="ordre-modal-total" style="color: #fff; text-align: right; min-width: 100px;">0 PTS</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-size: 0.85em;">
                 <span style="color: #888;">VOTRE PARTICIPATION :</span>
-                <strong id="ordre-modal-part" style="color: var(--ed-blue);">0% (0 PTS)</strong>
+                <strong id="ordre-modal-part" style="color: var(--ed-blue); text-align: right; min-width: 100px;">0% (0 PTS)</strong>
             </div>
+            
             <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 15px;">
                 <div id="ordre-modal-bar" style="height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 5px var(--ed-blue);"></div>
             </div>
@@ -626,8 +636,8 @@
         </div>
 
         <div>
-            <span style="color: #888; font-size: 0.8em;">BRIEFING DE L'OFFICIER (<span id="ordre-modal-auteur" style="color: var(--ed-blue);">...</span>) :</span>
-            <div id="ordre-modal-brief" style="color: #ccc; font-size: 0.9em; background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-top: 4px; min-height: 70px; line-height: 1.5; white-space: pre-wrap;">...</div>
+            <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">SIGNÉ PAR : <strong style="color: var(--ed-blue);">CMDR <span id="ordre-modal-auteur">...</span></strong></span>
+            <div id="ordre-modal-brief" style="color: #ccc; font-size: 0.9em; background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-top: 6px; min-height: 70px; line-height: 1.5; white-space: pre-wrap;">...</div>
         </div>
     </div>
 </div>
@@ -846,13 +856,19 @@
 
         function switchMobileTab(tabId) {
             sonClic();
+            // On cache tous les onglets
             document.getElementById('tab-qg').style.display = 'none';
+            document.getElementById('tab-radar').style.display = 'none';
             document.getElementById('tab-bgs').style.display = 'none';
             document.getElementById('tab-comms').style.display = 'none';
 
+            // On désélectionne tous les boutons
             document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // On active le bouton cliqué
             document.getElementById('nav-btn-' + tabId).classList.add('active');
 
+            // On affiche le bon onglet
             const target = document.getElementById('tab-' + tabId);
             if (tabId === 'comms') {
                 target.style.display = 'flex';
@@ -1082,7 +1098,7 @@
             const fmt = new Intl.NumberFormat('fr-FR');
 
             // -------------------------------------------------------------
-            // 1. RADAR D'INFLUENCE VIA EDSM AVEC ÉVOLUTION 24H (DELTA & FLÈCHES)
+            // 1. RADAR D'INFLUENCE VIA EDSM AVEC GRAPHIQUE (7 JOURS)
             // -------------------------------------------------------------
             const infCont = document.getElementById('m-influence-container');
             try {
@@ -1113,95 +1129,186 @@
                     }));
 
                     let htmlInf = '';
-                    favoris.forEach(fav => {
-                        const nomFaction = (fav.faction || fav.nom || fav.name || '').trim();
-                        const nomSysteme = (fav.systeme || fav.system || '').trim();
+                    const chartsData = []; // Pour stocker les données des graphiques avant de les dessiner
 
-                        let influencePct = 0;
-                        let etatBgs = 'STABLE';
-                        let deltaHtml = '';
+                    // Nettoyage des anciens graphiques en mémoire pour éviter les bugs visuels
+                    if (window.mobileSparklines) {
+                        for (let key in window.mobileSparklines) {
+                            if (window.mobileSparklines[key]) window.mobileSparklines[key].destroy();
+                        }
+                    }
+                    window.mobileSparklines = {};
 
-                        const factionsDuSysteme = systemDataMap[nomSysteme.toUpperCase()] || [];
-                        const facData = factionsDuSysteme.find(f => f.name.toUpperCase() === nomFaction.toUpperCase());
+                    // 🎯 1. REGROUPEMENT PAR SYSTÈME
+                    const groupesSystemes = {};
+                    favoris.forEach((fav, index) => {
+                        const sysName = (fav.systeme || fav.system || 'INCONNU').trim().toUpperCase();
+                        if (!groupesSystemes[sysName]) groupesSystemes[sysName] = [];
+                        groupesSystemes[sysName].push({ fav: fav, index: index });
+                    });
 
-                        if (facData) {
-                            influencePct = (facData.influence * 100).toFixed(1);
-                            
-                            // Calcul du Delta 24h (identique à bgs.html)
+                    // Tri des systèmes par ordre alphabétique
+                    const systemesTries = Object.keys(groupesSystemes).sort();
+
+                    // 🎯 2. GÉNÉRATION DE L'AFFICHAGE GROUPÉ
+                    systemesTries.forEach(nomSysteme => {
+                        
+                        // EN-TÊTE DU SYSTÈME
+                        htmlInf += `
+                            <div style="color: #888; font-size: 0.85em; font-weight: bold; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 4px; letter-spacing: 2px;">
+                                > SYSTÈME : <span style="color: var(--ed-orange);">${nomSysteme}</span>
+                            </div>
+                        `;
+
+                        // LES FACTIONS DE CE SYSTÈME
+                        groupesSystemes[nomSysteme].forEach(item => {
+                            const fav = item.fav;
+                            const index = item.index;
+                            const nomFaction = (fav.faction || fav.nom || fav.name || '').trim();
+
+                            let influencePct = 0;
+                            let etatBgs = 'STABLE';
                             let delta24h = 0;
                             let couleurDelta = '#888';
                             let fleche = '—';
+                            let historique7j = [];
 
-                            if (facData.influenceHistory) {
-                                const timestamps = Object.keys(facData.influenceHistory).map(Number).sort((a, b) => a - b);
-                                if (timestamps.length > 0) {
-                                    const latestHistoryTs = timestamps[timestamps.length - 1];
-                                    const latestDateStr = new Date(latestHistoryTs * 1000).toLocaleDateString('fr-FR');
-                                    
-                                    // Filtre anti-doublon journalier
-                                    const prevTimestamps = timestamps.filter(ts => new Date(ts * 1000).toLocaleDateString('fr-FR') !== latestDateStr);
-                                    let infHier = Number(influencePct);
+                            const factionsDuSysteme = systemDataMap[nomSysteme] || [];
+                            const facData = factionsDuSysteme.find(f => f.name.toUpperCase() === nomFaction.toUpperCase());
 
-                                    if (prevTimestamps.length > 0) {
-                                        infHier = facData.influenceHistory[prevTimestamps[prevTimestamps.length - 1]] * 100;
-                                    } else if (timestamps.length > 1) {
-                                        infHier = facData.influenceHistory[timestamps[0]] * 100;
+                            if (facData) {
+                                influencePct = (facData.influence * 100).toFixed(1);
+
+                                if (facData.influenceHistory) {
+                                    const timestamps = Object.keys(facData.influenceHistory).map(Number).sort((a, b) => a - b);
+                                    if (timestamps.length > 0) {
+                                        const latestHistoryTs = timestamps[timestamps.length - 1];
+                                        const latestDateStr = new Date(latestHistoryTs * 1000).toLocaleDateString('fr-FR');
+                                        
+                                        const prevTimestamps = timestamps.filter(ts => new Date(ts * 1000).toLocaleDateString('fr-FR') !== latestDateStr);
+                                        let infHier = Number(influencePct);
+
+                                        if (prevTimestamps.length > 0) {
+                                            infHier = facData.influenceHistory[prevTimestamps[prevTimestamps.length - 1]] * 100;
+                                        } else if (timestamps.length > 1) {
+                                            infHier = facData.influenceHistory[timestamps[0]] * 100;
+                                        }
+
+                                        delta24h = (Number(influencePct) - infHier);
+                                        if (delta24h > 0.1) { couleurDelta = '#00FF66'; fleche = '↗'; } 
+                                        else if (delta24h < -0.1) { couleurDelta = '#FF3333'; fleche = '↘'; }
+
+                                        const time7Jours = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+                                        historique7j = prevTimestamps.filter(ts => ts >= time7Jours).map(ts => facData.influenceHistory[ts] * 100);
                                     }
+                                }
+                                historique7j.push(Number(influencePct));
 
-                                    delta24h = (Number(influencePct) - infHier);
-                                    if (delta24h > 0.1) {
-                                        couleurDelta = '#00FF66';
-                                        fleche = '↗';
-                                    } else if (delta24h < -0.1) {
-                                        couleurDelta = '#FF3333';
-                                        fleche = '↘';
-                                    }
+                                if (facData.activeStates && facData.activeStates.length > 0) {
+                                    etatBgs = facData.activeStates[0].state;
+                                } else if (facData.state && facData.state !== 'None') {
+                                    etatBgs = facData.state;
                                 }
                             }
 
-                            deltaHtml = `<span style="color: ${couleurDelta}; font-size: 0.75em; font-weight: bold; margin-left: 6px;">${fleche} ${delta24h > 0 ? '+' : ''}${delta24h.toFixed(1)}%</span>`;
+                            // TRADUCTION DE L'ÉTAT POLITIQUE (Badge textuel)
+                            let colorEtat = 'var(--ed-blue)'; 
+                            let etatTraduit = etatBgs.toUpperCase();
 
-                            if (facData.activeStates && facData.activeStates.length > 0) {
-                                etatBgs = facData.activeStates[0].state;
-                            } else if (facData.state && facData.state !== 'None') {
-                                etatBgs = facData.state;
+                            if (etatTraduit === 'WAR') etatTraduit = 'GUERRE';
+                            else if (etatTraduit === 'CIVIL WAR') etatTraduit = 'GUERRE CIVILE';
+                            else if (etatTraduit === 'ELECTION') etatTraduit = 'ÉLECTION';
+                            else if (etatTraduit === 'BOOM') etatTraduit = 'BOOM ÉCONOMIQUE';
+
+                            if (etatTraduit.includes('GUERRE') || etatTraduit.includes('ÉLECTION') || etatTraduit.includes('LOCKDOWN')) {
+                                colorEtat = 'var(--ed-red)';
+                            } else if (etatTraduit.includes('BOOM') || etatTraduit.includes('EXPANSION')) {
+                                colorEtat = 'var(--ed-green)';
                             }
-                        }
 
-                        let colorEtat = 'var(--ed-orange)';
-                        let etatTraduit = etatBgs.toUpperCase();
+                            // COULEUR DE LA COURBE (TENDANCE 7 JOURS)
+                            let colorCurve = '#00F0FF'; // Cyan par défaut
+                            if (historique7j.length > 1) {
+                                const pointLePlusAncien = historique7j[0];
+                                const pointAujourdhui = historique7j[historique7j.length - 1];
+                                const tendance7j = pointAujourdhui - pointLePlusAncien;
+                                
+                                if (tendance7j > 0.1) colorCurve = '#00FF66'; 
+                                else if (tendance7j < -0.1) colorCurve = '#FF3333'; 
+                            }
 
-                        if (etatTraduit === 'WAR') etatTraduit = 'GUERRE';
-                        else if (etatTraduit === 'CIVIL WAR') etatTraduit = 'GUERRE CIVILE';
-                        else if (etatTraduit === 'ELECTION') etatTraduit = 'ÉLECTION';
-                        else if (etatTraduit === 'BOOM') etatTraduit = 'BOOM ÉCONOMIQUE';
+                            chartsData.push({
+                                id: `m-sparkline-${index}`,
+                                data: historique7j,
+                                color: colorCurve
+                            });
 
-                        if (etatTraduit.includes('GUERRE') || etatTraduit.includes('ÉLECTION') || etatTraduit.includes('LOCKDOWN')) {
-                            colorEtat = 'var(--ed-red)';
-                        } else if (etatTraduit.includes('BOOM') || etatTraduit.includes('EXPANSION')) {
-                            colorEtat = 'var(--ed-green)';
-                        }
-
-                        htmlInf += `
-                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--ed-blue); padding: 8px 10px; border-radius: 0 4px 4px 0; margin-bottom: 4px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; font-weight: bold; margin-bottom: 4px;">
-                                    <span style="color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;">${nomFaction.toUpperCase()}</span>
-                                    <div style="display: flex; align-items: center; justify-content: flex-end;">
-                                        <span style="color: ${influencePct > 0 ? '#fff' : '#888'};">${influencePct > 0 ? influencePct + '%' : '---'}</span>
-                                        ${deltaHtml}
+                            htmlInf += `
+                                <div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${colorEtat}; padding: 12px; border-radius: 0 4px 4px 0; margin-bottom: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <span style="color: #fff; font-weight: bold; font-size: 1.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 65%;">${nomFaction.toUpperCase()}</span>
+                                        <span style="color: ${colorEtat}; font-weight: bold; font-size: 0.75em; border: 1px solid ${colorEtat}; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05);">${etatTraduit}</span>
                                     </div>
-                                </div>
-                                <div style="height: 4px; background: #222; border-radius: 2px; overflow: hidden; margin-bottom: 4px;">
-                                    <div style="width: ${Math.min(influencePct, 100)}%; height: 100%; background: var(--ed-blue);"></div>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.7em; color: #888;">
-                                    <span>ÉTAT : <strong style="color: ${colorEtat};">${etatTraduit}</strong></span>
-                                    <span>${nomSysteme.toUpperCase()}</span>
-                                </div>
-                            </div>`;
+
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;">
+                                        <div style="display: flex; flex-direction: column; min-width: 80px;">
+                                            <span style="color: #fff; font-size: 1.8em; font-weight: bold; line-height: 1; margin-bottom: 5px;">${influencePct}%</span>
+                                            <span style="color: #888; font-size: 0.6em; letter-spacing: 1px;">SOUS 24H</span>
+                                            <span style="color: ${couleurDelta}; font-weight: bold; font-size: 0.9em;">${fleche} ${delta24h > 0 ? '+' : ''}${delta24h.toFixed(1)}%</span>
+                                        </div>
+
+                                        <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-end;">
+                                            <div style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 5px;">
+                                                <span style="color: #666; font-size: 0.6em; letter-spacing: 1px;">7 JOURS</span>
+                                            </div>
+                                            <div style="width: 100%; height: 35px; position: relative;">
+                                                <canvas id="m-sparkline-${index}"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
                     });
 
                     infCont.innerHTML = htmlInf;
+
+                    // 🎯 DESSIN DES GRAPHIQUES UNE FOIS LE HTML INJECTÉ
+                    chartsData.forEach(chartInfo => {
+                        const ctxEl = document.getElementById(chartInfo.id);
+                        if (ctxEl) {
+                            const ctx = ctxEl.getContext('2d');
+                            window.mobileSparklines[chartInfo.id] = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: chartInfo.data, // Labels fictifs, on les cache
+                                    datasets: [{
+                                        data: chartInfo.data,
+                                        borderColor: chartInfo.color,
+                                        backgroundColor: chartInfo.color + '22', // Transparence pour le voile
+                                        borderWidth: 2,
+                                        tension: 0.4, // Rend la courbe fluide
+                                        pointRadius: 1,
+                                        fill: true
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                    scales: {
+                                        x: { display: false },
+                                        y: {
+                                            display: false,
+                                            min: Math.max(0, Math.min(...chartInfo.data) - 2),
+                                            max: Math.max(...chartInfo.data) + 2
+                                        }
+                                    },
+                                    layout: { padding: { top: 2, bottom: 2 } }
+                                }
+                            });
+                        }
+                    });
+
                 } else {
                     infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune faction surveillée sur le radar tactique.</div>';
                 }
@@ -1263,13 +1370,12 @@
 
                         htmlOrdres += `
                             <div onclick="ouvrirModalOrdre(${index}, '${prioColor}')" style="cursor: pointer; background: rgba(0,0,0,0.5); border-left: 3px solid ${prioColor}; padding: 10px; border-radius: 0 4px 4px 0; margin-bottom: 6px; transition: 0.2s;">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; font-weight: bold; margin-bottom: 6px;">
-                                    <span style="color: #fff;">${sys.toUpperCase()} // ${fac.toUpperCase()}</span>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px; font-weight: bold;">
+                                    <span style="color: #fff; display : block; font-weight: bold">${sys.toUpperCase()}</span>
                                     <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 2px;">${type}</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: #888; font-size: 0.8em; font-style: italic;">ÉMIS PAR : CMDR ${auteur.toUpperCase()}</span>
-                                    <span style="color: ${prioColor}; font-size: 0.8em; font-weight: bold;">[ DÉTAILS ]</span>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; font-weight: normal;">
+                                    <span style="color: #fff; display : block; font-weight: normal">${fac.toUpperCase()}</span>
                                 </div>
                             </div>`;
                     });
@@ -1329,19 +1435,33 @@
             }
 
             // -------------------------------------------------------------
-            // 4. JOURNAL DES EXPLOITS
+            // 4. JOURNAL DES EXPLOITS (FILTRÉ + SCROLL + SÉCURITÉ NOMS)
             // -------------------------------------------------------------
             const exploitsCont = document.getElementById('m-exploits-container');
             try {
-                // Requête classique sans jointure risquée
+                // 1. On identifie d'abord les missions actuellement ACTIVES
+                const { data: ordresActifs } = await supabaseApp.from('ordres_bgs')
+                    .select('id')
+                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
+                    .eq('statut', 'ACTIF');
+                
+                const idsActifs = (ordresActifs || []).map(o => o.id);
+
+                if (idsActifs.length === 0) {
+                    exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune directive en cours. Le journal est vierge.</div>';
+                    return;
+                }
+
+                // 2. On charge les exploits (ATTENTION : select('*') simple pour ne pas faire planter Supabase)
                 const { data: efforts } = await supabaseApp.from('efforts_bgs')
                     .select('*')
+                    .in('ordre_id', idsActifs) 
                     .order('date_action', { ascending: false })
-                    .limit(10); 
+                    .limit(50); 
 
                 if (efforts && efforts.length > 0) {
                     
-                    // 🛡️ TRADUCTION DES NOMS 100% SÉCURISÉE
+                    // 🛡️ 3. TRADUCTION DES NOMS 100% SÉCURISÉE (La fameuse rustine inébranlable)
                     const idsPilotes = [...new Set(efforts.map(e => e.user_id).filter(Boolean))];
                     if (idsPilotes.length > 0) {
                         const { data: profilsPilotes } = await supabaseApp.from('profils').select('user_id, cmdr_nom').in('user_id', idsPilotes);
@@ -1353,6 +1473,7 @@
                         }
                     }
 
+                    // 4. GÉNÉRATION DE L'AFFICHAGE
                     let htmlEx = '';
                     efforts.forEach(e => {
                         const cmdr = e.cmdr_nom ? e.cmdr_nom.toUpperCase() : 'INCONNU';
@@ -1997,7 +2118,8 @@
         document.getElementById('ordre-modal-type').style.color = couleur;
 
         // 2. Textes standards
-        document.getElementById('ordre-modal-cible').innerText = `${ordre.systeme_cible} // ${ordre.faction_cible}`.toUpperCase();
+        document.getElementById('ordre-modal-faction').innerText = ordre.faction_cible.toUpperCase();
+        document.getElementById('ordre-modal-systeme').innerText = ordre.systeme_cible.toUpperCase();
         document.getElementById('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
         
         const nomOfficier = ordre.nom_officier_traduit || ordre.auteur_nom || ordre.emetteur_nom || ordre.auteur || 'AMIRAUTÉ';
