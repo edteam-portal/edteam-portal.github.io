@@ -270,5 +270,64 @@ const activerCovasAudio = () => {
     }
 };
 
+// ==========================================
+// 6. COMPTEUR DE PRÉSENCE EN TEMPS RÉEL
+// ==========================================
+window.initialiserCompteurPresence = function() {
+    let db;
+    if (typeof getDb === 'function') db = getDb();
+    else if (typeof supabaseApp !== 'undefined') db = supabaseApp;
+    else if (typeof window.supabaseApp !== 'undefined') db = window.supabaseApp;
+
+    if (!db || typeof profilCommandant === 'undefined' || !profilCommandant) {
+        setTimeout(window.initialiserCompteurPresence, 2000);
+        return;
+    }
+
+    const presenceChannel = db.channel('pilotes-actifs-webapp', {
+        config: { presence: { key: profilCommandant.user_id } }
+    });
+
+    presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+            const etat = presenceChannel.presenceState();
+            const nbConnectes = Object.keys(etat).length;
+
+            // --- Mise à jour interface PC (index.html, bgs.html...) ---
+            const pcCountVal = document.getElementById('online-count-val');
+            const pcDot = document.getElementById('online-dot');
+            if (pcCountVal) {
+                pcCountVal.innerText = nbConnectes;
+                pcCountVal.style.color = '#fff';
+            }
+            if (pcDot) {
+                pcDot.style.background = '#00FF66';
+                pcDot.style.boxShadow = '0 0 6px #00FF66';
+            }
+
+            // --- Mise à jour interface Mobile (mobile.html) ---
+            const mobileText = document.getElementById('m-online-text');
+            const mobileDot = document.getElementById('m-online-dot');
+            if (mobileText) {
+                mobileText.innerText = `${nbConnectes} EN LIGNE`;
+                mobileText.style.color = '#fff';
+            }
+            if (mobileDot) {
+                mobileDot.style.background = '#00FF66';
+                mobileDot.style.boxShadow = '0 0 6px #00FF66';
+            }
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await presenceChannel.track({
+                    cmdr: profilCommandant.cmdr_nom || 'INCONNU',
+                    connecte_a: new Date().toISOString()
+                });
+            }
+        });
+};
+
+setTimeout(window.initialiserCompteurPresence, 3000);
+
 // On attache au "body" pour que ça marche sur TOUTES les pages au premier clic
 document.body.addEventListener('click', activerCovasAudio, { once: true });

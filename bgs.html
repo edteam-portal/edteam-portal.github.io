@@ -1488,9 +1488,6 @@
                 if (typeof synchroniserHorlogeBGS === 'function') synchroniserHorlogeBGS();
                 if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                 chargerEffectifsEscadron(); // <- NOUVELLE LIGNE
-
-                actualiserPilotesEnLigne();
-                setInterval(actualiserPilotesEnLigne, 15000); // Balayage toutes les 15 secondes
             } else {
                 // SI CONNECTÉ MAIS NON APPROUVÉ -> ÉJECTION
                 await supabaseApp.auth.signOut();
@@ -4346,81 +4343,6 @@
                 afficherAlerte("ÉCHEC SYSTÈME", "Erreur lors du protocole de destruction.", "#FF3333");
             }
         }
-
-        window.actualiserPilotesEnLigne = async function() {
-            const countVal = document.getElementById('online-count-val');
-            const dotEl = document.getElementById('online-dot');
-            const listeEl = document.getElementById('liste-pilotes-online');
-            if (!countVal || !profilCommandant) return;
-
-            try {
-                const timestampActuel = Math.floor(Date.now() / 1000);
-                const limite = timestampActuel - 30;
-
-                const { data: actifs, error: err1 } = await supabaseApp.from('parametres_app')
-                    .select('user_id')
-                    .gte('last_heartbeat', limite);
-
-                if (err1) throw err1;
-
-                if (actifs && actifs.length > 0) {
-                    const userIds = actifs.map(a => a.user_id);
-                    
-                    const { data: profils, error: err2 } = await supabaseApp.from('profils_publics')
-                        .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate')
-                        .in('user_id', userIds)
-                        .eq('est_approuve', true)
-                        .order('cmdr_nom');
-                        
-                    if (err2) throw err2;
-
-                    countVal.innerText = profils.length;
-                    countVal.style.color = '#fff';
-                    if (dotEl) {
-                        dotEl.style.background = '#00FF66';
-                        dotEl.style.boxShadow = '0 0 6px #00FF66';
-                    }
-
-                    if (listeEl) {
-                        let html = '';
-                        profils.forEach(p => {
-                            let badges = '';
-                            if (p.est_amiral) badges += '<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
-                            if (p.est_officier) badges += '<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER</span>';
-                            if (p.est_diplomate) badges += '<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
-                            
-                            const squad = p.escadron_id ? `<span style="color: var(--ed-orange); font-weight: bold;">[ ${p.escadron_id} ]</span>` : `<span style="color: #888;">[ INDÉPENDANT ]</span>`;
-                            const indicateurVous = (p.user_id === profilCommandant.user_id) ? '<span style="color: var(--ed-blue); font-size: 0.75em; margin-left: 8px; font-weight: bold; letter-spacing: 1px;">[ VOUS ]</span>' : '';
-
-                            html += `
-                            <div style="background: rgba(0, 0, 0, 0.6); border-left: 3px solid #00FF66; padding: 12px 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <div>
-                                        <span style="color: #fff; font-weight: bold; font-size: 1.1em;">CMDR ${p.cmdr_nom.toUpperCase()}</span>
-                                        ${indicateurVous}
-                                    </div>
-                                    <div style="font-size: 0.85em;">${squad}</div>
-                                </div>
-                                <div style="display: flex; gap: 6px;">
-                                    ${badges}
-                                </div>
-                            </div>`;
-                        });
-                        listeEl.innerHTML = html;
-                    }
-                } else {
-                    countVal.innerText = '0';
-                    countVal.style.color = '#888';
-                    if (dotEl) {
-                        dotEl.style.background = '#FF3333';
-                        dotEl.style.boxShadow = '0 0 6px #FF3333';
-                    }
-                    if (listeEl) listeEl.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucun pilote détecté dans la galaxie.</div>';
-                }
-            } catch(e) {
-                console.error("Erreur actualisation joueurs en ligne", e);
-            }
-        };
 
         window.enregistrerTelemetrie = function(type, cle) {
             try {

@@ -847,8 +847,6 @@
             chargerQGMobile();
             chargerBGSMobile();
             initialiserCommsMobile();
-            actualiserPilotesEnLigneMobile();
-            setInterval(actualiserPilotesEnLigneMobile, 15000);
             demarrerTickTimer();
         }
 
@@ -1703,40 +1701,6 @@
 
             input.value = '';
             await supabaseApp.from('transmissions').insert([payload]);
-        }
-
-        // --- PILOTES EN JEU ---
-        async function actualiserPilotesEnLigneMobile() {
-            const txt = document.getElementById('m-online-text');
-            const dot = document.getElementById('m-online-dot');
-            const liste = document.getElementById('m-pilotes-liste');
-
-            try {
-                const limite = Math.floor(Date.now() / 1000) - 30;
-                const { data: actifs } = await supabaseApp.from('parametres_app').select('user_id').gte('last_heartbeat', limite);
-
-                if (actifs && actifs.length > 0) {
-                    const ids = actifs.map(a => a.user_id);
-                    const { data: profils } = await supabaseApp.from('profils_publics').select('cmdr_nom, escadron_id').in('user_id', ids).eq('est_approuve', true);
-
-                    txt.innerText = `${profils.length} EN JEU`;
-                    dot.style.background = 'var(--ed-green)';
-
-                    let html = '';
-                    profils.forEach(p => {
-                        html += `
-                            <div style="background: rgba(0,0,0,0.5); border-left: 2px solid var(--ed-green); padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85em;">
-                                <strong style="color: #fff;">CMDR ${(p.cmdr_nom || 'PILOTE').toUpperCase()}</strong>
-                                <span style="color: var(--ed-orange); font-size: 0.8em;">[ ${p.escadron_id || 'INDÉPENDANT'} ]</span>
-                            </div>`;
-                    });
-                    liste.innerHTML = html;
-                } else {
-                    txt.innerText = '0 EN JEU';
-                    dot.style.background = '#666';
-                    liste.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Aucun pilote détecté dans la galaxie.</div>';
-                }
-            } catch (e) {}
         }
 
         // CE QU'IL FAUT METTRE À LA PLACE
