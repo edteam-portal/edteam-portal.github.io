@@ -1196,7 +1196,7 @@
     if (!containerEffectifs) return;
 
     try {
-        const { data: effectifs, error } = await supabaseApp.from('profils')
+        const { data: effectifs, error } = await supabaseApp.from('profils_publics')
             .select('*')
             .eq('escadron_id', profilCommandant.escadron_id)
             .eq('est_approuve', true)
@@ -1255,7 +1255,7 @@
                 if(typeof ouvrirModal === 'function') ouvrirModal('modal-profil-pilote'); // Utilise le son et ferme les tooltips
                 else document.getElementById('modal-profil-pilote').style.display = 'flex';
 
-                const { data: profil } = await supabaseApp.from('profils').select('*').eq('user_id', userId).single();
+                const { data: profil } = await supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single();
                 const { data: params } = await supabaseApp.from('parametres_app').select('*').eq('user_id', userId).maybeSingle();
 
                 if (!profil) return;
@@ -3315,7 +3315,7 @@
                 const [resOrdres, resEfforts, resProfils] = await Promise.all([
                     supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS'),
                     supabaseApp.from('efforts_bgs').select('*'),
-                    supabaseApp.from('profils').select('*') 
+                    supabaseApp.from('profils_publics').select('*') 
                 ]);
 
                 const ordres = resOrdres.data || [];
@@ -4394,7 +4394,7 @@
                 if (actifs && actifs.length > 0) {
                     const userIds = actifs.map(a => a.user_id);
                     
-                    const { data: profils, error: err2 } = await supabaseApp.from('profils')
+                    const { data: profils, error: err2 } = await supabaseApp.from('profils_publics')
                         .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate')
                         .in('user_id', userIds)
                         .eq('est_approuve', true)

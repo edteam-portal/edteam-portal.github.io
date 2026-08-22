@@ -986,7 +986,7 @@
 
             // 5. Effectif escadron
             if (profilCommandant.escadron_id) {
-                const { data: membres } = await supabaseApp.from('profils')
+                const { data: membres } = await supabaseApp.from('profils_publics')
                     .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id')
                     .eq('escadron_id', profilCommandant.escadron_id)
                     .eq('est_approuve', true)
@@ -1464,7 +1464,7 @@
                     // 🛡️ 3. TRADUCTION DES NOMS 100% SÉCURISÉE (La fameuse rustine inébranlable)
                     const idsPilotes = [...new Set(efforts.map(e => e.user_id).filter(Boolean))];
                     if (idsPilotes.length > 0) {
-                        const { data: profilsPilotes } = await supabaseApp.from('profils').select('user_id, cmdr_nom').in('user_id', idsPilotes);
+                        const { data: profilsPilotes } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').in('user_id', idsPilotes);
                         if (profilsPilotes) {
                             efforts.forEach(e => {
                                 const match = profilsPilotes.find(p => p.user_id === e.user_id);
@@ -1562,7 +1562,7 @@
             if (!select) return;
 
             try {
-                const { data: profils } = await supabaseApp.from('profils')
+                const { data: profils } = await supabaseApp.from('profils_publics')
                     .select('user_id, cmdr_nom')
                     .eq('est_approuve', true)
                     .neq('user_id', profilCommandant.user_id)
@@ -1714,7 +1714,7 @@
 
                 if (actifs && actifs.length > 0) {
                     const ids = actifs.map(a => a.user_id);
-                    const { data: profils } = await supabaseApp.from('profils').select('cmdr_nom, escadron_id').in('user_id', ids).eq('est_approuve', true);
+                    const { data: profils } = await supabaseApp.from('profils_publics').select('cmdr_nom, escadron_id').in('user_id', ids).eq('est_approuve', true);
 
                     txt.innerText = `${profils.length} EN JEU`;
                     dot.style.background = 'var(--ed-green)';
@@ -2164,7 +2164,7 @@
             
             try {
                 // Requête ciblée pour avoir les noms des participants
-                const { data: profils } = await supabaseApp.from('profils').select('user_id, cmdr_nom').in('user_id', idsParticipants);
+                const { data: profils } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').in('user_id', idsParticipants);
                 const dicoNoms = {};
                 if (profils) profils.forEach(p => dicoNoms[p.user_id] = p.cmdr_nom);
 
