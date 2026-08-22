@@ -1599,7 +1599,8 @@
                     faction_cible: fac,
                     type_ordre: ord,
                     briefing_amiral: brief || null,
-                    plafonds_custom: Object.keys(customCaps).length > 0 ? customCaps : null
+                    plafonds_custom: Object.keys(customCaps).length > 0 ? customCaps : null,
+                    auteur_id: profilCommandant.user_id // 👈 LA SIGNATURE DE L'OFFICIER EST LÀ
                 }]);
                 
                 if (error) throw error;
@@ -4445,6 +4446,84 @@
     <div style="position: fixed; bottom: 8px; left: 0; width: 100%; text-align: center; color: #555; font-size: 0.75em; letter-spacing: 1px; z-index: 5000; pointer-events: none; font-family: 'Share Tech Mono', monospace; opacity: 0.7;">
         Application de fan - edteam.portal 2026
     </div>
+
+    <!-- OVERLAY TACTIQUE COVAS (Zéro interférence avec le reste) -->
+    <style>
+        #covas-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 450px;
+            background: rgba(5, 10, 15, 0.95);
+            border: 1px solid var(--ed-blue);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            border-radius: 4px;
+            padding: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            color: #00F0FF;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            
+            /* Animation de centrage : Fondu et léger zoom holographique */
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #covas-overlay.deploye {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .covas-ligne {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            line-height: 1.4;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .covas-alerte { color: #FF3333; }
+        .covas-neutre { color: #00FF66; }
+        .covas-curseur { animation: covas-blink 0.8s infinite; }
+        
+        @keyframes covas-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        #covas-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--ed-blue);
+            color: var(--ed-blue);
+            padding: 8px 15px;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 9999;
+            display: none;
+            transition: 0.2s;
+        }
+        #covas-badge:hover {
+            background: var(--ed-blue);
+            color: #000;
+            box-shadow: 0 0 15px var(--ed-blue);
+        }
+    </style>
+
+    <div id="covas-overlay">
+        <div id="covas-contenu"></div>
+        <span class="covas-curseur">_</span>
+    </div>
+    <div id="covas-badge" onclick="deployerCovasManuel()">>_ SYS: EN ATTENTE</div>
+
+
+    <script src="covas.js"></script>
+
 
 </body>
 </html>
