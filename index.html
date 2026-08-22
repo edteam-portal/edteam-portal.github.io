@@ -12,9 +12,10 @@
     <title>EDTEAM</title>
     
     <script>
-        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isSmallScreen = window.matchMedia("(max-width: 800px)").matches;
-        if (isMobileDevice || isSmallScreen) { window.location.replace("mobile.html"); }
+    // Seuls les petits écrans (téléphones) sont redirigés
+        if (window.innerWidth < 768) {
+            window.location.replace("mobile.html");
+        }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
