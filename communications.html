@@ -449,31 +449,29 @@
                 if (!data.cmdr_nom) {
                     document.getElementById('failsafe-modal').style.display = 'flex';
                     document.getElementById('failsafe-status-text').innerText = "IDENTIFICATION COMMANDANT MANQUANTE";
-                    document.getElementById('main-ui').style.display = 'none'; // On cache l'interface en arrière-plan
-                    return; // On coupe le moteur ici, la page ne chargera pas plus loin !
+                    document.getElementById('main-ui').style.display = 'none';
+                    return; 
                 }
 
                 profilCommandant = data;
                 enregistrerTelemetrie('page', 'comms');
                 synchroniserTelemetrie();
 
-                // AFFICHAGE DU BOUTON AMIRAUTÉ (Si Officier ou Directeur)
+                // AFFICHAGE DU BOUTON AMIRAUTÉ
                 if (data.est_amiral || data.est_directeur) {
                     const navAmiraute = document.getElementById('nav-bureau-amiraute');
                     if (navAmiraute) navAmiraute.style.display = 'flex';
-                    actualiserBadgeAmiraute();
+                    if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
                 }
 
-                // AFFICHAGE DU BGS ET DES COMMS ESCADRON (Si le pilote fait partie d'un escadron)
+                // AFFICHAGE DU BGS ET DES COMMS ESCADRON
                 if (data.escadron_id) {
                     const navBgs = document.getElementById('nav-bgs-factions');
                     if (navBgs) navBgs.style.display = 'flex';
                     
-                    // >>> LIGNES À AJOUTER <<<
                     const btnEscadron = document.getElementById('btn-tab-escadron');
                     if (btnEscadron) btnEscadron.style.display = 'inline-block';
                     
-                    // --- NOUVEAU : VÉRIFICATION COALITION ---
                     const { data: coalData } = await supabaseApp.from('coalition_membres')
                         .select('coalition_id')
                         .eq('escadron_tag', data.escadron_id)
@@ -496,7 +494,7 @@
                 chargerListePilotes();
                 chargerHistorique();
                 ecouterTransmissions();
-                } else {
+            } else {
                 window.location.href = 'index.html';
             }
         });
