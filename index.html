@@ -2805,9 +2805,20 @@
                 if (nomCmdr) {
                     btn.disabled = false;
                     btn.style.opacity = '1';
-                    btn.style.borderColor = "var(--ed-orange)";
-                    btn.style.color = "var(--ed-orange)";
+                    btn.style.borderColor = "#00FF66";
+                    btn.style.color = "#00FF66";
+                    btn.style.backgroundColor = "rgba(0, 255, 102, 0.1)";
                     btn.style.cursor = "pointer";
+                    
+                    // Animation de clignotement (pulse)
+                    btn.animate([
+                        { boxShadow: '0 0 5px rgba(0, 255, 102, 0.2)', opacity: 1 },
+                        { boxShadow: '0 0 20px rgba(0, 255, 102, 0.8)', opacity: 0.6 },
+                        { boxShadow: '0 0 5px rgba(0, 255, 102, 0.2)', opacity: 1 }
+                    ], {
+                        duration: 1500,
+                        iterations: Infinity
+                    });
                     
                     // ON STOCKE LES DONNÉES EN MÉMOIRE (Le pilote n'est pas encore sur le Bureau du Directeur)
                     window.sasCacheCmdr = nomCmdr;
