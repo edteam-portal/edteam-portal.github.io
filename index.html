@@ -369,17 +369,14 @@
 
                         <!-- Si le pilote a un escadron -->
                         <div id="qg-squad-actif" style="display: none; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 40px;">
-                                <div>
-                                    <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">TAG ESCADRON</span>
-                                    <span id="qg-squad-tag" style="color: var(--ed-orange); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;">[ ... ]</span>
-                                </div>
-                                <div>
-                                    <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">ACCRÉDITATIONS</span>
-                                    <div id="qg-squad-roles" style="display: flex; gap: 10px;"></div>
-                                </div>
+                            <div>
+                                <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">TAG ESCADRON</span>
+                                <span id="qg-squad-tag" style="color: var(--ed-orange); font-size: 1.8em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,113,0,0.3);">[ ... ]</span>
                             </div>
-                            <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 10px 20px; font-family: inherit; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="quitterEscadron()" onmouseenter="sonHover()">DÉMISSIONNER DE L'ESCADRON</button>
+                            <div style="text-align: right;">
+                                <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">ACCRÉDITATIONS TACTIQUES</span>
+                                <div id="qg-squad-roles" style="display: flex; gap: 10px; justify-content: flex-end;"></div>
+                            </div>
                         </div>
 
                         <!-- Si le pilote est mercenaire indépendant -->
@@ -2152,7 +2149,7 @@
                 const rolesDiv = document.getElementById('qg-squad-roles');
                 if (rolesDiv) {
                     let rolesHtml = '';
-                    const styleBase = "padding: 3px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold; cursor: help;";
+                    const styleBase = "padding: 6px 15px; border-radius: 4px; font-size: 1.15em; letter-spacing: 1px; font-weight: bold; cursor: help; box-shadow: 0 0 10px currentColor;";
                     
                     // Grade Principal
                     if (profilCommandant.est_amiral) {
@@ -2185,96 +2182,6 @@
                 divActif.style.display = 'none';
                 divMercenaire.style.display = 'flex';
                 // Tout le vieux code de recherche d'escadron de la base de données a été purgé ici.
-            }
-        }
-
-        // Étape 1 : Afficher la modale personnalisée ou Bloquer si Amiral
-        function quitterEscadron() {
-            if(typeof sonClic === 'function') sonClic();
-            
-            const modal = document.getElementById('modal-confirm-demission');
-            const titre = modal.querySelector('.modal-title');
-            const p1 = modal.querySelectorAll('p')[0];
-            const p2 = modal.querySelectorAll('p')[1];
-            const btnConfirmer = modal.querySelectorAll('button')[1]; // Le bouton rouge
-
-            // Si c'est l'Amiral qui clique, on adapte la fenêtre pour une dissolution
-            if (profilCommandant.est_amiral) {
-                titre.innerText = "⚠️ DISSOLUTION DE LA FLOTTE";
-                p1.innerText = "Êtes-vous ABSOLUMENT certain de vouloir dissoudre l'escadron ?";
-                p2.innerText = "TOUTES LES DONNÉES SERONT ORPHELINES. LE PERSONNEL SERA RÉVOQUÉ. ACTION IRRÉVERSIBLE.";
-                btnConfirmer.innerText = "CONFIRMER LA DISSOLUTION";
-                btnConfirmer.onclick = executerDissolution;
-            } 
-            // Si c'est un pilote, on reste sur une démission classique
-            else {
-                titre.innerText = "⚠️ CONFIRMATION REQUISE";
-                p1.innerText = "Voulez-vous vraiment démissionner de votre escadron ?";
-                p2.innerText = "VOUS PERDREZ IMMÉDIATEMENT L'ACCÈS AU BGS ET AUX OPÉRATIONS DE L'ESCADRON.";
-                btnConfirmer.innerText = "CONFIRMER LA DÉMISSION";
-                btnConfirmer.onclick = executerDemission;
-            }
-            
-            modal.style.display = 'flex';
-        }
-
-        // Étape 2 : Exécuter l'action si confirmé
-        async function executerDissolution() {
-            if(typeof sonClic === 'function') sonClic();
-            document.getElementById('modal-confirm-demission').style.display = 'none';
-            
-            try {
-                // 1. Rétrograder et libérer tous les membres de cet escadron
-                await supabaseApp.from('profils').update({ 
-                    escadron_id: null, 
-                    demande_escadron: null, 
-                    est_amiral: false, 
-                    est_officier: false, 
-                    est_diplomate: false 
-                }).eq('escadron_id', profilCommandant.escadron_id);
-                
-                // 2. Supprimer la ligne de l'escadron
-                await supabaseApp.from('escadrons').delete().eq('tag', profilCommandant.escadron_id);
-
-                // 3. Afficher l'alerte de confirmation immersive
-                afficherAlerte(
-                    "DISSOLUTION TERMINÉE", 
-                    "La flotte a été rayée des registres. Tout le personnel a été révoqué.<br><br>Vous êtes redevenu un pilote indépendant.", 
-                    "#FF3333", 
-                    () => location.reload()
-                );
-            } catch(e) {
-                console.error(e);
-                afficherAlerte("ERREUR SYSTÈME", "Une erreur est survenue lors du démantèlement de la flotte.", "#FF3333");
-            }
-        }
-
-        async function executerDemission() {
-            if(typeof sonClic === 'function') sonClic();
-            document.getElementById('modal-confirm-demission').style.display = 'none';
-            
-            try {
-                // Le pilote quitte l'escadron. On révoque tous ses accès tactiques.
-                const { error } = await supabaseApp.from('profils').update({ 
-                    escadron_id: null, 
-                    demande_escadron: null,
-                    est_amiral: false, 
-                    est_officier: false, 
-                    est_diplomate: false 
-                }).eq('user_id', profilCommandant.user_id);
-                
-                if (error) throw error;
-
-                // On utilise notre nouvelle modale holographique pour confirmer
-                afficherAlerte(
-                    "DÉMISSION VALIDÉE", 
-                    "Vous avez quitté l'escadron avec succès.<br><br>Vos accréditations tactiques et diplomatiques ont été révoquées.", 
-                    "var(--ed-orange)", 
-                    () => location.reload()
-                );
-            } catch(e) {
-                console.error("Erreur démission :", e);
-                afficherAlerte("ERREUR SYSTÈME", "Impossible de traiter votre démission.", "#FF3333");
             }
         }
 
