@@ -47,7 +47,7 @@ async function ecrireLigneCovas(texte, conteneur, classeCouleur = "") {
 
 // 3. LOGIQUE D'ANALYSE (Rapport de l'IA avec acquittement manuel)
 async function declencherAnalyseTactique(nomSysteme) {
-    if (covasEnCours || nomSysteme === systemeCourant) return;
+    if (!nomSysteme || nomSysteme === systemeCourant) return;
     covasEnCours = true;
     systemeCourant = nomSysteme;
 
@@ -203,12 +203,6 @@ window.deployerCovasManuel = function(e) {
 // 5. ÉCOUTE TEMPS RÉEL SUR SUPABASE
 // ==========================================
 window.initCovasRealtime = function() {
-    if (typeof profilCommandant === 'undefined' || !profilCommandant) {
-        setTimeout(window.initCovasRealtime, 2000);
-        return;
-    }
-
-    // NOUVEAU : Recherche intelligente de la base de données selon la page
     let db;
     if (typeof getDb === 'function') db = getDb();
     else if (typeof supabaseApp !== 'undefined') db = supabaseApp;
@@ -216,24 +210,29 @@ window.initCovasRealtime = function() {
 
     if (!db) {
         console.warn("SYS.EDTEAM : Base de données introuvable pour le COVAS.");
+        setTimeout(window.initCovasRealtime, 2000);
         return;
     }
     
     db.channel('covas-tactique-channel')
         .on('postgres_changes', { 
-            event: 'INSERT', 
+            event: '*', 
             schema: 'public', 
-            table: 'radar_commercial', 
-            filter: `user_id=eq.${profilCommandant.user_id}` 
+            table: 'radar_commercial'
         }, (payload) => {
             const ligne = payload.new;
-            const sys = ligne.system_name ? ligne.system_name.trim().toUpperCase() : '';
-            const fauxSystemes = ['FINANCE', 'SYS_CORE', 'INCONNU', 'HEARTBEAT', 'STATUS', 'PARAM_UPDATE', 'APP_PARAMS'];
-            
-            if (!sys || fauxSystemes.includes(sys) || sys.length > 35) return;
+            if (!ligne) return;
 
-            if (sys !== systemeCourant) {
-                declencherAnalyseTactique(sys);
+            // On cible en priorité le statut système émis par EDMC
+            if (ligne.target_commodity === 'SYSTEM_STATUS' || ligne.type_operation === 'INFO') {
+                const sys = ligne.system_name ? ligne.system_name.trim().toUpperCase() : '';
+                const fauxSystemes = ['FINANCE', 'SYS_CORE', 'INCONNU', 'HEARTBEAT', 'STATUS', 'PARAM_UPDATE', 'APP_PARAMS', 'SOL'];
+                
+                if (sys && !fauxSystemes.includes(sys) && sys.length <= 35) {
+                    if (sys !== systemeCourant) {
+                        declencherAnalyseTactique(sys);
+                    }
+                }
             }
         })
         .subscribe();
