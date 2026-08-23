@@ -1830,7 +1830,7 @@
                 
                 // ZONE ROUGE : Le compte à rebours est écoulé
                 if (diff <= 0) {
-                    el.innerText = "[ EN ATTENTE EDCD... ]";
+                    el.innerText = "[ TICK EN COURS... ]";
                     el.style.color = "var(--ed-blue)";
                     el.style.textShadow = "0 0 10px rgba(0, 240, 255, 0.5)";
                     return;
@@ -3513,47 +3513,41 @@
                             const cibleFac = ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : "FACTION INCONNUE";
                             const typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "BGS";
 
-                            // Badge Ordre
+                            // Badge Ordre et Couleur Principale (Imposés par l'objectif de mission)
                             let colorOrdre = 'var(--ed-blue)';
-                            if (typeOrdre === 'HAUSSE') colorOrdre = '#00FF66';
-                            else if (typeOrdre === 'BAISSE') colorOrdre = '#FF3333';
-                            else if (typeOrdre === 'GUERRE') colorOrdre = '#FF7100';
+                            if (typeOrdre === 'HAUSSE') colorOrdre = 'var(--ed-green)';
+                            else if (typeOrdre === 'BAISSE') colorOrdre = 'var(--ed-red)';
+                            else if (typeOrdre === 'GUERRE') colorOrdre = 'var(--ed-orange)';
+                            else if (typeOrdre === 'ELECTION') colorOrdre = 'var(--ed-blue)';
 
-                            // Formatage & Couleur selon le vecteur
+                            // Formatage de la valeur en texte (La couleur suit maintenant colorOrdre)
                             let formatValeur = a.valeur;
-                            let colorValeur = '#fff';
 
                             if (['ECONOMIE', 'CONTREBANDE'].includes(a.type_action)) {
                                 formatValeur = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
-                                colorValeur = '#00FF66';
                             } else if (a.type_action === 'SECURITE') {
                                 formatValeur = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
-                                colorValeur = 'var(--ed-blue)';
                             } else if (a.type_action === 'SCIENCE') {
                                 formatValeur = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
-                                colorValeur = '#B026FF';
-                            } else if (a.type_action === 'MISSIONS') {
+                            } else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(a.type_action)) {
                                 formatValeur = `+${a.valeur} INF`;
-                                colorValeur = 'var(--ed-orange)';
-                            } else if (['ECHECS', 'MEURTRES'].includes(a.type_action)) {
-                                formatValeur = `-${a.valeur}`;
-                                colorValeur = '#FF3333';
-                            } else {
-                                formatValeur = `${a.valeur}`;
-                                colorValeur = '#ccc';
-                            }
-                            if (a.type_action === 'CZ_VICTOIRES') {
-                                formatValeur = `+${a.valeur} BATAILLE GAGNÉE`;
-                                colorValeur = '#FFD700'; // Doré triomphal
-                            } else if (['ECONOMIE', 'CONTREBANDE'].includes(a.type_action)) {
-                                formatValeur = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
-                                colorValeur = '#00FF66';
+                            } else if (a.type_action === 'ECHECS') {
+                                formatValeur = `${a.valeur} ÉCHEC${a.valeur > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'MEURTRES') {
+                                formatValeur = `${a.valeur} MEURTRE${a.valeur > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'CZ_VICTOIRES') {
+                                formatValeur = `+${a.valeur} BATAILLE${a.valeur > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'VOLS') {
+                                formatValeur = `${a.valeur} VOL${a.valeur > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'PIRATAGE') {
+                                formatValeur = `${a.valeur} PIRATAGE${a.valeur > 1 ? 'S' : ''}`;
                             }
 
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                             
+                            // Injection HTML avec ajout d'une bordure latérale colorée (comme sur mobile)
                             feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 125px 160px 145px 1fr 130px 120px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s;" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 125px 160px 145px 1fr 130px 120px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
                                 
                                 <!-- 1. DATE & HEURE -->
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
@@ -3573,8 +3567,8 @@
                                     <span style="color: #aaa;">${cibleFac}</span>
                                 </div>
 
-                                <!-- 5. RÉSULTAT -->
-                                <span style="text-align: right; color: ${colorValeur}; font-weight: bold; font-size: 1.1em; text-shadow: 0 0 6px ${colorValeur}40;">${formatValeur}</span>
+                                <!-- 5. RÉSULTAT (Colorisé par la mission) -->
+                                <span style="text-align: right; color: ${colorOrdre}; font-weight: bold; font-size: 1.1em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}</span>
                                 
                                 <!-- 6. VECTEUR -->
                                 <span style="text-align: right; color: #777; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${a.type_action} ]</span>

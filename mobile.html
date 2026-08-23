@@ -434,9 +434,9 @@
             <div id="tab-bgs" style="display: none; flex-direction: column; gap: 14px;">
                 
                 <!-- TICK BGS -->
-                <div class="card" style="border-color: var(--ed-orange); text-align: center; padding: 12px;">
-                    <span style="color: #888; font-size: 0.75em; letter-spacing: 2px; display: block;">PROCHAIN TICK GALACTIQUE (ESTIMATION)</span>
-                    <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px;">--H --M --S</span>
+                <div class="card" style="border-color: var(--ed-orange); text-align: center; padding: 12px; cursor: pointer; transition: 0.2s;" onclick="window.ouvrirModalInfoTick(event)">
+                    <span style="color: #888; font-size: 0.75em; letter-spacing: 2px; display: block; margin-bottom: 4px;">HORLOGE GALACTIQUE (TICK) ℹ️</span>
+                    <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px; display: block; white-space: nowrap;">--H --M --S</span>
                 </div>
                 
                 <!-- MEMBRES DE L'ESCADRON -->
@@ -473,7 +473,7 @@
                 <!-- JOURNAL DES EXPLOITS -->
                 <div class="card" style="border-color: var(--ed-blue-dim);">
                     <div class="card-header" style="color: var(--ed-blue); border-bottom-color: var(--ed-blue-dim);">
-                        <span>> JOURNAL DES MISSIONS</span>
+                        <span>> JOURNAL DES EXPLOITS</span>
                     </div>
                     <div id="m-exploits-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Écoute des rapports de missions...</div>
@@ -486,6 +486,23 @@
             <!-- ONGLET 4 : TRANSMISSIONS (COMMS CYAN)      -->
             <!-- ========================================== -->
             <div id="tab-comms" style="display: none; flex-direction: column; gap: 10px; height: calc(100vh - 160px);">
+
+                <!-- NOUVEAU BANDEAU DE SÉCURITÉ MOBILE (COMMS) -->
+                <div id="m-comms-tick-box" style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.4); padding: 8px 10px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.3s;" onclick="ouvrirModalInfoTickComms()">
+                    
+                    <!-- Ligne 1 : Le titre discret -->
+                    <span id="m-comms-tick-title" style="color: var(--ed-blue); font-size: 0.7em; font-weight: normal; letter-spacing: 2px; margin-bottom: 2px;">
+                    PURGE DANS
+                    </span>
+                    
+                    <!-- Ligne 2 : Le compteur / Tick en cours -->
+                    <div id="m-comms-tick-label" style="color: var(--ed-blue); font-size: 1.1em; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; width: 100%; white-space: nowrap;">
+                        <span id="m-comms-countdown" style="white-space: nowrap;">--H --M --S</span>
+                    </div>
+                    
+                    <span style="color: #666; font-size: 0.65em; font-style: normal; margin-top: 2px;">[ SECURITE & CONFIDENTIALITE ]</span>
+                </div>
+                <!-- FIN DU BANDEAU -->
                 
                 <div style="display: flex; gap: 6px;">
                     <button id="btn-chan-global" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('GLOBAL')">GLOBAL</button>
@@ -713,6 +730,39 @@
     </div>
 </div>
 
+    <!-- MODAL INFO TICK COMMS (ROLEPLAY) -->
+    <div class="modal-overlay" id="modal-info-tick-comms" onclick="fermerModalInfoTickComms(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; border-color: var(--ed-red); box-shadow: 0 0 30px rgba(255,51,51,0.2);" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="color: var(--ed-red); font-weight: bold; letter-spacing: 2px;">> SYNCHRONISATION</span>
+                <span style="color: var(--ed-red); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-info-tick-comms').style.display='none'">✕</span>
+            </div>
+            <div style="color: #ccc; font-size: 0.9em; line-height: 1.5; text-align: justify;">
+                <strong style="color: #fff; display: block; margin-bottom: 8px;">SÉCURITÉ & CONFIDENTIALITÉ :</strong>
+                Pour prévenir toute interception, nos canaux de communication sont synchronisés sur la pulsation du réseau galactique (Tick quotidien). À la fin de chaque cycle, les algorithmes de cryptage sont réinitialisés et <strong>les messages sont effacés</strong>.
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="m-btn" style="width: 100%; border-color: #555; color: #aaa; background: transparent;" onclick="document.getElementById('modal-info-tick-comms').style.display='none'">[ COMPRIS ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INFO TICK BGS -->
+    <div class="modal-overlay" id="modal-info-tick" onclick="fermerModalInfoTick(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; border-color: var(--ed-orange); box-shadow: 0 0 30px rgba(255,113,0,0.2);" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;">HORLOGE GALACTIQUE</span>
+                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-info-tick').style.display='none'">✕</span>
+            </div>
+            <div style="color: #ccc; font-size: 0.9em; line-height: 1.5; text-align: justify;">
+                Heure du Tick synchronisée via le réseau EDCD.<br><br><strong style="color: var(--ed-orange);">Vos efforts d'influence sont réinitialisés à chaque tick.</strong>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="m-btn" style="width: 100%; border-color: #555; color: #aaa; background: transparent;" onclick="document.getElementById('modal-info-tick').style.display='none'">[ COMPRIS ]</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT APPLICATION -->
     <script>
 
@@ -921,6 +971,9 @@
 
         function switchMobileTab(tabId) {
             sonClic();
+            // NOUVEAU : On remonte l'écran tout en haut pour ne pas chercher les boutons
+            window.scrollTo(0, 0);
+
             // On cache tous les onglets
             document.getElementById('tab-qg').style.display = 'none';
             document.getElementById('tab-radar').style.display = 'none';
@@ -1159,26 +1212,69 @@
         }
 
         function mettreAJourCompteurMobile() {
-            const el = document.getElementById('m-tick-timer');
-            if (!el) return;
+            const elBgs = document.getElementById('m-tick-timer');
+            const elComms = document.getElementById('m-comms-countdown');
+            const boxComms = document.getElementById('m-comms-tick-box');
+            const labelComms = document.getElementById('m-comms-tick-label');
+            const titleComms = document.getElementById('m-comms-tick-title'); // Le nouveau petit titre
+            
+            if (!elBgs && !elComms) return;
 
             const maintenant = new Date();
             let diff = prochainTick.getTime() - maintenant.getTime();
 
-            // ZONE ROUGE (Le Tick est en retard)
+            // ZONE ROUGE (ATTENTE DU TICK)
             if (diff <= 0) {
-                el.innerText = "[ EN ATTENTE EDCD... ]";
-                el.style.color = "var(--ed-blue)";
+                const txt = "[ TICK EN COURS... ]";
+                if (elBgs) { 
+                    elBgs.innerText = txt; 
+                    elBgs.style.color = "var(--ed-blue)"; 
+                    elBgs.style.fontSize = "1.2em"; 
+                    elBgs.style.letterSpacing = "1px"; 
+                }
+                if (elComms) { 
+                    elComms.innerText = txt; 
+                    elComms.style.color = "var(--ed-red)"; 
+                }
+                
+                // Moteur de clignotement rouge sur l'onglet Comms
+                if (boxComms && labelComms && titleComms) {
+                    boxComms.style.background = "rgba(255, 51, 51, 0.05)";
+                    boxComms.style.borderColor = "rgba(255, 51, 51, 0.4)";
+                    labelComms.style.color = "var(--ed-red)";
+                    titleComms.style.color = "var(--ed-red)";
+                    labelComms.style.animation = "alertPulse 1.5s infinite"; 
+                    titleComms.style.animation = "alertPulse 1.5s infinite";
+                }
                 return;
             }
 
-            // AFFICHAGE CLASSIQUE
+            // AFFICHAGE CLASSIQUE (ZONE BLEUE)
             const h = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
             const m = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
             const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+            const timeStr = `${h}H ${m}M ${s}S`;
 
-            el.innerText = `${h}H ${m}M ${s}S`;
-            el.style.color = "var(--ed-orange)";
+            if (elBgs) { 
+                elBgs.innerText = timeStr; 
+                elBgs.style.color = "var(--ed-orange)"; 
+                elBgs.style.fontSize = "1.6em"; 
+                elBgs.style.letterSpacing = "3px"; 
+            }
+            if (elComms) { 
+                elComms.innerText = timeStr; 
+                elComms.style.color = "var(--ed-blue)"; 
+            }
+            
+            // On fige le bandeau Comms en Bleu (Pacifique)
+            if (boxComms && labelComms && titleComms) {
+                boxComms.style.background = "rgba(0, 240, 255, 0.05)";
+                boxComms.style.borderColor = "rgba(0, 240, 255, 0.4)";
+                labelComms.style.color = "var(--ed-blue)";
+                titleComms.style.color = "var(--ed-blue)";
+                labelComms.style.animation = "none"; 
+                titleComms.style.animation = "none"; 
+            }
         }
 
         // --- BGS & DIRECTIVES (API EDSM + DELTA 24H + SUPABASE) ---
@@ -1530,7 +1626,7 @@
             try {
                 // 1. On identifie d'abord les missions actuellement ACTIVES
                 const { data: ordresActifs } = await supabaseApp.from('ordres_bgs')
-                    .select('id')
+                    .select('id, type_ordre') // <-- AJOUT CRUCIAL : On récupère le type
                     .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
                     .eq('statut', 'ACTIF');
                 
@@ -1541,7 +1637,7 @@
                     return;
                 }
 
-                // 2. On charge les exploits (ATTENTION : select('*') simple pour ne pas faire planter Supabase)
+                // 2. On charge les exploits
                 const { data: efforts } = await supabaseApp.from('efforts_bgs')
                     .select('*')
                     .in('ordre_id', idsActifs) 
@@ -1550,7 +1646,7 @@
 
                 if (efforts && efforts.length > 0) {
                     
-                    // 🛡️ 3. TRADUCTION DES NOMS 100% SÉCURISÉE (La fameuse rustine inébranlable)
+                    // 🛡️ 3. TRADUCTION DES NOMS
                     const idsPilotes = [...new Set(efforts.map(e => e.user_id).filter(Boolean))];
                     if (idsPilotes.length > 0) {
                         const { data: profilsPilotes } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').in('user_id', idsPilotes);
@@ -1566,28 +1662,35 @@
                     let htmlEx = '';
                     efforts.forEach(e => {
                         const cmdr = e.cmdr_nom ? e.cmdr_nom.toUpperCase() : 'INCONNU';
-                        const typeAction = (e.type_ordre || e.type_action || 'ACTION').toUpperCase();
+                        const action = (e.type_action || 'ACTION').toUpperCase();
                         
-                        let col = 'var(--ed-orange)';
-                        let labelQte = e.valeur;
-                        let iconeType = typeAction;
+                        // Rétro-ingénierie : Trouver le type de l'ordre pour forcer la couleur
+                        const ordreInfo = (ordresActifs || []).find(o => String(o.id) === String(e.ordre_id));
+                        const typeOrdre = ordreInfo ? ordreInfo.type_ordre.toUpperCase() : 'BGS';
+                        
+                        // Couleur imposée par la nature de l'ordre
+                        let col = 'var(--ed-blue)';
+                        if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)';
+                        else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)';
+                        else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
+                        else if (typeOrdre === 'ELECTION') col = 'var(--ed-blue)';
 
-                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'HAUSSE'].includes(typeAction)) {
-                            labelQte = new Intl.NumberFormat('fr-FR').format(e.valeur) + ' CR';
-                            col = 'var(--ed-green)';
-                            iconeType = typeAction === 'HAUSSE' ? '↗ HAUSSE' : typeAction;
-                        } else if (['MISSIONS', 'ELECTION'].includes(typeAction)) {
+                        // Formatage de la quantité selon l'action (sans changer la couleur qui suit l'ordre !)
+                        let labelQte = e.valeur;
+                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) {
+                            labelQte = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(e.valeur) + ' CR';
+                        } else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(action)) {
                             labelQte = `+${e.valeur} INF`;
-                            col = 'var(--ed-blue)';
-                            iconeType = typeAction === 'ELECTION' ? '🗳 ÉLECTION' : '↗ SOUTIEN';
-                        } else if (['BAISSE', 'ECHECS', 'MEURTRES'].includes(typeAction)) {
-                            labelQte = `-${e.valeur} INF`;
-                            col = 'var(--ed-red)';
-                            iconeType = '↘ BAISSE';
-                        } else if (['GUERRE', 'COMBAT'].includes(typeAction)) {
-                            labelQte = new Intl.NumberFormat('fr-FR').format(e.valeur) + ' CR';
-                            col = 'var(--ed-red)';
-                            iconeType = '⚔ GUERRE';
+                        } else if (action === 'ECHECS') {
+                            labelQte = `${e.valeur} ÉCHEC${e.valeur > 1 ? 'S' : ''}`;
+                        } else if (action === 'MEURTRES') {
+                            labelQte = `${e.valeur} MEURTRE${e.valeur > 1 ? 'S' : ''}`;
+                        } else if (action === 'CZ_VICTOIRES') {
+                            labelQte = `+${e.valeur} BATAILLE${e.valeur > 1 ? 'S' : ''}`;
+                        } else if (action === 'VOLS') {
+                            labelQte = `${e.valeur} VOL${e.valeur > 1 ? 'S' : ''}`;
+                        } else if (action === 'PIRATAGE') {
+                            labelQte = `${e.valeur} PIRATAGE${e.valeur > 1 ? 'S' : ''}`;
                         }
 
                         const d = e.date_action ? new Date(e.date_action) : new Date();
@@ -1601,8 +1704,8 @@
                                     <span style="color: #888; font-size: 0.9em;">${dateJour} - ${heure}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: ${col}; font-weight: bold; font-size: 0.9em;">[ OP.#${e.ordre_id} | ${iconeType} ]</span>
-                                    <span style="color: #fff; font-weight: bold;">${labelQte}</span>
+                                    <span style="color: ${col}; font-weight: bold; font-size: 0.9em;">[ OP.#${e.ordre_id} | ${action} ]</span>
+                                    <span style="color: ${col}; font-weight: bold;">${labelQte}</span>
                                 </div>
                             </div>`;
                     });
@@ -2266,6 +2369,30 @@
         sonClic();
         document.getElementById('modal-ordre-details').style.display = 'none';
     };
+
+    window.ouvrirModalInfoTick = function(e) {
+            if (e) e.stopPropagation(); // Empêche un autre élément de bloquer le clic
+            if (typeof sonClic === 'function') sonClic();
+            const modal = document.getElementById('modal-info-tick');
+            if (modal) modal.style.display = 'flex';
+        };
+        
+    window.fermerModalInfoTick = function(e) {
+            if (e && e.target.id !== 'modal-info-tick' && !e.target.innerText.includes('✕')) return;
+            if (typeof sonClic === 'function') sonClic();
+            const modal = document.getElementById('modal-info-tick');
+            if (modal) modal.style.display = 'none';
+        };
+
+    window.ouvrirModalInfoTickComms = function() {
+            if (typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-info-tick-comms').style.display = 'flex';
+        };
+    window.fermerModalInfoTickComms = function(e) {
+            if (e && e.target.id !== 'modal-info-tick-comms' && !e.target.innerText.includes('✕')) return;
+            if (typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-info-tick-comms').style.display = 'none';
+        };
 
     </script>
 </body>

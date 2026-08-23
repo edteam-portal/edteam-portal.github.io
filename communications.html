@@ -194,31 +194,36 @@
             </div>
         </header>
 
-        <!-- ONGLETS -->
-        <nav class="tab-bar">
-            <button class="tab-btn active" onclick="changerCanal('GLOBAL', this)" onmouseenter="sonHover()">FRÉQUENCE OUVERTE</button>
-            <button class="tab-btn" id="btn-tab-escadron" style="display: none;" onclick="changerCanal('ESCADRON', this)" onmouseenter="sonHover()">CANAL ESCADRON</button>
-            <button class="tab-btn" id="btn-tab-coalition" onclick="changerCanal('COALITION', this)" onmouseenter="sonHover()" style="display: none; border-color: #B026FF; color: #B026FF;">RÉSEAU COALITION</button>
-            <button class="tab-btn" onclick="changerCanal('PRIVE', this)" onmouseenter="sonHover()">TRANSMISSIONS PRIVÉES <span id="badge-unread" style="color:#FF3333; display:none;">(•)</span></button>
-        </nav>
+        <!-- ONGLETS ET HORLOGE GALACTIQUE -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; gap: 15px;">
+            <nav class="tab-bar" style="margin-bottom: 0;">
+                <button class="tab-btn active" onclick="changerCanal('GLOBAL', this)" onmouseenter="sonHover()">FRÉQUENCE OUVERTE</button>
+                <button class="tab-btn" id="btn-tab-escadron" style="display: none;" onclick="changerCanal('ESCADRON', this)" onmouseenter="sonHover()">CANAL ESCADRON</button>
+                <button class="tab-btn" id="btn-tab-coalition" onclick="changerCanal('COALITION', this)" onmouseenter="sonHover()" style="display: none; border-color: #B026FF; color: #B026FF;">RÉSEAU COALITION</button>
+                <button class="tab-btn" onclick="changerCanal('PRIVE', this)" onmouseenter="sonHover()">TRANSMISSIONS PRIVÉES <span id="badge-unread" style="color:#FF3333; display:none;">(•)</span></button>
+            </nav>
+
+            <!-- COMPTEUR ENCADRÉ AVEC MODALE AU SURVOL -->
+            <div id="comms-tick-box" style="position: relative; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.4); padding: 6px 15px; border-radius: 4px; display: flex; align-items: center; cursor: help; white-space: nowrap; transition: all 0.3s;"
+                 onmouseenter="document.getElementById('tick-tooltip').style.display='block'; if(typeof sonHover==='function') sonHover();"
+                 onmouseleave="document.getElementById('tick-tooltip').style.display='none';">
+                
+                <span id="comms-tick-label" style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">
+                PURGE DANS : <span id="comms-countdown" style="font-size: 1.2em; margin-left: 5px;">--H --M --S</span>
+                </span>
+
+                <!-- MODALE FLOTTANTE (DÉCALÉE VERS LA GAUCHE POUR NE PAS SORTIR DE L'ÉCRAN) -->
+                <div id="tick-tooltip" style="display: none; position: absolute; top: 120%; right: 0; width: 380px; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-red); box-shadow: 0 0 20px rgba(255, 51, 51, 0.2); padding: 15px; z-index: 10000; color: #ccc; font-size: 0.9em; line-height: 1.5; text-align: left; white-space: normal; cursor: default;">
+                    <strong style="color: var(--ed-red); display: block; margin-bottom: 8px; letter-spacing: 1px; font-size: 1.1em; border-bottom: 1px dashed var(--ed-red); padding-bottom: 5px;">> SYNCHRONISATION</strong>
+                    <strong style="color: #fff; display: block; margin-bottom: 5px;">SÉCURITÉ & CONFIDENTIALITÉ :</strong>
+                    Pour prévenir toute interception, nos canaux de communication sont synchronisés sur la pulsation du réseau galactique (Tick quotidien). À la fin de chaque cycle, les algorithmes de cryptage sont réinitialisés et <strong>les messages sont effacés</strong>.
+                </div>
+            </div>
+        </div>
 
         <!-- TERMINAL CRT -->
         <div class="crt-terminal">
             <div class="crt-overlay"></div>
-            
-            <!-- BANDEAU DE SÉCURITÉ MILITAIRE -->
-            <div style="background: rgba(255, 51, 51, 0.05); border-bottom: 1px solid rgba(255, 51, 51, 0.4); padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-wrap: wrap; gap: 10px;">
-                <span style="color: var(--ed-red); font-size: 0.85em; font-weight: bold; letter-spacing: 2px; animation: alertPulse 2s infinite;">
-                    ⚠️ ROTATION DES CLÉS QUANTIQUES DANS : <span id="comms-countdown" style="font-size: 1.2em; margin-left: 5px;">--H --M --S</span>
-                </span>
-                <span style="color: #666; font-size: 0.75em; font-style: italic; letter-spacing: 1px;">[ PROTOCOLE FANTÔME ACTIF ]</span>
-            </div>
-            
-            <!-- BLOC ROLEPLAY EXPLICATIF -->
-            <div style="background: rgba(0, 0, 0, 0.7); padding: 12px 20px; border-bottom: 1px dashed #333; font-size: 0.8em; color: #888; line-height: 1.5; letter-spacing: 1px; z-index: 9;">
-                <strong style="color: var(--ed-red);">NOTE DU RENSEIGNEMENT :</strong> Pour prévenir toute interception par les forces fédérales ou impériales, nos canaux de communication sont indexés sur la pulsation du réseau galactique (Tick). À la fin de chaque cycle, les algorithmes de cryptage sont réinitialisés et <strong>les messages sont effacés</strong>
-            </div>
-            <!-- FIN DU BANDEAU -->
 
             <div class="message-feed" id="message-feed">
                 <div style="color: #555; font-style: italic; text-align: center; margin-top: 40px;">Synchronisation des archives...</div>
@@ -977,8 +982,8 @@
 
         #covas-badge {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 95px; /* <-- MODIFIÉ : On le remonte au-dessus de la barre de saisie */
+            right: 35px;  /* <-- MODIFIÉ : On le décale un peu pour l'aligner avec le terminal */
             background: rgba(0, 240, 255, 0.1);
             border: 1px solid var(--ed-blue);
             color: var(--ed-blue);
@@ -991,6 +996,7 @@
             display: none;
             transition: 0.2s;
         }
+    
         #covas-badge:hover {
             background: var(--ed-blue);
             color: #000;
@@ -1083,29 +1089,64 @@
             }
 
             function mettreAJourAffichage() {
-                // S'adapte intelligemment à BGS ou Comms
-                const el = document.getElementById('comms-countdown') || document.getElementById('bgs-countdown');
-                if (!el) return;
+                // On cible tous les éléments (BGS et Comms)
+                const elBgs = document.getElementById('bgs-countdown');
+                const elComms = document.getElementById('comms-countdown');
+                const boxComms = document.getElementById('comms-tick-box');
+                const labelComms = document.getElementById('comms-tick-label');
                 
                 const maintenant = new Date();
                 let diff = prochainTick.getTime() - maintenant.getTime();
                 
-                // ZONE ROUGE : Le compte à rebours est écoulé
+                // ZONE ROUGE : Le compte à rebours est écoulé (ATTENTE DU TICK)
                 if (diff <= 0) {
-                    el.innerText = "[ EN ATTENTE EDCD... ]";
-                    el.style.color = "var(--ed-blue)";
-                    el.style.textShadow = "0 0 10px rgba(0, 240, 255, 0.5)";
+                    const txt = "[ TICK EN COURS... ]";
+                    
+                    if (elBgs) {
+                        elBgs.innerText = txt;
+                        elBgs.style.color = "var(--ed-blue)";
+                        elBgs.style.textShadow = "0 0 10px rgba(0, 240, 255, 0.5)";
+                    }
+                    
+                    if (elComms) {
+                        elComms.innerText = txt;
+                        elComms.style.color = "var(--ed-red)"; // Le texte devient ROUGE
+                    }
+                    
+                    // On bascule l'encadré en ALERTE ROUGE CLIGNOTANTE
+                    if (boxComms && labelComms) {
+                        boxComms.style.background = "rgba(255, 51, 51, 0.05)";
+                        boxComms.style.borderColor = "rgba(255, 51, 51, 0.4)";
+                        labelComms.style.color = "var(--ed-red)";
+                        labelComms.style.animation = "alertPulse 1.5s infinite"; // Active le clignotement
+                    }
                     return;
                 }
 
-                // Affichage classique
+                // ZONE BLEUE : AFFICHAGE CLASSIQUE (COMPTEUR NORMAL)
                 const h = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
                 const m = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
                 const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+                const timeStr = `${h}H ${m}M ${s}S`;
                 
-                el.innerText = `${h}H ${m}M ${s}S`;
-                el.style.color = "var(--ed-orange)";
-                el.style.textShadow = "0 0 8px rgba(255, 113, 0, 0.5)";
+                if (elBgs) {
+                    elBgs.innerText = timeStr;
+                    elBgs.style.color = "var(--ed-orange)";
+                    elBgs.style.textShadow = "0 0 8px rgba(255, 113, 0, 0.5)";
+                }
+                
+                if (elComms) {
+                    elComms.innerText = timeStr;
+                    elComms.style.color = "var(--ed-blue)"; // Le compteur est BLEU
+                }
+                
+                // On bascule l'encadré en MODE NORMAL (BLEU, STATIQUE)
+                if (boxComms && labelComms) {
+                    boxComms.style.background = "rgba(0, 240, 255, 0.05)";
+                    boxComms.style.borderColor = "rgba(0, 240, 255, 0.4)";
+                    labelComms.style.color = "var(--ed-blue)";
+                    labelComms.style.animation = "none"; // Coupe le clignotement
+                }
             }
 
             setTimeout(synchroniserHorloge, 1500);
