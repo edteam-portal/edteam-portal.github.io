@@ -1754,9 +1754,11 @@
         // ==========================================
         // HORLOGE GALACTIQUE BGS (EDCD + SUPABASE)
         // ==========================================
+        // On déclare les variables GLOBALEMENT pour que les missions et le journal puissent les lire !
+        let dernierTick = new Date(0);
+        let prochainTick = new Date();
+
         (function initHorlogeGalactique() {
-            let prochainTick = new Date();
-            let memoireServeur = new Date(0);
             let isChecking = false;
 
             async function synchroniserHorloge() {
@@ -1764,13 +1766,13 @@
                     // 1. Lecture de la date officielle sur Supabase
                     const { data, error } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
                     if (!error && data && data.dernier_tick) {
-                        memoireServeur = new Date(data.dernier_tick);
+                        dernierTick = new Date(data.dernier_tick);
                     }
                 } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
                 
-                if (memoireServeur.getTime() === 0) memoireServeur = new Date(); 
+                if (dernierTick.getTime() === 0 || isNaN(dernierTick.getTime())) dernierTick = new Date(); 
                 
-                prochainTick = new Date(memoireServeur.getTime() + 24 * 60 * 60 * 1000);
+                prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
                 
                 // 2. Lancement des moteurs
                 setInterval(mettreAJourAffichage, 1000);
@@ -1799,12 +1801,12 @@
                     const cleanDate = texteDate.replace(/"/g, ''); 
                     const nouveauTick = new Date(cleanDate);
                     
-                    if (nouveauTick > memoireServeur) {
+                    if (nouveauTick > dernierTick) {
                         console.log("SYS.EDTEAM BGS : NOUVEAU TICK CONFIRMÉ !");
                         
                         // ANTI-BOUCLE : On met à jour l'horloge sans recharger la page
-                        memoireServeur = nouveauTick;
-                        prochainTick = new Date(memoireServeur.getTime() + 24 * 60 * 60 * 1000);
+                        dernierTick = nouveauTick;
+                        prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
 
                         // On prévient Supabase en arrière-plan (si un autre onglet ne l'a pas déjà fait)
                         supabaseApp.rpc('declarer_nouveau_tick', { heure_tick: nouveauTick.toISOString() }).then();
@@ -1812,7 +1814,6 @@
                         // DÉCLENCHEMENT DES ANIMATIONS BGS SPÉCIFIQUES
                         if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                         if (typeof notifierTickBGS === 'function') notifierTickBGS();
-                        
                     }
                 } catch (err) {
                     console.warn("SYS.EDTEAM BGS : Impossible de joindre EDCD.");
