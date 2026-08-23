@@ -807,6 +807,12 @@
                     <input type="text" id="diplo-faction" class="search-input" placeholder="Ex: THE DARK WHEEL" style="border-color: var(--ed-blue); width: 100%; text-transform: uppercase;">
                 </div>
                 
+                <!-- NOUVEAU CHAMP TAG -->
+                <div>
+                    <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">TAG DE L'ESCADRON (OPTIONNEL) :</label>
+                    <input type="text" id="diplo-tag" class="search-input" placeholder="Ex: DARK" maxlength="4" style="border-color: var(--ed-orange); width: 100%; text-transform: uppercase;">
+                </div>
+                
                 <div>
                     <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">STATUT DIPLOMATIQUE :</label>
                     <select id="diplo-statut" class="search-input" style="border-color: var(--ed-blue); width: 100%; font-weight: bold;">
@@ -3985,6 +3991,7 @@
             
             idTraiteEnEdition = null; // On vide la mémoire
             document.getElementById('diplo-faction').value = "";
+            document.getElementById('diplo-tag').value = ""; // NOUVEAU
             document.getElementById('diplo-statut').value = "ALLIE";
             document.getElementById('diplo-directives').value = "";
             
@@ -4004,6 +4011,7 @@
 
             // On remplit les champs avec les données actuelles
             document.getElementById('diplo-faction').value = traite.faction_cible;
+            document.getElementById('diplo-tag').value = traite.tag || ''; // NOUVEAU
             document.getElementById('diplo-statut').value = traite.type_relation;
             document.getElementById('diplo-directives').value = traite.directives || '';
 
@@ -4017,6 +4025,7 @@
         async function sauvegarderTraite() {
             if(typeof sonClic === 'function') sonClic();
             const faction = document.getElementById('diplo-faction').value.trim();
+            const tagFormulaire = document.getElementById('diplo-tag').value.trim().toUpperCase(); // NOUVEAU
             const statut = document.getElementById('diplo-statut').value;
             const directives = document.getElementById('diplo-directives').value.trim();
             const btn = document.getElementById('btn-signer-traite');
@@ -4036,9 +4045,10 @@
                     const { error } = await supabaseApp.from('traites_diplomatiques')
                         .update({
                             faction_cible: faction,
+                            tag: tagFormulaire || null, // NOUVEAU
                             type_relation: statut,
                             directives: directives,
-                            signataire_nom: profilCommandant.cmdr_nom || 'INCONNU' // Met à jour le nom du dernier éditeur
+                            signataire_nom: profilCommandant.cmdr_nom || 'INCONNU'
                         })
                         .eq('id', idTraiteEnEdition);
                     if (error) throw error;
@@ -4047,6 +4057,7 @@
                     const { error } = await supabaseApp.from('traites_diplomatiques').insert([{
                         escadron_id: profilCommandant.escadron_id,
                         faction_cible: faction,
+                        tag: tagFormulaire || null, // NOUVEAU
                         type_relation: statut,
                         directives: directives,
                         signataire_nom: profilCommandant.cmdr_nom || 'INCONNU'

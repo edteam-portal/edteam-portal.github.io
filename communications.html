@@ -455,7 +455,11 @@
         let canalActif = 'GLOBAL';
         let isUrgent = false;
         let listePilotes = [];
-        let maCoalitionId = null; // NOUVELLE VARIABLE
+        let maCoalitionId = null;
+        
+        // Caches du Renseignement Tactique
+        let cacheRegistreTactique = [];
+        let cacheTraitesDiplo = [];
 
         window.addEventListener('load', async () => {
             try {
@@ -520,6 +524,7 @@
                 }
                 
                 chargerListePilotes();
+                chargerRenseignementLocal(); // <-- NOUVELLE FONCTION
                 chargerHistorique();
                 ecouterTransmissions();
 
@@ -568,9 +573,9 @@
             document.getElementById('char-counter').innerText = `${input.value.length}/140`;
         }
 
-        // --- LOGIQUE SUPABASE ---
         async function chargerListePilotes() {
-            const { data } = await supabaseApp.from('profils').select('user_id, cmdr_nom');
+            // AJOUT : On télécharge l'escadron de chaque pilote pour vérifier ses traités !
+            const { data } = await supabaseApp.from('profils').select('user_id, cmdr_nom, escadron_id');
             if (data) {
                 listePilotes = data;
                 const select = document.getElementById('select-destinataire');
@@ -583,6 +588,19 @@
                     }
                 });
             }
+        }
+
+        // NOUVELLE FONCTION : Téléchargement silencieux des archives de l'escadron
+        async function chargerRenseignementLocal() {
+            if (!profilCommandant || !profilCommandant.escadron_id) return;
+            try {
+                const [resTactique, resDiplo] = await Promise.all([
+                    supabaseApp.from('registre_tactique').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('est_valide', true),
+                    supabaseApp.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id)
+                ]);
+                if (resTactique.data) cacheRegistreTactique = resTactique.data;
+                if (resDiplo.data) cacheTraitesDiplo = resDiplo.data;
+            } catch(e) { console.error("Erreur chargement renseignement:", e); }
         }
 
         async function chargerHistorique() {
@@ -650,6 +668,44 @@
                 deleteBtn = `<span class="msg-delete" onclick="supprimerMessage('${msg.id}', this)" title="Effacer l'archive">[x]</span>`;
             }
 
+            // =========================================
+            // FILTRE À RAYONS X : ANALYSE TACTIQUE DE L'EXPÉDITEUR
+            // =========================================
+            let tagsRenseignement = "";
+            
+            // On ne scanne pas nos propres messages
+            if (msg.expediteur_id !== profilCommandant.user_id && profilCommandant.escadron_id) {
+                const nomExpediteur = msg.expediteur_nom ? msg.expediteur_nom.toUpperCase() : "";
+                
+                // 1. Recherche dans le Registre Tactique (Individuel)
+                const fiche = cacheRegistreTactique.find(f => f.cmdr_cible.toUpperCase() === nomExpediteur);
+                if (fiche) {
+                    if (fiche.niveau_menace === 'KOS') {
+                        tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Rapport : ${fiche.rapport}">[🔴 K.O.S]</span>`;
+                    } else if (fiche.niveau_menace === 'SUSPECT') {
+                        tagsRenseignement += `<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Rapport : ${fiche.rapport}">[🟠 SUSPECT]</span>`;
+                    } else if (fiche.niveau_menace === 'ALLIE') {
+                        tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Rapport : ${fiche.rapport}">[🟢 V.I.P]</span>`;
+                    }
+                }
+                
+                // 2. Recherche Diplomatique (Via le Tag de l'escadron du pilote)
+                const profilExpediteur = listePilotes.find(p => p.user_id === msg.expediteur_id);
+                if (profilExpediteur && profilExpediteur.escadron_id) {
+                    const traite = cacheTraitesDiplo.find(t => t.tag && t.tag.toUpperCase() === profilExpediteur.escadron_id.toUpperCase());
+                    if (traite) {
+                        if (traite.type_relation === 'HOSTILE') {
+                            tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px dashed #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Traité Hostile : ${traite.faction_cible}">[⚔️ ${traite.tag.toUpperCase()}]</span>`;
+                        } else if (traite.type_relation === 'PNA') {
+                            tagsRenseignement += `<span style="background: rgba(0,240,255,0.15); color: var(--ed-blue); border: 1px dashed var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="PNA : ${traite.faction_cible}">[🛡️ ${traite.tag.toUpperCase()}]</span>`;
+                        } else if (traite.type_relation === 'ALLIE') {
+                            tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px dashed #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Coalition : ${traite.faction_cible}">[🤝 ${traite.tag.toUpperCase()}]</span>`;
+                        }
+                    }
+                }
+            }
+            // =========================================
+
             const urgentClass = msg.est_urgent ? 'urgent' : '';
             const urgentTag = msg.est_urgent ? '<span style="color:var(--ed-red); font-weight:bold; margin-right:5px;">[!]</span>' : '';
 
@@ -658,6 +714,7 @@
             if (!animate) msgDiv.style.animation = 'none';
             msgDiv.innerHTML = `
                 <span class="msg-time">[${timeStr}]</span>
+                ${tagsRenseignement}
                 <span class="msg-author" style="color: ${auteurColor};">CMDR ${msg.expediteur_nom} ></span>
                 <span class="msg-channel">${canalTag}</span>
                 <span class="msg-text">${urgentTag}${msg.message}</span>

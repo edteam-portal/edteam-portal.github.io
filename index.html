@@ -362,8 +362,11 @@
             <!-- ONGLET 1 : DOSSIER COMMANDANT -->
             <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 15px;">
 
-                <!-- BLOC 4 : CARRIÈRE MILITAIRE (RECRUTEMENT) -->
-                    <div class="data-row" style="cursor: default; border-color: #555; background: rgba(0, 0, 0, 0.4);">
+                <!-- LIGNE COMBINÉE : CARRIÈRE MILITAIRE + MODULE REGISTRE -->
+                <div style="display: flex; gap: 15px; align-items: stretch;">
+                    
+                    <!-- 1. BLOC CARRIÈRE MILITAIRE (Prend tout l'espace disponible) -->
+                    <div class="data-row" style="flex: 1; cursor: default; border-color: #555; background: rgba(0, 0, 0, 0.4); margin-bottom: 0;">
                         <div class="row-top" style="border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 15px;">
                             <span style="color: #aaa; font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> CARRIÈRE MILITAIRE</span>
                         </div>
@@ -381,15 +384,46 @@
                         </div>
 
                         <!-- Si le pilote est mercenaire indépendant -->
-                <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 15px; text-align: center; padding: 20px; background: rgba(255, 113, 0, 0.05); border: 1px dashed var(--ed-orange-dim);">
-                    <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">STATUT : PILOTE INDÉPENDANT</span>
-                    <span style="color: #ccc; font-size: 0.9em; line-height: 1.5;">
-                        Aucune affiliation militaire n'a été détectée dans la télémétrie de votre vaisseau.<br><br>
-                        <span style="color: #888; font-size: 0.9em; font-style: italic;">Pour rejoindre ou fonder une flotte, veuillez utiliser le panneau de communication droit de votre cockpit (en jeu) puis redémarrez la liaison EDMC.</span>
-                    </span>
-                </div>
+                        <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 15px; text-align: center; padding: 20px; background: rgba(255, 113, 0, 0.05); border: 1px dashed var(--ed-orange-dim);">
+                            <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">STATUT : PILOTE INDÉPENDANT</span>
+                            <span style="color: #ccc; font-size: 0.9em; line-height: 1.5;">
+                                Aucune affiliation militaire n'a été détectée dans la télémétrie de votre vaisseau.<br><br>
+                                <span style="color: #888; font-size: 0.9em; font-style: italic;">Pour rejoindre ou fonder une flotte, veuillez utiliser le panneau de communication droit de votre cockpit (en jeu) puis redémarrez la liaison EDMC.</span>
+                            </span>
+                        </div>
+                    </div>
 
-                </div> <!-- FIN DU BLOC CARRIÈRE MILITAIRE -->
+                    <!-- 2. BOUTON CARRÉ TACTIQUE (À droite, aligné sur la hauteur) -->
+                    <div onclick="ouvrirBureauRenseignement()" 
+                         onmouseenter="showHoloTooltip(event, 'REGISTRE TACTIQUE<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Consulter les cibles et alliés</span>', '#FF3333')"
+                         onmouseleave="hideHoloTooltip()"
+                         onmousemove="if(document.getElementById('holo-tooltip').style.display === 'block') { document.getElementById('holo-tooltip').style.left = (event.clientX - document.getElementById('holo-tooltip').offsetWidth - 15) + 'px'; document.getElementById('holo-tooltip').style.top = (event.clientY + 15) + 'px'; }"
+                         style="width: 140px; background: rgba(255, 51, 51, 0.04); border: 1px solid rgba(255, 51, 51, 0.3); border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 10px;"
+                         onmouseover="this.style.background='rgba(255, 51, 51, 0.15)'; this.style.borderColor='#FF3333'; this.style.boxShadow='0 0 20px rgba(255, 51, 51, 0.25)';"
+                         onmouseout="this.style.background='rgba(255, 51, 51, 0.04)'; this.style.borderColor='rgba(255, 51, 51, 0.3)'; this.style.boxShadow='none';">
+                        
+                        <!-- Réticule holographique vectoriel -->
+                        <div style="position: relative; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center;">
+                            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; stroke: #FF3333; fill: none; stroke-width: 3; filter: drop-shadow(0 0 4px #FF3333);">
+                                <circle cx="50" cy="50" r="44" stroke-dasharray="8 6" opacity="0.6"/>
+                                <circle cx="50" cy="50" r="26"/>
+                                <circle cx="50" cy="50" r="5" fill="#FF3333"/>
+                                <line x1="50" y1="2" x2="50" y2="20"/>
+                                <line x1="50" y1="80" x2="50" y2="98"/>
+                                <line x1="2" y1="50" x2="20" y2="50"/>
+                                <line x1="80" y1="50" x2="98" y2="50"/>
+                            </svg>
+                        </div>
+
+                        <!-- Titre militaire compact -->
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <span style="color: #FF3333; font-size: 0.75em; font-weight: bold; letter-spacing: 1px; line-height: 1.2;">REGISTRE</span>
+                            <span style="color: #FF3333; font-size: 0.7em; font-weight: bold; letter-spacing: 1.5px; line-height: 1.2;">TACTIQUE</span>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- FIN LIGNE COMBINÉE -->
 
                 <!-- BLOC 1 : FÉDÉRATION DES PILOTES -->
                 <div class="data-row" style="cursor: default;">
@@ -875,6 +909,69 @@
             
             <div id="liste-pilotes-online" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 5px;">
                 <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Balayage des fréquences galactiques...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BUREAU DU RENSEIGNEMENT -->
+    <div class="modal-overlay" id="modal-renseignement" onclick="fermerModal('modal-renseignement', event)" style="z-index: 4500;">
+        <div class="modal-content" style="max-width: 800px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid #FF3333; box-shadow: 0 0 30px rgba(255, 51, 51, 0.2); display: flex; flex-direction: column; max-height: 85vh;" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: #FF3333;" onclick="fermerModal('modal-renseignement')">X</div>
+            <div style="color: #FF3333; border-bottom: 1px solid #FF3333; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; font-size: 1.3em; letter-spacing: 2px; display: flex; align-items: center; gap: 12px;">
+                <svg viewBox="0 0 100 100" style="width: 28px; height: 28px; stroke: #FF3333; fill: none; stroke-width: 4; filter: drop-shadow(0 0 5px rgba(255, 51, 51, 0.6)); flex-shrink: 0;">
+                    <circle cx="50" cy="50" r="44" stroke-dasharray="8 6" opacity="0.6"/>
+                    <circle cx="50" cy="50" r="26"/>
+                    <circle cx="50" cy="50" r="5" fill="#FF3333"/>
+                    <line x1="50" y1="2" x2="50" y2="20"/>
+                    <line x1="50" y1="80" x2="50" y2="98"/>
+                    <line x1="2" y1="50" x2="20" y2="50"/>
+                    <line x1="80" y1="50" x2="98" y2="50"/>
+                </svg>
+                BUREAU DU RENSEIGNEMENT TACTIQUE
+            </div>
+
+            <!-- NAVIGATION INTERNE -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px dashed #FF3333; padding-bottom: 15px;">
+                <button class="tab-btn" id="btn-rens-registre" style="border-color: #FF3333; background: #FF3333; color: #000;" onclick="switchRensTab('registre')">REGISTRE ACTIF</button>
+                <button class="tab-btn" id="btn-rens-signaler" style="border-color: #FF3333; background: transparent; color: #FF3333; opacity: 0.6;" onclick="switchRensTab('signaler')">SOUMETTRE UN RAPPORT</button>
+                <button class="tab-btn" id="btn-rens-validation" style="border-color: #00FF66; background: transparent; color: #00FF66; opacity: 0.6; display: none;" onclick="switchRensTab('validation')">VALIDATIONS EN ATTENTE</button>
+            </div>
+
+            <div style="overflow-y: auto; flex-grow: 1; padding-right: 5px;">
+                
+                <!-- VUE 1 : REGISTRE -->
+                <div id="rens-view-registre" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Chargement des cibles...</div>
+                </div>
+
+                <!-- VUE 2 : SIGNALER -->
+                <div id="rens-view-signaler" style="display: none; flex-direction: column; gap: 15px;">
+                    <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #555;">
+                        <label style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 5px; display: block;">NOM DE LA CIBLE (CMDR) :</label>
+                        <input type="text" id="rens-input-nom" class="search-input" style="width: 100%; border-color: #555; margin-bottom: 15px; padding: 8px; background: #000; color: #fff; text-transform: uppercase;" placeholder="Ex: HARRY POTTER">
+                        
+                        <label style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 5px; display: block;">SYSTÈME STELLAIRE :</label>
+                        <input type="text" id="rens-input-systeme" class="search-input" style="width: 100%; border-color: #555; margin-bottom: 15px; padding: 8px; background: #000; color: #fff; text-transform: uppercase;" placeholder="Ex: DECIAT">
+                        
+                        <label style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 5px; display: block;">NIVEAU DE MENACE :</label>
+                        <select id="rens-input-menace" class="search-input" style="width: 100%; border-color: #555; margin-bottom: 15px; padding: 8px; background: #000; color: #fff; font-family: inherit;">
+                            <option value="KOS">🔴 K.O.S (HOSTILE À ABATTRE)</option>
+                            <option value="SUSPECT">🟠 SUSPECT (À SURVEILLER)</option>
+                            <option value="ALLIE">🟢 ALLIÉ / VIP (À PROTÉGER)</option>
+                        </select>
+
+                        <label style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 5px; display: block;">RAPPORT D'INCIDENT :</label>
+                        <textarea id="rens-input-rapport" class="search-input" style="width: 100%; border-color: #555; margin-bottom: 15px; padding: 8px; background: #000; color: #fff; font-family: inherit; resize: vertical; min-height: 80px;" placeholder="Expliquez brièvement le motif du signalement..."></textarea>
+                        
+                        <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 10px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; font-family: inherit; font-size: 1.1em;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="soumettreRapportRenseignement()">TRANSMETTRE À L'ÉTAT-MAJOR</button>
+                    </div>
+                </div>
+
+                <!-- VUE 3 : VALIDATIONS (OFFICIERS UNIQUEMENT) -->
+                <div id="rens-view-validation" style="display: none; flex-direction: column; gap: 10px;">
+                    <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Vérification des rapports en attente...</div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1623,6 +1720,30 @@
                 processLatest('QG_FLEET', item => { try { paramUpdates.flotte_json = JSON.parse(item.station_name); paramModifie = true; } catch(e){} });
                 processLatest('QG_CARRIER_STATS', item => { try { paramUpdates.carrier_stats_json = JSON.parse(item.station_name); paramModifie = true; } catch(e){} });
                 processLatest('QG_ACTIVE_SHIP_ID', item => { paramUpdates.id_vaisseau_actif = item.station_name; paramModifie = true; });
+
+                // NOUVEAU MODULE : INTERCEPTION CIBLAGE TACTIQUE
+                processLatest('TARGETED_CMDR', item => { 
+                    const payloadBrut = item.station_name;
+                    if (payloadBrut !== window.lastTargetedCmdr) {
+                        window.lastTargetedCmdr = payloadBrut;
+                        if (payloadBrut === "LOST") {
+                            // On a déverrouillé la cible : on replie l'hologramme tactique
+                            const overlay = document.getElementById('tactical-overlay');
+                            if (overlay) overlay.classList.remove('deploye');
+                        } else {
+                            try {
+                                // On déballe le JSON envoyé par Python
+                                const cibleData = JSON.parse(payloadBrut);
+                                if (typeof verifierCibleTactique === 'function') {
+                                    verifierCibleTactique(cibleData.nom, cibleData.tag);
+                                }
+                            } catch(e) {
+                                // Sécurité (au cas où on recevrait l'ancien format texte)
+                                if (typeof verifierCibleTactique === 'function') verifierCibleTactique(payloadBrut, "");
+                            }
+                        }
+                    }
+                });
 
                 // E. Modules 
                 const moduleItems = radarData.filter(d => d.target_commodity && d.target_commodity.startsWith('QG_MODULES_'));
@@ -2577,6 +2698,201 @@
             }
         };
 
+        // ==========================================
+        // BUREAU DU RENSEIGNEMENT TACTIQUE
+        // ==========================================
+
+        function ouvrirBureauRenseignement() {
+            sonClic();
+            document.getElementById('modal-renseignement').style.display = 'flex';
+            
+            // Afficher l'onglet de validation uniquement pour les Amiraux et Officiers
+            const btnValidation = document.getElementById('btn-rens-validation');
+            if (profilCommandant.est_amiral || profilCommandant.est_officier) {
+                btnValidation.style.display = 'block';
+            } else {
+                btnValidation.style.display = 'none';
+            }
+            
+            switchRensTab('registre');
+        }
+
+        function switchRensTab(tab) {
+            sonClic();
+            // Cacher toutes les vues
+            document.getElementById('rens-view-registre').style.display = 'none';
+            document.getElementById('rens-view-signaler').style.display = 'none';
+            document.getElementById('rens-view-validation').style.display = 'none';
+            
+            // Remettre tous les boutons à zéro (Transparents)
+            const btnReg = document.getElementById('btn-rens-registre');
+            const btnSig = document.getElementById('btn-rens-signaler');
+            const btnVal = document.getElementById('btn-rens-validation');
+
+            btnReg.style.background = 'transparent'; btnReg.style.color = '#FF3333'; btnReg.style.opacity = '0.6';
+            btnSig.style.background = 'transparent'; btnSig.style.color = '#FF3333'; btnSig.style.opacity = '0.6';
+            btnVal.style.background = 'transparent'; btnVal.style.color = '#00FF66'; btnVal.style.opacity = '0.6';
+
+            // Allumer le bouton sélectionné (Fond plein, texte noir)
+            const activeBtn = document.getElementById('btn-rens-' + tab);
+            activeBtn.style.opacity = '1';
+            activeBtn.style.color = '#000';
+            activeBtn.style.background = (tab === 'validation') ? '#00FF66' : '#FF3333';
+
+            // Afficher la vue
+            document.getElementById('rens-view-' + tab).style.display = 'flex';
+
+            // Chargement des données si nécessaire
+            if (tab === 'registre') chargerRegistreRenseignement();
+            if (tab === 'validation') chargerValidationsRenseignement();
+        }
+
+        async function chargerRegistreRenseignement() {
+            const conteneur = document.getElementById('rens-view-registre');
+            conteneur.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Chargement des données...</div>';
+
+            try {
+                const { data, error } = await supabaseApp.from('registre_tactique')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .eq('est_valide', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(c => {
+                        let color = '#FF3333'; let bg = 'rgba(255, 51, 51, 0.05)'; let label = 'K.O.S (HOSTILE)';
+                        if (c.niveau_menace === 'SUSPECT') { color = 'var(--ed-orange)'; bg = 'rgba(255, 113, 0, 0.05)'; label = 'SUSPECT'; }
+                        if (c.niveau_menace === 'ALLIE') { color = '#00FF66'; bg = 'rgba(0, 255, 102, 0.05)'; label = 'ALLIÉ VIP'; }
+
+                        const d = new Date(c.created_at).toLocaleDateString('fr-FR');
+
+                        html += `
+                        <div style="background: ${bg}; border-left: 4px solid ${color}; padding: 12px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed ${color}; padding-bottom: 5px; margin-bottom: 8px;">
+                                <strong style="color: #fff; font-size: 1.2em;">CMDR ${c.cmdr_cible}</strong>
+                                <span style="color: ${color}; font-weight: bold; border: 1px solid ${color}; padding: 2px 8px; border-radius: 3px; font-size: 0.85em;">${label}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85em; color: #888; margin-bottom: 8px;">
+                                <span>📍 DERNIÈRE POSITION : <strong style="color: #ccc;">${c.systeme_rencontre}</strong></span>
+                                <span>SIGNALÉ PAR : <strong style="color: #ccc;">CMDR ${c.auteur_nom}</strong> (${d})</span>
+                            </div>
+                            <div style="color: #ccc; font-size: 0.9em; line-height: 1.4; background: rgba(0,0,0,0.5); padding: 8px; border: 1px solid #333;">
+                                ${c.rapport}
+                            </div>
+                        </div>`;
+                    });
+                    conteneur.innerHTML = html;
+                } else {
+                    conteneur.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Le registre tactique est vide.</div>';
+                }
+            } catch (e) {
+                conteneur.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Erreur de lecture du registre.</div>';
+            }
+        }
+
+        async function soumettreRapportRenseignement() {
+            sonClic();
+            const nom = document.getElementById('rens-input-nom').value.trim().toUpperCase();
+            const sys = document.getElementById('rens-input-systeme').value.trim().toUpperCase();
+            const menace = document.getElementById('rens-input-menace').value;
+            const rapport = document.getElementById('rens-input-rapport').value.trim();
+
+            if (!nom || !sys || !rapport) {
+                afficherAlerte("ERREUR", "Veuillez remplir tous les champs du rapport.", "#FF3333");
+                return;
+            }
+
+            try {
+                const { error } = await supabaseApp.from('registre_tactique').insert([{
+                    escadron_id: profilCommandant.escadron_id,
+                    cmdr_cible: nom,
+                    systeme_rencontre: sys,
+                    niveau_menace: menace,
+                    rapport: rapport,
+                    auteur_nom: profilCommandant.cmdr_nom,
+                    auteur_id: profilCommandant.user_id,
+                    est_valide: false // Passe par la case validation !
+                }]);
+
+                if (error) throw error;
+
+                afficherAlerte("RAPPORT ENVOYÉ", "Votre rapport a été transmis à l'État-Major pour validation.", "#00FF66");
+                document.getElementById('rens-input-nom').value = '';
+                document.getElementById('rens-input-systeme').value = '';
+                document.getElementById('rens-input-rapport').value = '';
+                switchRensTab('registre');
+
+            } catch (e) {
+                console.error("Erreur détaillée Supabase :", e);
+                // On affiche le message d'erreur précis renvoyé par la base de données
+                afficherAlerte("ERREUR DE LIAISON", "Impossible d'envoyer le rapport.<br><br><span style='font-size: 0.8em; color: #aaa;'>" + (e.message || JSON.stringify(e)) + "</span>", "#FF3333");
+            }
+        }
+
+        async function chargerValidationsRenseignement() {
+            const conteneur = document.getElementById('rens-view-validation');
+            conteneur.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Chargement des attentes...</div>';
+
+            try {
+                const { data, error } = await supabaseApp.from('registre_tactique')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .eq('est_valide', false)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(c => {
+                        let color = '#FF3333'; let label = 'K.O.S';
+                        if (c.niveau_menace === 'SUSPECT') { color = 'var(--ed-orange)'; label = 'SUSPECT'; }
+                        if (c.niveau_menace === 'ALLIE') { color = '#00FF66'; label = 'ALLIÉ VIP'; }
+
+                        html += `
+                        <div style="background: rgba(0,0,0,0.6); border: 1px solid #555; padding: 12px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div>
+                                    <strong style="color: #fff; font-size: 1.1em;">CMDR ${c.cmdr_cible}</strong>
+                                    <span style="color: ${color}; font-weight: bold; margin-left: 10px;">[ Suggéré : ${label} ]</span>
+                                </div>
+                                <span style="color: #888; font-size: 0.8em;">Par : CMDR ${c.auteur_nom}</span>
+                            </div>
+                            <div style="color: #ccc; font-size: 0.9em; margin-bottom: 10px;">
+                                <em>"${c.rapport}"</em>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                <button style="background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66; padding: 6px 12px; cursor: pointer; font-weight: bold; transition: 0.2s;" onclick="traiterRapportRens(${c.id}, true)" onmouseenter="if(typeof sonHover==='function') sonHover()">VALIDER & PUBLIER</button>
+                                <button style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 6px 12px; cursor: pointer; font-weight: bold; transition: 0.2s;" onclick="traiterRapportRens(${c.id}, false)" onmouseenter="if(typeof sonHover==='function') sonHover()">REJETER</button>
+                            </div>
+                        </div>`;
+                    });
+                    conteneur.innerHTML = html;
+                } else {
+                    conteneur.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Aucun rapport en attente de validation.</div>';
+                }
+            } catch (e) {
+                conteneur.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Erreur de lecture.</div>';
+            }
+        }
+
+        window.traiterRapportRens = async function(id, approuver) {
+            sonClic();
+            try {
+                if (approuver) {
+                    await supabaseApp.from('registre_tactique').update({ est_valide: true }).eq('id', id);
+                } else {
+                    await supabaseApp.from('registre_tactique').delete().eq('id', id);
+                }
+                chargerValidationsRenseignement();
+            } catch (e) {
+                afficherAlerte("ERREUR", "Impossible de traiter ce rapport.", "#FF3333");
+            }
+        };
+
         // --- GESTION DU COMPTE PILOTE ---
 
         async function modifierEmailCompte() {
@@ -2874,6 +3190,153 @@
             } catch(e) {}
         };
 
+        // ==========================================
+        // MOTEUR D'AFFICHAGE COVAS TACTIQUE
+        // ==========================================
+
+        // ==========================================
+        // MOTEUR D'AFFICHAGE COVAS TACTIQUE AVANCÉ
+        // ==========================================
+
+        async function verifierCibleTactique(nomCmdr, tagEscadron) {
+            try {
+                // Lancement de 3 recherches SIMULTANÉES pour ne pas ralentir l'alerte
+                const requeteProfil = supabaseApp.from('profils').select('escadron_id').ilike('cmdr_nom', nomCmdr).limit(1);
+                
+                // CORRECTION : On interroge la table 'traites_diplomatiques' en cherchant spécifiquement le tag ciblé
+                const requeteDiplo = (profilCommandant.escadron_id && tagEscadron) 
+                    ? supabaseApp.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('tag', tagEscadron.toUpperCase()).limit(1) 
+                    : Promise.resolve({ data: null });
+                
+                const requeteTactique = profilCommandant.escadron_id 
+                    ? supabaseApp.from('registre_tactique').select('*').eq('escadron_id', profilCommandant.escadron_id).ilike('cmdr_cible', nomCmdr).eq('est_valide', true).limit(1) 
+                    : Promise.resolve({ data: null });
+
+                // On attend que les 3 requêtes soient terminées
+                const [resProfil, resDiplo, resTact] = await Promise.all([requeteProfil, requeteDiplo, requeteTactique]);
+
+                // 1. Est-il inscrit sur EDTEAM ?
+                const isRegistered = (resProfil.data && resProfil.data.length > 0);
+
+                // 2. Y a-t-il un traité diplomatique pour son Escadron ?
+                let diploStatus = (resDiplo.data && resDiplo.data.length > 0) ? resDiplo.data[0] : null;
+
+                // 3. Est-il dans le Registre Tactique Individuel ?
+                const tacticalFiche = (resTact.data && resTact.data.length > 0) ? resTact.data[0] : null;
+
+                // On déploie l'hologramme
+                afficherAlerteCovas(nomCmdr, tagEscadron, tacticalFiche, diploStatus, isRegistered);
+
+            } catch(e) { console.error("Erreur de scan tactique croisé:", e); }
+        }
+
+        function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered) {
+            sonClic(); 
+            const overlay = document.getElementById('tactical-overlay');
+            const contenu = document.getElementById('tactical-contenu');
+
+            // Style par défaut (Bleu neutre)
+            let mainColor = 'var(--ed-blue)'; 
+            let mainTitle = 'ℹ️ ANALYSE CIBLE';
+            let pulseAnim = false;
+            let htmlBlocs = "";
+
+            // --- A. ANALYSE DU REGISTRE TACTIQUE ---
+            if (tacticalFiche) {
+                let tColor = '#FF3333'; let tLabel = 'K.O.S (HOSTILE)';
+                if (tacticalFiche.niveau_menace === 'SUSPECT') { tColor = 'var(--ed-orange)'; tLabel = 'SUSPECT'; }
+                if (tacticalFiche.niveau_menace === 'ALLIE') { tColor = '#00FF66'; tLabel = 'ALLIÉ VIP'; }
+                
+                mainColor = tColor;
+                mainTitle = '⚠️ ALERTE TACTIQUE';
+                pulseAnim = (tacticalFiche.niveau_menace === 'KOS');
+
+                htmlBlocs += `
+                <div class="covas-ligne" style="margin-bottom: 12px;">
+                    DOSSIER INDIVIDUEL : <strong style="color: #000; background: ${tColor}; padding: 2px 8px; border-radius: 2px;">${tLabel}</strong>
+                    <div style="color: #ccc; font-size: 0.9em; font-style: italic; border-left: 2px solid ${tColor}; padding-left: 10px; margin-top: 5px;">" ${tacticalFiche.rapport} "</div>
+                </div>`;
+            } else {
+                htmlBlocs += `
+                <div class="covas-ligne" style="margin-bottom: 12px; color: #888;">
+                    DOSSIER INDIVIDUEL : <strong style="color: #666; border: 1px solid #444; padding: 2px 8px; border-radius: 2px;">VIERGE</strong>
+                </div>`;
+            }
+
+            // --- B. ANALYSE DU TRAITÉ DIPLOMATIQUE ---
+            if (tag) {
+                if (diploStatus) {
+                    let dColor = 'var(--ed-blue)';
+                    let dLabel = diploStatus.type_relation ? diploStatus.type_relation.toUpperCase() : 'CONNU DANS LES TRAITÉS';
+                    let dIcon = '🤝';
+                    
+                    if (dLabel.includes('ENNEMI') || dLabel.includes('GUERRE') || dLabel.includes('HOSTILE')) {
+                        dColor = '#FF3333'; dIcon = '⚔️';
+                        if (!tacticalFiche) { mainColor = '#FF3333'; mainTitle = '⚠️ ALERTE DIPLOMATIQUE'; pulseAnim = true; }
+                    } else if (dLabel.includes('ALLI') || dLabel.includes('COALITION')) {
+                        dColor = '#00FF66'; dIcon = '🛡️';
+                        if (!tacticalFiche) { mainColor = '#00FF66'; mainTitle = '✅ IDENTIFICATION ALLIÉE'; }
+                    } else {
+                        dColor = 'var(--ed-orange)'; dIcon = '⚠️';
+                        if (!tacticalFiche) { mainColor = 'var(--ed-orange)'; mainTitle = '⚠️ AFFILIATION SOUS SURVEILLANCE'; }
+                    }
+
+                    htmlBlocs += `
+                    <div class="covas-ligne" style="margin-bottom: 12px;">
+                        TRAITÉ ESCADRON <span style="color:var(--ed-orange)">[ ${tag} ]</span> : 
+                        <strong style="color: ${dColor};">${dIcon} ${dLabel}</strong>
+                    </div>`;
+                } else {
+                    htmlBlocs += `
+                    <div class="covas-ligne" style="margin-bottom: 12px; color: #888;">
+                        TRAITÉ ESCADRON <span style="color:var(--ed-orange)">[ ${tag} ]</span> : 
+                        <strong style="color: #666; border: 1px solid #444; padding: 2px 8px; border-radius: 2px;">NEUTRE (AUCUN TRAITÉ)</strong>
+                    </div>`;
+                }
+            } else {
+                htmlBlocs += `
+                <div class="covas-ligne" style="margin-bottom: 12px; color: #888;">
+                    AFFILIATION MILITAIRE : <strong style="color: #666; border: 1px solid #444; padding: 2px 8px; border-radius: 2px;">INCONNUE / INDÉPENDANT</strong>
+                </div>`;
+            }
+
+            // --- C. ANALYSE RÉSEAU EDTEAM ---
+            if (isRegistered) {
+                if (!tacticalFiche && !diploStatus) {
+                    mainColor = 'var(--ed-blue)'; mainTitle = '🌐 RÉSEAU EDTEAM';
+                }
+                htmlBlocs += `
+                <div class="covas-ligne" style="margin-bottom: 12px;">
+                    EDTEAM : <strong style="color: #000; background: var(--ed-blue); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 8px var(--ed-blue);">✓ PILOTE EDTEAM IDENTIFIÉ</strong>
+                </div>`;
+            } else {
+                htmlBlocs += `
+                <div class="covas-ligne" style="margin-bottom: 12px; color: #888;">
+                    EDTEAM : <strong style="color: #666; border: 1px solid #444; padding: 2px 8px; border-radius: 2px;">NON RÉPERTORIÉ</strong>
+                </div>`;
+            }
+
+            // --- DÉPLOIEMENT DE L'INTERFACE ---
+            overlay.style.borderColor = mainColor;
+            overlay.style.boxShadow = pulseAnim ? `0 0 40px ${mainColor}` : `0 0 20px ${mainColor}40`;
+            const tagAffichage = tag ? `<span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ ${tag} ]</span>` : '';
+
+            contenu.innerHTML = `
+                <div style="color: ${mainColor}; font-size: 1.2em; font-weight: bold; border-bottom: 1px dashed ${mainColor}; padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 2px;">
+                    ${mainTitle}
+                </div>
+                <div class="covas-ligne" style="font-size: 1.1em; margin-bottom: 20px;">CIBLE VERROUILLÉE : <strong style="color: #fff; letter-spacing: 1px;">CMDR ${nom}</strong>${tagAffichage}</div>
+                
+                <div style="padding: 15px 15px 5px 15px; background: rgba(0,0,0,0.5); border: 1px solid #333;">
+                    ${htmlBlocs}
+                </div>
+                
+                <div class="covas-ligne" style="color: #555; font-size: 0.8em; margin-top: 20px; font-weight: bold; text-align: center;">[ DÉVERROUILLEZ LA CIBLE POUR FERMER L'ALERTE ]</div>
+            `;
+            
+            overlay.classList.add('deploye');
+        }
+
     </script>
     <!-- ========================================== -->
 
@@ -2956,6 +3419,27 @@
     </div>
     <div id="covas-badge" onclick="deployerCovasManuel()">>_ SYS: EN ATTENTE</div>
 
+    <!-- OVERLAY EXCLUSIF : CIBLAGE TACTIQUE -->
+    <style>
+        #tactical-overlay {
+            position: fixed; top: 50%; left: 50%; width: 480px;
+            background: rgba(10, 0, 0, 0.95);
+            border: 2px solid #FF3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4);
+            border-radius: 4px; padding: 25px;
+            font-family: 'Share Tech Mono', monospace; z-index: 10500;
+            backdrop-filter: blur(5px); pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #tactical-overlay.deploye {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1; visibility: visible;
+        }
+    </style>
+    <div id="tactical-overlay">
+        <div id="tactical-contenu"></div>
+    </div>
 
     <script src="covas.js"></script>
 
