@@ -111,6 +111,8 @@
         .fs-auth-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-sizing: border-box; width: 100%; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; }
         .fs-auth-btn:hover { background: var(--ed-orange) !important; color: #000 !important; box-shadow: 0 0 15px var(--ed-orange) !important; }
 
+        #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 8px 12px; font-size: 0.85em; z-index: 100000; pointer-events: none; border-radius: 3px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
+
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -123,6 +125,7 @@
 <body onload="document.getElementById('main-ui').style.opacity='1';">
 
     <div class="scanline"></div>
+    <div id="holo-tooltip"></div>
 
     <!-- MENU LATÉRAL -->
     <nav id="side-menu">
@@ -427,6 +430,32 @@
         function sonClic() { playUI('click'); }
         function sonType() { playUI('type'); }
 
+        // --- MOTEUR INFOBULLE HOLOGRAPHIQUE ---
+        const globalTooltip = document.getElementById('holo-tooltip');
+        function showHoloTooltip(e, text, color = 'var(--ed-orange)') {
+            if(typeof sonHover === 'function') sonHover(); 
+            if(globalTooltip) {
+                globalTooltip.innerHTML = text; 
+                globalTooltip.style.borderColor = color; 
+                globalTooltip.style.color = color; 
+                globalTooltip.style.boxShadow = `0 0 10px ${color}40`; 
+                globalTooltip.style.display = 'block'; 
+                moveHoloTooltip(e);
+            }
+        }
+        function hideHoloTooltip() { if(globalTooltip) globalTooltip.style.display = 'none'; }
+        function moveHoloTooltip(e) { 
+            if(globalTooltip && globalTooltip.style.display === 'block') { 
+                let leftPos = e.clientX + 15; 
+                let topPos = e.clientY + 15;
+                const rect = globalTooltip.getBoundingClientRect();
+                if (leftPos + rect.width > window.innerWidth) leftPos = e.clientX - rect.width - 15;
+                if (topPos + rect.height > window.innerHeight) topPos = window.innerHeight - rect.height - 10;
+                globalTooltip.style.left = leftPos + 'px'; 
+                globalTooltip.style.top = topPos + 'px'; 
+            } 
+        }
+
         function toggleMenu() {
             sonClic();
             document.getElementById('side-menu').classList.toggle('open');
@@ -523,10 +552,31 @@
                     if (keyDisplay) keyDisplay.innerText = data.cle_api;
                 }
                 
-                chargerListePilotes();
-                chargerRenseignementLocal(); // <-- NOUVELLE FONCTION
-                chargerHistorique();
-                ecouterTransmissions();
+                // --- SÉQUENCE D'ALLUMAGE SÉCURISÉE ---
+                await chargerListePilotes(); // On attend la liste des pilotes
+                await chargerRenseignementLocal();  // On attend les traités et KOS (CRUCIAL)
+                chargerHistorique(); // Maintenant on peut afficher les messages sereinement
+                ecouterTransmissions(); // On ouvre les communications temps réel
+
+                // NOUVEAU : ÉCOUTE INSTANTANÉE DU RADAR DE COMBAT
+                supabaseApp.channel('covas_tactique')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'radar_commercial', filter: `user_id=eq.${profilCommandant.user_id}` }, payload => {
+                        if (payload.new.target_commodity === 'TARGETED_CMDR') {
+                            const payloadBrut = payload.new.station_name;
+                            if (payloadBrut !== window.lastTargetedCmdr) {
+                                window.lastTargetedCmdr = payloadBrut;
+                                if (payloadBrut === "LOST") {
+                                    const overlay = document.getElementById('tactical-overlay');
+                                    if (overlay) overlay.classList.remove('deploye');
+                                } else {
+                                    try {
+                                        const cibleData = JSON.parse(payloadBrut);
+                                        if (typeof verifierCibleTactique === 'function') verifierCibleTactique(cibleData.nom, cibleData.tag);
+                                    } catch(e) {}
+                                }
+                            }
+                        }
+                    }).subscribe();
 
             } catch(e) {
                 console.error("Erreur critique au démarrage :", e);
@@ -574,11 +624,14 @@
         }
 
         async function chargerListePilotes() {
-            // AJOUT : On télécharge l'escadron de chaque pilote pour vérifier ses traités !
-            const { data } = await supabaseApp.from('profils').select('user_id, cmdr_nom, escadron_id');
+            // CORRECTION CRUCIALE : On interroge 'profils_publics' car 'profils' est protégé par Supabase !
+            const { data } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom, escadron_id');
             if (data) {
                 listePilotes = data;
                 const select = document.getElementById('select-destinataire');
+                // On nettoie la liste au cas où on la recharge
+                select.innerHTML = '<option value="">-- SÉLECTIONNEZ UN DESTINATAIRE --</option>';
+                
                 data.forEach(p => {
                     if (p.user_id !== profilCommandant.user_id && p.cmdr_nom) {
                         const opt = document.createElement('option');
@@ -673,33 +726,43 @@
             // =========================================
             let tagsRenseignement = "";
             
-            // On ne scanne pas nos propres messages
-            if (msg.expediteur_id !== profilCommandant.user_id && profilCommandant.escadron_id) {
+            if (profilCommandant.escadron_id) {
                 const nomExpediteur = msg.expediteur_nom ? msg.expediteur_nom.toUpperCase() : "";
                 
                 // 1. Recherche dans le Registre Tactique (Individuel)
                 const fiche = cacheRegistreTactique.find(f => f.cmdr_cible.toUpperCase() === nomExpediteur);
                 if (fiche) {
+                    const txtRapport = fiche.rapport ? fiche.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
                     if (fiche.niveau_menace === 'KOS') {
-                        tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Rapport : ${fiche.rapport}">[🔴 K.O.S]</span>`;
+                        // AJOUT DE L'ANIMATION DE CLIGNOTEMENT (alertPulse)
+                        tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help; animation: alertPulse 1.2s infinite;" onmouseenter="showHoloTooltip(event, '> CIBLE K.O.S<br><span style=\\'color:#fff; font-weight:normal;\\'>${txtRapport}</span>', '#FF3333')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🔴 K.O.S]</span>`;
                     } else if (fiche.niveau_menace === 'SUSPECT') {
-                        tagsRenseignement += `<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Rapport : ${fiche.rapport}">[🟠 SUSPECT]</span>`;
+                        tagsRenseignement += `<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> INDIVIDU SUSPECT<br><span style=\\'color:#fff; font-weight:normal;\\'>${txtRapport}</span>', 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🟠 SUSPECT]</span>`;
                     } else if (fiche.niveau_menace === 'ALLIE') {
-                        tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Rapport : ${fiche.rapport}">[🟢 V.I.P]</span>`;
+                        tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> ALLIÉ V.I.P<br><span style=\\'color:#fff; font-weight:normal;\\'>${txtRapport}</span>', '#00FF66')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🟢 V.I.P]</span>`;
                     }
                 }
                 
-                // 2. Recherche Diplomatique (Via le Tag de l'escadron du pilote)
+                // 2. Recherche Diplomatique (Croisement Tag et Nom)
                 const profilExpediteur = listePilotes.find(p => p.user_id === msg.expediteur_id);
                 if (profilExpediteur && profilExpediteur.escadron_id) {
-                    const traite = cacheTraitesDiplo.find(t => t.tag && t.tag.toUpperCase() === profilExpediteur.escadron_id.toUpperCase());
+                    
+                    const traite = cacheTraitesDiplo.find(t => 
+                        (t.tag && t.tag.toUpperCase() === profilExpediteur.escadron_id.toUpperCase()) || 
+                        (t.faction_cible && t.faction_cible.toUpperCase() === profilExpediteur.escadron_id.toUpperCase())
+                    );
+                    
                     if (traite) {
+                        const tagAffiche = traite.tag ? traite.tag.toUpperCase() : traite.faction_cible.substring(0, 4).toUpperCase();
+                        const facName = traite.faction_cible ? traite.faction_cible.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "INCONNUE";
+
                         if (traite.type_relation === 'HOSTILE') {
-                            tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px dashed #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Traité Hostile : ${traite.faction_cible}">[⚔️ ${traite.tag.toUpperCase()}]</span>`;
+                            // AJOUT DE L'ANIMATION DE CLIGNOTEMENT (alertPulse)
+                            tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px dashed #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help; animation: alertPulse 1.2s infinite;" onmouseenter="showHoloTooltip(event, '> TRAITÉ HOSTILE<br><span style=\\'color:#fff; font-weight:normal;\\'>${facName}</span>', '#FF3333')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[⚔️ ${tagAffiche}]</span>`;
                         } else if (traite.type_relation === 'PNA') {
-                            tagsRenseignement += `<span style="background: rgba(0,240,255,0.15); color: var(--ed-blue); border: 1px dashed var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="PNA : ${traite.faction_cible}">[🛡️ ${traite.tag.toUpperCase()}]</span>`;
+                            tagsRenseignement += `<span style="background: rgba(0,240,255,0.15); color: var(--ed-blue); border: 1px dashed var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> P.N.A (NON-AGRESSION)<br><span style=\\'color:#fff; font-weight:normal;\\'>${facName}</span>', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🛡️ ${tagAffiche}]</span>`;
                         } else if (traite.type_relation === 'ALLIE') {
-                            tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px dashed #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" title="Coalition : ${traite.faction_cible}">[🤝 ${traite.tag.toUpperCase()}]</span>`;
+                            tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px dashed #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> ALLIÉ (COALITION)<br><span style=\\'color:#fff; font-weight:normal;\\'>${facName}</span>', '#00FF66')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🤝 ${tagAffiche}]</span>`;
                         }
                     }
                 }
@@ -808,12 +871,13 @@
         async function actualiserBadgeAmiraute() {
             if (!profilCommandant) return;
             
-            // Les deux icônes du menu latéral
-            const badgeDirecteur = document.getElementById('badge-amiraute'); // Sur l'icône QG
-            const badgeEscadron = document.getElementById('badge-escadron'); // Sur l'icône BGS
+            // Capteurs du menu latéral (Présents sur TOUTES les pages)
+            const badgeDirecteur = document.getElementById('badge-amiraute'); 
+            const badgeEscadron = document.getElementById('badge-escadron'); 
             
             let totalDirecteur = 0;
             let totalEscadron = 0;
+            let totalRenseignement = 0;
 
             try {
                 // 1. STATUT DIRECTEUR : Les attentes d'accès au terminal
@@ -822,25 +886,32 @@
                     if (!error && count) totalDirecteur = count;
                 }
                 
-                // 2. STATUT AMIRAL : Les candidatures pour rejoindre l'escadron
+                // 2. STATUT AMIRAL : Les candidatures d'escadron
                 if (profilCommandant.est_amiral && profilCommandant.escadron_id) {
                     const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).eq('demande_escadron', profilCommandant.escadron_id);
                     if (!error && count) totalEscadron = count;
                 }
 
+                // 3. STATUT OFFICIER/AMIRAL : Les rapports tactiques (Renseignement)
+                if ((profilCommandant.est_amiral || profilCommandant.est_officier) && profilCommandant.escadron_id) {
+                    const { count, error } = await supabaseApp.from('registre_tactique').select('*', { count: 'exact', head: true }).eq('escadron_id', profilCommandant.escadron_id).eq('est_valide', false);
+                    if (!error && count) totalRenseignement = count;
+                }
+
                 // --- MISE À JOUR VISUELLE ---
 
-                // A. Pastille du QG (Rôle Directeur)
+                // A. Pastille du QG (Menu latéral) : Cumule requêtes d'accès + Renseignements
                 if (badgeDirecteur) {
-                    if (totalDirecteur > 0) {
-                        badgeDirecteur.innerText = totalDirecteur;
+                    const totalQG = totalDirecteur + totalRenseignement;
+                    if (totalQG > 0) {
+                        badgeDirecteur.innerText = totalQG;
                         badgeDirecteur.style.display = 'inline-block';
                     } else {
                         badgeDirecteur.style.display = 'none';
                     }
                 }
 
-                // B. Pastille du BGS (Rôle Amiral)
+                // B. Pastille du BGS (Menu latéral) : Candidatures Escadron
                 if (badgeEscadron) {
                     if (totalEscadron > 0) {
                         badgeEscadron.innerText = totalEscadron;
@@ -850,16 +921,19 @@
                     }
                 }
 
-                // C. Pastille de l'onglet spécifique (Uniquement dans index.html)
+                // C. Pastilles spécifiques à index.html
                 const badgeOngletDir = document.getElementById('badge-onglet-directeur');
-                if (badgeOngletDir) {
-                    if (totalDirecteur > 0) {
-                        badgeOngletDir.innerText = totalDirecteur;
-                        badgeOngletDir.style.display = 'inline-block';
-                    } else {
-                        badgeOngletDir.style.display = 'none';
-                    }
-                }
+                if (badgeOngletDir) { badgeOngletDir.innerText = totalDirecteur; badgeOngletDir.style.display = totalDirecteur > 0 ? 'inline-block' : 'none'; }
+
+                const badgeRegistre = document.getElementById('badge-registre-tactique');
+                if (badgeRegistre) { badgeRegistre.innerText = totalRenseignement; badgeRegistre.style.display = totalRenseignement > 0 ? 'flex' : 'none'; }
+
+                const badgeOngletVal = document.getElementById('badge-onglet-validation');
+                if (badgeOngletVal) { badgeOngletVal.innerText = totalRenseignement; badgeOngletVal.style.display = totalRenseignement > 0 ? 'inline-block' : 'none'; }
+
+                // D. Pastilles spécifiques à bgs.html
+                const badgeOngletEscadron = document.getElementById('badge-onglet-escadron');
+                if (badgeOngletEscadron) { badgeOngletEscadron.innerText = totalEscadron; badgeOngletEscadron.style.display = totalEscadron > 0 ? 'inline-block' : 'none'; }
 
             } catch (e) { console.error("Erreur calcul des badges", e); }
         }
@@ -1067,7 +1141,30 @@
     </div>
     <div id="covas-badge" onclick="deployerCovasManuel()">>_ SYS: EN ATTENTE</div>
 
+    <!-- OVERLAY EXCLUSIF : CIBLAGE TACTIQUE -->
+    <style>
+        #tactical-overlay {
+            position: fixed; top: 50%; left: 50%; width: 480px;
+            background: rgba(10, 0, 0, 0.95);
+            border: 2px solid #FF3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4);
+            border-radius: 4px; padding: 25px;
+            font-family: 'Share Tech Mono', monospace; z-index: 10500;
+            backdrop-filter: blur(5px); pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #tactical-overlay.deploye {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1; visibility: visible;
+        }
+    </style>
+    <div id="tactical-overlay">
+        <div id="tactical-contenu"></div>
+    </div>
+
     <script src="covas.js"></script>
+
 
     <script>
         // ==========================================
@@ -1208,6 +1305,7 @@
 
             setTimeout(synchroniserHorloge, 1500);
         })();
+
     </script>
 </body>
 </html>

@@ -803,13 +803,13 @@
             
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div>
-                    <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">NOM DE LA FACTION CIBLE :</label>
+                    <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">NOM DE LA FACTION / ESCADRON (REQUIS) :</label>
                     <input type="text" id="diplo-faction" class="search-input" placeholder="Ex: THE DARK WHEEL" style="border-color: var(--ed-blue); width: 100%; text-transform: uppercase;">
                 </div>
                 
                 <!-- NOUVEAU CHAMP TAG -->
                 <div>
-                    <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">TAG DE L'ESCADRON (OPTIONNEL) :</label>
+                    <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">TAG DE L'ESCADRON (REQUIS) :</label>
                     <input type="text" id="diplo-tag" class="search-input" placeholder="Ex: DARK" maxlength="4" style="border-color: var(--ed-orange); width: 100%; text-transform: uppercase;">
                 </div>
                 
@@ -2294,6 +2294,30 @@
                 processLatest('SHIP_BALANCE', item => { profilUpdates.solde_vaisseau = item.prix_unitaire; profilModifie = true; });
                 processLatest('FC_BALANCE', item => { profilUpdates.solde_fc = item.prix_unitaire; profilModifie = true; });
                 processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });
+
+                // NOUVEAU MODULE : INTERCEPTION CIBLAGE TACTIQUE
+                processLatest('TARGETED_CMDR', item => { 
+                    const payloadBrut = item.station_name;
+                    if (payloadBrut !== window.lastTargetedCmdr) {
+                        window.lastTargetedCmdr = payloadBrut;
+                        if (payloadBrut === "LOST") {
+                            // On a déverrouillé la cible : on replie l'hologramme tactique
+                            const overlay = document.getElementById('tactical-overlay');
+                            if (overlay) overlay.classList.remove('deploye');
+                        } else {
+                            try {
+                                // On déballe le JSON envoyé par Python
+                                const cibleData = JSON.parse(payloadBrut);
+                                if (typeof verifierCibleTactique === 'function') {
+                                    verifierCibleTactique(cibleData.nom, cibleData.tag);
+                                }
+                            } catch(e) {
+                                // Sécurité (au cas où on recevrait l'ancien format texte)
+                                if (typeof verifierCibleTactique === 'function') verifierCibleTactique(payloadBrut, "");
+                            }
+                        }
+                    }
+                });
                 
                 // Le Nettoyeur silencieux (pour effacer les données des autres onglets si cet onglet est le seul ouvert)
                 const junkTags = ['PARAM_UPDATE', 'QG_RANK_COMBAT', 'QG_RANK_TRADE', 'QG_RANK_EXPLOR', 'QG_RANK_FEDERA', 'QG_RANK_EMPIRE', 'QG_RANK_EXOBIO', 'QG_PROG_COMBAT', 'QG_PROG_TRADE', 'QG_PROG_EXPLOR', 'QG_PROG_FEDERA', 'QG_PROG_EMPIRE', 'QG_PROG_EXOBIO', 'QG_WEALTH', 'QG_SHIPS_VALUE', 'QG_REBUY', 'QG_POWERPLAY', 'QG_FLEET', 'QG_CARRIER_STATS', 'QG_ACTIVE_SHIP_ID'];
@@ -3804,12 +3828,13 @@
         async function actualiserBadgeAmiraute() {
             if (!profilCommandant) return;
             
-            // Les deux icônes du menu latéral
-            const badgeDirecteur = document.getElementById('badge-amiraute'); // Sur l'icône QG
-            const badgeEscadron = document.getElementById('badge-escadron'); // Sur l'icône BGS
+            // Capteurs du menu latéral (Présents sur TOUTES les pages)
+            const badgeDirecteur = document.getElementById('badge-amiraute'); 
+            const badgeEscadron = document.getElementById('badge-escadron'); 
             
             let totalDirecteur = 0;
             let totalEscadron = 0;
+            let totalRenseignement = 0;
 
             try {
                 // 1. STATUT DIRECTEUR : Les attentes d'accès au terminal
@@ -3818,25 +3843,32 @@
                     if (!error && count) totalDirecteur = count;
                 }
                 
-                // 2. STATUT AMIRAL : Les candidatures pour rejoindre l'escadron
+                // 2. STATUT AMIRAL : Les candidatures d'escadron
                 if (profilCommandant.est_amiral && profilCommandant.escadron_id) {
                     const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).eq('demande_escadron', profilCommandant.escadron_id);
                     if (!error && count) totalEscadron = count;
                 }
 
+                // 3. STATUT OFFICIER/AMIRAL : Les rapports tactiques (Renseignement)
+                if ((profilCommandant.est_amiral || profilCommandant.est_officier) && profilCommandant.escadron_id) {
+                    const { count, error } = await supabaseApp.from('registre_tactique').select('*', { count: 'exact', head: true }).eq('escadron_id', profilCommandant.escadron_id).eq('est_valide', false);
+                    if (!error && count) totalRenseignement = count;
+                }
+
                 // --- MISE À JOUR VISUELLE ---
 
-                // A. Pastille du QG (Rôle Directeur)
+                // A. Pastille du QG (Menu latéral) : Cumule requêtes d'accès + Renseignements
                 if (badgeDirecteur) {
-                    if (totalDirecteur > 0) {
-                        badgeDirecteur.innerText = totalDirecteur;
+                    const totalQG = totalDirecteur + totalRenseignement;
+                    if (totalQG > 0) {
+                        badgeDirecteur.innerText = totalQG;
                         badgeDirecteur.style.display = 'inline-block';
                     } else {
                         badgeDirecteur.style.display = 'none';
                     }
                 }
 
-                // B. Pastille du BGS (Rôle Amiral)
+                // B. Pastille du BGS (Menu latéral) : Candidatures Escadron
                 if (badgeEscadron) {
                     if (totalEscadron > 0) {
                         badgeEscadron.innerText = totalEscadron;
@@ -3846,27 +3878,19 @@
                     }
                 }
 
-                // C. Pastille de l'onglet spécifique (Uniquement dans index.html)
+                // C. Pastilles spécifiques à index.html
                 const badgeOngletDir = document.getElementById('badge-onglet-directeur');
-                if (badgeOngletDir) {
-                    if (totalDirecteur > 0) {
-                        badgeOngletDir.innerText = totalDirecteur;
-                        badgeOngletDir.style.display = 'inline-block';
-                    } else {
-                        badgeOngletDir.style.display = 'none';
-                    }
-                }
+                if (badgeOngletDir) { badgeOngletDir.innerText = totalDirecteur; badgeOngletDir.style.display = totalDirecteur > 0 ? 'inline-block' : 'none'; }
 
-                // D. Pastille de l'onglet Escadron (Uniquement dans bgs.html)
+                const badgeRegistre = document.getElementById('badge-registre-tactique');
+                if (badgeRegistre) { badgeRegistre.innerText = totalRenseignement; badgeRegistre.style.display = totalRenseignement > 0 ? 'flex' : 'none'; }
+
+                const badgeOngletVal = document.getElementById('badge-onglet-validation');
+                if (badgeOngletVal) { badgeOngletVal.innerText = totalRenseignement; badgeOngletVal.style.display = totalRenseignement > 0 ? 'inline-block' : 'none'; }
+
+                // D. Pastilles spécifiques à bgs.html
                 const badgeOngletEscadron = document.getElementById('badge-onglet-escadron');
-                if (badgeOngletEscadron) {
-                    if (totalEscadron > 0) {
-                        badgeOngletEscadron.innerText = totalEscadron;
-                        badgeOngletEscadron.style.display = 'inline-block';
-                    } else {
-                        badgeOngletEscadron.style.display = 'none';
-                    }
-                }
+                if (badgeOngletEscadron) { badgeOngletEscadron.innerText = totalEscadron; badgeOngletEscadron.style.display = totalEscadron > 0 ? 'inline-block' : 'none'; }
 
             } catch (e) { console.error("Erreur calcul des badges", e); }
         }
@@ -3969,7 +3993,7 @@
                     <strong style="color: ${color}; letter-spacing: 1px; margin-bottom: 10px; display: block;">[ DIRECTIVES ET MEMBRES CONNUS ]</strong>
                     ${directives}
                 </div>
-                <div style="margin-top: 15px; font-size: 0.8em; color: #666; text-align: right; font-style: italic;">
+                <div style="margin-top: 15px; font-size: 0.8em; color: #666; text-align: right; font-style: normal;">
                     Dossier mis à jour par CMDR ${traite.signataire_nom.toUpperCase()}
                 </div>
             `;
@@ -4030,8 +4054,8 @@
             const directives = document.getElementById('diplo-directives').value.trim();
             const btn = document.getElementById('btn-signer-traite');
 
-            if (!faction) {
-                btn.innerText = "ERREUR : NOM REQUIS";
+            if (!faction || !tagFormulaire) {
+                btn.innerText = "ERREUR : NOM ET TAG REQUIS";
                 setTimeout(() => btn.innerText = idTraiteEnEdition ? "METTRE À JOUR LE DOSSIER" : "RATIFIER LE TRAITÉ", 2000);
                 return;
             }
@@ -4466,9 +4490,29 @@
     </div>
     <div id="covas-badge" onclick="deployerCovasManuel()">>_ SYS: EN ATTENTE</div>
 
+    <!-- OVERLAY EXCLUSIF : CIBLAGE TACTIQUE -->
+    <style>
+        #tactical-overlay {
+            position: fixed; top: 50%; left: 50%; width: 480px;
+            background: rgba(10, 0, 0, 0.95);
+            border: 2px solid #FF3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4);
+            border-radius: 4px; padding: 25px;
+            font-family: 'Share Tech Mono', monospace; z-index: 10500;
+            backdrop-filter: blur(5px); pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #tactical-overlay.deploye {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1; visibility: visible;
+        }
+    </style>
+    <div id="tactical-overlay">
+        <div id="tactical-contenu"></div>
+    </div>
 
     <script src="covas.js"></script>
-
 
 </body>
 </html>

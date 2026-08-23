@@ -1523,12 +1523,13 @@
         async function actualiserBadgeAmiraute() {
             if (!profilCommandant) return;
             
-            // Les deux icônes du menu latéral
-            const badgeDirecteur = document.getElementById('badge-amiraute'); // Sur l'icône QG
-            const badgeEscadron = document.getElementById('badge-escadron'); // Sur l'icône BGS
+            // Capteurs du menu latéral (Présents sur TOUTES les pages)
+            const badgeDirecteur = document.getElementById('badge-amiraute'); 
+            const badgeEscadron = document.getElementById('badge-escadron'); 
             
             let totalDirecteur = 0;
             let totalEscadron = 0;
+            let totalRenseignement = 0;
 
             try {
                 // 1. STATUT DIRECTEUR : Les attentes d'accès au terminal
@@ -1537,25 +1538,32 @@
                     if (!error && count) totalDirecteur = count;
                 }
                 
-                // 2. STATUT AMIRAL : Les candidatures pour rejoindre l'escadron
+                // 2. STATUT AMIRAL : Les candidatures d'escadron
                 if (profilCommandant.est_amiral && profilCommandant.escadron_id) {
                     const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).eq('demande_escadron', profilCommandant.escadron_id);
                     if (!error && count) totalEscadron = count;
                 }
 
+                // 3. STATUT OFFICIER/AMIRAL : Les rapports tactiques (Renseignement)
+                if ((profilCommandant.est_amiral || profilCommandant.est_officier) && profilCommandant.escadron_id) {
+                    const { count, error } = await supabaseApp.from('registre_tactique').select('*', { count: 'exact', head: true }).eq('escadron_id', profilCommandant.escadron_id).eq('est_valide', false);
+                    if (!error && count) totalRenseignement = count;
+                }
+
                 // --- MISE À JOUR VISUELLE ---
 
-                // A. Pastille du QG (Rôle Directeur)
+                // A. Pastille du QG (Menu latéral) : Cumule requêtes d'accès + Renseignements
                 if (badgeDirecteur) {
-                    if (totalDirecteur > 0) {
-                        badgeDirecteur.innerText = totalDirecteur;
+                    const totalQG = totalDirecteur + totalRenseignement;
+                    if (totalQG > 0) {
+                        badgeDirecteur.innerText = totalQG;
                         badgeDirecteur.style.display = 'inline-block';
                     } else {
                         badgeDirecteur.style.display = 'none';
                     }
                 }
 
-                // B. Pastille du BGS (Rôle Amiral)
+                // B. Pastille du BGS (Menu latéral) : Candidatures Escadron
                 if (badgeEscadron) {
                     if (totalEscadron > 0) {
                         badgeEscadron.innerText = totalEscadron;
@@ -1565,16 +1573,19 @@
                     }
                 }
 
-                // C. Pastille de l'onglet spécifique (Uniquement dans index.html)
+                // C. Pastilles spécifiques à index.html
                 const badgeOngletDir = document.getElementById('badge-onglet-directeur');
-                if (badgeOngletDir) {
-                    if (totalDirecteur > 0) {
-                        badgeOngletDir.innerText = totalDirecteur;
-                        badgeOngletDir.style.display = 'inline-block';
-                    } else {
-                        badgeOngletDir.style.display = 'none';
-                    }
-                }
+                if (badgeOngletDir) { badgeOngletDir.innerText = totalDirecteur; badgeOngletDir.style.display = totalDirecteur > 0 ? 'inline-block' : 'none'; }
+
+                const badgeRegistre = document.getElementById('badge-registre-tactique');
+                if (badgeRegistre) { badgeRegistre.innerText = totalRenseignement; badgeRegistre.style.display = totalRenseignement > 0 ? 'flex' : 'none'; }
+
+                const badgeOngletVal = document.getElementById('badge-onglet-validation');
+                if (badgeOngletVal) { badgeOngletVal.innerText = totalRenseignement; badgeOngletVal.style.display = totalRenseignement > 0 ? 'inline-block' : 'none'; }
+
+                // D. Pastilles spécifiques à bgs.html
+                const badgeOngletEscadron = document.getElementById('badge-onglet-escadron');
+                if (badgeOngletEscadron) { badgeOngletEscadron.innerText = totalEscadron; badgeOngletEscadron.style.display = totalEscadron > 0 ? 'inline-block' : 'none'; }
 
             } catch (e) { console.error("Erreur calcul des badges", e); }
         }
@@ -1855,6 +1866,28 @@
                     profilUpdates.cmdr_nom = ligneCmdr.station_name;
                     profilModifie = true;
                     idsToDelete.push(ligneCmdr.id);
+                }
+
+                // E. INTERCEPTION DU CIBLAGE TACTIQUE
+                const ciblages = radarData.filter(d => d.target_commodity === 'TARGETED_CMDR').sort((a,b) => b.id - a.id);
+                if (ciblages.length > 0) {
+                    const item = ciblages[0];
+                    const payloadBrut = item.station_name;
+                    if (payloadBrut !== window.lastTargetedCmdr) {
+                        window.lastTargetedCmdr = payloadBrut;
+                        if (payloadBrut === "LOST") {
+                            const overlay = document.getElementById('tactical-overlay');
+                            if (overlay) overlay.classList.remove('deploye');
+                        } else {
+                            try {
+                                const cibleData = JSON.parse(payloadBrut);
+                                if (typeof verifierCibleTactique === 'function') verifierCibleTactique(cibleData.nom, cibleData.tag);
+                            } catch(e) {
+                                if (typeof verifierCibleTactique === 'function') verifierCibleTactique(payloadBrut, "");
+                            }
+                        }
+                    }
+                    ciblages.forEach(c => idsToDelete.push(c.id));
                 }
 
                 // E. Extraction du Statut COVAS
@@ -2388,9 +2421,29 @@
     </div>
     <div id="covas-badge" onclick="deployerCovasManuel()">>_ SYS: EN ATTENTE</div>
 
+    <!-- OVERLAY EXCLUSIF : CIBLAGE TACTIQUE -->
+    <style>
+        #tactical-overlay {
+            position: fixed; top: 50%; left: 50%; width: 480px;
+            background: rgba(10, 0, 0, 0.95);
+            border: 2px solid #FF3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4);
+            border-radius: 4px; padding: 25px;
+            font-family: 'Share Tech Mono', monospace; z-index: 10500;
+            backdrop-filter: blur(5px); pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #tactical-overlay.deploye {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1; visibility: visible;
+        }
+    </style>
+    <div id="tactical-overlay">
+        <div id="tactical-contenu"></div>
+    </div>
 
     <script src="covas.js"></script>
-
 
 </body>
 </html>
