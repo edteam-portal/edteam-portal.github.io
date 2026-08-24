@@ -362,6 +362,19 @@
             <!-- ONGLET 1 : DOSSIER COMMANDANT -->
             <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 15px;">
 
+                <!-- LA GAZETTE DE L'ESCADRON (BANNIÈRE D'ALERTE) -->
+                <div class="data-row" style="background: rgba(0, 0, 0, 0.7); border-color: var(--ed-blue); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0;" id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.borderColor='#fff';" onmouseout="this.style.background='rgba(0, 0, 0, 0.7)'; this.style.borderColor='var(--ed-blue)';">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <span style="font-size: 2.2em; filter: drop-shadow(0 0 10px rgba(0,240,255,0.5));">📰</span>
+                        <div>
+                            <span style="color: var(--ed-blue); font-size: 1.3em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">EDNEWS ESCADRON // ÉDITION PRIVEE</span>
+                            <span id="gazette-banner-date" style="color: #888; font-size: 0.9em; font-weight: bold;">Recherche des archives...</span>
+                        </div>
+                    </div>
+                    <div id="gazette-badge-new" style="display: none; background: #FF3333; color: #fff; padding: 6px 15px; border-radius: 4px; font-weight: bold; letter-spacing: 2px; font-size: 0.9em; animation: failsafe-pulse 1.5s infinite;">NOUVELLE TRANSMISSION</div>
+                    <div id="gazette-badge-read" style="display: block; color: var(--ed-blue); font-size: 1.5em; opacity: 0.5;">[ LIRE ]</div>
+                </div>
+
                 <!-- LIGNE COMBINÉE : CARRIÈRE MILITAIRE + MODULE REGISTRE -->
                 <div style="display: flex; gap: 15px; align-items: stretch;">
                     
@@ -374,11 +387,9 @@
                         <!-- Si le pilote a un escadron -->
                         <div id="qg-squad-actif" style="display: none; justify-content: space-between; align-items: center;">
                             <div>
-                                <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">TAG ESCADRON</span>
                                 <span id="qg-squad-tag" style="color: var(--ed-orange); font-size: 1.8em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,113,0,0.3);">[ ... ]</span>
                             </div>
                             <div style="text-align: right;">
-                                <span style="color: #666; font-size: 0.85em; display: block; margin-bottom: 5px;">ACCRÉDITATIONS TACTIQUES</span>
                                 <div id="qg-squad-roles" style="display: flex; gap: 10px; justify-content: flex-end;"></div>
                             </div>
                         </div>
@@ -982,6 +993,47 @@
         </div>
     </div>
 
+    <!-- MODALE : LECTEUR GALNET NEWS & ARCHIVES (V2 : DEUX COLONNES) -->
+    <div class="modal-overlay" id="modal-gazette" onclick="fermerModal('modal-gazette', event)" style="z-index: 4600;">
+        <div class="modal-content" style="max-width: 1100px; width: 95%; height: 85vh; display: flex; flex-direction: column; background: rgba(10, 5, 0, 0.98); border: 1px solid var(--ed-blue); box-shadow: 0 0 50px rgba(0, 240, 255, 0.15); padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
+            
+            <!-- EN-TÊTE FIXE -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-blue); padding: 15px 25px; background: rgba(0, 240, 255, 0.05); flex-shrink: 0;">
+                <div style="color: var(--ed-blue); font-size: 1.5em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,240,255,0.4);">📰 GALNET NEWS // ARCHIVES CENTRALES</div>
+                <div style="color: var(--ed-blue); cursor: pointer; font-size: 1.5em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='var(--ed-blue)';" onclick="fermerModal('modal-gazette')">X</div>
+            </div>
+
+            <!-- CORPS DU LECTEUR (FLEXBOX) -->
+            <div style="display: flex; flex-grow: 1; overflow: hidden;">
+                
+                <!-- COLONNE GAUCHE : LE REGISTRE -->
+                <div style="width: 320px; background: rgba(0, 0, 0, 0.6); border-right: 1px dashed var(--ed-blue); display: flex; flex-direction: column; flex-shrink: 0;">
+                    <div style="padding: 15px; color: #888; font-size: 0.85em; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid #333; background: rgba(255,255,255,0.02);">> REGISTRE DES ÉDITIONS</div>
+                    
+                    <!-- Liste des articles générée en JS -->
+                    <div id="gazette-history-list" style="flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="color: #555; font-style: italic; text-align: center; padding: 20px;">Chargement du registre...</div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : L'ARTICLE -->
+                <div style="flex-grow: 1; display: flex; flex-direction: column; padding: 25px; overflow: hidden; position: relative;">
+                    
+                    <!-- Le texte -->
+                    <div id="gazette-modal-content" style="flex-grow: 1; overflow-y: auto; padding-right: 15px; color: #ccc; font-size: 1.1em; line-height: 1.8;">
+                        <div style="text-align: center; color: #666; font-style: italic; padding: 40px;">Sélectionnez une archive pour décrypter son contenu.</div>
+                    </div>
+
+                    <!-- PANNEAU D'ADMINISTRATION (AMIRAUTÉ) -->
+                    <div id="gazette-admin-panel" style="display: none; margin-top: 20px; border-top: 1px dashed #333; padding-top: 20px; text-align: right; flex-shrink: 0;">
+                        <button class="auth-btn" style="width: auto; padding: 12px 30px; font-size: 1em; font-weight: bold; border-color: #00FF66; color: #00FF66; background: rgba(0,255,102,0.1); margin: 0; letter-spacing: 1px; transition: 0.2s;" onclick="genererNouvelleGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#00FF66'; this.style.color='#000'; this.style.boxShadow='0 0 15px #00FF66';" onmouseout="this.style.background='rgba(0,255,102,0.1)'; this.style.color='#00FF66'; this.style.boxShadow='none';">[ RÉDIGER UNE NOUVELLE ÉDITION (IA) ]</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- =========================================
          MOTEUR JAVASCRIPT ET SUPABASE
          ========================================= -->
@@ -1012,6 +1064,10 @@
         btnElement.classList.add('active');
 
         // Chargement des données
+        if (tabId === 'dossier') {
+            chargerGazette();
+        }
+        
         if (tabId === 'directeur') {
             chargerDemandesDirecteur();
             chargerPersonnelDirecteur();
@@ -1048,6 +1104,307 @@
                 globalTooltip.style.left = (e.clientX + 15) + 'px'; 
                 globalTooltip.style.top = (e.clientY + 15) + 'px'; 
             } 
+        }
+
+        let gazettesCache = []; // Mémoire locale pour les archives
+
+        // --- LECTURE CLOISONNÉE PAR ESCADRON ---
+        async function chargerGazette() {
+            const bannerDate = document.getElementById('gazette-banner-date');
+            const badgeNew = document.getElementById('gazette-badge-new');
+            const badgeRead = document.getElementById('gazette-badge-read');
+            const adminPanel = document.getElementById('gazette-admin-panel');
+            const historyList = document.getElementById('gazette-history-list');
+
+            // SEUL LE DIRECTEUR VOIT LE BOUTON D'IMPRESSION
+            if (profilCommandant.est_directeur) {
+                if(adminPanel) adminPanel.style.display = 'block';
+            } else {
+                if(adminPanel) adminPanel.style.display = 'none';
+            }
+
+            try {
+                // Le pilote ne télécharge que les gazettes de SON escadron
+                const { data, error } = await supabaseApp.from('gazette_hebdo')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                gazettesCache = data || [];
+
+                if (gazettesCache.length > 0) {
+                    const latest = gazettesCache[0];
+                    const dateEdition = new Date(latest.created_at).toLocaleDateString('fr-FR');
+                    if (bannerDate) bannerDate.innerText = "> ÉDITION LA PLUS RÉCENTE : " + dateEdition;
+
+                    // Remplir le registre latéral
+                    if (historyList) {
+                        historyList.innerHTML = '';
+                        gazettesCache.forEach((g, index) => {
+                            const d = new Date(g.created_at).toLocaleDateString('fr-FR');
+                            const estNouvelle = (index === 0);
+                            
+                            const div = document.createElement('div');
+                            div.className = 'gazette-archive-item';
+                            div.id = 'archive-item-' + g.id;
+                            div.style.padding = '12px 15px';
+                            div.style.border = '1px solid #333';
+                            div.style.background = 'rgba(0,0,0,0.5)';
+                            div.style.color = '#aaa';
+                            div.style.cursor = 'pointer';
+                            div.style.borderRadius = '3px';
+                            div.style.transition = '0.2s';
+                            div.style.fontSize = '0.9em';
+                            
+                            div.onmouseover = function() { if(this.dataset.active !== 'true') { this.style.borderColor = 'var(--ed-blue)'; this.style.background = 'rgba(0, 240, 255, 0.05)'; this.style.color = '#fff'; } };
+                            div.onmouseout = function() { if(this.dataset.active !== 'true') { this.style.borderColor = '#333'; this.style.background = 'rgba(0,0,0,0.5)'; this.style.color = '#aaa'; } };
+                            div.onclick = function() { afficherArticleGazette(g.id); };
+                            
+                            div.innerHTML = `
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="color: ${estNouvelle ? '#FF3333' : 'var(--ed-orange)'}; font-weight: bold; font-size: 0.8em; letter-spacing: 1px;">
+                                        ${estNouvelle ? '🔥 NOUVELLE ÉDITION' : '📜 ARCHIVE'}
+                                    </span>
+                                    <span style="color: #666; font-size: 0.8em;">${d}</span>
+                                </div>
+                                <div style="color: #fff; font-weight: bold; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    ${g.titre}
+                                </div>
+                            `;
+                            historyList.appendChild(div);
+                        });
+                    }
+
+                    // Vérification "Non Lu"
+                    const lastReadId = localStorage.getItem('edteam_last_gazette_read');
+                    if (String(lastReadId) !== String(latest.id)) {
+                        if(badgeNew) badgeNew.style.display = 'block';
+                        if(badgeRead) badgeRead.style.display = 'none';
+                    } else {
+                        if(badgeNew) badgeNew.style.display = 'none';
+                        if(badgeRead) badgeRead.style.display = 'block';
+                    }
+                } else {
+                    if (bannerDate) bannerDate.innerText = "Aucune transmission disponible.";
+                    if (historyList) historyList.innerHTML = '<div style="color: #555; text-align: center; padding: 20px;">Archives vides.</div>';
+                }
+            } catch(e) {
+                if (bannerDate) bannerDate.innerText = "Erreur de liaison réseau.";
+            }
+        }
+
+        // --- AFFICHAGE DE LA GAZETTE SÉLECTIONNÉE ---
+        window.afficherArticleGazette = function(id) {
+            if(typeof sonClic === 'function') sonClic();
+
+            // 1. On cherche l'article dans le cache chargé précédemment
+            const article = gazettesCache.find(g => String(g.id) === String(id));
+            if (!article) return;
+
+            // 2. On injecte le contenu dans la colonne de droite
+            const contentDiv = document.getElementById('gazette-modal-content');
+            const dateEdition = new Date(article.created_at).toLocaleDateString('fr-FR');
+            
+            contentDiv.innerHTML = `
+                <h3 style="color: var(--ed-orange); font-size: 1.5em; border-bottom: 1px solid var(--ed-orange-dim); padding-bottom: 10px; margin-top: 0; letter-spacing: 2px;">
+                    ${article.titre}
+                </h3>
+                <div style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 25px; letter-spacing: 1px;">
+                    > DATE D'ÉDITION : ${dateEdition} // CLASSIFICATION : CONFIDENTIEL
+                </div>
+                <div style="color: #ccc; font-size: 1.1em; line-height: 1.6;">
+                    ${article.contenu}
+                </div>
+            `;
+
+            // 3. Mise en surbrillance de l'onglet actif à gauche
+            document.querySelectorAll('.gazette-archive-item').forEach(el => {
+                el.dataset.active = 'false';
+                el.style.borderColor = '#333';
+                el.style.background = 'rgba(0,0,0,0.5)';
+                el.style.color = '#aaa';
+            });
+            
+            const activeItem = document.getElementById('archive-item-' + id);
+            if (activeItem) {
+                activeItem.dataset.active = 'true';
+                activeItem.style.borderColor = 'var(--ed-orange)';
+                activeItem.style.background = 'rgba(255, 113, 0, 0.05)';
+                activeItem.style.color = '#fff';
+            }
+
+            // 4. Si c'est la dernière édition, on la marque comme "Lue"
+            if (gazettesCache.length > 0 && String(gazettesCache[0].id) === String(id)) {
+                localStorage.setItem('edteam_last_gazette_read', id);
+                
+                const badgeNew = document.getElementById('gazette-badge-new');
+                const badgeRead = document.getElementById('gazette-badge-read');
+                if(badgeNew) badgeNew.style.display = 'none';
+                if(badgeRead) badgeRead.style.display = 'block';
+            }
+        };
+
+        // --- GÉNÉRATEUR GLOBAL (RÉSERVÉ AU DIRECTEUR) ---
+        async function genererNouvelleGazette() {
+            if(typeof sonClic==='function') sonClic();
+            
+            // Sécurité anti-intrusion
+            if (!profilCommandant.est_directeur) {
+                afficherAlerte("ACCÈS REFUSÉ", "Seul le Directeur de la plateforme possède les codes de lancement des rotatives globales.", "#FF3333");
+                return;
+            }
+
+            const btn = document.querySelector('#gazette-admin-panel button');
+            btn.innerText = "DÉPLOIEMENT DES IA SUR LE RÉSEAU...";
+            btn.style.pointerEvents = "none";
+
+            try {
+                const dateLimite = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                const d = new Date();
+                const currentWeekId = d.getUTCFullYear() + "-W" + Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1))) / 86400000) + 1)/7);
+
+                // 1. On télécharge toutes les données de la semaine en une seule fois
+                const [resParams, resTactique, resEfforts, resProfils] = await Promise.all([
+                    supabaseApp.from('parametres_app').select('user_id, telemetrie_usage'),
+                    supabaseApp.from('registre_tactique').select('id, escadron_id').gte('created_at', dateLimite),
+                    supabaseApp.from('efforts_bgs').select('user_id, type_action, valeur').gte('date_action', dateLimite),
+                    supabaseApp.from('profils_publics').select('user_id, cmdr_nom, escadron_id') 
+                ]);
+
+                // 2. NOUVELLE LOGIQUE : Déduire les escadrons directement depuis les profils
+                const profilsActifs = resProfils.data || [];
+                const tagsEscadrons = [...new Set(profilsActifs.map(p => p.escadron_id).filter(id => id && id !== 'INDEPENDANT'))];
+
+                if (tagsEscadrons.length === 0) throw new Error("Aucun escadron actif n'a été détecté parmi les pilotes.");
+
+                let compteSucces = 0;
+
+                // 3. L'IA va traiter chaque escadron un par un
+                for (const tagActuel of tagsEscadrons) {
+
+                    // Vérifier si la gazette de cet escadron existe déjà pour cette semaine
+                    const { data: checkData } = await supabaseApp.from('gazette_hebdo')
+                        .select('id')
+                        .eq('semaine_id', currentWeekId)
+                        .eq('escadron_id', tagActuel);
+
+                    if (checkData && checkData.length > 0) continue; // Si oui, on passe au suivant
+
+                    // Filtrer les données spécifiques à cet escadron
+                    const profilsEscadron = profilsActifs.filter(p => p.escadron_id === tagActuel);
+                    if (profilsEscadron.length === 0) continue; // Pas de joueurs, on saute.
+
+                    const idsPilotes = profilsEscadron.map(p => p.user_id);
+                    const dicoPilotes = {};
+                    profilsEscadron.forEach(p => dicoPilotes[p.user_id] = p.cmdr_nom || 'INCONNU');
+
+                    const paramsEscadron = (resParams.data || []).filter(p => idsPilotes.includes(p.user_id));
+                    const effortsEscadron = (resEfforts.data || []).filter(e => idsPilotes.includes(e.user_id));
+                    const tactiqueEscadron = (resTactique.data || []).filter(t => t.escadron_id === tagActuel);
+
+                    // Traitement mathématique
+                    let connexionsHebdo = 0;
+                    const limiteTs = new Date(dateLimite).getTime();
+                    paramsEscadron.forEach(p => {
+                        if (p.telemetrie_usage && p.telemetrie_usage.derniere_visite_web && new Date(p.telemetrie_usage.derniere_visite_web).getTime() >= limiteTs) connexionsHebdo++;
+                    });
+
+                    const signalementsHebdo = tactiqueEscadron.length;
+                    let totalInf = 0, totalCr = 0, totalMeurtres = 0, totalVols = 0, totalPiratages = 0, totalEchecs = 0;
+                    let palmares = {}; 
+
+                    effortsEscadron.forEach(e => {
+                        const nom = dicoPilotes[e.user_id] ? dicoPilotes[e.user_id].toUpperCase() : 'INCONNU';
+                        const val = Number(e.valeur || 0);
+                        const type = String(e.type_action || '').toUpperCase();
+
+                        if (!palmares[nom]) palmares[nom] = { inf: 0, cr: 0, meurtres: 0, vols: 0, piratages: 0, echecs: 0 };
+
+                        if (type.includes('MISSIONS') || type.includes('ELECTION') || type.includes('INF')) { totalInf += val; palmares[nom].inf += val; } 
+                        else if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) { totalCr += val; palmares[nom].cr += val; } 
+                        else if (type === 'MEURTRES' || type === 'CZ_VICTOIRES') { totalMeurtres += val; palmares[nom].meurtres += val; } 
+                        else if (type === 'VOLS') { totalVols += val; palmares[nom].vols += val; } 
+                        else if (type === 'PIRATAGE') { totalPiratages += val; palmares[nom].piratages += val; } 
+                        else if (type === 'ECHECS') { totalEchecs += val; palmares[nom].echecs += val; }
+                    });
+
+                    let texteSpecialistes = "";
+                    for (const [pilote, stats] of Object.entries(palmares)) {
+                        if (pilote !== 'INCONNU') {
+                            let faits = [];
+                            if (stats.inf > 0) faits.push(`${stats.inf} INF`);
+                            if (stats.cr > 0) faits.push(`${new Intl.NumberFormat('fr-FR').format(stats.cr)} CR`);
+                            if (stats.meurtres > 0) faits.push(`${stats.meurtres} éliminations confirmées`);
+                            if (stats.vols > 0) faits.push(`${stats.vols} vols/sabotages`);
+                            if (stats.piratages > 0) faits.push(`${stats.piratages} piratages informatiques`);
+                            if (stats.echecs > 0) faits.push(`${stats.echecs} missions abandonnées stratégiquement`);
+                            if (faits.length > 0) texteSpecialistes += `- CMDR ${pilote} : ${faits.join(', ')}.\n`;
+                        }
+                    }
+                    if (texteSpecialistes === "") texteSpecialistes = "- Opérations sous couverture absolue. Aucun exploit individuel n'a filtré ce cycle.\n";
+
+                    // Demande spécifique pour cet escadron (Le nom est remplacé par le Tag)
+                    const prompt = `Tu es le Rédacteur en Chef de Galnet News. Rédige un article épique et immersif (HTML fluide avec <p>, <strong> et un <h3>) résumant l'activité tactique de l'escadron [${tagActuel}].
+
+[ RÉSEAU & RENSEIGNEMENT ]
+- Pilotes actifs sur le terminal : ${connexionsHebdo}
+- Nouveaux signalements tactiques : ${signalementsHebdo}
+
+[ BILAN BGS ET JOURNAL DES EXPLOITS ]
+- Influence poussée : ${totalInf} INF
+- Mouvements financiers : ${new Intl.NumberFormat('fr-FR').format(totalCr)} CR
+- Bilan des opérations noires : ${totalMeurtres} assassinats, ${totalVols} vols tactiques, ${totalPiratages} piratages, et ${totalEchecs} missions sabotées.
+
+[ MUR DES SPÉCIALISTES ]
+Mets en valeur ces commandants :
+${texteSpecialistes}
+
+Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HTML ni markdown), suivie d'un saut de ligne, puis le code HTML de l'article.`;
+
+                    // Appel ultra-sécurisé via la fonction relais Supabase
+                    const { data: aiData, error: aiError } = await supabaseApp.functions.invoke('galnet-ia', {
+                        body: { prompt: prompt }
+                    });
+
+                    if (aiError) throw new Error("Échec de la communication avec le serveur IA.");
+
+                    if (aiData && aiData.candidates) {
+                        let fullText = aiData.candidates[0].content.parts[0].text.trim().replace(/^```html\n?/, '').replace(/```$/, '').trim();
+                        const firstLineBreak = fullText.indexOf('\n');
+                        
+                        if (firstLineBreak !== -1) {
+                            const titre = fullText.substring(0, firstLineBreak).replace(/[\*#]/g, '').trim();
+                            const htmlContent = fullText.substring(firstLineBreak).trim();
+
+                            await supabaseApp.from('gazette_hebdo').insert([{
+                                semaine_id: currentWeekId,
+                                escadron_id: tagActuel,
+                                titre: titre,
+                                contenu: htmlContent
+                            }]);
+                            compteSucces++;
+                        }
+                    }
+
+                    // Petite pause de politesse pour ne pas énerver l'API de Google
+                    await new Promise(r => setTimeout(r, 1500)); 
+                }
+
+                if (compteSucces > 0) {
+                    afficherAlerte("ÉDITIONS PUBLIÉES", `Mission accomplie Directeur. ${compteSucces} journaux d'escadron ont été imprimés et transmis sur le réseau.`, "#00FF66");
+                    await chargerGazette(); 
+                } else {
+                    afficherAlerte("TERMINÉ", "Aucune nouvelle gazette à imprimer (soit elles existent déjà, soit aucun escadron n'est actif).", "var(--ed-blue)");
+                }
+
+            } catch(e) {
+                console.error(e);
+                afficherAlerte("ERREUR DE DÉPLOIEMENT", "Échec global :<br><br><span style='font-size: 0.8em; color: #aaa;'>" + e.message + "</span>", "#FF3333");
+            } finally {
+                btn.innerText = "[ RÉDIGER UNE NOUVELLE ÉDITION (IA) ]";
+                btn.style.pointerEvents = "auto";
+            }
         }
 
         function bootSystem() {
@@ -1458,6 +1815,9 @@
                 const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
                 if (failsafeKeyDisplay) failsafeKeyDisplay.innerText = data.cle_api;
                 
+                // Charger la Gazette dès le démarrage
+                chargerGazette();
+                
             } else {
                 // Le pilote n'est pas encore approuvé par le Directeur.
                 document.getElementById('auth-screen').style.display = 'none';
@@ -1787,12 +2147,20 @@
                     Object.assign(paramData, paramUpdates);
                 }
                 if (profilModifie) {
-                    await supabaseApp.from('profils').update(profilUpdates).eq('user_id', profilCommandant.user_id);
-                    Object.assign(profilData, profilUpdates);
-                    profilCommandant = profilData; 
-                }
-                if (idsToDelete.length > 0) {
-                    await supabaseApp.from('radar_commercial').delete().in('id', idsToDelete.slice(0, 80));
+                    // On ajoute .select() pour forcer Supabase à nous dire combien de lignes ont été touchées
+                    const { data: updateData, error: errUpdate } = await supabaseApp.from('profils').update(profilUpdates).eq('user_id', profilCommandant.user_id).select();
+                    
+                    if (errUpdate) {
+                        console.error("SYS.EDTEAM - ERREUR BDD :", errUpdate);
+                    } else if (!updateData || updateData.length === 0) {
+                        console.error("SYS.EDTEAM - BLOCAGE RLS : 0 ligne mise à jour !");
+                        if (typeof afficherAlerte === 'function') {
+                            afficherAlerte("BLOCAGE DE SÉCURITÉ", "La base de données a bloqué la sauvegarde de vos données financières (0 ligne modifiée).<br><br><span style='font-size:0.85em; color:#aaa;'>Le pare-feu RLS de Supabase rejette votre compte.</span>", "#FF3333");
+                        }
+                    } else {
+                        Object.assign(profilData, profilUpdates);
+                        profilCommandant = profilData; 
+                    }
                 }
 
                 // --- 4. AFFICHAGE DE L'INTERFACE ---
@@ -2336,77 +2704,6 @@
                 divActif.style.display = 'none';
                 divMercenaire.style.display = 'flex';
                 // Tout le vieux code de recherche d'escadron de la base de données a été purgé ici.
-            }
-        }
-
-        // Alterner entre le formulaire d'enrôlement et de création
-        function switchMercenaireMode(mode, btn) {
-            sonClic();
-            document.getElementById('mode-rejoindre').style.display = 'none';
-            document.getElementById('mode-creer').style.display = 'none';
-            
-            document.querySelectorAll('#choix-mercenaire-btns button').forEach(b => {
-                b.classList.remove('active');
-                b.style.opacity = '0.5';
-            });
-            btn.classList.add('active');
-            btn.style.opacity = '1';
-
-            if (mode === 'REJOINDRE') document.getElementById('mode-rejoindre').style.display = 'flex';
-            if (mode === 'CREER') document.getElementById('mode-creer').style.display = 'flex';
-        }
-
-        // Fonder officiellement le nouvel escadron dans la galaxie
-        async function creerEscadron() {
-            sonClic();
-            const tag = document.getElementById('creer-tag').value.trim().toUpperCase();
-            const nom = document.getElementById('creer-nom').value.trim();
-            const allegeance = document.getElementById('creer-allegeance').value;
-            const puissance = document.getElementById('creer-puissance').value;
-            const factionInGame = document.getElementById('creer-faction-ig').value.trim(); 
-
-            if (!tag || tag.length > 4) { afficherAlerte("PARAMÈTRES INVALIDES", "Le TAG doit faire entre 1 et 4 caractères.", "#FF3333"); return; }
-            if (!nom) { afficherAlerte("PARAMÈTRES INVALIDES", "Veuillez saisir un nom pour l'escadron.", "#FF3333"); return; }
-
-            try {
-                // 1. Vérification Anti-Doublon du TAG
-                const { data: checkData } = await supabaseApp.from('escadrons').select('tag').eq('tag', tag);
-                if (checkData && checkData.length > 0) {
-                    afficherAlerte("CONFLIT D'IDENTIFICATION", "Ce TAG d'escadron est déjà utilisé par une autre flotte ! Veuillez en choisir un autre.", "#FF3333");
-                    return;
-                }
-
-                // 2. Fondation de l'Escadron
-                const { error: insertError } = await supabaseApp.from('escadrons').insert([{
-                    tag: tag,
-                    nom: nom,
-                    allegeance: allegeance,
-                    puissance: puissance,
-                    faction_in_game: factionInGame,
-                    fondateur_id: profilCommandant.user_id,
-                    medailles_json: [],
-                    diplomatie_json: []
-                }]);
-
-                if (insertError) throw insertError;
-
-                // 3. Promotion du Commandant au rang d'Amiral (et Officier/Diplomate)
-                const { error: updateError } = await supabaseApp.from('profils').update({
-                    escadron_id: tag,
-                    demande_escadron: null,
-                    est_amiral: true,
-                    est_officier: true,
-                    est_diplomate: true
-                }).eq('user_id', profilCommandant.user_id);
-
-                if (updateError) throw updateError;
-
-                // 4. L'ALERTE DE SUCCÈS (Qui recharge la page après clic sur OK)
-                afficherAlerte("SUCCÈS DE L'OPÉRATION", `FÉLICITATIONS AMIRAL !<br><br>L'Escadron <strong>${nom} [${tag}]</strong> est né !`, "#00FF66", () => location.reload());
-
-            } catch (e) {
-                console.error(e);
-                afficherAlerte("ERREUR SYSTÈME", "Impossible de fonder l'escadron. Vérifiez la liaison satellite.", "#FF3333");
             }
         }
 
@@ -3279,6 +3576,11 @@
                 window.telemetrieDirty = false;
             } catch(e) {}
         };
+
+        function ouvrirGazette() {
+            sonClic(); // Optionnel : pour le son de l'interface
+            ouvrirModal('modal-gazette');
+        }
 
     </script>
     <!-- ========================================== -->

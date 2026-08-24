@@ -8,6 +8,7 @@
 let covasAudioCtx = null;
 let covasEnCours = false;
 let systemeCourant = "";
+let covasSessionId = 0; // NOUVEAU: Identifiant de session pour bloquer les superpositions
 
 // 1. MOTEUR AUDIO IMPÉRIAL
 function playBipHolographique() {
@@ -31,13 +32,21 @@ function playBipHolographique() {
     osc.stop(covasAudioCtx.currentTime + 0.03);
 }
 
-// 2. EFFET MACHINE À ÉCRIRE
-async function ecrireLigneCovas(texte, conteneur, classeCouleur = "") {
+// 2. EFFET MACHINE À ÉCRIRE (AVEC ANTI-SUPERPOSITION)
+async function ecrireLigneCovas(texte, conteneur, classeCouleur = "", sessionId = null) {
+    // Si une nouvelle session a démarré, on annule l'écriture
+    if (sessionId !== null && sessionId !== covasSessionId) return;
+
     const div = document.createElement('div');
     div.className = 'covas-ligne ' + classeCouleur;
     conteneur.appendChild(div);
     
     for (let i = 0; i < texte.length; i++) {
+        // Contrôle en plein milieu de la phrase
+        if (sessionId !== null && sessionId !== covasSessionId) {
+            div.remove(); // Nettoie les phrases coupées
+            return;
+        }
         div.textContent += texte.charAt(i);
         playBipHolographique();
         await new Promise(r => setTimeout(r, 15));
@@ -57,13 +66,11 @@ function playSonCiblageTactique() {
     osc.type = 'sine';
     
     // Double bip court et furtif (Style transfert de données chiffrées)
-    // Bip 1
     osc.frequency.setValueAtTime(1800, t);
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(0.06, t + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
     
-    // Bip 2 (Légèrement plus aigu)
     osc.frequency.setValueAtTime(2400, t + 0.08);
     gain.gain.setValueAtTime(0, t + 0.07);
     gain.gain.linearRampToValueAtTime(0.04, t + 0.09);
@@ -78,9 +85,14 @@ function playSonCiblageTactique() {
 
 // 3. LOGIQUE D'ANALYSE (Rapport de l'IA avec acquittement manuel)
 async function declencherAnalyseTactique(nomSysteme) {
-    if (!nomSysteme || nomSysteme === systemeCourant) return;
-    covasEnCours = true;
+    if (!nomSysteme) return;
+    
+    // NOUVEAU : On incrémente l'ID pour tuer immédiatement les anciennes animations en cours
+    covasSessionId++;
+    const currentSession = covasSessionId;
+    
     systemeCourant = nomSysteme;
+    covasEnCours = true;
 
     if (!covasAudioCtx) covasAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (covasAudioCtx.state === 'suspended') covasAudioCtx.resume();
@@ -90,12 +102,16 @@ async function declencherAnalyseTactique(nomSysteme) {
     const contenu = document.getElementById('covas-contenu');
     if (!overlay || !contenu || !badge) return;
 
+    // Purge de l'écran holographique
     contenu.innerHTML = '';
     badge.style.display = 'none';
     overlay.classList.add('deploye');
 
-    await new Promise(r => setTimeout(r, 500));
-    await ecrireLigneCovas(`SYS.EDTEAM // ANALYSE LOCALE : ${nomSysteme.toUpperCase()}`, contenu);
+    await new Promise(r => setTimeout(r, 200));
+    if (currentSession !== covasSessionId) return;
+
+    await ecrireLigneCovas(`SYS.EDTEAM // ANALYSE LOCALE : ${nomSysteme.toUpperCase()}`, contenu, "", currentSession);
+    if (currentSession !== covasSessionId) return;
 
     try {
         let db;
@@ -116,26 +132,33 @@ async function declencherAnalyseTactique(nomSysteme) {
             }
         } catch(e) {}
 
+        if (currentSession !== covasSessionId) return;
+
         // DIPLOMATIE
         let diploAlerte = false;
         if (localFactions.length > 0) {
             const { data: traites } = await db.from('traites_diplomatiques').select('*').eq('escadron_id', escadronId);
+            if (currentSession !== covasSessionId) return;
+            
             if (traites && traites.length > 0) {
                 for (let traite of traites) {
                     if (localFactions.includes(traite.faction_cible.toUpperCase())) {
                         diploAlerte = true;
                         if (traite.type_relation === 'HOSTILE') {
-                            await ecrireLigneCovas(`>_ DIPLOMATIE : ⚠️ MENACE. Faction [${traite.faction_cible.toUpperCase()}] présente (HOSTILE).`, contenu, "covas-alerte");
+                            await ecrireLigneCovas(`>_ DIPLOMATIE : ⚠️ MENACE. Faction [${traite.faction_cible.toUpperCase()}] présente (HOSTILE).`, contenu, "covas-alerte", currentSession);
                         } else if (traite.type_relation === 'ALLIE') {
-                            await ecrireLigneCovas(`>_ DIPLOMATIE : Force alliée détectée [${traite.faction_cible.toUpperCase()}].`, contenu, "covas-neutre");
+                            await ecrireLigneCovas(`>_ DIPLOMATIE : Force alliée détectée [${traite.faction_cible.toUpperCase()}].`, contenu, "covas-neutre", currentSession);
                         } else {
-                            await ecrireLigneCovas(`>_ DIPLOMATIE : Territoire P.N.A. [${traite.faction_cible.toUpperCase()}].`, contenu);
+                            await ecrireLigneCovas(`>_ DIPLOMATIE : Territoire P.N.A. [${traite.faction_cible.toUpperCase()}].`, contenu, "", currentSession);
                         }
                     }
                 }
             }
         }
-        if (!diploAlerte) await ecrireLigneCovas(">_ DIPLOMATIE : RAS (Espace Neutre).", contenu, "covas-neutre");
+        if (currentSession !== covasSessionId) return;
+        if (!diploAlerte) await ecrireLigneCovas(">_ DIPLOMATIE : RAS (Espace Neutre).", contenu, "covas-neutre", currentSession);
+
+        if (currentSession !== covasSessionId) return;
 
         // BGS
         const { data: params } = await db.from('parametres_app').select('factions_favorites').eq('user_id', userId).single();
@@ -145,10 +168,13 @@ async function declencherAnalyseTactique(nomSysteme) {
             if (factionsSuivies.length > 0) {
                 bgsTrouve = true;
                 const nomsFactions = factionsSuivies.map(f => f.faction).join(', ');
-                await ecrireLigneCovas(`>_ BGS : Système sous surveillance (${nomsFactions}).`, contenu);
+                await ecrireLigneCovas(`>_ BGS : Système sous surveillance (${nomsFactions}).`, contenu, "", currentSession);
             }
         }
-        if (!bgsTrouve) await ecrireLigneCovas(">_ BGS : Aucune faction locale suivie.", contenu);
+        if (currentSession !== covasSessionId) return;
+        if (!bgsTrouve) await ecrireLigneCovas(">_ BGS : Aucune faction locale suivie.", contenu, "", currentSession);
+
+        if (currentSession !== covasSessionId) return;
 
         // ORDRES
         const { data: ordres } = await db.from('ordres_bgs').select('*')
@@ -160,11 +186,13 @@ async function declencherAnalyseTactique(nomSysteme) {
             for (let ordre of ordres) {
                 let textOrdre = ordre.type_ordre === 'HAUSSE' ? 'SOUTIEN' : (ordre.type_ordre === 'BAISSE' ? 'SABOTAGE' : ordre.type_ordre);
                 let couleurOrdre = ['BAISSE', 'GUERRE'].includes(ordre.type_ordre) ? 'covas-alerte' : 'covas-neutre';
-                await ecrireLigneCovas(`>_ ORDRE ACTIF : ${textOrdre} ciblant [${ordre.faction_cible.toUpperCase()}].`, contenu, couleurOrdre);
+                await ecrireLigneCovas(`>_ ORDRE ACTIF : ${textOrdre} ciblant [${ordre.faction_cible.toUpperCase()}].`, contenu, couleurOrdre, currentSession);
             }
         } else {
-            await ecrireLigneCovas(">_ ORDRES : Aucune directive de l'Amirauté.", contenu);
+            await ecrireLigneCovas(">_ ORDRES : Aucune directive de l'Amirauté.", contenu, "", currentSession);
         }
+
+        if (currentSession !== covasSessionId) return;
 
         // COMMERCE
         const { data: stations } = await db.from('stations_favorites').select('*')
@@ -172,16 +200,19 @@ async function declencherAnalyseTactique(nomSysteme) {
             .ilike('system_name', nomSysteme);
             
         if (stations && stations.length > 0) {
-            await ecrireLigneCovas(`>_ COMMERCE : ${stations.length} station(s) favorite(s) détectée(s).`, contenu, "covas-neutre");
+            await ecrireLigneCovas(`>_ COMMERCE : ${stations.length} station(s) favorite(s) détectée(s).`, contenu, "covas-neutre", currentSession);
         } else {
-            await ecrireLigneCovas(">_ COMMERCE : RAS.", contenu);
+            await ecrireLigneCovas(">_ COMMERCE : RAS.", contenu, "", currentSession);
         }
 
     } catch (error) {
-        await ecrireLigneCovas(">_ ⚠️ ERREUR DE LIAISON SATELLITE.", contenu, "covas-alerte");
+        if (currentSession === covasSessionId) {
+            await ecrireLigneCovas(">_ ⚠️ ERREUR DE LIAISON SATELLITE.", contenu, "covas-alerte", currentSession);
+        }
     }
 
-    await ecrireLigneCovas(">_ FIN DE TRANSMISSION.", contenu);
+    if (currentSession !== covasSessionId) return;
+    await ecrireLigneCovas(">_ FIN DE TRANSMISSION.", contenu, "", currentSession);
 
     // ==========================================
     // MÉCANIQUE DE FERMETURE AU CLIC
@@ -271,10 +302,9 @@ window.initCovasRealtime = function() {
                     const covasSysteme = document.getElementById('covas-overlay');
                     if (covasSysteme && covasSysteme.classList.contains('deploye')) {
                         covasSysteme.classList.remove('deploye');
-                        covasEnCours = false; // On libère le verrou d'animation
+                        covasEnCours = false;
                     }
 
-                    // SÉCURITÉ 2 : Plus permissif (includes) pour capter "LOST" même avec des guillemets
                     if (payloadBrut.includes("LOST")) {
                         const overlayTactique = document.getElementById('tactical-overlay');
                         if (overlayTactique) overlayTactique.classList.remove('deploye');
@@ -287,7 +317,7 @@ window.initCovasRealtime = function() {
                         }
                     }
                 }
-                return; // On arrête là pour ne pas lancer l'autre COVAS
+                return; 
             }
 
             // --- 2. GESTION DU COVAS D'INFORMATION SYSTÈME ---
@@ -300,12 +330,11 @@ window.initCovasRealtime = function() {
                 }
 
                 const sys = ligne.system_name ? ligne.system_name.trim().toUpperCase() : '';
-                const fauxSystemes = ['FINANCE', 'SYS_CORE', 'INCONNU', 'HEARTBEAT', 'STATUS', 'PARAM_UPDATE', 'APP_PARAMS', 'SOL'];
+                // NOUVEAU : Ajout de QG_DATA dans la liste des systèmes fantômes à ignorer
+                const fauxSystemes = ['FINANCE', 'SYS_CORE', 'INCONNU', 'HEARTBEAT', 'STATUS', 'PARAM_UPDATE', 'APP_PARAMS', 'SOL', 'QG_DATA'];
                 
                 if (sys && !fauxSystemes.includes(sys) && sys.length <= 35) {
-                    if (sys !== systemeCourant) {
-                        declencherAnalyseTactique(sys);
-                    }
+                    declencherAnalyseTactique(sys); // On l'appelle à chaque fois, l'ID de session gère les doublons
                 }
             }
         })
@@ -361,7 +390,6 @@ window.initialiserCompteurPresence = function() {
         return;
     }
 
-    // Clé unique basée sur l'utilisateur connecté ou une session anonyme de secours
     const userIdKey = profilCommandant.user_id ? profilCommandant.user_id : 'guest-' + Math.random();
 
     const presenceChannel = db.channel('pilotes-actifs-webapp', {
@@ -375,7 +403,6 @@ window.initialiserCompteurPresence = function() {
                 const users = Object.keys(etat);
                 const nbConnectes = users.length;
 
-                // --- 1. MISE À JOUR DES BADGES (PC & Mobile) ---
                 const pcCountVal = document.getElementById('online-count-val');
                 const pcDot = document.getElementById('online-dot');
                 if (pcCountVal) { pcCountVal.innerText = nbConnectes; pcCountVal.style.color = '#fff'; }
@@ -386,14 +413,13 @@ window.initialiserCompteurPresence = function() {
                 if (mobileText) { mobileText.innerText = `${nbConnectes} EN LIGNE`; mobileText.style.color = '#fff'; }
                 if (mobileDot) { mobileDot.style.background = '#00FF66'; mobileDot.style.boxShadow = '0 0 6px #00FF66'; }
 
-                // --- 2. MISE À JOUR DE LA MODALE DÉTAILLÉE ---
                 let htmlModal = '';
                 
                 users.forEach(key => {
                     const instances = etat[key];
                     if (!instances || !instances.length) return;
                     
-                    const p = instances[0]; // Récupération de la carte de visite du pilote
+                    const p = instances[0]; 
                     const nomCmdr = p.cmdr ? String(p.cmdr).toUpperCase() : 'COMMANDANT';
                     const nomSquad = p.escadron ? String(p.escadron).toUpperCase() : '';
                     
@@ -425,7 +451,6 @@ window.initialiserCompteurPresence = function() {
                     htmlModal = '<div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Aucun pilote détecté sur le réseau local.</div>';
                 }
 
-                // Injection dans les modales PC et Mobile
                 const listePc = document.getElementById('liste-pilotes-online');
                 if (listePc) listePc.innerHTML = htmlModal;
 
@@ -438,7 +463,6 @@ window.initialiserCompteurPresence = function() {
         })
         .subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-                // Diffusion de la carte de visite au réseau
                 await presenceChannel.track({
                     cmdr: profilCommandant.cmdr_nom || 'INCONNU',
                     escadron: profilCommandant.escadron_id || '',
@@ -451,42 +475,40 @@ window.initialiserCompteurPresence = function() {
         });
 };
 
-// Ne lancer le compteur qu'une seule fois !
 setTimeout(window.initialiserCompteurPresence, 3000);
 
 // ==========================================
-        // MOTEUR D'AFFICHAGE COVAS TACTIQUE AVANCÉ
-        // ==========================================
+// MOTEUR D'AFFICHAGE COVAS TACTIQUE AVANCÉ
+// ==========================================
 
-        async function verifierCibleTactique(nomCmdr, tagEscadron) {
-            try {
-                let db = typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp;
-                
-                const requeteProfil = db.from('profils').select('escadron_id').ilike('cmdr_nom', nomCmdr).limit(1);
-                const requeteDiplo = (profilCommandant.escadron_id && tagEscadron) 
-                    ? db.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('tag', tagEscadron.toUpperCase()).limit(1) 
-                    : Promise.resolve({ data: null });
-                const requeteTactique = profilCommandant.escadron_id 
-                    ? db.from('registre_tactique').select('*').eq('escadron_id', profilCommandant.escadron_id).ilike('cmdr_cible', nomCmdr).eq('est_valide', true).limit(1) 
-                    : Promise.resolve({ data: null });
+async function verifierCibleTactique(nomCmdr, tagEscadron) {
+    try {
+        let db = typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp;
+        
+        const requeteProfil = db.from('profils').select('escadron_id').ilike('cmdr_nom', nomCmdr).limit(1);
+        const requeteDiplo = (profilCommandant.escadron_id && tagEscadron) 
+            ? db.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('tag', tagEscadron.toUpperCase()).limit(1) 
+            : Promise.resolve({ data: null });
+        const requeteTactique = profilCommandant.escadron_id 
+            ? db.from('registre_tactique').select('*').eq('escadron_id', profilCommandant.escadron_id).ilike('cmdr_cible', nomCmdr).eq('est_valide', true).limit(1) 
+            : Promise.resolve({ data: null });
 
-                const [resProfil, resDiplo, resTact] = await Promise.all([requeteProfil, requeteDiplo, requeteTactique]);
+        const [resProfil, resDiplo, resTact] = await Promise.all([requeteProfil, requeteDiplo, requeteTactique]);
 
-                const isRegistered = (resProfil.data && resProfil.data.length > 0);
-                let diploStatus = (resDiplo.data && resDiplo.data.length > 0) ? resDiplo.data[0] : null;
-                const tacticalFiche = (resTact.data && resTact.data.length > 0) ? resTact.data[0] : null;
+        const isRegistered = (resProfil.data && resProfil.data.length > 0);
+        let diploStatus = (resDiplo.data && resDiplo.data.length > 0) ? resDiplo.data[0] : null;
+        const tacticalFiche = (resTact.data && resTact.data.length > 0) ? resTact.data[0] : null;
 
-                afficherAlerteCovas(nomCmdr, tagEscadron, tacticalFiche, diploStatus, isRegistered);
-            } catch(e) { console.error("Erreur scan tactique:", e); }
-        }
+        afficherAlerteCovas(nomCmdr, tagEscadron, tacticalFiche, diploStatus, isRegistered);
+    } catch(e) { console.error("Erreur scan tactique:", e); }
+}
 
-        function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered) {
+function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered) {
     if (typeof playSonCiblageTactique === 'function') playSonCiblageTactique(); 
     
     const overlay = document.getElementById('tactical-overlay');
     const contenu = document.getElementById('tactical-contenu');
     
-    // CORRECTION Z-INDEX : On force l'infobulle à s'afficher tout au-dessus (Couche 110000)
     const tooltipGlobale = document.getElementById('holo-tooltip');
     if (tooltipGlobale) tooltipGlobale.style.zIndex = '110000';
 
@@ -497,10 +519,8 @@ setTimeout(window.initialiserCompteurPresence, 3000);
     let pulseAnim = false;
     let htmlBlocs = "";
 
-    // Ligne stricte : Label à gauche, Résultat à droite
     const rowStyle = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;';
 
-    // --- A. ANALYSE DU REGISTRE TACTIQUE ---
     if (tacticalFiche) {
         let tColor = '#FF3333'; let tLabel = 'K.O.S (HOSTILE)';
         if (tacticalFiche.niveau_menace === 'SUSPECT') { tColor = 'var(--ed-orange)'; tLabel = 'SUSPECT'; }
@@ -513,7 +533,6 @@ setTimeout(window.initialiserCompteurPresence, 3000);
         let nomAuteur = tacticalFiche.auteur_nom ? tacticalFiche.auteur_nom.toUpperCase() : 'INCONNU';
         let txtRapport = tacticalFiche.rapport ? tacticalFiche.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
 
-        // Construction du contenu de l'infobulle holographique
         let tooltipContent = `> RAPPORT TACTIQUE<br><span style=\\'color:#fff; font-weight:normal; font-style:italic;\\'>&quot; ${txtRapport} &quot;</span><br><br><span style=\\'color:${tColor}; font-size:0.85em; font-weight:bold;\\'>SIGNALÉ PAR : CMDR ${nomAuteur}</span>`;
 
         htmlBlocs += `
@@ -535,7 +554,6 @@ setTimeout(window.initialiserCompteurPresence, 3000);
         </div>`;
     }
 
-    // --- B. ANALYSE DU TRAITÉ DIPLOMATIQUE ---
     if (tag) {
         if (diploStatus) {
             let dColor = 'var(--ed-blue)';
@@ -573,7 +591,6 @@ setTimeout(window.initialiserCompteurPresence, 3000);
         </div>`;
     }
 
-    // --- C. ANALYSE RÉSEAU EDTEAM ---
     if (isRegistered) {
         if (!tacticalFiche && !diploStatus) {
             mainColor = 'var(--ed-blue)'; mainTitle = '🌐 RÉSEAU EDTEAM';
@@ -591,7 +608,6 @@ setTimeout(window.initialiserCompteurPresence, 3000);
         </div>`;
     }
 
-    // --- DÉPLOIEMENT DE L'INTERFACE ---
     overlay.style.borderColor = mainColor;
     overlay.style.boxShadow = pulseAnim ? `0 0 40px ${mainColor}` : `0 0 20px ${mainColor}40`;
     const tagAffichage = tag ? `<span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ ${tag} ]</span>` : '';
@@ -609,16 +625,14 @@ setTimeout(window.initialiserCompteurPresence, 3000);
         <div class="covas-ligne" style="color: #555; font-size: 0.8em; margin-top: 20px; font-weight: bold; text-align: center;">[ DÉVERROUILLEZ LA CIBLE OU CLIQUEZ ICI POUR FERMER ]</div>
     `;
     
-    // --- AUTORISATION DU CLIC MANUEL ---
-    overlay.style.pointerEvents = 'auto'; // Rend la modale solide au clic
+    overlay.style.pointerEvents = 'auto'; 
     overlay.style.cursor = 'pointer';
     
     overlay.onclick = function() {
         if (typeof sonClic === 'function') sonClic();
         overlay.classList.remove('deploye');
-        window.lastTargetedCmdr = "LOST"; // On réinitialise la mémoire système
+        window.lastTargetedCmdr = "LOST"; 
         
-        // On referme le tooltip s'il était ouvert et on rend la fenêtre fantôme
         setTimeout(() => {
             overlay.style.pointerEvents = 'none';
             if (typeof hideHoloTooltip === 'function') hideHoloTooltip();
@@ -628,5 +642,5 @@ setTimeout(window.initialiserCompteurPresence, 3000);
     overlay.classList.add('deploye');
 }
 
-// On attache au "body" pour que ça marche sur TOUTES les pages au premier clic
+// Sécurité finale pour attacher l'activation au premier clic
 document.body.addEventListener('click', activerCovasAudio, { once: true });
