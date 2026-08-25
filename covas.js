@@ -262,9 +262,73 @@ window.deployerCovasManuel = function(e) {
 };
 
 // ==========================================
+// GESTIONNAIRE UNIVERSEL DE CIBLAGE TACTIQUE
+// ==========================================
+window.fermerCibleTactique = function() {
+    window.lastTargetedCmdr = "LOST";
+    const overlay = document.getElementById('tactical-overlay');
+    if (overlay) {
+        overlay.classList.remove('deploye');
+        overlay.style.pointerEvents = 'none';
+    }
+    if (typeof hideHoloTooltip === 'function') hideHoloTooltip();
+};
+
+window.traiterCiblageTactique = function(payloadBrut) {
+    if (!payloadBrut) {
+        window.fermerCibleTactique();
+        return;
+    }
+
+    const str = String(payloadBrut).trim();
+    const strUpper = str.toUpperCase();
+
+    // Détection universelle de déverrouillage / perte de cible
+    if (
+        strUpper === "LOST" || 
+        strUpper.includes("LOST") || 
+        strUpper === "NONE" || 
+        strUpper === "" || 
+        strUpper === "{}" ||
+        strUpper.includes('"NOM":""') ||
+        strUpper.includes('"NOM":"LOST"') ||
+        strUpper.includes('"TARGETLOCKED":FALSE')
+    ) {
+        window.fermerCibleTactique();
+        return;
+    }
+
+    if (str === window.lastTargetedCmdr) return;
+    window.lastTargetedCmdr = str;
+
+    // Fermeture du COVAS système bleu si ouvert
+    const covasSysteme = document.getElementById('covas-overlay');
+    if (covasSysteme && covasSysteme.classList.contains('deploye')) {
+        covasSysteme.classList.remove('deploye');
+        covasEnCours = false;
+    }
+
+    try {
+        const cibleData = JSON.parse(str);
+        const nom = cibleData.nom ? cibleData.nom.trim() : "";
+        const tag = cibleData.tag ? cibleData.tag.trim() : "";
+        
+        if (!nom || nom.toUpperCase() === "LOST" || nom.toUpperCase() === "NONE") {
+            window.fermerCibleTactique();
+        } else {
+            verifierCibleTactique(nom, tag);
+        }
+    } catch(e) {
+        verifierCibleTactique(str, "");
+    }
+};
+
+// ==========================================
 // 5. ÉCOUTE TEMPS RÉEL SUR SUPABASE
 // ==========================================
-window.initCovasRealtime = function() {
+window.lastSystemeCovas = ""; // Mémorise le dernier système visité pour éviter les doublons
+
+window.initCovasRealtime = async function() {
     let db = typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp;
 
     // SÉCURITÉ : On attend l'identification du commandant
@@ -273,6 +337,16 @@ window.initCovasRealtime = function() {
         return;
     }
     
+    // CALIBRAGE INITIAL : On charge le système actuel pour ne pas déclencher COVAS au premier reset de scan
+    if (window.lastSystemeCovas === "") {
+        try {
+            const { data: paramInit } = await db.from('parametres_app').select('position_actuelle').eq('user_id', profilCommandant.user_id).single();
+            if (paramInit && paramInit.position_actuelle) {
+                window.lastSystemeCovas = paramInit.position_actuelle.trim().toUpperCase();
+            }
+        } catch(e) {}
+    }
+
     db.channel('covas-tactique-channel')
         .on('postgres_changes', { 
             event: '*', 
@@ -282,7 +356,7 @@ window.initCovasRealtime = function() {
         }, (payload) => {
             const ligne = payload.new;
             
-            // SÉCURITÉ 1 : Si la ligne est supprimée (DELETE), on replie l'hologramme
+            // SÉCURITÉ 1 : Si la ligne est supprimée (DELETE), on replie l'hologramme tactique
             if (payload.eventType === 'DELETE') {
                 const overlayTactique = document.getElementById('tactical-overlay');
                 if (overlayTactique) overlayTactique.classList.remove('deploye');
@@ -293,48 +367,50 @@ window.initCovasRealtime = function() {
 
             // --- 1. INTERCEPTION GLOBALE DU CIBLAGE TACTIQUE ---
             if (ligne.target_commodity === 'TARGETED_CMDR') {
-                const payloadBrut = ligne.station_name || "";
-                
-                if (payloadBrut !== window.lastTargetedCmdr) {
-                    window.lastTargetedCmdr = payloadBrut;
-                    
-                    // COUPE-CIRCUIT : On referme de force le COVAS Système bleu s'il était ouvert
-                    const covasSysteme = document.getElementById('covas-overlay');
-                    if (covasSysteme && covasSysteme.classList.contains('deploye')) {
-                        covasSysteme.classList.remove('deploye');
-                        covasEnCours = false;
-                    }
-
-                    if (payloadBrut.includes("LOST")) {
-                        const overlayTactique = document.getElementById('tactical-overlay');
-                        if (overlayTactique) overlayTactique.classList.remove('deploye');
-                    } else {
-                        try {
-                            const cibleData = JSON.parse(payloadBrut);
-                            verifierCibleTactique(cibleData.nom, cibleData.tag);
-                        } catch(e) {
-                            verifierCibleTactique(payloadBrut, "");
-                        }
-                    }
-                }
+                window.traiterCiblageTactique(ligne.station_name);
                 return; 
             }
 
             // --- 2. GESTION DU COVAS D'INFORMATION SYSTÈME ---
             if (ligne.target_commodity === 'SYSTEM_STATUS' || ligne.type_operation === 'INFO') {
                 const texteStatut = ligne.station_name ? ligne.station_name.toUpperCase() : '';
+                const sys = ligne.system_name ? ligne.system_name.trim().toUpperCase() : '';
+                const fauxSystemes = ['FINANCE', 'SYS_CORE', 'INCONNU', 'HEARTBEAT', 'STATUS', 'PARAM_UPDATE', 'APP_PARAMS', 'SOL', 'QG_DATA'];
                 
-                // COUPE-CIRCUIT : On bloque l'analyse système bleu si le vaisseau scanne une cible
-                if (texteStatut.includes('CIBLE') || texteStatut.includes('SCAN') || (window.lastTargetedCmdr && !window.lastTargetedCmdr.includes("LOST"))) {
+                // A. COUPE-CIRCUIT DES MOTS-CLÉS DE SCAN
+                const motsScans = ['CIBLE', 'SCAN', 'AMORÇAGE', 'EDSM', 'PURGE', 'MISE À JOUR', 'TERMINÉ', 'ERREUR', 'ANNULÉ', 'LIAISON', 'VEILLE', 'PRÉDICTIF', 'ACHAT', 'VENTE'];
+                const estUnScan = motsScans.some(mot => texteStatut.includes(mot));
+                const aUneCibleVerrouillee = window.lastTargetedCmdr && !window.lastTargetedCmdr.includes("LOST");
+
+                let boutonScanActif = false;
+                const btnScan = document.getElementById('btn-trigger-scan');
+                if (btnScan && (btnScan.style.pointerEvents === 'none' || btnScan.innerText.includes('COURS') || btnScan.innerText.includes('TERMINÉ'))) {
+                    boutonScanActif = true;
+                }
+
+                if (estUnScan || aUneCibleVerrouillee || boutonScanActif) {
+                    // LA SOLUTION : On mémorise silencieusement le système pendant le scan pour ne pas se faire piéger à la fin !
+                    if (sys && !fauxSystemes.includes(sys) && sys.length <= 35) {
+                        window.lastSystemeCovas = sys;
+                    }
                     return; 
                 }
 
-                const sys = ligne.system_name ? ligne.system_name.trim().toUpperCase() : '';
-                // NOUVEAU : Ajout de QG_DATA dans la liste des systèmes fantômes à ignorer
-                const fauxSystemes = ['FINANCE', 'SYS_CORE', 'INCONNU', 'HEARTBEAT', 'STATUS', 'PARAM_UPDATE', 'APP_PARAMS', 'SOL', 'QG_DATA'];
-                
+                // B. FILTRE DES FAUX SYSTÈMES ET DÉCLENCHEMENT
                 if (sys && !fauxSystemes.includes(sys) && sys.length <= 35) {
-                    declencherAnalyseTactique(sys); // On l'appelle à chaque fois, l'ID de session gère les doublons
+                    
+                    let sysMemoireApp = window.lastSystemeCovas; 
+                    if (typeof paramApp !== 'undefined' && paramApp && paramApp.position_actuelle) {
+                        sysMemoireApp = paramApp.position_actuelle.trim().toUpperCase();
+                    }
+
+                    // L'animation ne se lance QUE si le système reçu est différent de là où on est déjà
+                    if (sys !== window.lastSystemeCovas && sys !== sysMemoireApp) {
+                        window.lastSystemeCovas = sys; // On enregistre le nouveau système
+                        declencherAnalyseTactique(sys);
+                    } else {
+                        window.lastSystemeCovas = sys; // Maintien de la synchro silencieuse
+                    }
                 }
             }
         })

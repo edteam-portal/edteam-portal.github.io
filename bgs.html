@@ -279,6 +279,16 @@
                     </div>
                 </div>
 
+                <!-- STATUT LÉGAL (CASIER) -->
+                <div id="header-legal-status" 
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 8px 14px; cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                    onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <span id="legal-text" style="color: #00FF66; font-size: 1.2em; font-weight: bold; line-height: 1;">CASIER VIERGE</span>
+                    </div>
+                </div>
+
                 <!-- ENCADRÉ HUD : PILOTES EN JEU (FORMAT CARRÉ / COMPACT) -->
                     <div id="online-counter" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-online-pilots', event)"
                         style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: pointer; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
@@ -524,28 +534,78 @@
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <!-- Rangs -->
-                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
-                            <div style="color: #888; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> RANGS FÉDÉRATION DES PILOTES</div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">COMBAT</span> <span id="modal-rank-combat" style="color: #fff; font-weight: bold;">-</span></div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">COMMERCE</span> <span id="modal-rank-trade" style="color: #fff; font-weight: bold;">-</span></div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">EXPLORATION</span> <span id="modal-rank-explo" style="color: #fff; font-weight: bold;">-</span></div>
-                            <div style="display: flex; justify-content: space-between;"><span style="color: #ccc;">EXOBIOLOGIE</span> <span id="modal-rank-exobio" style="color: #fff; font-weight: bold;">-</span></div>
+                        
+                        <!-- COLONNE GAUCHE -->
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Rangs Fédération -->
+                            <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                                <div style="color: #888; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> FÉDÉRATION DES PILOTES</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">COMBAT</span> <span id="modal-rank-combat" style="color: #fff; font-weight: bold;">-</span></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">COMMERCE</span> <span id="modal-rank-trade" style="color: #fff; font-weight: bold;">-</span></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">EXPLORATION</span> <span id="modal-rank-explo" style="color: #fff; font-weight: bold;">-</span></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">EXOBIOLOGIE</span> <span id="modal-rank-exobio" style="color: #fff; font-weight: bold;">-</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #ccc;">MERCENAIRE</span> <span id="modal-rank-merc" style="color: #fff; font-weight: bold;">-</span></div>
+                            </div>
+                            
+                            <!-- Rangs Navaux -->
+                            <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                                <div style="color: #888; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> RANGS AUXILIAIRES</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">FÉDÉRATION</span> <span id="modal-rank-fed" style="color: #fff; font-weight: bold;">-</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color: #ccc;">EMPIRE</span> <span id="modal-rank-emp" style="color: #fff; font-weight: bold;">-</span></div>
+                            </div>
+
+                            <!-- Patrimoine (Dossier Fédéral) - DÉPLACÉ ICI -->
+                            <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                                <div style="color: #888; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> FINANCE</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;"><span style="color: #ccc;">PATRIMOINE TOTAL</span> <span id="modal-wealth" style="color: #00FF66; font-weight: bold;">- CR</span></div>
+                            </div>
                         </div>
 
-                        <!-- Allégeance et Vaisseau -->
+                        <!-- COLONNE DROITE -->
                         <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
-                                <div style="color: #888; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> PUISSANCE SOUTENUE</div>
-                                <div id="modal-power" style="color: var(--ed-orange); font-weight: bold; font-size: 1.2em;">-</div>
+                            
+                            <!-- Casier Légal & Impact Stratégique (Sur la même ligne) -->
+                            <div style="display: flex; gap: 15px;">
+                                
+                                <!-- Casier Légal (Badge Coloré Dynamique) -->
+                                <div id="modal-casier-container" style="flex: 1; display: flex; justify-content: center; align-items: center; border-radius: 4px; border: 1px solid #333; background: rgba(0,0,0,0.5); transition: 0.3s; padding: 10px;">
+                                    <div id="modal-notoriety" style="font-size: 1.1em; font-weight: bold; letter-spacing: 1px; text-align: center;">-</div>
+                                </div>
+
+                                <!-- Impact Stratégique (Jauge Circulaire) -->
+                                <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px; flex: 1.5; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                                        <span style="color: #888; font-weight: bold; letter-spacing: 1px; font-size: 0.85em;">> BGS</span>
+                                        <span style="color: #ccc; font-size: 0.8em;">EFFORT GLOBAL</span>
+                                    </div>
+                                    
+                                    <!-- Le Cercle Holographique -->
+                                    <div style="position: relative; width: 55px; height: 55px;">
+                                        <div id="modal-bgs-circle" style="width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(var(--ed-orange) 0% 0%, rgba(255,113,0,0.1) 0% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,113,0,0.4); transition: background 0.5s;">
+                                            <div style="width: 45px; height: 45px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
+                                                <span id="modal-bgs-part" style="font-weight: bold; color: var(--ed-orange); font-size: 0.9em;">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                             </div>
-                            <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); padding: 15px; border-radius: 4px;">
-                                <div style="color: var(--ed-blue); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> VAISSEAU ACTIF</div>
-                                <div id="modal-ship" style="color: #fff; font-weight: bold; font-size: 1.1em;">-</div>
-                                <div id="modal-system" style="color: #888; font-size: 0.9em; margin-top: 5px;">📍 -</div>
+
+                            <!-- ÉTATS DE SERVICE BGS -->
+                            <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px; flex-grow: 1;">
+                                <div style="color: #888; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">> ÉTATS DE SERVICE BGS</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="color: #ccc; font-size: 0.9em;">OPÉRATIONS REJOINTES</span>
+                                    <span id="modal-ops-count" style="color: #fff; font-weight: bold; font-size: 1.1em;">-</span>
+                                </div>
+                                <div id="modal-specialiste-titres" style="display: flex; flex-direction: column; gap: 6px;">
+                                    <!-- Les titres de spécialistes seront injectés ici -->
+                                </div>
                             </div>
+                            
                         </div>
                     </div>
+
                     <!-- PANNEAU D'ADMINISTRATION (Amirauté Uniquement) -->
                     <div id="modal-admin-panel" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #FF3333;">
                         <div style="color: #FF3333; font-weight: bold; letter-spacing: 1px; margin-bottom: 15px;">> GESTION DU PERSONNEL (AMIRAUTÉ)</div>
@@ -1255,17 +1315,123 @@
         const ranksTrade = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
         const ranksExplore = ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
         const ranksExobio = ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+        const ranksFed = ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"];
+        const ranksEmp = ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"];
+        const ranksMercenary = ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
 
         async function ouvrirProfilPilote(userId) {
             try {
                 if(typeof ouvrirModal === 'function') ouvrirModal('modal-profil-pilote'); // Utilise le son et ferme les tooltips
                 else document.getElementById('modal-profil-pilote').style.display = 'flex';
 
-                const { data: profil } = await supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single();
-                const { data: params } = await supabaseApp.from('parametres_app').select('*').eq('user_id', userId).maybeSingle();
+                // 1. On télécharge le profil et le vaisseau
+                const [resProfil, resParams] = await Promise.all([
+                    supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single(),
+                    supabaseApp.from('parametres_app').select('*').eq('user_id', userId).maybeSingle()
+                ]);
 
+                const profil = resProfil.data;
+                const params = resParams.data;
                 if (!profil) return;
 
+                // --- 2. CALCUL ROBUSTE DE L'IMPACT BGS ET DES SPÉCIALITÉS ---
+                let totalSquad = 0;
+                let totalPilote = 0;
+                let opsCount = 0;
+                let titresHtml = '<div style="color: #666; font-style: italic; font-size: 0.8em; text-align: center;">Aucune distinction de spécialiste.</div>';
+                
+                try {
+                    // On sécurise la recherche de l'escadron
+                    const escadronCible = profilCommandant.escadron_id || 'ISS';
+                    const { data: squadOrdres } = await supabaseApp.from('ordres_bgs').select('id').eq('escadron_id', escadronCible);
+                    
+                    if (squadOrdres && squadOrdres.length > 0) {
+                        const ordreIds = squadOrdres.map(o => String(o.id));
+                        
+                        // On télécharge l'étoile complète (*)
+                        const { data: allEfforts } = await supabaseApp.from('efforts_bgs').select('*');
+                        
+                        if (allEfforts) {
+                            const effortsEscadron = allEfforts.filter(e => ordreIds.includes(String(e.ordre_id)));
+                            
+                            // 1. Calcul de l'impact (pourcentage) et nombre d'opérations uniques
+                            const uniqueOps = new Set();
+                            const scoresSpecialistes = {};
+
+                            effortsEscadron.forEach(e => {
+                                const val = Math.abs(Number(e.valeur) || 0);
+                                let pts = val;
+                                // Application du diviseur pour les crédits
+                                if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) { 
+                                    pts = val / 2000000; 
+                                }
+                                
+                                totalSquad += pts;
+                                
+                                const uid = String(e.user_id);
+                                if (uid === String(userId)) {
+                                    totalPilote += pts;
+                                    uniqueOps.add(e.ordre_id);
+                                }
+
+                                // 2. Préparation du classement des Spécialistes
+                                if (!scoresSpecialistes[uid]) scoresSpecialistes[uid] = { log: 0, eco: 0, sec: 0, sci: 0 };
+                                if (e.type_action === 'MISSIONS' || e.type_action === 'ECHECS') scoresSpecialistes[uid].log += pts;
+                                else if (e.type_action === 'ECONOMIE' || e.type_action === 'CONTREBANDE') scoresSpecialistes[uid].eco += pts;
+                                else if (e.type_action === 'SECURITE' || e.type_action === 'MEURTRES') scoresSpecialistes[uid].sec += pts;
+                                else if (e.type_action === 'SCIENCE') scoresSpecialistes[uid].sci += pts;
+                            });
+
+                            opsCount = uniqueOps.size;
+
+                            // 3. Élection des Spécialistes (Comparaison avec le reste de l'escadron)
+                            const trouverMeilleur = (categorie) => {
+                                let max = 0; let topPilote = null;
+                                for (const [uid, scores] of Object.entries(scoresSpecialistes)) {
+                                    // S'il y a un effort valide (> 0) et qu'il est le plus grand
+                                    if (scores[categorie] > max) { max = scores[categorie]; topPilote = uid; }
+                                }
+                                return topPilote;
+                            };
+
+                            const N1_Sec = trouverMeilleur('sec');
+                            const N1_Log = trouverMeilleur('log');
+                            const N1_Eco = trouverMeilleur('eco');
+                            const N1_Sci = trouverMeilleur('sci');
+
+                            let tempTitres = '';
+                            const addTitre = (icon, nom, color) => {
+                                tempTitres += `<div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${color}; padding: 6px 10px; font-size: 0.85em; color: ${color}; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 0 4px 4px 0; margin-bottom: 4px;"><span>${icon} ${nom}</span><span style="font-size: 1.2em;">🏆</span></div>`;
+                            };
+
+                            // Si le joueur cliqué est le N°1, on lui ajoute la médaille correspondante !
+                            if (String(userId) === String(N1_Sec)) addTitre('🛡️', 'LE FER DE LANCE (SÉCURITÉ)', 'var(--ed-blue)');
+                            if (String(userId) === String(N1_Log)) addTitre('📦', 'MAÎTRE LOGISTICIEN (MISSIONS)', 'var(--ed-orange)');
+                            if (String(userId) === String(N1_Eco)) addTitre('💰', 'LE MAGNAT (ÉCONOMIE)', '#00FF66');
+                            if (String(userId) === String(N1_Sci)) addTitre('🔬', 'L\'ÉCLAIREUR (SCIENCE)', '#B026FF');
+
+                            if (tempTitres !== '') titresHtml = tempTitres;
+                        }
+                    }
+                } catch(err) { console.error("Erreur calcul BGS:", err); }
+
+                // Mise à jour visuelle de la jauge circulaire
+                const partPct = totalSquad > 0 ? ((totalPilote / totalSquad) * 100).toFixed(1) : 0;
+                const elPart = document.getElementById('modal-bgs-part');
+                const elCircle = document.getElementById('modal-bgs-circle');
+                
+                if (elPart) elPart.innerText = partPct + '%';
+                if (elCircle) {
+                    elCircle.style.background = `conic-gradient(var(--ed-orange) 0% ${partPct}%, rgba(255,113,0,0.1) ${partPct}% 100%)`;
+                }
+
+                // Mise à jour des États de Service
+                const elOpsCount = document.getElementById('modal-ops-count');
+                if (elOpsCount) elOpsCount.innerText = opsCount;
+                const elSpecialiste = document.getElementById('modal-specialiste-titres');
+                if (elSpecialiste) elSpecialiste.innerHTML = titresHtml;
+
+                // --- 3. INJECTION DES DONNÉES DU PROFIL ---
                 document.getElementById('modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.7em;">[ EN ATTENTE EDMC ]</span>');
                 
                 let badges = '';
@@ -1274,30 +1440,50 @@
                 if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">DIPLOMATE</span>';
                 document.getElementById('modal-cmdr-roles').innerHTML = badges;
 
-                document.getElementById('modal-rank-combat').innerText = ranksCombat[profil.rang_combat || 0] || 'INCONNU';
-                document.getElementById('modal-rank-trade').innerText = ranksTrade[profil.rang_commerce || 0] || 'INCONNU';
-                document.getElementById('modal-rank-explo').innerText = ranksExplore[profil.rang_explo || 0] || 'INCONNU';
-                document.getElementById('modal-rank-exobio').innerText = ranksExobio[profil.rang_exobio || 0] || 'INCONNU';
+                const formatRank = (rankArray, rankVal, progVal) => {
+                    const rName = rankArray[rankVal || 0] || 'INCONNU';
+                    return `${rName} <span style="color:var(--ed-orange); font-size:0.85em; margin-left:5px;">(${progVal || 0}%)</span>`;
+                };
 
-                document.getElementById('modal-power').innerText = profil.power_nom ? profil.power_nom.toUpperCase() : 'INDEPENDANT';
+                // Injection des grades
+                document.getElementById('modal-rank-combat').innerHTML = formatRank(ranksCombat, profil.rang_combat, profil.prog_combat);
+                document.getElementById('modal-rank-trade').innerHTML = formatRank(ranksTrade, profil.rang_commerce, profil.prog_commerce);
+                document.getElementById('modal-rank-explo').innerHTML = formatRank(ranksExplore, profil.rang_explo, profil.prog_explore);
+                document.getElementById('modal-rank-exobio').innerHTML = formatRank(ranksExobio, profil.rang_exobio, profil.prog_exobio);
+                document.getElementById('modal-rank-merc').innerHTML = formatRank(ranksMercenary, profil.rang_mercenary, profil.prog_mercenary);
+                document.getElementById('modal-rank-fed').innerHTML = profil.rang_fed > 0 ? formatRank(ranksFed, profil.rang_fed, profil.prog_fed) : '<span style="color:#666;">AUCUN</span>';
+                document.getElementById('modal-rank-emp').innerHTML = profil.rang_emp > 0 ? formatRank(ranksEmp, profil.rang_emp, profil.prog_emp) : '<span style="color:#666;">AUCUN</span>';
 
-                if (params && params.vaisseau_nom) {
-                    let modeleAff = params.vaisseau_modele || 'INCONNU';
-                    if (typeof dicoVaisseaux !== 'undefined' && dicoVaisseaux[modeleAff.toLowerCase()]) modeleAff = dicoVaisseaux[modeleAff.toLowerCase()];
-                    document.getElementById('modal-ship').innerText = `${params.vaisseau_nom.toUpperCase()} (${modeleAff})`;
-                    document.getElementById('modal-system').innerText = `📍 ${params.position_actuelle || 'SYSTÈME INCONNU'}`;
+                const fmt = new Intl.NumberFormat('fr-FR');
+                document.getElementById('modal-wealth').innerText = profil.patrimoine_total ? fmt.format(profil.patrimoine_total) + ' CR' : 'INCONNU';
+                
+                // --- INJECTION DU CASIER (BADGE) ---
+                const noto = profil.notoriete || 0;
+                const casierContainer = document.getElementById('modal-casier-container');
+                const notorietyText = document.getElementById('modal-notoriety');
+                
+                if (noto > 0) {
+                    if (casierContainer) {
+                        casierContainer.style.background = 'rgba(255, 51, 51, 0.1)';
+                        casierContainer.style.borderColor = '#FF3333';
+                        casierContainer.style.boxShadow = 'inset 0 0 15px rgba(255,51,51,0.2)';
+                    }
+                    if (notorietyText) notorietyText.innerHTML = `<span style="color: #FF3333; text-shadow: 0 0 5px rgba(255,51,51,0.5);">RECHERCHÉ (${noto})</span>`;
                 } else {
-                    document.getElementById('modal-ship').innerText = 'DONNÉES NAVALES NON SYNCHRONISÉES';
-                    document.getElementById('modal-system').innerText = '📍 -';
+                    if (casierContainer) {
+                        casierContainer.style.background = 'rgba(0, 255, 102, 0.05)';
+                        casierContainer.style.borderColor = '#00FF66';
+                        casierContainer.style.boxShadow = 'none';
+                    }
+                    if (notorietyText) notorietyText.innerHTML = `<span style="color: #00FF66;">CASIER VIERGE</span>`;
                 }
 
-                // --- AJOUT : CONTRÔLE AMIRAUTÉ ---
+                // --- 4. CONTRÔLE AMIRAUTÉ ---
                 const adminPanel = document.getElementById('modal-admin-panel');
                 const adminButtons = document.getElementById('modal-admin-buttons');
                 
-                // L'Amiral voit le panneau, mais on lui interdit de se rétrograder lui-même !
                 if (profilCommandant.est_amiral || profilCommandant.est_directeur) {
-                    adminPanel.style.display = 'block';
+                    if(adminPanel) adminPanel.style.display = 'block';
                     
                     let btnOfficier = profil.est_officier 
                         ? `<button style="background: transparent; border: 1px solid #888; color: #888; flex:1; min-width: 200px; padding:10px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#888'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#888';" onclick="modifierRoleMembre('${userId}', 'officier', false)" onmouseenter="if(typeof sonHover==='function') sonHover()">RÉTROGRADER OFFICIER BGS</button>`
@@ -1307,9 +1493,9 @@
                         ? `<button style="background: transparent; border: 1px solid #888; color: #888; flex:1; min-width: 200px; padding:10px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='#888'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#888';" onclick="modifierRoleMembre('${userId}', 'diplomate', false)" onmouseenter="if(typeof sonHover==='function') sonHover()">RÉTROGRADER DIPLOMATE</button>`
                         : `<button style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); flex:1; min-width: 200px; padding:10px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';" onclick="modifierRoleMembre('${userId}', 'diplomate', true)" onmouseenter="if(typeof sonHover==='function') sonHover()">PROMOUVOIR DIPLOMATE</button>`;
 
-                    adminButtons.innerHTML = btnOfficier + btnDiplomate;
+                    if(adminButtons) adminButtons.innerHTML = btnOfficier + btnDiplomate;
                 } else {
-                    adminPanel.style.display = 'none';
+                    if(adminPanel) adminPanel.style.display = 'none';
                 }
 
             } catch(e) { console.error("Erreur chargement profil pilote", e); }
@@ -2382,6 +2568,30 @@
                 }
                 if (profilData.cmdr_nom) {
                     const elCmdr = document.getElementById('cmdr-name-display');
+                    // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
+                    const notoriete = parseInt(profilData.notoriete) || 0;
+                    const legalBox = document.getElementById("header-legal-status");
+                    const legalText = document.getElementById("legal-text");
+
+                    if (legalBox && legalText) {
+                        if (notoriete > 0) {
+                            legalBox.style.background = "rgba(255, 51, 51, 0.05)";
+                            legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
+                            legalText.style.color = "#FF3333";
+                            legalText.innerText = "RECHERCHÉ";
+                            
+                            const explicationCrime = "STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#FF3333; font-size:1.2em;\\'>" + notoriete + "</strong><br><br>La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br>Tant qu\\'elle n\\'est pas à 0, vous ne pouvez pas utiliser les terminaux de l\\'autorité<br>pour payer vos amendes.</span>";
+                            legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationCrime}', '#FF3333')`);
+                        } else {
+                            legalBox.style.background = "rgba(0, 255, 102, 0.05)";
+                            legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
+                            legalText.style.color = "#00FF66";
+                            legalText.innerText = "CASIER VIERGE";
+                            
+                            const explicationVierge = "STATUT LÉGAL : SAIN<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#00FF66; font-size:1.2em;\\'>0</strong><br><br>Aucune infraction grave récente n\\'est enregistrée par la Fédération des Pilotes.<br>Vous avez un accès total aux services des spatioports et des Facteurs.</span>";
+                            legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationVierge}', '#00FF66')`);
+                        }
+                    }
                     if(elCmdr) elCmdr.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase();
                 }
 
@@ -3338,24 +3548,25 @@
                 });
                 memoireDicoPilotes = dicoPilotes;
 
-                // 2. PEUPLEMENT DU FILTRE DES ORDRES
+                // 2. PEUPLEMENT DU FILTRE DES ORDRES (AVEC NUMÉRO D'OPÉRATION)
                 const selectOrdre = document.getElementById('filtre-ordre');
                 if (selectOrdre && selectOrdre.options.length <= 1) {
                     ordres.forEach(o => {
                         const opt = document.createElement('option');
                         opt.value = o.id;
-                        opt.innerText = `[ ${o.statut} ] ${o.systeme_cible} (${o.type_ordre})`;
+                        opt.innerText = `[ ${o.statut} #${o.id} ] ${o.systeme_cible} (${o.type_ordre})`;
                         selectOrdre.appendChild(opt);
                     });
                 }
 
-                // 3. FILTRAGE TEMPOREL ET OPÉRATIONNEL
+                // 3. FILTRAGE TEMPOREL, OPÉRATIONNEL ET PILOTE
                 let tickRef = dernierTick;
                 if (new Date() > prochainTick) tickRef = prochainTick;
                 const now = Date.now();
                 
                 let effortsFiltres = effortsBruts.filter(e => {
                     if (filtreOrdre !== 'ALL' && String(e.ordre_id) !== String(filtreOrdre)) return false;
+                    if (filtrePilote === 'ME' && e.user_id !== profilCommandant.user_id) return false;
                     
                     let dateStr = e.date_action;
                     if (!dateStr) return false;
@@ -3508,9 +3719,9 @@
                     }
                 }
 
-                // 6. JOURNAL DES EXPLOITS (GRILLE AVEC HORODATAGE COMPLET JJ/MM HH:MM)
+                // 6. JOURNAL DES EXPLOITS (FILTRÉ DYNAMIQUEMENT)
                 const conteneurFeed = document.getElementById('exploit-feed');
-                const lastActions = [...effortsBruts].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 40);
+                const lastActions = [...effortsFiltres].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 50);
                 
                 if (conteneurFeed) {
                     if (lastActions.length === 0) {

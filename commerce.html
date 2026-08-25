@@ -487,6 +487,43 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL AIDE SOUTE & INVENTAIRE -->
+    <div class="modal-overlay" id="modal-aide-soute" onclick="fermerModal('modal-aide-soute', event)" style="z-index: 3500;">
+        <div class="modal-content" style="max-width: 650px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-aide-soute')">X</div>
+            <div class="modal-title" style="color: var(--ed-orange); font-size: 1.2em; border-bottom: 1px solid var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px;">
+                ℹ️ MANUEL // SYNCHRONISATION DES SOUTES
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 15px; font-size: 0.9em; line-height: 1.6;">
+                
+                <div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); padding: 12px 15px; border-radius: 0 4px 4px 0;">
+                    <strong style="color: var(--ed-blue); display: block; margin-bottom: 4px;">1. SOUTE DU VAISSEAU (AUTOMATIQUE)</strong>
+                    Le jeu transmet l'intégralité de la soute en direct. Chaque achat, vente ou minage s'affiche instantanément sur le radar.
+                </div>
+
+                <div style="background: rgba(255, 113, 0, 0.05); border-left: 3px solid var(--ed-orange); padding: 12px 15px; border-radius: 0 4px 4px 0;">
+                    <strong style="color: var(--ed-orange); display: block; margin-bottom: 4px;">2. INVENTAIRE DU FLEET CARRIER (INCRÉMENTAL)</strong>
+                    Frontier Developments ne détaille pas la cargaison complète à l'ouverture du panneau de gestion. Le radar enregistre donc chaque mouvement validé dans le menu de <strong>Transfert d'objets</strong>.
+                </div>
+
+                <div style="background: rgba(0, 255, 102, 0.05); border-left: 3px solid #00FF66; padding: 12px 15px; border-radius: 0 4px 4px 0;">
+                    <strong style="color: #00FF66; display: block; margin-bottom: 4px;">3. PERSISTANCE & SAUVEGARDE</strong>
+                    Vos marchandises restent sauvegardées en base de données de façon permanente. Vous n'avez <strong>jamais besoin de recommencer</strong> à chaque session.
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px dashed #555; padding: 12px 15px; border-radius: 4px; color: #aaa;">
+                    <strong style="color: #fff; display: block; margin-bottom: 4px;">⚙️ EN CAS D'OUBLI D'EDMC :</strong>
+                    Si vous avez déplacé de la marchandise sans EDMC, effectuez simplement un transfert de ce tonnage (aller / retour) pour réaligner le compteur.
+                </div>
+
+            </div>
+
+            <button class="btn-save" style="margin-top: 20px;" onclick="fermerModal('modal-aide-soute')">[ FERMER LE MANUEL ]</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-economie" onclick="fermerModal('modal-economie', event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-economie')">X</div>
@@ -514,6 +551,16 @@
                     <div style="display: flex; flex-direction: column; justify-content: center;">
                         <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
                         <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
+                    </div>
+                </div>
+
+                <!-- STATUT LÉGAL (CASIER) -->
+                <div id="header-legal-status" 
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 8px 14px; cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                    onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <span id="legal-text" style="color: #00FF66; font-size: 1.2em; font-weight: bold; line-height: 1;">CASIER VIERGE</span>
                     </div>
                 </div>
 
@@ -615,9 +662,14 @@
                         <div class="fc-cargo-grid" id="fc-cargo-grid"></div>
                     </div>
                 </div>
-                <div class="settings-icons-col" style="justify-content: center; align-items: center;">
-                    <button id="btn-settings-economie" class="ui-icon-btn" style="height: 80px; width: 80px;" onclick="ouvrirModalEconomie(event)" onmouseenter="showHoloTooltip(event, 'MOYENNES GALACTIQUES', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
+                <div class="settings-icons-col" style="justify-content: space-between; align-items: center; padding: 0 15px;">
+                    <!-- Bouton Moyennes Galactiques -->
+                    <button id="btn-settings-economie" class="ui-icon-btn" style="height: 48%; width: 75px;" onclick="ouvrirModalEconomie(event)" onmouseenter="showHoloTooltip(event, 'MOYENNES GALACTIQUES', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
                         <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(50, 50) rotate(-25) translate(-50, -50)"><rect x="15" y="30" width="70" height="35" rx="2" fill="var(--ed-bg)" /><path d="M20 73 H85 M25 81 H90" /><text x="50" y="55" font-family="'Share Tech Mono', monospace" font-size="24" font-weight="bold" fill="currentColor" stroke="none" text-anchor="middle">CR</text></g></svg>
+                    </button>
+                    <!-- Bouton Aide / Manuel Soute -->
+                    <button id="btn-settings-aide-soute" class="ui-icon-btn" style="height: 48%; width: 75px; border-color: var(--ed-orange); color: var(--ed-orange);" onclick="ouvrirModal('modal-aide-soute', event)" onmouseenter="showHoloTooltip(event, 'MANUEL : SOUTE & CARRIER', 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">
+                        <span style="font-size: 1.6em; font-weight: bold;">?</span>
                     </button>
                 </div>
                 <div class="scan-action-col" style="padding-left: 25px;">
@@ -1890,10 +1942,14 @@
                     ciblages.forEach(c => idsToDelete.push(c.id));
                 }
 
-                // E. Extraction du Statut COVAS
+                // F. Extraction du Statut COVAS
                 const statuses = radarData.filter(d => d.target_commodity === 'SYSTEM_STATUS').sort((a,b) => b.id - a.id);
                 if (statuses.length > 0) {
                     paramUpdates.covas_status = statuses[0].station_name;
+                    // LIGNE RESTAURÉE : Mise à jour de la position actuelle dans la base
+                    if (statuses[0].system_name && statuses[0].system_name !== 'SYS_CORE') {
+                        paramUpdates.position_actuelle = statuses[0].system_name;
+                    }
                     paramModifie = true;
                     statuses.forEach(h => idsToDelete.push(h.id));
                 }
@@ -1942,6 +1998,30 @@
                 }
                 if (profilCommandant.cmdr_nom) {
                     const elCmdr = document.getElementById('cmdr-name-display');
+                    // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
+                    const notoriete = parseInt(profilCommandant.notoriete) || 0;
+                    const legalBox = document.getElementById("header-legal-status");
+                    const legalText = document.getElementById("legal-text");
+
+                    if (legalBox && legalText) {
+                        if (notoriete > 0) {
+                            legalBox.style.background = "rgba(255, 51, 51, 0.05)";
+                            legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
+                            legalText.style.color = "#FF3333";
+                            legalText.innerText = "RECHERCHÉ";
+                            
+                            const explicationCrime = "STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#FF3333; font-size:1.2em;\\'>" + notoriete + "</strong><br><br>La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br>Tant qu\\'elle n\\'est pas à 0, vous ne pouvez pas utiliser les terminaux de l\\'autorité<br>pour payer vos amendes.</span>";
+                            legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationCrime}', '#FF3333')`);
+                        } else {
+                            legalBox.style.background = "rgba(0, 255, 102, 0.05)";
+                            legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
+                            legalText.style.color = "#00FF66";
+                            legalText.innerText = "CASIER VIERGE";
+                            
+                            const explicationVierge = "STATUT LÉGAL : SAIN<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#00FF66; font-size:1.2em;\\'>0</strong><br><br>Aucune infraction grave récente n\\'est enregistrée par la Fédération des Pilotes.<br>Vous avez un accès total aux services des spatioports et des Facteurs.</span>";
+                            legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationVierge}', '#00FF66')`);
+                        }
+                    }
                     if(elCmdr) elCmdr.innerText = 'CMDR ' + profilCommandant.cmdr_nom.toUpperCase();
                 }
                 if (paramUpdates.covas_status || (paramApp && paramApp.covas_status)) {
@@ -1966,7 +2046,16 @@
 
         function afficherDonnees() {
             const container = document.querySelector('.data-container'); if (baseDonnees.length === 0) return;
-            let itemsToDisplay = baseDonnees.filter(d => (d.type_operation || 'ACHAT') === modeActif); 
+            
+            // FILTRE AMÉLIORÉ : L'onglet Prédictif affiche tout ce qui n'est pas un achat/vente classique
+            let itemsToDisplay = baseDonnees.filter(d => {
+                const op = d.type_operation || 'ACHAT';
+                if (modeActif === 'PREDICTIF') {
+                    return op === 'PREDICTIF' || op === 'PREDICTIF_LOCAL';
+                }
+                return op === modeActif;
+            });
+            
             if (itemsToDisplay.length === 0) { container.innerHTML = '<p style="color:var(--ed-orange);">> AUCUN RÉSULTAT POUR CE FILTRE.</p>'; return; }
             try {
                 const moyennesUpper = {}; if (paramApp && paramApp.moyennes_galactiques) { for(let k in paramApp.moyennes_galactiques) { moyennesUpper[k.toUpperCase()] = paramApp.moyennes_galactiques[k]; } }
@@ -2006,6 +2095,13 @@
                         const dt = new Date(ligne.date_maj); const diffHeures = (new Date() - dt) / (1000 * 60 * 60);
                         if (diffHeures < 1) { ageTexte = "MAINTENANT"; couleurAge = "#00FF00"; } else if (diffHeures < 24) { ageTexte = Math.floor(diffHeures) + "H"; couleurAge = "#00FF00"; } else { ageTexte = Math.floor(diffHeures / 24) + " JOURS"; couleurAge = "red"; }
                     }
+                    
+                    // --- CORRECTION DU BUG FANTÔME ICI ---
+                    let htmlMoyenneTop = "";
+                    let couleurMarge = "";
+                    let texteMarge = "";
+                    // -------------------------------------
+
                     const refPrixMoyen = ligne.prix_moyen || 0;
                     if (refPrixMoyen > 0) {
                         const diffPourcentage = ((ligne.prix_unitaire - refPrixMoyen) / refPrixMoyen) * 100; const diffFormat = Math.abs(diffPourcentage).toFixed(1) + "%";
@@ -2089,7 +2185,7 @@
                     </div>`;
                 });
                 if (newHTML !== lastRenderedDataHTML) { container.innerHTML = newHTML; lastRenderedDataHTML = newHTML; }
-            } catch (e) {}
+            } catch (e) { console.error("Erreur de rendu HTML:", e); }
         }
 
         async function systemLoop() {

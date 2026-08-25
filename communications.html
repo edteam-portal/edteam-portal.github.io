@@ -177,6 +177,16 @@
                 </div>
             </div>
 
+            <!-- STATUT LÉGAL (CASIER) -->
+            <div id="header-legal-status" 
+                style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 8px 14px; cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                <div style="display: flex; align-items: center; justify-content: center;">
+                    <span id="legal-text" style="color: #00FF66; font-size: 1.2em; font-weight: bold; line-height: 1;">CASIER VIERGE</span>
+                </div>
+            </div>
+
             <!-- ENCADRÉ HUD : PILOTES EN JEU (FORMAT CARRÉ / COMPACT) -->
             <div id="online-counter" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-online-pilots', event)"
                 style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: pointer; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
@@ -486,6 +496,10 @@
         let listePilotes = [];
         let maCoalitionId = null;
         
+        // HORLOGE GLOBALE DU TICK
+        let dernierTick = new Date(0);
+        let prochainTick = new Date();
+        
         // Caches du Renseignement Tactique
         let cacheRegistreTactique = [];
         let cacheTraitesDiplo = [];
@@ -546,6 +560,31 @@
 
                 // MISE À JOUR DE L'INTERFACE
                 document.getElementById('cmdr-name-display').innerText = 'CMDR ' + data.cmdr_nom.toUpperCase();
+
+                // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
+                const notoriete = parseInt(data.notoriete) || 0;
+                const legalBox = document.getElementById("header-legal-status");
+                const legalText = document.getElementById("legal-text");
+
+                if (legalBox && legalText) {
+                    if (notoriete > 0) {
+                        legalBox.style.background = "rgba(255, 51, 51, 0.05)";
+                        legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
+                        legalText.style.color = "#FF3333";
+                        legalText.innerText = "RECHERCHÉ";
+                        
+                        const explicationCrime = "STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#FF3333; font-size:1.2em;\\'>" + notoriete + "</strong><br><br>La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br>Tant qu\\'elle n\\'est pas à 0, vous ne pouvez pas utiliser les terminaux de l\\'autorité<br>pour payer vos amendes.</span>";
+                        legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationCrime}', '#FF3333')`);
+                    } else {
+                        legalBox.style.background = "rgba(0, 255, 102, 0.05)";
+                        legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
+                        legalText.style.color = "#00FF66";
+                        legalText.innerText = "CASIER VIERGE";
+                        
+                        const explicationVierge = "STATUT LÉGAL : SAIN<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#00FF66; font-size:1.2em;\\'>0</strong><br><br>Aucune infraction grave récente n\\'est enregistrée par la Fédération des Pilotes.<br>Vous avez un accès total aux services des spatioports et des Facteurs.</span>";
+                        legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationVierge}', '#00FF66')`);
+                    }
+                }
                 
                 if (data.cle_api) {
                     const keyDisplay = document.getElementById('api-key-display');
@@ -553,10 +592,11 @@
                 }
                 
                 // --- SÉQUENCE D'ALLUMAGE SÉCURISÉE ---
-                await chargerListePilotes(); // On attend la liste des pilotes
-                await chargerRenseignementLocal();  // On attend les traités et KOS (CRUCIAL)
-                chargerHistorique(); // Maintenant on peut afficher les messages sereinement
-                ecouterTransmissions(); // On ouvre les communications temps réel
+                await chargerListePilotes();
+                await chargerRenseignementLocal();
+                await verifierEtPurgerTick(); // <-- Synchronise et purge AVANT d'afficher
+                await chargerHistorique();    // <-- Affiche uniquement les messages propres
+                ecouterTransmissions();
 
                 // NOUVEAU : ÉCOUTE INSTANTANÉE DU RADAR DE COMBAT
                 supabaseApp.channel('covas_tactique')
@@ -663,6 +703,11 @@
             try {
                 let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(50);
                 
+                // FILTRE DE PURGE : Seuls les messages émis depuis le dernier Tick sont chargés
+                if (dernierTick && dernierTick.getTime() > 0) {
+                    query = query.gte('created_at', dernierTick.toISOString());
+                }
+
                 if (canalActif === 'GLOBAL') {
                     query = query.eq('canal', 'GLOBAL');
                 } else if (canalActif === 'ESCADRON') {
@@ -1168,144 +1213,86 @@
 
     <script>
         // ==========================================
-        // HORLOGE GALACTIQUE UNIFIÉE (EDCD + SUPABASE)
+        // HORLOGE GALACTIQUE ET PURGE DU TICK (EDCD)
         // ==========================================
-        (function initHorlogeGalactique() {
-            let prochainTick = new Date();
-            let memoireServeur = new Date(0);
-            let isChecking = false;
-
-            async function synchroniserHorloge() {
-                try {
-                    // 1. Lecture de la date officielle sur Supabase
-                    const { data, error } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
-                    if (!error && data && data.dernier_tick) {
-                        memoireServeur = new Date(data.dernier_tick);
-                    }
-                } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
-                
-                // Si la BDD est vide, on sécurise pour éviter un crash
-                if (memoireServeur.getTime() === 0) memoireServeur = new Date(); 
-                
-                prochainTick = new Date(memoireServeur.getTime() + 24 * 60 * 60 * 1000);
-                
-                // 2. Lancement des moteurs
-                setInterval(mettreAJourAffichage, 1000);
-                mettreAJourAffichage();
-                
-                await verifierReseauEDCD();
-                setInterval(verifierReseauEDCD, 120000); // Scan automatique toutes les 2 minutes
-            }
-
-            async function verifierReseauEDCD() {
-                if (isChecking) return;
-                const maintenant = new Date();
-                
-                // On ne déclenche l'API que si le compte à rebours est tombé à zéro
-                if (maintenant < prochainTick) return;
-                
-                isChecking = true;
-                try {
-                    console.log("SYS.EDTEAM : Scan du radar EDCD...");
-                    const controleur = new AbortController();
-                    const timeoutId = setTimeout(() => controleur.abort(), 4000);
-                    
-                    const response = await fetch('https://tick.edcd.io/api/tick', { signal: controleur.signal });
-                    clearTimeout(timeoutId);
-                    
-                    // Nettoyage brut du texte reçu (anti-crash)
-                    const texteDate = await response.text();
-                    const cleanDate = texteDate.replace(/"/g, ''); 
-                    const nouveauTick = new Date(cleanDate);
-                    
-                    if (nouveauTick > memoireServeur) {
-                        console.log("SYS.EDTEAM : NOUVEAU TICK CONFIRMÉ ! Lancement de la purge.");
-                        
-                        // Frappe chirurgicale avec VÉRIFICATION D'ERREUR
-                        const { error: errRpc } = await supabaseApp.rpc('declarer_nouveau_tick', { heure_tick: nouveauTick.toISOString() });
-                        
-                        if (errRpc) {
-                            console.error("SYS.EDTEAM : 🔴 ÉCHEC SUPABASE ! La base de données a refusé l'ordre de purge.", errRpc);
-                            // ANTIBOUCLE : On met à jour l'horloge locale pour forcer le code à se calmer
-                            memoireServeur = nouveauTick;
-                            prochainTick = new Date(memoireServeur.getTime() + 24 * 60 * 60 * 1000);
-                        } else {
-                            // Succès total, Supabase a bien enregistré. On peut rafraîchir l'écran.
-                            setTimeout(() => location.reload(), 1000); 
-                        }
-                    } else {
-                        console.log("SYS.EDTEAM : EDCD n'a pas encore le nouveau Tick. Attente...");
-                    }
-                } catch (err) {
-                    console.warn("SYS.EDTEAM : Impossible de joindre EDCD.");
+        async function verifierEtPurgerTick() {
+            try {
+                // 1. Lecture de l'heure en base
+                const { data } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
+                if (data && data.dernier_tick) {
+                    dernierTick = new Date(data.dernier_tick);
                 }
-                isChecking = false;
-            }
+            } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
+            
+            if (dernierTick.getTime() === 0 || isNaN(dernierTick.getTime())) dernierTick = new Date(); 
+            prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
 
+            // 2. Vérification immédiate auprès d'EDCD
+            try {
+                const controleur = new AbortController();
+                const timeoutId = setTimeout(() => controleur.abort(), 3000);
+                const response = await fetch('https://tick.edcd.io/api/tick', { signal: controleur.signal });
+                clearTimeout(timeoutId);
+                
+                const texteDate = await response.text();
+                const nouveauTick = new Date(texteDate.replace(/"/g, ''));
+                
+                if (nouveauTick > dernierTick) {
+                    dernierTick = nouveauTick;
+                    prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
+                    
+                    await supabaseApp.rpc('declarer_nouveau_tick', { heure_tick: nouveauTick.toISOString() });
+                    await supabaseApp.from('transmissions').delete().lt('created_at', nouveauTick.toISOString());
+                }
+            } catch (err) {}
+        }
+
+        (function initHorlogeGalactique() {
             function mettreAJourAffichage() {
-                // On cible tous les éléments (BGS et Comms)
-                const elBgs = document.getElementById('bgs-countdown');
                 const elComms = document.getElementById('comms-countdown');
                 const boxComms = document.getElementById('comms-tick-box');
                 const labelComms = document.getElementById('comms-tick-label');
                 
-                const maintenant = new Date();
-                let diff = prochainTick.getTime() - maintenant.getTime();
+                const diff = prochainTick.getTime() - Date.now();
                 
-                // ZONE ROUGE : Le compte à rebours est écoulé (ATTENTE DU TICK)
                 if (diff <= 0) {
-                    const txt = "[ TICK EN COURS... ]";
-                    
-                    if (elBgs) {
-                        elBgs.innerText = txt;
-                        elBgs.style.color = "var(--ed-blue)";
-                        elBgs.style.textShadow = "0 0 10px rgba(0, 240, 255, 0.5)";
-                    }
-                    
                     if (elComms) {
-                        elComms.innerText = txt;
-                        elComms.style.color = "var(--ed-red)"; // Le texte devient ROUGE
+                        elComms.innerText = "[ TICK EN COURS... ]";
+                        elComms.style.color = "var(--ed-red)";
                     }
-                    
-                    // On bascule l'encadré en ALERTE ROUGE CLIGNOTANTE
                     if (boxComms && labelComms) {
                         boxComms.style.background = "rgba(255, 51, 51, 0.05)";
                         boxComms.style.borderColor = "rgba(255, 51, 51, 0.4)";
                         labelComms.style.color = "var(--ed-red)";
-                        labelComms.style.animation = "alertPulse 1.5s infinite"; // Active le clignotement
+                        labelComms.style.animation = "alertPulse 1.5s infinite";
                     }
                     return;
                 }
 
-                // ZONE BLEUE : AFFICHAGE CLASSIQUE (COMPTEUR NORMAL)
                 const h = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
                 const m = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
                 const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
-                const timeStr = `${h}H ${m}M ${s}S`;
-                
-                if (elBgs) {
-                    elBgs.innerText = timeStr;
-                    elBgs.style.color = "var(--ed-orange)";
-                    elBgs.style.textShadow = "0 0 8px rgba(255, 113, 0, 0.5)";
-                }
                 
                 if (elComms) {
-                    elComms.innerText = timeStr;
-                    elComms.style.color = "var(--ed-blue)"; // Le compteur est BLEU
+                    elComms.innerText = `${h}H ${m}M ${s}S`;
+                    elComms.style.color = "var(--ed-blue)";
                 }
-                
-                // On bascule l'encadré en MODE NORMAL (BLEU, STATIQUE)
                 if (boxComms && labelComms) {
                     boxComms.style.background = "rgba(0, 240, 255, 0.05)";
                     boxComms.style.borderColor = "rgba(0, 240, 255, 0.4)";
                     labelComms.style.color = "var(--ed-blue)";
-                    labelComms.style.animation = "none"; // Coupe le clignotement
+                    labelComms.style.animation = "none";
                 }
             }
 
-            setTimeout(synchroniserHorloge, 1500);
+            setInterval(mettreAJourAffichage, 1000);
+            setInterval(async () => {
+                const ancien = dernierTick.getTime();
+                await verifierEtPurgerTick();
+                if (dernierTick.getTime() > ancien) chargerHistorique();
+            }, 120000);
+            mettreAJourAffichage();
         })();
-
     </script>
 
 </body>

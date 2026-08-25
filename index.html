@@ -143,7 +143,7 @@
     </div>
 
     <!-- NOUVEAU SAS DE SÉCURITÉ (STYLE MINISITE) -->
-    <div id="sas-screen" class="failsafe-overlay" style="display: none; z-index: 10005; background: rgba(20, 10, 0, 0.95);">
+    <div id="sas-screen" class="failsafe-overlay" style="display: none; z-index: 10005; background-color: var(--ed-bg);">
         <div class="failsafe-content" style="max-width: 750px; border-color: var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.15); animation: none; padding: 40px;">
             
             <!-- LOGO EDTEAM -->
@@ -169,10 +169,10 @@
                     <span id="sas-squad-name" style="color: #FF3333; font-weight: bold;">RECHERCHE DU SIGNAL...</span>
                 </div>
 
-                <button id="btn-sas-demande" class="fs-auth-btn" style="border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5;" disabled onclick="soumettreDossier()">TRANSMETTRE LE DOSSIER À L'AMIRAUTÉ</button>
+                <button id="btn-sas-demande" class="fs-auth-btn" style="border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5;" disabled onclick="soumettreDossier()">ENVOYER LA DEMANDE D'ACCES</button>
 
-                <!-- SECTION AIDE -->
-                <div style="margin-top: 35px; border-top: 1px solid rgba(255,113,0,0.3); padding-top: 20px;">
+                <!-- SECTION AIDE (RÉPARÉE) -->
+                <div id="sas-diagnostics-section" style="margin-top: 35px; border-top: 1px solid rgba(255,113,0,0.3); padding-top: 20px;">
                     <p style="color: #888; font-size: 0.9em; text-align: left; margin-bottom: 15px;">LE SIGNAL NE VIENT PAS ? IDENTIFIEZ LE PROBLÈME :</p>
                     
                     <button class="fs-auth-btn" style="text-align: left; padding: 12px 15px; margin-bottom: 10px; font-size: 0.95em; border-color: rgba(255,113,0,0.4);" onclick="navSas('sas-page-edmc')" onmouseenter="if(typeof sonHover==='function') sonHover()"><strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS LANCÉ EDMC (OU PAS INSTALLÉ)</button>
@@ -304,6 +304,16 @@
                     <div style="display: flex; flex-direction: column; justify-content: center;">
                         <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
                         <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
+                    </div>
+                </div>
+
+                <!-- NOUVEAU : STATUT LÉGAL (CASIER ULTRA-ÉPURÉ) -->
+                <div id="header-legal-status" 
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 8px 14px; cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
+                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                    onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <span id="legal-text" style="color: #00FF66; font-size: 1.2em; font-weight: bold; line-height: 1;">CASIER VIERGE</span>
                     </div>
                 </div>
 
@@ -439,101 +449,53 @@
                 </div>
                 <!-- FIN LIGNE COMBINÉE -->
 
-                <!-- BLOC 1 : FÉDÉRATION DES PILOTES -->
-                <div class="data-row" style="cursor: default;">
-                    <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
-                        <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px;">> ÉVALUATION DE LA FÉDÉRATION DES PILOTES</span>
-                        <span style="color: #888; font-size: 0.8em; font-style: italic;">Cliquez sur un rang pour consulter la hiérarchie</span>
-                    </div>
+                <!-- LIGNE GLOBALE (2 COLONNES) -->
+                <div style="display: flex; gap: 15px; align-items: stretch; margin-bottom: 15px;">
                     
-                    <!-- COMBAT -->
-                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('combat')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
-                        <span style="color: #ccc; width: 150px;">COMBAT</span>
-                        <span id="qg-combat-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
-                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
-                            <div id="qg-combat-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                    <!-- COLONNE GAUCHE (Fédération + Rangs Aux) -->
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                        
+                        <!-- BLOC 1A : FÉDÉRATION DES PILOTES -->
+                        <div class="data-row" style="cursor: default; margin-bottom: 0; flex: 1;">
+                            <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
+                                <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px;">> FÉDÉRATION DES PILOTES</span>
+                            </div>
+                            <div class="rank-clickable-row" onclick="ouvrirModalGrades('combat')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1em; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.2s;"><span style="color: #ccc; width: 110px;">COMBAT</span><span id="qg-combat-rank" style="color: var(--ed-orange); width: 110px; font-weight: bold;">INCONNU</span><div style="flex-grow: 1; height: 10px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 10px;"><div id="qg-combat-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div></div><span id="qg-combat-prog" style="color: #fff; width: 45px; text-align: right;">0%</span></div>
+                            <div class="rank-clickable-row" onclick="ouvrirModalGrades('trade')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1em; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.2s;"><span style="color: #ccc; width: 110px;">COMMERCE</span><span id="qg-trade-rank" style="color: var(--ed-orange); width: 110px; font-weight: bold;">INCONNU</span><div style="flex-grow: 1; height: 10px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 10px;"><div id="qg-trade-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div></div><span id="qg-trade-prog" style="color: #fff; width: 45px; text-align: right;">0%</span></div>
+                            <div class="rank-clickable-row" onclick="ouvrirModalGrades('explore')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1em; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.2s;"><span style="color: #ccc; width: 110px;">EXPLORATION</span><span id="qg-explore-rank" style="color: var(--ed-orange); width: 110px; font-weight: bold;">INCONNU</span><div style="flex-grow: 1; height: 10px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 10px;"><div id="qg-explore-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div></div><span id="qg-explore-prog" style="color: #fff; width: 45px; text-align: right;">0%</span></div>
+                            <div class="rank-clickable-row" onclick="ouvrirModalGrades('exobio')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1em; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.2s;"><span style="color: #ccc; width: 110px;">EXOBIOLOGIE</span><span id="qg-exobio-rank" style="color: var(--ed-orange); width: 110px; font-weight: bold;">INCONNU</span><div style="flex-grow: 1; height: 10px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 10px;"><div id="qg-exobio-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div></div><span id="qg-exobio-prog" style="color: #fff; width: 45px; text-align: right;">0%</span></div>
+                            <div class="rank-clickable-row" onclick="ouvrirModalGrades('mercenary')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 1em; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.2s;"><span style="color: #ccc; width: 110px;">MERCENAIRE</span><span id="qg-mercenary-rank" style="color: var(--ed-orange); width: 110px; font-weight: bold;">INCONNU</span><div style="flex-grow: 1; height: 10px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 10px;"><div id="qg-mercenary-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div></div><span id="qg-mercenary-prog" style="color: #fff; width: 45px; text-align: right;">0%</span></div>
                         </div>
-                        <span id="qg-combat-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
+
+                        <!-- BLOC 2A : RANGS AUXILIAIRES -->
+                        <div class="data-row" style="cursor: default; margin-bottom: 0; flex: 1;">
+                            <div class="row-top" style="border-bottom: 1px dashed var(--ed-blue); padding-bottom: 10px; margin-bottom: 15px;">
+                                <span style="color: var(--ed-blue); font-size: 1.1em; letter-spacing: 2px;">> RANGS AUXILIAIRES</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 20px;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">FÉDÉRATION</span><span style="color: #fff; font-weight: bold;"><span id="qg-fed-rank">INCONNU</span> <span id="qg-fed-prog" style="color: var(--ed-blue);">(0%)</span></span></div>
+                                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1);"><div id="qg-fed-bar" style="height: 100%; width: 0%; background: #fff; box-shadow: 0 0 5px #fff; transition: 0.5s;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;"><span style="color: #ccc;">EMPIRE</span><span style="color: #fff; font-weight: bold;"><span id="qg-emp-rank">INCONNU</span> <span id="qg-emp-prog" style="color: #FF3333;">(0%)</span></span></div>
+                                    <div style="width: 100%; height: 8px; background: rgba(255,51,51,0.1);"><div id="qg-emp-bar" style="height: 100%; width: 0%; background: #FF3333; box-shadow: 0 0 5px #FF3333; transition: 0.5s;"></div></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- COMMERCE -->
-                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('trade')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
-                        <span style="color: #ccc; width: 150px;">COMMERCE</span>
-                        <span id="qg-trade-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
-                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
-                            <div id="qg-trade-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
+                    <!-- COLONNE DROITE (Galnet 100% ORANGE) -->
+                    <div class="data-row" style="flex: 1; cursor: default; margin-bottom: 0; display: flex; flex-direction: column; padding: 0; border-color: var(--ed-orange); box-shadow: inset 4px 0 0 var(--ed-orange); background: rgba(255, 113, 0, 0.02);">
+                        <div style="background: rgba(255, 113, 0, 0.05); border-bottom: 1px dashed rgba(255, 113, 0, 0.3); padding: 15px 25px;">
+                            <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> ACTUALITÉS GALNET</span>
                         </div>
-                        <span id="qg-trade-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
-                    </div>
-
-                    <!-- EXPLORATION -->
-                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('explore')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
-                        <span style="color: #ccc; width: 150px;">EXPLORATION</span>
-                        <span id="qg-explore-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
-                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
-                            <div id="qg-explore-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
-                        </div>
-                        <span id="qg-explore-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
-                    </div>
-
-                    <!-- EXOBIOLOGIE -->
-                    <div class="rank-clickable-row" onclick="ouvrirModalGrades('exobio')" onmouseenter="sonHover()" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 1.1em; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
-                        <span style="color: #ccc; width: 150px;">EXOBIOLOGIE</span>
-                        <span id="qg-exobio-rank" style="color: var(--ed-orange); width: 150px; font-weight: bold;">INCONNU</span>
-                        <div style="flex-grow: 1; height: 12px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); position: relative; margin: 0 20px;">
-                            <div id="qg-exobio-bar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); transition: 0.5s;"></div>
-                        </div>
-                        <span id="qg-exobio-prog" style="color: #fff; width: 60px; text-align: right;">0%</span>
-                    </div>
-                </div>
-
-                <!-- BLOC 2 : PUISSANCES ET FACTIONS -->
-                <div style="display: flex; gap: 15px;">
-                    <div class="data-row" style="flex: 1; cursor: default;">
-                        <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
-                            <span style="color: var(--ed-blue); font-size: 1.1em; letter-spacing: 2px;">> RANGS AUXILIAIRES</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div id="galnet-container" style="display: flex; flex-direction: column; flex-grow: 1; padding: 20px 25px;">
+                            <h4 id="galnet-title" style="color: var(--ed-orange); margin: 0 0 10px 0; text-transform: uppercase; font-size: 1.2em; letter-spacing: 1px;">Réception des données...</h4>
+                            <p id="galnet-date" style="color: gray; font-size: 0.85em; margin: 0 0 15px 0; font-weight: bold;"></p>
+                            <p id="galnet-snippet" style="color: #ccc; font-size: 1em; margin: 0 0 20px 0; line-height: 1.5; font-style: normal; flex-grow: 1;"></p>
                             <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                    <span style="color: #ccc;">FÉDÉRATION</span>
-                                    <span style="color: #fff; font-weight: bold;"><span id="qg-fed-rank">INCONNU</span> <span id="qg-fed-prog" style="color: var(--ed-blue);">(0%)</span></span>
-                                </div>
-                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1);">
-                                    <div id="qg-fed-bar" style="height: 100%; width: 0%; background: #fff; box-shadow: 0 0 5px #fff; transition: 0.5s;"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                    <span style="color: #ccc;">EMPIRE</span>
-                                    <span style="color: #fff; font-weight: bold;"><span id="qg-emp-rank">INCONNU</span> <span id="qg-emp-prog" style="color: #FF3333;">(0%)</span></span>
-                                </div>
-                                <div style="width: 100%; height: 6px; background: rgba(255,51,51,0.1);">
-                                    <div id="qg-emp-bar" style="height: 100%; width: 0%; background: #FF3333; box-shadow: 0 0 5px #FF3333; transition: 0.5s;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="data-row" style="flex: 1; cursor: default;">
-                        <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
-                            <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px;">> ALLÉGEANCE GALACTIQUE</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <!-- Ajout de "overflow: hidden" et d'une balise <img> cachée par défaut -->
-                            <div style="width: 80px; height: 80px; border: 2px solid var(--ed-orange); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 15px rgba(255,113,0,0.3); overflow: hidden; background: rgba(0,0,0,0.4);">
-                                <span id="qg-power-emoji" style="font-size: 2em;">✊</span>
-                                <img id="qg-power-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none; opacity: 0.9;" referrerpolicy="no-referrer">
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1;">
-                                <span style="color: #ccc; font-size: 0.9em;">PUISSANCE SOUTENUE :</span>
-                                <span id="qg-power-name" style="color: #fff; font-weight: bold; font-size: 1.2em;">INCONNUE</span>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
-                                    <span id="qg-power-rank" style="color: var(--ed-orange); font-weight: bold; font-size: 0.9em;">RANG : 0 / 5</span>
-                                </div>
-                                <div style="width: 100%; height: 6px; background: rgba(255,113,0,0.1); border-radius: 2px;">
-                                    <div id="qg-power-bar" style="height: 100%; width: 0%; background: var(--ed-orange); box-shadow: 0 0 5px var(--ed-orange); transition: 0.5s;"></div>
-                                </div>
+                                <button onclick="ouvrirModalGalnet()" style="background: transparent; color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 8px 15px; cursor: pointer; transition: 0.3s; font-family: inherit; font-weight: bold; letter-spacing: 1px;" onmouseover="this.style.background='var(--ed-orange)'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='var(--ed-orange)';" onmouseenter="if(typeof sonHover==='function') sonHover()">[ LIRE L'ARTICLE COMPLET ]</button>
                             </div>
                         </div>
                     </div>
@@ -590,12 +552,22 @@
 
             <!-- ONGLET 2 : GESTION DE LA FLOTTE -->
             <div id="qg-tab-flotte" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
-                <!-- Les vaisseaux seront générés ici automatiquement par le système -->
+                <!-- BOUTON AIDE -->
+                <div style="display: flex; justify-content: flex-end; margin-bottom: -5px;">
+                    <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 6px 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; transition: 0.2s;" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-aide-synchro', event)" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ ? AIDE : FORCER LA SYNCHRONISATION ]</button>
+                </div>
+                <!-- Conteneur ciblé par le Javascript -->
+                <div id="flotte-liste-conteneur" style="display: flex; flex-direction: column; gap: 15px;"></div>
             </div>
 
             <!-- ONGLET 3 : LOGISTIQUE CARRIER -->
             <div id="qg-tab-carrier" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
                 
+                <!-- BOUTON AIDE -->
+                <div style="display: flex; justify-content: flex-end; margin-bottom: -5px;">
+                    <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 6px 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; transition: 0.2s;" onclick="if(typeof ouvrirModal === 'function') ouvrirModal('modal-aide-synchro', event)" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ ? AIDE : FORCER LA SYNCHRONISATION ]</button>
+                </div>
+
                 <!-- LIGNE 1 : TÉLÉMÉTRIE ET CARBURANT -->
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     
@@ -828,6 +800,52 @@
         </div>
     </div>
 
+    <!-- MODALE GALNET -->
+    <div class="modal-overlay" id="modal-galnet" onclick="fermerModalGalnet()" style="z-index: 4600;">
+        <div class="modal-content" style="max-width: 700px; width: 90%; background-color: #0b1016; border: 1px solid var(--ed-blue); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModalGalnet()">X</div>
+            <h2 id="modal-galnet-title" style="color: var(--ed-blue); margin-top: 0; margin-bottom: 5px; font-size: 1.4em; letter-spacing: 1px;">Titre</h2>
+            <p id="modal-galnet-date" style="color: gray; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;"></p>
+            <div id="modal-galnet-body" style="color: #e0e0e0; line-height: 1.6; font-size: 1em; white-space: pre-wrap;">Texte</div>
+        </div>
+    </div>
+
+    <!-- MODAL AIDE SYNCHRONISATION (FLOTTE & CARRIER) -->
+    <div class="modal-overlay" id="modal-aide-synchro" onclick="fermerModal('modal-aide-synchro', event)" style="z-index: 3500;">
+        <div class="modal-content" style="max-width: 600px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-aide-synchro')">X</div>
+            <div style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">ℹ️ MANUEL DE SYNCHRONISATION</div>
+
+            <p style="color: #ccc; font-size: 0.95em; line-height: 1.6; margin-bottom: 20px;">
+                Si vos données navales ou votre Fleet Carrier ne s'affichent pas ou semblent obsolètes, vous devez forcer le jeu à transmettre les informations au réseau via EDMC.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="background: rgba(255, 113, 0, 0.05); border-left: 3px solid var(--ed-orange); padding: 15px; border-radius: 4px;">
+                    <div style="color: var(--ed-orange); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> POUR LA FLOTTE (VAISSEAUX)</div>
+                    <div style="color: #aaa; font-size: 0.9em; line-height: 1.6;">
+                        1. Entrez dans une station disposant d'un <strong>Chantier Naval</strong>.<br>
+                        2. Ouvrez le panneau des Services de la station.<br>
+                        3. Entrez dans le <strong>Chantier Naval (Shipyard)</strong>.<br>
+                        <em style="color: #888; margin-top: 5px; display: block;">Le terminal scannera automatiquement tous vos vaisseaux stockés et vos modules.</em>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 255, 102, 0.05); border-left: 3px solid #00FF66; padding: 15px; border-radius: 4px;">
+                    <div style="color: #00FF66; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> POUR LE FLEET CARRIER</div>
+                    <div style="color: #aaa; font-size: 0.9em; line-height: 1.6;">
+                        1. Assurez-vous d'être amarré (ou utilisez la gestion à distance).<br>
+                        2. Ouvrez le panneau interne Droit (Vaisseau).<br>
+                        3. Cliquez sur <strong>Gestion du Fleet Carrier</strong>.<br>
+                        <em style="color: #888; margin-top: 5px; display: block;">Laissez le menu ouvert quelques secondes. Le terminal récupèrera vos soldes, votre soute de Tritium et vos modules installés.</em>
+                    </div>
+                </div>
+            </div>
+
+            <button class="auth-btn" style="background: rgba(0, 240, 255, 0.1); border-color: var(--ed-blue); color: var(--ed-blue); width: 100%; margin-top: 25px; margin-bottom: 0;" onclick="fermerModal('modal-aide-synchro')" onmouseenter="if(typeof sonHover==='function') sonHover()">[ COMPRIS ]</button>
+        </div>
+    </div>
+
     <!-- MODAL GESTION DU COMPTE -->
     <div class="modal-overlay" id="modal-gestion-compte" onclick="fermerModal('modal-gestion-compte', event)" style="z-index: 3500;">
         <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
@@ -999,7 +1017,7 @@
             
             <!-- EN-TÊTE FIXE -->
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-blue); padding: 15px 25px; background: rgba(0, 240, 255, 0.05); flex-shrink: 0;">
-                <div style="color: var(--ed-blue); font-size: 1.5em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,240,255,0.4);">📰 GALNET NEWS // ARCHIVES CENTRALES</div>
+                <div style="color: var(--ed-blue); font-size: 1.5em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,240,255,0.4);">📰 EDTEAM NEWS // ARCHIVES CENTRALES</div>
                 <div style="color: var(--ed-blue); cursor: pointer; font-size: 1.5em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='var(--ed-blue)';" onclick="fermerModal('modal-gazette')">X</div>
             </div>
 
@@ -1819,36 +1837,37 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 chargerGazette();
                 
             } else {
-                // Le pilote n'est pas encore approuvé par le Directeur.
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('sas-screen').style.display = 'flex';
-                document.getElementById('sas-api-key').innerText = data.cle_api;
-                
-                // 👉 DÉMARRAGE DE LA MUSIQUE CINÉMATOGRAPHIQUE
-                if(typeof startSasMusic === 'function') startSasMusic();
-                
-                // VÉRIFICATION : Le dossier a-t-il déjà été transmis ?
+                // LE PILOTE N'EST PAS APPROUVÉ (SAS OU ATTENTE)
+
+                // 1. ON FORCE LA DISPARITION DU DASHBOARD ET DU BOOT-SCREEN (ANTI-BUG VISUEL)
+                const bootScreen = document.getElementById('boot-screen');
+                if (bootScreen) bootScreen.style.display = 'none';
+                const mainUi = document.getElementById('main-ui');
+                if (mainUi) mainUi.style.display = 'none';
+
+                // 2. LOGIQUE DU SAS
                 if (data.cmdr_nom) {
-                    // Oui, les données sont déjà en base. On verrouille l'interface.
-                    const btn = document.getElementById('btn-sas-demande');
-                    btn.innerText = "DOSSIER TRANSMIS. ATTENTE VALIDATION...";
-                    btn.style.borderColor = "#00FF66";
-                    btn.style.color = "#00FF66";
-                    btn.disabled = true;
+                    // Le dossier est déjà transmis, on bloque l'accès proprement
+                    document.getElementById('sas-screen').style.display = 'none';
+                    document.getElementById('auth-screen').style.display = 'flex';
                     
-                    // On réaffiche les données sauvegardées
-                    document.getElementById('sas-cmdr-name').innerText = data.cmdr_nom.toUpperCase();
-                    document.getElementById('sas-cmdr-name').style.color = "#00FF66";
+                    const msg = document.getElementById('auth-msg');
+                    msg.style.color = "var(--ed-orange)";
+                    msg.innerText = "> ACCÈS RESTREINT : EN ATTENTE DE VALIDATION.";
                     
-                    if (data.escadron_id) {
-                        document.getElementById('sas-squad-name').innerText = data.escadron_id.toUpperCase();
-                        document.getElementById('sas-squad-name').style.color = "#00FF66";
-                    } else {
-                        document.getElementById('sas-squad-name').innerText = "INCONNU / INDÉPENDANT";
-                        document.getElementById('sas-squad-name').style.color = "var(--ed-orange)";
-                    }
                 } else {
-                    // Non, le dossier est vide. On lance le radar pour écouter EDMC.
+                    // Le dossier est vide. On lance le radar pour écouter EDMC.
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('sas-screen').style.display = 'flex';
+                    document.getElementById('sas-api-key').innerText = data.cle_api;
+                    
+                    navSas('sas-page-main'); // <-- FORCE L'AFFICHAGE DES BOUTONS ET DU RADAR
+                    
+                    // On s'assure que les diagnostics sont bien visibles pour une nouvelle recrue
+                    const diagSection = document.getElementById('sas-diagnostics-section');
+                    if (diagSection) diagSection.style.display = 'block';
+                    
+                    if(typeof startSasMusic === 'function') startSasMusic();
                     sasLoop(user.id);
                 }
             }
@@ -1859,19 +1878,20 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         // =========================================
         // VARIABLES GLOBALES DES RANGS
         // =========================================
-        const currentRanks = { combat: 0, trade: 0, explore: 0, exobio: 0 };
-        const currentProgs = { combat: 0, trade: 0, explore: 0, exobio: 0 };
+        const currentRanks = { combat: 0, trade: 0, explore: 0, exobio: 0, mercenary: 0 };
+        const currentProgs = { combat: 0, trade: 0, explore: 0, exobio: 0, mercenary: 0 };
 
         const tablesGrades = {
             combat: ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
             trade: ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
             explore: ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
-            exobio: ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"]
+            exobio: ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            mercenary: ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"]
         };
 
         function ouvrirModalGrades(domaine) {
             sonClic();
-            const titrage = { combat: "COMBAT", trade: "COMMERCE", explore: "EXPLORATION", exobio: "EXOBIOLOGIE" };
+            const titrage = { combat: "COMBAT", trade: "COMMERCE", explore: "EXPLORATION", exobio: "EXOBIOLOGIE", mercenary: "MERCENAIRE" };
             document.getElementById("grades-modal-title").innerText = "HIÉRARCHIE // " + titrage[domaine];
             
             const liste = tablesGrades[domaine];
@@ -2025,89 +2045,41 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const radarData = resRadar.data || [];
                 
                 const idsToDelete = [];
-                const profilUpdates = {};
                 const paramUpdates = {};
-                let profilModifie = false;
                 let paramModifie = false;
 
-                // --- 2. LE TRIEUR ---
+                // --- 2. LE TRIEUR SÉCURISÉ ---
                 const processLatest = (target, callback) => {
                     const items = radarData.filter(d => d.target_commodity === target).sort((a,b) => b.id - a.id);
                     if (items.length > 0) {
-                        callback(items[0]);
+                        if (callback) callback(items[0]);
                         items.forEach(i => idsToDelete.push(i.id));
                     }
                 };
 
-                // A. Failsafe et Finances
+                // A. Le navigateur gère uniquement la télémétrie locale
                 processLatest('HEARTBEAT', item => { paramUpdates.last_heartbeat = parseInt(item.station_name); paramModifie = true; });
-                processLatest('SHIP_BALANCE', item => { profilUpdates.solde_vaisseau = item.prix_unitaire; profilModifie = true; });
-                processLatest('FC_BALANCE', item => { profilUpdates.solde_fc = item.prix_unitaire; profilModifie = true; });
-                processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });
                 processLatest('PARAM_UPDATE', item => { try { Object.assign(paramUpdates, JSON.parse(item.station_name)); paramModifie = true; } catch(e){} });
-                processLatest('SQUADRON_INFO', item => { 
-                    try { 
-                        const sInfo = JSON.parse(item.station_name); 
-                        if (profilData.escadron_id !== sInfo.nom) {
-                            profilUpdates.escadron_id = sInfo.nom;
-                            // Détection automatique selon le rang Elite Dangerous (0 = Leader, 1-2 = Officiers)
-                            // Ton compte Directeur conserve les droits même si ton rang en jeu est inférieur
-                            profilUpdates.est_amiral = (sInfo.rank === 0);
-                            profilUpdates.est_officier = (sInfo.rank <= 2);
-                            profilModifie = true;
-                            
-                            // Si le joueur est le chef absolu in-game (0), on auto-crée l'escadron
-                            if (sInfo.rank === 0) {
-                                supabaseApp.from('escadrons').upsert({ tag: sInfo.nom, nom: sInfo.nom, fondateur_id: profilCommandant.user_id }, { onConflict: 'tag' }).then();
-                            }
-                            
-                            // Rafraîchir l'interface visuelle après l'enregistrement
-                            setTimeout(actualiserAffichageRH, 1500); 
-                        }
-                    } catch(e){} 
-                });
 
-                // B. Rangs et Progressions
-                const rankMapping = {
-                    'QG_RANK_COMBAT': 'rang_combat', 'QG_RANK_TRADE': 'rang_commerce', 'QG_RANK_EXPLOR': 'rang_explo',
-                    'QG_RANK_FEDERA': 'rang_fed', 'QG_RANK_EMPIRE': 'rang_emp', 'QG_RANK_EXOBIO': 'rang_exobio',
-                    'QG_PROG_COMBAT': 'prog_combat', 'QG_PROG_TRADE': 'prog_commerce', 'QG_PROG_EXPLOR': 'prog_explore',
-                    'QG_PROG_FEDERA': 'prog_fed', 'QG_PROG_EMPIRE': 'prog_emp', 'QG_PROG_EXOBIO': 'prog_exobio',
-                    'QG_WEALTH': 'patrimoine_total', 'QG_SHIPS_VALUE': 'valeur_vaisseaux', 'QG_REBUY': 'cout_rachat'
-                };
-                for (const [target, col] of Object.entries(rankMapping)) {
-                    processLatest(target, item => { profilUpdates[col] = item.prix_unitaire; profilModifie = true; });
-                }
+                // B. Profil & Rangs : L'Automate SQL a déjà fait le travail en base.
+                const ciblesPurger = [
+                    'SHIP_BALANCE', 'FC_BALANCE', 'CMDR_NAME', 'SQUADRON_INFO', 
+                    'QG_POWERPLAY', 'QG_SHIPS_VALUE', 'QG_REBUY', 'QG_WEALTH', 
+                    'QG_RANK_COMBAT', 'QG_RANK_TRADE', 'QG_RANK_EXPLOR', 'QG_RANK_FEDERA', 'QG_RANK_EMPIRE', 'QG_RANK_EXOBIO', 'QG_RANK_MERCEN', 'QG_RANK_SOLDIE',
+                    'QG_PROG_COMBAT', 'QG_PROG_TRADE', 'QG_PROG_EXPLOR', 'QG_PROG_FEDERA', 'QG_PROG_EMPIRE', 'QG_PROG_EXOBIO', 'QG_PROG_MERCEN', 'QG_PROG_SOLDIE',
+                    'QG_NOTORIETE', 'QG_AMENDES', 'QG_PRIMES', 'QG_TITRES_CHASSE', 'QG_TITRES_COMBAT'
+                ];
+                ciblesPurger.forEach(c => processLatest(c, null));
 
-                // C. Powerplay
-                processLatest('QG_POWERPLAY', item => { profilUpdates.power_nom = item.station_name; profilUpdates.power_rang = item.prix_unitaire; profilModifie = true; });
-
-                // D. Flotte et Carrier
+                // C. Flotte et Carrier
                 processLatest('QG_FLEET', item => { try { paramUpdates.flotte_json = JSON.parse(item.station_name); paramModifie = true; } catch(e){} });
                 processLatest('QG_CARRIER_STATS', item => { try { paramUpdates.carrier_stats_json = JSON.parse(item.station_name); paramModifie = true; } catch(e){} });
                 processLatest('QG_ACTIVE_SHIP_ID', item => { paramUpdates.id_vaisseau_actif = item.station_name; paramModifie = true; });
 
-                // NOUVEAU MODULE : INTERCEPTION CIBLAGE TACTIQUE
+                // D. Ciblage Tactique
                 processLatest('TARGETED_CMDR', item => { 
-                    const payloadBrut = item.station_name;
-                    if (payloadBrut !== window.lastTargetedCmdr) {
-                        window.lastTargetedCmdr = payloadBrut;
-                        if (payloadBrut === "LOST") {
-                            // On a déverrouillé la cible : on replie l'hologramme tactique
-                            const overlay = document.getElementById('tactical-overlay');
-                            if (overlay) overlay.classList.remove('deploye');
-                        } else {
-                            try {
-                                // On déballe le JSON envoyé par Python
-                                const cibleData = JSON.parse(payloadBrut);
-                                if (typeof verifierCibleTactique === 'function') {
-                                    verifierCibleTactique(cibleData.nom, cibleData.tag);
-                                }
-                            } catch(e) {
-                                // Sécurité (au cas où on recevrait l'ancien format texte)
-                                if (typeof verifierCibleTactique === 'function') verifierCibleTactique(payloadBrut, "");
-                            }
-                        }
+                    if (typeof window.traiterCiblageTactique === 'function') {
+                        window.traiterCiblageTactique(item.station_name);
                     }
                 });
 
@@ -2122,53 +2094,36 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     });
                 }
                 
-                // F. Statut COVAS & POSITION ACTUELLE (LECTURE SEULE - SANS DESTRUCTION)
-                const systemStatusItems = radarData.filter(d => d.target_commodity === 'SYSTEM_STATUS').sort((a,b) => b.id - a.id);
-                if (systemStatusItems.length > 0) {
-                    const item = systemStatusItems[0];
+                // F. Statut COVAS
+                processLatest('SYSTEM_STATUS', item => {
                     paramUpdates.covas_status = item.station_name;
                     if (item.system_name && item.system_name !== 'SYS_CORE') {
                         paramUpdates.position_actuelle = item.system_name;
                     }
                     paramModifie = true;
-                }
+                });
 
-                // --- 3. SAUVEGARDE PERMANENTE ET LE NETTOYEUR ---
+                // --- 3. SAUVEGARDE ET NETTOYAGE ---
                 if (paramModifie) {
                     if (resParam.data) {
-                        // Si le pilote a déjà un dossier de paramètres, on le met à jour
                         await supabaseApp.from('parametres_app').update(paramUpdates).eq('user_id', profilCommandant.user_id);
                     } else {
-                        // Si c'est un nouveau pilote, on crée son dossier initial
                         paramUpdates.user_id = profilCommandant.user_id;
                         await supabaseApp.from('parametres_app').insert(paramUpdates);
-                        resParam.data = paramUpdates; // On informe le système local que le dossier existe
                     }
                     Object.assign(paramData, paramUpdates);
                 }
-                if (profilModifie) {
-                    // On ajoute .select() pour forcer Supabase à nous dire combien de lignes ont été touchées
-                    const { data: updateData, error: errUpdate } = await supabaseApp.from('profils').update(profilUpdates).eq('user_id', profilCommandant.user_id).select();
-                    
-                    if (errUpdate) {
-                        console.error("SYS.EDTEAM - ERREUR BDD :", errUpdate);
-                    } else if (!updateData || updateData.length === 0) {
-                        console.error("SYS.EDTEAM - BLOCAGE RLS : 0 ligne mise à jour !");
-                        if (typeof afficherAlerte === 'function') {
-                            afficherAlerte("BLOCAGE DE SÉCURITÉ", "La base de données a bloqué la sauvegarde de vos données financières (0 ligne modifiée).<br><br><span style='font-size:0.85em; color:#aaa;'>Le pare-feu RLS de Supabase rejette votre compte.</span>", "#FF3333");
-                        }
-                    } else {
-                        Object.assign(profilData, profilUpdates);
-                        profilCommandant = profilData; 
+
+                if (idsToDelete.length > 0) {
+                    for (let i = 0; i < idsToDelete.length; i += 50) {
+                        await supabaseApp.from('radar_commercial').delete().in('id', idsToDelete.slice(i, i + 50));
                     }
                 }
 
                 // --- 4. AFFICHAGE DE L'INTERFACE ---
-                // Failsafe
                 const failsafeModal = document.getElementById('failsafe-modal');
                 let edmcEnLigne = false;
                 
-                // 🛑 NOUVELLE RÈGLE STRICTE : Heartbeat récent ET Nom de CMDR connu !
                 if (paramData.last_heartbeat && profilData.cmdr_nom) {
                     if (Math.floor(Date.now() / 1000) - paramData.last_heartbeat < 25) { edmcEnLigne = true; }
                 }
@@ -2218,9 +2173,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const ranksExobio = ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
                 const ranksFed = ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"];
                 const ranksEmp = ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"];
+                const ranksMercenary = ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
 
                 const updateRankUI = (idPrefix, rankVal, progVal, rankArray) => {
-                    const r = rankVal || 0; const p = progVal || 0;
+                    const r = parseInt(rankVal) || 0; 
+                    const p = parseInt(progVal) || 0;
                     const elR = document.getElementById(`qg-${idPrefix}-rank`); if(elR) elR.innerText = rankArray[r] || "INCONNU";
                     const elP = document.getElementById(`qg-${idPrefix}-prog`); if(elP) elP.innerText = (idPrefix==='fed'||idPrefix==='emp') ? `(${p}%)` : `${p}%`;
                     const elB = document.getElementById(`qg-${idPrefix}-bar`); if(elB) elB.style.width = `${p}%`;
@@ -2231,29 +2188,55 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 updateRankUI('trade', profilData.rang_commerce, profilData.prog_commerce, ranksTrade);
                 updateRankUI('explore', profilData.rang_explo, profilData.prog_explore, ranksExplore);
                 updateRankUI('exobio', profilData.rang_exobio, profilData.prog_exobio, ranksExobio);
+                updateRankUI('mercenary', profilData.rang_mercenary, profilData.prog_mercenary, ranksMercenary);
                 updateRankUI('fed', profilData.rang_fed, profilData.prog_fed, ranksFed);
                 updateRankUI('emp', profilData.rang_emp, profilData.prog_emp, ranksEmp);
 
-                // Powerplay
-                const powerName = profilData.power_nom || 'AUCUNE';
-                const powerRank = profilData.power_rang || 0;
-                const elPwrName = document.getElementById("qg-power-name"); if(elPwrName) elPwrName.innerText = powerName.toUpperCase();
-                const elPwrRank = document.getElementById("qg-power-rank"); if(elPwrRank) elPwrRank.innerText = "RANG : " + powerRank + " / " + Math.max(100, powerRank);
-                const elPwrBar = document.getElementById("qg-power-bar"); if(elPwrBar) elPwrBar.style.width = ((powerRank / Math.max(100, powerRank)) * 100) + "%";
+                // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
+                const notoriete = parseInt(profilData.notoriete) || 0;
+                
+                const legalBox = document.getElementById("header-legal-status");
+                const legalText = document.getElementById("legal-text");
+
+                if (legalBox && legalText) {
+                    if (notoriete > 0) {
+                        legalBox.style.background = "rgba(255, 51, 51, 0.05)";
+                        legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
+                        legalText.style.color = "#FF3333";
+                        legalText.innerText = "RECHERCHÉ";
+                        
+                        // L'explication avec la valeur de la notoriété en évidence
+                        const explicationCrime = "STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#FF3333; font-size:1.2em;\\'>" + notoriete + "</strong><br><br>La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br>Tant qu\\'elle n\\'est pas à 0, vous ne pouvez pas utiliser les terminaux de l\\'autorité<br>pour payer vos amendes.</span>";
+                        legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationCrime}', '#FF3333')`);
+                    } else {
+                        legalBox.style.background = "rgba(0, 255, 102, 0.05)";
+                        legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
+                        legalText.style.color = "#00FF66";
+                        legalText.innerText = "CASIER VIERGE";
+                        
+                        // L'explication avec notoriété = 0
+                        const explicationVierge = "STATUT LÉGAL : SAIN<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#00FF66; font-size:1.2em;\\'>0</strong><br><br>Aucune infraction grave récente n\\'est enregistrée par la Fédération des Pilotes.<br>Vous avez un accès total aux services des spatioports et des Facteurs.</span>";
+                        legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationVierge}', '#00FF66')`);
+                    }
+                }
 
                 // Finances Avancées
-                const valFcExacte = profilData.solde_fc || 0;
-                const vraiPatrimoine = (profilData.solde_vaisseau||0) + (profilData.valeur_vaisseaux||0) + valFcExacte;
+                const valFcExacte = parseInt(profilData.solde_fc) || 0;
+                const soldeV = parseInt(profilData.solde_vaisseau) || 0;
+                const valNavires = parseInt(profilData.valeur_vaisseaux) || 0;
+                const coutRachat = parseInt(profilData.cout_rachat) || 0;
+                
+                const vraiPatrimoine = soldeV + valNavires + valFcExacte;
                 if (vraiPatrimoine > 0) {
                     document.getElementById("qg-wealth-total").innerText = fmt.format(vraiPatrimoine) + " CR";
-                    document.getElementById("qg-wealth-liquid").innerHTML = fmt.format(profilData.solde_vaisseau||0) + " <span style='color: var(--ed-orange); font-size: 0.8em;'>CR</span>";
+                    document.getElementById("qg-wealth-liquid").innerHTML = fmt.format(soldeV) + " <span style='color: var(--ed-orange); font-size: 0.8em;'>CR</span>";
                     document.getElementById("qg-wealth-fc").innerHTML = fmt.format(valFcExacte) + " <span style='color: var(--ed-blue); font-size: 0.8em;'>CR</span>";
-                    document.getElementById("qg-wealth-ships").innerHTML = fmt.format(profilData.valeur_vaisseaux||0) + " <span style='color: #00FF66; font-size: 0.8em;'>CR</span>";
-                    document.getElementById("qg-rebuy").innerHTML = fmt.format(profilData.cout_rachat||0) + " <span style='color: #FF3333; font-size: 0.8em;'>CR</span>";
+                    document.getElementById("qg-wealth-ships").innerHTML = fmt.format(valNavires) + " <span style='color: #00FF66; font-size: 0.8em;'>CR</span>";
+                    document.getElementById("qg-rebuy").innerHTML = fmt.format(coutRachat) + " <span style='color: #FF3333; font-size: 0.8em;'>CR</span>";
 
-                    const pctLiq = (((profilData.solde_vaisseau||0) / vraiPatrimoine) * 100).toFixed(1);
+                    const pctLiq = ((soldeV / vraiPatrimoine) * 100).toFixed(1);
                     const pctFc = ((valFcExacte / vraiPatrimoine) * 100).toFixed(1);
-                    const pctShips = (((profilData.valeur_vaisseaux||0) / vraiPatrimoine) * 100).toFixed(1);
+                    const pctShips = ((valNavires / vraiPatrimoine) * 100).toFixed(1);
 
                     document.getElementById("qg-bar-liquid").style.width = pctLiq + "%";
                     document.getElementById("qg-bar-fc").style.width = pctFc + "%";
@@ -2346,7 +2329,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 }
 
                 // --- 6. GESTION DE LA FLOTTE ---
-                const conteneurFlotte = document.getElementById('qg-tab-flotte');
+                const conteneurFlotte = document.getElementById('flotte-liste-conteneur'); // <-- ID MODIFIÉ ICI
                 if (conteneurFlotte && paramData.flotte_json) {
                     const flotte = paramData.flotte_json;
                     const modulesJson = paramData.modules_json || {};
@@ -2372,7 +2355,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                                 const titleCol = estActif ? "var(--ed-blue)" : "#aaa";
                                 const badgeActif = estActif ? `<span style="color: #00FF66; font-size: 0.7em; font-weight: bold; background: rgba(0, 255, 102, 0.1); padding: 2px 6px; border: 1px solid #00FF66; border-radius: 3px; margin-left: 10px;">ACTIF</span>` : "";
                                 
-                                // On utilise la position actuelle pour savoir si le vaisseau est avec nous
                                 const sysVaisseau = estActif ? positionActuelle : vaisseau.systeme;
                                 const estSurFC = (sysVaisseau === positionActuelle);
                                 const iconeLieu = estSurFC ? `🛸 <span style="color:var(--ed-blue); font-weight:bold;">${sysVaisseau} (Soute Carrier)</span>` : `📍 ${sysVaisseau}`;
@@ -2763,16 +2745,24 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (typeof sonClic === 'function') sonClic();
             try {
                 if (accepter) {
-                    await supabaseApp.from('profils').update({ est_approuve: true }).eq('user_id', userId);
+                    // NOUVEAU : Appel du guichet sécurisé côté serveur pour l'approbation
+                    const { error } = await supabaseApp.rpc('approuver_utilisateur', { target_user_id: userId });
+                    if (error) throw error;
                 } else {
-                    // Appel de la fonction serveur pour une destruction totale
+                    // Appel du guichet sécurisé côté serveur pour la destruction
                     const { error } = await supabaseApp.rpc('purger_utilisateur', { target_user_id: userId });
                     if (error) throw error;
                 }
+                
+                // On met à jour l'interface
                 chargerDemandesDirecteur();
+                chargerPersonnelDirecteur();
                 if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute(); 
             } catch (e) {
                 console.error("Erreur lors de l'opération :", e);
+                if (typeof afficherAlerte === 'function') {
+                    afficherAlerte("ERREUR SYSTÈME", "Impossible de finaliser l'opération. L'accès a été bloqué par le serveur.", "#FF3333");
+                }
             }
         };
 
@@ -3515,12 +3505,15 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         { boxShadow: '0 0 5px rgba(0, 255, 102, 0.2)', opacity: 1 },
                         { boxShadow: '0 0 20px rgba(0, 255, 102, 0.8)', opacity: 0.6 },
                         { boxShadow: '0 0 5px rgba(0, 255, 102, 0.2)', opacity: 1 }
-                    ], {
-                        duration: 1500,
-                        iterations: Infinity
-                    });
+                    ], { duration: 1500, iterations: Infinity });
                     
-                    // ON STOCKE LES DONNÉES EN MÉMOIRE (Le pilote n'est pas encore sur le Bureau du Directeur)
+                    // --- NOUVEAU : ON FORCE L'AFFICHAGE DU BOUTON ET ON CACHE L'AIDE ---
+                    navSas('sas-page-main'); 
+                    const diagSection = document.getElementById('sas-diagnostics-section');
+                    if (diagSection) diagSection.style.display = 'none';
+                    // ------------------------------------------------------------------
+                    
+                    // ON STOCKE LES DONNÉES EN MÉMOIRE
                     window.sasCacheCmdr = nomCmdr;
                     window.sasCacheSquad = squadInfo ? squadInfo.nom : null;
                     window.sasUserId = userId;
@@ -3537,16 +3530,34 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if(typeof sonClic === 'function') sonClic();
             const btn = document.getElementById('btn-sas-demande');
             
-            // C'EST LE CLIC QUI ÉCRIT LE NOM EN BASE DE DONNÉES
-            await supabaseApp.from('profils').update({
-                cmdr_nom: window.sasCacheCmdr,
-                escadron_id: window.sasCacheSquad
-            }).eq('user_id', window.sasUserId);
-
-            btn.innerText = "DOSSIER TRANSMIS. ATTENTE VALIDATION...";
-            btn.style.borderColor = "#00FF66";
-            btn.style.color = "#00FF66";
+            btn.innerText = "TRANSMISSION EN COURS...";
             btn.disabled = true;
+
+            try {
+                // APPEL DU TUNNEL SÉCURISÉ (RPC) AU LIEU D'UN UPDATE DIRECT
+                const { error } = await supabaseApp.rpc('soumettre_dossier', {
+                    p_cmdr_nom: window.sasCacheCmdr,
+                    p_escadron_id: window.sasCacheSquad
+                });
+                
+                if (error) throw error;
+
+                // On renvoie sur la page d'authentification
+                document.getElementById('sas-screen').style.display = 'none';
+                document.getElementById('auth-screen').style.display = 'flex';
+                
+                const msg = document.getElementById('auth-msg');
+                msg.style.color = "var(--ed-orange)";
+                msg.innerText = "> DOSSIER TRANSMIS. EN ATTENTE DE VALIDATION.";
+                
+                if(typeof stopSasMusic === 'function') stopSasMusic();
+                
+            } catch (e) {
+                console.error("Erreur de soumission :", e);
+                btn.innerText = "ERREUR DE TRANSMISSION";
+                btn.style.color = "#FF3333";
+                btn.style.borderColor = "#FF3333";
+            }
         }
 
         window.enregistrerTelemetrie = function(type, cle) {
@@ -3581,6 +3592,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             sonClic(); // Optionnel : pour le son de l'interface
             ouvrirModal('modal-gazette');
         }
+
+        
 
     </script>
     <!-- ========================================== -->
@@ -3687,6 +3700,70 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </div>
 
     <script src="covas.js"></script>
+
+    <!-- MOTEUR GALNET NEWS (API OFFICIELLE FRONTIER) -->
+    <script>
+        let dernierArticleGalnet = null;
+
+        async function chargerGalnet() {
+            try {
+                // Connexion à l'API officielle de Frontier CMS (Zaonce)
+                const response = await fetch('https://cms.zaonce.net/fr-FR/jsonapi/node/galnet_article?sort=-created&page[limit]=1');
+                const payload = await response.json();
+                
+                if (payload && payload.data && payload.data.length > 0) {
+                    const article = payload.data[0].attributes;
+                    
+                    // On reformate les données pour notre système
+                    dernierArticleGalnet = {
+                        title: article.title,
+                        date: article.created,
+                        body: article.body ? article.body.value : "Contenu crypté ou indisponible."
+                    };
+
+                    document.getElementById('galnet-title').innerText = dernierArticleGalnet.title;
+                    
+                    // On ajoute 1286 ans pour l'immersion In-Game
+                    const dateReelle = new Date(dernierArticleGalnet.date);
+                    dateReelle.setFullYear(dateReelle.getFullYear() + 1286);
+                    document.getElementById('galnet-date').innerText = dateReelle.toLocaleDateString('fr-FR');
+                    
+                    // Création du résumé : Frontier renvoie du HTML, on le nettoie pour l'aperçu
+                    let rawText = dernierArticleGalnet.body.replace(/(<([^>]+)>)/gi, "").replace(/&nbsp;/gi, " ").trim(); 
+                    document.getElementById('galnet-snippet').innerText = rawText.substring(0, 500) + "...";
+                }
+            } catch (error) {
+                console.error("Erreur Galnet :", error);
+                document.getElementById('galnet-title').innerText = "ERREUR DE LIAISON COMM";
+                document.getElementById('galnet-snippet').innerText = "Impossible de joindre les serveurs officiels de la Fédération.";
+            }
+        }
+
+        function ouvrirModalGalnet() {
+            if(typeof sonClic==='function') sonClic();
+            if (!dernierArticleGalnet) return;
+            document.getElementById('modal-galnet-title').innerText = dernierArticleGalnet.title;
+            
+            const dateReelle = new Date(dernierArticleGalnet.date);
+            dateReelle.setFullYear(dateReelle.getFullYear() + 1286);
+            document.getElementById('modal-galnet-date').innerText = dateReelle.toLocaleDateString('fr-FR');
+            
+            // Frontier fournit déjà un code HTML propre, on l'injecte directement
+            document.getElementById('modal-galnet-body').innerHTML = dernierArticleGalnet.body;
+            
+            document.getElementById('modal-galnet').style.display = "flex";
+        }
+
+        function fermerModalGalnet() {
+            if(typeof sonClic==='function') sonClic();
+            document.getElementById('modal-galnet').style.display = "none";
+        }
+
+        // Lancement automatique
+        document.addEventListener('DOMContentLoaded', () => {
+            chargerGalnet();
+        });
+    </script>
 
 </body>
 </html>
