@@ -608,7 +608,7 @@
                                     <div style="position: relative; width: 55px; height: 55px;">
                                         <div id="modal-bgs-circle" style="width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(var(--ed-orange) 0% 0%, rgba(255,113,0,0.1) 0% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,113,0,0.4); transition: background 0.5s;">
                                             <div style="width: 45px; height: 45px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
-                                                <span id="modal-bgs-part" style="font-weight: bold; color: var(--ed-orange); font-size: 0.9em;">0%</span>
+                                                <span id="modal-bgs-part" style="font-weight: bold; color: var(--ed-orange); font-size: 0.75em; white-space: nowrap;">0%</span>
                                             </div>
                                         </div>
                                     </div>
@@ -763,7 +763,7 @@
     <div class="modal-overlay" id="modal-commandement" onclick="fermerModal('modal-commandement', event)">
         <div class="modal-content" style="max-width: 1200px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-commandement')">X</div>
-            <div class="modal-title" style="color: #FF3333; border-bottom: 1px solid #FF3333; padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">🛠️ SALLE DE COMMANDEMENT (NIVEAU AMIRAL)</div>
+            <div class="modal-title" style="color: #FF3333; border-bottom: 1px solid #FF3333; padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">🛠️ SALLE DE COMMANDEMENT</div>
             
             <div style="display: flex; gap: 40px; flex-wrap: wrap; overflow-y: auto; padding-right: 10px;">
                 
@@ -798,7 +798,7 @@
 
                         <!-- 2. BRIEFING GLOBAL DU SYSTÈME -->
                         <div>
-                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">BRIEFING STRATÉGIQUE DU THÉÂTRE (Amirauté) :</label>
+                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">BRIEFING STRATÉGIQUE :</label>
                             <textarea id="cmd-briefing" class="search-input" placeholder="Consignes globales pour le système, contexte de la campagne..." 
                                     autocomplete="off" data-lpignore="true"
                                     style="border-color: #FF3333; width: 100%; height: 75px; resize: vertical;"></textarea>
@@ -1419,13 +1419,15 @@
                 } catch(err) { console.error("Erreur calcul BGS:", err); }
 
                 // Mise à jour visuelle de la jauge circulaire
-                const partPct = totalSquad > 0 ? ((totalPilote / totalSquad) * 100).toFixed(1) : 0;
+                const rawPct = totalSquad > 0 ? ((totalPilote / totalSquad) * 100) : 0;
+                const partAff = rawPct >= 99.95 ? '100%' : (rawPct > 0 ? (rawPct % 1 === 0 ? rawPct.toFixed(0) : rawPct.toFixed(1)) + '%' : '0%');
+
                 const elPart = document.getElementById('modal-bgs-part');
                 const elCircle = document.getElementById('modal-bgs-circle');
-                
-                if (elPart) elPart.innerText = partPct + '%';
+
+                if (elPart) elPart.innerText = partAff;
                 if (elCircle) {
-                    elCircle.style.background = `conic-gradient(var(--ed-orange) 0% ${partPct}%, rgba(255,113,0,0.1) ${partPct}% 100%)`;
+                    elCircle.style.background = `conic-gradient(var(--ed-orange) 0% ${Math.min(100, rawPct)}%, rgba(255,113,0,0.1) ${Math.min(100, rawPct)}% 100%)`;
                 }
 
                 // Mise à jour des États de Service
@@ -2353,7 +2355,7 @@
                     let htmlBriefing = '';
                     if (briefingSysteme) {
                         htmlBriefing = `
-                        <div style="margin: 0 0 15px 0; padding: 12px 15px; border-left: 3px solid var(--ed-orange); background: rgba(255, 113, 0, 0.04); font-style: italic; color: #ccc; font-size: 0.9em; line-height: 1.5; border-radius: 0 4px 4px 0;">
+                        <div style="margin: 0 0 15px 0; padding: 12px 15px; border: 1px solid rgba(255, 113, 0, 0.15); background: rgba(255, 113, 0, 0.04); font-style: italic; color: #ccc; font-size: 0.9em; line-height: 1.5; border-radius: 4px;">
                             <strong style="color: var(--ed-orange); font-style: normal; display: block; margin-bottom: 5px; letter-spacing: 1px;">> TRANSMISSION DE L'AMIRAUTÉ :</strong>
                             "${briefingSysteme.replace(/\n/g, '<br>')}"
                         </div>`;
