@@ -2270,22 +2270,24 @@
             setTimeout(synchroniserHorloge, 1500);
         })();
 
-        // --- ÉPINGLER UN SYSTÈME EN HAUT DE LISTE ---
-        window.togglePinSystem = function(nomSysteme, event) {
+        function togglePinSystem(nomSysteme, event) {
             if (event) event.stopPropagation();
-            if (typeof sonClic === 'function') sonClic();
-            
-            let pinned = JSON.parse(localStorage.getItem('edteam_pinned_systems') || '[]');
-            
-            if (pinned.includes(nomSysteme)) {
-                pinned = pinned.filter(s => s !== nomSysteme); // Retire des favoris
+
+            // Utilisation de l'ID unique du compte pour une séparation totale
+            const piloteId = profilCommandant ? profilCommandant.user_id : 'inconnu';
+            const cleStockage = 'favoris_bgs_' + piloteId;
+
+            let favoris = JSON.parse(localStorage.getItem(cleStockage)) || [];
+
+            if (favoris.includes(nomSysteme)) {
+                favoris = favoris.filter(sys => sys !== nomSysteme);
             } else {
-                pinned.push(nomSysteme); // Ajoute aux favoris
+                favoris.push(nomSysteme);
             }
-            
-            localStorage.setItem('edteam_pinned_systems', JSON.stringify(pinned));
-            afficherOrdresBGS(); // On relance l'affichage pour appliquer le tri
-        };
+
+            localStorage.setItem(cleStockage, JSON.stringify(favoris));
+            afficherOrdresBGS(); 
+        }
 
         // --- AFFICHAGE DYNAMIQUE DES ORDRES BGS SUR LE TABLEAU DE BORD ---
         async function afficherOrdresBGS() {
@@ -2371,7 +2373,9 @@
                 let html = '';
 
                 // LECTURE DES FAVORIS ET TRI DES SYSTÈMES
-                let pinnedSystems = JSON.parse(localStorage.getItem('edteam_pinned_systems') || '[]');
+                const piloteId = profilCommandant ? profilCommandant.user_id : 'inconnu';
+                let pinnedSystems = JSON.parse(localStorage.getItem('favoris_bgs_' + piloteId)) || [];
+                
                 let systemesTries = Object.keys(groupesSystemes).sort((a, b) => {
                     let pinA = pinnedSystems.includes(a) ? 1 : 0;
                     let pinB = pinnedSystems.includes(b) ? 1 : 0;

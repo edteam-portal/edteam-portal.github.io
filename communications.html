@@ -902,13 +902,27 @@
 
             const msgDiv = document.createElement('div');
             msgDiv.className = `msg-line ${urgentClass}`;
+            
+            // NOUVEAU : On force l'alignement en haut et on empêche le bloc de se casser
+            msgDiv.style.flexWrap = 'nowrap';
+            msgDiv.style.alignItems = 'flex-start';
+            
             if (!animate) msgDiv.style.animation = 'none';
+            
             msgDiv.innerHTML = `
-                <span class="msg-time">[${timeStr}]</span>
-                ${tagsRenseignement}
-                <span class="msg-author" style="color: ${auteurColor};">CMDR ${msg.expediteur_nom} ></span>
-                <span class="msg-channel">${canalTag}</span>
-                <span class="msg-text">${urgentTag}${msg.message}</span>
+                <!-- COLONNE GAUCHE : L'en-tête -->
+                <div style="flex-shrink: 0; margin-right: 8px; display: flex; align-items: baseline; flex-wrap: wrap;">
+                    <span class="msg-time">[${timeStr}]</span>
+                    ${tagsRenseignement}
+                    <span class="msg-author" style="color: ${auteurColor};">CMDR ${msg.expediteur_nom} ></span>
+                    <span class="msg-channel">${canalTag}</span>
+                </div>
+                
+                <!-- COLONNE DROITE : Le message -->
+                <div class="msg-text" style="flex-grow: 1; word-break: break-word;">
+                    ${urgentTag}${msg.message}
+                </div>
+                
                 ${deleteBtn}
             `;
             
