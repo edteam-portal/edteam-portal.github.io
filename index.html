@@ -36,6 +36,18 @@
         .boot-btn:hover { background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-glow); }
         .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
 
+        @keyframes enveloppeBlink {
+            0%, 100% { color: var(--ed-blue); filter: none; }
+            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
+        }
+        .alerte-enveloppe .nav-icon {
+            animation: enveloppeBlink 1s infinite !important;
+        }
+        .alerte-enveloppe .nav-text {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
         /* =========================================
            MENU LATÉRAL TACTIQUE (HAMBURGER)
            ========================================= */
@@ -234,7 +246,7 @@
             <div id="sas-page-game" class="sas-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.95em; line-height: 1.6; text-align: left;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez votre jeu Elite Dangerous <strong>depuis votre bureau</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Le radar devrait détecter le signal automatiquement en quelques secondes.</p>
                 <button class="fs-auth-btn" style="margin-top: 30px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="navSas('sas-page-main')" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">< RETOUR AU RADAR</button>
@@ -271,7 +283,7 @@
             </div>
             <span class="nav-text">QUARTIER GÉNÉRAL</span>
         </a>
-        <a href="communications.html" class="nav-link" onmouseenter="sonHover()">
+        <a href="communications.html" id="nav-comms-link" class="nav-link" onmouseenter="sonHover()" onclick="retirerAlerteEnveloppe()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
             <span class="nav-text">COMMUNICATIONS</span>
         </a>
@@ -287,6 +299,19 @@
             <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
             <span class="nav-text">COMMERCE FURTIF</span>
         </a>
+
+        <!-- LIEN SUPPORT DISCORD -->
+        <a href="https://discord.gg/max5W9FreN" target="_blank" class="nav-link" style="margin-top: auto; margin-bottom: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1v-6h3v4z"></path>
+                    <path d="M3 19a2 2 0 0 0 2 2h1v-6H3v4z"></path>
+                </svg>
+            </div>
+            <span class="nav-text">SUPPORT DISCORD</span>
+        </a>
+
     </nav>
 
     <!-- ZONE PRINCIPALE -->
@@ -363,6 +388,7 @@
                     BUREAU DIRECTEUR
                     <span id="badge-onglet-directeur" style="display: none; background: #FF3333; color: #fff; border-radius: 10px; padding: 2px 6px; font-size: 0.8em; margin-left: 8px; box-shadow: 0 0 8px #FF3333; vertical-align: middle;">0</span>
                 </button>
+            
             </nav>
         </div>
 
@@ -396,8 +422,9 @@
 
                         <!-- Si le pilote a un escadron -->
                         <div id="qg-squad-actif" style="display: none; justify-content: space-between; align-items: center;">
-                            <div>
+                            <div style="display: flex; align-items: center; gap: 20px;">
                                 <span id="qg-squad-tag" style="color: var(--ed-orange); font-size: 1.8em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,113,0,0.3);">[ ... ]</span>
+                                <button onclick="ouvrirModalReputation()" style="background: transparent; color: var(--ed-blue); border: 1px solid var(--ed-blue); padding: 8px 15px; cursor: pointer; transition: 0.3s; font-family: inherit; font-weight: bold; letter-spacing: 1px;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='var(--ed-blue)';" onmouseenter="if(typeof sonHover==='function') sonHover()">[ OBJECTIFS RÉPUTATION ]</button>
                             </div>
                             <div style="text-align: right;">
                                 <div id="qg-squad-roles" style="display: flex; gap: 10px; justify-content: flex-end;"></div>
@@ -717,6 +744,29 @@
         </main>
     </div>
 
+    <!-- MODAL OBJECTIFS RÉPUTATION -->
+    <div class="modal-overlay" id="modal-reputation" onclick="fermerModal('modal-reputation', event)" style="z-index: 3500;">
+        <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-reputation')">X</div>
+            <div style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">🎯 OBJECTIFS DE RÉPUTATION</div>
+
+            <p style="color: #ccc; font-size: 0.9em; margin-bottom: 15px; line-height: 1.5;">Factions locales à soutenir en priorité via l'exploration, les primes ou les missions pour débloquer des alliances stratégiques.</p>
+
+            <div id="liste-reputation" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                <div style="color: #666; font-style: italic; text-align: center;">Recherche en cours...</div>
+            </div>
+
+            <!-- Ajout réservé Amiral/Directeur -->
+            <div id="admin-reputation-panel" style="display: none; border-top: 1px dashed var(--ed-blue); padding-top: 15px;">
+                <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">AJOUTER UNE FACTION (ADMIN) :</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="input-nouvelle-reputation" class="search-input" placeholder="Nom exact de la faction..." style="flex-grow: 1; border-color: var(--ed-blue);">
+                    <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';" onclick="ajouterReputation()" onmouseenter="if(typeof sonHover==='function') sonHover()">AJOUTER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE (UNIFIÉ) -->
     <div class="failsafe-overlay" id="failsafe-modal">
         <div class="failsafe-content" style="max-width: 750px; text-align: left; padding: 30px; position: relative;">
@@ -792,7 +842,7 @@
             <div id="fs-page-game" class="fs-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez votre jeu Elite Dangerous <strong>depuis votre bureau</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
                 <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
@@ -1875,6 +1925,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         
         async function deconnexion() { await supabaseApp.auth.signOut(); location.reload(); }
 
+        window.retirerAlerteEnveloppe = function() {
+            const envIcon = document.getElementById('nav-comms-link');
+            if (envIcon) envIcon.classList.remove('alerte-enveloppe');
+        };
+
         // =========================================
         // VARIABLES GLOBALES DES RANGS
         // =========================================
@@ -2329,7 +2384,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 }
 
                 // --- 6. GESTION DE LA FLOTTE ---
-                const conteneurFlotte = document.getElementById('flotte-liste-conteneur'); // <-- ID MODIFIÉ ICI
+                const conteneurFlotte = document.getElementById('flotte-liste-conteneur');
                 if (conteneurFlotte && paramData.flotte_json) {
                     const flotte = paramData.flotte_json;
                     const modulesJson = paramData.modules_json || {};
@@ -2344,6 +2399,24 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             if (activeShipId && !flotte.find(v => String(v.id) === String(activeShipId))) {
                                 flotte.unshift({ id: activeShipId, nom: nomVaisseauActif, modele: paramData.vaisseau_modele || "INCONNU", systeme: positionActuelle });
                             }
+
+                            // --- 🚀 NOUVEAU : MOTEUR DE TRI DE LA FLOTTE 🚀 ---
+                            flotte.sort((a, b) => {
+                                const estActifA = (nomVaisseauActif === (a.nom || "").toUpperCase() || String(a.id) === String(activeShipId));
+                                const estActifB = (nomVaisseauActif === (b.nom || "").toUpperCase() || String(b.id) === String(activeShipId));
+                                
+                                // Règle 1 : Le vaisseau actif remonte tout en haut (Priorité absolue)
+                                if (estActifA && !estActifB) return -1;
+                                if (!estActifA && estActifB) return 1;
+                                
+                                // Règle 2 : Tri alphabétique par nom de vaisseau
+                                const nomA = (a.nom || "ZZZ").toUpperCase();
+                                const nomB = (b.nom || "ZZZ").toUpperCase();
+                                if (nomA < nomB) return -1;
+                                if (nomA > nomB) return 1;
+                                return 0;
+                            });
+                            // --------------------------------------------------
 
                             let htmlFlotte = "";
                             flotte.forEach(vaisseau => {
@@ -2594,6 +2667,29 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (!profilCommandant || commsRadarActif) return;
             commsRadarActif = true;
             console.log("> Radar de communications synchronisé.");
+
+            // ---> NOUVEAU : VÉRIFICATION DE TOUS LES CANAUX AU DÉMARRAGE <---
+            let filtreCanaux = `canal.eq.GLOBAL,destinataire_id.eq.${profilCommandant.user_id}`;
+            if (profilCommandant.escadron_id) filtreCanaux += `,escadron_id.eq.${profilCommandant.escadron_id}`;
+
+            supabaseApp.from('transmissions')
+                .select('created_at')
+                .or(filtreCanaux)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .then(({ data }) => {
+                    if (data && data.length > 0) {
+                        const dateDernierMsgServeur = new Date(data[0].created_at).getTime();
+                        const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_msg_time') || '0');
+                        
+                        // Si le message sur le serveur est plus récent que ta dernière visite
+                        if (dateDernierMsgServeur > dateDerniereLecture) {
+                            const envIcon = document.getElementById('nav-comms-link');
+                            if (envIcon) envIcon.classList.add('alerte-enveloppe');
+                        }
+                    }
+                });
+            // -------------------------------------------------------------------------
 
             supabaseApp.channel('public:transmissions')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
@@ -3763,6 +3859,92 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         document.addEventListener('DOMContentLoaded', () => {
             chargerGalnet();
         });
+
+        // ==========================================
+        // GESTION DES OBJECTIFS DE RÉPUTATION
+        // ==========================================
+        window.ouvrirModalReputation = function() {
+            if(typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-reputation').style.display = 'flex';
+            
+            // Le panneau d'ajout est réservé aux Amiraux et Directeurs
+            const adminPanel = document.getElementById('admin-reputation-panel');
+            if (profilCommandant && (profilCommandant.est_amiral || profilCommandant.est_directeur)) {
+                adminPanel.style.display = 'block';
+            } else {
+                adminPanel.style.display = 'none';
+            }
+            
+            chargerReputation();
+        };
+
+        window.chargerReputation = async function() {
+            const liste = document.getElementById('liste-reputation');
+            if (!profilCommandant || !profilCommandant.escadron_id) return;
+            
+            try {
+                const { data, error } = await supabaseApp.from('objectifs_reputation')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                if (data.length === 0) {
+                    liste.innerHTML = '<div style="color: #666; font-style: italic; text-align: center; padding: 10px;">Aucun objectif de réputation en cours.</div>';
+                    return;
+                }
+                
+                let html = '';
+                const isAdmin = profilCommandant.est_amiral || profilCommandant.est_directeur;
+                
+                data.forEach(item => {
+                    let btnDelete = isAdmin ? `<span style="color: #FF3333; cursor: pointer; font-weight: bold; padding: 0 5px;" onclick="supprimerReputation(${item.id})" title="Supprimer l'objectif">X</span>` : '';
+                    html += `
+                    <div style="background: rgba(0,240,255,0.05); border-left: 3px solid var(--ed-blue); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 4px 4px 0;">
+                        <span style="color: #fff; font-weight: bold; letter-spacing: 1px;">${item.faction_nom}</span>
+                        ${btnDelete}
+                    </div>`;
+                });
+                liste.innerHTML = html;
+            } catch (e) {
+                liste.innerHTML = '<div style="color: red; text-align: center;">Erreur de connexion avec le noyau.</div>';
+            }
+        };
+
+        window.ajouterReputation = async function() {
+            if(typeof sonClic === 'function') sonClic();
+            const input = document.getElementById('input-nouvelle-reputation');
+            const faction = input.value.trim().toUpperCase();
+            
+            if (!faction) return;
+            
+            try {
+                const { error } = await supabaseApp.from('objectifs_reputation').insert([{
+                    escadron_id: profilCommandant.escadron_id,
+                    faction_nom: faction,
+                    ajoute_par: profilCommandant.cmdr_nom
+                }]);
+                
+                if (error) throw error;
+                input.value = ''; // On vide le champ
+                chargerReputation(); // On actualise la liste
+            } catch (e) {
+                console.error("Erreur ajout réputation :", e);
+            }
+        };
+
+        window.supprimerReputation = async function(id) {
+            if(typeof sonClic === 'function') sonClic();
+            try {
+                const { error } = await supabaseApp.from('objectifs_reputation').delete().eq('id', id);
+                if (error) throw error;
+                chargerReputation(); // On actualise la liste
+            } catch (e) {
+                console.error("Erreur suppression réputation :", e);
+            }
+        };
+
     </script>
 
 </body>

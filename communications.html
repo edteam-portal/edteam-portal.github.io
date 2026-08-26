@@ -24,6 +24,29 @@
         .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-blue); box-shadow: 0 0 15px rgba(0,240,255,0.5), 0 0 5px var(--ed-blue); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 8s linear infinite; }
         @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
 
+        @keyframes enveloppeBlink {
+            0%, 100% { color: var(--ed-blue); filter: none; }
+            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
+        }
+
+        @keyframes tabBlink {
+            0%, 100% { color: var(--ed-blue); text-shadow: none; border-color: rgba(0, 240, 255, 0.2); }
+            50% { color: #fff; text-shadow: 0 0 10px #fff; border-color: #fff; box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
+        }
+
+        .alerte-onglet {
+            animation: tabBlink 1.5s infinite !important;
+            opacity: 1 !important;
+        }
+
+        .alerte-enveloppe .nav-icon {
+            animation: enveloppeBlink 1s infinite !important;
+        }
+        .alerte-enveloppe .nav-text {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
         /* MENU LATÉRAL */
         #side-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 60px; background: rgba(10, 10, 10, 0.95); border-right: 1px solid rgba(0, 240, 255, 0.2); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px; }
         #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-blue); }
@@ -141,7 +164,7 @@
             </div>
             <span class="nav-text">QUARTIER GÉNÉRAL</span>
         </a>
-        <a href="communications.html" class="nav-link active" onmouseenter="sonHover()">
+        <a href="communications.html" id="nav-comms-link" class="nav-link active" onmouseenter="sonHover()" onclick="retirerAlerteEnveloppe()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
             <span class="nav-text">COMMUNICATIONS</span>
         </a>
@@ -157,6 +180,19 @@
             <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
             <span class="nav-text">COMMERCE FURTIF</span>
         </a>
+
+        <!-- LIEN SUPPORT DISCORD -->
+        <a href="https://discord.gg/max5W9FreN" target="_blank" class="nav-link" style="margin-top: auto; margin-bottom: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1v-6h3v4z"></path>
+                    <path d="M3 19a2 2 0 0 0 2 2h1v-6H3v4z"></path>
+                </svg>
+            </div>
+            <span class="nav-text">SUPPORT DISCORD</span>
+        </a>
+
     </nav>
 
     <!-- ZONE PRINCIPALE -->
@@ -210,11 +246,11 @@
         <!-- ONGLETS ET HORLOGE GALACTIQUE -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; gap: 15px;">
             <nav class="tab-bar" style="margin-bottom: 0;">
-                <button class="tab-btn active" onclick="changerCanal('GLOBAL', this)" onmouseenter="sonHover()">FRÉQUENCE OUVERTE</button>
-                <button class="tab-btn" id="btn-tab-escadron" style="display: none;" onclick="changerCanal('ESCADRON', this)" onmouseenter="sonHover()">CANAL ESCADRON</button>
-                <button class="tab-btn" id="btn-tab-coalition" onclick="changerCanal('COALITION', this)" onmouseenter="sonHover()" style="display: none; border-color: #B026FF; color: #B026FF;">RÉSEAU COALITION</button>
-                <button class="tab-btn" onclick="changerCanal('PRIVE', this)" onmouseenter="sonHover()">TRANSMISSIONS PRIVÉES <span id="badge-unread" style="color:#FF3333; display:none;">(•)</span></button>
-            </nav>
+            <button id="btn-tab-global" class="tab-btn active" onclick="changerCanal('GLOBAL', this)" onmouseenter="sonHover()">FRÉQUENCE OUVERTE</button>
+            <button id="btn-tab-escadron" class="tab-btn" style="display: none;" onclick="changerCanal('ESCADRON', this)" onmouseenter="sonHover()">CANAL ESCADRON</button>
+            <button id="btn-tab-coalition" class="tab-btn" onclick="changerCanal('COALITION', this)" onmouseenter="sonHover()" style="display: none; border-color: #B026FF; color: #B026FF;">RÉSEAU COALITION</button>
+            <button id="btn-tab-prive" class="tab-btn" onclick="changerCanal('PRIVE', this)" onmouseenter="sonHover()">TRANSMISSIONS PRIVÉES <span id="badge-unread" style="color:#FF3333; display:none;">(•)</span></button>
+        </nav>
 
             <!-- COMPTEUR ENCADRÉ AVEC MODALE AU SURVOL -->
             <div id="comms-tick-box" style="position: relative; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.4); padding: 6px 15px; border-radius: 4px; display: flex; align-items: center; cursor: help; white-space: nowrap; transition: all 0.3s;"
@@ -235,7 +271,7 @@
         </div>
 
         <!-- TERMINAL CRT -->
-        <div class="crt-terminal">
+        <div class="crt-terminal" onclick="retirerAlerteEnveloppe()">
             <div class="crt-overlay"></div>
 
             <div class="message-feed" id="message-feed">
@@ -346,7 +382,7 @@
             <div id="fs-page-game" class="fs-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez votre jeu Elite Dangerous <strong>depuis votre bureau</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
                 <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
@@ -618,6 +654,9 @@
                         }
                     }).subscribe();
 
+            // ---> AJOUTE LE LANCEMENT DU SCANNEUR JUSTE ICI <---
+                await verifierOngletsNonLus();
+
             } catch(e) {
                 console.error("Erreur critique au démarrage :", e);
             }
@@ -625,14 +664,21 @@
 
         async function deconnexion() { await supabaseApp.auth.signOut(); location.href = 'index.html'; }
 
+        window.retirerAlerteEnveloppe = function() {
+            const envIcon = document.getElementById('nav-comms-link');
+            if (envIcon) envIcon.classList.remove('alerte-enveloppe');
+        };
+
         // --- GESTION DE L'INTERFACE ---
         function changerCanal(nouveauCanal, btn) {
             if (canalActif === nouveauCanal) return;
             sonClic();
+            retirerAlerteEnveloppe(); // <--- AJOUT ICI
             canalActif = nouveauCanal;
             
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            btn.classList.remove('alerte-onglet'); // <--- NOUVELLE LIGNE POUR ÉTEINDRE L'ONGLET !
 
             const selectDest = document.getElementById('select-destinataire');
             const inputField = document.getElementById('comms-input');
@@ -726,7 +772,7 @@
                     feed.innerHTML = '<div style="color: #555; text-align: center; margin-top: 40px;">> AUCUN SIGNAL DÉTECTÉ SUR CETTE FRÉQUENCE.</div>';
                 } else {
                     data.forEach(msg => afficherMessage(msg, false));
-                    if (canalActif === 'PRIVE') {
+                   if (canalActif === 'PRIVE') {
                         const unreadIds = data.filter(m => m.destinataire_id === profilCommandant.user_id && !m.lu).map(m => m.id);
                         if (unreadIds.length > 0) {
                             supabaseApp.from('transmissions').update({ lu: true }).in('id', unreadIds).then();
@@ -734,9 +780,46 @@
                     }
                 }
                 feed.scrollTop = feed.scrollHeight;
+                
+                // ON MET À JOUR LE CHRONOMÈTRE GLOBAL ET CELUI DE L'ONGLET ACTIF
+                localStorage.setItem('edteam_last_msg_time', Date.now().toString());
+                localStorage.setItem('edteam_last_read_' + canalActif, Date.now().toString());
+                
             } catch (e) {
                 feed.innerHTML = '<div style="color: red; text-align: center; margin-top: 40px;">> ERREUR DE SYNCHRONISATION.</div>';
             }
+        }
+
+        async function verifierOngletsNonLus() {
+            if (!profilCommandant) return;
+            
+            // 1. Privé
+            const { count } = await supabaseApp.from('transmissions').select('id', { count: 'exact', head: true }).eq('destinataire_id', profilCommandant.user_id).eq('lu', false);
+            if (count > 0 && canalActif !== 'PRIVE') {
+                const btn = document.getElementById('btn-tab-prive');
+                if (btn) btn.classList.add('alerte-onglet');
+                document.getElementById('badge-unread').style.display = 'inline';
+            }
+
+            // 2. Fonction pour vérifier les canaux publics
+            const verifierCanal = async (canal, filtreCol, filtreVal, idBtn) => {
+                const btn = document.getElementById(idBtn);
+                if (!btn || btn.style.display === 'none' || canalActif === canal) return;
+
+                const lastRead = parseInt(localStorage.getItem('edteam_last_read_' + canal) || '0');
+                let query = supabaseApp.from('transmissions').select('created_at').eq('canal', canal).order('created_at', { ascending: false }).limit(1);
+                if (filtreCol) query = query.eq(filtreCol, filtreVal);
+
+                const { data } = await query;
+                // S'il y a un message plus récent que notre dernière visite, ça clignote !
+                if (data && data.length > 0 && new Date(data[0].created_at).getTime() > lastRead) {
+                    btn.classList.add('alerte-onglet');
+                }
+            };
+
+            await verifierCanal('GLOBAL', null, null, 'btn-tab-global');
+            if (profilCommandant.escadron_id) await verifierCanal('ESCADRON', 'escadron_id', profilCommandant.escadron_id, 'btn-tab-escadron');
+            if (maCoalitionId) await verifierCanal('COALITION', 'coalition_id', maCoalitionId, 'btn-tab-coalition');
         }
 
         function afficherMessage(msg, animate = true) {
@@ -905,9 +988,22 @@
                         if (canalActif === 'PRIVE' && msg.destinataire_id === profilCommandant.user_id) {
                             supabaseApp.from('transmissions').update({ lu: true }).eq('id', msg.id).then();
                         }
-                    } else if (msg.destinataire_id === profilCommandant.user_id && msg.canal === 'PRIVE') {
-                        document.getElementById('badge-unread').style.display = 'inline';
-                        playUI('receive');
+                    } else {
+                        // Le message n'est pas pour l'onglet actif : on fait clignoter l'onglet concerné !
+                        let idOnglet = null;
+                        if (msg.canal === 'GLOBAL') idOnglet = 'btn-tab-global';
+                        else if (msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) idOnglet = 'btn-tab-escadron';
+                        else if (msg.canal === 'COALITION' && msg.coalition_id === maCoalitionId) idOnglet = 'btn-tab-coalition';
+                        else if (msg.canal === 'PRIVE' && msg.destinataire_id === profilCommandant.user_id) {
+                            idOnglet = 'btn-tab-prive';
+                            document.getElementById('badge-unread').style.display = 'inline';
+                        }
+
+                        if (idOnglet) {
+                            const btnOnglet = document.getElementById(idOnglet);
+                            if (btnOnglet) btnOnglet.classList.add('alerte-onglet');
+                            playUI('receive');
+                        }
                     }
                 })
                 .subscribe();

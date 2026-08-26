@@ -45,6 +45,18 @@
             100% { transform: translateY(100vh); }
         }
 
+        @keyframes enveloppeBlink {
+            0%, 100% { color: var(--ed-blue); filter: none; }
+            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
+        }
+        .alerte-enveloppe .nav-icon {
+            animation: enveloppeBlink 1s infinite !important;
+        }
+        .alerte-enveloppe .nav-text {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
         /* =========================================
            MENU LATÉRAL TACTIQUE
            ========================================= */
@@ -241,7 +253,7 @@
             </div>
             <span class="nav-text">QUARTIER GÉNÉRAL</span>
         </a>
-        <a href="communications.html" class="nav-link" onmouseenter="sonHover()">
+        <a href="communications.html" id="nav-comms-link" class="nav-link" onmouseenter="sonHover()" onclick="retirerAlerteEnveloppe()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
             <span class="nav-text">COMMUNICATIONS</span>
         </a>
@@ -257,6 +269,19 @@
             <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
             <span class="nav-text">COMMERCE FURTIF</span>
         </a>
+    
+        <!-- LIEN SUPPORT DISCORD -->
+        <a href="https://discord.gg/max5W9FreN" target="_blank" class="nav-link" style="margin-top: auto; margin-bottom: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1v-6h3v4z"></path>
+                    <path d="M3 19a2 2 0 0 0 2 2h1v-6H3v4z"></path>
+                </svg>
+            </div>
+            <span class="nav-text">SUPPORT DISCORD</span>
+        </a>
+
     </nav>
 
     <!-- ZONE PRINCIPALE -->
@@ -273,7 +298,7 @@
                         <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
                     </svg>
 
-                    <<div style="display: flex; flex-direction: column; justify-content: center;">
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
                         <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
                         <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
                     </div>
@@ -605,6 +630,9 @@
                             
                         </div>
                     </div>
+
+                    <!-- NOUVEAU : CONTENEUR DES RÉPUTATIONS -->
+                    <div id="modal-reputations-container" style="display: none;"></div>
 
                     <!-- PANNEAU D'ADMINISTRATION (Amirauté Uniquement) -->
                     <div id="modal-admin-panel" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #FF3333;">
@@ -967,7 +995,7 @@
             <div id="fs-page-game" class="fs-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez votre jeu Elite Dangerous <strong>depuis votre bureau</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
                 <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
@@ -1478,6 +1506,106 @@
                     if (notorietyText) notorietyText.innerHTML = `<span style="color: #00FF66;">CASIER VIERGE</span>`;
                 }
 
+                // --- 3.5 INJECTION DES RÉPUTATIONS FACTIONS ---
+                const conteneurReps = document.getElementById('modal-reputations-container');
+                try {
+                    const { data: objectifs } = await supabaseApp.from('objectifs_reputation').select('faction_nom').eq('escadron_id', profilCommandant.escadron_id);
+                    if (objectifs && objectifs.length > 0 && conteneurReps) {
+                        let repHtml = `
+                        <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px; margin-top: 20px; flex-grow: 1;">
+                            <div style="color: var(--ed-blue); font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">> REPUTATIONS ESCADRON (OBJECTIFS)</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 15px;">`;
+                        
+                        const reps = profil.reputations || {};
+                        
+                        // On convertit le dictionnaire en majuscules pour la comparaison
+                        const repsMajuscules = {};
+                        for (let key in reps) {
+                            repsMajuscules[key.toUpperCase()] = reps[key];
+                        }
+
+                        objectifs.forEach(obj => {
+                            const val = repsMajuscules[obj.faction_nom.toUpperCase()];
+                            
+                            let color = '#555'; 
+                            let label = 'INCONNU';
+                            let formatVal = '---';
+                            let barHtml = '';
+
+                            if (val !== undefined) {
+                                formatVal = val.toFixed(1) + '%';
+                                
+                                // Définition exacte des 6 paliers d'Elite Dangerous
+                                const paliers = [
+                                    { min: -100, max: -90, nom: 'HOSTILE', col: '#FF3333' },
+                                    { min: -90, max: -35, nom: 'INAMICAL', col: 'var(--ed-orange)' },
+                                    { min: -35, max: 4, nom: 'NEUTRE', col: '#FFFFFF' },
+                                    { min: 4, max: 35, nom: 'CORDIAL', col: '#A8FF00' },
+                                    { min: 35, max: 90, nom: 'AMICAL', col: '#00FF66' },
+                                    { min: 90, max: 100, nom: 'ALLIÉ', col: '#00F0FF' }
+                                ];
+
+                                // Identifier dans quel palier on se trouve actuellement
+                                let palierActuelIdx = 0;
+                                for (let i = 0; i < paliers.length; i++) {
+                                    if (val >= paliers[i].min && val <= paliers[i].max) {
+                                        palierActuelIdx = i;
+                                        color = paliers[i].col;
+                                        label = paliers[i].nom;
+                                        break;
+                                    }
+                                }
+                                // Sécurités si dépassement mathématique
+                                if (val > 100) { palierActuelIdx = 5; color = paliers[5].col; label = 'ALLIÉ'; }
+                                if (val < -100) { palierActuelIdx = 0; color = paliers[0].col; label = 'HOSTILE'; }
+
+                                // Génération des 6 rectangles de progression
+                                let rectsHtml = '';
+                                paliers.forEach((p, index) => {
+                                    let fillPct = 0;
+                                    
+                                    // Si le palier est déjà franchi, on le remplit à 100%
+                                    if (val >= p.max) {
+                                        fillPct = 100;
+                                    } 
+                                    // Si on est DANS ce palier, on calcule le % de remplissage relatif
+                                    else if (val > p.min && val < p.max) {
+                                        fillPct = ((val - p.min) / (p.max - p.min)) * 100;
+                                    }
+                                    
+                                    const isCurrent = (index === palierActuelIdx);
+                                    
+                                    rectsHtml += `
+                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                                        <div style="width: 100%; height: 10px; background: rgba(0,0,0,0.8); border: 1px solid ${isCurrent ? p.col : '#333'}; border-radius: 2px; overflow: hidden; position: relative; box-shadow: ${isCurrent ? '0 0 5px ' + p.col : 'none'};">
+                                            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${fillPct}%; background: ${p.col}; box-shadow: 0 0 8px ${p.col}; transition: width 0.5s ease-out;"></div>
+                                        </div>
+                                        <div style="font-size: 0.65em; text-align: center; font-weight: ${isCurrent ? 'bold' : 'normal'}; color: ${isCurrent ? p.col : '#666'}; letter-spacing: 0.5px;">
+                                            ${p.nom}
+                                        </div>
+                                    </div>`;
+                                });
+
+                                barHtml = `<div style="display: flex; width: 100%; gap: 6px; margin-top: 15px;">${rectsHtml}</div>`;
+                            }
+
+                            repHtml += `
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid ${color}; padding: 15px; border-radius: 0 4px 4px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <span style="color: #ccc; font-size: 1em; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 10px;" title="${obj.faction_nom}">${obj.faction_nom}</span>
+                                    <div style="text-align: right; line-height: 1;">
+                                        <div style="color: ${color}; font-weight: bold; font-size: 1.2em;">${formatVal}</div>
+                                    </div>
+                                </div>
+                                ${barHtml}
+                            </div>`;
+                        });
+                        repHtml += `</div></div>`;
+                        conteneurReps.innerHTML = repHtml;
+                        conteneurReps.style.display = 'block';
+                    } else if (conteneurReps) conteneurReps.style.display = 'none';
+                } catch(e) { console.error("Erreur réputations:", e); }
+
                 // --- 4. CONTRÔLE AMIRAUTÉ ---
                 const adminPanel = document.getElementById('modal-admin-panel');
                 const adminButtons = document.getElementById('modal-admin-buttons');
@@ -1578,6 +1706,13 @@
             await supabaseApp.auth.signOut(); 
             window.location.href = 'index.html'; 
         }
+
+        async function deconnexion() { await supabaseApp.auth.signOut(); location.reload(); }
+
+        window.retirerAlerteEnveloppe = function() {
+            const envIcon = document.getElementById('nav-comms-link');
+            if (envIcon) envIcon.classList.remove('alerte-enveloppe');
+        };
 
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
@@ -1680,6 +1815,24 @@
                 if (typeof synchroniserHorlogeBGS === 'function') synchroniserHorlogeBGS();
                 if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                 chargerEffectifsEscadron(); // <- NOUVELLE LIGNE
+                
+                // NOUVEAU : ÉCOUTE FURTIVE DES COMMUNICATIONS
+                supabaseApp.channel('alerte_comms')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
+                        const msg = payload.new;
+                        if (msg.expediteur_id === profilCommandant.user_id) return;
+
+                        const isForMe = (msg.destinataire_id === profilCommandant.user_id);
+                        const isEscadron = (msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id);
+                        const isGlobal = (msg.canal === 'GLOBAL');
+
+                        if (isForMe || isEscadron || isGlobal) {
+                            const envIcon = document.getElementById('nav-comms-link');
+                            if (envIcon) envIcon.classList.add('alerte-enveloppe');
+                            try { if (typeof playUI === 'function') playUI('receive'); } catch(e) {}
+                        }
+                    }).subscribe();
+
             } else {
                 // SI CONNECTÉ MAIS NON APPROUVÉ -> ÉJECTION
                 await supabaseApp.auth.signOut();
@@ -3993,6 +4146,29 @@
             if (!profilCommandant || commsRadarActif) return;
             commsRadarActif = true;
             console.log("> Radar de communications synchronisé.");
+
+            // ---> NOUVEAU : VÉRIFICATION DE TOUS LES CANAUX AU DÉMARRAGE <---
+            let filtreCanaux = `canal.eq.GLOBAL,destinataire_id.eq.${profilCommandant.user_id}`;
+            if (profilCommandant.escadron_id) filtreCanaux += `,escadron_id.eq.${profilCommandant.escadron_id}`;
+
+            supabaseApp.from('transmissions')
+                .select('created_at')
+                .or(filtreCanaux)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .then(({ data }) => {
+                    if (data && data.length > 0) {
+                        const dateDernierMsgServeur = new Date(data[0].created_at).getTime();
+                        const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_msg_time') || '0');
+                        
+                        // Si le message sur le serveur est plus récent que ta dernière visite
+                        if (dateDernierMsgServeur > dateDerniereLecture) {
+                            const envIcon = document.getElementById('nav-comms-link');
+                            if (envIcon) envIcon.classList.add('alerte-enveloppe');
+                        }
+                    }
+                });
+            // -------------------------------------------------------------------------
 
             supabaseApp.channel('public:transmissions')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {

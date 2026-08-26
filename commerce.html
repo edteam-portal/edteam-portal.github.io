@@ -253,6 +253,18 @@
         .transac-row.achat { border-color: #FF3333; }
         .transac-row.vente { border-color: #00FF66; }
 
+        @keyframes enveloppeBlink {
+            0%, 100% { color: var(--ed-blue); filter: none; }
+            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
+        }
+        .alerte-enveloppe .nav-icon {
+            animation: enveloppeBlink 1s infinite !important;
+        }
+        .alerte-enveloppe .nav-text {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
         /* OVERRIDE TACTIQUE & MENU LATÉRAL */
         body { align-items: flex-start !important; padding-top: 2.5vh !important; }
         .hud-container { margin-left: 60px !important; width: calc(100% - 60px) !important; transition: margin-left 0.3s, width 0.3s !important; }
@@ -295,7 +307,7 @@
             </div>
             <span class="nav-text">QUARTIER GÉNÉRAL</span>
         </a>
-        <a href="communications.html" class="nav-link" onmouseenter="sonHover()">
+        <a href="communications.html" id="nav-comms-link" class="nav-link" onmouseenter="sonHover()" onclick="retirerAlerteEnveloppe()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
             <span class="nav-text">COMMUNICATIONS</span>
         </a>
@@ -311,6 +323,19 @@
             <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
             <span class="nav-text">COMMERCE FURTIF</span>
         </a>
+
+        <!-- LIEN SUPPORT DISCORD -->
+        <a href="https://discord.gg/max5W9FreN" target="_blank" class="nav-link" style="margin-top: auto; margin-bottom: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1v-6h3v4z"></path>
+                    <path d="M3 19a2 2 0 0 0 2 2h1v-6H3v4z"></path>
+                </svg>
+            </div>
+            <span class="nav-text">SUPPORT DISCORD</span>
+        </a>
+
     </nav>
 
     <div class="scanline"></div>
@@ -409,7 +434,7 @@
             <div id="fs-page-game" class="fs-page" style="display: none;">
                 <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
                 <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez ou relancez <strong>Elite Dangerous</strong>.<br>
+                1. Lancez votre jeu Elite Dangerous <strong>depuis votre bureau</strong>.<br>
                 2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
                 3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
                 <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
@@ -936,6 +961,48 @@
 
                 // Lancement de la boucle de commerce
                 if (!isSystemLooping) systemLoop();
+                
+                // ---> NOUVEAU : VÉRIFICATION DE TOUS LES CANAUX AU DÉMARRAGE <---
+                let filtreCanaux = `canal.eq.GLOBAL,destinataire_id.eq.${profilCommandant.user_id}`;
+                if (profilCommandant.escadron_id) filtreCanaux += `,escadron_id.eq.${profilCommandant.escadron_id}`;
+
+                supabaseApp.from('transmissions')
+                    .select('created_at')
+                    .or(filtreCanaux)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .then(({ data }) => {
+                        if (data && data.length > 0) {
+                            const dateDernierMsgServeur = new Date(data[0].created_at).getTime();
+                            const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_msg_time') || '0');
+                            
+                            // Si le message sur le serveur est plus récent que ta dernière visite
+                            if (dateDernierMsgServeur > dateDerniereLecture) {
+                                const envIcon = document.getElementById('nav-comms-link');
+                                if (envIcon) envIcon.classList.add('alerte-enveloppe');
+                            }
+                        }
+                    });
+                // -------------------------------------------------------------------------
+
+                // NOUVEAU : ÉCOUTE FURTIVE DES COMMUNICATIONS
+                supabaseApp.channel('alerte_comms')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
+                        const msg = payload.new;
+                        // On ignore nos propres messages
+                        if (msg.expediteur_id === profilCommandant.user_id) return;
+
+                        const isForMe = (msg.destinataire_id === profilCommandant.user_id);
+                        const isEscadron = (msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id);
+                        const isGlobal = (msg.canal === 'GLOBAL');
+
+                        if (isForMe || isEscadron || isGlobal) {
+                            const envIcon = document.getElementById('nav-comms-link');
+                            if (envIcon) envIcon.classList.add('alerte-enveloppe');
+                            try { if (typeof playUI === 'function') playUI('receive'); } catch(e) {}
+                        }
+                    }).subscribe();
+
                 } else {
                 // SI CONNECTÉ MAIS NON APPROUVÉ -> ÉJECTION
                 await supabaseApp.auth.signOut();
@@ -1027,6 +1094,13 @@
                 scanAudioNodes = [];
             }
         }
+
+        async function deconnexion() { await supabaseApp.auth.signOut(); location.reload(); }
+
+        window.retirerAlerteEnveloppe = function() {
+            const envIcon = document.getElementById('nav-comms-link');
+            if (envIcon) envIcon.classList.remove('alerte-enveloppe');
+        };
 
         // Moteur d'Ambiance Spatiale V7 : Cinématique Épurée (Strictement en rythme)
         let ambientGain = null;
@@ -1423,7 +1497,7 @@
                     hasLoadedParams = true;
                     await syncParamsToRadar(); 
                 } else {
-                    paramApp = { user_id: profilCommandant.user_id, mode_flotte: 'FC', fc_nom: 'FLEET CARRIER', fc_capacite: 25000, vaisseau_nom: 'VAISSEAU', vaisseau_capacite: 720, cibles_achat: ["Gold", "Silver", "Palladium", "Agronomic Treatment"], moyennes_galactiques: {"Gold": 45450, "Silver": 31180, "Palladium": 46420} };
+                    paramApp = { user_id: profilCommandant.user_id, mode_flotte: 'FC', fc_nom: 'FLEET CARRIER', fc_capacite: 25000, vaisseau_nom: 'VAISSEAU', vaisseau_capacite: 720, cibles_achat: [], moyennes_galactiques: {"Gold": 45450, "Silver": 31180, "Palladium": 46420} };
                     const res = await getDb().from('parametres_app').insert([paramApp]).select().single();
                     if(res.data) paramApp = res.data;
                     hasLoadedParams = true;
