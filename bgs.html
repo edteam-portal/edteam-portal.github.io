@@ -2270,6 +2270,23 @@
             setTimeout(synchroniserHorloge, 1500);
         })();
 
+        // --- ÉPINGLER UN SYSTÈME EN HAUT DE LISTE ---
+        window.togglePinSystem = function(nomSysteme, event) {
+            if (event) event.stopPropagation();
+            if (typeof sonClic === 'function') sonClic();
+            
+            let pinned = JSON.parse(localStorage.getItem('edteam_pinned_systems') || '[]');
+            
+            if (pinned.includes(nomSysteme)) {
+                pinned = pinned.filter(s => s !== nomSysteme); // Retire des favoris
+            } else {
+                pinned.push(nomSysteme); // Ajoute aux favoris
+            }
+            
+            localStorage.setItem('edteam_pinned_systems', JSON.stringify(pinned));
+            afficherOrdresBGS(); // On relance l'affichage pour appliquer le tri
+        };
+
         // --- AFFICHAGE DYNAMIQUE DES ORDRES BGS SUR LE TABLEAU DE BORD ---
         async function afficherOrdresBGS() {
             if (!profilCommandant) return;
@@ -2325,6 +2342,16 @@
                 const ordresData = resOrdres.data || [];
                 const effortsData = resEfforts.data || [];
 
+                // RADAR AUDIO POUR LE JOUEUR CONNECTÉ
+                const totalEffortsActuel = effortsData
+                    .filter(e => e.user_id === profilCommandant.user_id)
+                    .reduce((sum, e) => sum + Number(e.valeur), 0);
+
+                if (window.memoireEffortsGlobaux !== undefined && totalEffortsActuel > window.memoireEffortsGlobaux) {
+                    if (typeof sonBgsUpdate === 'function') sonBgsUpdate();
+                }
+                window.memoireEffortsGlobaux = totalEffortsActuel;
+
                 if (ordresData.length === 0) {
                     container.innerHTML = '<div class="data-row" style="text-align: center; color: #888; border-color: #333; padding: 40px;">AUCUNE DIRECTIVE ACTIVE DANS CE SECTEUR.<br><span style="font-size: 0.8em; color: #555;">EN ATTENTE DES ORDRES DE L\'AMIRAUTÉ.</span></div>';
                     return;
@@ -2343,23 +2370,22 @@
 
                 let html = '';
 
-                for (const [nomSysteme, factionsDuSysteme] of Object.entries(groupesSystemes)) {
+                // LECTURE DES FAVORIS ET TRI DES SYSTÈMES
+                let pinnedSystems = JSON.parse(localStorage.getItem('edteam_pinned_systems') || '[]');
+                let systemesTries = Object.keys(groupesSystemes).sort((a, b) => {
+                    let pinA = pinnedSystems.includes(a) ? 1 : 0;
+                    let pinB = pinnedSystems.includes(b) ? 1 : 0;
+                    if (pinA !== pinB) return pinB - pinA; // Les épinglés en haut
+                    return a.localeCompare(b); // Le reste par ordre alphabétique
+                });
+
+                for (const nomSysteme of systemesTries) {
+                    const factionsDuSysteme = groupesSystemes[nomSysteme];
                     const premierOrdre = factionsDuSysteme[0];
                     const popFormatee = new Intl.NumberFormat('fr-FR').format(premierOrdre.population || 0);
 
                     const plusAncienTs = Math.min(...factionsDuSysteme.map(o => new Date(o.date_emission || o.created_at || timeNow).getTime()));
                     const joursEcoules = Math.max(1, Math.ceil((timeNow - plusAncienTs) / (24 * 60 * 60 * 1000)));
-
-                    const briefingSysteme = factionsDuSysteme.find(o => o.briefing_amiral && o.briefing_amiral.trim() !== '')?.briefing_amiral || null;
-
-                    let htmlBriefing = '';
-                    if (briefingSysteme) {
-                        htmlBriefing = `
-                        <div style="margin: 0 0 15px 0; padding: 12px 15px; border: 1px solid rgba(255, 113, 0, 0.15); background: rgba(255, 113, 0, 0.04); font-style: italic; color: #ccc; font-size: 0.9em; line-height: 1.5; border-radius: 4px;">
-                            <strong style="color: var(--ed-orange); font-style: normal; display: block; margin-bottom: 5px; letter-spacing: 1px;">> TRANSMISSION DE L'AMIRAUTÉ :</strong>
-                            "${briefingSysteme.replace(/\n/g, '<br>')}"
-                        </div>`;
-                    }
 
                     let htmlAccordionsFactions = '';
 
@@ -2484,7 +2510,6 @@
                                         <span style="color: #fff; font-size: 1.15em; font-weight: bold;">${ordre.faction_cible.toUpperCase()}</span>
                                         <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
                                     </div>
-                                    <span style="color: #888; font-size: 0.8em; margin-top: 3px; display: block;">${labelDirective}</span>
                                 </div>
 
                                 <div style="display: flex; align-items: center; gap: 20px;">
@@ -2523,20 +2548,56 @@
                         </div>`;
                     }
 
+                    const estEpingle = pinnedSystems.includes(nomSysteme);
+                    const starIcon = estEpingle ? '★' : '☆';
+                    
+                    const colorTheme = estEpingle ? '#FFD700' : 'var(--ed-orange)';
+                    const colorThemeDim = estEpingle ? 'rgba(255, 215, 0, 0.3)' : 'rgba(255, 113, 0, 0.3)';
+                    const colorThemeBg = estEpingle ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 113, 0, 0.1)';
+                    
+                    const cardShadow = estEpingle 
+                        ? 'inset 4px 0 0 #FFD700, inset -4px 0 0 #FFD700, 0 0 20px rgba(255, 215, 0, 0.15)' 
+                        : 'inset 4px 0 0 var(--ed-orange)';
+
+                    const briefingSysteme = factionsDuSysteme.find(o => o.briefing_amiral && o.briefing_amiral.trim() !== '')?.briefing_amiral || null;
+
+                    let btnBriefingHTML = '';
+                    if (briefingSysteme) {
+                        const safeBriefing = briefingSysteme.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
+                        btnBriefingHTML = `
+                            <div style="cursor: help; background: ${colorThemeBg}; border: 1px solid ${colorTheme}; padding: 6px 15px; border-radius: 4px; color: ${colorTheme}; font-weight: bold; font-size: 0.85em; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: 0.2s;"
+                                 onmouseenter="if(typeof showHoloTooltip==='function') showHoloTooltip(event, '<div style=\\'white-space: normal; max-width: 400px; line-height: 1.5;\\'><strong style=\\'color: ${colorTheme}; font-size: 1.1em;\\'>> TRANSMISSION DE L\\'AMIRAUTÉ</strong><br><br><span style=\\'color: #ccc; font-style: italic; font-size: 0.95em;\\'>&quot;${safeBriefing}&quot;</span></div>', '${colorTheme}')"
+                                 onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()"
+                                 onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)"
+                                 onmouseover="this.style.background='${colorTheme}'; this.style.color='#000'; this.style.boxShadow='0 0 10px ${colorTheme}';"
+                                 onmouseout="this.style.background='${colorThemeBg}'; this.style.color='${colorTheme}'; this.style.boxShadow='none';">
+                                <span style="font-size: 1.2em;">💬</span> <span>BRIEFING</span>
+                            </div>
+                        `;
+                    }
+
                     html += `
-                    <div class="data-row" style="border-color: var(--ed-orange); box-shadow: inset 4px 0 0 var(--ed-orange); background: rgba(10, 5, 0, 0.7); margin-bottom: 25px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div class="data-row" style="border-color: ${colorTheme}; box-shadow: ${cardShadow}; background: rgba(10, 5, 0, 0.7); margin-bottom: 25px; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed ${colorThemeDim}; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                             <div>
-                                <span style="color: var(--ed-orange); font-size: 1.3em; font-weight: bold; letter-spacing: 2px;"> SYSTEME : ${nomSysteme}</span>
-                                <div style="color: #888; font-size: 0.85em; margin-top: 4px; display: flex; gap: 15px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span onclick="togglePinSystem('${nomSysteme.replace(/'/g, "\\'")}', event); if(typeof hideHoloTooltip === 'function') hideHoloTooltip();" 
+                                          style="color: ${estEpingle ? '#FFD700' : '#666'}; font-size: 1.8em; cursor: pointer; transition: 0.2s; line-height: 0.8;" 
+                                          onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${estEpingle ? 'Désépingler ce système' : '📌 Épingler ce système en haut'}', '${estEpingle ? '#FFD700' : 'var(--ed-orange)'}')" 
+                                          onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
+                                          onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                                        ${starIcon}
+                                    </span>
+                                    <span style="color: ${colorTheme}; font-size: 1.3em; font-weight: bold; letter-spacing: 2px;">SYSTÈME : ${nomSysteme}</span>
+                                </div>
+                                <div style="color: #888; font-size: 0.85em; margin-top: 6px; display: flex; gap: 15px; margin-left: 38px;">
                                     <span>POPULATION : <strong style="color: #fff;">${popFormatee}</strong></span>
                                     <span>EN COURS DEPUIS : <strong style="color: var(--ed-blue);">${joursEcoules} JOUR${joursEcoules > 1 ? 'S' : ''}</strong></span>
-                                    <span>FACTIONS CIBLÉES : <strong style="color: var(--ed-orange);">${factionsDuSysteme.length}</strong></span>
+                                    <span>FACTIONS CIBLÉES : <strong style="color: ${colorTheme};">${factionsDuSysteme.length}</strong></span>
                                 </div>
                             </div>
+                            ${btnBriefingHTML}
                         </div>
-
-                        ${htmlBriefing}
 
                         <div style="display: flex; flex-direction: column; gap: 5px;">
                             ${htmlAccordionsFactions}
@@ -2553,6 +2614,16 @@
                         const icon = document.getElementById(id.replace('details-', 'icon-'));
                         if (icon) icon.innerText = display === 'none' ? '▼' : '▲';
                     }
+                }
+
+                // REFRESH TEMPOREL RÉTABLI
+                if (!window.bgsLoopActive) {
+                    window.bgsLoopActive = true;
+                    setInterval(() => {
+                        if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
+                            afficherOrdresBGS();
+                        }
+                    }, 60000);
                 }
 
             } catch (e) {
