@@ -767,97 +767,70 @@
             
             <div style="display: flex; gap: 40px; flex-wrap: wrap; overflow-y: auto; padding-right: 10px;">
                 
-                <!-- COLONNE GAUCHE : NOUVEL ORDRE -->
-                <div style="flex: 1 1 450px; display: flex; flex-direction: column;">
-                    <p style="color: #ccc; font-size: 0.9em; margin-bottom: 25px; margin-top: 0; line-height: 1.5;">Générez une nouvelle directive tactique pour l'escadron. Lors de la transmission, cet ordre remplacera l'objectif actuel sur les terminaux de tous vos pilotes.</p>
+                <!-- COLONNE GAUCHE : NOUVELLE CAMPAGNE SYSTÈME -->
+                <div style="flex: 1 1 500px; display: flex; flex-direction: column;">
+                    <p style="color: #ccc; font-size: 0.9em; margin-bottom: 20px; margin-top: 0; line-height: 1.5;">
+                        Définissez un théâtre d'opération par système. Vous pouvez assigner plusieurs directives à différentes factions au sein du même secteur.
+                    </p>
                     
                     <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div>
-                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">SYSTÈME CIBLE :</label>
-                            <input type="text" id="cmd-system" class="search-input" placeholder="Ex: WREDGUIA DT-Q B32-2" style="border-color: #FF3333; width: 100%; text-transform: uppercase;" onblur="scannerFactionsEDSM(this.value)" onchange="scannerFactionsEDSM(this.value)" onpaste="setTimeout(() => scannerFactionsEDSM(this.value), 100)">
-                        </div>
-                        
-                        <div>
-                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">POPULATION DU SYSTÈME :</label>
-                            <input type="number" id="cmd-population" class="search-input" placeholder="Ex: 2500000" style="border-color: #FF3333; width: 100%;" oninput="ajusterChampsPlafonds()">
-                        </div>
-
-                        <div>
-                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">SOUS-FACTION CIBLE :</label>
-                            <input list="liste-factions-api" type="text" id="cmd-faction" class="search-input" placeholder="En attente du scan système..." style="border-color: #FF3333; width: 100%;">
-                            <datalist id="liste-factions-api"></datalist>
-                        </div>
-
-                        <div>
-                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">DIRECTIVE TACTIQUE :</label>
-                            <select id="cmd-ordre" class="search-input" style="border-color: #FF3333; width: 100%;" onchange="ajusterChampsPlafonds()">
-                                <option value="HAUSSE">AUGMENTER L'INFLUENCE (Soutien & Missions)</option>
-                                <option value="BAISSE">RÉDUIRE L'INFLUENCE (Opérations Noires)</option>
-                                <option value="GUERRE">REMPORTER LE CONFLIT (Guerre / Guerre Civile)</option>
-                                <option value="ELECTION">GAGNER L'ÉLECTION (Missions pacifiques)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px; margin-top: 5px;">BRIEFING DE MISSION (Optionnel) :</label>
-                            <textarea id="cmd-briefing" class="search-input" placeholder="Motivations, consignes spécifiques, discours de l'Amiral..." style="border-color: #FF3333; width: 100%; height: 80px; resize: vertical;"></textarea>
-                        </div>
-
-                        <!-- SECTION AVANCÉE : PLAFONDS DYNAMIQUES SELON L'ORDRE -->
-                        <div style="margin-top: 10px; border: 1px dashed rgba(255, 51, 51, 0.4); border-radius: 4px; padding: 12px; background: rgba(0,0,0,0.3);">
-                            <div onclick="const el = document.getElementById('cmd-custom-caps-box'); el.style.display = el.style.display === 'none' ? 'flex' : 'none';" style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                                <span>⚙️ PLAFONDS AVANCÉS (FORCEUR OPTIONNEL)</span>
-                                <span style="font-size: 0.8em; color: #888;">[ DÉPLIER / REPLIER ]</span>
+                        <!-- 1. SYSTÈME & POPULATION (Verrouillage anti-autocomplétion) -->
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 2;">
+                                <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">SYSTÈME CIBLE :</label>
+                                <input type="search" id="cmd-system" class="search-input" placeholder="Ex: ATHENA" 
+                                    name="bgs_sector_search_query" autocomplete="one-time-code"
+                                    data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false"
+                                    style="border-color: #FF3333; width: 100%; text-transform: uppercase;" 
+                                    onblur="scannerFactionsEDSM(this.value)" onchange="scannerFactionsEDSM(this.value)">
                             </div>
-                            
-                            <div id="cmd-custom-caps-box" style="display: none; flex-direction: column; gap: 10px; margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
-                                <div style="color: #888; font-size: 0.75em; font-style: italic;">
-                                    Laissez vide pour conserver le calcul logarithmique automatique standard.
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                    
-                                    <!-- CHAMP 1 : MISSIONS / CONTRATS / SABOTAGE -->
-                                    <div id="wrap-cap-missions">
-                                        <label id="lbl-cap-missions" style="color: #aaa; font-size: 0.75em; display: block; margin-bottom: 3px;">MISSIONS (INF) :</label>
-                                        <input type="number" id="cmd-custom-missions" class="search-input" placeholder="Auto" style="border-color: #555; width: 100%; font-size: 0.85em; padding: 6px 10px;">
-                                    </div>
+                            <div style="flex: 1.2;">
+                                <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">POPULATION :</label>
+                                <input type="text" inputmode="numeric" id="cmd-population" class="search-input" placeholder="Auto" 
+                                    name="bgs_sector_population" autocomplete="one-time-code" 
+                                    data-lpignore="true" data-1p-ignore="true" data-form-type="other"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                    style="border-color: #FF3333; width: 100%;">
+                            </div>
+                        </div>
 
-                                    <!-- CHAMP 2 : SÉCURITÉ / COMBAT BONDS / MEURTRES -->
-                                    <div id="wrap-cap-securite">
-                                        <label id="lbl-cap-securite" style="color: #aaa; font-size: 0.75em; display: block; margin-bottom: 3px;">COMBAT BONDS (CR) :</label>
-                                        <input type="number" id="cmd-custom-securite" class="search-input" placeholder="Auto" style="border-color: #555; width: 100%; font-size: 0.85em; padding: 6px 10px;">
-                                    </div>
+                        <datalist id="liste-factions-api"></datalist>
 
-                                    <!-- CHAMP 3 : ÉCONOMIE / CONTREBANDE -->
-                                    <div id="wrap-cap-eco">
-                                        <label id="lbl-cap-eco" style="color: #aaa; font-size: 0.75em; display: block; margin-bottom: 3px;">COMMERCE / VENTES (CR) :</label>
-                                        <input type="number" id="cmd-custom-eco" class="search-input" placeholder="Auto" style="border-color: #555; width: 100%; font-size: 0.85em; padding: 6px 10px;">
-                                    </div>
+                        <!-- 2. BRIEFING GLOBAL DU SYSTÈME -->
+                        <div>
+                            <label style="color: #FF3333; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">BRIEFING STRATÉGIQUE DU THÉÂTRE (Amirauté) :</label>
+                            <textarea id="cmd-briefing" class="search-input" placeholder="Consignes globales pour le système, contexte de la campagne..." 
+                                    autocomplete="off" data-lpignore="true"
+                                    style="border-color: #FF3333; width: 100%; height: 75px; resize: vertical;"></textarea>
+                        </div>
 
-                                    <!-- CHAMP 4 : SCIENCE / EXOBIO -->
-                                    <div id="wrap-cap-science">
-                                        <label id="lbl-cap-science" style="color: #aaa; font-size: 0.75em; display: block; margin-bottom: 3px;">CARTO / EXOBIO (CR) :</label>
-                                        <input type="number" id="cmd-custom-science" class="search-input" placeholder="Auto" style="border-color: #555; width: 100%; font-size: 0.85em; padding: 6px 10px;">
-                                    </div>
+                        <!-- 3. LISTE DYNAMIQUE DES DIRECTIVES PAR FACTION -->
+                        <div style="border-top: 1px dashed rgba(255, 51, 51, 0.4); padding-top: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <label style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">DIRECTIVES PAR FACTION :</label>
+                                <button type="button" onclick="ajouterLigneDirective()" 
+                                        onmouseenter="if(typeof sonHover==='function') sonHover()"
+                                        onmouseover="this.style.background='#00FF66'; this.style.color='#000'; this.style.boxShadow='0 0 12px #00FF66';"
+                                        onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66'; this.style.boxShadow='none';"
+                                        style="background: rgba(0, 255, 102, 0.1); border: 1px solid #00FF66; color: #00FF66; padding: 6px 14px; font-family: inherit; font-size: 0.8em; font-weight: bold; cursor: pointer; border-radius: 3px; transition: 0.2s;">
+                                    + AJOUTER UNE FACTION
+                                </button>
+                            </div>
 
-                                    <!-- CHAMP 5 : VICTOIRES CZ (BATAILLES) -->
-                                    <div id="wrap-cap-cz">
-                                        <label id="lbl-cap-cz" style="color: #aaa; font-size: 0.75em; display: block; margin-bottom: 3px;">VICTOIRES CZ (BATAILLES) :</label>
-                                        <input type="number" id="cmd-custom-cz" class="search-input" placeholder="Auto" style="border-color: #555; width: 100%; font-size: 0.85em; padding: 6px 10px;">
-                                    </div>
-
-                                    <!-- CHAMP 6 : SABOTAGE (DONNÉES & RÉGULATEURS)) -->
-                                    <div id="wrap-cap-vols" style="display: none;">
-                                        <label id="lbl-cap-vols" style="color: #aaa; font-size: 0.75em; display: block; margin-bottom: 3px;">SABOTAGE (DONNÉES & RÉGULATEURS) :</label>
-                                        <input type="number" id="cmd-custom-vols" class="search-input" placeholder="Auto" style="border-color: #555; width: 100%; font-size: 0.85em; padding: 6px 10px;">
-                                    </div>
-
-                                </div>
+                            <div id="cmd-directives-container" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                                <!-- Les lignes de factions s'injectent ici dynamiquement -->
                             </div>
                         </div>
                     </div>
 
-                    <button id="btn-transmettre" style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; margin-top: 25px; margin-bottom: 0; text-transform: uppercase; font-weight: bold;" onclick="transmettreOrdre()" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 15px #FF3333';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';">TRANSMETTRE L'ORDRE</button>
+                    <button id="btn-transmettre" 
+                            onclick="transmettreOrdre()" 
+                            onmouseenter="if(typeof sonHover === 'function') sonHover()"
+                            onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 20px #FF3333';"
+                            onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';"
+                            style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; margin-top: 20px; text-transform: uppercase; font-weight: bold;">
+                        TRANSMETTRE LA CAMPAGNE
+                    </button>
                 </div>
 
                 <!-- COLONNE DROITE : DIRECTIVES ACTIVES -->
@@ -1691,15 +1664,87 @@
             } 
         }
 
+        let nbLignesDirectives = 0;
+        window.dernieresFactionsScannees = [];
+
+        window.actualiserTousLesSelectsFactions = function() {
+            document.querySelectorAll('.cmd-faction-select').forEach(selectEl => {
+                const valActuelle = selectEl.value;
+                let optionsHtml = '<option value="">-- Choisir une faction --</option>';
+                
+                if (window.dernieresFactionsScannees.length > 0) {
+                    window.dernieresFactionsScannees.forEach(nom => {
+                        optionsHtml += `<option value="${nom}" ${nom === valActuelle ? 'selected' : ''}>${nom}</option>`;
+                    });
+                } else {
+                    optionsHtml = '<option value="">> Saisissez un système ci-dessus...</option>';
+                }
+                selectEl.innerHTML = optionsHtml;
+            });
+        };
+
+        window.ajouterLigneDirective = function(nomFaction = '', typeOrdre = 'HAUSSE') {
+            if (typeof sonClic === 'function') sonClic();
+            const conteneur = document.getElementById('cmd-directives-container');
+            if (!conteneur) return;
+
+            nbLignesDirectives++;
+            const rowId = 'cmd-row-' + nbLignesDirectives;
+
+            let optionsHtml = '<option value="">-- Choisir une faction --</option>';
+            if (window.dernieresFactionsScannees.length > 0) {
+                window.dernieresFactionsScannees.forEach(nom => {
+                    optionsHtml += `<option value="${nom}" ${nom === nomFaction ? 'selected' : ''}>${nom}</option>`;
+                });
+            } else {
+                optionsHtml = '<option value="">> En attente du scan système...</option>';
+            }
+
+            const div = document.createElement('div');
+            div.id = rowId;
+            div.style.cssText = "background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 10px; border-radius: 4px; display: flex; gap: 8px; align-items: center;";
+
+            div.innerHTML = `
+                <div style="flex: 1.6;">
+                    <select class="search-input cmd-faction-select" style="width: 100%; border-color: #555; padding: 7px 10px; font-size: 0.85em; font-weight: bold; color: #fff; background: rgba(10, 5, 0, 0.9);">
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <div style="flex: 1.4;">
+                    <select class="search-input cmd-ordre-select" style="width: 100%; border-color: #555; padding: 7px 8px; font-size: 0.85em; background: rgba(10, 5, 0, 0.9);">
+                        <option value="HAUSSE" ${typeOrdre === 'HAUSSE' ? 'selected' : ''}>🟢 AUGMENTER (Soutien)</option>
+                        <option value="BAISSE" ${typeOrdre === 'BAISSE' ? 'selected' : ''}>🔴 RÉDUIRE (Op. Noires)</option>
+                        <option value="GUERRE" ${typeOrdre === 'GUERRE' ? 'selected' : ''}>⚔️ GUERRE (Conflit)</option>
+                        <option value="ELECTION" ${typeOrdre === 'ELECTION' ? 'selected' : ''}>🔵 ÉLECTION (Diplomatie)</option>
+                    </select>
+                </div>
+                <button type="button" onclick="supprimerLigneDirective('${rowId}')" 
+                    onmouseenter="if(typeof sonHover==='function') sonHover()"
+                    onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 10px #FF3333';"
+                    onmouseout="this.style.background='transparent'; this.style.color='#FF3333'; this.style.boxShadow='none';"
+                    style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 6px 12px; cursor: pointer; font-weight: bold; border-radius: 3px; transition: 0.2s;" 
+                    title="Retirer cette faction">✖</button>
+            `;
+            conteneur.appendChild(div);
+        };
+
+        window.supprimerLigneDirective = function(rowId) {
+            if (typeof sonClic === 'function') sonClic();
+            const el = document.getElementById(rowId);
+            if (el) el.remove();
+        };
+
         function ouvrirModal(id, e) { 
             if (e) e.stopPropagation(); 
             hideHoloTooltip(); 
             sonClic(); 
             document.getElementById(id).style.display = 'flex'; 
-            // AJOUT POUR LE BGS :
             if (id === 'modal-commandement') {
                 chargerOrdresAmiraute();
-                ajusterChampsPlafonds();
+                const conteneur = document.getElementById('cmd-directives-container');
+                if (conteneur && conteneur.children.length === 0) {
+                    ajouterLigneDirective();
+                }
             }
         }
         function fermerModal(id, e) { if (e && e.target !== document.getElementById(id)) return; sonClic(); document.getElementById(id).style.display = 'none'; }
@@ -1860,144 +1905,168 @@
         };
 
         async function transmettreOrdre() {
-            if(typeof sonClic === 'function') sonClic();
+            if (typeof sonClic === 'function') sonClic();
             const btn = document.getElementById('btn-transmettre');
             const sys = document.getElementById('cmd-system').value.trim().toUpperCase();
-            const pop = document.getElementById('cmd-population').value.trim();
-            const fac = document.getElementById('cmd-faction').value.trim();
-            const ord = document.getElementById('cmd-ordre').value;
+            const pop = parseInt(document.getElementById('cmd-population').value || '0', 10);
             const brief = document.getElementById('cmd-briefing').value.trim();
-            
-            // Récupération des plafonds manuels (si renseignés)
-            const customCaps = {};
-            const valCz = document.getElementById('cmd-custom-cz')?.value.trim();
-            const valMiss = document.getElementById('cmd-custom-missions').value.trim();
-            const valSec = document.getElementById('cmd-custom-securite').value.trim();
-            const valEco = document.getElementById('cmd-custom-eco').value.trim();
-            const valSci = document.getElementById('cmd-custom-science').value.trim();
-            const valVols = document.getElementById('cmd-custom-vols')?.value.trim(); // <-- NOUVEAU
 
-            if (valCz) customCaps['CZ_VICTOIRES'] = parseInt(valCz, 10);
-            if (valMiss) {
-                customCaps['MISSIONS'] = parseInt(valMiss, 10);
-                customCaps['ELECTION_MISSIONS'] = parseInt(valMiss, 10);
-                customCaps['GUERRE_MISSIONS'] = parseInt(valMiss, 10);
-                customCaps['ECHECS'] = parseInt(valMiss, 10); // <--- AJOUT CRUCIAL
-            }
-            if (valSec) {
-                customCaps['SECURITE'] = parseInt(valSec, 10);
-                customCaps['GUERRE_BONDS'] = parseInt(valSec, 10);
-                customCaps['MEURTRES'] = parseInt(valSec, 10); // <--- AJOUT CRUCIAL
-            }
-            if (valEco) {
-                customCaps['ECONOMIE'] = parseInt(valEco, 10);
-                customCaps['CONTREBANDE'] = parseInt(valEco, 10);
-            }
-            if (valSci) customCaps['SCIENCE'] = parseInt(valSci, 10);
-            
-            // <-- NOUVEAU BLOC SABOTAGE -->
-            if (valVols) {
-                customCaps['VOLS'] = parseInt(valVols, 10);
-                customCaps['PIRATAGE'] = parseInt(valVols, 10); 
-            }
+            const factionSelects = document.querySelectorAll('.cmd-faction-select');
+            const ordreSelects = document.querySelectorAll('.cmd-ordre-select');
 
-            if (!sys || !fac || !pop) { 
-                btn.innerText = "ERREUR : DONNÉES MANQUANTES"; 
-                setTimeout(() => btn.innerText = "TRANSMETTRE L'ORDRE", 2000); 
+            const directivesAEnvoyer = [];
+            factionSelects.forEach((fSelect, idx) => {
+                const facName = fSelect.value.trim();
+                const ordType = ordreSelects[idx]?.value || 'HAUSSE';
+                if (facName) {
+                    directivesAEnvoyer.push({
+                        escadron_id: profilCommandant.escadron_id || 'ISS',
+                        systeme_cible: sys,
+                        population: pop,
+                        faction_cible: facName,
+                        type_ordre: ordType,
+                        briefing_amiral: brief || null,
+                        auteur_id: profilCommandant.user_id
+                    });
+                }
+            });
+
+            if (!sys || pop === 0 || directivesAEnvoyer.length === 0) { 
+                btn.innerText = "ERREUR : SYSTÈME ET AU MOINS 1 FACTION REQUIS"; 
+                setTimeout(() => btn.innerText = "TRANSMETTRE LA CAMPAGNE", 2000); 
                 return; 
             }
             
-            btn.innerText = "TRANSMISSION SATELLITE...";
+            btn.innerText = "TRANSMISSION DES DIRECTIVES...";
             btn.style.pointerEvents = "none";
             
             try {
-                const { error } = await supabaseApp.from('ordres_bgs').insert([{
-                    escadron_id: profilCommandant.escadron_id || 'ISS',
-                    systeme_cible: sys,
-                    population: parseInt(pop, 10),
-                    faction_cible: fac,
-                    type_ordre: ord,
-                    briefing_amiral: brief || null,
-                    plafonds_custom: Object.keys(customCaps).length > 0 ? customCaps : null,
-                    auteur_id: profilCommandant.user_id // 👈 LA SIGNATURE DE L'OFFICIER EST LÀ
-                }]);
-                
+                const { error } = await supabaseApp.from('ordres_bgs').insert(directivesAEnvoyer);
                 if (error) throw error;
                 
-                if(typeof sonSucces === 'function') sonSucces();
-                btn.innerText = "ORDRE DÉPLOYÉ SUR LE RÉSEAU";
+                if (typeof sonSucces === 'function') sonSucces();
+                btn.innerText = "CAMPAGNE DÉPLOYÉE";
                 btn.style.color = "#00FF66";
                 btn.style.borderColor = "#00FF66";
-                btn.style.backgroundColor = "rgba(0,255,102,0.1)";
                 
                 setTimeout(() => { 
                     chargerOrdresAmiraute(); 
                     afficherOrdresBGS();
                     fermerModal('modal-commandement'); 
-                    btn.innerText = "TRANSMETTRE L'ORDRE"; 
+                    btn.innerText = "TRANSMETTRE LA CAMPAGNE"; 
                     btn.style.color = "#FF3333"; 
                     btn.style.borderColor = "#FF3333";
-                    btn.style.backgroundColor = "rgba(255, 51, 51, 0.1)";
                     btn.style.pointerEvents = "auto";
                     
+                    document.getElementById('cmd-system').value = "";
                     document.getElementById('cmd-population').value = "";
-                    document.getElementById('cmd-faction').value = "";
                     document.getElementById('cmd-briefing').value = "";
-                    document.getElementById('cmd-custom-missions').value = "";
-                    document.getElementById('cmd-custom-securite').value = "";
-                    document.getElementById('cmd-custom-eco').value = "";
-                    document.getElementById('cmd-custom-science').value = "";
-                }, 2000);
+                    document.getElementById('cmd-directives-container').innerHTML = "";
+                    ajouterLigneDirective();
+                }, 1500);
                 
             } catch(e) {
                 console.error(e);
-                btn.innerText = "ÉCHEC DE CONNEXION AU NOYAU";
-                setTimeout(() => { btn.innerText = "TRANSMETTRE L'ORDRE"; btn.style.pointerEvents = "auto"; }, 2000);
+                btn.innerText = "ÉCHEC DE TRANSMISSION";
+                setTimeout(() => { btn.innerText = "TRANSMETTRE LA CAMPAGNE"; btn.style.pointerEvents = "auto"; }, 2000);
             }
         }
 
-        // --- CHARGEMENT DES ORDRES ACTIFS ---
         async function chargerOrdresAmiraute() {
             const container = document.getElementById('liste-ordres-actifs');
-            if (!container) return;
+            if (!container || !profilCommandant) return;
             
             try {
                 const { data, error } = await supabaseApp.from('ordres_bgs')
                     .select('*')
                     .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
                     .eq('statut', 'ACTIF')
-                    .order('date_emission', { ascending: false });
+                    .order('systeme_cible');
                     
                 if (error) throw error;
                 
-                if (data.length === 0) {
+                if (!data || data.length === 0) {
                     container.innerHTML = '<div style="color: #666; font-style: italic; padding: 10px; border: 1px solid #333; text-align: center;">Aucune directive active pour le moment.</div>';
                     return;
                 }
                 
-                let html = '';
-                data.forEach(ordre => {
-                    const color = ordre.type_ordre === 'HAUSSE' ? '#00FF66' : (ordre.type_ordre === 'GUERRE' ? '#FF7100' : (ordre.type_ordre === 'ELECTION' ? '#00F0FF' : '#FF3333'));
-                    const icon = ordre.type_ordre === 'HAUSSE' ? '↗' : '↘';
-                    html += `
-                    <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; border-left: 3px solid ${color}; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="color: #fff; font-weight: bold; font-size: 1.1em;">${ordre.faction_cible}</div>
-                            <div style="color: #888; font-size: 0.85em;">📍 ${ordre.systeme_cible} | <span style="color: ${color}; font-weight: bold;">${icon} ${ordre.type_ordre}</span></div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 8px 12px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8em; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';" onclick="cloturerOrdre('${ordre.id}')" onmouseenter="if(typeof sonHover === 'function') sonHover()">CLÔTURER</button>
-                            <button onclick="supprimerOrdre('${ordre.id}')" style="background: transparent; border: 1px solid var(--ed-red); color: var(--ed-red); padding: 8px 12px; cursor: pointer; font-weight: bold; font-size: 0.8em; transition: 0.2s;" onmouseover="this.style.background='var(--ed-red)'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='var(--ed-red)';">SUPPRIMER</button>
-                        </div>
-                    </div>
-                    `;
+                const groupes = {};
+                data.forEach(o => {
+                    const s = o.systeme_cible.toUpperCase();
+                    if (!groupes[s]) groupes[s] = [];
+                    groupes[s].push(o);
                 });
+
+                let html = '';
+                for (const [sys, liste] of Object.entries(groupes)) {
+                    html += `
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #555; border-radius: 4px; padding: 12px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,51,51,0.3); padding-bottom: 8px; margin-bottom: 10px;">
+                            <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1px; font-size: 1.05em;"> SYSTÈME : ${sys}</span>
+                            <button onmouseenter="if(typeof sonHover==='function') sonHover()"
+                                    onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 12px #FF3333';"
+                                    onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';"
+                                    style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 5px 10px; cursor: pointer; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; border-radius: 3px; transition: 0.2s;" 
+                                    onclick="cloturerSystemeEntier('${sys}')">
+                                CLÔTURER LE SYSTÈME
+                            </button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">`;
+
+                    liste.forEach(ordre => {
+                        const color = ordre.type_ordre === 'HAUSSE' ? '#00FF66' : (ordre.type_ordre === 'GUERRE' ? '#FF7100' : (ordre.type_ordre === 'ELECTION' ? '#00F0FF' : '#FF3333'));
+                        html += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 8px 12px; border-left: 3px solid ${color}; border-radius: 2px;">
+                                <div>
+                                    <span style="color: #fff; font-size: 0.95em; font-weight: bold;">${ordre.faction_cible}</span>
+                                    <span style="color: ${color}; font-size: 0.8em; margin-left: 8px; font-weight: bold;">[ ${ordre.type_ordre} ]</span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button onmouseenter="if(typeof sonHover==='function') sonHover()"
+                                            onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000'; this.style.borderColor='var(--ed-blue)'; this.style.boxShadow='0 0 8px var(--ed-blue)';"
+                                            onmouseout="this.style.background='transparent'; this.style.color='#ccc'; this.style.borderColor='#666'; this.style.boxShadow='none';"
+                                            style="background: transparent; border: 1px solid #666; color: #ccc; padding: 4px 8px; font-size: 0.75em; cursor: pointer; border-radius: 3px; font-weight: bold; transition: 0.2s;" 
+                                            onclick="cloturerOrdre('${ordre.id}')">Clôturer</button>
+                                    <button onmouseenter="if(typeof sonHover==='function') sonHover()"
+                                            onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 8px #FF3333';"
+                                            onmouseout="this.style.background='transparent'; this.style.color='#FF3333'; this.style.boxShadow='none';"
+                                            style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 4px 8px; font-size: 0.75em; cursor: pointer; border-radius: 3px; font-weight: bold; transition: 0.2s;" 
+                                            onclick="supprimerOrdre('${ordre.id}')">Supprimer</button>
+                                </div>
+                            </div>`;
+                    });
+
+                    html += `</div></div>`;
+                }
                 container.innerHTML = html;
             } catch (e) {
                 console.error(e);
-                container.innerHTML = '<div style="color: red;">Erreur de liaison avec le noyau central.</div>';
             }
         }
+
+        window.cloturerSystemeEntier = async function(nomSysteme) {
+            const confirmation = await demanderConfirmation(
+                "📦 ARCHIVAGE SYSTÈME", 
+                `Voulez-vous clôturer <strong>TOUTES</strong> les opérations actives dans le système <strong>${nomSysteme}</strong> ?`, 
+                "#00F0FF"
+            );
+            if (!confirmation) return;
+
+            try {
+                const { error } = await supabaseApp.from('ordres_bgs')
+                    .update({ statut: 'ARCHIVÉ' })
+                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
+                    .eq('systeme_cible', nomSysteme)
+                    .eq('statut', 'ACTIF');
+
+                if (error) throw error;
+                if (typeof sonSucces === 'function') sonSucces();
+                chargerOrdresAmiraute(); 
+                afficherOrdresBGS(); 
+            } catch (e) {
+                alert("Erreur lors de la clôture du système.");
+            }
+        };
 
         // --- MOTEUR DE CONFIRMATION TACTIQUE (Remplace le confirm() Windows) ---
         function demanderConfirmation(titre, message, couleurHex) {
@@ -2205,17 +2274,14 @@
             const container = document.getElementById('bgs-conteneur-ordres');
             if (!container) return;
 
-            // 1. MÉMOIRE VISUELLE DES ACCORDÉONS
             const etatsAccordions = {};
             document.querySelectorAll('[id^="details-"]').forEach(el => {
                 etatsAccordions[el.id] = el.style.display;
             });
 
-            // 2. GÉNÉRATEUR DE JAUGES AVEC AFFICHAGE COMBINÉ (Centré sur le joueur)
             const genererJaugeHTML = (titre, valeurTexte, couleur, pourcentage, seuilAtteint, alerteTexte = '', couleurOp = '', tooltipInfo = '') => {
                 const width = Math.min(100, pourcentage);
                 const shadow = width > 0 ? `box-shadow: 0 0 8px ${couleur};` : "";
-                
                 const couleurBarre = seuilAtteint ? '#4CAF50' : couleur;
                 const shadowBarre = seuilAtteint ? 'box-shadow: 0 0 12px #4CAF50;' : shadow;
                 
@@ -2224,12 +2290,11 @@
 
                 if (alerteTexte !== '') {
                     bgStyle = `background: repeating-linear-gradient(-45deg, rgba(0,0,0,0.7), rgba(0,0,0,0.7) 10px, ${couleurOp}08 10px, ${couleurOp}08 20px); border: 1px solid ${couleurOp}50;`;
-                    titreHighlight = `${titre} <span style="margin-left: 15px; color: ${couleurOp}; font-size: 0.85em; letter-spacing: 1px; text-shadow: 0 0 5px #000, 0 0 10px ${couleurOp}80; animation: alertPulse 1.5s infinite;">${alerteTexte}</span>`;
+                    titreHighlight = `${titre} <span style="margin-left: 15px; color: ${couleurOp}; font-size: 0.85em; letter-spacing: 1px; animation: alertPulse 1.5s infinite;">${alerteTexte}</span>`;
                 }
-                
-                const tooltipEvents = `onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: var(--ed-orange);\\'>OBJECTIF PERSONNEL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Remplissez cette barre pour atteindre votre rendement BGS maximum.<br>Si elle est verte, vous êtes à 100% d\\'efficacité !</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"`;
 
-                // --- NOUVEAU : GESTION DE L'INFOBULLE SUR LE TITRE ---
+                const tooltipEvents = `onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: var(--ed-orange);\\'>OBJECTIF PERSONNEL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Remplissez cette barre pour atteindre votre rendement BGS maximum.</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"`;
+
                 let styleTitre = "color: #fff; font-weight: bold; display: flex; align-items: center;";
                 let eventsTitre = "";
                 if (tooltipInfo !== '') {
@@ -2238,93 +2303,93 @@
                 }
 
                 return `
-                <div style="${bgStyle} padding: 15px; border-radius: 4px; width: 100%; box-sizing: border-box; transition: 0.3s; position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; margin-bottom: 6px; position: relative; z-index: 2; text-shadow: 0px 1px 3px rgba(0,0,0,0.9); flex-wrap: wrap; gap: 8px;">
+                <div style="${bgStyle} padding: 12px 15px; border-radius: 4px; width: 100%; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                         <span style="${styleTitre}" ${eventsTitre}>${titreHighlight}</span>
-                        <span style="background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05);">${valeurTexte}</span>
+                        <span style="background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.9em;">${valeurTexte}</span>
                     </div>
-
-                    <div class="bgs-bar-bg" style="width: 100%; height: 14px; background: #050200; border: 1px solid rgba(255,255,255,0.15); position: relative; z-index: 2; box-shadow: inset 0 3px 5px rgba(0,0,0,0.5); cursor: help;" ${tooltipEvents}>
-                        <div class="bgs-bar-fill" style="height: 100%; width: ${width}%; background: ${couleurBarre}; ${shadowBarre} position: relative; z-index: 3; transition: width 0.5s ease-out, background-color 0.3s;"></div>
+                    <div class="bgs-bar-bg" style="width: 100%; height: 12px; background: #050200; border: 1px solid rgba(255,255,255,0.15); cursor: help;" ${tooltipEvents}>
+                        <div class="bgs-bar-fill" style="height: 100%; width: ${width}%; background: ${couleurBarre}; ${shadowBarre} transition: width 0.5s ease-out;"></div>
                     </div>
-                </div>
-                `;
+                </div>`;
             };
 
             try {
-                // TÉLÉCHARGEMENTS SUPABASE
-                const { data: ordresData, error: ordresError } = await supabaseApp.from('ordres_bgs')
-                    .select('*')
-                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
-                    .eq('statut', 'ACTIF')
-                    .order('date_emission', { ascending: false });
-                if (ordresError) throw ordresError;
+                const [resOrdres, resEfforts] = await Promise.all([
+                    supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF').order('date_emission', { ascending: false }),
+                    supabaseApp.from('efforts_bgs').select('*')
+                ]);
 
-                const { data: effortsData, error: effortsError } = await supabaseApp.from('efforts_bgs').select('*');
-                if (effortsError) throw effortsError;
+                const ordresData = resOrdres.data || [];
+                const effortsData = resEfforts.data || [];
 
-                // RADAR AUDIO POUR LE JOUEUR CONNECTÉ
-                const totalEffortsActuel = (effortsData || [])
-                    .filter(e => e.user_id === profilCommandant.user_id)
-                    .reduce((sum, e) => sum + Number(e.valeur), 0);
-                if (window.memoireEffortsGlobaux !== undefined && totalEffortsActuel > window.memoireEffortsGlobaux) {
-                    if (typeof sonBgsUpdate === 'function') sonBgsUpdate();
-                }
-                window.memoireEffortsGlobaux = totalEffortsActuel;
-
-                // AFFICHAGE
-                if (!ordresData || ordresData.length === 0) {
+                if (ordresData.length === 0) {
                     container.innerHTML = '<div class="data-row" style="text-align: center; color: #888; border-color: #333; padding: 40px;">AUCUNE DIRECTIVE ACTIVE DANS CE SECTEUR.<br><span style="font-size: 0.8em; color: #555;">EN ATTENTE DES ORDRES DE L\'AMIRAUTÉ.</span></div>';
-                } else {
-                    let html = '';
-                    if (!window.edsmStateCache) window.edsmStateCache = {};
-                    const timeNow = Date.now();
-                    
-                    let tickDeReference = dernierTick;
-                    if (new Date() > prochainTick) tickDeReference = prochainTick;
-                    
-                    for (const ordre of ordresData) {
-                        // 1. Plafonds automatiques calculés par logarithme
+                    return;
+                }
+
+                const groupesSystemes = {};
+                ordresData.forEach(o => {
+                    const sys = o.systeme_cible.toUpperCase();
+                    if (!groupesSystemes[sys]) groupesSystemes[sys] = [];
+                    groupesSystemes[sys].push(o);
+                });
+
+                const timeNow = Date.now();
+                let tickRef = dernierTick;
+                if (new Date() > prochainTick) tickRef = prochainTick;
+
+                let html = '';
+
+                for (const [nomSysteme, factionsDuSysteme] of Object.entries(groupesSystemes)) {
+                    const premierOrdre = factionsDuSysteme[0];
+                    const popFormatee = new Intl.NumberFormat('fr-FR').format(premierOrdre.population || 0);
+
+                    const plusAncienTs = Math.min(...factionsDuSysteme.map(o => new Date(o.date_emission || o.created_at || timeNow).getTime()));
+                    const joursEcoules = Math.max(1, Math.ceil((timeNow - plusAncienTs) / (24 * 60 * 60 * 1000)));
+
+                    const briefingSysteme = factionsDuSysteme.find(o => o.briefing_amiral && o.briefing_amiral.trim() !== '')?.briefing_amiral || null;
+
+                    let htmlBriefing = '';
+                    if (briefingSysteme) {
+                        htmlBriefing = `
+                        <div style="margin: 0 0 15px 0; padding: 12px 15px; border-left: 3px solid var(--ed-orange); background: rgba(255, 113, 0, 0.04); font-style: italic; color: #ccc; font-size: 0.9em; line-height: 1.5; border-radius: 0 4px 4px 0;">
+                            <strong style="color: var(--ed-orange); font-style: normal; display: block; margin-bottom: 5px; letter-spacing: 1px;">> TRANSMISSION DE L'AMIRAUTÉ :</strong>
+                            "${briefingSysteme.replace(/\n/g, '<br>')}"
+                        </div>`;
+                    }
+
+                    let htmlAccordionsFactions = '';
+
+                    for (const ordre of factionsDuSysteme) {
                         const capsCalcules = calculerPlafonds(ordre.population || 0);
+                        const capsQuotidien = { ...capsCalcules, ...(ordre.plafonds_custom || {}) };
 
-                        // 2. Écrasement par les valeurs manuelles si définies par l'Amiral
-                        const capsQuotidien = {
-                            ...capsCalcules,
-                            ...(ordre.plafonds_custom || {})
-                        };
-
-                        // Calcul de la durée de l'ordre (en jours)
                         const dateEmission = new Date(ordre.date_emission || ordre.created_at || timeNow);
-                        const diffJours = Math.ceil((timeNow - dateEmission.getTime()) / (24 * 60 * 60 * 1000));
-                        const joursEcoules = Math.max(1, isNaN(diffJours) ? 1 : diffJours);
+                        const joursOrdre = Math.max(1, Math.ceil((timeNow - dateEmission.getTime()) / (24 * 60 * 60 * 1000)));
 
-                        // Plafonds globaux proportionnels à la durée de l'ordre
                         const capsGlobaux = {};
                         for (const [cle, val] of Object.entries(capsQuotidien)) {
-                            capsGlobaux[cle] = val * joursEcoules;
+                            capsGlobaux[cle] = val * joursOrdre;
                         }
 
-                        const effortsOrdreEscadron = (effortsData || []).filter(e => String(e.ordre_id) === String(ordre.id));
+                        const effortsOrdreEscadron = effortsData.filter(e => String(e.ordre_id) === String(ordre.id));
                         const effortsOrdreMoi = effortsOrdreEscadron.filter(e => e.user_id === profilCommandant.user_id);
-                        
+
                         const effortsQuotidienEscadron = effortsOrdreEscadron.filter(e => {
                             if (!e.date_action) return false;
-                            let dateStr = e.date_action;
-                            if (dateStr.includes(' ')) dateStr = dateStr.replace(' ', 'T');
-                            if (dateStr.endsWith('+00')) dateStr = dateStr.replace('+00', 'Z');
-                            if (!dateStr.includes('Z') && !dateStr.includes('+')) dateStr += 'Z';
-                            return new Date(dateStr) > tickDeReference;
+                            let ds = e.date_action.replace(' ', 'T');
+                            if (!ds.includes('Z') && !ds.includes('+')) ds += 'Z';
+                            return new Date(ds) > tickRef;
                         });
 
                         const effortsQuotidienMoi = effortsOrdreMoi.filter(e => {
                             if (!e.date_action) return false;
-                            let dateStr = e.date_action;
-                            if (dateStr.includes(' ')) dateStr = dateStr.replace(' ', 'T');
-                            if (dateStr.endsWith('+00')) dateStr = dateStr.replace('+00', 'Z');
-                            if (!dateStr.includes('Z') && !dateStr.includes('+')) dateStr += 'Z';
-                            return new Date(dateStr) > tickDeReference;
+                            let ds = e.date_action.replace(' ', 'T');
+                            if (!ds.includes('Z') && !ds.includes('+')) ds += 'Z';
+                            return new Date(ds) > tickRef;
                         });
-                        
+
                         const totauxQ = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
                         const totauxG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
                         const totauxMoiQ = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
@@ -2335,267 +2400,161 @@
                         effortsQuotidienMoi.forEach(e => { if (totauxMoiQ[e.type_action] !== undefined) totauxMoiQ[e.type_action] += Number(e.valeur); });
                         effortsOrdreMoi.forEach(e => { if (totauxMoiG[e.type_action] !== undefined) totauxMoiG[e.type_action] += Number(e.valeur); });
 
-                        // La barre se remplit désormais selon les efforts du pilote (Moi) par rapport au plafond
                         const getRatioQ = (type) => Math.min(100, (totauxMoiQ[type] / capsQuotidien[type]) * 100);
-                        const getRatioG = (type) => Math.min(100, (totauxG[type] / capsGlobaux[type]) * 100);
                         const formatCR = (val) => new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(val) + " CR";
                         const formatNum = (val) => new Intl.NumberFormat('fr-FR').format(val);
-
-                        // FORMATEUR COMBINÉ : VOUS | ESCADRON (Nouvelle architecture)
                         const fmtDual = (valMoi, valSquad, cap, unite = '') => {
                             const u = unite ? ` ${unite}` : '';
-                            return `<span style="color:#aaa; font-weight:normal;">Vous :</span> <span style="color:#fff; font-weight:bold;">${valMoi} / ${cap}${u}</span> <span style="color:#666; margin: 0 8px;">|</span> <span style="color:#aaa; font-weight:normal;">Total Escadron :</span> <span style="color:#fff;">${valSquad}${u}</span>`;
+                            return `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${valMoi} / ${cap}${u}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <span style="color:#fff;">${valSquad}${u}</span>`;
                         };
 
-                        // COULEURS DE BASE DE L'OPÉRATION
-                        let titreOrdre = ""; let colorPrincipale = ""; let colorFond = ""; let colorSec = "";
-                        const popFormatee = new Intl.NumberFormat('fr-FR').format(ordre.population || 0);
-                        
-                        if (ordre.type_ordre === 'HAUSSE') { titreOrdre = "AUGMENTER L'INFLUENCE"; colorPrincipale = '#00FF66'; colorFond = 'rgba(0, 255, 102, 0.02)'; colorSec = '#00F0FF'; } 
-                        else if (ordre.type_ordre === 'BAISSE') { titreOrdre = "RÉDUIRE L'INFLUENCE"; colorPrincipale = '#FF3333'; colorFond = 'rgba(255, 51, 51, 0.02)'; colorSec = '#FF7100'; } 
-                        else if (ordre.type_ordre === 'GUERRE') { titreOrdre = "REMPORTER LE CONFLIT ARMÉ"; colorPrincipale = '#FF7100'; colorFond = 'rgba(255, 113, 0, 0.02)'; colorSec = '#FF3333'; } 
-                        else if (ordre.type_ordre === 'ELECTION') { titreOrdre = "GAGNER L'ÉLECTION POLITIQUE"; colorPrincipale = '#00F0FF'; colorFond = 'rgba(0, 240, 255, 0.02)'; colorSec = '#00FF66'; }
+                        let colorPrinc = '#00FF66'; let colorFond = 'rgba(0, 255, 102, 0.02)'; let colorSec = '#00F0FF'; let labelDirective = "AUGMENTER L'INFLUENCE";
+                        if (ordre.type_ordre === 'BAISSE') { colorPrinc = '#FF3333'; colorFond = 'rgba(255, 51, 51, 0.02)'; colorSec = '#FF7100'; labelDirective = "RÉDUIRE L'INFLUENCE"; }
+                        else if (ordre.type_ordre === 'GUERRE') { colorPrinc = '#FF7100'; colorFond = 'rgba(255, 113, 0, 0.02)'; colorSec = '#FF3333'; labelDirective = "REMPORTER LE CONFLIT"; }
+                        else if (ordre.type_ordre === 'ELECTION') { colorPrinc = '#00F0FF'; colorFond = 'rgba(0, 240, 255, 0.02)'; colorSec = '#00FF66'; labelDirective = "GAGNER L'ÉLECTION"; }
 
-                        // ÉTATS BGS EDSM
-                        let cacheKey = ordre.systeme_cible + '_' + ordre.faction_cible;
-                        let activeStates = [];
-                        if (!window.edsmStateCache[cacheKey] || timeNow - window.edsmStateCache[cacheKey].time > 1800000) { 
-                            try {
-                                let res = await fetch(`https://www.edsm.net/api-system-v1/factions?systemName=${encodeURIComponent(ordre.systeme_cible)}`);
-                                let data = await res.json();
-                                let fac = data.factions.find(f => f.name.toLowerCase() === ordre.faction_cible.toLowerCase());
-                                if (fac) {
-                                    if (fac.activeStates) activeStates = fac.activeStates.map(s => s.state);
-                                    if (fac.state && fac.state !== 'None') activeStates.push(fac.state);
-                                    window.edsmStateCache[cacheKey] = { time: timeNow, states: activeStates };
-                                }
-                            } catch(e) {}
-                        }
-                        if (window.edsmStateCache[cacheKey]) activeStates = window.edsmStateCache[cacheKey].states;
-                        
-                        const etatStr = activeStates.join(' ').toUpperCase();
-                        
-                        let alerteEco = ''; let alerteLog = ''; let alerteSec = '';
-                        if (etatStr.includes('FAMINE')) alerteEco = '⚠️ [ ÉTAT : FAMINE ] PRIORITÉ : NOURRITURE';
-                        if (etatStr.includes('OUTBREAK')) alerteEco = '⚠️ [ ÉTAT : ÉPIDÉMIE ] PRIORITÉ : MÉDICAMENTS';
-                        if (etatStr.includes('BOOM')) alerteLog = '📈 [ ÉTAT : BOOM ÉCO ] MULTIPLICATEUR LOGISTIQUE';
-                        if (etatStr.includes('EXPANSION')) alerteLog = '🚀 [ ÉTAT : EXPANSION ] EFFORT DE SOUTIEN REQUIS';
-                        if (etatStr.includes('BUST')) alerteSec = '🚨 [ ÉTAT : CRISE ] PRIMES DE CONTREBANDE ÉLEVÉES';
-                        if (etatStr.includes('INFRASTRUCTURE')) alerteEco = '🔧 [ ÉTAT : INFRA. DÉFAILLANTE ] BESOIN DE MACHINES';
-
-                        let htmlBriefing = '';
-                        if (ordre.briefing_amiral) {
-                            htmlBriefing = `<div style="margin: 5px 0 15px 0; padding: 12px 15px; border-left: 3px solid ${colorPrincipale}; background: rgba(255,255,255,0.03); font-style: italic; color: #ccc; font-size: 0.9em; line-height: 1.5; border-radius: 0 4px 4px 0;">
-                                <strong style="color: ${colorPrincipale}; font-style: normal; display: block; margin-bottom: 5px; letter-spacing: 1px;">> TRANSMISSION DE L'AMIRAUTÉ :</strong>
-                                "${ordre.briefing_amiral.replace(/\n/g, '<br>')}"
-                            </div>`;
-                        }
-
-                        // INJECTION DES JAUGES & POIDS
-                        let sommeRatiosQ = 0; let sommeRatiosG = 0; let diviseur = 1; let htmlJauges = '';
+                        let sommeRatiosQ = 0; let diviseur = 1; let htmlJauges = '';
                         let poidsTotalEscadron = 0; let poidsTotalMoi = 0;
 
                         if (ordre.type_ordre === 'HAUSSE') {
                             sommeRatiosQ = getRatioQ('MISSIONS') + getRatioQ('ECONOMIE') + getRatioQ('SECURITE') + getRatioQ('SCIENCE');
-                            sommeRatiosG = getRatioG('MISSIONS') + getRatioG('ECONOMIE') + getRatioG('SECURITE') + getRatioG('SCIENCE');
                             diviseur = 4;
                             poidsTotalEscadron = totauxG['MISSIONS'] + (totauxG['ECONOMIE']/2000000) + (totauxG['SECURITE']/2000000) + (totauxG['SCIENCE']/2000000);
                             poidsTotalMoi = totauxMoiG['MISSIONS'] + (totauxMoiG['ECONOMIE']/2000000) + (totauxMoiG['SECURITE']/2000000) + (totauxMoiG['SCIENCE']/2000000);
 
-                            const ttLog = `📝 <strong style=\\'color: var(--ed-orange);\\'>LOGISTIQUE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Privilégiez les missions avec récompense en Influence (+INF).</span>`;
-                            const ttEco = `💰 <strong style=\\'color: #00FF66;\\'>ÉCONOMIE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Achetez ou vendez des marchandises avec profit (Minage inclus).</span>`;
-                            const ttSec = `💥 <strong style=\\'color: var(--ed-blue);\\'>SÉCURITÉ</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Encaissez des primes (Bounties) de la faction à la station.</span>`;
-                            const ttSci = `🔬 <strong style=\\'color: #B026FF;\\'>SCIENCE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Vendez des données d\\'Exploration ou d\\'Exobiologie.</span>`;
-
                             htmlJauges = 
-                                genererJaugeHTML('📝 LOGISTIQUE (Missions)', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capsQuotidien['MISSIONS']), 'INF'), 'var(--ed-orange)', getRatioQ('MISSIONS'), getRatioQ('MISSIONS') >= 100, alerteLog, colorPrincipale, ttLog) +
-                                genererJaugeHTML('💰 ÉCONOMIE (Commerce & Minage)', fmtDual(formatCR(totauxMoiQ['ECONOMIE']), formatCR(totauxQ['ECONOMIE']), formatCR(capsQuotidien['ECONOMIE'])), '#00FF66', getRatioQ('ECONOMIE'), getRatioQ('ECONOMIE') >= 100, alerteEco, colorPrincipale, ttEco) +
-                                genererJaugeHTML('💥 SÉCURITÉ (Primes & Conflits)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capsQuotidien['SECURITE'])), 'var(--ed-blue)', getRatioQ('SECURITE'), getRatioQ('SECURITE') >= 100, alerteSec, colorPrincipale, ttSec) +
-                                genererJaugeHTML('🔬 SCIENCE (Carto. & Exobio)', fmtDual(formatCR(totauxMoiQ['SCIENCE']), formatCR(totauxQ['SCIENCE']), formatCR(capsQuotidien['SCIENCE'])), '#B026FF', getRatioQ('SCIENCE'), getRatioQ('SCIENCE') >= 100, '', '', ttSci);
+                                genererJaugeHTML('📝 LOGISTIQUE (Missions)', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capsQuotidien['MISSIONS']), 'INF'), 'var(--ed-orange)', getRatioQ('MISSIONS'), getRatioQ('MISSIONS') >= 100) +
+                                genererJaugeHTML('💰 ÉCONOMIE (Commerce & Minage)', fmtDual(formatCR(totauxMoiQ['ECONOMIE']), formatCR(totauxQ['ECONOMIE']), formatCR(capsQuotidien['ECONOMIE'])), '#00FF66', getRatioQ('ECONOMIE'), getRatioQ('ECONOMIE') >= 100) +
+                                genererJaugeHTML('💥 SÉCURITÉ (Primes & Conflits)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capsQuotidien['SECURITE'])), 'var(--ed-blue)', getRatioQ('SECURITE'), getRatioQ('SECURITE') >= 100) +
+                                genererJaugeHTML('🔬 SCIENCE (Carto. & Exobio)', fmtDual(formatCR(totauxMoiQ['SCIENCE']), formatCR(totauxQ['SCIENCE']), formatCR(capsQuotidien['SCIENCE'])), '#B026FF', getRatioQ('SCIENCE'), getRatioQ('SCIENCE') >= 100);
 
                         } else if (ordre.type_ordre === 'BAISSE') {
                             const valMoiSabotage = totauxMoiQ['VOLS'] + totauxMoiQ['PIRATAGE'];
                             const valSquadSabotage = totauxQ['VOLS'] + totauxQ['PIRATAGE'];
                             const capSabotage = capsQuotidien['VOLS'];
                             const ratioSabotageQ = Math.min(100, (valMoiSabotage / capSabotage) * 100);
-                            
-                            const valSquadTotalSabotage = totauxG['VOLS'] + totauxG['PIRATAGE'];
-                            const capSabotageG = capsGlobaux['VOLS'];
-                            const ratioSabotageG = Math.min(100, (valSquadTotalSabotage / capSabotageG) * 100);
 
                             sommeRatiosQ = getRatioQ('MEURTRES') + ratioSabotageQ + getRatioQ('CONTREBANDE') + getRatioQ('ECHECS');
-                            sommeRatiosG = getRatioG('MEURTRES') + ratioSabotageG + getRatioG('CONTREBANDE') + getRatioG('ECHECS');
                             diviseur = 4;
-                            
-                            poidsTotalEscadron = totauxG['MEURTRES'] + valSquadTotalSabotage + (totauxG['CONTREBANDE']/2000000) + totauxG['ECHECS'];
+                            poidsTotalEscadron = totauxG['MEURTRES'] + (totauxG['VOLS'] + totauxG['PIRATAGE']) + (totauxG['CONTREBANDE']/2000000) + totauxG['ECHECS'];
                             poidsTotalMoi = totauxMoiG['MEURTRES'] + (totauxMoiG['VOLS'] + totauxMoiG['PIRATAGE']) + (totauxMoiG['CONTREBANDE']/2000000) + totauxMoiG['ECHECS'];
 
-                            const ttMeurtres = `☠️ <strong style=\\'color: var(--ed-red);\\'>RÈGLES D\\'ENGAGEMENT</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Détruisez des vaisseaux de la cible ou assassinez son personnel au sol.<br>L\\'action DOIT générer une prime (Bounty) ou être enregistrée.</span>`;
-                            const ttVols = `🔋 <strong style=\\'color: var(--ed-red);\\'>INFILTRATION AU SOL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Volez des Régulateurs de Puissance ou téléchargez des<br>données illégales depuis leurs terminaux.</span>`;
-                            const ttContrebande = `📦 <strong style=\\'color: var(--ed-red);\\'>ATTAQUE ÉCONOMIQUE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Vendez des marchandises volées ou illégales au Marché Noir<br>d\\'une station contrôlée par la cible.</span>`;
-                            const ttEchecs = `❌ <strong style=\\'color: var(--ed-red);\\'>SABOTAGE RÉPUTATIONNEL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Acceptez des missions de la faction cible puis abandonnez-les<br>immédiatement pour nuire à sa réputation.</span>`;
-
                             htmlJauges = 
-                                genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiQ['MEURTRES']), formatNum(totauxQ['MEURTRES']), formatNum(capsQuotidien['MEURTRES'])), 'var(--ed-red)', getRatioQ('MEURTRES'), getRatioQ('MEURTRES') >= 100, '', '', ttMeurtres) +
-                                genererJaugeHTML('🔋 SABOTAGE AU SOL (Régulateurs & Données)', fmtDual(formatNum(valMoiSabotage), formatNum(valSquadSabotage), formatNum(capSabotage)), 'var(--ed-red)', ratioSabotageQ, ratioSabotageQ >= 100, '', '', ttVols) +
-                                genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiQ['CONTREBANDE']), formatCR(totauxQ['CONTREBANDE']), formatCR(capsQuotidien['CONTREBANDE'])), 'var(--ed-red)', getRatioQ('CONTREBANDE'), getRatioQ('CONTREBANDE') >= 100, alerteSec, colorPrincipale, ttContrebande) +
-                                genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiQ['ECHECS']), formatNum(totauxQ['ECHECS']), formatNum(capsQuotidien['ECHECS'])), 'var(--ed-red)', getRatioQ('ECHECS'), getRatioQ('ECHECS') >= 100, '', '', ttEchecs);
-                        
+                                genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiQ['MEURTRES']), formatNum(totauxQ['MEURTRES']), formatNum(capsQuotidien['MEURTRES'])), 'var(--ed-red)', getRatioQ('MEURTRES'), getRatioQ('MEURTRES') >= 100) +
+                                genererJaugeHTML('🔋 SABOTAGE AU SOL (Régulateurs & Données)', fmtDual(formatNum(valMoiSabotage), formatNum(valSquadSabotage), formatNum(capSabotage)), 'var(--ed-red)', ratioSabotageQ, ratioSabotageQ >= 100) +
+                                genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiQ['CONTREBANDE']), formatCR(totauxQ['CONTREBANDE']), formatCR(capsQuotidien['CONTREBANDE'])), 'var(--ed-red)', getRatioQ('CONTREBANDE'), getRatioQ('CONTREBANDE') >= 100) +
+                                genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiQ['ECHECS']), formatNum(totauxQ['ECHECS']), formatNum(capsQuotidien['ECHECS'])), 'var(--ed-red)', getRatioQ('ECHECS'), getRatioQ('ECHECS') >= 100);
+
                         } else if (ordre.type_ordre === 'GUERRE') {
                             const capBondsQ = capsQuotidien['GUERRE_BONDS'] || capsQuotidien['SECURITE'];
-                            const capBondsG = capsGlobaux['GUERRE_BONDS'] || capsGlobaux['SECURITE'];
                             const capMissQ = capsQuotidien['GUERRE_MISSIONS'] || capsQuotidien['MISSIONS'];
-                            const capMissG = capsGlobaux['GUERRE_MISSIONS'] || capsGlobaux['MISSIONS'];
-
                             const ratioBondsQ = Math.min(100, (totauxMoiQ['SECURITE'] / capBondsQ) * 100);
-                            const ratioBondsG = Math.min(100, (totauxG['SECURITE'] / capBondsG) * 100);
                             const ratioMissQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capMissQ) * 100);
-                            const ratioMissG = Math.min(100, (totauxG['MISSIONS'] / capMissG) * 100);
 
-                            // On calcule désormais l'impact global sur 2 jauges au lieu de 3
                             sommeRatiosQ = ratioBondsQ + ratioMissQ;
-                            sommeRatiosG = ratioBondsG + ratioMissG;
                             diviseur = 2;
-                            
-                            // On retire le poids des victoires CZ du total des points
                             poidsTotalEscadron = (totauxG['SECURITE'] / 2000000) + totauxG['MISSIONS'];
                             poidsTotalMoi = (totauxMoiG['SECURITE'] / 2000000) + totauxMoiG['MISSIONS'];
 
-                            const ttBonds = `⚔️ <strong style=\\'color: var(--ed-orange);\\'>OBLIGATIONS DE COMBAT</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Encaissez vos bons de combat au comptoir Frontline ou Contacts.</span>`;
-                            const ttMissGuerre = `🎯 <strong style=\\'color: var(--ed-red);\\'>MISSIONS DE GUERRE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Accomplissez des missions de massacre ou logistiques (récompense INF).</span>`;
-
                             htmlJauges = 
-                                genererJaugeHTML('⚔️ OBLIGATIONS DE COMBAT (Bons déposés)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capBondsQ)), 'var(--ed-orange)', ratioBondsQ, ratioBondsQ >= 100, '', '', ttBonds) +
-                                genererJaugeHTML('🎯 MISSIONS MILITAIRES (Massacres & Logistiques)', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capMissQ), 'CONTRATS'), 'var(--ed-red)', ratioMissQ, ratioMissQ >= 100, '', '', ttMissGuerre);
+                                genererJaugeHTML('⚔️ OBLIGATIONS DE COMBAT (Bons)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capBondsQ)), 'var(--ed-orange)', ratioBondsQ, ratioBondsQ >= 100) +
+                                genererJaugeHTML('🎯 MISSIONS MILITAIRES', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capMissQ), 'CONTRATS'), 'var(--ed-red)', ratioMissQ, ratioMissQ >= 100);
 
                         } else if (ordre.type_ordre === 'ELECTION') {
                             const capElecQ = capsQuotidien['ELECTION_MISSIONS'] || capsQuotidien['MISSIONS'];
-                            const capElecG = capsGlobaux['ELECTION_MISSIONS'] || capsGlobaux['MISSIONS'];
-
                             const ratioElecQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capElecQ) * 100);
-                            const ratioElecG = Math.min(100, (totauxG['MISSIONS'] / capElecG) * 100);
-
                             sommeRatiosQ = ratioElecQ;
-                            sommeRatiosG = ratioElecG;
                             diviseur = 1;
                             poidsTotalEscadron = totauxG['MISSIONS'];
                             poidsTotalMoi = totauxMoiG['MISSIONS'];
 
-                            const ttElec = `🗳️ <strong style=\\'color: var(--ed-blue);\\'>SOUTIEN POLITIQUE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Transportez des VIP, données ou marchandises (Récompense +INF).</span>`;
-
-                            htmlJauges = genererJaugeHTML(
-                                '🗳️ LOGISTIQUE ÉLECTORALE (Transports données & passagers)', 
-                                fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capElecQ), 'INF'), 
-                                'var(--ed-blue)', 
-                                ratioElecQ, 
-                                ratioElecQ >= 100,
-                                '', '', ttElec
-                            );
+                            htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capElecQ), 'INF'), 'var(--ed-blue)', ratioElecQ, ratioElecQ >= 100);
                         }
 
                         const impactQuotidien = Math.min(100, Math.round(sommeRatiosQ / diviseur));
-                        const impactGlobal = Math.min(100, Math.round(sommeRatiosG / diviseur));
                         const partPilote = poidsTotalEscadron > 0 ? Math.min(100, Math.round((poidsTotalMoi / poidsTotalEscadron) * 100)) : 0;
 
-                        html += `
-                        <div class="data-row" style="border-color: ${colorPrincipale}; box-shadow: inset 4px 0 0 ${colorPrincipale}; background: ${colorFond};">
-                            
-                            <!-- EN-TÊTE COMPACT -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed ${colorPrincipale}; padding-bottom: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 15px;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                                
-                                <!-- Bloc Gauche : Infos -->
-                                <div style="flex-grow: 1; min-width: 300px;">
-                                    <span style="color: ${colorPrincipale}; font-size: 1.3em; font-weight: bold; letter-spacing: 2px; display: block;">[ OPÉRATION #${ordre.id} ] : ${titreOrdre}</span>
-                                    <div style="margin-top: 5px; display: flex; gap: 15px; font-size: 0.9em; flex-wrap: wrap;">
-                                        <span><span style="color: #666;">CIBLE :</span> <span style="color: #fff; font-weight: bold;">${ordre.faction_cible.toUpperCase()}</span></span>
-                                        <span><span style="color: #666;">SYSTÈME :</span> <span class="copy-click" style="color: #fff; font-weight: bold;" onclick="copierNav('${ordre.systeme_cible.replace(/'/g, "\\'")}', this, event)" title="Cliquer pour copier le système">${ordre.systeme_cible.toUpperCase()}</span></span>
-                                        <span><span style="color: #666;">POP :</span> <span style="color: #fff;">${popFormatee}</span></span>
-                                        <span><span style="color: #666;">EN COURS DEPUIS :</span> <span style="color: var(--ed-blue); font-weight: bold;">${joursEcoules} JOUR${joursEcoules > 1 ? 'S' : ''}</span></span>
+                        htmlAccordionsFactions += `
+                        <div style="border: 1px solid ${colorPrinc}; background: ${colorFond}; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="color: #fff; font-size: 1.15em; font-weight: bold;">${ordre.faction_cible.toUpperCase()}</span>
+                                        <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
                                     </div>
+                                    <span style="color: #888; font-size: 0.8em; margin-top: 3px; display: block;">${labelDirective}</span>
                                 </div>
-                                
-                                <!-- Bloc Droite : 3 Jauges (Quotidien, Global, Votre Part) + Flèche -->
-                                <div style="display: flex; align-items: center; gap: 25px; flex-wrap: wrap; justify-content: flex-end;">
-    
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: help;" 
-                                        onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: ${colorSec};\\'>QUOTA PERSONNEL (24H)</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Votre limite d\\'efficacité journalière (Rendement décroissant).<br>Remplissez cet anneau à 100% pour optimiser votre temps de jeu.<br>Au-delà, votre impact sur les serveurs chute drastiquement.</span>', '${colorSec}')" 
-                                        onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
-                                        onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                                        <div style="width: 55px; height: 55px; border-radius: 50%; background: conic-gradient(${colorSec} 0% ${impactQuotidien}%, rgba(255,255,255,0.05) ${impactQuotidien}% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px ${colorSec}40;">
-                                            <div style="width: 45px; height: 45px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
-                                                <span style="font-weight: bold; color: #fff; font-size: 0.9em;">${impactQuotidien}%</span>
+
+                                <div style="display: flex; align-items: center; gap: 20px;">
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: conic-gradient(${colorSec} 0% ${impactQuotidien}%, rgba(255,255,255,0.05) ${impactQuotidien}% 100%); display: flex; align-items: center; justify-content: center;">
+                                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
+                                                <span style="font-weight: bold; color: #fff; font-size: 0.8em;">${impactQuotidien}%</span>
                                             </div>
                                         </div>
-                                        <span style="color: #888; font-size: 0.65em; font-weight: bold; letter-spacing: 1px;">QUOTA (24H)</span>
+                                        <span style="color: #888; font-size: 0.6em; font-weight: bold;">QUOTA (24H)</span>
                                     </div>
 
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: help;" 
-                                        onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '♾️ <strong style=\\'color: ${colorPrincipale};\\'>IMPACT DE L\\'ESCADRON</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Force de frappe totale du groupe, sans limite maximale.<br><br><strong>BARÈME D\\'ÉQUIVALENCE (PTS) :</strong><br>• 1 Mission / Meurtre / Vol = <span style=\\'color:#fff;\\'>1 PT</span><br>• 2 000 000 CR (Commerce/Primes) = <span style=\\'color:#fff;\\'>1 PT</span><br>• 1 Victoire Zone de Conflit = <span style=\\'color:#fff;\\'>3 PTS</span></span>', '${colorPrincipale}')" 
-                                        onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
-                                        onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                                        <div style="width: 55px; height: 55px; border-radius: 50%; border: 2px dashed ${colorPrincipale}; background: ${colorFond}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 12px ${colorPrincipale}40; box-sizing: border-box;">
-                                            <span style="font-weight: bold; color: #fff; font-size: 0.85em;">${formatNum(Math.round(poidsTotalEscadron))}</span>
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <div style="width: 44px; height: 44px; border-radius: 50%; border: 1px dashed ${colorPrinc}; display: flex; align-items: center; justify-content: center;">
+                                            <span style="font-weight: bold; color: #fff; font-size: 0.8em;">${formatNum(Math.round(poidsTotalEscadron))}</span>
                                         </div>
-                                        <span style="color: #888; font-size: 0.65em; font-weight: bold; letter-spacing: 1px;">TOTAL PTS</span>
+                                        <span style="color: #888; font-size: 0.6em; font-weight: bold;">TOTAL PTS</span>
                                     </div>
 
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: help;" 
-                                        onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🤝 <strong style=\\'color: var(--ed-orange);\\'>CONTRIBUTION PERSONNELLE</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Représente votre part d\\'effort (${partPilote}%) dans le score<br>total généré par l\\'escadron sur cette directive.</span>', 'var(--ed-orange)')" 
-                                        onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
-                                        onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                                        <div style="width: 55px; height: 55px; border-radius: 50%; background: conic-gradient(var(--ed-orange) 0% ${partPilote}%, rgba(255,113,0,0.1) ${partPilote}% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,113,0,0.4);">
-                                            <div style="width: 45px; height: 45px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
-                                                <span style="font-weight: bold; color: var(--ed-orange); font-size: 0.9em;">${partPilote}%</span>
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: conic-gradient(var(--ed-orange) 0% ${partPilote}%, rgba(255,113,0,0.1) ${partPilote}% 100%); display: flex; align-items: center; justify-content: center;">
+                                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
+                                                <span style="font-weight: bold; color: var(--ed-orange); font-size: 0.8em;">${partPilote}%</span>
                                             </div>
                                         </div>
-                                        <span style="color: var(--ed-orange); font-size: 0.65em; font-weight: bold; letter-spacing: 1px;">VOTRE PART</span>
+                                        <span style="color: var(--ed-orange); font-size: 0.6em; font-weight: bold;">VOTRE PART</span>
                                     </div>
 
-                                    <div style="font-size: 1.8em; color: ${colorPrincipale}; margin-left: 10px; cursor: pointer;" id="icon-${ordre.id}">▼</div>
+                                    <div style="font-size: 1.4em; color: ${colorPrinc}; margin-left: 5px;" id="icon-${ordre.id}">▼</div>
                                 </div>
-                                
                             </div>
 
-                            <!-- BRIEFING -->
-                            ${htmlBriefing}
+                            <div id="details-${ordre.id}" style="display: none; flex-direction: column; gap: 10px; padding: 15px 18px; border-top: 1px dashed rgba(255,255,255,0.1); background: rgba(0,0,0,0.4);">
+                                ${htmlJauges}
+                            </div>
+                        </div>`;
+                    }
 
-                            <!-- DÉTAILS DÉPLIANTS -->
-                            <div id="details-${ordre.id}" style="display: none; flex-direction: column; gap: 15px; margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 20px;">
-                                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
-                                    ${htmlJauges}
+                    html += `
+                    <div class="data-row" style="border-color: var(--ed-orange); box-shadow: inset 4px 0 0 var(--ed-orange); background: rgba(10, 5, 0, 0.7); margin-bottom: 25px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange); padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <span style="color: var(--ed-orange); font-size: 1.3em; font-weight: bold; letter-spacing: 2px;"> SYSTEME : ${nomSysteme}</span>
+                                <div style="color: #888; font-size: 0.85em; margin-top: 4px; display: flex; gap: 15px;">
+                                    <span>POPULATION : <strong style="color: #fff;">${popFormatee}</strong></span>
+                                    <span>EN COURS DEPUIS : <strong style="color: var(--ed-blue);">${joursEcoules} JOUR${joursEcoules > 1 ? 'S' : ''}</strong></span>
+                                    <span>FACTIONS CIBLÉES : <strong style="color: var(--ed-orange);">${factionsDuSysteme.length}</strong></span>
                                 </div>
                             </div>
                         </div>
-                        `;
-                    }
-                    
-                    container.innerHTML = html;
+
+                        ${htmlBriefing}
+
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            ${htmlAccordionsFactions}
+                        </div>
+                    </div>`;
                 }
 
-                // RÉOUVERTURE DES ACCORDÉONS
+                container.innerHTML = html;
+
                 for (const [id, display] of Object.entries(etatsAccordions)) {
                     const el = document.getElementById(id);
                     if (el) {
                         el.style.display = display;
-                        const iconId = id.replace('details-', 'icon-');
-                        const icon = document.getElementById(iconId);
+                        const icon = document.getElementById(id.replace('details-', 'icon-'));
                         if (icon) icon.innerText = display === 'none' ? '▼' : '▲';
                     }
                 }
 
             } catch (e) {
-                console.error("Erreur BGS :", e);
-                container.innerHTML = '<div style="color: red; text-align: center;">> ERREUR DE LIAISON AVEC LE NOYAU.</div>';
-            }
-
-            // REFRESH TEMPOREL
-            if (!window.bgsLoopActive) {
-                window.bgsLoopActive = true;
-                setInterval(() => {
-                    if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
-                        afficherOrdresBGS();
-                    }
-                }, 60000);
+                console.error("Erreur affichage BGS :", e);
             }
         }
 
@@ -2869,24 +2828,14 @@
         // --- SCAN EDSM POUR LE COMMANDEMENT (FACTIONS & POPULATION AUTOMATIQUE) ---
         async function scannerFactionsEDSM(systemName) {
             if (!systemName || systemName.trim() === '') return;
-
-            const inputFaction = document.getElementById('cmd-faction');
             const inputPop = document.getElementById('cmd-population');
-            const datalist = document.getElementById('liste-factions-api');
             const systemeRecherche = systemName.trim();
 
-            inputFaction.value = "";
-            inputFaction.placeholder = "> SCAN DU RÉSEAU EDSM EN COURS...";
-            if (inputPop) {
-                inputPop.value = "";
-                inputPop.placeholder = "> SCAN DE LA POPULATION...";
-            }
-            datalist.innerHTML = ''; // On vide l'ancienne liste
-            
-            if (typeof sonHover === 'function') sonHover();
+            if (inputPop) { inputPop.value = ""; inputPop.placeholder = "> SCAN POPULATION..."; }
+            window.dernieresFactionsScannees = [];
+            actualiserTousLesSelectsFactions();
 
             try {
-                // Double requête en parallèle : Factions + Fiche d'information du système
                 const [resFactions, resInfo] = await Promise.all([
                     fetch(`https://www.edsm.net/api-system-v1/factions?systemName=${encodeURIComponent(systemeRecherche)}`),
                     fetch(`https://www.edsm.net/api-v1/system?systemName=${encodeURIComponent(systemeRecherche)}&showInformation=1`)
@@ -2895,33 +2844,17 @@
                 const dataFactions = await resFactions.json();
                 const dataInfo = await resInfo.json();
 
-                // 1. Remplissage automatique de la Population
-                if (dataInfo && dataInfo.information && dataInfo.information.population !== undefined) {
-                    if (inputPop) {
-                        inputPop.value = dataInfo.information.population;
-                        inputPop.placeholder = "Ex: 2500000";
-                        ajusterChampsPlafonds(); // Recalcule les plafonds en direct
-                    }
-                } else if (inputPop) {
-                    inputPop.placeholder = "⚠️ POPULATION INTROUVABLE (SAISIE MANUELLE)";
+                if (dataInfo?.information?.population !== undefined && inputPop) {
+                    inputPop.value = dataInfo.information.population;
                 }
 
-                // 2. Remplissage du menu déroulant des Factions
-                if (dataFactions && dataFactions.factions && dataFactions.factions.length > 0) {
-                    dataFactions.factions.forEach(f => {
-                        const option = document.createElement('option');
-                        option.value = f.name;
-                        datalist.appendChild(option);
-                    });
-                    inputFaction.placeholder = "> SÉLECTIONNEZ UNE FACTION";
+                if (dataFactions?.factions?.length > 0) {
+                    window.dernieresFactionsScannees = dataFactions.factions.map(f => f.name);
+                    actualiserTousLesSelectsFactions();
                     if (typeof sonSucces === 'function') sonSucces();
-                } else {
-                    inputFaction.placeholder = "⚠️ SYSTÈME INCONNU. SAISIE MANUELLE REQUISE.";
                 }
             } catch (e) {
-                console.error("Erreur de liaison EDSM :", e);
-                inputFaction.placeholder = "> ÉCHEC CONNEXION EDSM. SAISIE MANUELLE.";
-                if (inputPop) inputPop.placeholder = "Ex: 2500000";
+                console.error("Erreur liaison EDSM :", e);
             }
         }
 
