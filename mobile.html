@@ -137,6 +137,15 @@
             box-shadow: inset 0 3px 0 var(--ed-blue) !important;
         }
 
+        @keyframes navMobileBlink {
+            0%, 100% { color: #777; }
+            50% { color: var(--ed-blue); filter: drop-shadow(0 0 8px var(--ed-blue)); }
+        }
+        .alerte-nav-mobile {
+            animation: navMobileBlink 1.5s infinite !important;
+            color: var(--ed-blue) !important;
+        }
+
         .m-input {
             width: 100%;
             background: rgba(0,0,0,0.6);
@@ -296,14 +305,15 @@
             <!-- ONGLET 1 : QG & ACTIFS                     -->
             <!-- ========================================== -->
             <div id="tab-qg" style="display: flex; flex-direction: column; gap: 14px;">
-                
-                <!-- DOSSIER & ALLÉGEANCE -->
+
+                <!-- DOSSIER & GRADE -->
                 <div class="card">
                     <div class="card-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px dashed var(--ed-orange-dim);">
                         <span id="m-qg-squad" style="color: var(--ed-orange); font-size: 1.05em; font-weight: bold; letter-spacing: 2px;">[ INDÉPENDANT ]</span>
-                        <span id="m-qg-squad-allegeance" style="color: var(--ed-blue); font-size: 0.75em; font-weight: bold; letter-spacing: 1px; text-align: center;">PUISSANCE : ---</span>
+                        
+                        <!-- REMPLACEMENT DE LA PUISSANCE PAR LE GRADE -->
+                        <span id="m-qg-grade" style="font-size: 0.85em; font-weight: bold; letter-spacing: 1.5px; text-align: center; padding: 2px 8px; border-radius: 3px;">GRADE : ---</span>
                     </div>
-                    <div id="m-qg-badges" style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;"></div>
                     
                     <div style="display: flex; justify-content: space-around; font-size: 0.85em; margin-bottom: 12px; border-bottom: 1px dashed #333; padding-bottom: 10px;">
                         <div style="text-align: center; flex: 1;">
@@ -320,32 +330,45 @@
                     <span style="color: #888; font-size: 0.75em; letter-spacing: 1px; display: block; margin-bottom: 6px;">ÉVALUATION DE LA FÉDÉRATION DES PILOTES :</span>
                     <div class="rank-grid">
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('combat')" style="cursor: pointer;">
-                            <div style="display: flex; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #888; font-size: 0.85em;">COMBAT</span>
-                                <span id="rank-combat-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                                <span id="rank-combat-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-combat" style="color: #fff;">---</strong>
                         </div>
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('trade')" style="cursor: pointer;">
-                            <div style="display: flex; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #888; font-size: 0.85em;">COMMERCE</span>
-                                <span id="rank-trade-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                                <span id="rank-trade-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-trade" style="color: #fff;">---</strong>
                         </div>
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('explore')" style="cursor: pointer;">
-                            <div style="display: flex; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #888; font-size: 0.85em;">EXPLORATION</span>
-                                <span id="rank-explore-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                                <span id="rank-explore-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-explore" style="color: #fff;">---</strong>
                         </div>
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('exobio')" style="cursor: pointer;">
-                            <div style="display: flex; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #888; font-size: 0.85em;">EXOBIOLOGIE</span>
-                                <span id="rank-exo-pct" style="color: var(--ed-blue); font-size: 0.8em;">--%</span>
+                                <span id="rank-exo-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-exo" style="color: #fff;">---</strong>
+                        </div>
+                        <!-- RANG MERCENAIRE (Réduit à 50%) -->
+                        <div class="rank-item" onclick="ouvrirModalGradesMobile('mercenary')" style="cursor: pointer; border-color: #555; background: rgba(255,255,255,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #888; font-size: 0.85em;">MERCENAIRE</span>
+                                <span id="rank-mercenary-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
+                            </div>
+                            <strong id="rank-mercenary" style="color: #fff;">---</strong>
+                        </div>
+                        <!-- NOUVEAU : STATUT LÉGAL (Prend les autres 50%) -->
+                        <div class="rank-item" id="m-legal-status-box" style="cursor: pointer; justify-content: center; align-items: center; background: rgba(0, 255, 102, 0.05); border-color: rgba(0, 255, 102, 0.3);" onclick="ouvrirModalLegalMobile()">
+                            <span style="color: #888; font-size: 0.65em; letter-spacing: 1px; margin-bottom: 2px;">STATUT LÉGAL</span>
+                            <strong id="m-legal-status-text" style="color: #00FF66; font-size: 1em; text-align: center;">CASIER VIERGE</strong>
                         </div>
                     </div>
                 </div>
@@ -407,11 +430,53 @@
                     </div>
                 </div>
 
+                <!-- 1. BOUTON REGISTRE TACTIQUE -->
+                <div class="card" style="border-color: #FF3333; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 51, 51, 0.05);" onclick="ouvrirRegistreMobile()">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(255,51,51,0.5));">🎯</span>
+                        <div>
+                            <span style="color: #FF3333; font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">REGISTRE TACTIQUE</span>
+                            <span id="m-registre-count" style="display: block; color: #888; font-size: 0.75em;">Recherche des cibles...</span>
+                        </div>
+                    </div>
+                    <span style="color: #FF3333; font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
+                <!-- NOUVEAU : BOUTON GALNET -->
+                <div class="card" style="border-color: var(--ed-orange); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 113, 0, 0.05);" onclick="ouvrirGalnetMobile()">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5));">📡</span>
+                        <div>
+                            <span style="color: var(--ed-orange); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">ACTUALITÉS GALNET</span>
+                            <span id="m-galnet-date" style="display: block; color: #888; font-size: 0.75em;">Connexion Frontier...</span>
+                        </div>
+                    </div>
+                    <span style="color: var(--ed-orange); font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
+                <!-- NOUVEAU : BANNIÈRE GAZETTE -->
+                <div class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirGazetteMobile()">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📰</span>
+                        <div>
+                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">EDNEWS ESCADRON</span>
+                            <span id="m-gazette-date" style="display: block; color: #888; font-size: 0.75em;">Recherche des archives...</span>
+                        </div>
+                    </div>
+                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
                 <!-- BOUTON ACCÈS DIRECTEUR (Affiché uniquement si est_directeur === true) -->
                 <button id="btn-bureau-directeur" class="m-btn" style="display: none; background: rgba(255, 51, 51, 0.15); border-color: var(--ed-red); color: var(--ed-red); margin-top: 5px;" onclick="ouvrirBureauDirecteur()">
                     ⚙️ [ BUREAU DU DIRECTEUR ]
                 </button>
-                <button class="m-btn" style="background: transparent; border-color: #555; color: #888; font-size: 0.85em; margin-top: 5px;" onclick="deconnexionMobile()">[ DÉCONNEXION DU PADD ]</button>
+                
+                <button class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.85em; margin-top: 15px;" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')">
+                    🎧 [ SUPPORT DISCORD ]
+                </button>
+                <button class="m-btn" style="background: transparent; border-color: #555; color: #888; font-size: 0.85em; margin-top: 5px;" onclick="deconnexionMobile()">
+                    [ DÉCONNEXION DU PADD ]
+                </button>
             </div>
 
             <!-- ========================================== -->
@@ -505,8 +570,8 @@
                 <!-- FIN DU BANDEAU -->
                 
                 <div style="display: flex; gap: 6px;">
-                    <button id="btn-chan-global" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('GLOBAL')">GLOBAL</button>
-                    <button id="btn-chan-squad" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
+                    <button id="btn-chan-global" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="changerCanalComms('GLOBAL')">GLOBAL</button>
+                    <button id="btn-chan-squad" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
                     <button id="btn-chan-prive" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('PRIVE')">PRIVÉ</button>
                 </div>
 
@@ -763,6 +828,139 @@
         </div>
     </div>
 
+    <!-- MODAL GALNET MOBILE -->
+    <div class="modal-overlay" id="modal-galnet" onclick="document.getElementById('modal-galnet').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-orange);" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); display: flex; justify-content: space-between; align-items: center; background: rgba(255,113,0,0.1);">
+                <span style="color: var(--ed-orange); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">📡 GALNET NEWS</span>
+                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-galnet').style.display='none'">✕</span>
+            </div>
+            <div style="padding: 15px; overflow-y: auto;">
+                <h3 id="m-galnet-title-modal" style="color: var(--ed-orange); margin-top: 0; margin-bottom: 5px; font-size: 1.2em;">Titre</h3>
+                <p id="m-galnet-date-modal" style="color: #888; margin-bottom: 15px; font-size: 0.85em; border-bottom: 1px dashed #333; padding-bottom: 10px;"></p>
+                <div id="m-galnet-body-modal" style="color: #ccc; line-height: 1.5; font-size: 0.95em;">Texte</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GAZETTE MOBILE -->
+    <div class="modal-overlay" id="modal-gazette" onclick="document.getElementById('modal-gazette').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.1);">
+                <span style="color: var(--ed-blue); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">📰 EDNEWS ARCHIVES</span>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-gazette').style.display='none'">✕</span>
+            </div>
+            <div style="padding: 10px 15px; background: rgba(0,0,0,0.5); border-bottom: 1px solid #333;">
+                <select id="m-gazette-selector" class="m-input" style="border-color: var(--ed-blue); color: var(--ed-blue);" onchange="afficherGazetteSelectionnee(this.value)">
+                    <option value="">Chargement des archives...</option>
+                </select>
+            </div>
+            <div style="padding: 15px; overflow-y: auto;">
+                <h3 id="m-gazette-title-modal" style="color: var(--ed-blue); margin-top: 0; margin-bottom: 5px; font-size: 1.2em;"></h3>
+                <div id="m-gazette-body-modal" style="color: #ccc; line-height: 1.5; font-size: 0.95em; white-space: pre-wrap;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRE TACTIQUE MOBILE -->
+    <div class="modal-overlay" id="modal-registre-tactique" onclick="document.getElementById('modal-registre-tactique').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: #FF3333;" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid #FF3333; display: flex; justify-content: space-between; align-items: center; background: rgba(255,51,51,0.1);">
+                <span style="color: #FF3333; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">🎯 REGISTRE TACTIQUE</span>
+                <span style="color: #FF3333; font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-registre-tactique').style.display='none'">✕</span>
+            </div>
+            <div id="m-registre-modal-content" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">Chargement des cibles...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL STATUT LÉGAL MOBILE -->
+    <div class="modal-overlay" id="modal-legal-status" onclick="document.getElementById('modal-legal-status').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" id="modal-legal-card" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: #00FF66;" onclick="event.stopPropagation()">
+            <div id="modal-legal-header" style="padding: 15px; border-bottom: 1px solid #00FF66; display: flex; justify-content: space-between; align-items: center; background: rgba(0,255,102,0.1);">
+                <span id="modal-legal-title" style="color: #00FF66; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">⚖️ STATUT LÉGAL</span>
+                <span id="modal-legal-close" style="color: #00FF66; font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-legal-status').style.display='none'">✕</span>
+            </div>
+            <div style="padding: 25px 20px; overflow-y: auto; text-align: center;">
+                <h3 id="modal-legal-notoriety" style="color: #00FF66; margin-top: 0; margin-bottom: 15px; font-size: 1.4em; letter-spacing: 1px;">Niveau de Notoriété : 0</h3>
+                <div id="modal-legal-desc" style="color: #ccc; line-height: 1.6; font-size: 0.95em;">Aucune infraction grave...</div>
+                <button class="m-btn" id="modal-legal-btn" style="margin-top: 25px; width: 100%; border-color: #00FF66; color: #00FF66; background: transparent;" onclick="document.getElementById('modal-legal-status').style.display='none'">[ COMPRIS ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PROFIL PILOTE MOBILE -->
+    <div class="modal-overlay" id="modal-profil-pilote" onclick="document.getElementById('modal-profil-pilote').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-orange);" onclick="event.stopPropagation()">
+            
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); display: flex; justify-content: space-between; align-items: flex-start; background: rgba(255,113,0,0.1); flex-shrink: 0;">
+                <div>
+                    <span id="m-modal-cmdr-nom" style="color: var(--ed-orange); font-weight: bold; font-size: 1.3em; letter-spacing: 1px;">CMDR ...</span>
+                    <div id="m-modal-cmdr-roles" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;"></div>
+                </div>
+                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-profil-pilote').style.display='none'">✕</span>
+            </div>
+            
+            <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                
+                <!-- Casier Légal & Impact BGS (Côte à côte) -->
+                <div style="display: flex; gap: 10px;">
+                    <!-- Casier Légal -->
+                    <div id="m-modal-casier-container" style="flex: 1; display: flex; justify-content: center; align-items: center; border-radius: 4px; border: 1px solid #333; background: rgba(0,0,0,0.5); padding: 10px;">
+                        <div id="m-modal-notoriety" style="font-size: 1em; font-weight: bold; letter-spacing: 1px; text-align: center;">-</div>
+                    </div>
+
+                    <!-- Impact BGS (Effort Global) -->
+                    <div style="flex: 1.2; background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; flex-direction: column; gap: 3px;">
+                            <span style="color: #888; font-weight: bold; letter-spacing: 1px; font-size: 0.75em;">> BGS</span>
+                            <span style="color: #ccc; font-size: 0.7em;">EFFORT GLOBAL</span>
+                        </div>
+                        <div style="position: relative; width: 45px; height: 45px;">
+                            <div id="m-modal-bgs-circle" style="width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(var(--ed-orange) 0% 0%, rgba(255,113,0,0.1) 0% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,113,0,0.4); transition: background 0.5s;">
+                                <div style="width: 35px; height: 35px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
+                                    <span id="m-modal-bgs-part" style="font-weight: bold; color: var(--ed-orange); font-size: 0.85em;">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- États de Service BGS (Opérations & Spécialités) -->
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                    <div style="color: #888; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; font-size: 0.9em;">> ÉTATS DE SERVICE BGS</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="color: #ccc; font-size: 0.9em;">OPÉRATIONS REJOINTES</span>
+                        <span id="m-modal-ops-count" style="color: #fff; font-weight: bold; font-size: 1.1em;">-</span>
+                    </div>
+                    <div id="m-modal-specialiste-titres" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                </div>
+
+                <!-- Rangs Fédération -->
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                    <div style="color: #888; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; font-size: 0.9em;">> FÉDÉRATION DES PILOTES</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">COMBAT</span> <span id="m-modal-rank-combat" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">COMMERCE</span> <span id="m-modal-rank-trade" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">EXPLORATION</span> <span id="m-modal-rank-explo" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">EXOBIOLOGIE</span> <span id="m-modal-rank-exobio" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95em;"><span style="color: #ccc;">MERCENAIRE</span> <span id="m-modal-rank-merc" style="color: #fff; font-weight: bold;">-</span></div>
+                </div>
+                
+                <!-- Rangs Navaux -->
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                    <div style="color: #888; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; font-size: 0.9em;">> RANGS AUXILIAIRES</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">FÉDÉRATION</span> <span id="m-modal-rank-fed" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95em;"><span style="color: #ccc;">EMPIRE</span> <span id="m-modal-rank-emp" style="color: #fff; font-weight: bold;">-</span></div>
+                </div>
+
+                <!-- Réputations (S'affiche uniquement si des objectifs existent) -->
+                <div id="m-modal-reputations-container" style="display: none;"></div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT APPLICATION -->
     <script>
 
@@ -895,6 +1093,9 @@
             document.getElementById('app-main').style.display = 'flex';
 
             chargerQGMobile();
+            chargerGalnetMobile();
+            chargerGazetteListMobile();
+            chargerRegistreTactiqueMobile();
             chargerBGSMobile();
             initialiserCommsMobile();
             demarrerTickTimer();
@@ -984,7 +1185,9 @@
             document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
             
             // On active le bouton cliqué
-            document.getElementById('nav-btn-' + tabId).classList.add('active');
+            const btnClic = document.getElementById('nav-btn-' + tabId);
+            btnClic.classList.add('active');
+            btnClic.classList.remove('alerte-nav-mobile'); // <-- NOUVELLE LIGNE : Éteint l'alerte !
 
             // On affiche le bon onglet
             const target = document.getElementById('tab-' + tabId);
@@ -1003,6 +1206,7 @@
             trade: ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
             explore: ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
             exobiologist: ["DIRECTIONLESS", "MOSTLY DIRECTIONLESS", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+            mercenary: ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
             federation: ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"],
             empire: ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"]
         };
@@ -1011,130 +1215,164 @@
             if (!profilCommandant) return;
             const fmt = new Intl.NumberFormat('fr-FR');
 
-            // 1. Identité, Escadron & Powerplay
-            document.getElementById('m-cmdr-name').innerText = `CMDR ${profilCommandant.cmdr_nom ? profilCommandant.cmdr_nom.toUpperCase() : 'COMMANDANT'}`;
-            document.getElementById('m-qg-squad').innerText = profilCommandant.escadron_id ? `[ ${profilCommandant.escadron_id.toUpperCase()} ]` : `[ INDÉPENDANT ]`;
+            try {
+                // 1. Identité & Grade (Remplaçant Powerplay)
+                if (document.getElementById('m-cmdr-name')) {
+                    document.getElementById('m-cmdr-name').innerText = `CMDR ${profilCommandant.cmdr_nom ? profilCommandant.cmdr_nom.toUpperCase() : 'COMMANDANT'}`;
+                }
+                if (document.getElementById('m-qg-squad')) {
+                    document.getElementById('m-qg-squad').innerText = profilCommandant.escadron_id ? `[ ${profilCommandant.escadron_id.toUpperCase()} ]` : `[ INDÉPENDANT ]`;
+                }
 
-            const elAllegeance = document.getElementById('m-qg-squad-allegeance');
-            const pNom = profilCommandant.power_nom;
-            const pRang = profilCommandant.power_rang || 0;
+                const elGrade = document.getElementById('m-qg-grade');
+                if (elGrade) {
+                    let txtGrade = "PILOTE"; let colGrade = "var(--ed-orange)"; let bgGrade = "rgba(255,113,0,0.1)";
 
-            if (pNom && pNom.trim() !== '') {
-                const nomU = pNom.toUpperCase();
-                elAllegeance.innerText = pRang > 0 ? `PUISSANCE : ${nomU} (RANG ${pRang})` : `PUISSANCE : ${nomU}`;
+                    if (profilCommandant.est_amiral) { txtGrade = "AMIRAL"; colGrade = "var(--ed-red)"; bgGrade = "rgba(255,51,51,0.1)"; }
+                    else if (profilCommandant.est_directeur) { txtGrade = "DIRECTEUR"; colGrade = "var(--ed-blue)"; bgGrade = "rgba(0,240,255,0.1)"; }
+                    else if (profilCommandant.est_officier) { txtGrade = "OFFICIER BGS"; colGrade = "var(--ed-green)"; bgGrade = "rgba(0,255,102,0.1)"; }
+                    else if (profilCommandant.est_diplomate) { txtGrade = "DIPLOMATE"; colGrade = "var(--ed-blue)"; bgGrade = "rgba(0,240,255,0.1)"; }
+
+                    elGrade.innerText = `GRADE : ${txtGrade}`;
+                    elGrade.style.color = colGrade;
+                    elGrade.style.borderColor = colGrade;
+                    elGrade.style.background = bgGrade;
+                }
+
+                // Bouton Directeur
+                const btnDir = document.getElementById('btn-bureau-directeur');
+                if (btnDir) btnDir.style.display = profilCommandant.est_directeur ? 'block' : 'none';
+
+                // 2. Traduction des rangs
+                function lireRang(index, table, pct) {
+                    if (index === null || index === undefined) return { nom: '---', pct: '--%' };
+                    const nom = (table && table[index]) ? table[index] : '---';
+                    const p = (pct !== null && pct !== undefined) ? `${pct}%` : '--%';
+                    return { nom, pct: p };
+                }
+
+                const rFed = lireRang(profilCommandant.rang_fed, TABLES_ED_RANGS.federation, profilCommandant.prog_fed);
+                const rEmp = lireRang(profilCommandant.rang_emp, TABLES_ED_RANGS.empire, profilCommandant.prog_emp);
                 
-                if (nomU.includes('WINTERS') || nomU.includes('HUDSON')) elAllegeance.style.color = 'var(--ed-blue)';
-                else if (nomU.includes('DUVAL') || nomU.includes('PATREUS') || nomU.includes('TORVAL')) elAllegeance.style.color = 'var(--ed-orange)';
-                else if (nomU.includes('MAHON')) elAllegeance.style.color = 'var(--ed-green)';
-                else elAllegeance.style.color = '#FFCC00';
-            } else {
-                elAllegeance.innerText = `PUISSANCE : AUCUNE`;
-                elAllegeance.style.color = '#888';
-            }
+                if (document.getElementById('m-rank-fed')) document.getElementById('m-rank-fed').innerText = rFed.nom !== '---' ? `${rFed.nom} (${rFed.pct})` : '---';
+                if (document.getElementById('m-rank-emp')) document.getElementById('m-rank-emp').innerText = rEmp.nom !== '---' ? `${rEmp.nom} (${rEmp.pct})` : '---';
 
-            // Badges
-            let badgesHtml = '';
-            if (profilCommandant.est_amiral) badgesHtml += '<span style="color: var(--ed-red); border: 1px solid var(--ed-red); padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">AMIRAL</span>';
-            if (profilCommandant.est_officier) badgesHtml += '<span style="color: var(--ed-green); border: 1px solid var(--ed-green); padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">OFFICIER BGS</span>';
-            if (profilCommandant.est_diplomate) badgesHtml += '<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">DIPLOMATE</span>';
-            document.getElementById('m-qg-badges').innerHTML = badgesHtml;
+                const rCombat = lireRang(profilCommandant.rang_combat, TABLES_ED_RANGS.combat, profilCommandant.prog_combat);
+                const rTrade  = lireRang(profilCommandant.rang_commerce, TABLES_ED_RANGS.trade, profilCommandant.prog_commerce);
+                const rExplore = lireRang(profilCommandant.rang_explo, TABLES_ED_RANGS.explore, profilCommandant.prog_explore);
+                const rExo    = lireRang(profilCommandant.rang_exobio, TABLES_ED_RANGS.exobiologist, profilCommandant.prog_exobio);
+                const rMercenary = lireRang(profilCommandant.rang_mercenary, TABLES_ED_RANGS.mercenary, profilCommandant.prog_mercenary);
 
-            // Affichage du bouton Bureau Directeur si vous avez les droits
-            const btnDir = document.getElementById('btn-bureau-directeur');
-            if (btnDir) btnDir.style.display = profilCommandant.est_directeur ? 'block' : 'none';
+                if (document.getElementById('rank-combat')) {
+                    document.getElementById('rank-combat').innerText = rCombat.nom;
+                    document.getElementById('rank-combat-pct').innerText = rCombat.pct;
+                    document.getElementById('rank-trade').innerText = rTrade.nom;
+                    document.getElementById('rank-trade-pct').innerText = rTrade.pct;
+                    document.getElementById('rank-explore').innerText = rExplore.nom;
+                    document.getElementById('rank-explore-pct').innerText = rExplore.pct;
+                    document.getElementById('rank-exo').innerText = rExo.nom;
+                    document.getElementById('rank-exo-pct').innerText = rExo.pct;
+                    
+                    if (document.getElementById('rank-mercenary')) {
+                        document.getElementById('rank-mercenary').innerText = rMercenary.nom;
+                        document.getElementById('rank-mercenary-pct').innerText = rMercenary.pct;
 
-            // 2. Traduction des rangs
-            function lireRang(index, table, pct) {
-                if (index === null || index === undefined) return { nom: '---', pct: '--%' };
-                const nom = table[index] ? table[index] : '---';
-                const p = (pct !== null && pct !== undefined) ? `${pct}%` : '--%';
-                return { nom, pct: p };
-            }
+                        // MISE À JOUR DU STATUT LÉGAL
+                        const notoriete = parseInt(profilCommandant.notoriete) || 0;
+                        const legalBox = document.getElementById("m-legal-status-box");
+                        const legalText = document.getElementById("m-legal-status-text");
 
-            const rFed = lireRang(profilCommandant.rang_fed, TABLES_ED_RANGS.federation, profilCommandant.prog_fed);
-            const rEmp = lireRang(profilCommandant.rang_emp, TABLES_ED_RANGS.empire, profilCommandant.prog_emp);
-            document.getElementById('m-rank-fed').innerText = rFed.nom !== '---' ? `${rFed.nom} (${rFed.pct})` : '---';
-            document.getElementById('m-rank-emp').innerText = rEmp.nom !== '---' ? `${rEmp.nom} (${rEmp.pct})` : '---';
-
-            const rCombat = lireRang(profilCommandant.rang_combat, TABLES_ED_RANGS.combat, profilCommandant.prog_combat);
-            const rTrade  = lireRang(profilCommandant.rang_commerce, TABLES_ED_RANGS.trade, profilCommandant.prog_commerce);
-            const rExplore = lireRang(profilCommandant.rang_explo, TABLES_ED_RANGS.explore, profilCommandant.prog_explore);
-            const rExo    = lireRang(profilCommandant.rang_exobio, TABLES_ED_RANGS.exobiologist, profilCommandant.prog_exobio);
-
-            document.getElementById('rank-combat').innerText = rCombat.nom;
-            document.getElementById('rank-combat-pct').innerText = rCombat.pct;
-            document.getElementById('rank-trade').innerText = rTrade.nom;
-            document.getElementById('rank-trade-pct').innerText = rTrade.pct;
-            document.getElementById('rank-explore').innerText = rExplore.nom;
-            document.getElementById('rank-explore-pct').innerText = rExplore.pct;
-            document.getElementById('rank-exo').innerText = rExo.nom;
-            document.getElementById('rank-exo-pct').innerText = rExo.pct;
-
-            // 3. Finances réelles
-            const soldeV = profilCommandant.solde_vaisseau || 0;
-            const soldeF = profilCommandant.solde_fc || 0;
-            const valFlotte = profilCommandant.valeur_vaisseaux || 0;
-            const patTotal = profilCommandant.patrimoine_total || (soldeV + soldeF + valFlotte);
-            const rebuy = profilCommandant.cout_rachat || 0;
-
-            document.getElementById('m-solde-vaisseau').innerText = fmt.format(soldeV);
-            document.getElementById('m-solde-fc').innerText = fmt.format(soldeF);
-            document.getElementById('m-valeur-flotte').innerText = valFlotte > 0 ? fmt.format(valFlotte) : '---';
-            document.getElementById('m-valeur-totale').innerText = patTotal > 0 ? `${fmt.format(patTotal)} CR` : '--- CR';
-            document.getElementById('m-rebuy-cout').innerText = rebuy > 0 ? `${fmt.format(rebuy)} CR` : '--- CR';
-
-            // 4. Fleet Carrier
-            const { data: param } = await supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).single();
-            if (param) {
-                if (param.carrier_stats_json) {
-                    const stats = param.carrier_stats_json;
-                    document.getElementById('m-fc-name').innerText = stats.name || "FLEET CARRIER";
-                    const fuel = stats.fuel !== undefined ? stats.fuel : 0;
-                    document.getElementById('m-tritium-depot-txt').innerText = `${fuel} / 1000 T`;
-                    document.getElementById('m-tritium-depot-bar').style.width = `${(fuel / 1000) * 100}%`;
+                        if (legalBox && legalText) {
+                            legalBox.dataset.notoriety = notoriete; // On stocke la valeur
+                            if (notoriete > 0) {
+                                legalBox.style.background = "rgba(255, 51, 51, 0.05)";
+                                legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
+                                legalText.style.color = "#FF3333";
+                                legalText.innerText = "RECHERCHÉ";
+                            } else {
+                                legalBox.style.background = "rgba(0, 255, 102, 0.05)";
+                                legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
+                                legalText.style.color = "#00FF66";
+                                legalText.innerText = "CASIER VIERGE";
+                            }
+                        }
+                    }
                 }
 
-                const upkeepHebdo = 25000000;
-                const semainesRestantes = soldeF > 0 ? Math.floor(soldeF / upkeepHebdo) : 0;
-                document.getElementById('m-fc-autonomie').innerText = `${semainesRestantes} SEMAINES`;
+                // 3. Finances réelles
+                const soldeV = profilCommandant.solde_vaisseau || 0;
+                const soldeF = profilCommandant.solde_fc || 0;
+                const valFlotte = profilCommandant.valeur_vaisseaux || 0;
+                const patTotal = profilCommandant.patrimoine_total || (soldeV + soldeF + valFlotte);
+                const rebuy = profilCommandant.cout_rachat || 0;
 
-                const { data: tritData } = await supabaseApp.from('inventaire_fc').select('quantite').eq('marchandise', 'Tritium').eq('user_id', profilCommandant.user_id).maybeSingle();
-                document.getElementById('m-tritium-soute-txt').innerText = `${fmt.format(tritData ? tritData.quantite : 0)} T`;
-            }
-
-            // 5. Effectif escadron
-            if (profilCommandant.escadron_id) {
-                const { data: membres } = await supabaseApp.from('profils_publics')
-                    .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id')
-                    .eq('escadron_id', profilCommandant.escadron_id)
-                    .eq('est_approuve', true)
-                    .order('cmdr_nom');
-
-                if (membres) {
-                    document.getElementById('m-squad-count').innerText = `${membres.length} PILOTES`;
-                    let htmlMembres = '';
-
-                    membres.forEach(m => {
-                        let badges = [];
-                        if (m.est_amiral) badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">AMIRAL</span>');
-                        else if (m.est_officier) badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">OFFICIER</span>');
-                        else badges.push('<span style="color:#888; border:1px solid #444; padding:1px 5px; border-radius:3px; font-size:0.7em;">PILOTE</span>');
-
-                        if (m.est_diplomate) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">DIPLOMATE</span>');
-
-                        htmlMembres += `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; font-size:0.85em; margin-bottom:4px;">
-                                <span style="color:#fff; font-weight:bold;">CMDR ${(m.cmdr_nom || 'RECRUE').toUpperCase()}</span>
-                                <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
-                                    ${badges.join('')}
-                                </div>
-                            </div>`;
-                    });
-
-                    document.getElementById('m-squad-members-list').innerHTML = htmlMembres;
+                if (document.getElementById('m-solde-vaisseau')) {
+                    document.getElementById('m-solde-vaisseau').innerText = fmt.format(soldeV);
+                    document.getElementById('m-solde-fc').innerText = fmt.format(soldeF);
+                    document.getElementById('m-valeur-flotte').innerText = valFlotte > 0 ? fmt.format(valFlotte) : '---';
+                    document.getElementById('m-valeur-totale').innerText = patTotal > 0 ? `${fmt.format(patTotal)}` : '---';
+                    document.getElementById('m-rebuy-cout').innerText = rebuy > 0 ? `${fmt.format(rebuy)} CR` : '--- CR';
                 }
-            } else {
-                document.getElementById('m-squad-members-list').innerHTML = '<div style="color:#666; font-size:0.8em; text-align:center; padding:10px;">Pilote sans escadron rattaché.</div>';
+
+                // 4. Fleet Carrier
+                const { data: param } = await supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).single();
+                if (param) {
+                    if (param.carrier_stats_json) {
+                        const stats = param.carrier_stats_json;
+                        if (document.getElementById('m-fc-name')) {
+                            document.getElementById('m-fc-name').innerText = stats.name || "FLEET CARRIER";
+                            const fuel = stats.fuel !== undefined ? stats.fuel : 0;
+                            document.getElementById('m-tritium-depot-txt').innerText = `${fuel} / 1000 T`;
+                            document.getElementById('m-tritium-depot-bar').style.width = `${(fuel / 1000) * 100}%`;
+                        }
+                    }
+
+                    const upkeepHebdo = 25000000;
+                    const semainesRestantes = soldeF > 0 ? Math.floor(soldeF / upkeepHebdo) : 0;
+                    if (document.getElementById('m-fc-autonomie')) document.getElementById('m-fc-autonomie').innerText = `${semainesRestantes} SEMAINES`;
+
+                    const { data: tritData } = await supabaseApp.from('inventaire_fc').select('quantite').eq('marchandise', 'Tritium').eq('user_id', profilCommandant.user_id).maybeSingle();
+                    if (document.getElementById('m-tritium-soute-txt')) document.getElementById('m-tritium-soute-txt').innerText = `${fmt.format(tritData ? tritData.quantite : 0)} T`;
+                }
+
+                // 5. Effectif escadron (S'affiche dans l'onglet BGS)
+                if (profilCommandant.escadron_id) {
+                    const { data: membres } = await supabaseApp.from('profils_publics')
+                        .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id')
+                        .eq('escadron_id', profilCommandant.escadron_id)
+                        .eq('est_approuve', true)
+                        .order('cmdr_nom');
+
+                    if (membres && document.getElementById('m-squad-members-list')) {
+                        const countEl = document.getElementById('m-squad-count');
+                        if (countEl) countEl.innerText = `${membres.length} PILOTES`;
+                        let htmlMembres = '';
+
+                        membres.forEach(m => {
+                            let badges = [];
+                            if (m.est_amiral) badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">AMIRAL</span>');
+                            else if (m.est_officier) badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">OFFICIER</span>');
+                            else badges.push('<span style="color:#888; border:1px solid #444; padding:1px 5px; border-radius:3px; font-size:0.7em;">PILOTE</span>');
+
+                            if (m.est_diplomate) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">DIPLOMATE</span>');
+
+                            htmlMembres += `
+                                <div onclick="ouvrirProfilPiloteMobile('${m.user_id}')" style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.4); border: 1px solid #333; padding:8px 10px; border-radius:4px; font-size:0.85em; margin-bottom:6px; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='rgba(255,113,0,0.1)'; this.style.borderColor='var(--ed-orange)';" onmouseup="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='#333';">
+                                    <span style="color:#fff; font-weight:bold;">CMDR ${(m.cmdr_nom || 'RECRUE').toUpperCase()}</span>
+                                    <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
+                                        ${badges.join('')}
+                                    </div>
+                                </div>`;
+                        });
+
+                        document.getElementById('m-squad-members-list').innerHTML = htmlMembres;
+                    }
+                } else if (document.getElementById('m-squad-members-list')) {
+                    document.getElementById('m-squad-members-list').innerHTML = '<div style="color:#666; font-size:0.8em; text-align:center; padding:10px;">Pilote sans escadron rattaché.</div>';
+                }
+                
+            } catch (error) {
+                console.error("SYS.EDTEAM MOBILE : Erreur de rendu QG ->", error);
             }
         }
 
@@ -1734,16 +1972,33 @@
             supabaseApp.channel('mobile-transmissions')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
                     const msg = payload.new;
+                    let estConcerne = false;
+
                     if (canalActif === 'ESCADRON' && msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) {
-                        ajouterBulleMessage(msg);
+                        estConcerne = true;
                     } else if (canalActif === 'GLOBAL' && msg.canal === 'GLOBAL') {
-                        ajouterBulleMessage(msg);
+                        estConcerne = true;
                     } else if (canalActif === 'PRIVE' && msg.canal === 'PRIVE') {
                         const targetId = document.getElementById('m-select-destinataire').value;
                         if ((msg.expediteur_id === targetId && msg.destinataire_id === profilCommandant.user_id) ||
                             (msg.expediteur_id === profilCommandant.user_id && msg.destinataire_id === targetId)) {
-                            ajouterBulleMessage(msg);
+                            estConcerne = true;
                         }
+                    }
+
+                    // Si on est concerné par le message...
+                    if (estConcerne || (msg.canal === 'PRIVE' && msg.destinataire_id === profilCommandant.user_id)) {
+                        
+                        // Si l'onglet COMMS n'est pas ouvert, on fait clignoter le bouton du bas !
+                        const ongletCommsOuvert = document.getElementById('tab-comms').style.display === 'flex';
+                        if (!ongletCommsOuvert) {
+                            document.getElementById('nav-btn-comms').classList.add('alerte-nav-mobile');
+                        } else if (estConcerne) {
+                            ajouterBulleMessage(msg); // On l'affiche direct si on est dessus
+                        }
+                        
+                        // On joue le son de réception radar
+                        if (typeof playUI === 'function') playUI('success');
                     }
                 })
                 .subscribe();
@@ -1939,6 +2194,8 @@
                 if (domaine === 'trade') { monRang = profilCommandant.rang_commerce || 0; maProg = profilCommandant.prog_commerce || 0; }
                 if (domaine === 'explore') { monRang = profilCommandant.rang_explo || 0; maProg = profilCommandant.prog_explore || 0; }
                 if (domaine === 'exobio') { monRang = profilCommandant.rang_exobio || 0; maProg = profilCommandant.prog_exobio || 0; }
+                // NOUVELLE LIGNE AJOUTÉE POUR LE MERCENAIRE
+                if (domaine === 'mercenary') { monRang = profilCommandant.rang_mercenary || 0; maProg = profilCommandant.prog_mercenary || 0; }
             }
 
             const container = document.getElementById("grades-list-container");
@@ -2051,27 +2308,31 @@
                         const nom = m.cmdr_nom ? m.cmdr_nom.toUpperCase() : 'PILOTE';
                         const estMoi = m.user_id === profilCommandant.user_id;
 
-                        // Badge Amiral en lecture seule (géré uniquement par EDMC / le jeu)
+                        // Badge Amiral compact
                         const badgeAmiral = m.est_amiral 
-                            ? '<span style="color: var(--ed-red); border: 1px solid var(--ed-red); background: rgba(255,51,51,0.15); padding: 2px 6px; border-radius: 2px; font-size: 0.7em; font-weight: bold;">AMIRAL</span>' 
+                            ? '<span style="color: var(--ed-red); border: 1px solid var(--ed-red); background: rgba(255,51,51,0.15); padding: 2px 4px; border-radius: 2px; font-size: 0.65em; font-weight: bold;">AMIRAL</span>' 
                             : '';
 
-                        // Bouton révoquer l'accès (impossible sur son propre compte)
+                        // Bouton révoquer l'accès transformé en petite icône (impossible sur son propre compte)
                         const btnRevoquer = !estMoi 
-                            ? `<button style="background: rgba(255,51,51,0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 2px 6px; font-size: 0.7em; font-weight: bold; border-radius: 2px; margin-left: auto; cursor: pointer;" onclick="revoquerMembreDirecteur('${m.user_id}')">RÉVOQUER ACCÈS</button>` 
-                            : '';
+                            ? `<button style="background: rgba(255,51,51,0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 2px 6px; font-size: 0.8em; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--ed-red)'; this.style.color='#000';" onmouseout="this.style.background='rgba(255,51,51,0.1)'; this.style.color='var(--ed-red)';" onclick="revoquerMembreDirecteur('${m.user_id}')" title="Révoquer l'accès">✖</button>` 
+                            : `<div style="width: 24px;"></div>`; // Espace vide pour garder l'alignement sur sa propre ligne
 
+                        // Ligne unique avec flexbox et troncature du nom si l'écran est trop petit
                         html += `
-                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--ed-blue); padding: 8px 10px; border-radius: 0 4px 4px 0; display: flex; flex-direction: column; gap: 6px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: #fff; font-weight: bold; font-size: 0.85em;">CMDR ${nom} ${estMoi ? '<span style="color:var(--ed-blue); font-size:0.75em;">[VOUS]</span>' : ''}</span>
-                                    ${badgeAmiral}
+                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--ed-blue); padding: 6px 8px; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center; gap: 4px;">
+                                
+                                <div style="color: #fff; font-weight: bold; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;" title="CMDR ${nom}">
+                                    ${nom} ${estMoi ? '<span style="color:var(--ed-blue); font-size: 0.8em;">[VOUS]</span>' : ''}
                                 </div>
-                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                                    <button style="padding: 2px 6px; font-size: 0.7em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_officier ? 'var(--ed-green)' : '#444'}; background: ${m.est_officier ? 'rgba(0,255,102,0.2)' : 'transparent'}; color: ${m.est_officier ? 'var(--ed-green)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_officier', ${!m.est_officier})">OFFICIER</button>
-                                    <button style="padding: 2px 6px; font-size: 0.7em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_diplomate ? 'var(--ed-blue)' : '#444'}; background: ${m.est_diplomate ? 'rgba(0,240,255,0.2)' : 'transparent'}; color: ${m.est_diplomate ? 'var(--ed-blue)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_diplomate', ${!m.est_diplomate})">DIPLOMATE</button>
+                                
+                                <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
+                                    ${badgeAmiral}
+                                    <button style="padding: 2px 4px; font-size: 0.65em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_officier ? 'var(--ed-green)' : '#444'}; background: ${m.est_officier ? 'rgba(0,255,102,0.2)' : 'transparent'}; color: ${m.est_officier ? 'var(--ed-green)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_officier', ${!m.est_officier})">OFFICIER</button>
+                                    <button style="padding: 2px 4px; font-size: 0.65em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_diplomate ? 'var(--ed-blue)' : '#444'}; background: ${m.est_diplomate ? 'rgba(0,240,255,0.2)' : 'transparent'}; color: ${m.est_diplomate ? 'var(--ed-blue)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_diplomate', ${!m.est_diplomate})">DIPLOMATE</button>
                                     ${btnRevoquer}
                                 </div>
+                                
                             </div>`;
                     });
                     cont.innerHTML = html;
@@ -2392,6 +2653,390 @@
             if (e && e.target.id !== 'modal-info-tick-comms' && !e.target.innerText.includes('✕')) return;
             if (typeof sonClic === 'function') sonClic();
             document.getElementById('modal-info-tick-comms').style.display = 'none';
+        };
+
+        // ==========================================
+        // GALNET NEWS (API FRONTIER)
+        // ==========================================
+        let cacheGalnetArticle = null;
+        async function chargerGalnetMobile() {
+            try {
+                const response = await fetch('https://cms.zaonce.net/fr-FR/jsonapi/node/galnet_article?sort=-created&page[limit]=1');
+                const payload = await response.json();
+                if (payload && payload.data && payload.data.length > 0) {
+                    const article = payload.data[0].attributes;
+                    cacheGalnetArticle = { title: article.title, date: article.created, body: article.body ? article.body.value : "Contenu indisponible." };
+                    const d = new Date(article.created); d.setFullYear(d.getFullYear() + 1286);
+                    document.getElementById('m-galnet-date').innerText = "Édition : " + d.toLocaleDateString('fr-FR');
+                }
+            } catch (e) { document.getElementById('m-galnet-date').innerText = "Erreur de liaison."; }
+        }
+
+        function ouvrirGalnetMobile() {
+            if (!cacheGalnetArticle) return;
+            sonClic();
+            document.getElementById('m-galnet-title-modal').innerText = cacheGalnetArticle.title;
+            const d = new Date(cacheGalnetArticle.date); d.setFullYear(d.getFullYear() + 1286);
+            document.getElementById('m-galnet-date-modal').innerText = d.toLocaleDateString('fr-FR');
+            document.getElementById('m-galnet-body-modal').innerHTML = cacheGalnetArticle.body;
+            document.getElementById('modal-galnet').style.display = 'flex';
+        }
+
+        // ==========================================
+        // GAZETTES & ARCHIVES
+        // ==========================================
+        let cacheGazettesMobile = [];
+        async function chargerGazetteListMobile() {
+            if (!profilCommandant) return;
+            try {
+                const { data } = await supabaseApp.from('gazette_hebdo').select('*').eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT').order('created_at', { ascending: false });
+
+                if (data && data.length > 0) {
+                    cacheGazettesMobile = data;
+                    const d = new Date(data[0].created_at).toLocaleDateString('fr-FR');
+                    document.getElementById('m-gazette-date').innerText = "> DERNIÈRE ÉDITION : " + d;
+                    
+                    const select = document.getElementById('m-gazette-selector');
+                    select.innerHTML = '';
+                    data.forEach((g, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = g.id;
+                        opt.innerText = (i === 0 ? "🔴 " : "📜 ") + new Date(g.created_at).toLocaleDateString('fr-FR') + " : " + g.titre.substring(0, 25) + "...";
+                        select.appendChild(opt);
+                    });
+                    afficherGazetteSelectionnee(data[0].id); // Précharge la 1ère
+                } else {
+                    document.getElementById('m-gazette-date').innerText = "Aucune archive disponible.";
+                    document.getElementById('m-gazette-selector').innerHTML = '<option>Archives vides</option>';
+                }
+            } catch(e) {}
+        }
+
+        window.afficherGazetteSelectionnee = function(id) {
+            const article = cacheGazettesMobile.find(g => String(g.id) === String(id));
+            if (!article) return;
+            document.getElementById('m-gazette-title-modal').innerText = article.titre;
+            document.getElementById('m-gazette-body-modal').innerHTML = article.contenu;
+        };
+
+        function ouvrirGazetteMobile() { sonClic(); document.getElementById('modal-gazette').style.display = 'flex'; }
+
+        // ==========================================
+        // REGISTRE TACTIQUE (CIBLES VIP)
+        // ==========================================
+        async function chargerRegistreTactiqueMobile() {
+            if (!profilCommandant || !profilCommandant.escadron_id) return;
+            const cont = document.getElementById('m-registre-modal-content');
+            const countLabel = document.getElementById('m-registre-count');
+            
+            try {
+                const { data } = await supabaseApp.from('registre_tactique')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .eq('est_valide', true)
+                    .order('created_at', { ascending: false });
+
+                if (data && data.length > 0) {
+                    if (countLabel) countLabel.innerText = `${data.length} CIBLE(S) ENREGISTRÉE(S)`;
+                    
+                    const kos = data.filter(c => c.niveau_menace === 'KOS');
+                    const suspects = data.filter(c => c.niveau_menace === 'SUSPECT');
+                    const allies = data.filter(c => c.niveau_menace === 'ALLIE');
+
+                    const buildSection = (titre, liste, couleur) => {
+                        if (liste.length === 0) return '';
+                        let html = `
+                        <div style="margin-bottom: 10px;">
+                            <div style="color: ${couleur}; font-weight: bold; font-size: 0.9em; letter-spacing: 1px; border-bottom: 1px solid ${couleur}; padding-bottom: 4px; margin-bottom: 8px;">
+                                ${titre} [ ${liste.length} ]
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">`;
+                        
+                        liste.forEach(c => {
+                            const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
+                            let label = c.niveau_menace === 'KOS' ? 'K.O.S' : (c.niveau_menace === 'SUSPECT' ? 'SUSPECT' : 'ALLIÉ');
+                            
+                            html += `
+                            <div style="background: rgba(0,0,0,0.5); border-left: 3px solid ${couleur}; padding: 10px; border-radius: 0 4px 4px 0; cursor: pointer;" 
+                                 onclick="alert('DOSSIER TACTIQUE :\\n\\nCIBLE : CMDR ${c.cmdr_cible}\\nSTATUT : ${label}\\nAUTEUR : CMDR ${c.auteur_nom}\\n\\nRAPPORT : ${txtRapport}')">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="color: #fff; font-weight: bold; font-size: 0.95em;">CMDR ${c.cmdr_cible}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8em;">
+                                    <span style="color: #888;">SYS: ${c.systeme_rencontre}</span>
+                                    <span style="color: ${couleur}; font-style: italic;">[ LIRE LE RAPPORT ]</span>
+                                </div>
+                            </div>`;
+                        });
+                        html += `</div></div>`;
+                        return html;
+                    };
+
+                    cont.innerHTML = 
+                        buildSection('🔴 K.O.S (HOSTILES)', kos, '#FF3333') +
+                        buildSection('🟠 SUSPECTS (À SURVEILLER)', suspects, 'var(--ed-orange)') +
+                        buildSection('🟢 ALLIÉS VIP (À PROTÉGER)', allies, '#00FF66');
+
+                } else {
+                    if (countLabel) countLabel.innerText = "Aucune cible enregistrée.";
+                    cont.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Le registre est vierge.</div>';
+                }
+            } catch(e) { 
+                if (countLabel) countLabel.innerText = "Erreur de liaison.";
+                cont.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 10px;">Erreur de liaison tactique.</div>'; 
+            }
+        }
+
+        function ouvrirRegistreMobile() {
+            if (typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-registre-tactique').style.display = 'flex';
+        }
+
+        window.ouvrirProfilPiloteMobile = async function(userId) {
+            if (typeof sonClic === 'function') sonClic();
+            
+            try {
+                // 1. Récupération globale (Profil + BGS + Réputations)
+                const escadronCible = profilCommandant.escadron_id || 'ISS';
+                
+                const [resProfil, resOrdres, resEfforts, resObj] = await Promise.all([
+                    supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single(),
+                    supabaseApp.from('ordres_bgs').select('id').eq('escadron_id', escadronCible),
+                    supabaseApp.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action'),
+                    supabaseApp.from('objectifs_reputation').select('faction_nom').eq('escadron_id', escadronCible)
+                ]);
+                
+                const profil = resProfil.data;
+                if (!profil) { alert("Erreur: Profil indisponible."); return; }
+
+                // --- 2. EN-TÊTE (Nom et Badges) ---
+                document.getElementById('m-modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : 'INCONNU');
+                let badges = '';
+                if (profil.est_amiral) badges += '<span style="background: rgba(255,51,51,0.1); color: #FF3333; border: 1px solid #FF3333; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
+                else if (profil.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER BGS</span>';
+                else badges += '<span style="background: rgba(255,113,0,0.1); color: var(--ed-orange); border: 1px solid var(--ed-orange); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">PILOTE</span>';
+                if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
+                document.getElementById('m-modal-cmdr-roles').innerHTML = badges;
+
+                // --- 3. CALCUL DU BGS ET DES SPÉCIALISTES ---
+                let totalSquad = 0; let totalPilote = 0; let opsCount = 0;
+                let titresHtml = '<div style="color: #666; font-style: italic; font-size: 0.8em; text-align: center;">Aucune distinction de spécialiste.</div>';
+
+                if (resOrdres.data && resEfforts.data) {
+                    const ordreIds = resOrdres.data.map(o => String(o.id));
+                    const effortsEscadron = resEfforts.data.filter(e => ordreIds.includes(String(e.ordre_id)));
+
+                    const uniqueOps = new Set();
+                    const scoresSpecialistes = {};
+
+                    effortsEscadron.forEach(e => {
+                        const val = Math.abs(Number(e.valeur) || 0);
+                        let pts = val;
+                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
+
+                        totalSquad += pts;
+                        const uid = String(e.user_id);
+                        if (uid === String(userId)) {
+                            totalPilote += pts;
+                            uniqueOps.add(e.ordre_id);
+                        }
+
+                        if (!scoresSpecialistes[uid]) scoresSpecialistes[uid] = { log: 0, eco: 0, sec: 0, sci: 0 };
+                        if (e.type_action === 'MISSIONS' || e.type_action === 'ECHECS') scoresSpecialistes[uid].log += pts;
+                        else if (e.type_action === 'ECONOMIE' || e.type_action === 'CONTREBANDE') scoresSpecialistes[uid].eco += pts;
+                        else if (e.type_action === 'SECURITE' || e.type_action === 'MEURTRES') scoresSpecialistes[uid].sec += pts;
+                        else if (e.type_action === 'SCIENCE') scoresSpecialistes[uid].sci += pts;
+                    });
+
+                    opsCount = uniqueOps.size;
+
+                    const trouverMeilleur = (categorie) => {
+                        let max = 0; let topPilote = null;
+                        for (const [uid, scores] of Object.entries(scoresSpecialistes)) {
+                            if (scores[categorie] > max) { max = scores[categorie]; topPilote = uid; }
+                        }
+                        return topPilote;
+                    };
+
+                    const N1_Sec = trouverMeilleur('sec');
+                    const N1_Log = trouverMeilleur('log');
+                    const N1_Eco = trouverMeilleur('eco');
+                    const N1_Sci = trouverMeilleur('sci');
+
+                    let tempTitres = '';
+                    const addTitre = (icon, nom, color) => {
+                        tempTitres += `<div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${color}; padding: 6px 10px; font-size: 0.75em; color: ${color}; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 0 4px 4px 0; margin-bottom: 4px;"><span>${icon} ${nom}</span><span style="font-size: 1.2em;">🏆</span></div>`;
+                    };
+
+                    if (String(userId) === String(N1_Sec)) addTitre('🛡️', 'LE FER DE LANCE (SÉCURITÉ)', 'var(--ed-blue)');
+                    if (String(userId) === String(N1_Log)) addTitre('📦', 'MAÎTRE LOGISTICIEN (MISSIONS)', 'var(--ed-orange)');
+                    if (String(userId) === String(N1_Eco)) addTitre('💰', 'LE MAGNAT (ÉCONOMIE)', '#00FF66');
+                    if (String(userId) === String(N1_Sci)) addTitre('🔬', 'L\'ÉCLAIREUR (SCIENCE)', '#B026FF');
+
+                    if (tempTitres !== '') titresHtml = tempTitres;
+                }
+
+                // Affichage Impact BGS et Titres
+                const partPct = totalSquad > 0 ? ((totalPilote / totalSquad) * 100).toFixed(1) : 0;
+                document.getElementById('m-modal-bgs-part').innerText = partPct + '%';
+                document.getElementById('m-modal-bgs-circle').style.background = `conic-gradient(var(--ed-orange) 0% ${partPct}%, rgba(255,113,0,0.1) ${partPct}% 100%)`;
+                document.getElementById('m-modal-ops-count').innerText = opsCount;
+                document.getElementById('m-modal-specialiste-titres').innerHTML = titresHtml;
+
+                // --- 4. RANGS DE LA FÉDÉRATION ---
+                const formatRank = (rankArray, rankVal, progVal) => {
+                    const rName = rankArray[rankVal || 0] || 'INCONNU';
+                    return `${rName} <span style="color:var(--ed-orange); font-size:0.85em; margin-left:5px;">(${progVal || 0}%)</span>`;
+                };
+
+                document.getElementById('m-modal-rank-combat').innerHTML = formatRank(TABLES_ED_RANGS.combat, profil.rang_combat, profil.prog_combat);
+                document.getElementById('m-modal-rank-trade').innerHTML = formatRank(TABLES_ED_RANGS.trade, profil.rang_commerce, profil.prog_commerce);
+                document.getElementById('m-modal-rank-explo').innerHTML = formatRank(TABLES_ED_RANGS.explore, profil.rang_explo, profil.prog_explore);
+                document.getElementById('m-modal-rank-exobio').innerHTML = formatRank(TABLES_ED_RANGS.exobiologist, profil.rang_exobio, profil.prog_exobio);
+                document.getElementById('m-modal-rank-merc').innerHTML = formatRank(TABLES_ED_RANGS.mercenary, profil.rang_mercenary, profil.prog_mercenary);
+                document.getElementById('m-modal-rank-fed').innerHTML = profil.rang_fed > 0 ? formatRank(TABLES_ED_RANGS.federation, profil.rang_fed, profil.prog_fed) : '<span style="color:#666;">AUCUN</span>';
+                document.getElementById('m-modal-rank-emp').innerHTML = profil.rang_emp > 0 ? formatRank(TABLES_ED_RANGS.empire, profil.rang_emp, profil.prog_emp) : '<span style="color:#666;">AUCUN</span>';
+
+                // --- 5. CASIER LÉGAL ---
+                const noto = profil.notoriete || 0;
+                const casierContainer = document.getElementById('m-modal-casier-container');
+                const notorietyText = document.getElementById('m-modal-notoriety');
+                if (noto > 0) {
+                    casierContainer.style.background = 'rgba(255, 51, 51, 0.1)';
+                    casierContainer.style.borderColor = '#FF3333';
+                    notorietyText.innerHTML = `<span style="color: #FF3333; text-shadow: 0 0 5px rgba(255,51,51,0.5);">RECHERCHÉ (${noto})</span>`;
+                } else {
+                    casierContainer.style.background = 'rgba(0, 255, 102, 0.05)';
+                    casierContainer.style.borderColor = '#00FF66';
+                    notorietyText.innerHTML = `<span style="color: #00FF66;">CASIER VIERGE</span>`;
+                }
+
+                // --- 6. RÉPUTATIONS ESCADRON ---
+                const conteneurReps = document.getElementById('m-modal-reputations-container');
+                const objectifs = resObj.data || [];
+
+                if (objectifs.length > 0 && conteneurReps) {
+                    let repHtml = `
+                    <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
+                        <div style="color: var(--ed-blue); font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; font-size: 0.9em;">> REPUTATIONS (OBJECTIFS)</div>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">`;
+
+                    const reps = profil.reputations || {};
+                    const repsMajuscules = {};
+                    for (let key in reps) repsMajuscules[key.toUpperCase()] = reps[key];
+
+                    objectifs.forEach(obj => {
+                        const val = repsMajuscules[obj.faction_nom.toUpperCase()];
+                        let color = '#555'; let formatVal = '---'; let barHtml = '';
+
+                        if (val !== undefined) {
+                            formatVal = val.toFixed(1) + '%';
+                            const paliers = [
+                                { min: -100, max: -90, nom: 'HOSTILE', col: '#FF3333' },
+                                { min: -90, max: -35, nom: 'INAMICAL', col: 'var(--ed-orange)' },
+                                { min: -35, max: 4, nom: 'NEUTRE', col: '#FFFFFF' },
+                                { min: 4, max: 35, nom: 'CORDIAL', col: '#A8FF00' },
+                                { min: 35, max: 90, nom: 'AMICAL', col: '#00FF66' },
+                                { min: 90, max: 100, nom: 'ALLIÉ', col: '#00F0FF' }
+                            ];
+
+                            let palierActuelIdx = 0;
+                            for (let i = 0; i < paliers.length; i++) {
+                                if (val >= paliers[i].min && val <= paliers[i].max) { palierActuelIdx = i; color = paliers[i].col; break; }
+                            }
+                            if (val > 100) { palierActuelIdx = 5; color = paliers[5].col; }
+                            if (val < -100) { palierActuelIdx = 0; color = paliers[0].col; }
+
+                            let rectsHtml = '';
+                            paliers.forEach((p, index) => {
+                                let fillPct = 0;
+                                if (val >= p.max) fillPct = 100;
+                                else if (val > p.min && val < p.max) fillPct = ((val - p.min) / (p.max - p.min)) * 100;
+                                const isCurrent = (index === palierActuelIdx);
+
+                                rectsHtml += `
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.8); border: 1px solid ${isCurrent ? p.col : '#333'}; border-radius: 2px; overflow: hidden; position: relative;">
+                                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${fillPct}%; background: ${p.col};"></div>
+                                    </div>
+                                    <div style="font-size: 0.55em; text-align: center; font-weight: ${isCurrent ? 'bold' : 'normal'}; color: ${isCurrent ? p.col : '#666'};">
+                                        ${p.nom.substring(0,3)}
+                                    </div>
+                                </div>`;
+                            });
+                            barHtml = `<div style="display: flex; width: 100%; gap: 3px; margin-top: 8px;">${rectsHtml}</div>`;
+                        }
+
+                        repHtml += `
+                        <div style="background: rgba(255,255,255,0.02); border-left: 3px solid ${color}; padding: 10px; border-radius: 0 4px 4px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #ccc; font-size: 0.85em; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${obj.faction_nom}</span>
+                                <span style="color: ${color}; font-weight: bold; font-size: 0.9em;">${formatVal}</span>
+                            </div>
+                            ${barHtml}
+                        </div>`;
+                    });
+                    repHtml += `</div></div>`;
+                    conteneurReps.innerHTML = repHtml;
+                    conteneurReps.style.display = 'block';
+                } else if (conteneurReps) {
+                    conteneurReps.style.display = 'none';
+                }
+
+                // 7. Ouverture Modale
+                document.getElementById('modal-profil-pilote').style.display = 'flex';
+
+            } catch (err) {
+                console.error("Erreur ouverture profil mobile:", err);
+            }
+        };
+
+        window.ouvrirModalLegalMobile = function() {
+            if (typeof sonClic === 'function') sonClic();
+            const legalBox = document.getElementById("m-legal-status-box");
+            if (!legalBox) return;
+            
+            const notoriete = parseInt(legalBox.dataset.notoriety) || 0;
+            
+            // Éléments de la modale
+            const modal = document.getElementById('modal-legal-status');
+            const card = document.getElementById('modal-legal-card');
+            const header = document.getElementById('modal-legal-header');
+            const title = document.getElementById('modal-legal-title');
+            const closeBtn = document.getElementById('modal-legal-close');
+            const notorietyText = document.getElementById('modal-legal-notoriety');
+            const descText = document.getElementById('modal-legal-desc');
+            const okBtn = document.getElementById('modal-legal-btn');
+            
+            // Couleurs par défaut (Sain)
+            let color = "#00FF66";
+            let bgHeader = "rgba(0,255,102,0.1)";
+            let status = "SAIN";
+            let desc = "Aucune infraction grave récente n'est enregistrée.<br><br>Vous avez un accès total aux services de la Fédération des Pilotes et des spatioports locaux.";
+            
+            // Couleurs de crime (Recherché)
+            if (notoriete > 0) {
+                color = "#FF3333";
+                bgHeader = "rgba(255,51,51,0.1)";
+                status = "SOUS SURVEILLANCE";
+                desc = "La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br><br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br><br>Tant qu'elle n'est pas à 0, vous ne pouvez pas utiliser les terminaux de l'autorité pour payer vos amendes.";
+            }
+            
+            // Application du style
+            card.style.borderColor = color;
+            header.style.background = bgHeader;
+            header.style.borderBottomColor = color;
+            title.style.color = color;
+            title.innerHTML = `⚖️ STATUT LÉGAL : ${status}`;
+            closeBtn.style.color = color;
+            okBtn.style.color = color;
+            okBtn.style.borderColor = color;
+            
+            notorietyText.style.color = color;
+            notorietyText.innerHTML = `NIVEAU DE NOTORIÉTÉ : <strong>${notoriete}</strong>`;
+            descText.innerHTML = desc;
+            
+            modal.style.display = 'flex';
         };
 
     </script>
