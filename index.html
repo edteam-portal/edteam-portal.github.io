@@ -2762,16 +2762,18 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">PILOTE</span>`;
                     }
                     
-                    // Accréditations supplémentaires
-                    if (profilCommandant.est_officier) {
-                        rolesHtml += `<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); ${styleBase}" 
-                            onmouseenter="showHoloTooltip(event, 'GESTION TACTIQUE BGS<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Autorisé à publier les Ordres de l\\'Amirauté<br>et à définir les cibles BGS.</span>', '#00FF66')" 
-                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">OFFICIER BGS</span>`;
-                    }
-                    if (profilCommandant.est_diplomate) {
-                        rolesHtml += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); ${styleBase}" 
-                            onmouseenter="showHoloTooltip(event, 'RELATIONS EXTÉRIEURES<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Administre la liste noire (KOS)<br>et les traités avec les alliés.</span>', 'var(--ed-blue)')" 
-                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">DIPLOMATE</span>`;
+                    // Accréditations supplémentaires (Cachées pour l'Amiral)
+                    if (!profilCommandant.est_amiral) {
+                        if (profilCommandant.est_officier) {
+                            rolesHtml += `<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); ${styleBase}" 
+                                onmouseenter="showHoloTooltip(event, 'GESTION TACTIQUE BGS<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Autorisé à publier les Ordres de l\\'Amirauté<br>et à définir les cibles BGS.</span>', '#00FF66')" 
+                                onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">OFFICIER BGS</span>`;
+                        }
+                        if (profilCommandant.est_diplomate) {
+                            rolesHtml += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); ${styleBase}" 
+                                onmouseenter="showHoloTooltip(event, 'RELATIONS EXTÉRIEURES<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Administre la liste noire (KOS)<br>et les traités avec les alliés.</span>', 'var(--ed-blue)')" 
+                                onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">DIPLOMATE</span>`;
+                        }
                     }
                     
                     rolesDiv.innerHTML = rolesHtml;

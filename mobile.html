@@ -1350,11 +1350,19 @@
 
                         membres.forEach(m => {
                             let badges = [];
-                            if (m.est_amiral) badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">AMIRAL</span>');
-                            else if (m.est_officier) badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">OFFICIER</span>');
-                            else badges.push('<span style="color:#888; border:1px solid #444; padding:1px 5px; border-radius:3px; font-size:0.7em;">PILOTE</span>');
-
-                            if (m.est_diplomate) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">DIPLOMATE</span>');
+                            if (m.est_amiral) {
+                                badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">AMIRAL</span>');
+                                // On n'ajoute ni l'officier ni le diplomate si c'est un Amiral
+                            } else {
+                                if (m.est_officier) {
+                                    badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">OFFICIER</span>');
+                                } else {
+                                    badges.push('<span style="color:#888; border:1px solid #444; padding:1px 5px; border-radius:3px; font-size:0.7em;">PILOTE</span>');
+                                }
+                                if (m.est_diplomate) {
+                                    badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">DIPLOMATE</span>');
+                                }
+                            }
 
                             htmlMembres += `
                                 <div onclick="ouvrirProfilPiloteMobile('${m.user_id}')" style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.4); border: 1px solid #333; padding:8px 10px; border-radius:4px; font-size:0.85em; margin-bottom:6px; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='rgba(255,113,0,0.1)'; this.style.borderColor='var(--ed-orange)';" onmouseup="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='#333';">
@@ -2812,10 +2820,14 @@
                 // --- 2. EN-TÊTE (Nom et Badges) ---
                 document.getElementById('m-modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : 'INCONNU');
                 let badges = '';
-                if (profil.est_amiral) badges += '<span style="background: rgba(255,51,51,0.1); color: #FF3333; border: 1px solid #FF3333; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
-                else if (profil.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER BGS</span>';
-                else badges += '<span style="background: rgba(255,113,0,0.1); color: var(--ed-orange); border: 1px solid var(--ed-orange); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">PILOTE</span>';
-                if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
+                if (profil.est_amiral) {
+                    badges += '<span style="background: rgba(255,51,51,0.1); color: #FF3333; border: 1px solid #FF3333; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
+                } else {
+                    if (profil.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER BGS</span>';
+                    else badges += '<span style="background: rgba(255,113,0,0.1); color: var(--ed-orange); border: 1px solid var(--ed-orange); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">PILOTE</span>';
+                    
+                    if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
+                }
                 document.getElementById('m-modal-cmdr-roles').innerHTML = badges;
 
                 // --- 3. CALCUL DU BGS ET DES SPÉCIALISTES ---
