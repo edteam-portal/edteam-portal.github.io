@@ -1304,8 +1304,10 @@
             const color = p.est_amiral ? '#FF3333' : 'var(--ed-orange)';
             
             let badges = '';
-            if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
-            if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
+            if (!p.est_amiral) {
+                if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
+                if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
+            }
 
             const nomPilote = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
 
@@ -1463,9 +1465,12 @@
                 document.getElementById('modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.7em;">[ EN ATTENTE EDMC ]</span>');
                 
                 let badges = '';
-                if (profil.est_amiral) badges += '<span style="background: rgba(255,51,51,0.1); color: #FF3333; border: 1px solid #FF3333; font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">AMIRAL</span>';
-                if (profil.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">OFFICIER BGS</span>';
-                if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">DIPLOMATE</span>';
+                if (profil.est_amiral) {
+                    badges += '<span style="background: rgba(255,51,51,0.1); color: #FF3333; border: 1px solid #FF3333; font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">AMIRAL</span>';
+                } else {
+                    if (profil.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">OFFICIER BGS</span>';
+                    if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 3px;">DIPLOMATE</span>';
+                }
                 document.getElementById('modal-cmdr-roles').innerHTML = badges;
 
                 const formatRank = (rankArray, rankVal, progVal) => {
