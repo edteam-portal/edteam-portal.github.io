@@ -1852,10 +1852,19 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
                 }
 
-                // AFFICHAGE DU BGS (Si le pilote fait partie d'un escadron)
+                // AFFICHAGE DU BGS (Si le pilote fait partie d'un escadron ET n'est pas recrue)
                 if (data.escadron_id) {
                     const navBgs = document.getElementById('nav-bgs-factions');
-                    if (navBgs) navBgs.style.display = 'flex';
+                    const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
+                    
+                    if (navBgs) {
+                        // Si c'est une recrue (rang 4) et qu'il n'est pas officier manuellement, on cache !
+                        if (rangJeu === 4 && !data.est_amiral && !data.est_officier) {
+                            navBgs.style.display = 'none';
+                        } else {
+                            navBgs.style.display = 'flex';
+                        }
+                    }
                 }
                 
                 // 1. On cache l'écran de connexion (ou Cacher l'authentification)
@@ -2115,10 +2124,16 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // A. Le navigateur gère uniquement la télémétrie locale
                 processLatest('HEARTBEAT', item => { paramUpdates.last_heartbeat = parseInt(item.station_name); paramModifie = true; });
                 processLatest('PARAM_UPDATE', item => { try { Object.assign(paramUpdates, JSON.parse(item.station_name)); paramModifie = true; } catch(e){} });
-
+                processLatest('SQUADRON_INFO', item => { 
+                    try { 
+                        const sq = JSON.parse(item.station_name); 
+                        localStorage.setItem('edteam_rang_jeu', sq.rank);
+                    } catch(e){} 
+                });
+                
                 // B. Profil & Rangs : L'Automate SQL a déjà fait le travail en base.
                 const ciblesPurger = [
-                    'SHIP_BALANCE', 'FC_BALANCE', 'CMDR_NAME', 'SQUADRON_INFO', 
+                    'SHIP_BALANCE', 'FC_BALANCE', 'CMDR_NAME', 
                     'QG_POWERPLAY', 'QG_SHIPS_VALUE', 'QG_REBUY', 'QG_WEALTH', 
                     'QG_RANK_COMBAT', 'QG_RANK_TRADE', 'QG_RANK_EXPLOR', 'QG_RANK_FEDERA', 'QG_RANK_EMPIRE', 'QG_RANK_EXOBIO', 'QG_RANK_MERCEN', 'QG_RANK_SOLDIE',
                     'QG_PROG_COMBAT', 'QG_PROG_TRADE', 'QG_PROG_EXPLOR', 'QG_PROG_FEDERA', 'QG_PROG_EMPIRE', 'QG_PROG_EXOBIO', 'QG_PROG_MERCEN', 'QG_PROG_SOLDIE',
@@ -2752,10 +2767,16 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     const styleBase = "padding: 6px 15px; border-radius: 4px; font-size: 1.15em; letter-spacing: 1px; font-weight: bold; cursor: help; box-shadow: 0 0 10px currentColor;";
                     
                     // Grade Principal
+                    const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
+
                     if (profilCommandant.est_amiral) {
                         rolesHtml += `<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); ${styleBase}" 
                             onmouseenter="showHoloTooltip(event, 'COMMANDANT SUPRÊME<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Gère les effectifs, accrédite les officiers<br>et administre l\\'escadron.</span>', '#FF3333')" 
                             onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">AMIRAL</span>`;
+                    } else if (rangJeu === 4) {
+                        rolesHtml += `<span style="color: #ccc; border: 1px solid #666; background: rgba(255,255,255,0.05); ${styleBase}" 
+                            onmouseenter="showHoloTooltip(event, 'RECRUE<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Accès limité.<br>Le panneau tactique BGS est verrouillé.</span>', '#ccc')" 
+                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">RECRUE</span>`;
                     } else {
                         rolesHtml += `<span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); ${styleBase}" 
                             onmouseenter="showHoloTooltip(event, 'MEMBRE ACTIF<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Accès aux opérations de l\\'escadron<br>et au réseau de communication.</span>', 'var(--ed-orange)')" 
@@ -3582,7 +3603,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 if (nomCmdr) { elCmdr.innerText = nomCmdr.toUpperCase(); elCmdr.style.color = "#00FF66"; }
                 if (squadInfo) {
                     // La vraie hiérarchie Elite Dangerous (0 = Boss, 4 = Recrue)
-                    const rankText = ["Amiral", "Officier", "Officier", "Pilote", "Pilote"][squadInfo.rank] || "Pilote";
+                    const rankText = ["Amiral", "Officier", "Officier", "Pilote", "Recrue"][squadInfo.rank] || "Pilote";
                     elSquad.innerText = `${squadInfo.nom.toUpperCase()} (${rankText})`;
                     elSquad.style.color = "#00FF66";
                 } else if (nomCmdr) {

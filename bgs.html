@@ -1781,6 +1781,15 @@
                 window.location.href = 'index.html'; 
                 return; 
             }
+
+            // SÉCURITÉ ANTI-RECRUE
+            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
+            const { data: profData } = await supabaseApp.from('profils').select('est_amiral, est_officier').eq('user_id', session.user.id).single();
+            
+            if (rangJeu === 4 && (!profData || (!profData.est_amiral && !profData.est_officier))) {
+                window.location.href = 'index.html'; 
+                return; 
+            }
             
             // 2. VÉRIFICATION DU PROFIL EN BASE DE DONNÉES
             const { data } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
@@ -2570,7 +2579,7 @@
                         const safeBriefing = briefingSysteme.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
                         btnBriefingHTML = `
                             <div style="cursor: help; background: ${colorThemeBg}; border: 1px solid ${colorTheme}; padding: 6px 15px; border-radius: 4px; color: ${colorTheme}; font-weight: bold; font-size: 0.85em; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: 0.2s;"
-                                 onmouseenter="if(typeof showHoloTooltip==='function') showHoloTooltip(event, '<div style=\\'white-space: normal; max-width: 400px; line-height: 1.5;\\'><strong style=\\'color: ${colorTheme}; font-size: 1.1em;\\'>> TRANSMISSION DE L\\'AMIRAUTÉ</strong><br><br><span style=\\'color: #ccc; font-style: italic; font-size: 0.95em;\\'>&quot;${safeBriefing}&quot;</span></div>', '${colorTheme}')"
+                                 onmouseenter="if(typeof showHoloTooltip==='function') showHoloTooltip(event, '<div style=\\'white-space: normal; max-width: 400px; line-height: 1.5;\\'><strong style=\\'color: ${colorTheme}; font-size: 1.1em;\\'>> TRANSMISSION SECURISEE</strong><br><br><span style=\\'color: #ccc; font-style: italic; font-size: 0.95em;\\'>&quot;${safeBriefing}&quot;</span></div>', '${colorTheme}')"
                                  onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()"
                                  onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)"
                                  onmouseover="this.style.background='${colorTheme}'; this.style.color='#000'; this.style.boxShadow='0 0 10px ${colorTheme}';"
