@@ -181,7 +181,7 @@
                     <span id="sas-squad-name" style="color: #FF3333; font-weight: bold;">RECHERCHE DU SIGNAL...</span>
                 </div>
 
-                <button id="btn-sas-demande" class="fs-auth-btn" style="border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5;" disabled onclick="soumettreDossier()">ENVOYER LA DEMANDE D'ACCES</button>
+                <button id="btn-sas-demande" class="fs-auth-btn" style="border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5;" disabled onclick="soumettreDossier()"> CERTIFIER L'IDENTITÉ NAVALE</button>
 
                 <!-- SECTION AIDE (RÉPARÉE) -->
                 <div id="sas-diagnostics-section" style="margin-top: 35px; border-top: 1px solid rgba(255,113,0,0.3); padding-top: 20px;">
@@ -2124,10 +2124,24 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // A. Le navigateur gère uniquement la télémétrie locale
                 processLatest('HEARTBEAT', item => { paramUpdates.last_heartbeat = parseInt(item.station_name); paramModifie = true; });
                 processLatest('PARAM_UPDATE', item => { try { Object.assign(paramUpdates, JSON.parse(item.station_name)); paramModifie = true; } catch(e){} });
-                processLatest('SQUADRON_INFO', item => { 
+                // Sauvegarde du Rang et CONTRÔLE D'INTÉGRITÉ
+                processLatest('SQUADRON_INFO', async (item) => { 
                     try { 
                         const sq = JSON.parse(item.station_name); 
                         localStorage.setItem('edteam_rang_jeu', sq.rank);
+
+                        // Si le joueur est validé, mais que l'escadron en jeu est différent de sa fiche :
+                        if (profilCommandant && profilCommandant.escadron_id && profilCommandant.est_approuve) {
+                            if (sq.nom.toUpperCase() !== profilCommandant.escadron_id.toUpperCase()) {
+                                
+                                // AUTO-DESTRUCTION IMMÉDIATE
+                                await supabaseApp.rpc('purger_utilisateur', { target_user_id: profilCommandant.user_id });
+                                await supabaseApp.auth.signOut();
+                                
+                                alert("⚠️ ALERTE INTRUSION : Vos données navales ne correspondent plus à l'escadron accrédité. Accès révoqué définitivement.");
+                                window.location.reload();
+                            }
+                        }
                     } catch(e){} 
                 });
                 
@@ -3602,16 +3616,16 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                 if (nomCmdr) { elCmdr.innerText = nomCmdr.toUpperCase(); elCmdr.style.color = "#00FF66"; }
                 if (squadInfo) {
-                    // La vraie hiérarchie Elite Dangerous (0 = Boss, 4 = Recrue)
                     const rankText = ["Amiral", "Officier", "Officier", "Pilote", "Recrue"][squadInfo.rank] || "Pilote";
                     elSquad.innerText = `${squadInfo.nom.toUpperCase()} (${rankText})`;
                     elSquad.style.color = "#00FF66";
                 } else if (nomCmdr) {
                     elSquad.innerText = "INCONNU / INDÉPENDANT";
-                    elSquad.style.color = "var(--ed-orange)";
+                    elSquad.style.color = "#FF3333";
                 }
 
-                if (nomCmdr) {
+                // SÉCURITÉ : Le bouton ne s'allume QUE s'il y a un escadron
+                if (nomCmdr && squadInfo) {
                     btn.disabled = false;
                     btn.style.opacity = '1';
                     btn.style.borderColor = "#00FF66";
@@ -3635,6 +3649,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     // ON STOCKE LES DONNÉES EN MÉMOIRE
                     window.sasCacheCmdr = nomCmdr;
                     window.sasCacheSquad = squadInfo ? squadInfo.nom : null;
+                    window.sasCacheRank = squadInfo ? squadInfo.rank : 4;
                     window.sasUserId = userId;
                 }
             } catch(e) { console.error(e); }
@@ -3653,29 +3668,41 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             btn.disabled = true;
 
             try {
-                // APPEL DU TUNNEL SÉCURISÉ (RPC) AU LIEU D'UN UPDATE DIRECT
-                const { error } = await supabaseApp.rpc('soumettre_dossier', {
+                if (event) event.preventDefault(); 
+                
+                const { data: { user }, error: authErr } = await supabaseApp.auth.getUser();
+                if (authErr || !user) throw new Error("Joueur non authentifié !");
+                
+                const rank = window.sasCacheRank !== undefined ? window.sasCacheRank : 4;
+                
+                const { data: reponse, error } = await supabaseApp.rpc('soumettre_dossier', {
+                    p_user_id: user.id,
                     p_cmdr_nom: window.sasCacheCmdr,
-                    p_escadron_id: window.sasCacheSquad
+                    p_escadron_id: window.sasCacheSquad,
+                    p_rank: rank
                 });
                 
                 if (error) throw error;
 
-                // On renvoie sur la page d'authentification
-                document.getElementById('sas-screen').style.display = 'none';
-                document.getElementById('auth-screen').style.display = 'flex';
-                
-                const msg = document.getElementById('auth-msg');
-                msg.style.color = "var(--ed-orange)";
-                msg.innerText = "> DOSSIER TRANSMIS. EN ATTENTE DE VALIDATION.";
-                
-                if(typeof stopSasMusic === 'function') stopSasMusic();
+                if (reponse === 'PILOTE_ACCEPTE_ET_VERIFIE_TRUE') {
+                    window.location.reload();
+                    return;
+                }
+
+                if (reponse === 'REJET_INDEPENDANT' || reponse === 'REJET_ESCADRON_NON_ACCREDITE') {
+                    await supabaseApp.auth.signOut();
+                    window.location.reload();
+                    return;
+                }
+                if (reponse === 'AMIRAL_ATTENTE') {
+                    window.location.reload();
+                    return;
+                }
                 
             } catch (e) {
                 console.error("Erreur de soumission :", e);
                 btn.innerText = "ERREUR DE TRANSMISSION";
                 btn.style.color = "#FF3333";
-                btn.style.borderColor = "#FF3333";
             }
         }
 
