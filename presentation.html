@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS.EDTEAM // Accréditation Navale</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ed-orange: #FF7100;
+            --ed-blue: #00F0FF;
+            --ed-red: #FF3333;
+            --bg-dark: #010203;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                radial-gradient(circle at 50% 10%, #0a1824 0%, #010203 100%);
+            background-size: 50px 50px, 50px 50px, 100% 100%;
+            background-attachment: fixed;
+            color: #ddd;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .scanline {
+            position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--ed-blue);
+            box-shadow: 0 0 15px var(--ed-blue), 0 0 30px var(--ed-blue);
+            opacity: 0.15; z-index: 9999; pointer-events: none;
+            animation: scanline-anim 6s linear infinite;
+        }
+        @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
+
+        .container { max-width: 1600px; margin: 0 auto; padding: 0 40px; }
+
+        h1, h2, h3 { text-transform: uppercase; margin: 0; }
+        
+        .neon-blue { color: #fff; text-shadow: 0 0 10px var(--ed-blue), 0 0 30px var(--ed-blue), 0 0 60px var(--ed-blue); }
+        .neon-orange { color: #fff; text-shadow: 0 0 10px var(--ed-orange), 0 0 30px var(--ed-orange), 0 0 60px var(--ed-orange); }
+        .sub-data { display: block; color: #555; font-size: 0.8em; letter-spacing: 4px; margin-bottom: 10px; font-weight: bold; }
+
+        /* =========================================
+           HERO SECTION (ÉCRAN D'ACCUEIL)
+           ========================================= */
+        .hero-section {
+            height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; position: relative;
+            border-bottom: 1px solid var(--ed-blue);
+            box-shadow: 0 20px 80px rgba(0, 240, 255, 0.1);
+        }
+
+        .logo-giant {
+            width: 160px; height: 160px; margin-bottom: 50px;
+            filter: drop-shadow(0 0 40px rgba(0, 240, 255, 0.6));
+            animation: pulse-logo 3s infinite alternate ease-in-out;
+        }
+        @keyframes pulse-logo {
+            0% { filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4)); transform: scale(0.98); }
+            100% { filter: drop-shadow(0 0 60px rgba(0, 240, 255, 1)); transform: scale(1.02); }
+        }
+
+        .main-title { font-size: 6em; letter-spacing: 8px; line-height: 1.1; margin-bottom: 30px; }
+        .sub-title { font-size: 1.6em; color: #aaa; max-width: 1000px; line-height: 1.6; margin-bottom: 60px; letter-spacing: 2px; }
+
+        .btn-massive {
+            display: inline-block; background: rgba(255, 113, 0, 0.05); border: 2px solid var(--ed-orange);
+            color: #fff; padding: 25px 60px; font-family: inherit; font-size: 1.8em; font-weight: bold; letter-spacing: 5px;
+            text-decoration: none; text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 113, 0, 0.2), inset 0 0 20px rgba(255, 113, 0, 0.1);
+            transition: all 0.3s ease-out; position: relative; overflow: hidden; backdrop-filter: blur(5px);
+        }
+        .btn-massive::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg); transition: 0.5s;
+        }
+        .btn-massive:hover::before { left: 150%; }
+        .btn-massive:hover {
+            background: var(--ed-orange); color: #000; box-shadow: 0 0 60px var(--ed-orange), inset 0 0 20px #fff;
+            transform: scale(1.05); border-color: #fff;
+        }
+
+        /* CORRECTIONS POUR ÉCRANS 14" ET PETITS PC */
+        @media (max-width: 1366px), (max-height: 800px) {
+            .logo-giant { width: 100px; height: 100px; margin-bottom: 25px; }
+            .main-title { font-size: 3.8em; letter-spacing: 5px; margin-bottom: 20px; }
+            .sub-title { font-size: 1.2em; margin-bottom: 35px; max-width: 800px; }
+            .btn-massive { padding: 15px 40px; font-size: 1.3em; }
+            #audio-toggle-btn { padding: 10px 15px !important; font-size: 0.9em !important; bottom: 20px !important; right: 20px !important; }
+        }
+
+        /* =========================================
+           SECTIONS & GRILLES LARGES
+           ========================================= */
+        .section { padding: 150px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); position: relative; }
+        .section-title { font-size: 3.5em; letter-spacing: 6px; text-align: center; margin-bottom: 100px; }
+
+        .feature-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 80px; align-items: center; margin-bottom: 150px; }
+        .feature-grid.reverse { grid-template-columns: 1.5fr 1fr; }
+
+        .feature-text { background: rgba(10, 15, 20, 0.8); padding: 50px; border-left: 4px solid var(--ed-blue); box-shadow: inset 30px 0 80px rgba(0,240,255,0.05); backdrop-filter: blur(10px); }
+        .feature-grid.reverse .feature-text { border-left: none; border-right: 4px solid var(--ed-orange); box-shadow: inset -30px 0 80px rgba(255,113,0,0.05); grid-column: 2; grid-row: 1; }
+        .feature-grid.reverse .holo-container { grid-column: 1; grid-row: 1; }
+
+        .feature-text h3 { font-size: 2.5em; margin-bottom: 25px; letter-spacing: 3px; line-height: 1.2; }
+        .feature-text p { font-size: 1.3em; line-height: 1.8; color: #bbb; margin-bottom: 20px; }
+
+        .holo-container { perspective: 2000px; width: 100%; padding: 40px; cursor: crosshair; }
+        .holo-card {
+            position: relative; width: 100%; border: 2px solid var(--ed-blue); border-radius: 6px;
+            box-shadow: -30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 240, 255, 0.2);
+            transform: rotateY(-12deg) rotateX(4deg) translateZ(0) scale(0.95);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); background-color: #000;
+        }
+        .feature-grid.reverse .holo-card { border-color: var(--ed-orange); box-shadow: 30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 113, 0, 0.2); transform: rotateY(12deg) rotateX(4deg) translateZ(0) scale(0.95); }
+        .holo-card::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 10;
+        }
+        .holo-card img { width: 100%; display: block; filter: brightness(0.9) contrast(1.1); }
+        .holo-container:hover .holo-card { transform: rotateY(0deg) rotateX(0deg) translateZ(50px) scale(1.05); box-shadow: 0 20px 80px rgba(0, 240, 255, 0.5), 0 0 40px rgba(0, 240, 255, 0.8); border-color: #fff; z-index: 20; }
+        .feature-grid.reverse .holo-container:hover .holo-card { transform: rotateY(0deg) rotateX(0deg) translateZ(50px) scale(1.05); box-shadow: 0 20px 80px rgba(255, 113, 0, 0.5), 0 0 40px rgba(255, 113, 0, 0.8); border-color: #fff; }
+        .holo-container:hover .holo-card img { filter: brightness(1.1) contrast(1.2); }
+
+        .steps-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 80px; }
+        .step-box { background: rgba(10, 15, 20, 0.8); border: 1px solid #333; border-top: 4px solid var(--ed-blue); padding: 50px 40px; text-align: center; transition: 0.4s; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .step-box::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top, rgba(0,240,255,0.15), transparent 70%); pointer-events: none; }
+        .step-box:hover { border-color: #fff; box-shadow: 0 20px 60px rgba(0,240,255,0.3); transform: translateY(-15px); }
+        .step-number { font-size: 6em; color: var(--ed-blue); font-weight: bold; opacity: 0.15; margin-bottom: -40px; }
+        .step-title { color: #fff; font-size: 1.8em; margin-bottom: 25px; letter-spacing: 2px; font-weight: bold; }
+
+        @media (max-width: 1024px) {
+            .feature-grid, .feature-grid.reverse { grid-template-columns: 1fr; gap: 40px; margin-bottom: 80px; }
+            .feature-grid.reverse .feature-text { grid-column: 1; grid-row: auto; }
+            .feature-grid.reverse .holo-container { grid-column: 1; grid-row: auto; }
+            .holo-card, .feature-grid.reverse .holo-card { transform: none !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+            .main-title { font-size: 3em; }
+            .steps-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanline"></div>
+
+    <header class="hero-section">
+        <div class="container">
+            <svg class="logo-giant" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+            </svg>
+            
+            <span class="sub-data">// SYSTÈME OPÉRATIONNEL DE L'AMIRAUTÉ</span>
+            <h1 class="main-title neon-blue">UNIFIEZ LA FLOTTE.<br><span class="neon-orange">GAGNEZ LA GUERRE.</span></h1>
+            <p class="sub-title">Le renseignement est votre meilleure arme. Découvrez <strong>SYS.EDTEAM</strong>, le réseau tactique qui connecte l'ordinateur de bord de votre vaisseau au commandement central de l'escadron en temps réel.</p>
+            
+            <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
+        </div>
+    </header>
+
+    <section class="section" style="background: rgba(0,0,0,0.7); box-shadow: inset 0 0 100px #000;">
+        <div class="container" style="text-align: center; max-width: 1000px;">
+            <h2 class="section-title neon-orange" style="margin-bottom: 40px;">LA FIN DES EFFORTS FANTÔMES</h2>
+            <p style="font-size: 1.6em; line-height: 1.8; color: #bbb;">
+                Jusqu'à aujourd'hui, vous voliez parfois à l'aveugle. La télémétrie était floue, et vos exploits individuels pouvaient passer inaperçus.<br><br>
+                <strong class="text-orange" style="font-size: 1.2em; text-shadow: 0 0 20px rgba(255,113,0,0.5);">L'ère du tableau Excel est révolue.</strong><br><br>
+                Désormais, chaque saut hyperspatial, chaque crédit gagné, et chaque tir de laser alimente le Background Simulation (BGS) en direct. <br><strong style="color: #fff;">Vous volez. Le système s'occupe du reste.</strong>
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            
+            <div class="feature-grid">
+                <div class="feature-text">
+                    <span class="sub-data">// MODULE 01 : SUPERVISION</span>
+                    <h3 class="neon-blue">VISION STRATÉGIQUE</h3>
+                    <p>Votre <strong>Quartier Général</strong> centralise toutes vos données navales. Finances en direct, état de votre flotte, logistique de votre Fleet Carrier et avancée de vos rangs militaires.</p>
+                    <p>Tout ce dont un commandant a besoin pour préparer son prochain déploiement, réuni sur un terminal unique et mis à jour instantanément.</p>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card"><img src="images/qg.png" alt="Quartier Général"></div>
+                </div>
+            </div>
+
+            <div class="feature-grid reverse">
+                <div class="feature-text">
+                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 02 : BGS TACTIQUE</span>
+                    <h3 class="neon-orange">FRAPPEZ OÙ ÇA FAIT MAL</h3>
+                    <p>Ne demandez plus sur le Discord <em>"Où est-ce qu'on se bat aujourd'hui ?"</em>. L'Amirauté définit les théâtres d'opération. Vous n'avez plus qu'à verrouiller la cible.</p>
+                    <p>Visualisez instantanément l'objectif (Guerre, Élection, Hausse), suivez votre part d'impact personnel et remplissez le <strong>Quota Quotidien (24H)</strong> de l'escadron avant le prochain Tick de Frontier.</p>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card"><img src="images/ordres.png" alt="Directives Tactiques"></div>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-text">
+                    <span class="sub-data">// MODULE 03 : ÉTATS DE SERVICE</span>
+                    <h3 class="neon-blue">FORGEZ VOTRE LÉGENDE</h3>
+                    <p>Votre implication ne passera plus sous le radar. Le terminal analyse vos prouesses économiques ou militaires et attribue automatiquement le titre de <strong>Spécialiste de l'Escadron</strong> aux meilleurs (Fer de Lance, Maître Logisticien, Magnat...).</p>
+                    <p>Participez aux campagnes de guerre pour décrocher des Citations d'Honneur et voir votre pseudo trôner sur le tableau de la Force de Frappe.</p>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card"><img src="images/efforts.png" alt="Tableau d'Honneur"></div>
+                </div>
+            </div>
+
+            <div class="feature-grid reverse">
+                <div class="feature-text">
+                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 04 : LOGISTIQUE LOURDE</span>
+                    <h3 class="neon-orange">GUERRE ÉCONOMIQUE TOTALE</h3>
+                    <p>Financez l'effort de guerre. Le <strong>Radar de Commerce Furtif</strong> scrute le marché galactique et croise la soute de votre Fleet Carrier avec les bases de données EDSM.</p>
+                    <p>Repérez en un clic les stations les plus lucratives, détectez les filons prédictifs cachés, et inondez le marché noir sans jamais quitter votre cockpit.</p>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card"><img src="images/commerce.png" alt="Radar de Commerce"></div>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-text">
+                    <span class="sub-data">// MODULE 05 : CRYPTOGRAPHIE</span>
+                    <h3 class="neon-blue">SÉCURITÉ MILITAIRE</h3>
+                    <p>Coordonnez-vous via les <strong>Communications Holographiques</strong> intégrées. Canal privé, canal d'escadron ou fréquences de coalition.</p>
+                    <p>Pour prévenir toute interception par l'ennemi, l'intégralité du registre de communication est purgée et détruite automatiquement à chaque nouveau cycle galactique (Tick). Ne laissez aucune trace.</p>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card"><img src="images/comms.png" alt="Communications Sécurisées"></div>
+                </div>
+            </div>
+
+            <div class="feature-grid reverse" style="margin-bottom: 0;">
+                <div class="feature-text">
+                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 06 : LIAISON DISTANTE</span>
+                    <h3 class="neon-orange">LE COMMANDEMENT DANS LA POCHE</h3>
+                    <p>Pas devant votre PC ? L'Amirauté vous accompagne partout.</p>
+                    <p>Connectez-vous depuis votre smartphone pour accéder à l'application <strong>Compagnon Mobile</strong>. Suivez le compte à rebours du Tick, gardez un œil sur le statut de la flotte, ou communiquez avec vos ailiers en plein vol directement depuis votre téléphone.</p>
+                </div>
+                <div class="holo-container" style="display:flex; justify-content:center;">
+                    <div class="holo-card" style="max-width: 450px;"><img src="images/mobile.png" alt="PADD Mobile"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section" style="background: rgba(0,240,255,0.02); border-top: 1px solid var(--ed-blue);">
+        <div class="container">
+            <h2 class="section-title neon-blue" style="margin-bottom: 40px;">INITIALISATION EN 3 ÉTAPES</h2>
+            <p style="text-align: center; color: #aaa; font-size: 1.4em; margin-bottom: 80px;">Le déploiement prend moins de 2 minutes. Aucun logiciel lourd à installer.</p>
+
+            <div class="steps-container">
+                <div class="step-box">
+                    <div class="step-number">01</div>
+                    <div class="step-title">ACCRÉDITATION WEB</div>
+                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Rendez-vous sur le Terminal et créez votre profil sécurisé. Le commandement validera votre demande d'accès.</p>
+                </div>
+                <div class="step-box">
+                    <div class="step-number">02</div>
+                    <div class="step-title">LIAISON NAVALE</div>
+                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Téléchargez notre plugin furtif <code>SYS.EDTEAM.zip</code> et placez-le dans le dossier de votre utilitaire <strong>EDMC</strong>.</p>
+                </div>
+                <div class="step-box">
+                    <div class="step-number">03</div>
+                    <div class="step-title">SYNCHRONISATION</div>
+                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Copiez votre clé de sécurité unique dans les réglages d'EDMC. Décollez. Le système fait le reste.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 120px;">
+                <p style="color: #fff; font-size: 1.8em; margin-bottom: 40px; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,0.5);">L'AMIRAUTÉ N'ATTEND PLUS QUE VOUS.</p>
+                <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 60px; background: #000; color: #555; font-size: 0.9em; letter-spacing: 3px;">
+        SYSTÈME DE COMMANDEMENT SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS
+    </footer>
+
+    <!-- =========================================
+         MOTEUR AUDIO (ORCHESTRE CINÉMATIQUE / RYTHME & CHOEURS)
+         ========================================= -->
+    
+    <div id="audio-toggle-btn" onclick="toggleMajesticMusic()" style="position: fixed; bottom: 30px; right: 30px; background: rgba(0, 240, 255, 0.05); border: 2px solid var(--ed-blue); padding: 15px 25px; color: var(--ed-blue); font-family: 'Share Tech Mono', monospace; font-size: 1.1em; font-weight: bold; cursor: pointer; letter-spacing: 2px; border-radius: 4px; box-shadow: 0 0 20px rgba(0,240,255,0.1); z-index: 10000; transition: 0.3s; backdrop-filter: blur(5px); text-transform: uppercase; display: flex; align-items: center; gap: 10px;">
+        <span id="audio-icon" style="font-size: 1.4em; animation: pulse-logo 2s infinite alternate;">📻</span>
+        <span id="audio-text">ACTIVER LA SYMPHONIE</span>
+    </div>
+
+    <script>
+        let majesticCtx = null;
+        let isMajesticPlaying = false;
+        let masterGain = null;
+        let concertHallDelay = null;
+        let scheduleTimer = null;
+        
+        let nextBeatTime = 0;
+        let current16th = 0; // Séquenceur en double-croches pour le rythme ostinato
+        let measure = 0;
+
+        // Progression d'accords majestueuse et héroïque
+        const majesticChords = [
+            { bass: 65.41, pad: [130.81, 155.56, 196.00] }, // Cm
+            { bass: 51.91, pad: [103.83, 130.81, 155.56] }, // Ab
+            { bass: 77.78, pad: [155.56, 196.00, 233.08] }, // Eb
+            { bass: 58.27, pad: [116.54, 146.83, 174.61] }  // Bb
+        ];
+
+        // Mélodie épique (French Horn) qui plane par-dessus
+        const hornMelody = [
+            { step: 0,  note: 261.63, dur: 16 }, // C4
+            { step: 16, note: 311.13, dur: 8 },  // Eb4
+            { step: 24, note: 392.00, dur: 8 },  // G4
+            { step: 32, note: 349.23, dur: 24 }, // F4
+            { step: 56, note: 233.08, dur: 8 },  // Bb3
+            { step: 64, note: 311.13, dur: 16 }, // Eb4
+            { step: 80, note: 261.63, dur: 16 }, // C4
+            { step: 96, note: 293.66, dur: 32 }  // D4
+        ];
+
+        function toggleMajesticMusic() {
+            const btn = document.getElementById('audio-toggle-btn');
+            const txt = document.getElementById('audio-text');
+            const icon = document.getElementById('audio-icon');
+
+            if (isMajesticPlaying) {
+                isMajesticPlaying = false;
+                clearTimeout(scheduleTimer);
+                if (masterGain) {
+                    masterGain.gain.linearRampToValueAtTime(0, majesticCtx.currentTime + 3);
+                }
+                btn.style.borderColor = 'var(--ed-blue)';
+                btn.style.background = 'rgba(0, 240, 255, 0.05)';
+                btn.style.color = 'var(--ed-blue)';
+                btn.style.boxShadow = '0 0 20px rgba(0,240,255,0.1)';
+                txt.innerText = "ACTIVER LA SYMPHONIE";
+                icon.innerText = "📻";
+            } else {
+                if (!majesticCtx) majesticCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (majesticCtx.state === 'suspended') majesticCtx.resume();
+                
+                isMajesticPlaying = true;
+                initMajesticEngine();
+                
+                btn.style.borderColor = '#00FF66';
+                btn.style.background = 'rgba(0, 255, 102, 0.1)';
+                btn.style.color = '#00FF66';
+                btn.style.boxShadow = '0 0 30px rgba(0,255,102,0.4)';
+                txt.innerText = "SYMPHONIE SPATIALE EN LIGNE";
+                icon.innerText = "🎵";
+            }
+        }
+
+        function initMajesticEngine() {
+            const t = majesticCtx.currentTime;
+            
+            masterGain = majesticCtx.createGain();
+            masterGain.gain.setValueAtTime(0, t);
+            masterGain.gain.linearRampToValueAtTime(0.7, t + 4); 
+            
+            // Écho d'immense salle de concert
+            concertHallDelay = majesticCtx.createDelay();
+            concertHallDelay.delayTime.value = 0.8; 
+            
+            const feedback = majesticCtx.createGain();
+            feedback.gain.value = 0.6; 
+            
+            const delayFilter = majesticCtx.createBiquadFilter();
+            delayFilter.type = 'lowpass';
+            delayFilter.frequency.value = 800; 
+            
+            concertHallDelay.connect(delayFilter); 
+            delayFilter.connect(feedback);
+            feedback.connect(concertHallDelay); 
+            concertHallDelay.connect(masterGain);
+            
+            masterGain.connect(majesticCtx.destination);
+
+            current16th = 0; 
+            measure = 0;
+            nextBeatTime = majesticCtx.currentTime + 0.1;
+            scheduler();
+        }
+
+        function scheduler() {
+            if (!isMajesticPlaying) return;
+            
+            // Tempo dynamique : 75 BPM
+            const secondsPerBeat = 60.0 / 75.0;
+            const secondsPer16th = secondsPerBeat / 4;
+
+            while (nextBeatTime < majesticCtx.currentTime + 0.1) {
+                composeOrchestra(current16th, measure, nextBeatTime, secondsPer16th);
+                
+                nextBeatTime += secondsPer16th;
+                current16th++;
+                
+                // Une mesure = 16 double-croches (4 temps)
+                if (current16th === 16) {
+                    current16th = 0; 
+                    measure++;
+                }
+            }
+            scheduleTimer = setTimeout(scheduler, 25);
+        }
+
+        function composeOrchestra(step16, meas, time, stepDur) {
+            const chordIndex = meas % 4; 
+            const currentChord = majesticChords[chordIndex];
+            const globalStep = (meas % 8) * 16 + step16;
+
+            // 1. LES NAPPES DE CORDES ET CHOEURS (Au début de chaque mesure)
+            if (step16 === 0) {
+                playOrchestralPad(time, currentChord.pad, stepDur * 16);
+                playDeepCello(time, currentChord.bass, stepDur * 16);
+                playEpicChoir(time, currentChord.pad, stepDur * 16);
+            }
+
+            // 2. TIMBALES D'ORCHESTRE (Timpani)
+            if (step16 === 0) playTimpaniHit(time, currentChord.bass, 0.9);
+            // Relance syncopée à la fin de certaines mesures
+            if (meas % 2 === 1 && step16 === 12) playTimpaniHit(time, currentChord.bass, 0.4);
+            if (meas % 2 === 1 && step16 === 14) playTimpaniHit(time, currentChord.bass, 0.7);
+
+            // 3. LA LIGNE DE BASSE RYTHMIQUE (Ostinato)
+            if (step16 % 2 === 0 && step16 !== 0) {
+                playRhythmicBass(time, currentChord.bass, 0.35);
+            }
+            if (step16 % 4 === 3) {
+                playRhythmicBass(time, currentChord.bass, 0.2);
+            }
+
+            // 4. LA MÉLODIE HÉROÏQUE (Cors d'harmonie)
+            const hornNote = hornMelody.find(m => m.step === globalStep);
+            if (hornNote) {
+                playFrenchHorn(time, hornNote.note, hornNote.dur * stepDur);
+            }
+
+            // 5. TÉLÉCHARGEMENT DE DONNÉES (Burst prolongé, très espionnage SF)
+            if (meas % 2 === 1 && step16 === 4) {
+                playDataDownload(time);
+            }
+        }
+
+        // --- LES INSTRUMENTS "ORCHESTRAUX" ---
+
+        function playOrchestralPad(time, freqs, duration) {
+            freqs.forEach((f) => {
+                [-2, 0, 2].forEach(detuneCents => {
+                    const osc = majesticCtx.createOscillator();
+                    const gain = majesticCtx.createGain();
+                    const filter = majesticCtx.createBiquadFilter();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = f;
+                    osc.detune.value = detuneCents; 
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(200, time);
+                    filter.frequency.linearRampToValueAtTime(1200, time + duration * 0.5); 
+                    filter.frequency.linearRampToValueAtTime(200, time + duration); 
+                    
+                    gain.gain.setValueAtTime(0, time);
+                    gain.gain.linearRampToValueAtTime(0.04, time + duration * 0.5);
+                    gain.gain.linearRampToValueAtTime(0.001, time + duration);
+                    
+                    osc.connect(filter); filter.connect(gain); 
+                    gain.connect(masterGain); gain.connect(concertHallDelay);
+                    
+                    osc.start(time); osc.stop(time + duration + 0.1);
+                });
+            });
+        }
+
+        function playDeepCello(time, freq, duration) {
+            const osc = majesticCtx.createOscillator();
+            const gain = majesticCtx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.15, time + duration * 0.5);
+            gain.gain.linearRampToValueAtTime(0.001, time + duration);
+            
+            osc.connect(gain); gain.connect(masterGain);
+            osc.start(time); osc.stop(time + duration + 0.1);
+        }
+
+        function playFrenchHorn(time, freq, duration) {
+            const osc1 = majesticCtx.createOscillator();
+            const osc2 = majesticCtx.createOscillator();
+            const gain = majesticCtx.createGain();
+            const filter = majesticCtx.createBiquadFilter();
+            
+            osc1.type = 'sawtooth';
+            osc2.type = 'sine'; 
+            osc1.frequency.value = freq;
+            osc2.frequency.value = freq;
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(400, time);
+            filter.frequency.linearRampToValueAtTime(1800, time + duration * 0.3);
+            filter.frequency.exponentialRampToValueAtTime(400, time + duration);
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.1, time + 0.2); 
+            gain.gain.linearRampToValueAtTime(0.06, time + duration * 0.8); 
+            gain.gain.linearRampToValueAtTime(0.001, time + duration); 
+            
+            osc1.connect(filter); osc2.connect(filter); 
+            filter.connect(gain); 
+            gain.connect(masterGain); gain.connect(concertHallDelay);
+            
+            osc1.start(time); osc2.start(time);
+            osc1.stop(time + duration); osc2.stop(time + duration);
+        }
+
+        function playTimpaniHit(time, freq, intensity) {
+            const osc = majesticCtx.createOscillator();
+            const gain = majesticCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq * 1.5, time);
+            osc.frequency.exponentialRampToValueAtTime(freq, time + 0.1);
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(intensity * 0.6, time + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 2.5); 
+            
+            osc.connect(gain); gain.connect(masterGain); gain.connect(concertHallDelay);
+            osc.start(time); osc.stop(time + 2.5);
+
+            const noiseSize = majesticCtx.sampleRate * 0.1;
+            const noiseBuffer = majesticCtx.createBuffer(1, noiseSize, majesticCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < noiseSize; i++) output[i] = Math.random() * 2 - 1;
+            
+            const noise = majesticCtx.createBufferSource(); noise.buffer = noiseBuffer;
+            const filter = majesticCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(600, time);
+            
+            const noiseGain = majesticCtx.createGain();
+            noiseGain.gain.setValueAtTime(intensity * 0.3, time);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+            
+            noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(masterGain);
+            noise.start(time);
+        }
+
+        function playRhythmicBass(time, freq, velocity) {
+            const osc = majesticCtx.createOscillator();
+            const filter = majesticCtx.createBiquadFilter();
+            const gain = majesticCtx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq / 2; // Une octave en dessous pour la profondeur
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, time);
+            filter.frequency.exponentialRampToValueAtTime(100, time + 0.2);
+
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(velocity, time + 0.02); 
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25); 
+
+            osc.connect(filter); filter.connect(gain);
+            gain.connect(masterGain);
+
+            osc.start(time); osc.stop(time + 0.3);
+        }
+
+        function playEpicChoir(time, freqs, duration) {
+            freqs.forEach((f) => {
+                const osc = majesticCtx.createOscillator();
+                const gain = majesticCtx.createGain();
+                const formantFilter = majesticCtx.createBiquadFilter();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.value = f * 2; 
+                
+                formantFilter.type = 'bandpass';
+                formantFilter.frequency.setValueAtTime(800, time);
+                formantFilter.Q.value = 2.0; 
+                
+                formantFilter.frequency.linearRampToValueAtTime(1000, time + duration * 0.5);
+                formantFilter.frequency.linearRampToValueAtTime(800, time + duration);
+                
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.04, time + duration * 0.4);
+                gain.gain.linearRampToValueAtTime(0.001, time + duration);
+                
+                osc.connect(formantFilter); formantFilter.connect(gain);
+                gain.connect(masterGain); gain.connect(concertHallDelay);
+                
+                osc.start(time); osc.stop(time + duration + 0.1);
+            });
+        }
+
+        function playDataDownload(time) {
+            const numBeeps = 24; // Rafale longue et prononcée
+            const durationPerBeep = 0.035; 
+            
+            for (let i = 0; i < numBeeps; i++) {
+                const t = time + (i * durationPerBeep * 1.5);
+                const osc = majesticCtx.createOscillator();
+                const gain = majesticCtx.createGain();
+                
+                osc.type = 'square';
+                osc.frequency.value = 2000 + Math.random() * 3000; 
+                
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.015, t + 0.01); 
+                gain.gain.exponentialRampToValueAtTime(0.001, t + durationPerBeep);
+                
+                osc.connect(gain);
+                gain.connect(masterGain);
+                
+                osc.start(t); osc.stop(t + durationPerBeep + 0.01);
+            }
+        }
+    </script>
+</body>
+</html>
