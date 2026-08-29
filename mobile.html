@@ -244,6 +244,27 @@
         }
         .chat-bubble.squad { border-left-color: var(--ed-orange); background: rgba(255, 113, 0, 0.05); }
         .chat-bubble.private { border-left-color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); }
+    
+        /* =========================================
+           ANTI-DÉBORDEMENT DES MODALES (SÉCURITÉ)
+           ========================================= */
+        .modal-overlay {
+            padding: 15px !important; /* Force une marge de sécurité autour de l'écran */
+            box-sizing: border-box;
+        }
+        
+        .modal-overlay > .card {
+            max-height: calc(100vh - 30px) !important; /* Ne dépasse jamais la hauteur de l'écran */
+        }
+
+        /* Force l'apparition d'un scroll sur les fenêtres qui n'en ont pas par défaut */
+        #modal-diplo-details > .card,
+        #modal-ordre-details > .card,
+        #modal-info-tick > .card,
+        #modal-info-tick-comms > .card {
+            overflow-y: auto !important;
+        }
+    
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -306,6 +327,23 @@
             <!-- ========================================== -->
             <div id="tab-qg" style="display: flex; flex-direction: column; gap: 14px;">
 
+                <!-- BOUTON ACCÈS DIRECTEUR (DÉPLACÉ TOUT EN HAUT) -->
+                <button id="btn-bureau-directeur" class="m-btn" style="display: none; background: rgba(255, 51, 51, 0.15); border-color: var(--ed-red); color: var(--ed-red); box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);" onclick="ouvrirBureauDirecteur()">
+                    ⚙️ [ STATISTIQUES ]
+                </button>
+
+                <!-- REGISTRE TACTIQUE (DÉPLACÉ EN HAUT) -->
+                <div class="card" style="border-color: #FF3333; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 51, 51, 0.05);" onclick="ouvrirRegistreMobile()">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(255,51,51,0.5));">🎯</span>
+                        <div>
+                            <span style="color: #FF3333; font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">REGISTRE TACTIQUE</span>
+                            <span id="m-registre-count" style="display: block; color: #888; font-size: 0.75em;">Recherche des cibles...</span>
+                        </div>
+                    </div>
+                    <span style="color: #FF3333; font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
                 <!-- DOSSIER & GRADE -->
                 <div class="card">
                     <div class="card-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px dashed var(--ed-orange-dim);">
@@ -345,14 +383,14 @@
                         </div>
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('explore')" style="cursor: pointer;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: #888; font-size: 0.85em;">EXPLORATION</span>
+                                <span style="color: #888; font-size: 0.85em;">EXPLO</span>
                                 <span id="rank-explore-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-explore" style="color: #fff;">---</strong>
                         </div>
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('exobio')" style="cursor: pointer;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: #888; font-size: 0.85em;">EXOBIOLOGIE</span>
+                                <span style="color: #888; font-size: 0.85em;">EXOBIO</span>
                                 <span id="rank-exo-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-exo" style="color: #fff;">---</strong>
@@ -371,6 +409,25 @@
                             <strong id="m-legal-status-text" style="color: #00FF66; font-size: 1em; text-align: center;">CASIER VIERGE</strong>
                         </div>
                     </div>
+                </div>
+
+                <!-- ACTUALITÉS (GALNET & EDNEWS CÔTE À CÔTE) -->
+                <div style="display: flex; gap: 10px;">
+                    
+                    <!-- GALNET -->
+                    <div class="card" style="flex: 1; border-color: var(--ed-orange); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(255, 113, 0, 0.05);" onclick="ouvrirGalnetMobile()">
+                        <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5)); margin-bottom: 6px;">📡</span>
+                        <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">GALNET</span>
+                        <span id="m-galnet-date" style="display: block; color: #888; font-size: 0.65em; margin-top: 4px;">Connexion...</span>
+                    </div>
+
+                    <!-- EDNEWS -->
+                    <div class="card" style="flex: 1; border-color: var(--ed-blue); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirGazetteMobile()">
+                        <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); margin-bottom: 6px;">📰</span>
+                        <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">EDNEWS</span>
+                        <span id="m-gazette-date" style="display: block; color: #888; font-size: 0.65em; margin-top: 4px;">Archives...</span>
+                    </div>
+                    
                 </div>
 
                 <!-- BILAN FINANCIER CONSOLIDÉ -->
@@ -396,7 +453,7 @@
                             <strong id="m-valeur-totale" style="color: #fff; font-size: 1.1em;">--- CR</strong>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; font-size: 0.8em; color: #888;">
-                            <span>COÛT DE RACHAT (ASSURANCE) :</span>
+                            <span>ASSURANCE :</span>
                             <span id="m-rebuy-cout" style="color: var(--ed-red); font-weight: bold;">--- CR</span>
                         </div>
                     </div>
@@ -429,47 +486,6 @@
                         <strong id="m-fc-autonomie" style="color: var(--ed-green);">-- SEMAINES</strong>
                     </div>
                 </div>
-
-                <!-- 1. BOUTON REGISTRE TACTIQUE -->
-                <div class="card" style="border-color: #FF3333; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 51, 51, 0.05);" onclick="ouvrirRegistreMobile()">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(255,51,51,0.5));">🎯</span>
-                        <div>
-                            <span style="color: #FF3333; font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">REGISTRE TACTIQUE</span>
-                            <span id="m-registre-count" style="display: block; color: #888; font-size: 0.75em;">Recherche des cibles...</span>
-                        </div>
-                    </div>
-                    <span style="color: #FF3333; font-size: 1.2em; font-weight: bold;">></span>
-                </div>
-
-                <!-- NOUVEAU : BOUTON GALNET -->
-                <div class="card" style="border-color: var(--ed-orange); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 113, 0, 0.05);" onclick="ouvrirGalnetMobile()">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5));">📡</span>
-                        <div>
-                            <span style="color: var(--ed-orange); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">ACTUALITÉS GALNET</span>
-                            <span id="m-galnet-date" style="display: block; color: #888; font-size: 0.75em;">Connexion Frontier...</span>
-                        </div>
-                    </div>
-                    <span style="color: var(--ed-orange); font-size: 1.2em; font-weight: bold;">></span>
-                </div>
-
-                <!-- NOUVEAU : BANNIÈRE GAZETTE -->
-                <div class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirGazetteMobile()">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📰</span>
-                        <div>
-                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">EDNEWS ESCADRON</span>
-                            <span id="m-gazette-date" style="display: block; color: #888; font-size: 0.75em;">Recherche des archives...</span>
-                        </div>
-                    </div>
-                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
-                </div>
-
-                <!-- BOUTON ACCÈS DIRECTEUR (Affiché uniquement si est_directeur === true) -->
-                <button id="btn-bureau-directeur" class="m-btn" style="display: none; background: rgba(255, 51, 51, 0.15); border-color: var(--ed-red); color: var(--ed-red); margin-top: 5px;" onclick="ouvrirBureauDirecteur()">
-                    ⚙️ [ BUREAU DU DIRECTEUR ]
-                </button>
                 
                 <button class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.85em; margin-top: 15px;" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')">
                     🎧 [ SUPPORT DISCORD ]
@@ -483,13 +499,9 @@
             <!-- ONGLET 2 : RADAR D'INFLUENCE               -->
             <!-- ========================================== -->
             <div id="tab-radar" style="display: none; flex-direction: column; gap: 14px;">
-                <div class="card">
-                    <div class="card-header">
-                        <span>> INFLUENCES (FAVORIS)</span>
-                    </div>
-                    <div id="m-influence-container" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Analyse des influences galactiques...</div>
-                    </div>
+                <!-- Les cartes pliables des systèmes s'injecteront directement ici -->
+                <div id="m-influence-container" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Analyse des influences galactiques...</div>
                 </div>
             </div>
 
@@ -507,7 +519,7 @@
                 <!-- MEMBRES DE L'ESCADRON -->
                 <div class="card">
                     <div class="card-header">
-                        <span>> EFFECTIF ESCADRON</span>
+                        <span>> ESCADRON</span>
                         <span id="m-squad-count" style="color: var(--ed-green); font-size: 0.85em;">-- MEMBRES</span>
                     </div>
                     <div id="m-squad-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
@@ -535,14 +547,16 @@
                     </div>
                 </div>
 
-                <!-- JOURNAL DES EXPLOITS -->
-                <div class="card" style="border-color: var(--ed-blue-dim);">
-                    <div class="card-header" style="color: var(--ed-blue); border-bottom-color: var(--ed-blue-dim);">
-                        <span>> JOURNAL DES EXPLOITS</span>
+                <!-- BOUTON JOURNAL DES EXPLOITS -->
+                <div class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="document.getElementById('modal-journal-exploits').style.display='flex'; if(typeof sonClic==='function') sonClic();">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📜</span>
+                        <div>
+                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">JOURNAL DES EXPLOITS</span>
+                            <span style="display: block; color: #888; font-size: 0.75em;">Consulter les rapports BGS</span>
+                        </div>
                     </div>
-                    <div id="m-exploits-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
-                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Écoute des rapports de missions...</div>
-                    </div>
+                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
                 </div>
 
             </div>
@@ -678,7 +692,7 @@
 <div class="modal-overlay" id="modal-ordre-details" onclick="fermerModalOrdre(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 550; padding: 20px;">
     <div class="card" style="width: 100%; max-width: 450px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px;" id="ordre-modal-header">
-            <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;" id="ordre-modal-title">DIRECTIVE TACTIQUE</span>
+            <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;" id="ordre-modal-title">DIRECTIVE</span>
             <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="fermerModalOrdre()" id="ordre-modal-close">✕</span>
         </div>
         
@@ -698,7 +712,7 @@
         <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
             
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; font-size: 0.85em;">
-                <span style="color: #888;">IMPACT ESCADRON :</span>
+                <span style="color: #888;">ESCADRON :</span>
                 <strong id="ordre-modal-total" style="color: #fff; text-align: right; min-width: 100px;">0 PTS</strong>
             </div>
             
@@ -713,7 +727,7 @@
 
             <!-- LE CLASSEMENT DES PARTICIPANTS -->
             <div style="border-top: 1px dashed #555; padding-top: 10px; margin-top: 10px;">
-                <span style="color: #888; font-size: 0.75em; letter-spacing: 1px; display: block; margin-bottom: 5px;">RAPPORTS D'EFFORT INDIVIDUELS :</span>
+                <span style="color: #888; font-size: 0.75em; letter-spacing: 1px; display: block; margin-bottom: 5px;">EFFORTS INDIVIDUELS :</span>
                 <div id="ordre-modal-participants" style="max-height: 130px; overflow-y: auto; padding-right: 5px;">
                     <!-- Rempli par le JS -->
                 </div>
@@ -721,79 +735,72 @@
         </div>
 
         <div>
-            <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">SIGNÉ PAR : <strong style="color: var(--ed-blue);">CMDR <span id="ordre-modal-auteur">...</span></strong></span>
+            <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">SIGNÉ PAR : <strong style="color: var(--ed-blue);"><span id="ordre-modal-auteur">...</span></strong></span>
             <div id="ordre-modal-brief" style="color: #ccc; font-size: 0.9em; background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-top: 6px; min-height: 70px; line-height: 1.5; white-space: pre-wrap;">...</div>
         </div>
     </div>
 </div>
 
-    <!-- MODAL BUREAU DU DIRECTEUR -->
-<div class="modal-overlay" id="modal-bureau-directeur" onclick="fermerBureauDirecteur(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 500; padding: 15px;">
-    <div class="card" style="width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; border-color: var(--ed-red); box-shadow: 0 0 25px rgba(255, 51, 51, 0.25);" onclick="event.stopPropagation()">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px; margin-bottom: 15px;">
-            <span style="color: var(--ed-red); font-weight: bold; letter-spacing: 2px;">⚙️ ADMINISTRATION DU TERMINAL</span>
-            <span style="color: var(--ed-red); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-bureau-directeur').style.display='none'">✕</span>
-        </div>
-
-        <!-- 1. APPROBATION DES COMPTES -->
-        <div style="margin-bottom: 20px;">
-            <div style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> COMPTES EN ATTENTE D'APPROBATION</div>
-            <div id="dir-liste-attente" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Vérification des demandes...</div>
-            </div>
-        </div>
-
-        <!-- 2. GESTION DES RÔLES -->
-        <div>
-            <div style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> GESTION DES RÔLES & ACCRÉDITATIONS</div>
-            <div id="dir-liste-membres" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;">
-                <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Chargement du personnel...</div>
-            </div>
-        </div>
-
-        <!-- 3. AUDIT TACTIQUE (KPI GLOBAUX & PAR JOUEUR) -->
-        <div style="margin-top: 20px; border-top: 1px dashed rgba(255, 113, 0, 0.3); padding-top: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">> AUDIT D'ADOPTION & USAGE</span>
-                <button class="m-btn" style="padding: 3px 10px; font-size: 0.7em; border-color: var(--ed-green); color: var(--ed-green); background: rgba(0,255,102,0.1);" onclick="window.chargerAuditDirecteur()">ACTUALISER</button>
+    <!-- MODAL REGISTRE ET AUDIT TACTIQUE -->
+    <div class="modal-overlay" id="modal-bureau-directeur" onclick="fermerBureauDirecteur(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 500; padding: 5px;">
+        <div class="card" style="width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; border-color: var(--ed-red); box-shadow: 0 0 25px rgba(255, 51, 51, 0.25);" onclick="event.stopPropagation()">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="color: var(--ed-red); font-weight: bold; letter-spacing: 1px;">⚙️ ADMINISTRATION</span>
+                <span style="color: var(--ed-red); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-bureau-directeur').style.display='none'">✕</span>
             </div>
 
-            <!-- GRILLE DES 6 INDICATEURS GLOBAUX -->
-            <div id="dir-stats-kpi-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 15px;">
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
-                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">1. PRÉSENCE WEB (7J)</div>
-                    <div id="kpi-presence" style="color: var(--ed-green); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- / --</div>
-                </div>
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
-                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">2. COMMS & MESSAGES</div>
-                    <div id="kpi-comms" style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- ACCÈS (-- MSG)</div>
-                </div>
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
-                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">3. RADAR BGS</div>
-                    <div id="kpi-radar" style="color: var(--ed-orange); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- FAC (-- SCANS)</div>
-                </div>
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
-                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">4. MISSIONS ESCADRON</div>
-                    <div id="kpi-ordres" style="color: var(--ed-green); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- ORDRES</div>
-                </div>
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
-                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">5. JOURNAL BGS</div>
-                    <div id="kpi-journal" style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- LECTURES</div>
-                </div>
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 6px 8px; border-radius: 3px;">
-                    <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px;">6. COMMERCE FURTIF</div>
-                    <div id="kpi-commerce" style="color: var(--ed-orange); font-size: 0.95em; font-weight: bold; margin-top: 2px;">-- SCANS (-- VIS)</div>
+            <!-- 1. REGISTRE DES PILOTES (Par escadron) -->
+            <div>
+                <div style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> REGISTRE DES PILOTES</div>
+                <div id="dir-liste-globale-pilotes" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;">
+                    <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Chargement du registre...</div>
                 </div>
             </div>
 
-            <!-- REGISTRE DÉTAILLÉ PAR PILOTE -->
-            <div style="color: #888; font-size: 0.75em; letter-spacing: 1px; margin-bottom: 6px;">> FRÉQUENTATION INDIVIDUELLE :</div>
-            <div id="dir-liste-audit" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
-                <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Génération de l'audit en cours...</div>
+            <!-- 2. AUDIT TACTIQUE (KPI GLOBAUX & PAR JOUEUR) -->
+            <div style="margin-top: 20px; border-top: 1px dashed rgba(255, 113, 0, 0.3); padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">> AUDIT D'ADOPTION</span>
+                    <button class="m-btn" style="padding: 3px 10px; font-size: 0.7em; border-color: var(--ed-green); color: var(--ed-green); background: rgba(0,255,102,0.1);" onclick="window.chargerAuditDirecteur()">ACTUALISER</button>
+                </div>
+
+                <!-- GRILLE DES 6 INDICATEURS GLOBAUX (FORCÉE SUR 2 LIGNES) -->
+                <div id="dir-stats-kpi-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
+                        <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">1. PRÉSENCE (7J)</div>
+                        <div id="kpi-presence" style="color: var(--ed-green); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- / --</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
+                        <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">2. COMMUNICATIONS</div>
+                        <div id="kpi-comms" style="color: var(--ed-blue); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- ACCÈS</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
+                        <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">3. RADAR BGS</div>
+                        <div id="kpi-radar" style="color: var(--ed-orange); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- FAC.</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
+                        <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">4. MISSIONS BGS</div>
+                        <div id="kpi-ordres" style="color: var(--ed-green); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- ORDRES</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
+                        <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">5. JOURNAL BGS</div>
+                        <div id="kpi-journal" style="color: var(--ed-blue); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- LECTURES</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
+                        <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">6. COMMERCE</div>
+                        <div id="kpi-commerce" style="color: var(--ed-orange); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- SCANS</div>
+                    </div>
+                </div>
+
+                <!-- REGISTRE DÉTAILLÉ PAR PILOTE -->
+                <div style="color: #888; font-size: 0.75em; letter-spacing: 1px; margin-bottom: 6px;">> FRÉQUENTATION INDIVIDUELLE :</div>
+                <div id="dir-liste-audit" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                    <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Génération de l'audit en cours...</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- MODAL INFO TICK COMMS (ROLEPLAY) -->
     <div class="modal-overlay" id="modal-info-tick-comms" onclick="fermerModalInfoTickComms(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;">
@@ -942,15 +949,15 @@
                     <div style="color: #888; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; font-size: 0.9em;">> FÉDÉRATION DES PILOTES</div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">COMBAT</span> <span id="m-modal-rank-combat" style="color: #fff; font-weight: bold;">-</span></div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">COMMERCE</span> <span id="m-modal-rank-trade" style="color: #fff; font-weight: bold;">-</span></div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">EXPLORATION</span> <span id="m-modal-rank-explo" style="color: #fff; font-weight: bold;">-</span></div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">EXOBIOLOGIE</span> <span id="m-modal-rank-exobio" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">EXPLO</span> <span id="m-modal-rank-explo" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">EXOBIO</span> <span id="m-modal-rank-exobio" style="color: #fff; font-weight: bold;">-</span></div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.95em;"><span style="color: #ccc;">MERCENAIRE</span> <span id="m-modal-rank-merc" style="color: #fff; font-weight: bold;">-</span></div>
                 </div>
                 
                 <!-- Rangs Navaux -->
                 <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px;">
                     <div style="color: #888; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; font-size: 0.9em;">> RANGS AUXILIAIRES</div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">FÉDÉRATION</span> <span id="m-modal-rank-fed" style="color: #fff; font-weight: bold;">-</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em;"><span style="color: #ccc;">FÉDÉ</span> <span id="m-modal-rank-fed" style="color: #fff; font-weight: bold;">-</span></div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.95em;"><span style="color: #ccc;">EMPIRE</span> <span id="m-modal-rank-emp" style="color: #fff; font-weight: bold;">-</span></div>
                 </div>
 
@@ -958,6 +965,29 @@
                 <div id="m-modal-reputations-container" style="display: none;"></div>
 
             </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL JOURNAL DES EXPLOITS (MOBILE) -->
+    <div class="modal-overlay" id="modal-journal-exploits" onclick="document.getElementById('modal-journal-exploits').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
+            
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.1); flex-shrink: 0;">
+                <span style="color: var(--ed-blue); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">📜 JOURNAL BGS</span>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-journal-exploits').style.display='none'; if(typeof sonClic==='function') sonClic();">✕</span>
+            </div>
+            
+            <!-- NOUVEAU : BARRE DE FILTRE -->
+            <div style="padding: 10px 15px; background: rgba(0,0,0,0.6); border-bottom: 1px solid #333; flex-shrink: 0;">
+                <input type="text" id="m-filtre-exploits" class="m-input" placeholder="Rechercher Pilote ou OP.#..." style="border-color: var(--ed-blue); padding: 8px; font-size: 0.85em;" oninput="filtrerJournalExploitsMobile()">
+            </div>
+
+            <!-- C'est ici que le JavaScript va injecter la liste -->
+            <div id="m-exploits-container" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Écoute des rapports de missions...</div>
+            </div>
+            
         </div>
     </div>
 
@@ -1581,14 +1611,24 @@
                     // Tri des systèmes par ordre alphabétique
                     const systemesTries = Object.keys(groupesSystemes).sort();
 
-                    // 🎯 2. GÉNÉRATION DE L'AFFICHAGE GROUPÉ
+                    // 🎯 2. GÉNÉRATION DE L'AFFICHAGE GROUPÉ (MODIFIÉ : PLIABLE)
+                    let sysIndex = 0;
                     systemesTries.forEach(nomSysteme => {
+                        sysIndex++;
+                        const contentId = 'sys-content-' + sysIndex;
+                        const iconId = 'sys-icon-' + sysIndex;
                         
-                        // EN-TÊTE DU SYSTÈME
+                        // EN-TÊTE DU SYSTÈME (CARTE PLIABLE)
                         htmlInf += `
-                            <div style="color: #888; font-size: 0.85em; font-weight: bold; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 4px; letter-spacing: 2px;">
-                                > SYSTÈME : <span style="color: var(--ed-orange);">${nomSysteme}</span>
-                            </div>
+                            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
+                                <div onclick="const c = document.getElementById('${contentId}'); const i = document.getElementById('${iconId}'); if(c.style.display === 'none'){ c.style.display = 'block'; i.innerText = '[-]'; } else { c.style.display = 'none'; i.innerText = '[+]'; } if(typeof sonClic === 'function') sonClic();" style="cursor: pointer; padding: 12px 15px; background: rgba(255, 113, 0, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange-dim);">
+                                    <span style="color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 2px;">
+                                        > <span style="color: var(--ed-orange);">${nomSysteme}</span>
+                                    </span>
+                                    <span id="${iconId}" style="color: var(--ed-orange); font-weight: bold; font-size: 1.2em;">[-]</span>
+                                </div>
+                                <div id="${contentId}" style="display: block; padding: 15px 15px 5px 15px;">
+                                    <div style="display: flex; flex-direction: column;">
                         `;
 
                         // LES FACTIONS DE CE SYSTÈME
@@ -1642,7 +1682,7 @@
                                 }
                             }
 
-                            // TRADUCTION DE L'ÉTAT POLITIQUE (Badge textuel)
+                            // TRADUCTION DE L'ÉTAT POLITIQUE
                             let colorEtat = 'var(--ed-blue)'; 
                             let etatTraduit = etatBgs.toUpperCase();
 
@@ -1657,8 +1697,8 @@
                                 colorEtat = 'var(--ed-green)';
                             }
 
-                            // COULEUR DE LA COURBE (TENDANCE 7 JOURS)
-                            let colorCurve = '#00F0FF'; // Cyan par défaut
+                            // COULEUR DE LA COURBE
+                            let colorCurve = '#00F0FF'; 
                             if (historique7j.length > 1) {
                                 const pointLePlusAncien = historique7j[0];
                                 const pointAujourdhui = historique7j[historique7j.length - 1];
@@ -1675,7 +1715,7 @@
                             });
 
                             htmlInf += `
-                                <div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${colorEtat}; padding: 12px; border-radius: 0 4px 4px 0; margin-bottom: 8px;">
+                                <div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${colorEtat}; padding: 12px; border-radius: 0 4px 4px 0; margin-bottom: 10px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                         <span style="color: #fff; font-weight: bold; font-size: 1.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 65%;">${nomFaction.toUpperCase()}</span>
                                         <span style="color: ${colorEtat}; font-weight: bold; font-size: 0.75em; border: 1px solid ${colorEtat}; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05);">${etatTraduit}</span>
@@ -1699,6 +1739,13 @@
                                     </div>
                                 </div>`;
                         });
+                        
+                        // FERMETURE DU BLOC SYSTÈME
+                        htmlInf += `
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     });
 
                     infCont.innerHTML = htmlInf;
@@ -1944,7 +1991,7 @@
                         const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
                         htmlEx += `
-                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${col}; padding: 8px 10px; margin-bottom: 6px; border-radius: 0 4px 4px 0; font-size: 0.85em;">
+                            <div class="exploit-item" style="background: rgba(0,0,0,0.4); border-left: 3px solid ${col}; padding: 8px 10px; margin-bottom: 6px; border-radius: 0 4px 4px 0; font-size: 0.85em;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
                                     <span style="color: #fff; font-weight: bold;">CMDR ${cmdr}</span>
                                     <span style="color: #888; font-size: 0.9em;">${dateJour} - ${heure}</span>
@@ -2168,140 +2215,25 @@
             sonClic();
             document.getElementById('modal-pilotes').style.display = 'none'; 
         }
-        // --- MODULE BUREAU DU DIRECTEUR ---
+        // --- MODULE REGISTRE ET AUDIT (MOBILE) ---
         async function ouvrirBureauDirecteur() {
             if (!profilCommandant || !profilCommandant.est_directeur) return;
             document.getElementById('modal-bureau-directeur').style.display = 'flex';
-            chargerAttenteDirecteur();
-            chargerMembresDirecteur();
-            chargerAuditDirecteur(); // <-- Ajout de cette ligne
+            chargerRegistreGlobalMobile();
+            chargerAuditDirecteur();
         }
 
         function fermerBureauDirecteur(e) {
-            sonClic();
-            if (e && e.target.id !== 'modal-bureau-directeur') return;
+            if (typeof sonClic === 'function') sonClic();
+            if (e && e.target.id !== 'modal-bureau-directeur' && !e.target.innerText.includes('✕')) return;
             document.getElementById('modal-bureau-directeur').style.display = 'none';
         }
 
-        // --- AFFICHAGE DES GRADES (MOBILE) ---
-        function ouvrirModalGradesMobile(domaine) {
-            sonClic();
-            const titrage = { combat: "COMBAT", trade: "COMMERCE", explore: "EXPLORATION", exobio: "EXOBIOLOGIE", mercenary: "MERCENAIRE" };
-            document.getElementById("grades-modal-title").innerText = "HIÉRARCHIE // " + titrage[domaine];
+        // 1. REGISTRE DES PILOTES (PAR ESCADRON)
+        async function chargerRegistreGlobalMobile() {
+            const cont = document.getElementById('dir-liste-globale-pilotes');
+            if (!cont) return;
             
-            // Correspondance avec le dictionnaire TABLES_ED_RANGS
-            const tableKey = domaine === 'exobio' ? 'exobiologist' : domaine;
-            const liste = TABLES_ED_RANGS[tableKey];
-            
-            // Récupération des données du commandant
-            let monRang = 0;
-            let maProg = 0;
-            
-            if (profilCommandant) {
-                if (domaine === 'combat') { monRang = profilCommandant.rang_combat || 0; maProg = profilCommandant.prog_combat || 0; }
-                if (domaine === 'trade') { monRang = profilCommandant.rang_commerce || 0; maProg = profilCommandant.prog_commerce || 0; }
-                if (domaine === 'explore') { monRang = profilCommandant.rang_explo || 0; maProg = profilCommandant.prog_explore || 0; }
-                if (domaine === 'exobio') { monRang = profilCommandant.rang_exobio || 0; maProg = profilCommandant.prog_exobio || 0; }
-                // NOUVELLE LIGNE AJOUTÉE POUR LE MERCENAIRE
-                if (domaine === 'mercenary') { monRang = profilCommandant.rang_mercenary || 0; maProg = profilCommandant.prog_mercenary || 0; }
-            }
-
-            const container = document.getElementById("grades-list-container");
-            container.innerHTML = "";
-
-            liste.forEach((nomGrade, index) => {
-                const item = document.createElement("div");
-                item.style.padding = "8px 12px";
-                item.style.borderRadius = "4px";
-                item.style.display = "flex";
-                item.style.justifyContent = "space-between";
-                item.style.alignItems = "center";
-                item.style.fontSize = "0.85em";
-
-                if (index < monRang) {
-                    // Grades déjà acquis (Vert)
-                    item.style.background = "rgba(0, 255, 102, 0.05)";
-                    item.style.border = "1px solid rgba(0, 255, 102, 0.2)";
-                    item.innerHTML = `<span style="color:var(--ed-green);">✔ ${nomGrade}</span><span style="color:var(--ed-green); font-size:0.8em;">ACQUIS</span>`;
-                } else if (index === monRang) {
-                    // Grade actuel (Bleu et Orange)
-                    item.style.background = "rgba(0, 240, 255, 0.15)";
-                    item.style.border = "1px solid var(--ed-blue)";
-                    item.innerHTML = `<div><span style="color:#fff; font-weight:bold;">▶ ${nomGrade}</span> <span style="color:var(--ed-orange); font-weight:bold;">(${maProg}%)</span></div><span style="color:var(--ed-blue); font-size:0.8em; font-weight:bold;">ACTUEL</span>`;
-                } else {
-                    // Grades verrouillés (Gris)
-                    item.style.background = "rgba(255, 255, 255, 0.02)";
-                    item.style.border = "1px solid rgba(255, 255, 255, 0.05)";
-                    item.style.opacity = "0.5";
-                    item.innerHTML = `<span style="color:#aaa;">🔒 ${nomGrade}</span>`;
-                }
-                container.appendChild(item);
-            });
-
-            document.getElementById("modal-grades").style.display = "flex";
-        }
-
-        function fermerModalGradesMobile(e) {
-            // Si on clique sur le fond noir ou sur la croix, on ferme
-            if (e && e.target.id !== 'modal-grades' && !e.target.innerText.includes('✕')) return; 
-            sonClic();
-            document.getElementById("modal-grades").style.display = "none";
-        }
-
-        // 1. Charger les comptes en attente d'approbation
-        async function chargerAttenteDirecteur() {
-            const cont = document.getElementById('dir-liste-attente');
-            try {
-                const { data: attentes, error } = await supabaseApp.from('profils')
-                    .select('user_id, cmdr_nom, email, created_at')
-                    .eq('est_approuve', false)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (attentes && attentes.length > 0) {
-                    let html = '';
-                    attentes.forEach(p => {
-                        const nom = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : (p.email || 'NOUVELLE RECRUE');
-                        html += `
-                            <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange); padding: 8px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                                <div>
-                                    <div style="color: #fff; font-weight: bold; font-size: 0.85em;">CMDR ${nom}</div>
-                                    <div style="color: #888; font-size: 0.7em;">${p.email || ''}</div>
-                                </div>
-                                <div style="display: flex; gap: 6px;">
-                                    <button class="m-btn" style="padding: 4px 8px; font-size: 0.75em; border-color: var(--ed-green); color: var(--ed-green); background: rgba(0,255,102,0.1);" onclick="validerPiloteDirecteur('${p.user_id}', true)">VALIDER</button>
-                                    <button class="m-btn" style="padding: 4px 8px; font-size: 0.75em; border-color: var(--ed-red); color: var(--ed-red); background: rgba(255,51,51,0.1);" onclick="validerPiloteDirecteur('${p.user_id}', false)">REFUSER</button>
-                                </div>
-                            </div>`;
-                    });
-                    cont.innerHTML = html;
-                } else {
-                    cont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Aucun pilote en attente d\'approbation.</div>';
-                }
-            } catch (e) {
-                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Erreur de synchronisation des demandes.</div>';
-            }
-        }
-
-        // 2. Valider ou refuser un pilote
-        async function validerPiloteDirecteur(userId, approuve) {
-            try {
-                if (approuve) {
-                    await supabaseApp.from('profils').update({ est_approuve: true }).eq('user_id', userId);
-                } else {
-                    await supabaseApp.from('profils').delete().eq('user_id', userId);
-                }
-                chargerAttenteDirecteur();
-                chargerMembresDirecteur();
-            } catch (e) {
-                alert("Erreur lors du traitement de la recrue.");
-            }
-        }
-
-        // 3. Liste du personnel avec gestion stricte des accréditations (Amiral en lecture seule)
-        async function chargerMembresDirecteur() {
-            const cont = document.getElementById('dir-liste-membres');
             try {
                 const { data: membres, error } = await supabaseApp.from('profils')
                     .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate, est_directeur')
@@ -2311,199 +2243,177 @@
                 if (error) throw error;
 
                 if (membres && membres.length > 0) {
-                    let html = '';
+                    const groupes = {};
                     membres.forEach(m => {
-                        const nom = m.cmdr_nom ? m.cmdr_nom.toUpperCase() : 'PILOTE';
-                        const estMoi = m.user_id === profilCommandant.user_id;
-
-                        // Badge Amiral compact
-                        const badgeAmiral = m.est_amiral 
-                            ? '<span style="color: var(--ed-red); border: 1px solid var(--ed-red); background: rgba(255,51,51,0.15); padding: 2px 4px; border-radius: 2px; font-size: 0.65em; font-weight: bold;">AMIRAL</span>' 
-                            : '';
-
-                        // Bouton révoquer l'accès transformé en petite icône (impossible sur son propre compte)
-                        const btnRevoquer = !estMoi 
-                            ? `<button style="background: rgba(255,51,51,0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 2px 6px; font-size: 0.8em; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--ed-red)'; this.style.color='#000';" onmouseout="this.style.background='rgba(255,51,51,0.1)'; this.style.color='var(--ed-red)';" onclick="revoquerMembreDirecteur('${m.user_id}')" title="Révoquer l'accès">✖</button>` 
-                            : `<div style="width: 24px;"></div>`; // Espace vide pour garder l'alignement sur sa propre ligne
-
-                        // Ligne unique avec flexbox et troncature du nom si l'écran est trop petit
-                        html += `
-                            <div style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--ed-blue); padding: 6px 8px; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center; gap: 4px;">
-                                
-                                <div style="color: #fff; font-weight: bold; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;" title="CMDR ${nom}">
-                                    ${nom} ${estMoi ? '<span style="color:var(--ed-blue); font-size: 0.8em;">[VOUS]</span>' : ''}
-                                </div>
-                                
-                                <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
-                                    ${badgeAmiral}
-                                    <button style="padding: 2px 4px; font-size: 0.65em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_officier ? 'var(--ed-green)' : '#444'}; background: ${m.est_officier ? 'rgba(0,255,102,0.2)' : 'transparent'}; color: ${m.est_officier ? 'var(--ed-green)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_officier', ${!m.est_officier})">OFFICIER</button>
-                                    <button style="padding: 2px 4px; font-size: 0.65em; font-weight: bold; border-radius: 2px; border: 1px solid ${m.est_diplomate ? 'var(--ed-blue)' : '#444'}; background: ${m.est_diplomate ? 'rgba(0,240,255,0.2)' : 'transparent'}; color: ${m.est_diplomate ? 'var(--ed-blue)' : '#666'}; cursor: pointer;" onclick="basculerRoleMembre('${m.user_id}', 'est_diplomate', ${!m.est_diplomate})">DIPLOMATE</button>
-                                    ${btnRevoquer}
-                                </div>
-                                
-                            </div>`;
+                        const squad = m.escadron_id || 'INDÉPENDANT';
+                        if (!groupes[squad]) groupes[squad] = [];
+                        groupes[squad].push(m);
                     });
-                    cont.innerHTML = html;
-                }
-            } catch (e) {
-                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Impossible de charger le personnel.</div>';
-            }
-        }
 
-        // 4. Modifier uniquement Officier ou Diplomate (Amiral est bloqué)
-        async function basculerRoleMembre(userId, champ, nouvelleValeur) {
-            if (champ !== 'est_officier' && champ !== 'est_diplomate') return;
-            try {
-                const updateObj = {};
-                updateObj[champ] = nouvelleValeur;
-                await supabaseApp.from('profils').update(updateObj).eq('user_id', userId);
-                chargerMembresDirecteur();
-                chargerQGMobile();
-            } catch (e) {
-                alert("Erreur lors de la mise à jour des accréditations.");
-            }
-        }
+                    const escadronsTries = Object.keys(groupes).sort((a, b) => {
+                        if (a === 'INDÉPENDANT') return 1;
+                        if (b === 'INDÉPENDANT') return -1;
+                        return a.localeCompare(b);
+                    });
 
-        // 5. Révocation complète de l'accès d'un pilote
-        async function revoquerMembreDirecteur(userId) {
-            if (!confirm("Confirmez-vous la révocation des accès de ce pilote au terminal ?")) return;
-            try {
-                await supabaseApp.from('profils').update({
-                    est_approuve: false,
-                    est_officier: false,
-                    est_diplomate: false,
-                    demande_escadron: null
-                }).eq('user_id', userId);
+                    let html = '';
+                    escadronsTries.forEach(squad => {
+                        html += `
+                            <div style="margin-bottom: 10px;">
+                                <div style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 4px; margin-bottom: 8px;">
+                                    > ${squad.toUpperCase()}
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                        `;
 
-                chargerMembresDirecteur();
-                if (typeof window.chargerAuditDirecteur === 'function') window.chargerAuditDirecteur();
-            } catch (e) {
-                alert("Erreur lors de la révocation de l'accès.");
-            }
-        }
+                        groupes[squad].forEach(m => {
+                            const nom = m.cmdr_nom ? m.cmdr_nom.toUpperCase() : 'PILOTE';
+                            let badges = [];
+                            if (m.est_directeur) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">DIR</span>');
+                            if (m.est_amiral) badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">AMIRAL</span>');
+                            if (m.est_officier && !m.est_amiral) badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">OFFICIER</span>');
+                            if (m.est_diplomate && !m.est_amiral) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">DIPLOMATE</span>');
 
-        // 5. Audit Tactique des activités et télémétrie des pilotes
-        window.chargerAuditDirecteur = async function() {
-        const cont = document.getElementById('dir-liste-audit');
-        if (!cont) return;
-        cont.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.8em; text-align: center; padding: 10px;">Interrogation du réseau télémétrique...</div>';
-
-        try {
-            // Requêtes simultanées sur toutes les tables d'activité
-            const [resProfils, resParams, resTransmissions, resOrdres] = await Promise.all([
-                supabaseApp.from('profils').select('user_id, cmdr_nom, email, created_at').eq('est_approuve', true).order('cmdr_nom'),
-                supabaseApp.from('parametres_app').select('user_id, last_heartbeat, telemetrie_usage, factions_favorites'),
-                supabaseApp.from('transmissions').select('id', { count: 'exact', head: true }),
-                supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }).eq('statut', 'ACTIF')
-            ]);
-
-            const profils = resProfils.data || [];
-            const params = resParams.data || [];
-            const nbMsg = resTransmissions.count || 0;
-            const nbOrdres = resOrdres.count || 0;
-
-            const paramsMap = {};
-            let totalPresence7J = 0;
-            let totalCommsAcces = 0;
-            let totalBgsScans = 0;
-            let totalJournalLectures = 0;
-            let totalCommerceScans = 0;
-            let totalCommerceVisites = 0;
-            const setFactions = new Set();
-
-            const nowMs = Date.now();
-            const nowSec = Math.floor(nowMs / 1000);
-            const septJoursMs = 7 * 24 * 3600 * 1000;
-
-            params.forEach(p => {
-                paramsMap[p.user_id] = p;
-                const tel = p.telemetrie_usage || {};
-                const vis = tel.visites_pages || {};
-                const act = tel.interactions || {};
-
-                // 1. Présence 7J
-                if (tel.derniere_visite_web && (nowMs - new Date(tel.derniere_visite_web).getTime() <= septJoursMs)) {
-                    totalPresence7J++;
-                }
-
-                // 2. Comms
-                totalCommsAcces += (vis.comms || 0);
-
-                // 3. Radar & Scans
-                totalBgsScans += (act.scans_systeme_bgs || 0);
-                if (p.factions_favorites) {
-                    let favs = typeof p.factions_favorites === 'string' ? JSON.parse(p.factions_favorites) : p.factions_favorites;
-                    if (Array.isArray(favs)) {
-                        favs.forEach(f => {
-                            const nom = f.faction || f.nom || f.name;
-                            if (nom) setFactions.add(nom.toUpperCase());
+                            html += `
+                                <div style="background: rgba(0,0,0,0.4); border-left: 3px solid #333; padding: 6px 10px; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #fff; font-weight: bold; font-size: 0.8em;">CMDR ${nom}</span>
+                                    <div style="display: flex; gap: 4px;">
+                                        ${badges.join('')}
+                                    </div>
+                                </div>
+                            `;
                         });
-                    }
+
+                        html += `</div></div>`;
+                    });
+
+                    cont.innerHTML = html;
+                } else {
+                    cont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center;">Aucun pilote enregistré dans la base.</div>';
                 }
-
-                // 4. Journal
-                totalJournalLectures += (act.onglets_bgs_journal || 0);
-
-                // 5. Commerce
-                totalCommerceScans += (act.scans_commerce || 0);
-                totalCommerceVisites += (vis.commerce || 0);
-            });
-
-            // Injection dans les 6 cartes macro
-            document.getElementById('kpi-presence').innerText = `${totalPresence7J} / ${profils.length}`;
-            document.getElementById('kpi-comms').innerText = `${totalCommsAcces} ACCÈS (${nbMsg} MSG)`;
-            document.getElementById('kpi-radar').innerText = `${setFactions.size} FACTIONS (${totalBgsScans} SCANS)`;
-            document.getElementById('kpi-ordres').innerText = `${nbOrdres} ORDRES`;
-            document.getElementById('kpi-journal').innerText = `${totalJournalLectures} LECTURES`;
-            document.getElementById('kpi-commerce').innerText = `${totalCommerceScans} SCANS (${totalCommerceVisites} VIS)`;
-
-            // Injection du registre individuel
-            let html = '';
-            profils.forEach(p => {
-                const nom = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : 'INCONNU';
-                const param = paramsMap[p.user_id] || {};
-                const tel = param.telemetrie_usage || {};
-                const visites = tel.visites_pages || {};
-                const actions = tel.interactions || {};
-
-                const enJeu = param.last_heartbeat && (nowSec - param.last_heartbeat < 30);
-                const statutJeu = enJeu 
-                    ? '<span style="color: var(--ed-green); font-weight: bold; font-size: 0.85em;">🟢 EN VOL</span>' 
-                    : '<span style="color: #666; font-size: 0.85em;">⚪ HORS LIGNE</span>';
-
-                let derniereVisite = 'Jamais';
-                if (tel.derniere_visite_web) {
-                    const d = new Date(tel.derniere_visite_web);
-                    derniereVisite = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                }
-
-                const totalActions = (actions.onglets_bgs_missions || 0) + (actions.onglets_bgs_journal || 0) + (actions.scans_systeme_bgs || 0) + (actions.scans_commerce || 0);
-
-                html += `
-                    <div style="background: rgba(0,0,0,0.5); border-left: 3px solid var(--ed-green); padding: 8px 10px; border-radius: 0 4px 4px 0; font-size: 0.8em;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <span style="color: #fff; font-weight: bold;">CMDR ${nom}</span>
-                            ${statutJeu}
-                        </div>
-                        <div style="display: flex; justify-content: space-between; color: #888; font-size: 0.9em; margin-bottom: 4px;">
-                            <span>Dernier accès Web : <strong style="color: var(--ed-blue);">${derniereVisite}</strong></span>
-                            <span>Actions : <strong style="color: var(--ed-orange);">${totalActions}</strong></span>
-                        </div>
-                        <div style="display: flex; gap: 8px; font-size: 0.85em; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 3px;">
-                            <span>QG: <strong style="color:#fff;">${visites.qg || 0}</strong></span>
-                            <span>BGS: <strong style="color:#fff;">${visites.bgs || 0}</strong></span>
-                            <span>COMMS: <strong style="color:#fff;">${visites.comms || 0}</strong></span>
-                            <span>COMMERCE: <strong style="color:#fff;">${visites.commerce || 0}</strong></span>
-                        </div>
-                    </div>`;
-            });
-
-            cont.innerHTML = html;
-
-        } catch (e) {
-            cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Erreur lors de la génération de l\'audit.</div>';
+            } catch (e) {
+                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Impossible de charger le registre des pilotes.</div>';
+            }
         }
-    };
+
+        // 2. AUDIT TACTIQUE ET TÉLÉMÉTRIE (INCHANGÉ)
+        window.chargerAuditDirecteur = async function() {
+            const cont = document.getElementById('dir-liste-audit');
+            if (!cont) return;
+            cont.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.8em; text-align: center; padding: 10px;">Interrogation du réseau télémétrique...</div>';
+
+            try {
+                const [resProfils, resParams, resTransmissions, resOrdres] = await Promise.all([
+                    supabaseApp.from('profils').select('user_id, cmdr_nom, email, created_at').eq('est_approuve', true).order('cmdr_nom'),
+                    supabaseApp.from('parametres_app').select('user_id, last_heartbeat, telemetrie_usage, factions_favorites'),
+                    supabaseApp.from('transmissions').select('id', { count: 'exact', head: true }),
+                    supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }).eq('statut', 'ACTIF')
+                ]);
+
+                const profils = resProfils.data || [];
+                const params = resParams.data || [];
+                const nbMsg = resTransmissions.count || 0;
+                const nbOrdres = resOrdres.count || 0;
+
+                const paramsMap = {};
+                let totalPresence7J = 0;
+                let totalCommsAcces = 0;
+                let totalBgsScans = 0;
+                let totalJournalLectures = 0;
+                let totalCommerceScans = 0;
+                let totalCommerceVisites = 0;
+                const setFactions = new Set();
+
+                const nowMs = Date.now();
+                const nowSec = Math.floor(nowMs / 1000);
+                const septJoursMs = 7 * 24 * 3600 * 1000;
+
+                params.forEach(p => {
+                    paramsMap[p.user_id] = p;
+                    const tel = p.telemetrie_usage || {};
+                    const vis = tel.visites_pages || {};
+                    const act = tel.interactions || {};
+
+                    // 1. Présence 7J
+                    if (tel.derniere_visite_web && (nowMs - new Date(tel.derniere_visite_web).getTime() <= septJoursMs)) {
+                        totalPresence7J++;
+                    }
+
+                    // 2. Comms
+                    totalCommsAcces += (vis.comms || 0);
+
+                    // 3. Radar & Scans
+                    totalBgsScans += (act.scans_systeme_bgs || 0);
+                    if (p.factions_favorites) {
+                        let favs = typeof p.factions_favorites === 'string' ? JSON.parse(p.factions_favorites) : p.factions_favorites;
+                        if (Array.isArray(favs)) {
+                            favs.forEach(f => {
+                                const nom = f.faction || f.nom || f.name;
+                                if (nom) setFactions.add(nom.toUpperCase());
+                            });
+                        }
+                    }
+
+                    // 4. Journal et Commerce
+                    totalJournalLectures += (act.onglets_bgs_journal || 0);
+                    totalCommerceScans += (act.scans_commerce || 0);
+                    totalCommerceVisites += (vis.commerce || 0);
+                });
+
+                // Mise à jour de la grille des 6 cartes (Raccourcis pour mobile)
+                document.getElementById('kpi-presence').innerText = `${totalPresence7J} / ${profils.length}`;
+                document.getElementById('kpi-comms').innerText = `${totalCommsAcces} VIS. (${nbMsg})`;
+                document.getElementById('kpi-radar').innerText = `${setFactions.size} FAC. (${totalBgsScans})`;
+                document.getElementById('kpi-ordres').innerText = `${nbOrdres} ORDRES`;
+                document.getElementById('kpi-journal').innerText = `${totalJournalLectures} LECTURES`;
+                document.getElementById('kpi-commerce').innerText = `${totalCommerceScans} SC. (${totalCommerceVisites})`;
+
+                // Injection du registre individuel
+                let html = '';
+                profils.forEach(p => {
+                    const nom = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : 'INCONNU';
+                    const param = paramsMap[p.user_id] || {};
+                    const tel = param.telemetrie_usage || {};
+                    const visites = tel.visites_pages || {};
+                    const actions = tel.interactions || {};
+
+                    const enJeu = param.last_heartbeat && (nowSec - param.last_heartbeat < 30);
+                    const statutJeu = enJeu 
+                        ? '<span style="color: var(--ed-green); font-weight: bold; font-size: 0.85em;">🟢 EN VOL</span>' 
+                        : '<span style="color: #666; font-size: 0.85em;">⚪ HORS LIGNE</span>';
+
+                    let derniereVisite = 'Jamais';
+                    if (tel.derniere_visite_web) {
+                        const d = new Date(tel.derniere_visite_web);
+                        derniereVisite = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    }
+
+                    const totalActions = (actions.onglets_bgs_missions || 0) + (actions.onglets_bgs_journal || 0) + (actions.scans_systeme_bgs || 0) + (actions.scans_commerce || 0);
+
+                    html += `
+                        <div style="background: rgba(0,0,0,0.5); border-left: 3px solid var(--ed-green); padding: 8px 10px; border-radius: 0 4px 4px 0; font-size: 0.8em; margin-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">CMDR ${nom}</span>
+                                ${statutJeu}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: #888; font-size: 0.85em; margin-bottom: 5px; gap: 8px;">
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Dernier accès: <strong style="color: var(--ed-blue);">${derniereVisite}</strong></span>
+                                <span style="white-space: nowrap; flex-shrink: 0;">Actions: <strong style="color: var(--ed-orange);">${totalActions}</strong></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85em; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 15px; border-radius: 3px;">
+                                <span>QG: <strong style="color:#fff;">${visites.qg || 0}</strong></span>
+                                <span>BGS: <strong style="color:#fff;">${visites.bgs || 0}</strong></span>
+                                <span>COMM: <strong style="color:#fff;">${visites.commerce || 0}</strong></span>
+                            </div>
+                        </div>`;
+                });
+
+                cont.innerHTML = html;
+
+            } catch (e) {
+                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Erreur lors de la génération de l\'audit.</div>';
+            }
+        };
 
     // --- AFFICHAGE DES DÉTAILS DIPLOMATIQUES (MOBILE) ---
     window.ouvrirModalDiplomatie = function(index, couleur, label) {
@@ -2547,7 +2457,7 @@
 
     // --- AFFICHAGE DES DÉTAILS DE L'ORDRE (MOBILE) ---
     window.ouvrirModalOrdre = async function(index, couleur) {
-        sonClic();
+        if(typeof sonClic === 'function') sonClic();
         const ordre = window.cacheOrdresBgs[index];
         if (!ordre) return;
 
@@ -2557,42 +2467,58 @@
         document.getElementById('ordre-modal-close').style.color = couleur;
         document.getElementById('ordre-modal-type').style.color = couleur;
 
-        document.getElementById('ordre-modal-title').innerText = `DIRECTIVE TACTIQUE #${ordre.id}`;
+        document.getElementById('ordre-modal-title').innerText = `DIRECTIVE #${ordre.id}`;
 
         // 2. Textes standards
-        document.getElementById('ordre-modal-faction').innerText = ordre.faction_cible.toUpperCase();
-        document.getElementById('ordre-modal-systeme').innerText = ordre.systeme_cible.toUpperCase();
+        document.getElementById('ordre-modal-faction').innerText = (ordre.faction_cible || 'INCONNU').toUpperCase();
+        document.getElementById('ordre-modal-systeme').innerText = (ordre.systeme_cible || 'INCONNU').toUpperCase();
         document.getElementById('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
         
         const nomOfficier = ordre.nom_officier_traduit || ordre.auteur_nom || ordre.emetteur_nom || ordre.auteur || 'AMIRAUTÉ';
         document.getElementById('ordre-modal-auteur').innerText = nomOfficier.toUpperCase();
-        
         document.getElementById('ordre-modal-brief').innerText = ordre.briefing_amiral || "Aucun briefing supplémentaire fourni.";
 
         // 3. Calcul de l'effort global et de ta part (en %)
-        const effortsLie = (window.cacheEffortsBgs || []).filter(e => e.ordre_id === ordre.id);
-        const totalPoints = effortsLie.reduce((sum, e) => sum + (Number(e.valeur) || 0), 0);
+        const effortsLie = (window.cacheEffortsBgs || []).filter(e => String(e.ordre_id) === String(ordre.id));
         
-        const mesEfforts = effortsLie.filter(e => e.user_id === profilCommandant.user_id);
-        const mesPoints = mesEfforts.reduce((sum, e) => sum + (Number(e.valeur) || 0), 0);
+        // --- CONVERTISSEUR INTELLIGENT ---
+        const calculerPts = (e) => {
+            const val = Math.abs(Number(e.valeur) || 0);
+            const action = String(e.type_action || '').toUpperCase();
+            
+            // Si c'est explicitement une action financière, OU si la valeur est absurde pour de l'Influence (> 10 000)
+            if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action) || val > 10000) {
+                return val / 2000000;
+            }
+            return val; // Missions, Meurtres, Échecs = 1 pour 1
+        };
+
+        const totalPoints = effortsLie.reduce((sum, e) => sum + calculerPts(e), 0);
+        
+        const mesEfforts = effortsLie.filter(e => String(e.user_id) === String(profilCommandant.user_id));
+        const mesPoints = mesEfforts.reduce((sum, e) => sum + calculerPts(e), 0);
         const monPourcentage = totalPoints > 0 ? ((mesPoints / totalPoints) * 100).toFixed(1) : 0;
 
-        document.getElementById('ordre-modal-total').innerText = `${new Intl.NumberFormat('fr-FR').format(totalPoints)} PTS`;
-        document.getElementById('ordre-modal-part').innerText = `${monPourcentage}% (${new Intl.NumberFormat('fr-FR').format(mesPoints)} PTS)`;
+        // Fonction pour formater proprement (ex: 0.2 PTS au lieu de 0.2347...)
+        const formatPts = (pts) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(pts);
+
+        document.getElementById('ordre-modal-total').innerText = `${formatPts(totalPoints)} PTS`;
+        document.getElementById('ordre-modal-part').innerText = `${monPourcentage}% (${formatPts(mesPoints)} PTS)`;
         document.getElementById('ordre-modal-bar').style.width = `${monPourcentage}%`;
 
         // 4. RÉPARTITION DES POINTS PAR PILOTE
         const pointsParPilote = {};
         effortsLie.forEach(e => {
-            if (!pointsParPilote[e.user_id]) pointsParPilote[e.user_id] = 0;
-            pointsParPilote[e.user_id] += (Number(e.valeur) || 0);
+            const uid = String(e.user_id);
+            if (!pointsParPilote[uid]) pointsParPilote[uid] = 0;
+            pointsParPilote[uid] += calculerPts(e);
         });
 
         const idsParticipants = Object.keys(pointsParPilote);
         const conteneurParticipants = document.getElementById('ordre-modal-participants');
         
         if (idsParticipants.length === 0) {
-            conteneurParticipants.innerHTML = '<div style="color:#666; text-align:center; font-size:0.8em; padding:10px; font-style: italic;">Aucune donnée enregistrée pour cette directive.</div>';
+            conteneurParticipants.innerHTML = '<div style="color:#666; text-align:center; font-size:0.8em; padding:10px; font-style: italic;">Aucune donnée enregistrée.</div>';
         } else {
             conteneurParticipants.innerHTML = '<div style="color:#666; text-align:center; font-size:0.8em; padding:10px; animation: alertPulse 1.5s infinite;">Analyse de la télémétrie...</div>';
             
@@ -2611,16 +2537,16 @@
                     const pct = totalPoints > 0 ? ((pts / totalPoints) * 100).toFixed(1) : 0;
                     const nom = dicoNoms[uid] ? dicoNoms[uid].toUpperCase() : 'INCONNU';
                     
-                    const estMoi = (uid === profilCommandant.user_id);
+                    const estMoi = (String(uid) === String(profilCommandant.user_id));
                     const colorNom = estMoi ? 'var(--ed-blue)' : '#fff';
                     const tagMoi = estMoi ? '<span style="font-size:0.8em; letter-spacing:1px; margin-left: 5px;">(VOUS)</span>' : '';
                     
                     htmlParticipants += `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85em;">
-                        <span style="color: ${colorNom}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">CMDR ${nom} ${tagMoi}</span>
+                        <span style="color: ${colorNom}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${nom} ${tagMoi}</span>
                         <div style="white-space: nowrap;">
                             <span style="color: #aaa; margin-right: 8px;">${pct}%</span>
-                            <strong style="color: ${couleur};">${new Intl.NumberFormat('fr-FR').format(pts)} PTS</strong>
+                            <strong style="color: ${couleur};">${formatPts(pts)} PTS</strong>
                         </div>
                     </div>`;
                 });
@@ -2675,7 +2601,7 @@
                     const article = payload.data[0].attributes;
                     cacheGalnetArticle = { title: article.title, date: article.created, body: article.body ? article.body.value : "Contenu indisponible." };
                     const d = new Date(article.created); d.setFullYear(d.getFullYear() + 1286);
-                    document.getElementById('m-galnet-date').innerText = "Édition : " + d.toLocaleDateString('fr-FR');
+                    document.getElementById('m-galnet-date').innerText = "DERNIÈRE ÉDITION : " + d.toLocaleDateString('fr-FR');
                 }
             } catch (e) { document.getElementById('m-galnet-date').innerText = "Erreur de liaison."; }
         }
@@ -2702,7 +2628,7 @@
                 if (data && data.length > 0) {
                     cacheGazettesMobile = data;
                     const d = new Date(data[0].created_at).toLocaleDateString('fr-FR');
-                    document.getElementById('m-gazette-date').innerText = "> DERNIÈRE ÉDITION : " + d;
+                    document.getElementById('m-gazette-date').innerText = "DERNIÈRE ÉDITION : " + d;
                     
                     const select = document.getElementById('m-gazette-selector');
                     select.innerHTML = '';
@@ -2754,25 +2680,49 @@
                     const buildSection = (titre, liste, couleur) => {
                         if (liste.length === 0) return '';
                         let html = `
-                        <div style="margin-bottom: 10px;">
-                            <div style="color: ${couleur}; font-weight: bold; font-size: 0.9em; letter-spacing: 1px; border-bottom: 1px solid ${couleur}; padding-bottom: 4px; margin-bottom: 8px;">
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: ${couleur}; font-weight: bold; font-size: 0.9em; letter-spacing: 1px; border-bottom: 1px solid ${couleur}; padding-bottom: 6px; margin-bottom: 12px;">
                                 ${titre} [ ${liste.length} ]
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 6px;">`;
+                            <div style="display: flex; flex-direction: column;">`;
                         
                         liste.forEach(c => {
-                            const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
                             let label = c.niveau_menace === 'KOS' ? 'K.O.S' : (c.niveau_menace === 'SUSPECT' ? 'SUSPECT' : 'ALLIÉ');
                             
+                            // SÉCURITÉ ABSOLUE : Vérifier que c.rapport existe ET n'est pas vide
+                            let texteRapport = "";
+                            if (c.rapport && String(c.rapport).trim() !== "" && String(c.rapport) !== "null") {
+                                texteRapport = String(c.rapport).trim();
+                            }
+                            const aUnRapport = (texteRapport.length > 0);
+                            
+                            const safeNom = (c.cmdr_cible || "INCONNU").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                            const safeAuteur = (c.auteur_nom || "INCONNU").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                            const safeRapport = aUnRapport ? texteRapport.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\r?\n/g, "\\n") : "";
+
+                            let indicateurLecture = "";
+                            let actionClic = "";
+                            let styleApparence = "";
+
+                            if (aUnRapport) {
+                                indicateurLecture = `<span style="color: ${couleur}; font-style: italic; white-space: nowrap; margin-left: auto; font-size: 0.85em; font-weight: bold; padding: 2px 6px; background: rgba(255,255,255,0.08); border-radius: 3px;">[ LIRE ]</span>`;
+                                actionClic = `onclick="afficherRapportTactiqueMobile('${safeNom}', '${label}', '${safeAuteur}', '${safeRapport}', '${couleur}')"`;
+                                styleApparence = `cursor: pointer; opacity: 1;`;
+                            } else {
+                                // Design "Éteint", gris, et non-cliquable s'il n'y a pas de rapport
+                                indicateurLecture = `<span style="color: #555; font-style: italic; white-space: nowrap; margin-left: auto; font-size: 0.8em;">[ VIDE ]</span>`; 
+                                actionClic = ``;
+                                styleApparence = `opacity: 0.4; filter: grayscale(30%);`; 
+                            }
+                            
                             html += `
-                            <div style="background: rgba(0,0,0,0.5); border-left: 3px solid ${couleur}; padding: 10px; border-radius: 0 4px 4px 0; cursor: pointer;" 
-                                 onclick="alert('DOSSIER TACTIQUE :\\n\\nCIBLE : CMDR ${c.cmdr_cible}\\nSTATUT : ${label}\\nAUTEUR : CMDR ${c.auteur_nom}\\n\\nRAPPORT : ${txtRapport}')">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <div ${actionClic} style="background: rgba(0,0,0,0.6); border-left: 3px solid ${couleur}; padding: 12px 15px; border-radius: 4px; margin-bottom: 10px; ${styleApparence} transition: opacity 0.2s;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                     <span style="color: #fff; font-weight: bold; font-size: 0.95em;">CMDR ${c.cmdr_cible}</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8em;">
+                                <div style="display: flex; align-items: center; font-size: 0.8em; width: 100%;">
                                     <span style="color: #888;">SYS: ${c.systeme_rencontre}</span>
-                                    <span style="color: ${couleur}; font-style: italic;">[ LIRE LE RAPPORT ]</span>
+                                    ${indicateurLecture}
                                 </div>
                             </div>`;
                         });
@@ -2794,6 +2744,43 @@
                 cont.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 10px;">Erreur de liaison tactique.</div>'; 
             }
         }
+
+        window.afficherRapportTactiqueMobile = function(cible, statut, auteur, rapport, couleur) {
+            if (typeof sonClic === 'function') sonClic();
+            
+            // Stylisation dynamique selon la menace
+            document.getElementById('card-lire-rapport').style.borderColor = couleur;
+            
+            // On gère la transparence du header
+            let rgbaColor = couleur;
+            if (couleur.startsWith('#')) {
+                const hex = couleur.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                rgbaColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
+            } else if (couleur.startsWith('var')) {
+                // Mapping simplifié si tu utilises tes variables CSS
+                if (couleur.includes('orange')) rgbaColor = 'rgba(255, 113, 0, 0.1)';
+                else if (couleur.includes('blue')) rgbaColor = 'rgba(0, 240, 255, 0.1)';
+            }
+            
+            document.getElementById('header-lire-rapport').style.background = rgbaColor;
+            document.getElementById('header-lire-rapport').style.borderBottomColor = couleur;
+            
+            document.getElementById('titre-lire-rapport').style.color = couleur;
+            document.getElementById('close-lire-rapport').style.color = couleur;
+            document.getElementById('statut-lire-rapport').style.color = couleur;
+
+            // Injection des textes
+            document.getElementById('cible-lire-rapport').innerText = `CMDR ${cible.toUpperCase()}`;
+            document.getElementById('statut-lire-rapport').innerText = `STATUT : ${statut}`;
+            document.getElementById('auteur-lire-rapport').innerText = `CMDR ${auteur.toUpperCase()}`;
+            document.getElementById('texte-lire-rapport').innerText = rapport;
+
+            // Affichage
+            document.getElementById('modal-lire-rapport').style.display = 'flex';
+        };
 
         function ouvrirRegistreMobile() {
             if (typeof sonClic === 'function') sonClic();
@@ -3053,6 +3040,46 @@
             modal.style.display = 'flex';
         };
 
+        // --- FILTRE DU JOURNAL DES EXPLOITS ---
+        window.filtrerJournalExploitsMobile = function() {
+            // On récupère le texte tapé (en majuscule pour ignorer la casse)
+            const input = document.getElementById('m-filtre-exploits').value.toUpperCase();
+            // On cible toutes les cartes d'exploits
+            const items = document.querySelectorAll('#m-exploits-container .exploit-item');
+            
+            items.forEach(item => {
+                // On récupère tout le texte de la carte (CMDR, OP, type d'action...)
+                const texte = item.innerText.toUpperCase();
+                // Si le texte tapé est trouvé dedans, on l'affiche, sinon on le cache
+                if (texte.includes(input)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        };
+
     </script>
+
+    <!-- MODAL LECTURE RAPPORT TACTIQUE (MOBILE) -->
+    <div class="modal-overlay" id="modal-lire-rapport" onclick="document.getElementById('modal-lire-rapport').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 7000; padding: 20px;">
+        <div class="card" id="card-lire-rapport" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: #FF3333;" onclick="event.stopPropagation()">
+            <div id="header-lire-rapport" style="padding: 15px; border-bottom: 1px solid #FF3333; display: flex; justify-content: space-between; align-items: center; background: rgba(255,51,51,0.1);">
+                <span id="titre-lire-rapport" style="color: #FF3333; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">DOSSIER TACTIQUE</span>
+                <span id="close-lire-rapport" style="color: #FF3333; font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-lire-rapport').style.display='none'">✕</span>
+            </div>
+            <div style="padding: 20px; overflow-y: auto;">
+                <h3 id="cible-lire-rapport" style="color: #fff; margin-top: 0; margin-bottom: 5px; font-size: 1.3em;">CMDR INCONNU</h3>
+                <div id="statut-lire-rapport" style="color: #FF3333; font-weight: bold; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px dashed #333; padding-bottom: 10px;">STATUT : INCONNU</div>
+                
+                <div style="color: #888; font-size: 0.85em; margin-bottom: 5px;">> SIGNALÉ PAR :</div>
+                <div id="auteur-lire-rapport" style="color: #ccc; font-weight: bold; margin-bottom: 15px;">CMDR ...</div>
+
+                <div style="color: #888; font-size: 0.85em; margin-bottom: 5px;">> RAPPORT D'INCIDENT :</div>
+                <div id="texte-lire-rapport" style="color: #eee; line-height: 1.5; font-size: 0.95em; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 4px; border: 1px solid #333;">...</div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
