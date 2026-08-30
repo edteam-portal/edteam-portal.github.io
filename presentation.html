@@ -30,6 +30,9 @@
             scroll-behavior: smooth;
         }
 
+        /* Bloquer le scroll tant que le sas est actif */
+        body.locked { overflow: hidden; height: 100vh; }
+
         .scanline {
             position: fixed; top: 0; left: 0; width: 100%; height: 2px;
             background: var(--ed-blue);
@@ -48,7 +51,41 @@
         .sub-data { display: block; color: #555; font-size: 0.8em; letter-spacing: 4px; margin-bottom: 10px; font-weight: bold; }
 
         /* =========================================
-           HERO SECTION (ÉCRAN D'ACCUEIL)
+           LE SAS D'ENTRÉE (SPLASH SCREEN ROLEPLAY)
+           ========================================= */
+        #sas-entree {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #010203;
+            background-image: radial-gradient(circle at center, #0a1118 0%, #000 100%);
+            z-index: 100000; /* Toujours au-dessus de tout */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center;
+            transition: opacity 1.5s ease-in-out, visibility 1.5s;
+        }
+        
+        #sas-entree .logo-sas {
+            width: 120px; height: 120px; margin-bottom: 30px;
+            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
+            animation: pulse-logo 2s infinite alternate ease-in-out;
+        }
+
+        .sas-box {
+            border: 1px solid var(--ed-blue);
+            background: rgba(0, 240, 255, 0.03);
+            padding: 40px 60px;
+            box-shadow: inset 0 0 40px rgba(0,240,255,0.05), 0 0 50px rgba(0,0,0,0.8);
+            border-radius: 4px;
+        }
+
+        .sas-warning {
+            color: var(--ed-orange);
+            font-size: 0.9em; letter-spacing: 2px;
+            margin-bottom: 30px; margin-top: 20px;
+            animation: pulse-logo 1.5s infinite alternate;
+        }
+
+        /* =========================================
+           HERO SECTION
            ========================================= */
         .hero-section {
             height: 100vh;
@@ -88,6 +125,15 @@
             background: var(--ed-orange); color: #000; box-shadow: 0 0 60px var(--ed-orange), inset 0 0 20px #fff;
             transform: scale(1.05); border-color: #fff;
         }
+        
+        .btn-cyan {
+            border-color: var(--ed-blue);
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+        .btn-cyan:hover {
+            background: var(--ed-blue); color: #000; box-shadow: 0 0 60px var(--ed-blue), inset 0 0 20px #fff;
+        }
 
         /* CORRECTIONS POUR ÉCRANS 14" ET PETITS PC */
         @media (max-width: 1366px), (max-height: 800px) {
@@ -95,7 +141,6 @@
             .main-title { font-size: 3.8em; letter-spacing: 5px; margin-bottom: 20px; }
             .sub-title { font-size: 1.2em; margin-bottom: 35px; max-width: 800px; }
             .btn-massive { padding: 15px 40px; font-size: 1.3em; }
-            #audio-toggle-btn { padding: 10px 15px !important; font-size: 0.9em !important; bottom: 20px !important; right: 20px !important; }
         }
 
         /* =========================================
@@ -146,49 +191,41 @@
             .holo-card, .feature-grid.reverse .holo-card { transform: none !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
             .main-title { font-size: 3em; }
             .steps-container { grid-template-columns: 1fr; }
+            .sas-box { padding: 30px 20px; }
         }
-
-        /* =========================================
-           CORRECTIONS SPÉCIFIQUES SMARTPHONES
-           ========================================= */
-        @media (max-width: 768px) {
-            .container { padding: 0 20px; }
-            .logo-giant { width: 80px; height: 80px; margin-bottom: 20px; }
-            .main-title { font-size: 2.2em; letter-spacing: 3px; line-height: 1.3; margin-bottom: 15px; }
-            .sub-title { font-size: 1em; margin-bottom: 30px; letter-spacing: 1px; }
-            .btn-massive { padding: 15px 20px; font-size: 1.1em; width: 100%; box-sizing: border-box; text-align: center; }
-            
-            .section { padding: 60px 0; }
-            .section-title { font-size: 2em; margin-bottom: 40px; letter-spacing: 2px; }
-            
-            .feature-grid, .feature-grid.reverse { gap: 20px; margin-bottom: 60px; }
-            .feature-text { padding: 25px 20px; border-left-width: 2px; }
-            .feature-grid.reverse .feature-text { border-right-width: 2px; }
-            .feature-text h3 { font-size: 1.5em; letter-spacing: 2px; }
-            .feature-text p { font-size: 1em; line-height: 1.5; }
-            
-            .holo-container { padding: 10px; }
-            
-            .step-box { padding: 30px 15px; }
-            .step-number { font-size: 4em; margin-bottom: -20px; }
-            .step-title { font-size: 1.3em; }
-
-            /* On réduit le bouton audio et on cache le texte pour gagner de la place */
-            #audio-toggle-btn { 
-                bottom: 15px !important; 
-                right: 15px !important; 
-                padding: 12px !important; 
-                border-radius: 50% !important; /* Devient complètement rond */
-            }
-            #audio-text { display: none; } /* Ne garde que l'icône 📻 */
-        }
-
     </style>
 </head>
-<body>
+<!-- On bloque le défilement au démarrage pour piéger le joueur dans le SAS -->
+<body class="locked">
 
     <div class="scanline"></div>
 
+    <!-- =========================================
+         LE SAS D'ONBOARDING
+         ========================================= -->
+    <div id="sas-entree">
+        <svg class="logo-sas" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+            <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+            <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+        </svg>
+        
+        <div class="sas-box">
+            <h2 class="neon-blue" style="font-size: 2.5em; letter-spacing: 4px; margin-bottom: 15px;">RÉSEAU SÉCURISÉ TACTIQUE</h2>
+            <p style="color: #aaa; font-size: 1.2em; margin-bottom: 5px;">Accréditation locale requise pour l'accès aux données.</p>
+            
+            <div class="sas-warning">
+                >_ SYSTÈME AUDIO SPATIALISÉ DÉTECTÉ. CASQUE RECOMMANDÉ.
+            </div>
+
+            <button class="btn-massive btn-cyan" onclick="deverrouillerTerminal()">[ ÉTABLIR LA LIAISON ]</button>
+        </div>
+    </div>
+
+
+    <!-- =========================================
+         LE RESTE DU SITE (Caché en dessous du SAS)
+         ========================================= -->
     <header class="hero-section">
         <div class="container">
             <svg class="logo-giant" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -201,6 +238,7 @@
             <h1 class="main-title neon-blue">UNIFIEZ LA FLOTTE.<br><span class="neon-orange">GAGNEZ LA GUERRE.</span></h1>
             <p class="sub-title">Le renseignement est votre meilleure arme. Découvrez <strong>SYS.EDTEAM</strong>, le réseau tactique qui connecte l'ordinateur de bord de votre vaisseau au commandement central de l'escadron en temps réel.</p>
             
+            <!-- Lien vers le vrai site / l'appli -->
             <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
         </div>
     </header>
@@ -209,7 +247,7 @@
         <div class="container" style="text-align: center; max-width: 1000px;">
             <h2 class="section-title neon-orange" style="margin-bottom: 40px;">LA FIN DES EFFORTS FANTÔMES</h2>
             <p style="font-size: 1.6em; line-height: 1.8; color: #bbb;">
-                Jusqu'à aujourd'hui, vous voliez parfois à l'aveugle. La télémétrie était floue, et vos exploits individuels pouvaient passer inaperçus.<br><br>
+                Jusqu'à aujourd'hui, vous voliez à l'aveugle. Les directives se perdaient, la télémétrie était floue, et vos exploits individuels passaient inaperçus.<br><br>
                 <strong class="text-orange" style="font-size: 1.2em; text-shadow: 0 0 20px rgba(255,113,0,0.5);">L'ère du tableau Excel est révolue.</strong><br><br>
                 Désormais, chaque saut hyperspatial, chaque crédit gagné, et chaque tir de laser alimente le Background Simulation (BGS) en direct. <br><strong style="color: #fff;">Vous volez. Le système s'occupe du reste.</strong>
             </p>
@@ -243,9 +281,61 @@
                 </div>
             </div>
 
+            <!-- LE NOUVEAU BLOC : COVAS IA EMBARQUÉE -->
             <div class="feature-grid">
+                <div class="feature-text" style="border-left-color: #00FF66; box-shadow: inset 30px 0 80px rgba(0,255,102,0.05);">
+                    <span class="sub-data" style="color: #00FF66;">// MODULE 03 : IA EMBARQUÉE</span>
+                    <h3 style="color: #00FF66; text-shadow: 0 0 20px rgba(0,255,102,0.4);">ASSISTANCE HOLOGRAPHIQUE EN DIRECT</h3>
+                    <p>Votre ordinateur de bord est désormais connecté aux archives de l'escadron. L'interface se superpose automatiquement à votre cockpit selon la situation :</p>
+                    
+                    <ul style="color: #bbb; font-size: 1.1em; line-height: 1.6; padding-left: 20px; margin-bottom: 20px;">
+                        <li style="margin-bottom: 15px;"><strong style="color: #fff;">SCAN AU SAUT HYPERSPATIAL :</strong> À la sortie du saut, le système analyse le secteur. Factions hostiles présentes ? Ordres de l'Amirauté actifs ? Vous êtes briefé avant même de dépasser l'étoile.</li>
+                        <li><strong style="color: #fff;">VERROUILLAGE TACTIQUE :</strong> Ciblez un vaisseau en super-navigation. Le COVAS croise son identité avec nos bases de données. Fiche individuelle et statuts diplomatiques de son escadron s'affichent instantanément. Ne tirez plus à l'aveugle.</li>
+                    </ul>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card" style="border-color: #00FF66; box-shadow: -30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 255, 102, 0.2);">
+                        
+                        <!-- FAUSSE IMAGE GÉNÉRÉE EN HTML/CSS (La Modale COVAS) -->
+                        <div style="background: rgba(10, 0, 0, 0.95); padding: 25px; font-family: 'Share Tech Mono', monospace; width: 100%; box-sizing: border-box; text-align: left; position: relative; z-index: 1;">
+                            
+                            <div style="color: var(--ed-red); font-size: 1.2em; font-weight: bold; border-bottom: 1px dashed var(--ed-red); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 2px; display: flex; justify-content: space-between;">
+                                <span>⚠️ ALERTE TACTIQUE</span>
+                                <span style="opacity: 0.5;">SYS.EDTEAM</span>
+                            </div>
+                            
+                            <div style="font-size: 1.1em; margin-bottom: 20px; color: #ddd;">
+                                CIBLE VERROUILLÉE : <strong style="color: #fff; letter-spacing: 1px;">CMDR VINKILL</strong> 
+                                <span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ ICE ]</span>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid #333;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span style="color: #888; font-size: 0.85em;">DOSSIER INDIVIDUEL :</span>
+                                    <strong style="color: #000; background: var(--ed-red); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 10px var(--ed-red); animation: pulse-logo 1.5s infinite alternate;">K.O.S (HOSTILE) ⓘ</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span style="color: #888; font-size: 0.85em;">TRAITÉ ESCADRON <span style="color:var(--ed-orange);">[ ICE ]</span> :</span>
+                                    <strong style="color: var(--ed-red);">⚔️ CIBLE HOSTILE</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
+                                    <span style="color: #888; font-size: 0.85em;">RÉSEAU EDTEAM :</span>
+                                    <strong style="color: #000; background: var(--ed-blue); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 10px var(--ed-blue);">✓ RÉPERTORIÉ</strong>
+                                </div>
+                            </div>
+                            
+                            <div style="color: #555; font-size: 0.8em; margin-top: 20px; font-weight: bold; text-align: center;">
+                                [ ANALYSE COMPLÈTE... ] <span style="animation: pulse-logo 1s infinite alternate;">_</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-grid reverse">
                 <div class="feature-text">
-                    <span class="sub-data">// MODULE 03 : ÉTATS DE SERVICE</span>
+                    <span class="sub-data">// MODULE 04 : ÉTATS DE SERVICE</span>
                     <h3 class="neon-blue">FORGEZ VOTRE LÉGENDE</h3>
                     <p>Votre implication ne passera plus sous le radar. Le terminal analyse vos prouesses économiques ou militaires et attribue automatiquement le titre de <strong>Spécialiste de l'Escadron</strong> aux meilleurs (Fer de Lance, Maître Logisticien, Magnat...).</p>
                     <p>Participez aux campagnes de guerre pour décrocher des Citations d'Honneur et voir votre pseudo trôner sur le tableau de la Force de Frappe.</p>
@@ -255,9 +345,9 @@
                 </div>
             </div>
 
-            <div class="feature-grid reverse">
+            <div class="feature-grid">
                 <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 04 : LOGISTIQUE LOURDE</span>
+                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 05 : LOGISTIQUE LOURDE</span>
                     <h3 class="neon-orange">GUERRE ÉCONOMIQUE TOTALE</h3>
                     <p>Financez l'effort de guerre. Le <strong>Radar de Commerce Furtif</strong> scrute le marché galactique et croise la soute de votre Fleet Carrier avec les bases de données EDSM.</p>
                     <p>Repérez en un clic les stations les plus lucratives, détectez les filons prédictifs cachés, et inondez le marché noir sans jamais quitter votre cockpit.</p>
@@ -267,71 +357,9 @@
                 </div>
             </div>
 
-            <!-- BLOC NOUVEAU : COVAS TACTIQUE -->
-            <div class="feature-grid">
+            <div class="feature-grid reverse">
                 <div class="feature-text">
-                    <span class="sub-data" style="color: #00FF66;">// MODULE 03 : IA EMBARQUÉE</span>
-                    <h3 style="color: #00FF66; text-shadow: 0 0 20px rgba(0,255,102,0.4);">ASSISTANCE HOLOGRAPHIQUE EN DIRECT</h3>
-                    <p>Votre ordinateur de bord est désormais connecté aux archives de l'escadron. L'interface se superpose automatiquement à votre cockpit selon la situation :</p>
-                    
-                    <ul style="color: #bbb; font-size: 1.1em; line-height: 1.6; padding-left: 20px; margin-bottom: 20px;">
-                        <li style="margin-bottom: 15px;"><strong style="color: #fff;">SCAN AU SAUT HYPERSPATIAL :</strong> À la sortie du saut, le système analyse le secteur. Factions hostiles présentes ? Ordres de l'Amirauté actifs ? Marchés lucratifs ? Vous êtes briefé avant même de dépasser l'étoile.</li>
-                        <li><strong style="color: #fff;">VERROUILLAGE TACTIQUE :</strong> Ciblez un vaisseau en super-navigation. Le COVAS croise son identité avec nos bases de données. Fiche individuelle (Suspect, K.O.S, Allié VIP) et statuts diplomatiques de son escadron s'affichent instantanément. Ne tirez plus à l'aveugle.</li>
-                    </ul>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card" style="border-color: #00FF66; box-shadow: -30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 255, 102, 0.2);">
-                        <!-- N'oublie pas de mettre une image de ta modale COVAS ici (ex: covas.png) -->
-                        <!-- FAUSSE IMAGE GÉNÉRÉE EN HTML/CSS (Modale COVAS) -->
-<div style="background: rgba(10, 0, 0, 0.95); border: 2px solid var(--ed-red); box-shadow: 0 0 50px rgba(255, 51, 51, 0.4); border-radius: 4px; padding: 25px; font-family: 'Share Tech Mono', monospace; width: 100%; box-sizing: border-box; text-align: left; position: relative; z-index: 1;">
-    
-    <!-- En-tête Alerte -->
-    <div style="color: var(--ed-red); font-size: 1.2em; font-weight: bold; border-bottom: 1px dashed var(--ed-red); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 2px; display: flex; justify-content: space-between;">
-        <span>⚠️ ALERTE TACTIQUE</span>
-        <span style="opacity: 0.5;">SYS.EDTEAM</span>
-    </div>
-    
-    <!-- Cible Verrouillée -->
-    <div style="font-size: 1.1em; margin-bottom: 20px; color: #ddd;">
-        CIBLE VERROUILLÉE : <strong style="color: #fff; letter-spacing: 1px;">CMDR VINKILL</strong> 
-        <span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ ICE ]</span>
-    </div>
-    
-    <!-- Boîte de Renseignement -->
-    <div style="padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid #333;">
-        
-        <!-- Ligne 1 : Registre Tactique -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <span style="color: #888;">DOSSIER INDIVIDUEL :</span>
-            <strong style="color: #000; background: var(--ed-red); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 10px var(--ed-red); animation: pulse-logo 1.5s infinite alternate;">K.O.S (HOSTILE) ⓘ</strong>
-        </div>
-        
-        <!-- Ligne 2 : Diplomatie -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <span style="color: #888;">TRAITÉ ESCADRON <span style="color:var(--ed-orange);">[ ICE ]</span> :</span>
-            <strong style="color: var(--ed-red);">⚔️ CIBLE HOSTILE</strong>
-        </div>
-        
-        <!-- Ligne 3 : Statut App -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
-            <span style="color: #888;">RÉSEAU EDTEAM :</span>
-            <strong style="color: #000; background: var(--ed-blue); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 10px var(--ed-blue);">✓ RÉPERTORIÉ</strong>
-        </div>
-        
-    </div>
-    
-    <!-- Curseur clignotant -->
-    <div style="color: #555; font-size: 0.8em; margin-top: 20px; font-weight: bold; text-align: center;">
-        [ ANALYSE COMPLÈTE... ] <span style="animation: pulse-logo 1s infinite alternate;">_</span>
-    </div>
-</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// MODULE 05 : CRYPTOGRAPHIE</span>
+                    <span class="sub-data">// MODULE 06 : CRYPTOGRAPHIE</span>
                     <h3 class="neon-blue">SÉCURITÉ MILITAIRE</h3>
                     <p>Coordonnez-vous via les <strong>Communications Holographiques</strong> intégrées. Canal privé, canal d'escadron ou fréquences de coalition.</p>
                     <p>Pour prévenir toute interception par l'ennemi, l'intégralité du registre de communication est purgée et détruite automatiquement à chaque nouveau cycle galactique (Tick). Ne laissez aucune trace.</p>
@@ -341,9 +369,9 @@
                 </div>
             </div>
 
-            <div class="feature-grid reverse" style="margin-bottom: 0;">
+            <div class="feature-grid" style="margin-bottom: 0;">
                 <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 06 : LIAISON DISTANTE</span>
+                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 07 : LIAISON DISTANTE</span>
                     <h3 class="neon-orange">LE COMMANDEMENT DANS LA POCHE</h3>
                     <p>Pas devant votre PC ? L'Amirauté vous accompagne partout.</p>
                     <p>Connectez-vous depuis votre smartphone pour accéder à l'application <strong>Compagnon Mobile</strong>. Suivez le compte à rebours du Tick, gardez un œil sur le statut de la flotte, ou communiquez avec vos ailiers en plein vol directement depuis votre téléphone.</p>
@@ -391,14 +419,8 @@
     </footer>
 
     <!-- =========================================
-         MOTEUR AUDIO (ORCHESTRE CINÉMATIQUE / RYTHME & CHOEURS)
+         MOTEUR AUDIO & LOGIQUE DU SAS D'ENTRÉE
          ========================================= -->
-    
-    <div id="audio-toggle-btn" onclick="toggleMajesticMusic()" style="position: fixed; bottom: 30px; right: 30px; background: rgba(0, 240, 255, 0.05); border: 2px solid var(--ed-blue); padding: 15px 25px; color: var(--ed-blue); font-family: 'Share Tech Mono', monospace; font-size: 1.1em; font-weight: bold; cursor: pointer; letter-spacing: 2px; border-radius: 4px; box-shadow: 0 0 20px rgba(0,240,255,0.1); z-index: 10000; transition: 0.3s; backdrop-filter: blur(5px); text-transform: uppercase; display: flex; align-items: center; gap: 10px;">
-        <span id="audio-icon" style="font-size: 1.4em; animation: pulse-logo 2s infinite alternate;">📻</span>
-        <span id="audio-text">ACTIVER LA SYMPHONIE</span>
-    </div>
-
     <script>
         let majesticCtx = null;
         let isMajesticPlaying = false;
@@ -407,10 +429,9 @@
         let scheduleTimer = null;
         
         let nextBeatTime = 0;
-        let current16th = 0; // Séquenceur en double-croches pour le rythme ostinato
+        let currentEighth = 0; 
         let measure = 0;
 
-        // Progression d'accords majestueuse et héroïque
         const majesticChords = [
             { bass: 65.41, pad: [130.81, 155.56, 196.00] }, // Cm
             { bass: 51.91, pad: [103.83, 130.81, 155.56] }, // Ab
@@ -418,49 +439,60 @@
             { bass: 58.27, pad: [116.54, 146.83, 174.61] }  // Bb
         ];
 
-        // Mélodie épique (French Horn) qui plane par-dessus
         const hornMelody = [
-            { step: 0,  note: 261.63, dur: 16 }, // C4
-            { step: 16, note: 311.13, dur: 8 },  // Eb4
-            { step: 24, note: 392.00, dur: 8 },  // G4
-            { step: 32, note: 349.23, dur: 24 }, // F4
-            { step: 56, note: 233.08, dur: 8 },  // Bb3
-            { step: 64, note: 311.13, dur: 16 }, // Eb4
-            { step: 80, note: 261.63, dur: 16 }, // C4
-            { step: 96, note: 293.66, dur: 32 }  // D4
+            { step: 0,  note: 261.63, dur: 16 }, 
+            { step: 16, note: 311.13, dur: 8 },  
+            { step: 24, note: 392.00, dur: 8 },  
+            { step: 32, note: 349.23, dur: 24 }, 
+            { step: 56, note: 233.08, dur: 8 },  
+            { step: 64, note: 311.13, dur: 16 }, 
+            { step: 80, note: 261.63, dur: 16 }, 
+            { step: 96, note: 293.66, dur: 32 }  
         ];
 
-        function toggleMajesticMusic() {
-            const btn = document.getElementById('audio-toggle-btn');
-            const txt = document.getElementById('audio-text');
-            const icon = document.getElementById('audio-icon');
+        // --- LA FONCTION MAGIQUE DU SAS ---
+        function deverrouillerTerminal() {
+            // 1. Initialiser le contexte Audio (le navigateur autorise le son car l'utilisateur a cliqué sur un bouton)
+            if (!majesticCtx) majesticCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (majesticCtx.state === 'suspended') majesticCtx.resume();
+            
+            // 2. Lancer la Symphonie
+            isMajesticPlaying = true;
+            initMajesticEngine();
+            
+            // Petit son de validation UI pour le clic
+            playUIValidation();
 
-            if (isMajesticPlaying) {
-                isMajesticPlaying = false;
-                clearTimeout(scheduleTimer);
-                if (masterGain) {
-                    masterGain.gain.linearRampToValueAtTime(0, majesticCtx.currentTime + 3);
-                }
-                btn.style.borderColor = 'var(--ed-blue)';
-                btn.style.background = 'rgba(0, 240, 255, 0.05)';
-                btn.style.color = 'var(--ed-blue)';
-                btn.style.boxShadow = '0 0 20px rgba(0,240,255,0.1)';
-                txt.innerText = "ACTIVER LA SYMPHONIE";
-                icon.innerText = "📻";
-            } else {
-                if (!majesticCtx) majesticCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (majesticCtx.state === 'suspended') majesticCtx.resume();
-                
-                isMajesticPlaying = true;
-                initMajesticEngine();
-                
-                btn.style.borderColor = '#00FF66';
-                btn.style.background = 'rgba(0, 255, 102, 0.1)';
-                btn.style.color = '#00FF66';
-                btn.style.boxShadow = '0 0 30px rgba(0,255,102,0.4)';
-                txt.innerText = "SYMPHONIE SPATIALE EN LIGNE";
-                icon.innerText = "🎵";
-            }
+            // 3. Faire disparaître le Sas en fondu
+            const sas = document.getElementById('sas-entree');
+            sas.style.opacity = '0';
+            
+            // 4. Débloquer le scroll du site
+            document.body.classList.remove('locked');
+
+            // 5. Retirer le Sas du DOM après le fondu pour ne pas bloquer les clics sur la page
+            setTimeout(() => {
+                sas.style.visibility = 'hidden';
+                sas.style.display = 'none';
+            }, 1500);
+        }
+
+        // Bruitage technologique au clic du bouton
+        function playUIValidation() {
+            if (!majesticCtx) return;
+            const t = majesticCtx.currentTime;
+            const osc = majesticCtx.createOscillator();
+            const gain = majesticCtx.createGain();
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(3000, t);
+            osc.frequency.exponentialRampToValueAtTime(1500, t + 0.05);
+            
+            gain.gain.setValueAtTime(0.05, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+            
+            osc.connect(gain); gain.connect(majesticCtx.destination);
+            osc.start(t); osc.stop(t + 0.1);
         }
 
         function initMajesticEngine() {
@@ -470,7 +502,6 @@
             masterGain.gain.setValueAtTime(0, t);
             masterGain.gain.linearRampToValueAtTime(0.7, t + 4); 
             
-            // Écho d'immense salle de concert
             concertHallDelay = majesticCtx.createDelay();
             concertHallDelay.delayTime.value = 0.8; 
             
@@ -488,7 +519,7 @@
             
             masterGain.connect(majesticCtx.destination);
 
-            current16th = 0; 
+            currentEighth = 0; 
             measure = 0;
             nextBeatTime = majesticCtx.currentTime + 0.1;
             scheduler();
@@ -497,64 +528,56 @@
         function scheduler() {
             if (!isMajesticPlaying) return;
             
-            // Tempo dynamique : 75 BPM
             const secondsPerBeat = 60.0 / 75.0;
-            const secondsPer16th = secondsPerBeat / 4;
+            const secondsPerEighth = secondsPerBeat / 2; 
 
             while (nextBeatTime < majesticCtx.currentTime + 0.1) {
-                composeOrchestra(current16th, measure, nextBeatTime, secondsPer16th);
+                composeOrchestra(currentEighth, measure, nextBeatTime, secondsPerEighth);
                 
-                nextBeatTime += secondsPer16th;
-                current16th++;
+                nextBeatTime += secondsPerEighth;
+                currentEighth++;
                 
-                // Une mesure = 16 double-croches (4 temps)
-                if (current16th === 16) {
-                    current16th = 0; 
+                if (currentEighth === 8) { 
+                    currentEighth = 0; 
                     measure++;
                 }
             }
             scheduleTimer = setTimeout(scheduler, 25);
         }
 
-        function composeOrchestra(step16, meas, time, stepDur) {
+        function composeOrchestra(step8, meas, time, stepDur) {
             const chordIndex = meas % 4; 
             const currentChord = majesticChords[chordIndex];
-            const globalStep = (meas % 8) * 16 + step16;
+            const globalStep = (meas % 8) * 8 + step8; 
 
-            // 1. LES NAPPES DE CORDES ET CHOEURS (Au début de chaque mesure)
-            if (step16 === 0) {
-                playOrchestralPad(time, currentChord.pad, stepDur * 16);
-                playDeepCello(time, currentChord.bass, stepDur * 16);
-                playEpicChoir(time, currentChord.pad, stepDur * 16);
+            if (step8 === 0) {
+                playOrchestralPad(time, currentChord.pad, stepDur * 8);
+                playDeepCello(time, currentChord.bass, stepDur * 8);
+                playEpicChoir(time, currentChord.pad, stepDur * 8);
             }
 
-            // 2. TIMBALES D'ORCHESTRE (Timpani)
-            if (step16 === 0) playTimpaniHit(time, currentChord.bass, 0.9);
-            // Relance syncopée à la fin de certaines mesures
-            if (meas % 2 === 1 && step16 === 12) playTimpaniHit(time, currentChord.bass, 0.4);
-            if (meas % 2 === 1 && step16 === 14) playTimpaniHit(time, currentChord.bass, 0.7);
+            if (step8 === 0) playTimpaniHit(time, currentChord.bass, 0.9);
+            if (meas % 2 === 1 && step8 === 6) {
+                playTimpaniHit(time, currentChord.bass, 0.4);
+                playTimpaniHit(time + 0.5, currentChord.bass, 0.6);
+            }
 
-            // 3. LA LIGNE DE BASSE RYTHMIQUE (Ostinato)
-            if (step16 % 2 === 0 && step16 !== 0) {
+            if (step8 % 2 === 0 && step8 !== 0) {
                 playRhythmicBass(time, currentChord.bass, 0.35);
             }
-            if (step16 % 4 === 3) {
+            if (step8 % 4 === 3) {
                 playRhythmicBass(time, currentChord.bass, 0.2);
             }
 
-            // 4. LA MÉLODIE HÉROÏQUE (Cors d'harmonie)
             const hornNote = hornMelody.find(m => m.step === globalStep);
             if (hornNote) {
                 playFrenchHorn(time, hornNote.note, hornNote.dur * stepDur);
             }
 
-            // 5. TÉLÉCHARGEMENT DE DONNÉES (Burst prolongé, très espionnage SF)
-            if (meas % 2 === 1 && step16 === 4) {
+            if (meas % 2 === 1 && step8 === 4) {
                 playDataDownload(time);
             }
         }
-
-        // --- LES INSTRUMENTS "ORCHESTRAUX" ---
 
         function playOrchestralPad(time, freqs, duration) {
             freqs.forEach((f) => {
@@ -605,10 +628,8 @@
             const gain = majesticCtx.createGain();
             const filter = majesticCtx.createBiquadFilter();
             
-            osc1.type = 'sawtooth';
-            osc2.type = 'sine'; 
-            osc1.frequency.value = freq;
-            osc2.frequency.value = freq;
+            osc1.type = 'sawtooth'; osc2.type = 'sine'; 
+            osc1.frequency.value = freq; osc2.frequency.value = freq;
             
             filter.type = 'lowpass';
             filter.frequency.setValueAtTime(400, time);
@@ -667,7 +688,7 @@
             const gain = majesticCtx.createGain();
 
             osc.type = 'sawtooth';
-            osc.frequency.value = freq / 2; // Une octave en dessous pour la profondeur
+            osc.frequency.value = freq / 2; 
 
             filter.type = 'lowpass';
             filter.frequency.setValueAtTime(800, time);
@@ -711,7 +732,7 @@
         }
 
         function playDataDownload(time) {
-            const numBeeps = 24; // Rafale longue et prononcée
+            const numBeeps = 24; 
             const durationPerBeep = 0.035; 
             
             for (let i = 0; i < numBeeps; i++) {
