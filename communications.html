@@ -810,6 +810,11 @@
                 let query = supabaseApp.from('transmissions').select('created_at').eq('canal', canal).order('created_at', { ascending: false }).limit(1);
                 if (filtreCol) query = query.eq(filtreCol, filtreVal);
 
+                // ---> AJOUT : On ignore les messages fantômes (avant le tick) <---
+                if (memoireServeur && memoireServeur.getTime() > 0) {
+                    query = query.gte('created_at', memoireServeur.toISOString());
+                }
+
                 const { data } = await query;
                 // S'il y a un message plus récent que notre dernière visite, ça clignote !
                 if (data && data.length > 0 && new Date(data[0].created_at).getTime() > lastRead) {
@@ -1351,7 +1356,7 @@
                     dernierTick = nouveauTick;
                     prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
                     
-                    // Supabase fait le travail en base de données grâce à ton script SQL
+                    // Supabase fait le travail en base de données
                     await supabaseApp.rpc('declarer_nouveau_tick', { heure_tick: nouveauTick.toISOString() });
                     
                     // On force le rafraîchissement visuel pour effacer l'écran du navigateur

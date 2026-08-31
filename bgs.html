@@ -2349,6 +2349,116 @@
             afficherOrdresBGS(); 
         }
 
+        // ==========================================
+        // OUVERTURE DE LA MODALE DES DÉTAILS DE L'ORDRE
+        // ==========================================
+        window.ouvrirModalOrdreDetails = async function(ordreId, couleur) {
+            if(typeof sonClic === 'function') sonClic();
+            const ordre = (window.cacheOrdresBgs || []).find(o => String(o.id) === String(ordreId));
+            if (!ordre) return;
+
+            // 1. Colorisation dynamique de la fenêtre
+            document.getElementById('modal-ordre-details').querySelector('.modal-content').style.borderColor = couleur;
+            document.getElementById('modal-ordre-details').querySelector('.modal-content').style.boxShadow = `0 0 40px ${couleur}30`;
+            document.getElementById('ordre-modal-header').style.borderBottomColor = couleur;
+            document.getElementById('ordre-modal-title').style.color = couleur;
+            document.querySelector('#modal-ordre-details .modal-close').style.color = couleur;
+            document.getElementById('ordre-modal-type').style.color = couleur;
+
+            document.getElementById('ordre-modal-title').innerText = `DIRECTIVE #${ordre.id}`;
+
+            // 2. Textes standards
+            document.getElementById('ordre-modal-faction').innerText = (ordre.faction_cible || 'INCONNU').toUpperCase();
+            document.getElementById('ordre-modal-systeme').innerText = (ordre.systeme_cible || 'INCONNU').toUpperCase();
+            document.getElementById('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
+            
+            // Injection du badge de priorité
+            const prioLevel = ordre.priorite || 3;
+            let badgePrioModal = '';
+            if (prioLevel === 1) badgePrioModal = `<span style="color: #FF3333; font-weight: bold; font-size: 0.85em; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); padding: 2px 8px; border-radius: 2px; animation: alertPulse 1.5s infinite; display: inline-block;">⚠️ PRIORITÉ CRITIQUE</span>`;
+            else if (prioLevel === 2) badgePrioModal = `<span style="color: var(--ed-orange); font-weight: bold; font-size: 0.85em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 8px; border-radius: 2px; display: inline-block;">⚡ PRIORITÉ HAUTE</span>`;
+            document.getElementById('ordre-modal-prio').innerHTML = badgePrioModal;
+
+            // 3. Calcul de l'effort global et de la part du joueur connecté
+            const effortsLie = (window.cacheEffortsBgs || []).filter(e => String(e.ordre_id) === String(ordre.id));
+            
+            const calculerPts = (e) => {
+                const val = Math.abs(Number(e.valeur) || 0);
+                const action = String(e.type_action || '').toUpperCase();
+                if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action) || val > 10000) {
+                    return val / 2000000;
+                }
+                return val;
+            };
+
+            const totalPoints = effortsLie.reduce((sum, e) => sum + calculerPts(e), 0);
+            const mesEfforts = effortsLie.filter(e => String(e.user_id) === String(profilCommandant.user_id));
+            const mesPoints = mesEfforts.reduce((sum, e) => sum + calculerPts(e), 0);
+            const monPourcentage = totalPoints > 0 ? ((mesPoints / totalPoints) * 100).toFixed(1) : 0;
+
+            const formatPts = (pts) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(pts);
+
+            document.getElementById('ordre-modal-total').innerText = `${formatPts(totalPoints)} PTS`;
+            document.getElementById('ordre-modal-part').innerText = `${monPourcentage}% (${formatPts(mesPoints)} PTS)`;
+            document.getElementById('ordre-modal-part').style.color = couleur;
+            
+            document.getElementById('ordre-modal-bar').style.width = `${monPourcentage}%`;
+            document.getElementById('ordre-modal-bar').style.background = couleur;
+            document.getElementById('ordre-modal-bar').style.boxShadow = `0 0 10px ${couleur}`;
+
+            // 4. RÉPARTITION DES POINTS PAR PILOTE (Classement)
+            const pointsParPilote = {};
+            effortsLie.forEach(e => {
+                const uid = String(e.user_id);
+                if (!pointsParPilote[uid]) pointsParPilote[uid] = 0;
+                pointsParPilote[uid] += calculerPts(e);
+            });
+
+            const idsParticipants = Object.keys(pointsParPilote);
+            const conteneurParticipants = document.getElementById('ordre-modal-participants');
+            
+            if (idsParticipants.length === 0) {
+                conteneurParticipants.innerHTML = '<div style="color:#666; text-align:center; font-size:0.9em; padding:20px; font-style: italic;">Aucune télémétrie enregistrée pour cette opération.</div>';
+            } else {
+                conteneurParticipants.innerHTML = '<div style="color:#666; text-align:center; font-size:0.9em; padding:20px; animation: alertPulse 1.5s infinite;">Analyse des archives navales...</div>';
+                
+                try {
+                    // Récupération des noms
+                    const { data: profils } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').in('user_id', idsParticipants);
+                    const dicoNoms = {};
+                    if (profils) profils.forEach(p => dicoNoms[p.user_id] = p.cmdr_nom);
+
+                    // Tri décroissant
+                    const listeTriee = idsParticipants.sort((a, b) => pointsParPilote[b] - pointsParPilote[a]);
+                    
+                    let htmlParticipants = '';
+                    listeTriee.forEach(uid => {
+                        const pts = pointsParPilote[uid];
+                        const pct = totalPoints > 0 ? ((pts / totalPoints) * 100).toFixed(1) : 0;
+                        const nom = dicoNoms[uid] ? dicoNoms[uid].toUpperCase() : 'INCONNU';
+                        
+                        const estMoi = (String(uid) === String(profilCommandant.user_id));
+                        const colorNom = estMoi ? couleur : '#fff';
+                        const tagMoi = estMoi ? `<span style="font-size:0.8em; letter-spacing:1px; margin-left: 8px; color: ${couleur};">(VOUS)</span>` : '';
+                        
+                        htmlParticipants += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95em; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='transparent';">
+                            <span style="color: ${colorNom}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; letter-spacing: 1px;">CMDR ${nom} ${tagMoi}</span>
+                            <div style="white-space: nowrap;">
+                                <span style="color: #aaa; margin-right: 12px;">${pct}%</span>
+                                <strong style="color: ${couleur}; font-size: 1.1em;">${formatPts(pts)} PTS</strong>
+                            </div>
+                        </div>`;
+                    });
+                    conteneurParticipants.innerHTML = htmlParticipants;
+                } catch (e) {
+                    conteneurParticipants.innerHTML = '<div style="color:var(--ed-red); text-align:center; font-size:0.9em; padding:20px;">Erreur lors de la récupération des registres pilotes.</div>';
+                }
+            }
+
+            document.getElementById('modal-ordre-details').style.display = 'flex';
+        };
+
         // --- AFFICHAGE DYNAMIQUE DES ORDRES BGS SUR LE TABLEAU DE BORD ---
         async function afficherOrdresBGS() {
             if (!profilCommandant) return;
@@ -2403,6 +2513,9 @@
 
                 const ordresData = resOrdres.data || [];
                 const effortsData = resEfforts.data || [];
+
+                window.cacheOrdresBgs = ordresData;
+                window.cacheEffortsBgs = effortsData;
 
                 // RADAR AUDIO POUR LE JOUEUR CONNECTÉ
                 const totalEffortsActuel = effortsData
@@ -2616,8 +2729,9 @@
                                     </div>
 
                                     <!-- 2. TOTAL ESCADRON (PTS) -->
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: help;"
-                                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:${colorPrinc}\\'>EFFORT GLOBAL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Score total de la faction, converti en <br>Points BGS (1 Mission = 1 Pt / 2M Crédits = 1 Pt).</span>', '${colorPrinc}')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;"
+                                         onclick="event.stopPropagation(); ouvrirModalOrdreDetails('${ordre.id}', '${colorPrinc}')"
+                                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:${colorPrinc}\\'>EFFORT GLOBAL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Cliquez pour ouvrir le dossier tactique de cette mission<br>et consulter les participations individuelles.</span>', '${colorPrinc}')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
                                         <div style="width: 44px; height: 44px; border-radius: 50%; border: 1px dashed ${colorPrinc}; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px ${colorPrinc}20; transition: 0.3s;" onmouseover="this.style.boxShadow='inset 0 0 10px ${colorPrinc}50, 0 0 10px ${colorPrinc}50'" onmouseout="this.style.boxShadow='0 0 10px ${colorPrinc}20'">
                                             <span style="font-weight: bold; color: #fff; font-size: 0.8em;">${formatNum(Math.round(poidsTotalEscadron))}</span>
                                         </div>
@@ -5136,6 +5250,54 @@
             </div>
 
             <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid #00F0FF; color: #00F0FF; padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; margin-top: 25px; text-transform: uppercase; font-weight: bold;" onclick="sauvegarderEditionOrdre()" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#00F0FF'; this.style.color='#000'; this.style.boxShadow='0 0 15px #00F0FF';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='#00F0FF'; this.style.boxShadow='none';" id="btn-save-edit-ordre">METTRE À JOUR LA DIRECTIVE</button>
+        </div>
+    </div>
+
+    <!-- MODALE : DÉTAILS DE LA DIRECTIVE ET CLASSEMENT (PC) -->
+    <div class="modal-overlay" id="modal-ordre-details" onclick="fermerModal('modal-ordre-details', event)" style="z-index: 5500;">
+        <div class="modal-content" style="max-width: 550px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.15);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-ordre-details')">X</div>
+            
+            <div id="ordre-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange); padding-bottom: 10px; margin-bottom: 20px;">
+                <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 3px; font-size: 1.3em;" id="ordre-modal-title">DIRECTIVE #...</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.9em; gap: 15px;">
+                <div style="flex-grow: 1; overflow: hidden;">
+                    <span style="color: #888; font-size: 0.85em; display: block; margin-bottom: 4px; letter-spacing: 1px;">CIBLE OPÉRATIONNELLE :</span>
+                    <div id="ordre-modal-faction" style="color: #fff; font-weight: bold; font-size: 1.4em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px;">...</div>
+                    <div id="ordre-modal-systeme" style="color: #ccc; font-weight: normal; font-size: 1em; margin-top: 4px; letter-spacing: 1px;">...</div>
+                    <div id="ordre-modal-prio" style="margin-top: 10px;"></div>
+                </div>
+                <div style="text-align: right; flex-shrink: 0;">
+                    <span style="color: #888; font-size: 0.85em; display: block; margin-bottom: 4px; letter-spacing: 1px;">TYPE :</span>
+                    <div id="ordre-modal-type" style="font-weight: bold; font-size: 1.3em; letter-spacing: 2px;">...</div>
+                </div>
+            </div>
+
+            <!-- Analyse d'Effort & Participants -->
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 20px; border-radius: 4px; margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-size: 0.95em;">
+                    <span style="color: #888; letter-spacing: 1px;">ESCADRON :</span>
+                    <strong id="ordre-modal-total" style="color: #fff; text-align: right; font-size: 1.3em; letter-spacing: 1px;">0 PTS</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; font-size: 0.95em;">
+                    <span style="color: #888; letter-spacing: 1px;">VOTRE IMPACT :</span>
+                    <strong id="ordre-modal-part" style="color: var(--ed-blue); text-align: right; font-size: 1.2em; letter-spacing: 1px;">0% (0 PTS)</strong>
+                </div>
+                
+                <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
+                    <div id="ordre-modal-bar" style="height: 100%; width: 0%; background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue);"></div>
+                </div>
+
+                <!-- LE CLASSEMENT DES PARTICIPANTS -->
+                <div style="border-top: 1px dashed #444; padding-top: 15px; margin-top: 15px;">
+                    <span style="color: #888; font-size: 0.85em; letter-spacing: 2px; display: block; margin-bottom: 15px;">EFFORTS INDIVIDUELS :</span>
+                    <div id="ordre-modal-participants" style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                        <!-- Rempli par le JS -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -1482,7 +1482,7 @@
                     // Rechargement des directives pour l'onglet BGS
                     if (typeof chargerBGSMobile === 'function') chargerBGSMobile();
                     
-                    // ---> LA LIGNE À AJOUTER POUR EFFACER L'ÉCRAN COMMS <---
+                    // ---> NOUVEAU : ON EFFACE L'ÉCRAN DE COMMUNICATIONS <---
                     if (typeof chargerMessagesComms === 'function') chargerMessagesComms();
                 }
             } catch (err) {
@@ -2133,16 +2133,28 @@
                     return;
                 }
 
-                const { data: messages } = await supabaseApp.from('transmissions')
+                let query = supabaseApp.from('transmissions')
                     .select('*')
                     .eq('canal', 'PRIVE')
                     .or(`and(expediteur_id.eq.${profilCommandant.user_id},destinataire_id.eq.${targetId}),and(expediteur_id.eq.${targetId},destinataire_id.eq.${profilCommandant.user_id})`)
                     .order('created_at', { ascending: true })
                     .limit(40);
+                    
+                // ---> FILTRE ANTI-ANCIENS MESSAGES <---
+                if (memoireServeur && memoireServeur.getTime() > 0) {
+                    query = query.gte('created_at', memoireServeur.toISOString());
+                }
 
+                const { data: messages } = await query;
                 afficherFluxComms(messages);
             } else {
                 let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(40);
+                
+                // ---> FILTRE ANTI-ANCIENS MESSAGES <---
+                if (memoireServeur && memoireServeur.getTime() > 0) {
+                    query = query.gte('created_at', memoireServeur.toISOString());
+                }
+
                 if (canalActif === 'ESCADRON') {
                     query = query.eq('canal', 'ESCADRON').eq('escadron_id', profilCommandant.escadron_id);
                 } else {
