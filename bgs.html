@@ -1919,6 +1919,15 @@
                         }
                     }).subscribe();
 
+                    // NOUVEAU : ÉCOUTE EN TEMPS RÉEL DES EFFORTS BGS
+                supabaseApp.channel('live_efforts_bgs')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'efforts_bgs' }, payload => {
+                        // Dès qu'un pilote (vous ou un allié) valide un effort, on force le rafraîchissement des jauges BGS
+                        if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
+                            if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
+                        }
+                    }).subscribe();
+
             } else {
                 // SI CONNECTÉ MAIS NON APPROUVÉ -> ÉJECTION
                 await supabaseApp.auth.signOut();
