@@ -2331,6 +2331,13 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 }
 
                 // --- 5. LOGISTIQUE FLEET CARRIER ---
+                // 1. On affiche le nom du FC depuis la base de données
+                if (paramData.fc_nom) {
+                    const elFcNomLog = document.getElementById('qg-fc-nom-logistique');
+                    if (elFcNomLog) elFcNomLog.innerText = '> ' + paramData.fc_nom.toUpperCase();
+                }
+
+                // 2. On traite les statistiques internes (Carburant, Équipage)
                 if (paramData.carrier_stats_json) {
                     try {
                         const stats = paramData.carrier_stats_json;
