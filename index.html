@@ -3236,7 +3236,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">`;
                         
                         liste.forEach(c => {
-                            const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
+                            // On ajoute le remplacement des sauts de ligne par des balises <br> HTML
+const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\r?\n/g, "<br>") : "Aucun rapport";
                             const tooltipHtml = `> SIGNALÉ PAR : CMDR ${c.auteur_nom}<br><span style=\\'color:#fff; font-weight:normal; font-style:italic;\\'>&quot;${txtRapport}&quot;</span>`;
 
                             let btnSupprimer = '';
