@@ -140,8 +140,25 @@
 
         #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;}
-        .modal-content { background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; max-width: 600px; color: #ccc; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;
+            padding: 40px; /* Force une belle marge noire tout autour de la modale */
+            box-sizing: border-box;
+        }
+        
+        .modal-content { 
+            background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; 
+            max-width: 600px; width: 100%; color: #ccc; position: relative; 
+            max-height: 100%; /* S'arrête exactement avant la marge de l'overlay */
+            overflow-y: auto; box-sizing: border-box;
+        }
+
+        /* Optimisation automatique pour les écrans 14" (Petite hauteur) */
+        @media (max-width: 1400px), (max-height: 800px) {
+            .modal-overlay { padding: 15px; } /* Marge réduite pour gagner de l'espace */
+            .modal-content { padding: 20px; } /* On réduit un peu l'espace vide à l'intérieur */
+        }
 
         /* Correction spécifique pour la barre de scroll des modales PC */
         .modal-content::-webkit-scrollbar { width: 8px; }
@@ -415,31 +432,28 @@
             <!-- ONGLET 2 : SUIVI D'INFLUENCE (MACRO / MICRO) -->
             <div id="bgs-tab-suivi" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
                 
-                <!-- BARRE DE RECHERCHE -->
-                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; display: flex; gap: 15px; align-items: flex-end;">
-                    <div style="flex-grow: 1;">
+                <!-- BARRE DE RECHERCHE & BOUTONS D'ACTION (UNIFIÉS) -->
+                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex-grow: 1; min-width: 250px;">
                         <label style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">SYSTÈME CIBLE (SCAN EDSM)</label>
                         <input type="text" id="bgs-system-search" class="search-input" placeholder="Ex: ATHENA" style="width: 100%; border-color: var(--ed-blue); text-transform: uppercase;">
                     </div>
-                    <button style="background: rgba(0, 240, 255, 0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" 
-                            onclick="lancerAnalyseBGS(document.getElementById('bgs-system-search').value)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">
-                        [ ANALYSER ]
-                    </button>
-                </div>
-
-                <!-- EN-TÊTE DU RADAR -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; border-bottom: 1px solid var(--ed-orange-dim); padding-bottom: 15px;">
-                    <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.3em;">> RADAR TACTIQUE</h3>
-                    <button onclick="declencherReboot()" onmouseenter="if(typeof sonHover === 'function') sonHover()"
-                            onmouseover="this.style.background='var(--ed-red)'; this.style.color='#000';" 
-                            onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='var(--ed-red)';"
-                            style="background: rgba(255, 51, 51, 0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 2px; white-space: nowrap;">
-                        [ BALAYAGE RADAR ]
-                    </button>
+                    <div style="display: flex; gap: 15px;">
+                        <button style="background: rgba(0, 240, 255, 0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" 
+                                onclick="lancerAnalyseBGS(document.getElementById('bgs-system-search').value)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">
+                            [ ANALYSER ]
+                        </button>
+                        <button onclick="declencherReboot()" onmouseenter="if(typeof sonHover === 'function') sonHover()"
+                                onmouseover="this.style.background='var(--ed-red)'; this.style.color='#000';" 
+                                onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='var(--ed-red)';"
+                                style="background: rgba(255, 51, 51, 0.1); border: 1px solid var(--ed-red); color: var(--ed-red); padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 2px; white-space: nowrap;">
+                            [ BALAYAGE RADAR ]
+                        </button>
+                    </div>
                 </div>
 
                 <!-- TABLEAU DE BORD DES FAVORIS (MACRO) -->
-                <div id="bgs-favorites-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+                <div id="bgs-favorites-container" style="display: flex; flex-direction: column; gap: 15px;">
                     <!-- Injecté par JS -->
                     <div style="color: #666; font-style: italic; padding: 20px;">> Chargement du réseau tactique...</div>
                 </div>
@@ -455,15 +469,17 @@
                         </div>
                         
                         <!-- TABLEAU DES FACTIONS (Pleine largeur) -->
-                        <div class="data-row" style="width: 100%; padding: 0; overflow: hidden; background: rgba(0,0,0,0.5); margin-bottom: 0;">
-                            <div style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85em;">
-                                    <thead style="color: #666; border-bottom: 1px solid #333;">
+                        <div class="data-row" style="width: 100%; padding: 0; background: rgba(0,0,0,0.5); margin-bottom: 0; flex-shrink: 0;">
+                            <!-- Ajout de max-height et overflow-y pour créer un scroll interne au tableau -->
+                            <div style="overflow-x: auto; max-height: 250px; overflow-y: auto;">
+                                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85em; position: relative;">
+                                    <!-- L'en-tête devient "sticky" pour rester visible quand on scroll les factions -->
+                                    <thead style="color: #666; background: rgba(8, 4, 0, 0.95); position: sticky; top: 0; z-index: 10;">
                                         <tr>
-                                            <th style="padding: 10px 15px;">FACTION</th>
-                                            <th style="padding: 10px;">ÉTAT ACTUEL</th>
-                                            <th style="padding: 10px; text-align: right;">INFLUENCE</th>
-                                            <th style="padding: 10px; text-align: center;">RADAR</th>
+                                            <th style="padding: 10px 15px; border-bottom: 1px solid #333;">FACTION</th>
+                                            <th style="padding: 10px; border-bottom: 1px solid #333;">ÉTAT ACTUEL</th>
+                                            <th style="padding: 10px; text-align: right; border-bottom: 1px solid #333;">INFLUENCE</th>
+                                            <th style="padding: 10px; text-align: center; border-bottom: 1px solid #333;">RADAR</th>
                                         </tr>
                                     </thead>
                                     <tbody id="bgs-factions-table"></tbody>
@@ -1714,12 +1730,19 @@
                         ${optionsHtml}
                     </select>
                 </div>
-                <div style="flex: 1.4;">
+                <div style="flex: 1.2;">
                     <select class="search-input cmd-ordre-select" style="width: 100%; border-color: #555; padding: 7px 8px; font-size: 0.85em; background: rgba(10, 5, 0, 0.9);">
-                        <option value="HAUSSE" ${typeOrdre === 'HAUSSE' ? 'selected' : ''}>🟢 AUGMENTER (Soutien)</option>
-                        <option value="BAISSE" ${typeOrdre === 'BAISSE' ? 'selected' : ''}>🔴 RÉDUIRE (Op. Noires)</option>
-                        <option value="GUERRE" ${typeOrdre === 'GUERRE' ? 'selected' : ''}>⚔️ GUERRE (Conflit)</option>
-                        <option value="ELECTION" ${typeOrdre === 'ELECTION' ? 'selected' : ''}>🔵 ÉLECTION (Diplomatie)</option>
+                        <option value="HAUSSE" ${typeOrdre === 'HAUSSE' ? 'selected' : ''}>🟢 AUGMENTER</option>
+                        <option value="BAISSE" ${typeOrdre === 'BAISSE' ? 'selected' : ''}>🔴 RÉDUIRE</option>
+                        <option value="GUERRE" ${typeOrdre === 'GUERRE' ? 'selected' : ''}>⚔️ GUERRE</option>
+                        <option value="ELECTION" ${typeOrdre === 'ELECTION' ? 'selected' : ''}>🔵 ÉLECTION</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <select class="search-input cmd-priorite-select" style="width: 100%; border-color: #555; padding: 7px 8px; font-size: 0.85em; background: rgba(10, 5, 0, 0.9);">
+                        <option value="1" style="color: #FF3333;">🔥 CRITIQUE</option>
+                        <option value="2" style="color: #FF7100;">⚡ HAUTE</option>
+                        <option value="3" selected style="color: #00FF66;">✅ NORMALE</option>
                     </select>
                 </div>
                 <button type="button" onclick="supprimerLigneDirective('${rowId}')" 
@@ -1926,11 +1949,14 @@
 
             const factionSelects = document.querySelectorAll('.cmd-faction-select');
             const ordreSelects = document.querySelectorAll('.cmd-ordre-select');
+            const prioriteSelects = document.querySelectorAll('.cmd-priorite-select'); // <- NOUVEAU
 
             const directivesAEnvoyer = [];
             factionSelects.forEach((fSelect, idx) => {
                 const facName = fSelect.value.trim();
                 const ordType = ordreSelects[idx]?.value || 'HAUSSE';
+                const prioVal = parseInt(prioriteSelects[idx]?.value || '3', 10); // <- NOUVEAU
+
                 if (facName) {
                     directivesAEnvoyer.push({
                         escadron_id: profilCommandant.escadron_id || 'ISS',
@@ -1938,6 +1964,7 @@
                         population: pop,
                         faction_cible: facName,
                         type_ordre: ordType,
+                        priorite: prioVal, // <- NOUVEAU
                         briefing_amiral: brief || null,
                         auteur_id: profilCommandant.user_id
                     });
@@ -2028,13 +2055,35 @@
 
                     liste.forEach(ordre => {
                         const color = ordre.type_ordre === 'HAUSSE' ? '#00FF66' : (ordre.type_ordre === 'GUERRE' ? '#FF7100' : (ordre.type_ordre === 'ELECTION' ? '#00F0FF' : '#FF3333'));
+                        
+                        // Traduction visuelle de la priorité
+                        const prioLevel = ordre.priorite || 3;
+                        let badgePrio = '';
+                        if (prioLevel === 1) {
+                            // On l'enferme dans une div avec un margin-top pour forcer le retour à la ligne
+                            badgePrio = '<div style="margin-top: 6px;"><span style="color: #FF3333; font-weight: bold; font-size: 0.85em; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); padding: 1px 6px; border-radius: 2px; animation: alertPulse 1.5s infinite; display: inline-block;">⚠️ CRITIQUE</span></div>';
+                        } else if (prioLevel === 2) {
+                            badgePrio = '<div style="margin-top: 6px;"><span style="color: var(--ed-orange); font-weight: bold; font-size: 0.85em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 1px 6px; border-radius: 2px; display: inline-block;">⚡ HAUTE</span></div>';
+                        }
+
                         html += `
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 8px 12px; border-left: 3px solid ${color}; border-radius: 2px;">
-                                <div>
-                                    <span style="color: #fff; font-size: 0.95em; font-weight: bold;">${ordre.faction_cible}</span>
-                                    <span style="color: ${color}; font-size: 0.8em; margin-left: 8px; font-weight: bold;">[ ${ordre.type_ordre} ]</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 10px 12px; border-left: 3px solid ${color}; border-radius: 2px;">
+                                <!-- Colonne Gauche : Faction + Badge -->
+                                <div style="display: flex; flex-direction: column; justify-content: center; flex-grow: 1; padding-right: 15px;">
+                                    <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                        <span style="color: #fff; font-size: 0.95em; font-weight: bold;">${ordre.faction_cible}</span>
+                                        <span style="color: ${color}; font-size: 0.8em; margin-left: 8px; font-weight: bold;">[ ${ordre.type_ordre} ]</span>
+                                    </div>
+                                    ${badgePrio}
                                 </div>
-                                <div style="display: flex; gap: 8px;">
+                                
+                                <!-- Colonne Droite : Boutons -->
+                                <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+                                    <button onmouseenter="if(typeof sonHover==='function') sonHover()"
+                                            onmouseover="this.style.background='#00F0FF'; this.style.color='#000'; this.style.borderColor='#00F0FF'; this.style.boxShadow='0 0 8px #00F0FF';"
+                                            onmouseout="this.style.background='transparent'; this.style.color='#00F0FF'; this.style.borderColor='#00F0FF'; this.style.boxShadow='none';"
+                                            style="background: transparent; border: 1px solid #00F0FF; color: #00F0FF; padding: 4px 8px; font-size: 0.75em; cursor: pointer; border-radius: 3px; font-weight: bold; transition: 0.2s;" 
+                                            onclick="ouvrirEditionOrdre(${ordre.id})">Éditer</button>
                                     <button onmouseenter="if(typeof sonHover==='function') sonHover()"
                                             onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000'; this.style.borderColor='var(--ed-blue)'; this.style.boxShadow='0 0 8px var(--ed-blue)';"
                                             onmouseout="this.style.background='transparent'; this.style.color='#ccc'; this.style.borderColor='#666'; this.style.boxShadow='none';"
@@ -2044,7 +2093,7 @@
                                             onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 8px #FF3333';"
                                             onmouseout="this.style.background='transparent'; this.style.color='#FF3333'; this.style.boxShadow='none';"
                                             style="background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 4px 8px; font-size: 0.75em; cursor: pointer; border-radius: 3px; font-weight: bold; transition: 0.2s;" 
-                                            onclick="supprimerOrdre('${ordre.id}')">Supprimer</button>
+                                            onclick="supprimerOrdre('${ordre.id}')">Suppr</button>
                                 </div>
                             </div>`;
                     });
@@ -2388,17 +2437,33 @@
                 let pinnedSystems = JSON.parse(localStorage.getItem('favoris_bgs_' + piloteId)) || [];
                 
                 let systemesTries = Object.keys(groupesSystemes).sort((a, b) => {
+                    // 1. Les favoris (épinglés) restent toujours tout en haut
                     let pinA = pinnedSystems.includes(a) ? 1 : 0;
                     let pinB = pinnedSystems.includes(b) ? 1 : 0;
-                    if (pinA !== pinB) return pinB - pinA; // Les épinglés en haut
-                    return a.localeCompare(b); // Le reste par ordre alphabétique
+                    if (pinA !== pinB) return pinB - pinA;
+
+                    // 2. NOUVEAU : On cherche la priorité la plus forte dans chaque système (1 = plus fort)
+                    const minPrioA = Math.min(...groupesSystemes[a].map(o => o.priorite || 3));
+                    const minPrioB = Math.min(...groupesSystemes[b].map(o => o.priorite || 3));
+                    
+                    if (minPrioA !== minPrioB) return minPrioA - minPrioB; // Le système avec Prio 1 passe avant Prio 2, etc.
+
+                    // 3. En cas d'égalité (même priorité), tri alphabétique classique
+                    return a.localeCompare(b);
                 });
 
                 for (const nomSysteme of systemesTries) {
                     const factionsDuSysteme = groupesSystemes[nomSysteme];
+
+                    // TRI PAR PRIORITÉ : 1 (Critique) en premier, puis 2 (Haute), puis 3 (Normale)
+                    factionsDuSysteme.sort((a, b) => {
+                        const prioA = a.priorite || 3;
+                        const prioB = b.priorite || 3;
+                        return prioA - prioB;
+                    });
+
                     const premierOrdre = factionsDuSysteme[0];
                     const popFormatee = new Intl.NumberFormat('fr-FR').format(premierOrdre.population || 0);
-
                     const plusAncienTs = Math.min(...factionsDuSysteme.map(o => new Date(o.date_emission || o.created_at || timeNow).getTime()));
                     const joursEcoules = Math.max(1, Math.ceil((timeNow - plusAncienTs) / (24 * 60 * 60 * 1000)));
 
@@ -2517,6 +2582,15 @@
                         const impactQuotidien = Math.min(100, Math.round(sommeRatiosQ / diviseur));
                         const partPilote = poidsTotalEscadron > 0 ? Math.min(100, Math.round((poidsTotalMoi / poidsTotalEscadron) * 100)) : 0;
 
+                        // Traduction visuelle de la priorité pour le pilote
+                        const prioLevel = ordre.priorite || 3;
+                        let badgePrioPilot = '';
+                        if (prioLevel === 1) {
+                            badgePrioPilot = '<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; animation: alertPulse 1.5s infinite; margin-left: 10px; box-shadow: 0 0 10px rgba(255,51,51,0.3);">⚠️ PRIORITÉ CRITIQUE</span>';
+                        } else if (prioLevel === 2) {
+                            badgePrioPilot = '<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; margin-left: 10px;">⚡ PRIORITÉ HAUTE</span>';
+                        }
+
                         htmlAccordionsFactions += `
                         <div style="border: 1px solid ${colorPrinc}; background: ${colorFond}; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
@@ -2524,6 +2598,7 @@
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <span style="color: #fff; font-size: 1.15em; font-weight: bold;">${ordre.faction_cible.toUpperCase()}</span>
                                         <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
+                                        ${badgePrioPilot}
                                     </div>
                                 </div>
 
@@ -3042,7 +3117,7 @@
             }
 
             // ==========================================
-            // TRI DES SYSTÈMES (PRIORITÉ AUX MISSIONS)
+            // TRI DES SYSTÈMES (ALPHABÉTIQUE STRICT)
             // ==========================================
             let systemesTries = [];
             for (const [systeme, favorisDuSysteme] of Object.entries(groupesSystemes)) {
@@ -3057,7 +3132,7 @@
                     );
                     if (ordreTrouve) {
                         aUneMissionActive = true;
-                        fav.ordreAssocie = ordreTrouve; // On sauvegarde l'ordre pour l'affichage
+                        fav.ordreAssocie = ordreTrouve; 
                     }
                 });
                 
@@ -3068,21 +3143,37 @@
                 });
             }
 
-            // On trie : Les priorités 1 en premier, puis par ordre alphabétique
-            systemesTries.sort((a, b) => {
-                if (b.priorite !== a.priorite) return b.priorite - a.priorite;
-                return a.nom.localeCompare(b.nom);
-            });
+            // Tri par ordre alphabétique
+            systemesTries.sort((a, b) => a.nom.localeCompare(b.nom));
 
-            // 2. Génération du HTML regroupé (dans le nouvel ordre)
+            // 2. Génération du HTML regroupé (Systèmes pliables)
             let html = '';
+            let sysIndex = 0;
+            
             for (const sys of systemesTries) {
+                sysIndex++;
                 const systeme = sys.nom;
                 const favorisDuSysteme = sys.factions;
+                const contentId = 'pc-sys-content-' + sysIndex;
+                const iconId = 'pc-sys-icon-' + sysIndex;
 
-                html += `<div style="margin-bottom: 20px; grid-column: 1 / -1;">`;
-                html += `<div style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid rgba(255,113,0,0.3); padding-bottom: 5px; letter-spacing: 2px;">> SYSTÈME : <span class="copy-click" onclick="copierNav('${systeme.replace(/'/g, "\\'")}', this, event)" style="color: var(--ed-orange);" title="Copier le nom du système">${systeme.toUpperCase()}</span></div>`;
-                html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">`;
+                // Conteneur global du système
+                html += `<div style="background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; overflow: hidden;">`;
+                
+                // En-tête cliquable (Pliable)
+                html += `
+                <div onclick="const c = document.getElementById('${contentId}'); const i = document.getElementById('${iconId}'); if(c.style.display === 'none'){ c.style.display = 'block'; i.innerText = '[-]'; } else { c.style.display = 'none'; i.innerText = '[+]'; } if(typeof sonClic === 'function') sonClic();" 
+                     style="cursor: pointer; padding: 12px 20px; background: rgba(255, 113, 0, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange-dim); transition: 0.2s;" 
+                     onmouseover="this.style.background='rgba(255,113,0,0.1)'" onmouseout="this.style.background='rgba(255,113,0,0.05)'">
+                    <span style="color: #888; font-size: 0.95em; font-weight: bold; letter-spacing: 2px;">
+                        > SYSTÈME : <span class="copy-click" onclick="event.stopPropagation(); copierNav('${systeme.replace(/'/g, "\\'")}', this, event)" style="color: var(--ed-orange);" title="Copier le nom du système">${systeme.toUpperCase()}</span>
+                    </span>
+                    <span id="${iconId}" style="color: var(--ed-orange); font-weight: bold; font-size: 1.5em; line-height: 1;">[-]</span>
+                </div>`;
+
+                // Corps de la grille
+                html += `<div id="${contentId}" style="display: block; padding: 20px;">`;
+                html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">`;
                 
                 favorisDuSysteme.forEach(fav => {
                     const i = fav.indexOrigine;
@@ -3153,7 +3244,8 @@
                     </div>`;
                 });
                 
-                html += `</div></div>`;
+                // Fermeture de la grille, du contenu pliable, et du conteneur du système
+                html += `</div></div></div>`;
             }
             container.innerHTML = html;
 
@@ -3422,7 +3514,9 @@
                     inputSys.disabled = false; return;
                 }
 
+                // ---> AJOUTE CETTE LIGNE ICI POUR PURGER LES FACTIONS À 0% <---
                 edsmData.factions = edsmData.factions.filter(f => f.influence > 0);
+
                 dernierSystemeBGS = edsmData;
                 
                 document.getElementById('bgs-detail-title').innerHTML = `> RAPPORT TACTIQUE : <span class="copy-click" style="color: #fff;" onclick="copierNav('${edsmData.name.replace(/'/g, "\\'")}', this, event)" title="Copier le nom du système">${edsmData.name.toUpperCase()}</span>`;
@@ -3441,20 +3535,24 @@
         function afficherTableauBGS(edsmData) {
             const tbody = document.getElementById('bgs-factions-table');
             let html = '';
-            const factionsList = edsmData.factions.sort((a, b) => b.influence - a.influence);
+            
+            // On s'assure d'avoir toutes les factions du système (pas de filtre)
+            const factionsList = [...edsmData.factions].sort((a, b) => b.influence - a.influence);
             const sysName = edsmData.name;
 
-            factionsList.forEach((f, index) => {
+            factionsList.forEach((f) => {
+                const originalIndex = edsmData.factions.findIndex(orig => orig.name === f.name);
+                const colorGraph = getBgsColor(originalIndex);
+                
                 const influenceActuelle = (f.influence * 100).toFixed(1);
+                
                 let etatsArray = [];
                 if (f.activeStates && f.activeStates.length > 0) etatsArray = f.activeStates.map(s => s.state);
                 else if (f.state && f.state !== 'None') etatsArray.push(f.state);
                 
                 const etatAffiche = etatsArray.length > 0 ? etatsArray.join(', ').toUpperCase() : 'AUCUN';
-                const colorGraph = getBgsColor(index);
                 const estFavori = mesFavorisBGS.some(fav => fav.systeme.toUpperCase() === sysName.toUpperCase() && fav.faction === f.name);
 
-                // Suppression de l'interactivité sur la ligne entière (focusFactionBGS)
                 html += `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <td style="padding: 10px 15px; color: ${colorGraph}; font-weight: bold;">${f.name}</td>
@@ -3488,13 +3586,20 @@
 
         function dessinerGraphiqueBGS(edsmData) {
             const ctx = document.getElementById('bgsChart').getContext('2d');
-            if (bgsChartInstance) { bgsChartInstance.destroy(); }
+            // C'est cette ligne qui est cruciale pour vider le graphique précédent :
+            if (bgsChartInstance) { 
+                bgsChartInstance.destroy(); 
+                bgsChartInstance = null; // Sécurité supplémentaire
+            }
 
             const limitTime = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
             let allTimestamps = new Set();
-            let maxTs = 0; // On va traquer le timestamp le plus récent de tout l'historique
+            let maxTs = 0; 
             
-            edsmData.factions.forEach(f => {
+            // On s'assure qu'on ne traite QUE les factions du système actuel
+            const factionsDuSysteme = edsmData.factions; 
+            
+            factionsDuSysteme.forEach(f => {
                 if (f.influenceHistory) {
                     Object.keys(f.influenceHistory).forEach(tsStr => {
                         const ts = Number(tsStr);
@@ -3505,6 +3610,8 @@
                     });
                 }
             });
+
+            // [...] (le reste de la fonction reste identique)
 
             // On identifie la date calendaire la plus récente
             const latestDateStr = maxTs > 0 ? new Date(maxTs * 1000).toLocaleDateString('fr-FR') : '';
@@ -4828,6 +4935,65 @@
             } catch(e) {}
         };
 
+        let ordreEditionEnCoursId = null;
+
+        window.ouvrirEditionOrdre = async function(id) {
+            if (typeof sonClic === 'function') sonClic();
+            try {
+                // On récupère les données fraîches
+                const { data, error } = await supabaseApp.from('ordres_bgs').select('*').eq('id', id).single();
+                if (error) throw error;
+
+                ordreEditionEnCoursId = id;
+                document.getElementById('edit-ordre-id').innerText = `#${id} (${data.faction_cible})`;
+                document.getElementById('edit-ordre-type').value = data.type_ordre || 'HAUSSE';
+                document.getElementById('edit-ordre-priorite').value = data.priorite || 3;
+                document.getElementById('edit-ordre-briefing').value = data.briefing_amiral || '';
+                
+                document.getElementById('modal-edition-ordre').style.display = 'flex';
+            } catch(e) {
+                console.error("Erreur lecture ordre pour édition:", e);
+            }
+        };
+
+        window.sauvegarderEditionOrdre = async function() {
+            if (typeof sonClic === 'function') sonClic();
+            const btn = document.getElementById('btn-save-edit-ordre');
+            btn.innerText = "MISE À JOUR...";
+            btn.style.pointerEvents = "none";
+
+            try {
+                const payload = {
+                    type_ordre: document.getElementById('edit-ordre-type').value,
+                    priorite: parseInt(document.getElementById('edit-ordre-priorite').value, 10),
+                    briefing_amiral: document.getElementById('edit-ordre-briefing').value.trim()
+                };
+
+                const { error } = await supabaseApp.from('ordres_bgs').update(payload).eq('id', ordreEditionEnCoursId);
+                if (error) throw error;
+
+                if (typeof sonSucces === 'function') sonSucces();
+                btn.innerText = "DIRECTIVE MODIFIÉE";
+                btn.style.background = "#00F0FF";
+                btn.style.color = "#000";
+
+                setTimeout(() => {
+                    chargerOrdresAmiraute();
+                    afficherOrdresBGS();
+                    document.getElementById('modal-edition-ordre').style.display = 'none';
+                    btn.innerText = "METTRE À JOUR LA DIRECTIVE";
+                    btn.style.background = "rgba(0, 240, 255, 0.1)";
+                    btn.style.color = "#00F0FF";
+                    btn.style.pointerEvents = "auto";
+                }, 1000);
+
+            } catch(e) {
+                console.error("Erreur modification ordre:", e);
+                btn.innerText = "ERREUR DE SYNCHRONISATION";
+                setTimeout(() => { btn.innerText = "METTRE À JOUR LA DIRECTIVE"; btn.style.pointerEvents = "auto"; }, 2000);
+            }
+        };
+
     </script>
     <!-- ========================================== -->
 
@@ -4933,6 +5099,45 @@
     </div>
 
     <script src="covas.js"></script>
+
+    <!-- MODALE : ÉDITION D'UN ORDRE BGS -->
+    <div class="modal-overlay" id="modal-edition-ordre" onclick="fermerModal('modal-edition-ordre', event)" style="z-index: 5000;">
+        <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid #00F0FF; box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: #00F0FF;" onclick="fermerModal('modal-edition-ordre')">X</div>
+            <div class="modal-title" style="color: #00F0FF; border-bottom: 1px solid #00F0FF; padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">✏️ ÉDITER LA DIRECTIVE <span id="edit-ordre-id"></span></div>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Type d'ordre -->
+                <div>
+                    <label style="color: #00F0FF; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">TYPE D'OPÉRATION :</label>
+                    <select id="edit-ordre-type" class="search-input" style="width: 100%; border-color: #00F0FF; font-weight: bold;">
+                        <option value="HAUSSE">🟢 AUGMENTER (Soutien)</option>
+                        <option value="BAISSE">🔴 RÉDUIRE (Op. Noires)</option>
+                        <option value="GUERRE">⚔️ GUERRE (Conflit)</option>
+                        <option value="ELECTION">🔵 ÉLECTION (Diplomatie)</option>
+                    </select>
+                </div>
+
+                <!-- Priorité -->
+                <div>
+                    <label style="color: #00F0FF; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">PRIORITÉ TACTIQUE :</label>
+                    <select id="edit-ordre-priorite" class="search-input" style="width: 100%; border-color: #00F0FF; font-weight: bold;">
+                        <option value="1" style="color: #FF3333;">🔥 CRITIQUE (Priorité Absolue)</option>
+                        <option value="2" style="color: #FF7100;">⚡ HAUTE</option>
+                        <option value="3" style="color: #00FF66;">✅ NORMALE</option>
+                    </select>
+                </div>
+
+                <!-- Briefing -->
+                <div>
+                    <label style="color: #00F0FF; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">BRIEFING SPÉCIFIQUE :</label>
+                    <textarea id="edit-ordre-briefing" class="search-input" style="width: 100%; height: 80px; resize: vertical; border-color: #00F0FF; font-family: inherit; font-size: 0.9em;"></textarea>
+                </div>
+            </div>
+
+            <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid #00F0FF; color: #00F0FF; padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; letter-spacing: 2px; cursor: pointer; transition: 0.2s; margin-top: 25px; text-transform: uppercase; font-weight: bold;" onclick="sauvegarderEditionOrdre()" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#00F0FF'; this.style.color='#000'; this.style.boxShadow='0 0 15px #00F0FF';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='#00F0FF'; this.style.boxShadow='none';" id="btn-save-edit-ordre">METTRE À JOUR LA DIRECTIVE</button>
+        </div>
+    </div>
 
 </body>
 </html>

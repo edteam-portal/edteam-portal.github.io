@@ -1351,8 +1351,11 @@
                     dernierTick = nouveauTick;
                     prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
                     
+                    // Supabase fait le travail en base de données grâce à ton script SQL
                     await supabaseApp.rpc('declarer_nouveau_tick', { heure_tick: nouveauTick.toISOString() });
-                    await supabaseApp.from('transmissions').delete().lt('created_at', nouveauTick.toISOString());
+                    
+                    // On force le rafraîchissement visuel pour effacer l'écran du navigateur
+                    if (typeof chargerHistorique === 'function') chargerHistorique();
                 }
             } catch (err) {}
         }

@@ -701,6 +701,7 @@
                 <span style="color: #888; font-size: 0.9em; display: block; margin-bottom: 2px;">CIBLE OPÉRATIONNELLE :</span>
                 <div id="ordre-modal-faction" style="color: #fff; font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">...</div>
                 <div id="ordre-modal-systeme" style="color: #ccc; font-weight: normal; font-size: 0.9em; margin-top: 2px;">...</div>
+                <div id="ordre-modal-prio"></div> <!-- NOUVEL EMPLACEMENT DU BADGE -->
             </div>
             <div style="text-align: right; flex-shrink: 0;">
                 <span style="color: #888; font-size: 0.9em; display: block; margin-bottom: 2px;">TYPE :</span>
@@ -1475,11 +1476,14 @@
                     memoireServeur = nouveauTick;
                     prochainTick = new Date(memoireServeur.getTime() + 24 * 60 * 60 * 1000);
 
-                    // On envoie le signal à Supabase
+                    // On envoie le signal à Supabase (qui va purger grâce à ton code SQL)
                     supabaseApp.rpc('declarer_nouveau_tick', { heure_tick: nouveauTick.toISOString() }).then();
 
-                    // Rechargement des directives en tâche de fond pour l'onglet BGS
+                    // Rechargement des directives pour l'onglet BGS
                     if (typeof chargerBGSMobile === 'function') chargerBGSMobile();
+                    
+                    // ---> LA LIGNE À AJOUTER POUR EFFACER L'ÉCRAN COMMS <---
+                    if (typeof chargerMessagesComms === 'function') chargerMessagesComms();
                 }
             } catch (err) {
                 console.warn("SYS.EDTEAM MOBILE : Impossible de joindre EDCD.");
@@ -1795,16 +1799,19 @@
             }
 
             // -------------------------------------------------------------
-            // 2. ORDRES DU JOUR (AVEC CALCUL DES EFFORTS)
+            // 2. ORDRES DU JOUR (AVEC TRI PAR PRIORITÉ)
             // -------------------------------------------------------------
             const ordresCont = document.getElementById('m-ordres-container');
             try {
+                // NOUVEAU TRI : On demande à la base de trier d'abord par priorité (1 puis 2 puis 3), puis par date.
+                // On passe la limite à 10 pour être sûr de bien voir les ordres critiques s'il y a beaucoup de missions.
                 const { data: ordres } = await supabaseApp.from('ordres_bgs')
                     .select('*')
                     .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
                     .eq('statut', 'ACTIF')
+                    .order('priorite', { ascending: true }) 
                     .order('date_emission', { ascending: false })
-                    .limit(5);
+                    .limit(10);
 
                 let effortsActifs = [];
                 if (ordres && ordres.length > 0) {
@@ -1814,10 +1821,8 @@
                         .in('ordre_id', idsOrdres);
                     if (efforts) effortsActifs = efforts;
 
-                    // 🛡️ RECHERCHE EXHAUSTIVE DE L'OFFICIER
-                    // On teste tous les noms de colonnes possibles où tu as pu ranger l'ID
+                    // Recherche de l'Officier...
                     const idsOfficiers = [...new Set(ordres.map(o => o.user_id || o.auteur_id || o.emetteur_id || o.createur_id || o.officier_id).filter(Boolean))];
-                    
                     if (idsOfficiers.length > 0) {
                         const { data: profilsOfficiers } = await supabaseApp.from('profils').select('user_id, cmdr_nom').in('user_id', idsOfficiers);
                         if (profilsOfficiers) {
@@ -1837,8 +1842,6 @@
                         const sys = o.systeme_cible || 'SECTEUR';
                         const fac = o.faction_cible || 'CIBLE';
                         const type = o.type_ordre || 'DIRECTIVE';
-                        
-                        // 🎯 ON RÉCUPÈRE LE NOM FINAL ICI
                         const auteur = o.nom_officier_traduit || o.auteur_nom || o.emetteur_nom || o.auteur || 'AMIRAUTÉ';
                         
                         let prioColor = 'var(--ed-orange)';
@@ -1846,15 +1849,31 @@
                         else if (type === 'BAISSE' || type === 'GUERRE') prioColor = 'var(--ed-red)';
                         else if (type === 'ELECTION') prioColor = 'var(--ed-blue)';
 
+                        // TRADUCTION VISUELLE DE LA PRIORITÉ
+                        const prioLevel = o.priorite || 3;
+                        let badgePrio = '';
+                        if (prioLevel === 1) {
+                            badgePrio = '<span style="color: #FF3333; font-weight: bold; font-size: 0.75em; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); padding: 2px 6px; border-radius: 2px; animation: alertPulse 1.5s infinite; display: inline-block; white-space: nowrap;">⚠️ CRITIQUE</span>';
+                        } else if (prioLevel === 2) {
+                            badgePrio = '<span style="color: var(--ed-orange); font-weight: bold; font-size: 0.75em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 6px; border-radius: 2px; display: inline-block; white-space: nowrap;">⚡ HAUTE</span>';
+                        }
+
+                        // MISE EN PAGE EN GRILLE (2x2) POUR UN ÉQUILIBRE PARFAIT
                         htmlOrdres += `
-                            <div onclick="ouvrirModalOrdre(${index}, '${prioColor}')" style="cursor: pointer; background: rgba(0,0,0,0.5); border-left: 3px solid ${prioColor}; padding: 10px; border-radius: 0 4px 4px 0; margin-bottom: 6px; transition: 0.2s;">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 6px; font-weight: bold;">
-                                    <span style="color: #fff; display : block; font-weight: bold">${sys.toUpperCase()}</span>
-                                    <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 2px;">#${o.id} - ${type}</span>
+                            <div onclick="ouvrirModalOrdre(${index}, '${prioColor}')" style="cursor: pointer; background: rgba(0,0,0,0.5); border-left: 3px solid ${prioColor}; padding: 10px 12px; border-radius: 0 4px 4px 0; margin-bottom: 8px; transition: 0.2s; display: flex; flex-direction: column; gap: 6px;">
+                                
+                                <!-- Ligne 1 : Système & Priorité -->
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #fff; font-size: 0.95em; font-weight: bold; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${sys.toUpperCase()}</span>
+                                    <div style="flex-shrink: 0;">${badgePrio}</div>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; font-weight: normal;">
-                                    <span style="color: #fff; display : block; font-weight: normal">${fac.toUpperCase()}</span>
+                                
+                                <!-- Ligne 2 : Faction & Type d'ordre -->
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #aaa; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${fac.toUpperCase()}</span>
+                                    <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 2px 6px; border-radius: 2px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">#${o.id} - ${type}</span>
                                 </div>
+
                             </div>`;
                     });
                     ordresCont.innerHTML = htmlOrdres;
@@ -2474,6 +2493,13 @@
         document.getElementById('ordre-modal-systeme').innerText = (ordre.systeme_cible || 'INCONNU').toUpperCase();
         document.getElementById('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
         
+        // NOUVEAU : INJECTION DU BADGE DE PRIORITÉ DANS LA MODALE
+        const prioLevel = ordre.priorite || 3;
+        let badgePrioModal = '';
+        if (prioLevel === 1) badgePrioModal = '<div style="margin-top: 6px;"><span style="color: #FF3333; font-weight: bold; font-size: 0.85em; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); padding: 2px 6px; border-radius: 2px; animation: alertPulse 1.5s infinite; display: inline-block;">⚠️ PRIORITÉ CRITIQUE</span></div>';
+        else if (prioLevel === 2) badgePrioModal = '<div style="margin-top: 6px;"><span style="color: var(--ed-orange); font-weight: bold; font-size: 0.85em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 6px; border-radius: 2px; display: inline-block;">⚡ PRIORITÉ HAUTE</span></div>';
+        document.getElementById('ordre-modal-prio').innerHTML = badgePrioModal;
+
         const nomOfficier = ordre.nom_officier_traduit || ordre.auteur_nom || ordre.emetteur_nom || ordre.auteur || 'AMIRAUTÉ';
         document.getElementById('ordre-modal-auteur').innerText = nomOfficier.toUpperCase();
         document.getElementById('ordre-modal-brief').innerText = ordre.briefing_amiral || "Aucun briefing supplémentaire fourni.";
