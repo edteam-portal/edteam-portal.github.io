@@ -972,10 +972,13 @@
             
             <!-- Le vrai input caché -->
             <input type="file" id="input-logo-file" accept="image/png, image/jpeg" style="display: none;" onchange="if(typeof previsualiserLogo==='function') previsualiserLogo(event)">
-            
+
             <!-- Le faux bouton pour faire joli -->
-            <button class="auth-btn" style="border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.1); margin-bottom: 20px;" onclick="document.getElementById('input-logo-file').click()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ PARCOURIR LES ARCHIVES LOCALES ]</button>
+            <button class="auth-btn" style="border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.1); margin-bottom: 10px;" onclick="document.getElementById('input-logo-file').click()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ PARCOURIR LES ARCHIVES LOCALES ]</button>
             
+            <!-- NOUVEAU BOUTON : SUPPRIMER LE LOGO -->
+            <button class="auth-btn" style="border-color: #FF3333; color: #FF3333; background: rgba(255, 51, 51, 0.1); margin-bottom: 20px; font-weight: bold;" onclick="if(typeof supprimerLogoEscadron==='function') supprimerLogoEscadron()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';">[ RESTAURER LE LOGO PAR DÉFAUT ]</button>
+
             <!-- La zone de prévisualisation -->
             <div id="preview-logo-container" style="display: none; margin: 0 auto 20px auto; width: 100px; height: 100px; border: 1px solid var(--ed-orange); padding: 5px; background: rgba(0,0,0,0.5); border-radius: 4px;">
                 <img id="preview-logo-img" src="" style="width: 100%; height: 100%; object-fit: contain;">
@@ -3960,6 +3963,31 @@ const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&qu
                 document.head.appendChild(link);
             }
             link.href = base64Str;
+        };
+
+        // 4. SUPPRESSION DU LOGO ET RETOUR PAR DÉFAUT
+        window.supprimerLogoEscadron = async function() {
+            if(typeof sonClic === 'function') sonClic();
+            if (!profilCommandant || !profilCommandant.escadron_id) return;
+
+            // On demande confirmation avec ta modale holographique
+            const confirmation = await demanderConfirmation("⚠️ PURGE DE L'IDENTITÉ", "Voulez-vous vraiment supprimer l'emblème de l'escadron ?<br><br><span style='color: #888; font-size: 0.9em;'>Le terminal reprendra l'affichage standard EDTEAM pour toute la flotte.</span>", "#FF3333");
+            if (!confirmation) return;
+
+            try {
+                // On efface purement et simplement la ligne de l'escadron dans Supabase
+                const { error } = await supabaseApp.from('logos_escadrons').delete().eq('escadron_id', profilCommandant.escadron_id);
+                if (error) throw error;
+                
+                // Pour remettre le beau SVG d'origine sans avoir à re-générer des tonnes de code HTML complexe, 
+                // on rafraîchit simplement la page. Au redémarrage, comme il n'y a plus de logo en BDD, 
+                // le code laissera le logo EDTEAM par défaut !
+                window.location.reload();
+
+            } catch (e) {
+                console.error("Erreur suppression logo:", e);
+                afficherAlerte("ERREUR", "Impossible de supprimer le logo.", "#FF3333");
+            }
         };
 
     </script>
