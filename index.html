@@ -3941,12 +3941,14 @@ const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&qu
                     // C'est encore le SVG d'origine, on le remplace par une balise IMG
                     const img = document.createElement('img');
                     img.src = base64Str;
-                    img.className = 'app-logo'; // Hérite de l'effet Hologramme !
+                    img.className = 'app-logo'; 
                     img.style.objectFit = 'contain';
+                    img.style.filter = 'none'; // <-- ON COUPE L'OMBRE ICI
                     mainLogo.parentNode.replaceChild(img, mainLogo);
                 } else {
                     // C'est déjà une image, on met juste à jour la source
                     mainLogo.src = base64Str;
+                    mainLogo.style.filter = 'none'; // <-- ET ICI AUSSI
                 }
             }
             

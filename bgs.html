@@ -5132,9 +5132,11 @@
                     img.src = base64Str;
                     img.className = 'app-logo';
                     img.style.objectFit = 'contain';
+                    img.style.filter = 'none'; // <-- ON COUPE L'OMBRE ICI
                     mainLogo.parentNode.replaceChild(img, mainLogo);
                 } else {
                     mainLogo.src = base64Str;
+                    mainLogo.style.filter = 'none'; // <-- ET ICI AUSSI
                 }
             }
             let link = document.querySelector("link[rel~='icon']");
