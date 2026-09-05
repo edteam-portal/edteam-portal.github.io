@@ -1822,6 +1822,14 @@
                 enregistrerTelemetrie('page', 'bgs');
                 synchroniserTelemetrie();
 
+                // TÉLÉCHARGEMENT DU LOGO DE L'ESCADRON
+                if (profilCommandant.escadron_id) {
+                    supabaseApp.from('logos_escadrons').select('logo_base64').eq('escadron_id', profilCommandant.escadron_id).single()
+                        .then(({ data: logoData }) => {
+                            if (logoData && logoData.logo_base64) appliquerLogoSurInterface(logoData.logo_base64);
+                        }).catch(() => {});
+                }
+
                 // AFFICHAGE DU BOUTON AMIRAUTÉ (Si Officier ou Directeur)
                 if (data.est_amiral || data.est_directeur) {
                     const navAmiraute = document.getElementById('nav-bureau-amiraute');
@@ -5113,6 +5121,25 @@
                 btn.innerText = "ERREUR DE SYNCHRONISATION";
                 setTimeout(() => { btn.innerText = "METTRE À JOUR LA DIRECTIVE"; btn.style.pointerEvents = "auto"; }, 2000);
             }
+        };
+
+        // AFFICHAGE DU LOGO ESCADRON (Header + Favicon)
+        window.appliquerLogoSurInterface = function(base64Str) {
+            const mainLogo = document.querySelector('.hud-header .app-logo');
+            if (mainLogo) {
+                if (mainLogo.tagName.toLowerCase() === 'svg') {
+                    const img = document.createElement('img');
+                    img.src = base64Str;
+                    img.className = 'app-logo';
+                    img.style.objectFit = 'contain';
+                    mainLogo.parentNode.replaceChild(img, mainLogo);
+                } else {
+                    mainLogo.src = base64Str;
+                }
+            }
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+            link.href = base64Str;
         };
 
     </script>
