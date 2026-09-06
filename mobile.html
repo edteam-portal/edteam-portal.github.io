@@ -3312,10 +3312,10 @@
         };
 
         // ==========================================
-        // MÉCANIQUES MANQUANTES (TÉLÉMÉTRIE, CHRONO & GRADES)
+        // MÉCANIQUES TÉLÉMÉTRIE, CHRONO & GRADES
         // ==========================================
 
-        // 1. Déclaration de la fonction de télémétrie
+        // 1. Déclaration de la fonction de télémétrie (Répare Galnet et Gazette)
         window.enregistrerTelemetrie = function(type, cle) {
             try {
                 let tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
@@ -3335,7 +3335,7 @@
             } catch(e) {}
         };
 
-        // 2. Formatage du temps (C'EST ÇA QUI FAISAIT PLANTER LA MODALE !)
+        // 2. Formatage du temps (Répare l'audit des pilotes)
         window.formaterTemps = function(secondes) {
             if (!secondes) return "0 MIN";
             if (secondes < 60) return "< 1 MIN";
@@ -3346,7 +3346,7 @@
             return `${h}H ${m}M`;
         };
 
-        // 3. Chronomètre local (Ajoute 10s toutes les 10s)
+        // 3. Chronomètre local (Mesure le temps passé)
         window.moduleActifChrono = 'qg';
         setInterval(() => {
             try {
