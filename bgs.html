@@ -2705,6 +2705,45 @@
                             const capMissQ = capsQuotidien['GUERRE_MISSIONS'] || capsQuotidien['MISSIONS'];
                             const capCzQ = capsQuotidien['CZ_VICTOIRES'] || 5;
 
+                            // Comptage réel du nombre de batailles et de leurs intensités
+                            let czMoiH = 0, czMoiM = 0, czMoiS = 0;
+                            effortsQuotidienMoi.forEach(e => {
+                                if (e.type_action === 'CZ_VICTOIRES') {
+                                    const v = Number(e.valeur) || 1;
+                                    if (v >= 1.5) czMoiH++;
+                                    else if (v >= 1.2) czMoiM++;
+                                    else czMoiS++;
+                                }
+                            });
+                            const nbCzMoiQ = czMoiH + czMoiM + czMoiS;
+
+                            let czSquadH = 0, czSquadM = 0, czSquadS = 0;
+                            effortsQuotidienEscadron.forEach(e => {
+                                if (e.type_action === 'CZ_VICTOIRES') {
+                                    const v = Number(e.valeur) || 1;
+                                    if (v >= 1.5) czSquadH++;
+                                    else if (v >= 1.2) czSquadM++;
+                                    else czSquadS++;
+                                }
+                            });
+                            const nbCzSquadQ = czSquadH + czSquadM + czSquadS;
+
+                            let tagsMoi = [];
+                            if (czMoiH > 0) tagsMoi.push(`${czMoiH}H`);
+                            if (czMoiM > 0) tagsMoi.push(`${czMoiM}M`);
+                            if (czMoiS > 0) tagsMoi.push(`${czMoiS}S`);
+                            const strTagsMoi = tagsMoi.length > 0 ? ` [${tagsMoi.join(', ')}]` : '';
+
+                            let tagsSquad = [];
+                            if (czSquadH > 0) tagsSquad.push(`${czSquadH}H`);
+                            if (czSquadM > 0) tagsSquad.push(`${czSquadM}M`);
+                            if (czSquadS > 0) tagsSquad.push(`${czSquadS}S`);
+                            const strTagsSquad = tagsSquad.length > 0 ? ` [${tagsSquad.join(', ')}]` : '';
+
+                            // La variable qui génère le texte avec BATAILLE(S) et les tags [2H, 1S]
+                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoiQ} / ${capCzQ} BATAILLE${capCzQ > 1 ? 'S' : ''}${strTagsMoi}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <span style="color:#fff;">${nbCzSquadQ} BATAILLE${nbCzSquadQ > 1 ? 'S' : ''}${strTagsSquad}</span>`;
+
+                            // Les points (1.6 / 1.3 / 1.0) restent le moteur des calculs de pourcentages et du "TOTAL PTS"
                             const ratioBondsQ = Math.min(100, (totauxMoiQ['SECURITE'] / capBondsQ) * 100);
                             const ratioMissQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capMissQ) * 100);
                             const ratioCzQ = Math.min(100, (totauxMoiQ['CZ_VICTOIRES'] / capCzQ) * 100);
@@ -2715,7 +2754,7 @@
                             poidsTotalMoi = (totauxMoiG['SECURITE'] / 2000000) + totauxMoiG['MISSIONS'] + totauxMoiG['CZ_VICTOIRES'];
 
                             htmlJauges = 
-                                genererJaugeHTML('🏆 VICTOIRES EN CZ (Batailles)', fmtDual(formatNum(totauxMoiQ['CZ_VICTOIRES']), formatNum(totauxQ['CZ_VICTOIRES']), formatNum(capCzQ), 'PTS'), '#FFD700', ratioCzQ, ratioCzQ >= 100) +
+                                genererJaugeHTML('🏆 VICTOIRES EN CZ (Batailles)', texteCzDual, '#FFD700', ratioCzQ, ratioCzQ >= 100) +
                                 genererJaugeHTML('⚔️ OBLIGATIONS DE COMBAT (Bons)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capBondsQ)), 'var(--ed-orange)', ratioBondsQ, ratioBondsQ >= 100) +
                                 genererJaugeHTML('🎯 MISSIONS MILITAIRES', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capMissQ), 'CONTRATS'), 'var(--ed-red)', ratioMissQ, ratioMissQ >= 100);
 
@@ -4306,7 +4345,7 @@
                     } else {
                         // Retour à la grille de 6 colonnes propre
                         let feedHtml = `
-                        <div style="display: grid; grid-template-columns: 125px 160px 145px 1fr 130px 120px; gap: 10px; padding: 10px 15px; color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
+                        <div style="display: grid; grid-template-columns: 125px 160px 145px 1fr 190px 120px; gap: 10px; padding: 10px 15px; color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
                             <span>HORODATAGE</span>
                             <span>COMMANDANT</span>
                             <span>ORDRE</span>
@@ -4356,8 +4395,7 @@
                                 if (v >= 1.5) tailleTag = "[H]";
                                 else if (v >= 1.2) tailleTag = "[M]";
 
-                                const vAffichee = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).format(v);
-                                formatValeur = `+${vAffichee} PTS ${tailleTag}`;
+                                formatValeur = `+1 BATAILLE GAGNÉE ${tailleTag}`;
                             } else if (a.type_action === 'VOLS') {
                                 formatValeur = `${a.valeur} VOL${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'PIRATAGE') {
@@ -4376,7 +4414,7 @@
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                             
                             feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 125px 160px 145px 1fr 130px 120px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 125px 160px 145px 1fr 190px 120px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
                                 <div style="white-space: nowrap;">
