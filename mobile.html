@@ -653,13 +653,15 @@
                             </div>
                         </div>
                         
-                        <!-- DÉTAIL DES INTERACTIONS GLOBALES (PLIABLE) -->
+                        <!-- DÉTAIL DES INTERACTIONS GLOBALES (FIXE) -->
                         <div style="margin-top: 15px; border: 1px solid #333; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden;">
-                            <div onclick="const c = document.getElementById('global-interactions-content'); const i = document.getElementById('global-interactions-icon'); if(c.style.display === 'none'){ c.style.display = 'flex'; i.innerText = '[-]'; } else { c.style.display = 'none'; i.innerText = '[+]'; } if(typeof sonClic === 'function') sonClic();" style="cursor: pointer; padding: 10px 15px; background: rgba(0, 240, 255, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.2); transition: 0.2s;" onmouseover="this.style.background='rgba(0, 240, 255, 0.1)';" onmouseout="this.style.background='rgba(0, 240, 255, 0.05)';">
+                            <!-- En-tête sans le onclick ni l'effet de survol -->
+                            <div style="padding: 10px 15px; background: rgba(0, 240, 255, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.2);">
                                 <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">> DÉTAIL DES INTERACTIONS</span>
-                                <span id="global-interactions-icon" style="color: var(--ed-blue); font-weight: bold;">[+]</span>
                             </div>
-                            <div id="global-interactions-content" style="display: none; flex-direction: column; gap: 6px; padding: 12px; font-size: 0.85em;">
+                            
+                            <!-- Contenu affiché par défaut (display: flex au lieu de none) -->
+                            <div id="global-interactions-content" style="display: flex; flex-direction: column; gap: 6px; padding: 12px; font-size: 0.85em;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">RATIO D'ACTION GLOBAL :</span>
                                     <strong id="tot-int-ratio">--</strong>
@@ -683,7 +685,7 @@
 
                     <!-- 2. REGISTRE DES PILOTES -->
                     <div style="border-top: 1px dashed rgba(255, 51, 51, 0.3); padding-top: 15px;">
-                        <div style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> REGISTRE DES PILOTES (Cliquez pour l'audit)</div>
+                        <div style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> REGISTRE DES PILOTES</div>
                         <div id="dir-liste-globale-pilotes" style="display: flex; flex-direction: column; gap: 8px; padding-right: 5px;">
                             <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Chargement du registre...</div>
                         </div>
@@ -2518,7 +2520,7 @@
             }
         };
 
-        // 3. OUVERTURE DE L'AUDIT INDIVIDUEL (NOUVELLE MODALE)
+        // 3. OUVERTURE DE L'AUDIT INDIVIDUEL (NOUVELLE MODALE COMPLÈTE)
         window.ouvrirAuditPiloteMobile = function(userId, cmdrNom) {
             if (typeof sonClic === 'function') sonClic();
             
@@ -2527,6 +2529,12 @@
             const visites = tel.visites_pages || {};
             const actions = tel.interactions || {};
             const temps = tel.temps_passe || {};
+
+            // Récupération sécurisée des factions favorites
+            let factionsFav = param.factions_favorites || [];
+            if (typeof factionsFav === 'string') {
+                try { factionsFav = JSON.parse(factionsFav); } catch(e) { factionsFav = []; }
+            }
 
             const nowSec = Math.floor(Date.now() / 1000);
             const enJeu = param.last_heartbeat && (nowSec - param.last_heartbeat < 30);
@@ -2591,10 +2599,29 @@
                     </div>
                 </div>
                 
-                <!-- 👇 AJOUTE CE BLOC ICI 👇 -->
-                <div style="color: #ccc; font-size: 0.85em; font-weight: bold; margin-top: 15px; margin-bottom: 8px; letter-spacing: 1px;">> INTERACTIONS SPÉCIFIQUES :</div>
+                <div style="color: #00FF66; font-size: 0.85em; font-weight: bold; margin-top: 15px; margin-bottom: 8px; letter-spacing: 1px;">> INTERACTIONS & USAGE PRÉCIS :</div>
                 <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85em;">
                     <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #888;">FACTIONS SURVEILLÉES :</span>
+                        <strong style="color: var(--ed-orange);">${factionsFav.length}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #888;">SCANS DE SYSTÈMES BGS :</span>
+                        <strong style="color: #fff;">${actions.scans_systeme_bgs || 0}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #888;">CONSULTATIONS DU JOURNAL :</span>
+                        <strong style="color: #fff;">${actions.onglets_bgs_journal || 0}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #888;">CONSULTATIONS DES ORDRES :</span>
+                        <strong style="color: #fff;">${actions.onglets_bgs_missions || 0}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #888;">SCANS COMMERCIAUX :</span>
+                        <strong style="color: #fff;">${actions.scans_commerce || 0}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px dashed #333; padding-top: 6px; margin-top: 2px;">
                         <span style="color: #888;">EDNEWS / GALNET :</span>
                         <strong style="color: #fff;">${actions.lecture_gazette || 0} / ${actions.lecture_galnet || 0}</strong>
                     </div>
@@ -2607,8 +2634,6 @@
                         <strong style="color: #fff;">${actions.fiches_pilotes || 0}</strong>
                     </div>
                 </div>
-                <!-- 👆 FIN DE L'AJOUT 👆 -->
-                
             `;
 
             document.getElementById('audit-pilote-contenu').innerHTML = html;
