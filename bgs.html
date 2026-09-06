@@ -2703,15 +2703,19 @@
                         } else if (ordre.type_ordre === 'GUERRE') {
                             const capBondsQ = capsQuotidien['GUERRE_BONDS'] || capsQuotidien['SECURITE'];
                             const capMissQ = capsQuotidien['GUERRE_MISSIONS'] || capsQuotidien['MISSIONS'];
+                            const capCzQ = capsQuotidien['CZ_VICTOIRES'] || 5;
+
                             const ratioBondsQ = Math.min(100, (totauxMoiQ['SECURITE'] / capBondsQ) * 100);
                             const ratioMissQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capMissQ) * 100);
+                            const ratioCzQ = Math.min(100, (totauxMoiQ['CZ_VICTOIRES'] / capCzQ) * 100);
 
-                            sommeRatiosQ = ratioBondsQ + ratioMissQ;
-                            diviseur = 2;
-                            poidsTotalEscadron = (totauxG['SECURITE'] / 2000000) + totauxG['MISSIONS'];
-                            poidsTotalMoi = (totauxMoiG['SECURITE'] / 2000000) + totauxMoiG['MISSIONS'];
+                            sommeRatiosQ = ratioBondsQ + ratioMissQ + ratioCzQ;
+                            diviseur = 3;
+                            poidsTotalEscadron = (totauxG['SECURITE'] / 2000000) + totauxG['MISSIONS'] + totauxG['CZ_VICTOIRES'];
+                            poidsTotalMoi = (totauxMoiG['SECURITE'] / 2000000) + totauxMoiG['MISSIONS'] + totauxMoiG['CZ_VICTOIRES'];
 
                             htmlJauges = 
+                                genererJaugeHTML('🏆 VICTOIRES EN CZ (Batailles)', fmtDual(formatNum(totauxMoiQ['CZ_VICTOIRES']), formatNum(totauxQ['CZ_VICTOIRES']), formatNum(capCzQ), 'PTS'), '#FFD700', ratioCzQ, ratioCzQ >= 100) +
                                 genererJaugeHTML('⚔️ OBLIGATIONS DE COMBAT (Bons)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capBondsQ)), 'var(--ed-orange)', ratioBondsQ, ratioBondsQ >= 100) +
                                 genererJaugeHTML('🎯 MISSIONS MILITAIRES', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capMissQ), 'CONTRATS'), 'var(--ed-red)', ratioMissQ, ratioMissQ >= 100);
 
@@ -4347,11 +4351,26 @@
                             } else if (a.type_action === 'MEURTRES') {
                                 formatValeur = `${a.valeur} MEURTRE${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'CZ_VICTOIRES') {
-                                formatValeur = `+${a.valeur} BATAILLE${a.valeur > 1 ? 'S' : ''}`;
+                                const v = Number(a.valeur) || 1;
+                                let tailleTag = "[S]";
+                                if (v >= 1.5) tailleTag = "[H]";
+                                else if (v >= 1.2) tailleTag = "[M]";
+
+                                const vAffichee = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).format(v);
+                                formatValeur = `+${vAffichee} PTS ${tailleTag}`;
                             } else if (a.type_action === 'VOLS') {
                                 formatValeur = `${a.valeur} VOL${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'PIRATAGE') {
                                 formatValeur = `${a.valeur} PIRATAGE${a.valeur > 1 ? 'S' : ''}`;
+                            }
+
+                            // Détermination du vecteur affiché
+                            let vecteurTexte = a.type_action;
+                            if (a.type_action === 'CZ_VICTOIRES') {
+                                const v = Number(a.valeur) || 1;
+                                if (v >= 1.5) vecteurTexte = "CZ HAUTE";
+                                else if (v >= 1.2) vecteurTexte = "CZ MOYENNE";
+                                else vecteurTexte = "CZ FAIBLE";
                             }
 
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
@@ -4369,9 +4388,10 @@
                                     <span style="color: #aaa;">${cibleFac}</span>
                                 </div>
                                 <span style="text-align: right; color: ${colorOrdre}; font-weight: bold; font-size: 1.1em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}</span>
-                                <span style="text-align: right; color: #777; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${a.type_action} ]</span>
+                                <span style="text-align: right; color: #777; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${vecteurTexte} ]</span>
                             </div>`;
                         });
+
                         feedHtml += `</div>`;
                         conteneurFeed.innerHTML = feedHtml;
                     }
