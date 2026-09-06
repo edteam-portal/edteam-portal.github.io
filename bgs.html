@@ -1078,21 +1078,19 @@
         function sonBgsUpdate() {
             if (!audioCtx) initAudio();
             if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume(); // Réveille l'audio si l'onglet était en arrière-plan
             const t = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             
-            // Fréquence type "Ping Radar"
             osc.type = 'sine';
             osc.frequency.setValueAtTime(1200, t);
             osc.frequency.exponentialRampToValueAtTime(600, t + 0.4);
             
-            // Enveloppe sonore
             gain.gain.setValueAtTime(0, t);
             gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
             gain.gain.exponentialRampToValueAtTime(0.001, t + 1);
             
-            // Effet d'écho spatial
             const delay = audioCtx.createDelay();
             delay.delayTime.value = 0.25;
             const feedback = audioCtx.createGain();
@@ -1266,6 +1264,8 @@
                 chargerRegistreTactique();
             } else if (tabId === 'diplomatie') {
                 chargerDiplomatie();
+            } else if (tabId === 'ordres') {
+                afficherOrdresBGS(); // Re-synchronise les jauges dès qu'on clique sur l'onglet
             }
             if (tabId === 'ordres') enregistrerTelemetrie('action', 'onglets_bgs_missions');
             if (tabId === 'classement') enregistrerTelemetrie('action', 'onglets_bgs_journal');
@@ -1937,11 +1937,9 @@
 
                     // NOUVEAU : ÉCOUTE EN TEMPS RÉEL DES EFFORTS BGS
                 supabaseApp.channel('live_efforts_bgs')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'efforts_bgs' }, payload => {
-                        // Dès qu'un pilote (vous ou un allié) valide un effort, on force le rafraîchissement des jauges BGS
-                        if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
-                            if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
-                        }
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'efforts_bgs' }, payload => {
+                        // Réagit à toute insertion ou mise à jour sans condition bloquante
+                        if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                     }).subscribe();
 
             } else {
