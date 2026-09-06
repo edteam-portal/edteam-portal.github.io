@@ -974,6 +974,18 @@
                 const { error } = await supabaseApp.from('transmissions').insert([payload]);
                 if (error) throw error;
                 
+                // NOUVEAU : Enregistrement direct dans le journal tactique (Canaux publics uniquement)
+                if (canalActif === 'GLOBAL' || canalActif === 'ESCADRON' || canalActif === 'COALITION') {
+                    supabaseApp.from('journal_activite').insert([{
+                        escadron_id: profilCommandant.escadron_id,
+                        user_id: profilCommandant.user_id,
+                        cmdr_nom: profilCommandant.cmdr_nom || 'INCONNU',
+                        type_action: 'TRANSMISSION',
+                        details: 'Nouveau message sur les fréquences de communication.',
+                        couleur: 'var(--ed-blue)'
+                    }]).then();
+                }
+
                 if (isUrgent) toggleUrgent();
             } catch (e) {
                 console.error(e);
