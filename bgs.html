@@ -3577,8 +3577,8 @@
                 }
             });
 
-            // ==========================================
-            // ALERTE TACTIQUE : DÉTECTION DES MENACES
+           // ==========================================
+            // ALERTE TACTIQUE & RENSEIGNEMENT MILITAIRE
             // ==========================================
             const cardEl = document.getElementById(`card-fav-${index}`);
             const alertEl = document.getElementById(`alerte-fav-${index}`);
@@ -3588,14 +3588,10 @@
                 let etatCritiqueNom = "";
                 const etatsAlerte = ['War', 'Civil War', 'Election'];
                 
-                // Vérification de l'état principal
                 if (etatsAlerte.includes(facData.state)) {
                     isCritical = true;
                     etatCritiqueNom = facData.state.toUpperCase();
-                }
-                
-                // Vérification des états secondaires actifs
-                if (facData.activeStates && !isCritical) {
+                } else if (facData.activeStates) {
                     for (let s of facData.activeStates) {
                         if (etatsAlerte.includes(s.state)) {
                             isCritical = true;
@@ -3605,37 +3601,71 @@
                     }
                 }
                 
-                // Formatage du nom d'état
                 if (etatCritiqueNom === 'WAR') etatCritiqueNom = 'GUERRE';
                 if (etatCritiqueNom === 'CIVIL WAR') etatCritiqueNom = 'GUERRE CIVILE';
                 if (etatCritiqueNom === 'ELECTION') etatCritiqueNom = 'ÉLECTION';
 
-                // DÉCLENCHEMENT DE L'ALERTE GLOBALE (État critique OU Baisse d'influence sévère >= 1%)
                 if (isCritical || delta24h <= -1.0) {
                     cardEl.style.backgroundColor = 'rgba(255, 51, 51, 0.15)';
                     cardEl.style.borderColor = '#FF3333';
                     cardEl.style.animation = 'failsafe-pulse 2s infinite';
-                    
-                    // Affichage du texte GÉANT en plein milieu de la courbe
                     alertEl.style.display = 'flex';
-                    
+
                     if (isCritical) {
-                        cardEl.title = "⚠️ ALERTE : ÉTAT POLITIQUE CRITIQUE EN COURS";
-                        alertEl.innerHTML = `⚠️ ÉTAT : ${etatCritiqueNom}`;
+                        // Message d'attente par défaut
+                        alertEl.innerHTML = `⚠️ ENVOYER UN ÉCLAIREUR POUR ANALYSER LE SYSTÈME`;
+                        cardEl.title = "Aucune télémétrie récente. Effectuez un saut dans le système pour actualiser le rapport.";
+
+                        const favItem = mesFavorisBGS[index];
+                        const systemeNom = (typeof favItem === 'object' ? (favItem.systeme || favItem.nom || favItem.name) : favItem) || "";
+                        const factionNom = facData.name.trim().toLowerCase();
+
+                        // Clés Supabase du projet EDTEAM
+                        const SB_URL = "https://oailvdigfdoyfcydmabb.supabase.co";
+                        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00";
+
+                        fetch(`${SB_URL}/rest/v1/conflits_systemes?systeme=ilike.${encodeURIComponent(systemeNom.trim())}`, {
+                            headers: {
+                                "apikey": SB_KEY,
+                                "Authorization": `Bearer ${SB_KEY}`
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(conflits => {
+                            if (!conflits || !Array.isArray(conflits) || conflits.length === 0) return;
+
+                            const conflit = conflits.find(c => 
+                                c.faction1_nom.trim().toLowerCase() === factionNom || 
+                                c.faction2_nom.trim().toLowerCase() === factionNom
+                            );
+
+                            if (conflit) {
+                                const ageHeures = (new Date() - new Date(conflit.mis_a_jour)) / (1000 * 60 * 60);
+
+                                if (ageHeures < 24) {
+                                    const estF1 = conflit.faction1_nom.trim().toLowerCase() === factionNom;
+                                    const scoreMoi = estF1 ? conflit.faction1_score : conflit.faction2_score;
+                                    const scoreAdv = estF1 ? conflit.faction2_score : conflit.faction1_score;
+                                    const nomAdv = estF1 ? conflit.faction2_nom : conflit.faction1_nom;
+                                    const enjeuMoi = estF1 ? conflit.faction1_enjeu : conflit.faction2_enjeu;
+                                    const enjeuTexte = enjeuMoi ? ` // Enjeu : ${enjeuMoi}` : '';
+
+                                    alertEl.innerHTML = `⚔️ ${etatCritiqueNom} : ${scoreMoi} vs ${scoreAdv}`;
+                                    cardEl.title = `${etatCritiqueNom} vs ${nomAdv} (Score : ${scoreMoi} - ${scoreAdv})${enjeuTexte}`;
+                                }
+                            }
+                        })
+                        .catch(err => console.error("[BGS] Erreur lecture conflits :", err));
                     } else {
-                        cardEl.title = `⚠️ ALERTE : CHUTE D'INFLUENCE SÉVÈRE (${delta24h.toFixed(1)}%)`;
-                        alertEl.innerHTML = `⚠️ BAISSE INFLUENCE`; // Suppression du % pour alléger l'interface
+                        alertEl.innerHTML = `⚠️ BAISSE INFLUENCE`;
+                        cardEl.title = "";
                     }
                 } else {
-                    // RETOUR À LA NORMALE (Nettoyage de l'alerte rouge)
                     cardEl.style.backgroundColor = '';
                     cardEl.style.borderColor = '';
                     cardEl.style.animation = '';
                     cardEl.title = "";
-                    
                     alertEl.style.display = 'none';
-                    
-                    // Restauration de l'ombre orange si une opération était en cours
                     cardEl.style.boxShadow = cardEl.getAttribute('data-original-shadow') || '';
                 }
             }
