@@ -3686,11 +3686,6 @@
             // Sauvegarde Cloud Supabase
             try {
                 await supabaseApp.from('parametres_app').update({ factions_favorites: mesFavorisBGS }).eq('user_id', profilCommandant.user_id);
-                
-                // NOUVEAU : On enregistre dans le journal uniquement si c'est un AJOUT (pas un retrait)
-                if (existe < 0) {
-                    window.enregistrerJournalActivite('RADAR BGS', 'Nouvelle faction placée sous surveillance.', 'var(--ed-blue)');
-                }
 
                 afficherRadarFavoris();
                 if (dernierSystemeBGS && dernierSystemeBGS.name.toUpperCase() === systeme.toUpperCase()) {
