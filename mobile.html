@@ -406,6 +406,18 @@
                     </div>
                 </div>
 
+                <!-- JOURNAL D'ACTIVITÉ / TACTIQUE -->
+<div class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirJournalTactiqueMobile()">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📋</span>
+                        <div>
+                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">JOURNAL D'ACTIVITÉ</span>
+                            <span style="display: block; color: #888; font-size: 0.75em;">Notes et informations de l'escadron</span>
+                        </div>
+                    </div>
+                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
                 <!-- ACTUALITÉS (GALNET & EDNEWS CÔTE À CÔTE) -->
                 <div style="display: flex; gap: 10px;">
                     
@@ -3422,6 +3434,56 @@
             document.getElementById('modal-grades').style.display = 'none';
         };
 
+        // ==========================================
+        // JOURNAL D'ACTIVITÉ (NOTES TACTIQUES)
+        // ==========================================
+        async function ouvrirJournalTactiqueMobile() {
+            if (typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-journal-tactique').style.display = 'flex';
+            
+            const cont = document.getElementById('m-journal-tactique-content');
+            cont.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.85em; text-align: center; margin-top: 20px; animation: alertPulse 1.5s infinite;">Téléchargement des notes...</div>';
+
+            try {
+                const { data, error } = await supabaseApp.from('journal_activite')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .order('created_at', { ascending: false })
+                    .limit(40);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(item => {
+                        const d = new Date(item.created_at);
+                        const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        const col = item.couleur || 'var(--ed-blue)';
+                        
+                        html += `
+                        <div style="background: rgba(0,0,0,0.6); border-left: 3px solid ${col}; padding: 10px 12px; border-radius: 0 4px 4px 0; margin-bottom: 5px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+                                <span style="color: ${col}; font-weight: bold; font-size: 0.85em; letter-spacing: 1px;">[ ${item.type_action} ]</span>
+                                <span style="color: #888; font-size: 0.75em;">${dateStr}</span>
+                            </div>
+                            <div style="color: #ddd; font-size: 0.9em; line-height: 1.4; margin-bottom: 8px;">
+                                ${item.details}
+                            </div>
+                            <div style="color: #555; font-size: 0.75em; text-align: right; font-style: italic;">
+                                CMDR ${item.cmdr_nom.toUpperCase()}
+                            </div>
+                        </div>`;
+                    });
+                    cont.innerHTML = html;
+                } else {
+                    cont.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Aucune note d\'information enregistrée.</div>';
+                }
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 20px;">Erreur de liaison.</div>';
+            }
+        }
+
     </script>
 
     <!-- MODAL LECTURE RAPPORT TACTIQUE (MOBILE) -->
@@ -3440,6 +3502,22 @@
 
                 <div style="color: #888; font-size: 0.85em; margin-bottom: 5px;">> RAPPORT D'INCIDENT :</div>
                 <div id="texte-lire-rapport" style="color: #eee; line-height: 1.5; font-size: 0.95em; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 4px; border: 1px solid #333;">...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL JOURNAL TACTIQUE (NOTES D'INFOS) AVEC EFFET CRT -->
+    <div class="modal-overlay" id="modal-journal-tactique" onclick="document.getElementById('modal-journal-tactique').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6500; padding: 20px;">
+        <div class="card crt-container" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
+            <div class="crt-scan-beam"></div>
+            
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.1); z-index: 2;">
+                <span style="color: var(--ed-blue); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">📋 JOURNAL D'ACTIVITÉ</span>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-journal-tactique').style.display='none'; if(typeof sonClic==='function') sonClic();">✕</span>
+            </div>
+            
+            <div id="m-journal-tactique-content" class="crt-screen" style="padding: 15px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; z-index: 1;">
+                <div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Connexion à la base de données...</div>
             </div>
         </div>
     </div>
