@@ -2705,43 +2705,19 @@
                             const capMissQ = capsQuotidien['GUERRE_MISSIONS'] || capsQuotidien['MISSIONS'];
                             const capCzQ = capsQuotidien['CZ_VICTOIRES'] || 5;
 
-                            // Comptage réel du nombre de batailles et de leurs intensités
-                            let czMoiH = 0, czMoiM = 0, czMoiS = 0;
+                            // Comptage simple du nombre de batailles
+                            let nbCzMoiQ = 0;
                             effortsQuotidienMoi.forEach(e => {
-                                if (e.type_action === 'CZ_VICTOIRES') {
-                                    const v = Number(e.valeur) || 1;
-                                    if (v >= 1.5) czMoiH++;
-                                    else if (v >= 1.2) czMoiM++;
-                                    else czMoiS++;
-                                }
+                                if (e.type_action === 'CZ_VICTOIRES') nbCzMoiQ++;
                             });
-                            const nbCzMoiQ = czMoiH + czMoiM + czMoiS;
 
-                            let czSquadH = 0, czSquadM = 0, czSquadS = 0;
+                            let nbCzSquadQ = 0;
                             effortsQuotidienEscadron.forEach(e => {
-                                if (e.type_action === 'CZ_VICTOIRES') {
-                                    const v = Number(e.valeur) || 1;
-                                    if (v >= 1.5) czSquadH++;
-                                    else if (v >= 1.2) czSquadM++;
-                                    else czSquadS++;
-                                }
+                                if (e.type_action === 'CZ_VICTOIRES') nbCzSquadQ++;
                             });
-                            const nbCzSquadQ = czSquadH + czSquadM + czSquadS;
 
-                            let tagsMoi = [];
-                            if (czMoiH > 0) tagsMoi.push(`${czMoiH}H`);
-                            if (czMoiM > 0) tagsMoi.push(`${czMoiM}M`);
-                            if (czMoiS > 0) tagsMoi.push(`${czMoiS}S`);
-                            const strTagsMoi = tagsMoi.length > 0 ? ` [${tagsMoi.join(', ')}]` : '';
-
-                            let tagsSquad = [];
-                            if (czSquadH > 0) tagsSquad.push(`${czSquadH}H`);
-                            if (czSquadM > 0) tagsSquad.push(`${czSquadM}M`);
-                            if (czSquadS > 0) tagsSquad.push(`${czSquadS}S`);
-                            const strTagsSquad = tagsSquad.length > 0 ? ` [${tagsSquad.join(', ')}]` : '';
-
-                            // La variable qui génère le texte avec BATAILLE(S) et les tags [2H, 1S]
-                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoiQ} / ${capCzQ} BATAILLE${capCzQ > 1 ? 'S' : ''}${strTagsMoi}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <span style="color:#fff;">${nbCzSquadQ} BATAILLE${nbCzSquadQ > 1 ? 'S' : ''}${strTagsSquad}</span>`;
+                            // La variable qui génère le texte épuré (sans les tags H/M/S)
+                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoiQ} / ${capCzQ} BATAILLE${capCzQ > 1 ? 'S' : ''}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <span style="color:#fff;">${nbCzSquadQ} BATAILLE${nbCzSquadQ > 1 ? 'S' : ''}</span>`;
 
                             // Les points (1.6 / 1.3 / 1.0) restent le moteur des calculs de pourcentages et du "TOTAL PTS"
                             const ratioBondsQ = Math.min(100, (totauxMoiQ['SECURITE'] / capBondsQ) * 100);
@@ -4390,12 +4366,7 @@
                             } else if (a.type_action === 'MEURTRES') {
                                 formatValeur = `${a.valeur} MEURTRE${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'CZ_VICTOIRES') {
-                                const v = Number(a.valeur) || 1;
-                                let tailleTag = "[S]";
-                                if (v >= 1.5) tailleTag = "[H]";
-                                else if (v >= 1.2) tailleTag = "[M]";
-
-                                formatValeur = `+1 BATAILLE GAGNÉE ${tailleTag}`;
+                                formatValeur = `+1 BATAILLE GAGNÉE`;
                             } else if (a.type_action === 'VOLS') {
                                 formatValeur = `${a.valeur} VOL${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'PIRATAGE') {
@@ -4405,10 +4376,7 @@
                             // Détermination du vecteur affiché
                             let vecteurTexte = a.type_action;
                             if (a.type_action === 'CZ_VICTOIRES') {
-                                const v = Number(a.valeur) || 1;
-                                if (v >= 1.5) vecteurTexte = "CZ HAUTE";
-                                else if (v >= 1.2) vecteurTexte = "CZ MOYENNE";
-                                else vecteurTexte = "CZ FAIBLE";
+                                vecteurTexte = "ZONE DE CONFLIT";
                             }
 
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
