@@ -221,6 +221,149 @@
         .ribbon-container { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px 0; }
         .ribbon-badge { background: linear-gradient(90deg, rgba(255,215,0,0.1), rgba(255,215,0,0.3)); border: 1px solid #FFD700; color: #FFD700; padding: 5px 10px; font-size: 0.75em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 0 5px rgba(255,215,0,0.2); }
         
+        /* =========================================
+           MÉDAILLES DE CAMPAGNE (STYLE INARA)
+           ========================================= */
+        .medal-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 5px 2px; /* Marges réduites pour en aligner davantage */
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 90px;
+        }
+        
+        .medal-wrapper:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        .medal-wrapper:hover .medal-text {
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+
+        /* Le ruban supérieur */
+        .medal-ribbon {
+            width: 25px;
+            height: 15px;
+            background: linear-gradient(to right, #002244 20%, #B22222 20%, #B22222 40%, #FFD700 40%, #FFD700 60%, #B22222 60%, #B22222 80%, #002244 80%);
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            margin-bottom: -5px; /* Pour passer sous la médaille */
+            border-radius: 1px;
+        }
+
+        /* La pièce métallique */
+        .medal-coin {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            /* Dégradé radial pour l'effet bombé et métallique */
+            background: radial-gradient(ellipse at top left, #FFE55C 0%, #FFD700 30%, #B8860B 70%, #5C4305 100%);
+            border: 2px solid #DAA520;
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.6), /* Ombre interne */
+                inset 2px 2px 5px rgba(255,255,255,0.5), /* Reflet lumière */
+                0 4px 8px rgba(0,0,0,0.6); /* Ombre portée externe */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: #4A3500; /* Couleur sombre pour donner l'impression d'être gravé en creux */
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Étoile centrale de la médaille */
+        .medal-coin::after {
+            content: '★';
+            position: absolute;
+            font-size: 1.8em;
+            color: rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.4);
+        }
+
+        /* Le texte gravé sous la médaille */
+        .medal-text {
+            margin-top: 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            transition: color 0.2s, text-shadow 0.2s;
+            /* Coupure propre si le nom du système est trop long */
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* =========================================
+           MÉDAILLES ÉPIQUES (TOP SPÉCIALISTES)
+           ========================================= */
+        .epic-medal-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            width: 105px; /* Petite taille pour tenir sur 2 lignes */
+        }
+        
+        .epic-medal-container:hover {
+            transform: scale(1.1) translateY(-5px);
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4));
+        }
+
+        .epic-medal-svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        }
+
+        .epic-medal-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        }
+
+        .epic-medal-title {
+            font-size: 0.6em;
+            color: #888;
+            text-align: center;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            height: 18px; /* Hauteur fixe pour l'alignement */
+        }
+
+        .epic-medal-cmdr {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(180deg, rgba(30,30,30,0.9), rgba(0,0,0,0.9));
+            border: 1px solid #555;
+            padding: 3px 6px;
+            border-radius: 3px;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        }
+
         .exploit-feed { height: 350px; overflow-y: auto; position: relative; background: rgba(0,0,0,0.6); border: 1px dashed #333; padding: 10px; font-size: 0.85em; }
         .exploit-feed::-webkit-scrollbar { width: 6px; }
         .exploit-feed::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.5); border-radius: 3px; }
@@ -535,7 +678,7 @@
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                         
                         <!-- MUR DES SPÉCIALISTES -->
-                        <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; flex-grow: 1;">
+                        <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px;">
                             <h4 style="margin: 0 0 15px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px;">MUR DES SPÉCIALISTES (TOP ESCADRON)</h4>
                             <div id="specialists-container">
                                 <div style="color: #555; font-style: italic; text-align: center; padding: 20px;">Calcul des experts en cours...</div>
@@ -545,7 +688,7 @@
 
                         <!-- RUBANS DE CAMPAGNE (MÉDAILLES) -->
                         <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px;">
-                            <h4 style="margin: 0 0 10px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px;">ÉTATS DE SERVICE (CAMPAGNES CLÔTURÉES)</h4>
+                            <h4 style="margin: 0 0 10px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px;">MES ÉTATS DE SERVICE (OPERATIONS CLÔTURÉES)</h4>
                             <div id="ribbons-container" class="ribbon-container">
                                 <div style="color: #555; font-style: italic; font-size: 0.9em;">Analyse des archives de l'Amirauté...</div>
                             </div>
@@ -556,7 +699,10 @@
 
                 <!-- ZONE 4 : JOURNAL DES EXPLOITS (LIVE FEED) -->
                 <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; border-color: var(--ed-blue);">
-                    <h4 style="margin: 0 0 15px 0; color: var(--ed-blue); letter-spacing: 2px; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px;">> JOURNAL DES EXPLOITS (COMMUNICATIONS INTERCEPTÉES)</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: var(--ed-blue); letter-spacing: 2px;">> JOURNAL DES EXPLOITS (COMMUNICATIONS INTERCEPTÉES)</h4>
+                        <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 0.8em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';" onclick="ouvrirModal('modal-exploit-fullscreen', event)" onmouseenter="if(typeof sonHover==='function') sonHover()">[ AGRANDIR ]</button>
+                    </div>
                     <div id="exploit-feed" class="exploit-feed">
                         <div style="color: #555; font-style: italic; text-align: center; margin-top: 40px;">Établissement de la liaison sécurisée...</div>
                         <!-- Le JS injectera les lignes d'exploits ici -->
@@ -567,17 +713,23 @@
             
             <!-- MODALE : DOSSIER DU PILOTE -->
             <div class="modal-overlay" id="modal-profil-pilote" onclick="fermerModal('modal-profil-pilote', event)">
-                <div class="modal-content" style="max-width: 800px; width: 90%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+                <div class="modal-content" style="max-width: 1050px; width: 95%; max-height: 90vh; overflow-y: auto; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
                     <div class="modal-close" style="position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold;" onclick="fermerModal('modal-profil-pilote')">X</div>
                     
-                    <div style="border-bottom: 1px dashed var(--ed-orange); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div>
+                    <div style="border-bottom: 1px dashed var(--ed-orange); padding-bottom: 15px; margin-bottom: 20px;">
+                        <!-- Ligne 1 : Le nom et les médailles collées à sa droite -->
+                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 20px;">
                             <div style="color: var(--ed-orange); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;" id="modal-cmdr-nom">CMDR ...</div>
-                            <div id="modal-cmdr-roles" style="margin-top: 10px; display: flex; gap: 10px;"></div>
+                            <div id="modal-cmdr-distinctions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                <!-- Les médailles globales seront injectées ici par JS -->
+                            </div>
                         </div>
+                        <!-- Ligne 2 : Les badges de rôles (Amiral, etc.) en dessous -->
+                        <div id="modal-cmdr-roles" style="margin-top: 10px; display: flex; gap: 10px;"></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- On donne 1.5x plus de place à la colonne des médailles -->
+                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px;">
                         
                         <!-- COLONNE GAUCHE -->
                         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -635,15 +787,14 @@
                                 
                             </div>
 
-                            <!-- ÉTATS DE SERVICE BGS -->
+                            <!-- ÉTATS DE SERVICE BGS (MÉDAILLES) -->
                             <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px; flex-grow: 1;">
-                                <div style="color: #888; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">> ÉTATS DE SERVICE BGS</div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <span style="color: #ccc; font-size: 0.9em;">OPÉRATIONS REJOINTES</span>
-                                    <span id="modal-ops-count" style="color: #fff; font-weight: bold; font-size: 1.1em;">-</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px;">
+                                    <span style="color: #888; font-weight: bold; letter-spacing: 1px;">> ÉTATS DE SERVICE</span>
+                                    <span style="color: #ccc; font-size: 0.85em;">OPERATIONS : <strong id="modal-ops-count" style="color: #fff; font-size: 1.2em;">-</strong></span>
                                 </div>
-                                <div id="modal-specialiste-titres" style="display: flex; flex-direction: column; gap: 6px;">
-                                    <!-- Les titres de spécialistes seront injectés ici -->
+                                <div id="modal-medailles-veteran" class="ribbon-container" style="max-height: 240px; overflow-y: auto; padding-right: 5px;">
+                                    <!-- Les médailles (rubans) seront injectées ici -->
                                 </div>
                             </div>
                             
@@ -1341,6 +1492,40 @@
         const ranksEmp = ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"];
         const ranksMercenary = ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
 
+        // =========================================
+        // FORGE VECTORIELLE DES MÉDAILLES GLOBALES
+        // =========================================
+        window.forgerMedailleSVG = function(type, couleurAura) {
+            let grad = ''; let ribbon = ''; let icone = '';
+            
+            if (type === 'SEC') { grad = 'gradTitane'; ribbon = '#00F0FF'; icone = '<path d="M35,45 L65,45 L65,65 C65,75 50,85 50,85 C50,85 35,75 35,65 Z" fill="url(#gradTitane)" stroke="#111" stroke-width="2"/>'; } 
+            else if (type === 'LOG') { grad = 'gradBronze'; ribbon = '#FF7100'; icone = '<polygon points="50,45 65,52 65,68 50,75 35,68 35,52" fill="none" stroke="url(#gradBronze)" stroke-width="4"/><polyline points="35,52 50,60 65,52" stroke="url(#gradBronze)" stroke-width="4" fill="none"/><line x1="50" y1="60" x2="50" y2="75" stroke="url(#gradBronze)" stroke-width="4"/>'; } 
+            else if (type === 'ECO') { grad = 'gradOr'; ribbon = '#00FF66'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="url(#gradOr)" stroke-width="4"/><path d="M50,42 L50,78 M45,60 L55,60" stroke="url(#gradOr)" stroke-width="3"/>'; } 
+            else if (type === 'SCI') { grad = 'gradPlatine'; ribbon = '#B026FF'; icone = '<ellipse cx="50" cy="60" rx="18" ry="6" transform="rotate(45 50 60)" fill="none" stroke="url(#gradPlatine)" stroke-width="3"/><ellipse cx="50" cy="60" rx="18" ry="6" transform="rotate(-45 50 60)" fill="none" stroke="url(#gradPlatine)" stroke-width="3"/><circle cx="50" cy="60" r="4" fill="#B026FF" filter="url(#glowMedal)"/>'; } 
+            else if (type === 'EXE') { grad = 'gradSombre'; ribbon = '#FF3333'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="38" x2="50" y2="46" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="74" x2="50" y2="82" stroke="#FF3333" stroke-width="3"/><line x1="28" y1="60" x2="36" y2="60" stroke="#FF3333" stroke-width="3"/><line x1="64" y1="60" x2="72" y2="60" stroke="#FF3333" stroke-width="3"/>'; } 
+            else if (type === 'GUE') { grad = 'gradAcier'; ribbon = '#FF7100'; icone = '<line x1="38" y1="48" x2="62" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><line x1="62" y1="48" x2="38" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="60" r="4" fill="#FF7100" filter="url(#glowMedal)"/>'; } 
+            else if (type === 'ELE') { grad = 'gradOr'; ribbon = '#00F0FF'; icone = '<polygon points="50,42 54,52 64,53 56,60 58,70 50,65 42,70 44,60 36,53 46,52" fill="url(#gradOr)"/>'; }
+
+            return `
+            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));">
+                <defs>
+                    <linearGradient id="gradOr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFE55C"/><stop offset="50%" stop-color="#B8860B"/><stop offset="100%" stop-color="#5C4305"/></linearGradient>
+                    <linearGradient id="gradTitane" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E2E2E2"/><stop offset="50%" stop-color="#8e9eab"/><stop offset="100%" stop-color="#3f4c6b"/></linearGradient>
+                    <linearGradient id="gradBronze" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffb347"/><stop offset="50%" stop-color="#cd7f32"/><stop offset="100%" stop-color="#4a2511"/></linearGradient>
+                    <linearGradient id="gradPlatine" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#B0C4DE"/><stop offset="100%" stop-color="#708090"/></linearGradient>
+                    <linearGradient id="gradSombre" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#555555"/><stop offset="50%" stop-color="#222222"/><stop offset="100%" stop-color="#050505"/></linearGradient>
+                    <linearGradient id="gradAcier" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A9A9A9"/><stop offset="50%" stop-color="#696969"/><stop offset="100%" stop-color="#2F4F4F"/></linearGradient>
+                    <filter id="glowMedal"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <path d="M35,0 L65,0 L65,30 L50,40 L35,30 Z" fill="${ribbon}"/>
+                <path d="M42,0 L58,0 L58,32 L50,37 L42,32 Z" fill="rgba(0,0,0,0.4)"/>
+                <circle cx="50" cy="60" r="35" fill="url(#${grad})"/>
+                <circle cx="50" cy="60" r="28" fill="#151515" stroke="url(#${grad})" stroke-width="2"/>
+                <circle cx="50" cy="60" r="24" fill="none" stroke="${couleurAura}" stroke-width="1.5" opacity="0.6" filter="url(#glowMedal)"/>
+                ${icone}
+            </svg>`;
+        };
+
         async function ouvrirProfilPilote(userId) {
             try {
                 if(typeof ouvrirModal === 'function') ouvrirModal('modal-profil-pilote'); // Utilise le son et ferme les tooltips
@@ -1356,93 +1541,83 @@
                 const params = resParams.data;
                 if (!profil) return;
 
-                // --- 2. CALCUL ROBUSTE DE L'IMPACT BGS ET DES SPÉCIALITÉS ---
+                // --- 2. CALCUL ROBUSTE DE L'IMPACT BGS ET DES MÉDAILLES ---
                 let totalSquad = 0;
                 let totalPilote = 0;
                 let opsCount = 0;
-                let titresHtml = '<div style="color: #666; font-style: italic; font-size: 0.8em; text-align: center;">Aucune distinction de spécialiste.</div>';
+                let medaillesHtml = '<div style="color: #666; font-style: italic; font-size: 0.8em; text-align: center;">Aucun état de service remarquable.</div>';
                 
                 try {
-                    // On sécurise la recherche de l'escadron
                     const escadronCible = profilCommandant.escadron_id || 'ISS';
-                    const { data: squadOrdres } = await supabaseApp.from('ordres_bgs').select('id').eq('escadron_id', escadronCible);
+                    const { data: squadOrdres } = await supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', escadronCible);
                     
                     if (squadOrdres && squadOrdres.length > 0) {
                         const ordreIds = squadOrdres.map(o => String(o.id));
-                        
-                        // On télécharge l'étoile complète (*)
                         const { data: allEfforts } = await supabaseApp.from('efforts_bgs').select('*');
                         
                         if (allEfforts) {
                             const effortsEscadron = allEfforts.filter(e => ordreIds.includes(String(e.ordre_id)));
-                            
-                            // 1. Calcul de l'impact (pourcentage) et nombre d'opérations uniques
                             const uniqueOps = new Set();
-                            const scoresSpecialistes = {};
-
+                            
+                            // 1. Calcul de l'impact global (Total Escadron vs Total Pilote)
                             effortsEscadron.forEach(e => {
                                 const val = Math.abs(Number(e.valeur) || 0);
                                 let pts = val;
-                                // Application du diviseur pour les crédits
-                                if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) { 
-                                    pts = val / 2000000; 
-                                }
+                                if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) { pts = val / 2000000; }
                                 
                                 totalSquad += pts;
                                 
-                                const uid = String(e.user_id);
-                                if (uid === String(userId)) {
+                                if (String(e.user_id) === String(userId)) {
                                     totalPilote += pts;
                                     uniqueOps.add(e.ordre_id);
                                 }
+                            });
 
-                                // 2. Préparation du classement des Spécialistes
-                            if (!scoresSpecialistes[uid]) scoresSpecialistes[uid] = { log: 0, eco: 0, sec: 0, sci: 0, exe: 0, gue: 0, ele: 0 };
+                            opsCount = uniqueOps.size;
+
+                            // 2. Calcul des Médailles de Vétéran (Campagnes clôturées uniquement)
+                            let tempMedailles = '';
+                            const ordresClotures = squadOrdres.filter(o => o.statut === 'ARCHIVÉ');
                             
-                            if (e.type_action === 'MISSIONS') scoresSpecialistes[uid].log += pts;
-                            else if (e.type_action === 'ECONOMIE') scoresSpecialistes[uid].eco += pts;
-                            else if (e.type_action === 'SECURITE') scoresSpecialistes[uid].sec += pts;
-                            else if (e.type_action === 'SCIENCE') scoresSpecialistes[uid].sci += pts;
-                            else if (['MEURTRES', 'VOLS', 'CONTREBANDE', 'ECHECS', 'PIRATAGE'].includes(e.type_action)) scoresSpecialistes[uid].exe += pts;
-                            else if (['CZ_VICTOIRES', 'GUERRE_MISSIONS', 'GUERRE_BONDS'].includes(e.type_action)) scoresSpecialistes[uid].gue += pts;
-                            else if (e.type_action === 'ELECTION_MISSIONS') scoresSpecialistes[uid].ele += pts;
-                        }); // <--- LA FAMEUSE FERMETURE MANQUANTE EST LÀ !
+                            ordresClotures.forEach(ordre => {
+                                const effortsDeCetOrdre = effortsEscadron.filter(e => String(e.ordre_id) === String(ordre.id));
+                                let poidsTotalOrdre = 0;
+                                let poidsPiloteCible = 0;
 
-                        opsCount = uniqueOps.size;
+                                effortsDeCetOrdre.forEach(e => {
+                                    const val = Math.abs(Number(e.valeur) || 0);
+                                    let pts = val;
+                                    if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
+                                    
+                                    poidsTotalOrdre += pts;
+                                    if (String(e.user_id) === String(userId)) {
+                                        poidsPiloteCible += pts;
+                                    }
+                                });
 
-                        // 3. Élection des Spécialistes (Comparaison avec le reste de l'escadron)
-                        const trouverMeilleur = (categorie) => {
-                            let max = 0; let topPilote = null;
-                            for (const [uid, scores] of Object.entries(scoresSpecialistes)) {
-                                // S'il y a un effort valide (> 0) et qu'il est le plus grand
-                                if (scores[categorie] > max) { max = scores[categorie]; topPilote = uid; }
-                            }
-                            return topPilote;
-                        };
+                                // Si le pilote a fourni au moins 1% de l'effort total de cette campagne précise
+                                const pctImplication = poidsTotalOrdre > 0 ? (poidsPiloteCible / poidsTotalOrdre) * 100 : 0;
+                                if (pctImplication >= 1) {
+                                    const nomSysteme = ordre.systeme_cible.toUpperCase();
+                                    const pctAffiche = Math.round(pctImplication) + '%';
+                                    
+                                    // Création de l'hologramme épuré (sans la mention de clic)
+                                    const tooltipText = `<strong style=\\'color:#FFD700\\'>CAMPAGNE DE ${nomSysteme}</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Contribution personnelle : <strong style=\\'color:var(--ed-orange)\\'>${pctAffiche}</strong> de l\\'effort total.</span>`;
+                                    
+                                    // Événements de la souris pour la bulle holographique
+                                    const tooltipEvents = `onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, '${tooltipText}', '#FFD700')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)"`;
 
-                        const N1_Sec = trouverMeilleur('sec');
-                        const N1_Log = trouverMeilleur('log');
-                        const N1_Eco = trouverMeilleur('eco');
-                        const N1_Sci = trouverMeilleur('sci');
-                        const N1_Exe = trouverMeilleur('exe');
-                        const N1_Gue = trouverMeilleur('gue');
-                        const N1_Ele = trouverMeilleur('ele');
+                                    // Utilisation de la structure de médaille CSS (sans l'attribut onclick)
+                                    tempMedailles += `
+                                    <div class="medal-wrapper" ${tooltipEvents}>
+                                        <div class="medal-ribbon"></div>
+                                        <div class="medal-coin"></div>
+                                        <div class="medal-text">${nomSysteme}</div>
+                                    </div>`;
+                                }
+                            });
 
-                        let tempTitres = '';
-                        const addTitre = (icon, nom, color) => {
-                            tempTitres += `<div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${color}; padding: 6px 10px; font-size: 0.85em; color: ${color}; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 0 4px 4px 0; margin-bottom: 4px;"><span>${icon} ${nom}</span><span style="font-size: 1.2em;">🏆</span></div>`;
-                        };
-
-                        // Si le joueur cliqué est le N°1, on lui ajoute la médaille correspondante !
-                        if (String(userId) === String(N1_Sec)) addTitre('🛡️', 'LE FER DE LANCE (SÉCURITÉ)', 'var(--ed-blue)');
-                        if (String(userId) === String(N1_Log)) addTitre('📦', 'MAÎTRE LOGISTICIEN (MISSIONS)', 'var(--ed-orange)');
-                        if (String(userId) === String(N1_Eco)) addTitre('💰', 'LE MAGNAT (ÉCONOMIE)', '#00FF66');
-                        if (String(userId) === String(N1_Sci)) addTitre('🔬', 'L\'ÉCLAIREUR (SCIENCE)', '#B026FF');
-                        if (String(userId) === String(N1_Exe)) addTitre('☠️', 'L\'EXÉCUTEUR (OP. NOIRES)', '#FF3333');
-                        if (String(userId) === String(N1_Gue)) addTitre('⚔️', 'SEIGNEUR DE GUERRE (CONFLITS)', '#FF7100');
-                        if (String(userId) === String(N1_Ele)) addTitre('🗳️', 'L\'ÉMINENCE GRISE (ÉLECTIONS)', '#00F0FF');
-
-                        if (tempTitres !== '') titresHtml = tempTitres;
+                            if (tempMedailles !== '') medaillesHtml = tempMedailles;
                         }
                     }
                 } catch(err) { console.error("Erreur calcul BGS:", err); }
@@ -1462,8 +1637,9 @@
                 // Mise à jour des États de Service
                 const elOpsCount = document.getElementById('modal-ops-count');
                 if (elOpsCount) elOpsCount.innerText = opsCount;
-                const elSpecialiste = document.getElementById('modal-specialiste-titres');
-                if (elSpecialiste) elSpecialiste.innerHTML = titresHtml;
+                
+                const elMedailles = document.getElementById('modal-medailles-veteran');
+                if (elMedailles) elMedailles.innerHTML = medaillesHtml;
 
                 // --- 3. INJECTION DES DONNÉES DU PROFIL ---
                 document.getElementById('modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.7em;">[ EN ATTENTE EDMC ]</span>');
@@ -1481,6 +1657,33 @@
                     const rName = rankArray[rankVal || 0] || 'INCONNU';
                     return `${rName} <span style="color:var(--ed-orange); font-size:0.85em; margin-left:5px;">(${progVal || 0}%)</span>`;
                 };
+
+                // --- INJECTION DES DISTINCTIONS GLOBALES (TOP ESCADRON) ---
+                const cacheName = 'edteam_specialists_' + (profilCommandant.escadron_id || 'ISS');
+                const cachedSpecs = JSON.parse(localStorage.getItem(cacheName) || '{}');
+                let distinctionsHtml = '';
+
+                const verifierDistinction = (categorie, typeCode, couleur, titre) => {
+                    // Si l'ID du pilote correspond au Spécialiste actuel en mémoire
+                    if (String(cachedSpecs[categorie]) === String(userId)) {
+                        distinctionsHtml += `
+                        <div style="width: 45px; height: 45px; cursor: help; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onmouseenter="if(typeof showHoloTooltip==='function') showHoloTooltip(event, '<strong style=\\'color:${couleur}\\'>${titre}</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Spécialiste de l\\'Escadron</span>', '${couleur}')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
+                            ${window.forgerMedailleSVG(typeCode, couleur)}
+                        </div>`;
+                    }
+                };
+
+                // On utilise des guillemets doubles "..." pour éviter les conflits avec les apostrophes
+                verifierDistinction('sec', 'SEC', 'var(--ed-blue)', "LE FER DE LANCE (SÉCURITÉ)");
+                verifierDistinction('log', 'LOG', 'var(--ed-orange)', "MAÎTRE LOGISTICIEN (MISSIONS)");
+                verifierDistinction('eco', 'ECO', '#00FF66', "LE MAGNAT (ÉCONOMIE)");
+                verifierDistinction('sci', 'SCI', '#B026FF', "L'ÉCLAIREUR (SCIENCE)");
+                verifierDistinction('exe', 'EXE', '#FF3333', "L'EXÉCUTEUR (OP. NOIRES)");
+                verifierDistinction('gue', 'GUE', '#FF7100', "SEIGNEUR DE GUERRE (CONFLITS)");
+                verifierDistinction('ele', 'ELE', '#00F0FF', "L'ÉMINENCE GRISE (ÉLECTIONS)");
+
+                const elDistinctions = document.getElementById('modal-cmdr-distinctions');
+                if (elDistinctions) elDistinctions.innerHTML = distinctionsHtml;
 
                 // Injection des grades
                 document.getElementById('modal-rank-combat').innerHTML = formatRank(ranksCombat, profil.rang_combat, profil.prog_combat);
@@ -1523,7 +1726,7 @@
                         let repHtml = `
                         <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px; margin-top: 20px; flex-grow: 1;">
                             <div style="color: var(--ed-blue); font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">> REPUTATIONS ESCADRON (OBJECTIFS)</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 15px;">`;
+                            <div style="display: flex; flex-direction: column; gap: 15px;">`;
                         
                         const reps = profil.reputations || {};
                         
@@ -2540,13 +2743,15 @@
             };
 
             try {
-                const [resOrdres, resEfforts] = await Promise.all([
+                const [resOrdres, resEfforts, resConflits] = await Promise.all([
                     supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF').order('date_emission', { ascending: false }),
-                    supabaseApp.from('efforts_bgs').select('*')
+                    supabaseApp.from('efforts_bgs').select('*'),
+                    supabaseApp.from('conflits_systemes').select('*') // <-- ON RÉCUPÈRE LES CONFLITS
                 ]);
 
                 const ordresData = resOrdres.data || [];
                 const effortsData = resEfforts.data || [];
+                const conflitsData = resConflits.data || []; // <-- ON STOCKE LES CONFLITS
 
                 window.cacheOrdresBgs = ordresData;
                 window.cacheEffortsBgs = effortsData;
@@ -2748,23 +2953,48 @@
                         const impactQuotidien = Math.min(100, Math.round(sommeRatiosQ / diviseur));
                         const partPilote = poidsTotalEscadron > 0 ? Math.min(100, Math.round((poidsTotalMoi / poidsTotalEscadron) * 100)) : 0;
 
-                        // Traduction visuelle de la priorité pour le pilote
-                        const prioLevel = ordre.priorite || 3;
-                        let badgePrioPilot = '';
-                        if (prioLevel === 1) {
-                            badgePrioPilot = '<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; animation: alertPulse 1.5s infinite; margin-left: 10px; box-shadow: 0 0 10px rgba(255,51,51,0.3);">⚠️ PRIORITÉ CRITIQUE</span>';
-                        } else if (prioLevel === 2) {
-                            badgePrioPilot = '<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; margin-left: 10px;">⚡ PRIORITÉ HAUTE</span>';
+                        // --- NOUVEAU : DÉTECTION DU SCORE DE GUERRE/ÉLECTION ---
+                        let conflitBadge = '';
+                        if (ordre.type_ordre === 'GUERRE' || ordre.type_ordre === 'ELECTION') {
+                            const nomFacSearch = ordre.faction_cible.trim().toLowerCase();
+                            const nomSysSearch = ordre.systeme_cible.trim().toLowerCase();
+                            
+                            const conflitTrouve = conflitsData.find(c => 
+                                c.systeme && c.systeme.trim().toLowerCase() === nomSysSearch &&
+                                (c.faction1_nom.trim().toLowerCase() === nomFacSearch || c.faction2_nom.trim().toLowerCase() === nomFacSearch)
+                            );
+
+                            if (conflitTrouve) {
+                                // On vérifie que la donnée a moins de 48h
+                                const ageHeures = (Date.now() - new Date(conflitTrouve.mis_a_jour).getTime()) / (1000 * 60 * 60);
+                                if (ageHeures < 48) {
+                                    const estF1 = conflitTrouve.faction1_nom.trim().toLowerCase() === nomFacSearch;
+                                    const scoreMoi = estF1 ? conflitTrouve.faction1_score : conflitTrouve.faction2_score;
+                                    const scoreAdv = estF1 ? conflitTrouve.faction2_score : conflitTrouve.faction1_score;
+                                    const nomAdv = estF1 ? conflitTrouve.faction2_nom : conflitTrouve.faction1_nom;
+                                    const iconConflit = ordre.type_ordre === 'GUERRE' ? '⚔️' : '🗳️';
+                                    
+                                    conflitBadge = `
+                                    <div style="background: rgba(0,0,0,0.5); border: 1px dashed ${colorPrinc}; padding: 2px 10px; border-radius: 3px; margin-left: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.8em; cursor: help;"
+                                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:${colorPrinc}\\'>RAPPORT DE CONFLIT</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Dernière mise à jour par l\\'éclaireur : il y a ${Math.round(ageHeures)}h</span>', '${colorPrinc}')" 
+                                         onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
+                                         onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                                        <span style="color: #ccc;">${iconConflit} SCORE : <strong style="color: ${colorPrinc}; font-size: 1.2em;">${scoreMoi} - ${scoreAdv}</strong></span>
+                                        <span style="color: #666;">vs</span>
+                                        <span style="color: #aaa; font-weight: bold;">${nomAdv.toUpperCase()}</span>
+                                    </div>`;
+                                }
+                            }
                         }
 
                         htmlAccordionsFactions += `
                         <div style="border: 1px solid ${colorPrinc}; background: ${colorFond}; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                 <div>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                                         <span class="copy-click" onclick="copierNav('${ordre.faction_cible.replace(/'/g, "\\'").toUpperCase()}', this, event)" style="color: #fff; font-size: 1.15em; font-weight: bold;" title="Copier la faction">${ordre.faction_cible.toUpperCase()}</span>
-                                        <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
-                                        ${badgePrioPilot}
+                                        <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold; margin-left: 2px;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
+                                        ${conflitBadge}
                                     </div>
                                 </div>
 
@@ -2840,10 +3070,22 @@
                         `;
                     }
 
+                    // --- NOUVEAU : CALCUL DE LA PRIORITÉ MAXIMALE DU SYSTÈME ---
+                    const sysPriorite = Math.min(...factionsDuSysteme.map(o => o.priorite || 3));
+                    let badgePrioSysteme = '';
+                    
+                    if (sysPriorite === 1) {
+                        badgePrioSysteme = '<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 4px 12px; border-radius: 3px; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; animation: alertPulse 1.5s infinite; box-shadow: 0 0 15px rgba(255,51,51,0.3);">⚠️ PRIORITÉ CRITIQUE</span>';
+                    } else if (sysPriorite === 2) {
+                        badgePrioSysteme = '<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 4px 12px; border-radius: 3px; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; box-shadow: 0 0 10px rgba(255,113,0,0.2);">⚡ PRIORITÉ HAUTE</span>';
+                    }
+
                     html += `
                     <div class="data-row" style="border-color: ${colorTheme}; box-shadow: ${cardShadow}; background: rgba(10, 5, 0, 0.7); margin-bottom: 25px; transition: all 0.3s ease;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed ${colorThemeDim}; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                            <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed ${colorThemeDim}; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            
+                            <!-- Zone Gauche : Infos du Système -->
+                            <div style="flex: 1; min-width: 300px;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <span onclick="togglePinSystem('${nomSysteme.replace(/'/g, "\\'")}', event); if(typeof hideHoloTooltip === 'function') hideHoloTooltip();" 
                                           style="color: ${estEpingle ? '#FFD700' : '#666'}; font-size: 1.8em; cursor: pointer; transition: 0.2s; line-height: 0.8;" 
@@ -2860,7 +3102,16 @@
                                     <span>FACTIONS CIBLÉES : <strong style="color: ${colorTheme};">${factionsDuSysteme.length}</strong></span>
                                 </div>
                             </div>
-                            ${btnBriefingHTML}
+
+                            <!-- Zone Centrale : Le Badge de Priorité -->
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                ${badgePrioSysteme}
+                            </div>
+
+                            <!-- Zone Droite : Le bouton de Briefing -->
+                            <div style="flex: 1; display: flex; justify-content: flex-end; min-width: 150px;">
+                                ${btnBriefingHTML}
+                            </div>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -3631,50 +3882,9 @@
                     alertEl.style.display = 'flex';
 
                     if (isCritical) {
-                        // Message d'attente par défaut
-                        alertEl.innerHTML = `⚠️ ENVOYER UN ÉCLAIREUR POUR ANALYSER LE SYSTÈME`;
-                        cardEl.title = "Aucune télémétrie récente. Effectuez un saut dans le système pour actualiser le rapport.";
-
-                        const favItem = mesFavorisBGS[index];
-                        const systemeNom = (typeof favItem === 'object' ? (favItem.systeme || favItem.nom || favItem.name) : favItem) || "";
-                        const factionNom = facData.name.trim().toLowerCase();
-
-                        // Clés Supabase du projet EDTEAM
-                        const SB_URL = "https://oailvdigfdoyfcydmabb.supabase.co";
-                        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00";
-
-                        fetch(`${SB_URL}/rest/v1/conflits_systemes?systeme=ilike.${encodeURIComponent(systemeNom.trim())}`, {
-                            headers: {
-                                "apikey": SB_KEY,
-                                "Authorization": `Bearer ${SB_KEY}`
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(conflits => {
-                            if (!conflits || !Array.isArray(conflits) || conflits.length === 0) return;
-
-                            const conflit = conflits.find(c => 
-                                c.faction1_nom.trim().toLowerCase() === factionNom || 
-                                c.faction2_nom.trim().toLowerCase() === factionNom
-                            );
-
-                            if (conflit) {
-                                const ageHeures = (new Date() - new Date(conflit.mis_a_jour)) / (1000 * 60 * 60);
-
-                                if (ageHeures < 24) {
-                                    const estF1 = conflit.faction1_nom.trim().toLowerCase() === factionNom;
-                                    const scoreMoi = estF1 ? conflit.faction1_score : conflit.faction2_score;
-                                    const scoreAdv = estF1 ? conflit.faction2_score : conflit.faction1_score;
-                                    const nomAdv = estF1 ? conflit.faction2_nom : conflit.faction1_nom;
-                                    const enjeuMoi = estF1 ? conflit.faction1_enjeu : conflit.faction2_enjeu;
-                                    const enjeuTexte = enjeuMoi ? ` // Enjeu : ${enjeuMoi}` : '';
-
-                                    alertEl.innerHTML = `⚔️ ${etatCritiqueNom} : ${scoreMoi} vs ${scoreAdv}`;
-                                    cardEl.title = `${etatCritiqueNom} vs ${nomAdv} (Score : ${scoreMoi} - ${scoreAdv})${enjeuTexte}`;
-                                }
-                            }
-                        })
-                        .catch(err => console.error("[BGS] Erreur lecture conflits :", err));
+                        let iconConflit = etatCritiqueNom === 'ÉLECTION' ? '🗳️' : '⚔️';
+                        alertEl.innerHTML = `${iconConflit} ${etatCritiqueNom}`;
+                        cardEl.title = `Conflit en cours : ${etatCritiqueNom}`;
                     } else {
                         alertEl.innerHTML = `⚠️ BAISSE INFLUENCE`;
                         cardEl.title = "";
@@ -4061,6 +4271,58 @@
                 });
                 memoireDicoPilotes = dicoPilotes;
 
+                // --- DÉTECTION GLOBALE ABSOLUE (POUR LE JOURNAL DU QG) ---
+                // Se fait sur l'intégralité des données, indépendamment des filtres de l'utilisateur
+                const scoresGlobaux = {};
+                effortsBruts.forEach(e => {
+                    const uid = e.user_id;
+                    if (!scoresGlobaux[uid]) scoresGlobaux[uid] = { log: 0, eco: 0, sec: 0, sci: 0, exe: 0, gue: 0, ele: 0 };
+                    const val = Math.abs(Number(e.valeur) || 0);
+                    let pts = val;
+                    if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
+                    
+                    if (e.type_action === 'MISSIONS') scoresGlobaux[uid].log += pts;
+                    else if (e.type_action === 'ECONOMIE') scoresGlobaux[uid].eco += pts;
+                    else if (e.type_action === 'SECURITE') scoresGlobaux[uid].sec += pts;
+                    else if (e.type_action === 'SCIENCE') scoresGlobaux[uid].sci += pts;
+                    else if (['MEURTRES', 'VOLS', 'CONTREBANDE', 'ECHECS', 'PIRATAGE'].includes(e.type_action)) scoresGlobaux[uid].exe += pts;
+                    else if (['CZ_VICTOIRES', 'GUERRE_MISSIONS', 'GUERRE_BONDS'].includes(e.type_action)) scoresGlobaux[uid].gue += pts;
+                    else if (e.type_action === 'ELECTION_MISSIONS') scoresGlobaux[uid].ele += pts;
+                });
+
+                const getGlobal = (cat) => {
+                    let m = 0; let t = null;
+                    for (const [u, s] of Object.entries(scoresGlobaux)) { if (s[cat] > m) { m = s[cat]; t = u; } }
+                    return t;
+                };
+
+                const cacheName = 'edteam_specialists_' + (profilCommandant.escadron_id || 'ISS');
+                const cachedStr = localStorage.getItem(cacheName);
+                // Si c'est la première fois, on initialise sans faire de bruit
+                const cached = cachedStr ? JSON.parse(cachedStr) : { sec: getGlobal('sec'), log: getGlobal('log'), eco: getGlobal('eco'), sci: getGlobal('sci'), exe: getGlobal('exe'), gue: getGlobal('gue'), ele: getGlobal('ele') };
+                
+                let aChangeGlobal = false;
+                const checkGlobal = (cat, newId, titre, col, icone) => {
+                    if (newId && newId !== cached[cat]) {
+                        aChangeGlobal = true;
+                        // On n'annonce que si c'est LE joueur connecté qui prend la place
+                        if (newId === profilCommandant.user_id && typeof window.enregistrerJournalActivite === 'function') {
+                            window.enregistrerJournalActivite('DISTINCTION BGS', `Le CMDR ${profilCommandant.cmdr_nom.toUpperCase()} a décroché le titre de ${icone} ${titre}.`, col);
+                        }
+                        cached[cat] = newId;
+                    }
+                };
+
+                checkGlobal('sec', getGlobal('sec'), 'FER DE LANCE (Sécurité)', 'var(--ed-blue)', '🛡️');
+                checkGlobal('log', getGlobal('log'), 'MAÎTRE LOGISTICIEN (Missions)', 'var(--ed-orange)', '📦');
+                checkGlobal('eco', getGlobal('eco'), 'LE MAGNAT (Économie)', '#00FF66', '💰');
+                checkGlobal('sci', getGlobal('sci'), 'L\'ÉCLAIREUR (Science & Exobio)', '#B026FF', '🔬');
+                checkGlobal('exe', getGlobal('exe'), 'L\'EXÉCUTEUR (Opérations Noires)', '#FF3333', '☠️');
+                checkGlobal('gue', getGlobal('gue'), 'SEIGNEUR DE GUERRE (Conflit)', '#FF7100', '⚔️');
+                checkGlobal('ele', getGlobal('ele'), 'L\'ÉMINENCE GRISE (Élection)', '#00F0FF', '🗳️');
+
+                if (aChangeGlobal || !cachedStr) localStorage.setItem(cacheName, JSON.stringify(cached));
+
                 // 2. PEUPLEMENT DU FILTRE DES ORDRES (AVEC NUMÉRO D'OPÉRATION)
                 const selectOrdre = document.getElementById('filtre-ordre');
                 if (selectOrdre && selectOrdre.options.length <= 1) {
@@ -4133,6 +4395,7 @@
                         return topPilote;
                     };
 
+                    // --- CORRECTION : CALCUL DES 7 SPÉCIALISTES POUR L'AFFICHAGE ---
                     const N1_Sec = trouverMeilleur('sec');
                     const N1_Log = trouverMeilleur('log');
                     const N1_Eco = trouverMeilleur('eco');
@@ -4141,67 +4404,65 @@
                     const N1_Gue = trouverMeilleur('gue');
                     const N1_Ele = trouverMeilleur('ele');
 
-                    // --- NOUVEAU : DÉTECTION DES NOUVEAUX SPÉCIALISTES ---
-                    const currentSpecs = { sec: N1_Sec, log: N1_Log, eco: N1_Eco, sci: N1_Sci, exe: N1_Exe, gue: N1_Gue, ele: N1_Ele };
-                    const cacheName = 'edteam_specialists_' + profilCommandant.escadron_id;
-                    const cachedSpecsStr = localStorage.getItem(cacheName);
-                    const cachedSpecs = cachedSpecsStr ? JSON.parse(cachedSpecsStr) : currentSpecs;
-                    
-                    let aChange = false;
-
-                    const verifierEtAnnoncer = (categorie, nouveauId, titre, couleur, icone) => {
-                        // Si le numéro 1 a changé par rapport à notre mémoire locale
-                        if (nouveauId && nouveauId !== cachedSpecs[categorie]) {
-                            aChange = true;
-                            // RÈGLE ANTI-SPAM : Seul le joueur qui vient de GAGNER le titre envoie l'alerte
-                            if (nouveauId === profilCommandant.user_id) {
-                                if (typeof window.enregistrerJournalActivite === 'function') {
-                                    window.enregistrerJournalActivite(
-                                        'DISTINCTION BGS', 
-                                        `Le CMDR ${profilCommandant.cmdr_nom.toUpperCase()} a décroché le titre de ${icone} ${titre}.`, 
-                                        couleur
-                                    );
-                                }
-                            }
-                            cachedSpecs[categorie] = nouveauId;
-                        }
-                    };
-
-                    verifierEtAnnoncer('sec', N1_Sec, 'FER DE LANCE (Sécurité)', 'var(--ed-blue)', '🛡️');
-                    verifierEtAnnoncer('log', N1_Log, 'MAÎTRE LOGISTICIEN (Missions)', 'var(--ed-orange)', '📦');
-                    verifierEtAnnoncer('eco', N1_Eco, 'LE MAGNAT (Économie)', '#00FF66', '💰');
-                    verifierEtAnnoncer('sci', N1_Sci, 'L\'ÉCLAIREUR (Science & Exobio)', '#B026FF', '🔬');
-                    verifierEtAnnoncer('exe', N1_Exe, 'L\'EXÉCUTEUR (Opérations Noires)', '#FF3333', '☠️');
-                    verifierEtAnnoncer('gue', N1_Gue, 'SEIGNEUR DE GUERRE (Conflit)', '#FF7100', '⚔️');
-                    verifierEtAnnoncer('ele', N1_Ele, 'L\'ÉMINENCE GRISE (Élection)', '#00F0FF', '🗳️');
-
-                    // On sauvegarde le nouveau classement dans le navigateur
-                    if (aChange || !cachedSpecsStr) {
-                        localStorage.setItem(cacheName, JSON.stringify(cachedSpecs));
-                    }
-
-                    const htmlSpec = (titre, uid, couleur) => {
+                    // 1. Fonction pour générer le HTML de la petite médaille SVG
+                    const htmlSpec = (typeCode, titre, sousTitre, description, uid, couleurBorder) => {
                         if (!uid) return '';
-                        const nomPilote = (dicoPilotes[uid] || 'INCONNU');
+                        const nomPilote = (dicoPilotes[uid] || 'INCONNU').toUpperCase();
+                        
+                        // Attention au 's' : la fonction est window.forgerMedailleSVG
+                        const miniSvg = window.forgerMedailleSVG(typeCode, couleurBorder);
+                        const safeDesc = description.replace(/'/g, "\\'"); 
+                        
                         return `
-                        <div class="specialist-card" style="border-left-color: ${couleur};">
-                            <div>
-                                <span style="color: ${couleur}; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 3px;">${titre}</span>
-                                <span style="color: #fff; font-weight: bold; font-size: 1.1em;">CMDR ${nomPilote}</span>
-                            </div>
-                            <div style="font-size: 1.5em; opacity: 0.8;">🏆</div>
+                        <div class="epic-medal-container" title="Dossier : ${titre}" onclick="ouvrirZoomMedaille('${typeCode}', '${couleurBorder}', '${titre}', '${sousTitre}', '${safeDesc}', '${nomPilote}')">
+                            ${miniSvg}
+                            <div class="epic-medal-title">${sousTitre}</div>
+                            <div class="epic-medal-cmdr" style="border-bottom: 2px solid ${couleurBorder};">${nomPilote}</div>
                         </div>`;
                     };
+
+                    // 2. Injection des médailles dans le mur des Spécialistes
+                    if (conteneurSpecialistes) {
+                        const descSec = "Récompense le pilote ayant eu l'impact tactique le plus brutal en éliminant les cibles prioritaires et en sécurisant le trafic local.";
+                        const descLog = "Récompense le maître de la logistique ayant accompli le plus grand nombre de missions pour assurer l'influence de la faction.";
+                        const descEco = "Récompense le négociant de génie ayant généré la plus grande richesse via les marchés et l'industrie minière.";
+                        const descSci = "Récompense le pionnier ayant rapporté et déchiffré les données cartographiques et exobiologiques les plus cruciales.";
+                        const descExe = "Récompense l'agent des ombres s'étant illustré de manière décisive dans les opérations de sabotage et les assassinats furtifs.";
+                        const descGue = "Récompense le vétéran incontesté ayant remporté le plus de victoires déterminantes au cœur des zones de guerre.";
+                        const descEle = "Récompense le fin stratège politique ayant manipulé l'opinion publique pour garantir la victoire lors des élections.";
+
+                        // Utilisation des guillemets doubles ("...") pour les titres avec apostrophes
+                        conteneurSpecialistes.innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 15px; justify-items: center;">
+                            ${htmlSpec('SEC', "LE FER DE LANCE", 'SÉCURITÉ', descSec, N1_Sec, 'var(--ed-blue)')}
+                            ${htmlSpec('LOG', "MAÎTRE LOGISTICIEN", 'MISSIONS', descLog, N1_Log, 'var(--ed-orange)')}
+                            ${htmlSpec('ECO', "LE MAGNAT", 'ÉCONOMIE', descEco, N1_Eco, '#00FF66')}
+                            ${htmlSpec('SCI', "L'ÉCLAIREUR", 'SCIENCE', descSci, N1_Sci, '#B026FF')}
+                            ${htmlSpec('EXE', "L'EXÉCUTEUR", 'OP. NOIRES', descExe, N1_Exe, '#FF3333')}
+                            ${htmlSpec('GUE', "SEIGNEUR DE GUERRE", 'CONFLITS', descGue, N1_Gue, '#FF7100')}
+                            ${htmlSpec('ELE', "L'ÉMINENCE GRISE", 'ÉLECTIONS', descEle, N1_Ele, '#00F0FF')}
+                        </div>`;
+                    }
                     
                     if (conteneurSpecialistes) {
-                        conteneurSpecialistes.innerHTML = 
-                            htmlSpec('🛡️ LE FER DE LANCE (SÉCURITÉ)', N1_Sec, 'var(--ed-blue)') +
-                            htmlSpec('📦 LE MAÎTRE LOGISTICIEN (MISSIONS)', N1_Log, 'var(--ed-orange)') +
-                            htmlSpec('💰 LE MAGNAT (ÉCONOMIE)', N1_Eco, '#00FF66') +
-                            htmlSpec('🔬 L\'ÉCLAIREUR (SCIENCE & EXOBIO)', N1_Sci, '#B026FF') +
-                            htmlSpec('☠️ L\'EXÉCUTEUR (OP. NOIRES)', N1_Exe, '#FF3333') +
-                            htmlSpec('⚔️ SEIGNEUR DE GUERRE (CONFLITS)', N1_Gue, '#FF7100') +
-                            htmlSpec('🗳️ L\'ÉMINENCE GRISE (ÉLECTIONS)', N1_Ele, '#00F0FF');
+                        const descSec = "Récompense le pilote ayant eu l'impact tactique le plus brutal en éliminant les cibles prioritaires et en sécurisant le trafic local.";
+                        const descLog = "Récompense le maître de la logistique ayant accompli le plus grand nombre de missions pour assurer l'influence de la faction.";
+                        const descEco = "Récompense le négociant de génie ayant généré la plus grande richesse via les marchés et l'industrie minière.";
+                        const descSci = "Récompense le pionnier ayant rapporté et déchiffré les données cartographiques et exobiologiques les plus cruciales.";
+                        const descExe = "Récompense l'agent des ombres s'étant illustré de manière décisive dans les opérations de sabotage et les assassinats furtifs.";
+                        const descGue = "Récompense le vétéran incontesté ayant remporté le plus de victoires déterminantes au cœur des zones de guerre.";
+                        const descEle = "Récompense le fin stratège politique ayant manipulé l'opinion publique pour garantir la victoire lors des élections.";
+
+                        conteneurSpecialistes.innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 15px; justify-items: center;">
+                            ${htmlSpec('SEC', 'LE FER DE LANCE', 'SÉCURITÉ', descSec, N1_Sec, 'var(--ed-blue)')}
+                            ${htmlSpec('LOG', 'MAÎTRE LOGISTICIEN', 'MISSIONS', descLog, N1_Log, 'var(--ed-orange)')}
+                            ${htmlSpec('ECO', 'LE MAGNAT', 'ÉCONOMIE', descEco, N1_Eco, '#00FF66')}
+                            ${htmlSpec('SCI', 'L\'ÉCLAIREUR', 'SCIENCE', descSci, N1_Sci, '#B026FF')}
+                            ${htmlSpec('EXE', 'L\'EXÉCUTEUR', 'OP. NOIRES', descExe, N1_Exe, '#FF3333')}
+                            ${htmlSpec('GUE', 'SEIGNEUR DE GUERRE', 'CONFLITS', descGue, N1_Gue, '#FF7100')}
+                            ${htmlSpec('ELE', 'L\'ÉMINENCE GRISE', 'ÉLECTIONS', descEle, N1_Ele, '#00F0FF')}
+                        </div>`;
                     }
 
                     // HISTOGRAMME FORCE DE FRAPPE
@@ -4210,7 +4471,13 @@
                         const ctxBar = chartEl.getContext('2d');
                         if (impactGlobalChartInstance) impactGlobalChartInstance.destroy();
 
-                        const pilotesTries = Object.entries(scoresPilotes).sort((a, b) => b[1].total - a[1].total);
+                        // Tri par ordre alphabétique sur le nom du CMDR
+                        const pilotesTries = Object.entries(scoresPilotes).sort((a, b) => {
+                            const nomA = dicoPilotes[a[0]] || 'INCONNU';
+                            const nomB = dicoPilotes[b[0]] || 'INCONNU';
+                            return nomA.localeCompare(nomB);
+                        });
+                        
                         const labelsBar = [];
                         const dataBar = [];
                         pilotesTries.forEach(([uid, scores]) => {
@@ -4287,9 +4554,13 @@
 
                     // CONDITION ABSOLUE : Il faut AU MOINS 1% d'effort personnel
                     if (pctImplication >= 1) {
+                        const nomSysteme = o.systeme_cible.toUpperCase();
+                        
                         medaillesHtml += `
-                        <div class="ribbon-badge" style="cursor: pointer; transition: 0.2s;" onclick="ouvrirDossierVeteran('${o.id}')" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='#fff';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#FFD700';">
-                            🎖️ VÉTÉRAN : ${o.systeme_cible}
+                        <div class="medal-wrapper" onclick="ouvrirDossierVeteran('${o.id}')" onmouseenter="if(typeof sonHover==='function') sonHover()" title="Consulter les états de service de la campagne de ${nomSysteme}">
+                            <div class="medal-ribbon"></div>
+                            <div class="medal-coin"></div>
+                            <div class="medal-text">${nomSysteme}</div>
                         </div>`;
                         medaillesCompte++;
                     }
@@ -4313,11 +4584,16 @@
 
                 // 6. JOURNAL DES EXPLOITS (FILTRÉ DYNAMIQUEMENT)
                 const conteneurFeed = document.getElementById('exploit-feed');
-                const lastActions = [...effortsFiltres].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 50);
+                const conteneurFeedModal = document.getElementById('modal-exploit-feed-content'); // <-- Cible de la modale
+                
+                // On passe de 50 à 100 lignes pour profiter du mode plein écran !
+                const lastActions = [...effortsFiltres].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 100);
                 
                 if (conteneurFeed) {
                     if (lastActions.length === 0) {
-                        conteneurFeed.innerHTML = '<div style="color: #555; font-style: italic; text-align: center; margin-top: 40px;">Aucune transmission interceptée.</div>';
+                        const txtVide = '<div style="color: #555; font-style: italic; text-align: center; margin-top: 40px;">Aucune transmission interceptée.</div>';
+                        conteneurFeed.innerHTML = txtVide;
+                        if (conteneurFeedModal) conteneurFeedModal.innerHTML = txtVide;
                     } else {
                         // Retour à la grille de 6 colonnes propre
                         let feedHtml = `
@@ -4400,6 +4676,7 @@
 
                         feedHtml += `</div>`;
                         conteneurFeed.innerHTML = feedHtml;
+                        if (conteneurFeedModal) conteneurFeedModal.innerHTML = feedHtml; // <-- Injection dans la modale
                     }
                 }
 
@@ -5519,6 +5796,43 @@
                         <!-- Rempli par le JS -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ZOOM MÉDAILLE ÉPIQUE -->
+    <div class="modal-overlay" id="modal-zoom-medaille" onclick="fermerModal('modal-zoom-medaille', event)" style="z-index: 6000;">
+        <div class="modal-content" style="max-width: 450px; text-align: center; background: rgba(10, 5, 0, 0.95); border: 1px solid #FFD700; box-shadow: 0 0 50px rgba(255, 215, 0, 0.15);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: #FFD700;" onclick="fermerModal('modal-zoom-medaille')">X</div>
+            
+            <!-- Le conteneur qui va recevoir la médaille géante -->
+            <div id="zoom-medaille-img-container" style="width: 200px; height: 200px; margin: 0 auto 25px auto; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.9)); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></div>
+            
+            <div id="zoom-medaille-titre" style="color: #FFD700; font-size: 1.6em; font-weight: bold; letter-spacing: 2px;">TITRE</div>
+            <div id="zoom-medaille-domaine" style="color: #888; font-size: 0.9em; letter-spacing: 3px; margin-bottom: 20px;">DOMAINE</div>
+            
+            <div id="zoom-medaille-desc" style="color: #ccc; font-style: italic; line-height: 1.6; font-size: 0.95em; background: rgba(0,0,0,0.5); padding: 20px; border-left: 3px solid #FFD700; text-align: left; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);">
+                Description...
+            </div>
+            
+            <div style="border-top: 1px dashed rgba(255, 215, 0, 0.3); padding-top: 20px;">
+                <span style="color: #888; font-size: 0.85em; letter-spacing: 2px;">DÉCERNÉ AU PILOTE</span><br>
+                <div id="zoom-medaille-cmdr" style="color: #fff; font-size: 1.4em; font-weight: bold; letter-spacing: 2px; margin-top: 5px;">CMDR INCONNU</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE : JOURNAL DES EXPLOITS (PLEIN ÉCRAN) -->
+    <div class="modal-overlay" id="modal-exploit-fullscreen" onclick="fermerModal('modal-exploit-fullscreen', event)" style="z-index: 6000;">
+        <div class="modal-content" style="max-width: 1400px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-blue); box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-exploit-fullscreen')">X</div>
+            
+            <div style="border-bottom: 1px dashed var(--ed-blue); padding-bottom: 15px; margin-bottom: 20px; flex-shrink: 0;">
+                <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 3px; font-size: 1.3em;">> REGISTRE TACTIQUE : COMMUNICATIONS INTERCEPTÉES</span>
+            </div>
+            
+            <div id="modal-exploit-feed-content" style="overflow-y: auto; flex-grow: 1; padding-right: 10px;">
+                <!-- Les lignes du journal seront injectées ici en miroir par le JS -->
             </div>
         </div>
     </div>
