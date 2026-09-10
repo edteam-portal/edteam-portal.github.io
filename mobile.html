@@ -265,6 +265,23 @@
             overflow-y: auto !important;
         }
     
+        /* ANIMATIONS D'ALERTES TACTIQUES */
+        @keyframes alertPulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        @keyframes alerteBoutonRouge {
+            0% { box-shadow: 0 0 5px rgba(255,51,51,0.2), inset 0 0 10px rgba(255,51,51,0.1); background-color: rgba(255,51,51,0.05); }
+            50% { box-shadow: 0 0 25px rgba(255,51,51,0.8), inset 0 0 20px rgba(255,51,51,0.4); background-color: rgba(255,51,51,0.25); border-color: #FF7777; }
+            100% { box-shadow: 0 0 5px rgba(255,51,51,0.2), inset 0 0 10px rgba(255,51,51,0.1); background-color: rgba(255,51,51,0.05); }
+        }
+
+        @keyframes navBlinkRouge {
+            0%, 100% { color: #777; background-color: transparent; box-shadow: none; }
+            50% { color: #FF3333; background-color: rgba(255, 51, 51, 0.15); box-shadow: inset 0 3px 0 #FF3333, 0 -5px 15px rgba(255, 51, 51, 0.3); }
+        }
+        .alerte-nav-rouge {
+            animation: navBlinkRouge 1.5s infinite !important;
+        }
+
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -327,16 +344,16 @@
             <!-- ========================================== -->
             <div id="tab-qg" style="display: flex; flex-direction: column; gap: 14px;">
 
-                <!-- REGISTRE TACTIQUE (DÉPLACÉ EN HAUT) -->
-                <div class="card" style="border-color: #FF3333; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255, 51, 51, 0.05);" onclick="ouvrirRegistreMobile()">
+                <!-- JOURNAL D'ACTIVITÉ / TACTIQUE -->
+                <div id="m-btn-journal-tactique" class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirJournalTactiqueMobile()">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(255,51,51,0.5));">🎯</span>
+                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📋</span>
                         <div>
-                            <span style="color: #FF3333; font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">REGISTRE TACTIQUE</span>
-                            <span id="m-registre-count" style="display: block; color: #888; font-size: 0.75em;">Recherche des cibles...</span>
+                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">JOURNAL D'ACTIVITÉ</span>
+                            <span style="display: block; color: #888; font-size: 0.75em;">Notes et informations de l'escadron</span>
                         </div>
                     </div>
-                    <span style="color: #FF3333; font-size: 1.2em; font-weight: bold;">></span>
+                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
                 </div>
 
                 <!-- DOSSIER & GRADE -->
@@ -406,35 +423,20 @@
                     </div>
                 </div>
 
-                <!-- JOURNAL D'ACTIVITÉ / TACTIQUE -->
-<div class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirJournalTactiqueMobile()">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📋</span>
-                        <div>
-                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">JOURNAL D'ACTIVITÉ</span>
-                            <span style="display: block; color: #888; font-size: 0.75em;">Notes et informations de l'escadron</span>
-                        </div>
-                    </div>
-                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
-                </div>
-
                 <!-- ACTUALITÉS (GALNET & EDNEWS CÔTE À CÔTE) -->
                 <div style="display: flex; gap: 10px;">
-                    
                     <!-- GALNET -->
-                    <div class="card" style="flex: 1; border-color: var(--ed-orange); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(255, 113, 0, 0.05);" onclick="ouvrirGalnetMobile()">
+                    <div id="m-btn-galnet" class="card" style="flex: 1; border-color: var(--ed-orange); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(255, 113, 0, 0.05);" onclick="ouvrirGalnetMobile()">
                         <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5)); margin-bottom: 6px;">📡</span>
                         <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">GALNET</span>
                         <span id="m-galnet-date" style="display: block; color: #888; font-size: 0.65em; margin-top: 4px;">Connexion...</span>
                     </div>
-
                     <!-- EDNEWS -->
-                    <div class="card" style="flex: 1; border-color: var(--ed-blue); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirGazetteMobile()">
+                    <div id="m-btn-gazette" class="card" style="flex: 1; border-color: var(--ed-blue); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirGazetteMobile()">
                         <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); margin-bottom: 6px;">📰</span>
                         <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">EDNEWS</span>
                         <span id="m-gazette-date" style="display: block; color: #888; font-size: 0.65em; margin-top: 4px;">Archives...</span>
                     </div>
-                    
                 </div>
 
                 <!-- BILAN FINANCIER CONSOLIDÉ -->
@@ -513,7 +515,7 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- ONGLET 3 : BGS, MISSIONS & DIPLOMATIE      -->
+            <!-- ONGLET 3 : BGS & MISSIONS                  -->
             <!-- ========================================== -->
             <div id="tab-bgs" style="display: none; flex-direction: column; gap: 14px;">
                 
@@ -523,18 +525,8 @@
                     <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px; display: block; white-space: nowrap;">--H --M --S</span>
                 </div>
 
-                <!-- 1. DIRECTIVES DE L'AMIRAUTÉ (DÉPLACÉ EN HAUT) -->
-                <div class="card">
-                    <div class="card-header">
-                        <span>> MISSIONS BGS (EN COURS)</span>
-                    </div>
-                    <div id="m-ordres-container" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Chargement des ordres tactiques...</div>
-                    </div>
-                </div>
-
-                <!-- 2. BOUTON JOURNAL DES EXPLOITS (DÉPLACÉ SOUS LES MISSIONS) -->
-                <div class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="document.getElementById('modal-journal-exploits').style.display='flex'; if(typeof sonClic==='function') sonClic();">
+                <!-- JOURNAL DES EXPLOITS (DÉPLACÉ TOUT EN HAUT) -->
+                <div id="m-btn-journal-exploits" class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirJournalExploitsMobile()">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📜</span>
                         <div>
@@ -545,25 +537,22 @@
                     <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
                 </div>
 
-                <!-- 3. NOUVEAU BOUTON DIPLOMATIE -->
-                <div class="card" style="border-color: var(--ed-green); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 255, 102, 0.05); box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.1);" onclick="document.getElementById('modal-diplomatie-liste').style.display='flex'; if(typeof sonClic==='function') sonClic();">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,255,102,0.5));">🤝</span>
-                        <div>
-                            <span style="color: var(--ed-green); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">ACCORDS DIPLOMATIQUES</span>
-                            <span style="display: block; color: #888; font-size: 0.75em;">Consulter les traités de l'escadron</span>
-                        </div>
+                <!-- DIRECTIVES DE L'AMIRAUTÉ (MISSIONS) -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>> MISSIONS BGS (EN COURS)</span>
                     </div>
-                    <span style="color: var(--ed-green); font-size: 1.2em; font-weight: bold;">></span>
+                    <div id="m-ordres-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="color: #666; font-size: 0.85em; text-align: center; padding: 15px;">Chargement des ordres tactiques...</div>
+                    </div>
                 </div>
 
-                <!-- 4. MEMBRES DE L'ESCADRON (DÉPLACÉ EN BAS ET AGRANDI) -->
+                <!-- MEMBRES DE L'ESCADRON -->
                 <div class="card">
                     <div class="card-header">
                         <span>> ESCADRON</span>
                         <span id="m-squad-count" style="color: var(--ed-green); font-size: 0.85em;">-- MEMBRES</span>
                     </div>
-                    <!-- max-height passe de 220px à 450px pour afficher ~10 pilotes -->
                     <div id="m-squad-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px;">
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Chargement de l'équipage...</div>
                     </div>
@@ -972,12 +961,14 @@
     <div class="modal-overlay" id="modal-profil-pilote" onclick="document.getElementById('modal-profil-pilote').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
         <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-orange);" onclick="event.stopPropagation()">
             
-            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); display: flex; justify-content: space-between; align-items: flex-start; background: rgba(255,113,0,0.1); flex-shrink: 0;">
-                <div>
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); flex-shrink: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span id="m-modal-cmdr-nom" style="color: var(--ed-orange); font-weight: bold; font-size: 1.3em; letter-spacing: 1px;">CMDR ...</span>
-                    <div id="m-modal-cmdr-roles" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;"></div>
+                    <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-profil-pilote').style.display='none'">✕</span>
                 </div>
-                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-profil-pilote').style.display='none'">✕</span>
+                <!-- ZONE DES PINS (DISTINCTIONS GLOBALES) -->
+                <div id="m-modal-cmdr-distinctions" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;"></div>
+                <div id="m-modal-cmdr-roles" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;"></div>
             </div>
             
             <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
@@ -1013,6 +1004,8 @@
                         <span id="m-modal-ops-count" style="color: #fff; font-weight: bold; font-size: 1.1em;">-</span>
                     </div>
                     <div id="m-modal-specialiste-titres" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                    <!-- ZONE DES MÉDAILLES VÉTÉRAN -->
+                    <div id="m-modal-medailles-veteran" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;"></div>
                 </div>
 
                 <!-- Rangs Fédération -->
@@ -1145,11 +1138,39 @@
         function sonClic() { playUI('click'); }
         function sonHover() { playUI('hover'); }
         function sonSucces() { playUI('success'); }
-        function sonType() { playUI('type'); }
 
-        function sonClic() { playUI('click'); }
-        function sonHover() { playUI('hover'); }
-        function sonSucces() { playUI('success'); }
+        // FORGE VECTORIELLE DES PINS (SPÉCIALISTES) POUR MOBILE
+        window.forgerMedailleSVG = function(type, couleurAura) {
+            let grad = ''; let icone = '';
+            if (type === 'SEC') { grad = 'gradTitane'; icone = '<path d="M35,45 L65,45 L65,65 C65,75 50,85 50,85 C50,85 35,75 35,65 Z" fill="url(#gradTitane)" stroke="#111" stroke-width="2"/>'; } 
+            else if (type === 'LOG') { grad = 'gradBronze'; icone = '<polygon points="50,45 65,52 65,68 50,75 35,68 35,52" fill="none" stroke="url(#gradBronze)" stroke-width="4"/><polyline points="35,52 50,60 65,52" stroke="url(#gradBronze)" stroke-width="4" fill="none"/><line x1="50" y1="60" x2="50" y2="75" stroke="url(#gradBronze)" stroke-width="4"/>'; } 
+            else if (type === 'ECO') { grad = 'gradOr'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="url(#gradOr)" stroke-width="4"/><path d="M50,42 L50,78 M45,60 L55,60" stroke="url(#gradOr)" stroke-width="3"/>'; } 
+            else if (type === 'SCI') { grad = 'gradPlatine'; icone = '<ellipse cx="50" cy="60" rx="18" ry="6" transform="rotate(45 50 60)" fill="none" stroke="url(#gradPlatine)" stroke-width="3"/><ellipse cx="50" cy="60" rx="18" ry="6" transform="rotate(-45 50 60)" fill="none" stroke="url(#gradPlatine)" stroke-width="3"/><circle cx="50" cy="60" r="4" fill="#B026FF" filter="url(#glowMedal)"/>'; } 
+            else if (type === 'EXE') { grad = 'gradSombre'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="38" x2="50" y2="46" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="74" x2="50" y2="82" stroke="#FF3333" stroke-width="3"/><line x1="28" y1="60" x2="36" y2="60" stroke="#FF3333" stroke-width="3"/><line x1="64" y1="60" x2="72" y2="60" stroke="#FF3333" stroke-width="3"/>'; } 
+            else if (type === 'GUE') { grad = 'gradAcier'; icone = '<line x1="38" y1="48" x2="62" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><line x1="62" y1="48" x2="38" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="60" r="4" fill="#FF7100" filter="url(#glowMedal)"/>'; } 
+            else if (type === 'ELE') { grad = 'gradOr'; icone = '<polygon points="50,42 54,52 64,53 56,60 58,70 50,65 42,70 44,60 36,53 46,52" fill="url(#gradOr)"/>'; }
+
+            return `
+            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">
+                <defs>
+                    <linearGradient id="gradOr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFE55C"/><stop offset="50%" stop-color="#B8860B"/><stop offset="100%" stop-color="#5C4305"/></linearGradient>
+                    <linearGradient id="gradTitane" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E2E2E2"/><stop offset="50%" stop-color="#8e9eab"/><stop offset="100%" stop-color="#3f4c6b"/></linearGradient>
+                    <linearGradient id="gradBronze" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffb347"/><stop offset="50%" stop-color="#cd7f32"/><stop offset="100%" stop-color="#4a2511"/></linearGradient>
+                    <linearGradient id="gradPlatine" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#B0C4DE"/><stop offset="100%" stop-color="#708090"/></linearGradient>
+                    <linearGradient id="gradSombre" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#555555"/><stop offset="50%" stop-color="#222222"/><stop offset="100%" stop-color="#050505"/></linearGradient>
+                    <linearGradient id="gradAcier" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A9A9A9"/><stop offset="50%" stop-color="#696969"/><stop offset="100%" stop-color="#2F4F4F"/></linearGradient>
+                    <filter id="glowMedal"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <g transform="translate(0, -10)">
+                    <circle cx="50" cy="60" r="35" fill="url(#${grad})"/>
+                    <circle cx="50" cy="60" r="28" fill="#151515" stroke="url(#${grad})" stroke-width="2"/>
+                    <circle cx="50" cy="60" r="24" fill="none" stroke="${couleurAura}" stroke-width="1.5" opacity="0.6" filter="url(#glowMedal)"/>
+                    ${icone}
+                </g>
+            </svg>`;
+        };
+
+        function sonType() { playUI('type'); }
 
         // Déverrouillage audio obligatoire au premier toucher de l'écran
         document.body.addEventListener('click', initAudio, { once: true });
@@ -1215,6 +1236,7 @@
             chargerRegistreTactiqueMobile();
             chargerBGSMobile();
             initialiserCommsMobile();
+            verifierNouvellesNotesMobile(); // <--- NOUVELLE LIGNE AJOUTÉE ICI
             demarrerTickTimer();
             
             // NOUVEAU : Lancement du radar des pilotes en jeu (Balayage toutes les 15s)
@@ -1310,6 +1332,7 @@
             const btnClic = document.getElementById('nav-btn-' + tabId);
             btnClic.classList.add('active');
             btnClic.classList.remove('alerte-nav-mobile'); // <-- NOUVELLE LIGNE : Éteint l'alerte !
+            btnClic.classList.remove('alerte-nav-rouge'); // Éteint l'alerte rouge des onglets QG et BGS
 
             // On affiche le bon onglet
             const target = document.getElementById('tab-' + tabId);
@@ -1653,49 +1676,45 @@
             if (!profilCommandant) return;
             const fmt = new Intl.NumberFormat('fr-FR');
 
+            // --- ON RÉCUPÈRE LES CONFLITS AU DÉBUT ---
+            let conflitsData = [];
+            try {
+                const resConflit = await supabaseApp.from('conflits_systemes').select('*');
+                if (resConflit.data) conflitsData = resConflit.data;
+            } catch(e) { console.warn("Mobile BGS: Erreur conflits"); }
+
             // -------------------------------------------------------------
             // 1. RADAR D'INFLUENCE VIA EDSM AVEC GRAPHIQUE (7 JOURS)
             // -------------------------------------------------------------
             const infCont = document.getElementById('m-influence-container');
             try {
-                const { data: param } = await supabaseApp.from('parametres_app')
-                    .select('factions_favorites')
-                    .eq('user_id', profilCommandant.user_id)
-                    .maybeSingle();
+                const { data: param } = await supabaseApp.from('parametres_app').select('factions_favorites').eq('user_id', profilCommandant.user_id).maybeSingle();
 
                 let favoris = [];
                 if (param && param.factions_favorites) {
-                    favoris = typeof param.factions_favorites === 'string' 
-                        ? JSON.parse(param.factions_favorites) 
-                        : param.factions_favorites;
+                    favoris = typeof param.factions_favorites === 'string' ? JSON.parse(param.factions_favorites) : param.factions_favorites;
                 }
 
                 if (Array.isArray(favoris) && favoris.length > 0) {
                     const systemes = [...new Set(favoris.map(f => (f.systeme || f.system || '').trim()).filter(Boolean))];
-
                     const systemDataMap = {};
+                    
                     await Promise.allSettled(systemes.map(async sys => {
                         try {
                             const res = await fetch(`https://www.edsm.net/api-system-v1/factions?systemName=${encodeURIComponent(sys)}&showHistory=1`);
                             const edsmData = await res.json();
-                            if (edsmData && edsmData.factions) {
-                                systemDataMap[sys.toUpperCase()] = edsmData.factions;
-                            }
+                            if (edsmData && edsmData.factions) systemDataMap[sys.toUpperCase()] = edsmData.factions;
                         } catch (err) {}
                     }));
 
                     let htmlInf = '';
-                    const chartsData = []; // Pour stocker les données des graphiques avant de les dessiner
+                    const chartsData = [];
 
-                    // Nettoyage des anciens graphiques en mémoire pour éviter les bugs visuels
                     if (window.mobileSparklines) {
-                        for (let key in window.mobileSparklines) {
-                            if (window.mobileSparklines[key]) window.mobileSparklines[key].destroy();
-                        }
+                        for (let key in window.mobileSparklines) if (window.mobileSparklines[key]) window.mobileSparklines[key].destroy();
                     }
                     window.mobileSparklines = {};
 
-                    // 🎯 1. REGROUPEMENT PAR SYSTÈME
                     const groupesSystemes = {};
                     favoris.forEach((fav, index) => {
                         const sysName = (fav.systeme || fav.system || 'INCONNU').trim().toUpperCase();
@@ -1703,62 +1722,44 @@
                         groupesSystemes[sysName].push({ fav: fav, index: index });
                     });
 
-                    // Tri des systèmes par ordre alphabétique
                     const systemesTries = Object.keys(groupesSystemes).sort();
-
-                    // 🎯 2. GÉNÉRATION DE L'AFFICHAGE GROUPÉ (MODIFIÉ : PLIABLE)
                     let sysIndex = 0;
+                    
                     systemesTries.forEach(nomSysteme => {
                         sysIndex++;
                         const contentId = 'sys-content-' + sysIndex;
                         const iconId = 'sys-icon-' + sysIndex;
                         
-                        // EN-TÊTE DU SYSTÈME (CARTE PLIABLE)
                         htmlInf += `
                             <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
                                 <div onclick="const c = document.getElementById('${contentId}'); const i = document.getElementById('${iconId}'); if(c.style.display === 'none'){ c.style.display = 'block'; i.innerText = '[-]'; } else { c.style.display = 'none'; i.innerText = '[+]'; } if(typeof sonClic === 'function') sonClic();" style="cursor: pointer; padding: 12px 15px; background: rgba(255, 113, 0, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange-dim);">
-                                    <span style="color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 2px;">
-                                        > <span style="color: var(--ed-orange);">${nomSysteme}</span>
-                                    </span>
+                                    <span style="color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 2px;">> <span style="color: var(--ed-orange);">${nomSysteme}</span></span>
                                     <span id="${iconId}" style="color: var(--ed-orange); font-weight: bold; font-size: 1.2em;">[+]</span>
                                 </div>
                                 <div id="${contentId}" style="display: none; padding: 15px 15px 5px 15px;">
                                     <div style="display: flex; flex-direction: column;">
                         `;
 
-                        // LES FACTIONS DE CE SYSTÈME
                         groupesSystemes[nomSysteme].forEach(item => {
-                            const fav = item.fav;
-                            const index = item.index;
+                            const fav = item.fav; const index = item.index;
                             const nomFaction = (fav.faction || fav.nom || fav.name || '').trim();
-
-                            let influencePct = 0;
-                            let etatBgs = 'STABLE';
-                            let delta24h = 0;
-                            let couleurDelta = '#888';
-                            let fleche = '—';
-                            let historique7j = [];
+                            let influencePct = 0; let etatBgs = 'STABLE'; let delta24h = 0; let couleurDelta = '#888'; let fleche = '—'; let historique7j = [];
 
                             const factionsDuSysteme = systemDataMap[nomSysteme] || [];
                             const facData = factionsDuSysteme.find(f => f.name.toUpperCase() === nomFaction.toUpperCase());
 
                             if (facData) {
                                 influencePct = (facData.influence * 100).toFixed(1);
-
                                 if (facData.influenceHistory) {
                                     const timestamps = Object.keys(facData.influenceHistory).map(Number).sort((a, b) => a - b);
                                     if (timestamps.length > 0) {
                                         const latestHistoryTs = timestamps[timestamps.length - 1];
                                         const latestDateStr = new Date(latestHistoryTs * 1000).toLocaleDateString('fr-FR');
-                                        
                                         const prevTimestamps = timestamps.filter(ts => new Date(ts * 1000).toLocaleDateString('fr-FR') !== latestDateStr);
                                         let infHier = Number(influencePct);
 
-                                        if (prevTimestamps.length > 0) {
-                                            infHier = facData.influenceHistory[prevTimestamps[prevTimestamps.length - 1]] * 100;
-                                        } else if (timestamps.length > 1) {
-                                            infHier = facData.influenceHistory[timestamps[0]] * 100;
-                                        }
+                                        if (prevTimestamps.length > 0) infHier = facData.influenceHistory[prevTimestamps[prevTimestamps.length - 1]] * 100;
+                                        else if (timestamps.length > 1) infHier = facData.influenceHistory[timestamps[0]] * 100;
 
                                         delta24h = (Number(influencePct) - infHier);
                                         if (delta24h > 0.1) { couleurDelta = '#00FF66'; fleche = '↗'; } 
@@ -1769,336 +1770,237 @@
                                     }
                                 }
                                 historique7j.push(Number(influencePct));
-
-                                if (facData.activeStates && facData.activeStates.length > 0) {
-                                    etatBgs = facData.activeStates[0].state;
-                                } else if (facData.state && facData.state !== 'None') {
-                                    etatBgs = facData.state;
-                                }
+                                if (facData.activeStates && facData.activeStates.length > 0) etatBgs = facData.activeStates[0].state;
+                                else if (facData.state && facData.state !== 'None') etatBgs = facData.state;
                             }
 
-                            // TRADUCTION DE L'ÉTAT POLITIQUE
-                            let colorEtat = 'var(--ed-blue)'; 
-                            let etatTraduit = etatBgs.toUpperCase();
-
+                            let colorEtat = 'var(--ed-blue)'; let etatTraduit = etatBgs.toUpperCase();
                             if (etatTraduit === 'WAR') etatTraduit = 'GUERRE';
                             else if (etatTraduit === 'CIVIL WAR') etatTraduit = 'GUERRE CIVILE';
                             else if (etatTraduit === 'ELECTION') etatTraduit = 'ÉLECTION';
                             else if (etatTraduit === 'BOOM') etatTraduit = 'BOOM ÉCONOMIQUE';
 
-                            if (etatTraduit.includes('GUERRE') || etatTraduit.includes('ÉLECTION') || etatTraduit.includes('LOCKDOWN')) {
-                                colorEtat = 'var(--ed-red)';
-                            } else if (etatTraduit.includes('BOOM') || etatTraduit.includes('EXPANSION')) {
-                                colorEtat = 'var(--ed-green)';
-                            }
+                            if (etatTraduit.includes('GUERRE') || etatTraduit.includes('ÉLECTION') || etatTraduit.includes('LOCKDOWN')) colorEtat = 'var(--ed-red)';
+                            else if (etatTraduit.includes('BOOM') || etatTraduit.includes('EXPANSION')) colorEtat = 'var(--ed-green)';
 
-                            // COULEUR DE LA COURBE
                             let colorCurve = '#00F0FF'; 
                             if (historique7j.length > 1) {
-                                const pointLePlusAncien = historique7j[0];
-                                const pointAujourdhui = historique7j[historique7j.length - 1];
-                                const tendance7j = pointAujourdhui - pointLePlusAncien;
-                                
-                                if (tendance7j > 0.1) colorCurve = '#00FF66'; 
-                                else if (tendance7j < -0.1) colorCurve = '#FF3333'; 
+                                const tendance7j = historique7j[historique7j.length - 1] - historique7j[0];
+                                if (tendance7j > 0.1) colorCurve = '#00FF66'; else if (tendance7j < -0.1) colorCurve = '#FF3333'; 
+                            }
+                            chartsData.push({ id: `m-sparkline-${index}`, data: historique7j, color: colorCurve });
+
+                            // --- CORRECTION : ALERTE SUR LE GRAPHIQUE (GUERRE/ELECTION/BAISSE) ---
+                            let isCritical = false;
+                            let etatCritiqueNom = "";
+                            const etatsAlerte = ['War', 'Civil War', 'Election'];
+                            
+                            // 1. Vérification via EDSM
+                            if (facData) {
+                                if (etatsAlerte.includes(facData.state)) {
+                                    isCritical = true; etatCritiqueNom = facData.state.toUpperCase();
+                                } else if (facData.activeStates) {
+                                    for (let s of facData.activeStates) {
+                                        if (etatsAlerte.includes(s.state)) {
+                                            isCritical = true; etatCritiqueNom = s.state.toUpperCase(); break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // 2. Vérification de secours via base de données (si EDSM est en retard)
+                            const nfSearch = nomFaction.toLowerCase(); const nsSearch = nomSysteme.toLowerCase();
+                            const conf = conflitsData.find(c => c.systeme && c.systeme.trim().toLowerCase() === nsSearch && (c.faction1_nom.trim().toLowerCase() === nfSearch || c.faction2_nom.trim().toLowerCase() === nfSearch));
+                            if (conf && !isCritical) {
+                                isCritical = true;
+                                if (fav.ordreAssocie && fav.ordreAssocie.type_ordre === 'ELECTION') etatCritiqueNom = 'ELECTION';
+                                else etatCritiqueNom = 'WAR';
                             }
 
-                            chartsData.push({
-                                id: `m-sparkline-${index}`,
-                                data: historique7j,
-                                color: colorCurve
-                            });
+                            // 3. Traduction
+                            if (etatCritiqueNom === 'WAR' || etatCritiqueNom === 'GUERRE') etatCritiqueNom = 'GUERRE';
+                            if (etatCritiqueNom === 'CIVIL WAR') etatCritiqueNom = 'GUERRE CIVILE';
+                            if (etatCritiqueNom === 'ELECTION') etatCritiqueNom = 'ÉLECTION';
+
+                            let displayAlerte = "none";
+                            let texteAlerte = "";
+                            let bgCard = "rgba(0,0,0,0.4)";
+                            let animCard = "";
+
+                            // Si c'est critique (Guerre/Élection) OU si l'influence s'effondre
+                            if (isCritical || delta24h <= -1.0) {
+                                displayAlerte = "flex";
+                                bgCard = "rgba(255, 51, 51, 0.15)";
+                                colorEtat = "#FF3333"; // Force la bordure en rouge
+                                animCard = "animation: failsafe-pulse 2s infinite;";
+                                
+                                if (isCritical) {
+                                    const ic = etatCritiqueNom === 'ÉLECTION' ? '🗳️' : '⚔️';
+                                    texteAlerte = `${ic} ${etatCritiqueNom}`;
+                                } else {
+                                    texteAlerte = `⚠️ BAISSE INFLUENCE`;
+                                }
+                            }
 
                             htmlInf += `
-                                <div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${colorEtat}; padding: 12px; border-radius: 0 4px 4px 0; margin-bottom: 10px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                        <span style="color: #fff; font-weight: bold; font-size: 1.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 65%;">${nomFaction.toUpperCase()}</span>
-                                        <span style="color: ${colorEtat}; font-weight: bold; font-size: 0.75em; border: 1px solid ${colorEtat}; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05);">${etatTraduit}</span>
+                                <div style="background: ${bgCard}; border-left: 3px solid ${colorEtat}; padding: 12px; border-radius: 0 4px 4px 0; margin-bottom: 10px; ${animCard} transition: 0.3s;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                        <div style="display: flex; flex-direction: column; width: 65%;">
+                                            <span style="color: #fff; font-weight: bold; font-size: 1.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nomFaction.toUpperCase()}</span>
+                                        </div>
+                                        <span style="color: ${colorEtat}; font-weight: bold; font-size: 0.75em; border: 1px solid ${colorEtat}; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05); height: fit-content;">${etatTraduit}</span>
                                     </div>
-
                                     <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;">
                                         <div style="display: flex; flex-direction: column; min-width: 80px;">
                                             <span style="color: #fff; font-size: 1.8em; font-weight: bold; line-height: 1; margin-bottom: 5px;">${influencePct}%</span>
                                             <span style="color: #888; font-size: 0.6em; letter-spacing: 1px;">SOUS 24H</span>
                                             <span style="color: ${couleurDelta}; font-weight: bold; font-size: 0.9em;">${fleche} ${delta24h > 0 ? '+' : ''}${delta24h.toFixed(1)}%</span>
                                         </div>
-
                                         <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-end;">
-                                            <div style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 5px;">
-                                                <span style="color: #666; font-size: 0.6em; letter-spacing: 1px;">7 JOURS</span>
-                                            </div>
+                                            <div style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 5px;"><span style="color: #666; font-size: 0.6em; letter-spacing: 1px;">7 JOURS</span></div>
                                             <div style="width: 100%; height: 35px; position: relative;">
+                                                <!-- C'est ici que l'alerte texte holographique apparaît ! -->
+                                                <div style="position: absolute; inset: -5px -10px; display: ${displayAlerte}; align-items: center; justify-content: center; z-index: 5; color: #FF3333; font-size: 1em; font-weight: bold; letter-spacing: 1px; text-shadow: 0px 2px 4px #000, 0 0 10px #FF3333; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); border-radius: 4px;">${texteAlerte}</div>
                                                 <canvas id="m-sparkline-${index}"></canvas>
                                             </div>
                                         </div>
                                     </div>
                                 </div>`;
                         });
-                        
-                        // FERMETURE DU BLOC SYSTÈME
-                        htmlInf += `
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        htmlInf += `</div></div></div>`;
                     });
-
                     infCont.innerHTML = htmlInf;
 
-                    // 🎯 DESSIN DES GRAPHIQUES UNE FOIS LE HTML INJECTÉ
                     chartsData.forEach(chartInfo => {
                         const ctxEl = document.getElementById(chartInfo.id);
                         if (ctxEl) {
-                            const ctx = ctxEl.getContext('2d');
-                            window.mobileSparklines[chartInfo.id] = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: chartInfo.data, // Labels fictifs, on les cache
-                                    datasets: [{
-                                        data: chartInfo.data,
-                                        borderColor: chartInfo.color,
-                                        backgroundColor: chartInfo.color + '22', // Transparence pour le voile
-                                        borderWidth: 2,
-                                        tension: 0.4, // Rend la courbe fluide
-                                        pointRadius: 1,
-                                        fill: true
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                                    scales: {
-                                        x: { display: false },
-                                        y: {
-                                            display: false,
-                                            min: Math.max(0, Math.min(...chartInfo.data) - 2),
-                                            max: Math.max(...chartInfo.data) + 2
-                                        }
-                                    },
-                                    layout: { padding: { top: 2, bottom: 2 } }
-                                }
+                            window.mobileSparklines[chartInfo.id] = new Chart(ctxEl.getContext('2d'), {
+                                type: 'line', data: { labels: chartInfo.data, datasets: [{ data: chartInfo.data, borderColor: chartInfo.color, backgroundColor: chartInfo.color + '22', borderWidth: 2, tension: 0.4, pointRadius: 1, fill: true }] },
+                                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false, min: Math.max(0, Math.min(...chartInfo.data) - 2), max: Math.max(...chartInfo.data) + 2 } }, layout: { padding: { top: 2, bottom: 2 } } }
                             });
                         }
                     });
-
-                } else {
-                    infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune faction surveillée sur le radar tactique.</div>';
-                }
-            } catch (e) {
-                infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Données d\'influence non synchronisées.</div>';
-            }
+                } else { infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune faction surveillée sur le radar tactique.</div>'; }
+            } catch (e) { infCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Données d\'influence non synchronisées.</div>'; }
 
             // -------------------------------------------------------------
-            // 2. ORDRES DU JOUR (AVEC TRI PAR PRIORITÉ)
+            // 2. ORDRES DU JOUR
             // -------------------------------------------------------------
             const ordresCont = document.getElementById('m-ordres-container');
             try {
-                // NOUVEAU TRI : On demande à la base de trier d'abord par priorité (1 puis 2 puis 3), puis par date.
-                // On passe la limite à 10 pour être sûr de bien voir les ordres critiques s'il y a beaucoup de missions.
-                const { data: ordres } = await supabaseApp.from('ordres_bgs')
-                    .select('*')
-                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
-                    .eq('statut', 'ACTIF')
-                    .order('priorite', { ascending: true }) 
-                    .order('date_emission', { ascending: false })
-                    .limit(10);
-
-                let effortsActifs = [];
+                const { data: ordres } = await supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF').order('priorite', { ascending: true }).order('date_emission', { ascending: false }).limit(10);
                 if (ordres && ordres.length > 0) {
-                    const idsOrdres = ordres.map(o => o.id);
-                    const { data: efforts } = await supabaseApp.from('efforts_bgs')
-                        .select('ordre_id, user_id, valeur')
-                        .in('ordre_id', idsOrdres);
-                    if (efforts) effortsActifs = efforts;
-
-                    // Recherche de l'Officier...
-                    const idsOfficiers = [...new Set(ordres.map(o => o.user_id || o.auteur_id || o.emetteur_id || o.createur_id || o.officier_id).filter(Boolean))];
-                    if (idsOfficiers.length > 0) {
-                        const { data: profilsOfficiers } = await supabaseApp.from('profils').select('user_id, cmdr_nom').in('user_id', idsOfficiers);
-                        if (profilsOfficiers) {
-                            ordres.forEach(o => {
-                                const idCherche = o.user_id || o.auteur_id || o.emetteur_id || o.createur_id || o.officier_id;
-                                const match = profilsOfficiers.find(p => p.user_id === idCherche);
-                                if (match && match.cmdr_nom) o.nom_officier_traduit = match.cmdr_nom;
-                            });
-                        }
-                    }
-
+                    const { data: efforts } = await supabaseApp.from('efforts_bgs').select('ordre_id, user_id, valeur').in('ordre_id', ordres.map(o => o.id));
+                    
                     window.cacheOrdresBgs = ordres;
-                    window.cacheEffortsBgs = effortsActifs;
+                    window.cacheEffortsBgs = efforts || [];
 
                     let htmlOrdres = '';
                     ordres.forEach((o, index) => {
-                        const sys = o.systeme_cible || 'SECTEUR';
-                        const fac = o.faction_cible || 'CIBLE';
-                        const type = o.type_ordre || 'DIRECTIVE';
-                        const auteur = o.nom_officier_traduit || o.auteur_nom || o.emetteur_nom || o.auteur || 'AMIRAUTÉ';
-                        
+                        const sys = o.systeme_cible || 'SECTEUR'; const fac = o.faction_cible || 'CIBLE'; const type = o.type_ordre || 'DIRECTIVE';
                         let prioColor = 'var(--ed-orange)';
-                        if (type === 'HAUSSE') prioColor = 'var(--ed-green)';
-                        else if (type === 'BAISSE' || type === 'GUERRE') prioColor = 'var(--ed-red)';
-                        else if (type === 'ELECTION') prioColor = 'var(--ed-blue)';
+                        if (type === 'HAUSSE') prioColor = 'var(--ed-green)'; else if (type === 'BAISSE' || type === 'GUERRE') prioColor = 'var(--ed-red)'; else if (type === 'ELECTION') prioColor = 'var(--ed-blue)';
 
-                        // TRADUCTION VISUELLE DE LA PRIORITÉ
-                        const prioLevel = o.priorite || 3;
-                        let badgePrio = '';
+                        const prioLevel = o.priorite || 3; let badgePrio = '';
                         if (prioLevel === 1) {
-                            badgePrio = '<span style="color: #FF3333; font-weight: bold; font-size: 0.75em; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); padding: 2px 6px; border-radius: 2px; animation: alertPulse 1.5s infinite; display: inline-block; white-space: nowrap;">⚠️ CRITIQUE</span>';
+                            badgePrio = '<span style="color: #FF3333; font-weight: bold; font-size: 0.75em; border: 1px solid #FF3333; background: rgba(255,51,51,0.15); padding: 2px 8px; border-radius: 2px; -webkit-animation: alertPulse 1.5s infinite; animation: alertPulse 1.5s infinite; display: inline-block; white-space: nowrap; box-shadow: 0 0 10px rgba(255,51,51,0.4);">⚠️ CRITIQUE</span>';
                         } else if (prioLevel === 2) {
-                            badgePrio = '<span style="color: var(--ed-orange); font-weight: bold; font-size: 0.75em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 6px; border-radius: 2px; display: inline-block; white-space: nowrap;">⚡ HAUTE</span>';
+                            badgePrio = '<span style="color: var(--ed-orange); font-weight: bold; font-size: 0.75em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 8px; border-radius: 2px; display: inline-block; white-space: nowrap;">⚡ HAUTE</span>';
                         }
 
-                        // MISE EN PAGE EN GRILLE (2x2) POUR UN ÉQUILIBRE PARFAIT
+                        // --- NOUVEAU : BADGE DE CONFLIT MISSIONS ---
+                        let conflitBadgeMission = '';
+                        if (type === 'GUERRE' || type === 'ELECTION') {
+                            const nfSearch = fac.toLowerCase(); const nsSearch = sys.toLowerCase();
+                            const conf = conflitsData.find(c => c.systeme && c.systeme.trim().toLowerCase() === nsSearch && (c.faction1_nom.trim().toLowerCase() === nfSearch || c.faction2_nom.trim().toLowerCase() === nfSearch));
+                            if (conf) {
+                                const ageH = (Date.now() - new Date(conf.mis_a_jour).getTime()) / (1000 * 60 * 60);
+                                if (ageH < 48) {
+                                    const estF1 = conf.faction1_nom.trim().toLowerCase() === nfSearch;
+                                    const scoreMoi = estF1 ? conf.faction1_score : conf.faction2_score;
+                                    const scoreAdv = estF1 ? conf.faction2_score : conf.faction1_score;
+                                    const nomAdv = estF1 ? conf.faction2_nom : conf.faction1_nom;
+                                    const ic = type === 'ELECTION' ? '🗳️' : '⚔️';
+                                    conflitBadgeMission = `
+                                    <div style="background: rgba(0,0,0,0.6); border: 1px dashed ${prioColor}; padding: 6px 10px; border-radius: 3px; font-size: 0.8em; margin-top: 6px;">
+                                        <span style="color: #ccc;">${ic} SCORE: <strong style="color: ${prioColor};">${scoreMoi} - ${scoreAdv}</strong></span>
+                                        <div style="color: #888; font-size: 0.9em; margin-top: 2px;">vs <strong style="color: #aaa;">${nomAdv.toUpperCase()}</strong></div>
+                                    </div>`;
+                                }
+                            }
+                        }
+
                         htmlOrdres += `
                             <div onclick="ouvrirModalOrdre(${index}, '${prioColor}')" style="cursor: pointer; background: rgba(0,0,0,0.5); border-left: 3px solid ${prioColor}; padding: 10px 12px; border-radius: 0 4px 4px 0; margin-bottom: 8px; transition: 0.2s; display: flex; flex-direction: column; gap: 6px;">
-                                
-                                <!-- Ligne 1 : Système & Priorité -->
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                     <span style="color: #fff; font-size: 0.95em; font-weight: bold; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${sys.toUpperCase()}</span>
-                                    <div style="flex-shrink: 0;">${badgePrio}</div>
+                                    <div style="flex-shrink: 0; text-align: right;">${badgePrio}</div>
                                 </div>
-                                
-                                <!-- Ligne 2 : Faction & Type d'ordre -->
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
                                     <span style="color: #aaa; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${fac.toUpperCase()}</span>
                                     <span style="color: ${prioColor}; font-size: 0.75em; border: 1px solid ${prioColor}; padding: 2px 6px; border-radius: 2px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">#${o.id} - ${type}</span>
                                 </div>
-
+                                ${conflitBadgeMission}
                             </div>`;
                     });
                     ordresCont.innerHTML = htmlOrdres;
-                } else {
-                    ordresCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune directive active pour le moment.</div>';
-                }
-            } catch (e) {
-                ordresCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Flux des ordres indisponible.</div>';
-            }
+                } else { ordresCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune directive active pour le moment.</div>'; }
+            } catch (e) { ordresCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Flux des ordres indisponible.</div>'; }
 
             // -------------------------------------------------------------
-            // 3. DIPLOMATIE DE L'ESCADRON
-            // -------------------------------------------------------------
-            const diploCont = document.getElementById('m-diplomatie-container');
-            try {
-                const { data: traites } = await supabaseApp.from('traites_diplomatiques')
-                    .select('*')
-                    .eq('escadron_id', profilCommandant.escadron_id)
-                    .order('faction_cible', { ascending: true });
-
-                if (traites && traites.length > 0) {
-                    window.cacheTraitesDiplo = traites; // 🔒 On stocke les données en cache
-                    
-                    let htmlDiplo = '';
-                    traites.forEach((t, index) => {
-                        const fac = t.faction_cible || 'ESCADRON';
-                        const rel = t.type_relation || 'PNA';
-
-                        let col = 'var(--ed-blue)';
-                        let bgCol = 'rgba(0, 240, 255, 0.05)';
-                        let label = 'P.N.A. ACTIF';
-
-                        if (rel === 'ALLIE') {
-                            col = 'var(--ed-green)';
-                            bgCol = 'rgba(0, 255, 102, 0.05)';
-                            label = 'ALLIÉ';
-                        } else if (rel === 'HOSTILE') {
-                            col = 'var(--ed-red)';
-                            bgCol = 'rgba(255, 51, 51, 0.05)';
-                            label = 'HOSTILE';
-                        }
-
-                        // Ajout du onclick et du curseur
-                        htmlDiplo += `
-                            <div onclick="ouvrirModalDiplomatie(${index}, '${col}', '${label}')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: ${bgCol}; border-left: 3px solid ${col}; padding: 8px 10px; font-size: 0.8em; margin-bottom: 4px; transition: 0.2s;">
-                                <strong style="color: #fff;">${fac.toUpperCase()}</strong>
-                                <span style="color: ${col}; font-weight: bold; font-size: 0.8em; letter-spacing: 1px;">${label}</span>
-                            </div>`;
-                    });
-                    diploCont.innerHTML = htmlDiplo;
-                } else {
-                    diploCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucun traité diplomatique enregistré.</div>';
-                }
-            } catch (e) {
-                diploCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Registre diplomatique inaccessible.</div>';
-            }
-
-            // -------------------------------------------------------------
-            // 4. JOURNAL DES EXPLOITS (FILTRÉ + SCROLL + SÉCURITÉ NOMS)
+            // 4. JOURNAL DES EXPLOITS
             // -------------------------------------------------------------
             const exploitsCont = document.getElementById('m-exploits-container');
             try {
-                // 1. On identifie d'abord les missions actuellement ACTIVES
-                const { data: ordresActifs } = await supabaseApp.from('ordres_bgs')
-                    .select('id, type_ordre') // <-- AJOUT CRUCIAL : On récupère le type
-                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
-                    .eq('statut', 'ACTIF');
-                
+                const { data: ordresActifs } = await supabaseApp.from('ordres_bgs').select('id, type_ordre').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF');
                 const idsActifs = (ordresActifs || []).map(o => o.id);
 
-                if (idsActifs.length === 0) {
-                    exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune directive en cours. Le journal est vierge.</div>';
-                    return;
-                }
+                if (idsActifs.length === 0) { exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Aucune directive en cours. Le journal est vierge.</div>'; return; }
 
-                // 2. On charge les exploits
-                const { data: efforts } = await supabaseApp.from('efforts_bgs')
-                    .select('*')
-                    .in('ordre_id', idsActifs) 
-                    .order('date_action', { ascending: false })
-                    .limit(50); 
-
+                const { data: efforts } = await supabaseApp.from('efforts_bgs').select('*').in('ordre_id', idsActifs).order('date_action', { ascending: false }).limit(50); 
                 if (efforts && efforts.length > 0) {
-                    
-                    // 🛡️ 3. TRADUCTION DES NOMS
+                    // --- ALERTE VISUELLE NOUVEL EXPLOIT ---
+                        const latestActionDate = new Date(efforts[0].date_action).getTime();
+                        const lastReadExploits = parseInt(localStorage.getItem('edteam_last_read_exploits') || '0');
+                        const btnExploits = document.getElementById('m-btn-journal-exploits');
+                        if (btnExploits && latestActionDate > lastReadExploits) {
+                            btnExploits.style.animation = 'alerteBoutonRouge 1.5s infinite';
+                            btnExploits.style.borderColor = '#FF3333';
+                            
+                            // Allume l'onglet BGS en bas si on n'y est pas
+                            if (document.getElementById('tab-bgs').style.display !== 'flex') {
+                                document.getElementById('nav-btn-bgs').classList.add('alerte-nav-rouge');
+                            }
+                        }
+                        // --------------------------------------
                     const idsPilotes = [...new Set(efforts.map(e => e.user_id).filter(Boolean))];
                     if (idsPilotes.length > 0) {
                         const { data: profilsPilotes } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').in('user_id', idsPilotes);
-                        if (profilsPilotes) {
-                            efforts.forEach(e => {
-                                const match = profilsPilotes.find(p => p.user_id === e.user_id);
-                                if (match && match.cmdr_nom) e.cmdr_nom = match.cmdr_nom;
-                            });
-                        }
+                        if (profilsPilotes) efforts.forEach(e => { const match = profilsPilotes.find(p => p.user_id === e.user_id); if (match && match.cmdr_nom) e.cmdr_nom = match.cmdr_nom; });
                     }
 
-                    // 4. GÉNÉRATION DE L'AFFICHAGE
                     let htmlEx = '';
                     efforts.forEach(e => {
                         const cmdr = e.cmdr_nom ? e.cmdr_nom.toUpperCase() : 'INCONNU';
                         const action = (e.type_action || 'ACTION').toUpperCase();
-                        
-                        // Rétro-ingénierie : Trouver le type de l'ordre pour forcer la couleur
                         const ordreInfo = (ordresActifs || []).find(o => String(o.id) === String(e.ordre_id));
                         const typeOrdre = ordreInfo ? ordreInfo.type_ordre.toUpperCase() : 'BGS';
                         
-                        // Couleur imposée par la nature de l'ordre
                         let col = 'var(--ed-blue)';
-                        if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)';
-                        else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)';
-                        else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
-                        else if (typeOrdre === 'ELECTION') col = 'var(--ed-blue)';
+                        if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)'; else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)'; else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
 
-                        // Formatage de la quantité selon l'action (sans changer la couleur qui suit l'ordre !)
+                        // --- CORRECTION : TEXTE DES BATAILLES ---
                         let labelQte = e.valeur;
-                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) {
-                            labelQte = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(e.valeur) + ' CR';
-                        } else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(action)) {
-                            labelQte = `+${e.valeur} INF`;
-                        } else if (action === 'ECHECS') {
-                            labelQte = `${e.valeur} ÉCHEC${e.valeur > 1 ? 'S' : ''}`;
-                        } else if (action === 'MEURTRES') {
-                            labelQte = `${e.valeur} MEURTRE${e.valeur > 1 ? 'S' : ''}`;
-                        } else if (action === 'CZ_VICTOIRES') {
-                            labelQte = `+${e.valeur} BATAILLE${e.valeur > 1 ? 'S' : ''}`;
-                        } else if (action === 'VOLS') {
-                            labelQte = `${e.valeur} VOL${e.valeur > 1 ? 'S' : ''}`;
-                        } else if (action === 'PIRATAGE') {
-                            labelQte = `${e.valeur} PIRATAGE${e.valeur > 1 ? 'S' : ''}`;
-                        }
+                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) labelQte = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(e.valeur) + ' CR';
+                        else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(action)) labelQte = `+${e.valeur} INF`;
+                        else if (action === 'ECHECS') labelQte = `${e.valeur} ÉCHEC${e.valeur > 1 ? 'S' : ''}`;
+                        else if (action === 'MEURTRES') labelQte = `${e.valeur} MEURTRE${e.valeur > 1 ? 'S' : ''}`;
+                        else if (action === 'CZ_VICTOIRES') labelQte = `+1 BATAILLE GAGNÉE`; // <--- CORRECTION APPLIQUÉE ICI
+                        else if (action === 'VOLS') labelQte = `${e.valeur} VOL${e.valeur > 1 ? 'S' : ''}`;
+                        else if (action === 'PIRATAGE') labelQte = `${e.valeur} PIRATAGE${e.valeur > 1 ? 'S' : ''}`;
 
                         const d = e.date_action ? new Date(e.date_action) : new Date();
-                        const dateJour = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-                        const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        const dateJour = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }); const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
                         htmlEx += `
                             <div class="exploit-item" style="background: rgba(0,0,0,0.4); border-left: 3px solid ${col}; padding: 8px 10px; margin-bottom: 6px; border-radius: 0 4px 4px 0; font-size: 0.85em;">
@@ -2113,12 +2015,8 @@
                             </div>`;
                     });
                     exploitsCont.innerHTML = htmlEx;
-                } else {
-                    exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">En attente de nouveaux rapports de vol.</div>';
-                }
-            } catch (e) {
-                exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Flux du journal indisponible.</div>';
-            }
+                } else { exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">En attente de nouveaux rapports de vol.</div>'; }
+            } catch (e) { exploitsCont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center; padding: 12px;">Flux du journal indisponible.</div>'; }
         }
 
         // --- COMMS & CHAT (INTACTS) ---
@@ -2714,8 +2612,11 @@
         // NOUVEAU : INJECTION DU BADGE DE PRIORITÉ DANS LA MODALE
         const prioLevel = ordre.priorite || 3;
         let badgePrioModal = '';
-        if (prioLevel === 1) badgePrioModal = '<div style="margin-top: 6px;"><span style="color: #FF3333; font-weight: bold; font-size: 0.85em; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); padding: 2px 6px; border-radius: 2px; animation: alertPulse 1.5s infinite; display: inline-block;">⚠️ PRIORITÉ CRITIQUE</span></div>';
-        else if (prioLevel === 2) badgePrioModal = '<div style="margin-top: 6px;"><span style="color: var(--ed-orange); font-weight: bold; font-size: 0.85em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 2px 6px; border-radius: 2px; display: inline-block;">⚡ PRIORITÉ HAUTE</span></div>';
+        if (prioLevel === 1) {
+            badgePrioModal = '<div style="margin-top: 6px;"><span style="color: #FF3333; font-weight: bold; font-size: 0.85em; border: 1px solid #FF3333; background: rgba(255,51,51,0.15); padding: 4px 10px; border-radius: 3px; -webkit-animation: alertPulse 1.5s infinite; animation: alertPulse 1.5s infinite; display: inline-block; box-shadow: 0 0 15px rgba(255,51,51,0.5);">⚠️ PRIORITÉ CRITIQUE</span></div>';
+        } else if (prioLevel === 2) {
+            badgePrioModal = '<div style="margin-top: 6px;"><span style="color: var(--ed-orange); font-weight: bold; font-size: 0.85em; border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 4px 10px; border-radius: 3px; display: inline-block;">⚡ PRIORITÉ HAUTE</span></div>';
+        }
         document.getElementById('ordre-modal-prio').innerHTML = badgePrioModal;
 
         const nomOfficier = ordre.nom_officier_traduit || ordre.auteur_nom || ordre.emetteur_nom || ordre.auteur || 'AMIRAUTÉ';
@@ -3042,12 +2943,11 @@
             enregistrerTelemetrie('action', 'fiches_pilotes');
             
             try {
-                // 1. Récupération globale (Profil + BGS + Réputations)
                 const escadronCible = profilCommandant.escadron_id || 'ISS';
                 
                 const [resProfil, resOrdres, resEfforts, resObj] = await Promise.all([
                     supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single(),
-                    supabaseApp.from('ordres_bgs').select('id').eq('escadron_id', escadronCible),
+                    supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', escadronCible),
                     supabaseApp.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action'),
                     supabaseApp.from('objectifs_reputation').select('faction_nom').eq('escadron_id', escadronCible)
                 ]);
@@ -3055,7 +2955,7 @@
                 const profil = resProfil.data;
                 if (!profil) { alert("Erreur: Profil indisponible."); return; }
 
-                // --- 2. EN-TÊTE (Nom et Badges) ---
+                // --- EN-TÊTE ---
                 document.getElementById('m-modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : 'INCONNU');
                 let badges = '';
                 if (profil.est_amiral) {
@@ -3063,19 +2963,38 @@
                 } else {
                     if (profil.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER BGS</span>';
                     else badges += '<span style="background: rgba(255,113,0,0.1); color: var(--ed-orange); border: 1px solid var(--ed-orange); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">PILOTE</span>';
-                    
                     if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
                 }
                 document.getElementById('m-modal-cmdr-roles').innerHTML = badges;
 
-                // --- 3. CALCUL DU BGS ET DES SPÉCIALISTES ---
+                // --- INJECTION DES DISTINCTIONS (PINS) ---
+                const cacheName = 'edteam_specialists_' + escadronCible;
+                const cachedSpecs = JSON.parse(localStorage.getItem(cacheName) || '{}');
+                let distinctionsHtml = '';
+
+                const verifierDistinction = (categorie, typeCode, couleur) => {
+                    if (String(cachedSpecs[categorie]) === String(userId)) {
+                        distinctionsHtml += `<div style="width: 35px; height: 35px;">${window.forgerMedailleSVG(typeCode, couleur)}</div>`;
+                    }
+                };
+                verifierDistinction('sec', 'SEC', 'var(--ed-blue)');
+                verifierDistinction('log', 'LOG', 'var(--ed-orange)');
+                verifierDistinction('eco', 'ECO', '#00FF66');
+                verifierDistinction('sci', 'SCI', '#B026FF');
+                verifierDistinction('exe', 'EXE', '#FF3333');
+                verifierDistinction('gue', 'GUE', '#FF7100');
+                verifierDistinction('ele', 'ELE', '#00F0FF');
+                const elDist = document.getElementById('m-modal-cmdr-distinctions');
+                if (elDist) elDist.innerHTML = distinctionsHtml;
+
+                // --- CALCUL DU BGS ET DES MÉDAILLES VÉTÉRANS ---
                 let totalSquad = 0; let totalPilote = 0; let opsCount = 0;
                 let titresHtml = '<div style="color: #666; font-style: italic; font-size: 0.8em; text-align: center;">Aucune distinction de spécialiste.</div>';
+                let medaillesVets = '';
 
                 if (resOrdres.data && resEfforts.data) {
                     const ordreIds = resOrdres.data.map(o => String(o.id));
                     const effortsEscadron = resEfforts.data.filter(e => ordreIds.includes(String(e.ordre_id)));
-
                     const uniqueOps = new Set();
                     const scoresSpecialistes = {};
 
@@ -3083,7 +3002,6 @@
                         const val = Math.abs(Number(e.valeur) || 0);
                         let pts = val;
                         if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
-
                         totalSquad += pts;
                         const uid = String(e.user_id);
                         if (uid === String(userId)) {
@@ -3100,6 +3018,30 @@
 
                     opsCount = uniqueOps.size;
 
+                    // Calcul Médailles Vétérans (Missions Archivées)
+                    const ordresClotures = resOrdres.data.filter(o => o.statut === 'ARCHIVÉ');
+                    ordresClotures.forEach(ordre => {
+                        const effOrdre = effortsEscadron.filter(e => String(e.ordre_id) === String(ordre.id));
+                        let pTot = 0; let pMoi = 0;
+                        effOrdre.forEach(e => {
+                            const val = Math.abs(Number(e.valeur) || 0);
+                            let pts = val;
+                            if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
+                            pTot += pts;
+                            if (String(e.user_id) === String(userId)) pMoi += pts;
+                        });
+                        const pctImplication = pTot > 0 ? (pMoi / pTot) * 100 : 0;
+                        if (pctImplication >= 1) {
+                            medaillesVets += `
+                            <div class="medal-wrapper">
+                                <div class="medal-ribbon"></div>
+                                <div class="medal-coin"></div>
+                                <div class="medal-text">${ordre.systeme_cible.toUpperCase()}</div>
+                            </div>`;
+                        }
+                    });
+
+                    // Calcul Spécialités (Textes d'ambiance)
                     const trouverMeilleur = (categorie) => {
                         let max = 0; let topPilote = null;
                         for (const [uid, scores] of Object.entries(scoresSpecialistes)) {
@@ -3107,16 +3049,10 @@
                         }
                         return topPilote;
                     };
-
-                    const N1_Sec = trouverMeilleur('sec');
-                    const N1_Log = trouverMeilleur('log');
-                    const N1_Eco = trouverMeilleur('eco');
-                    const N1_Sci = trouverMeilleur('sci');
+                    const N1_Sec = trouverMeilleur('sec'); const N1_Log = trouverMeilleur('log'); const N1_Eco = trouverMeilleur('eco'); const N1_Sci = trouverMeilleur('sci');
 
                     let tempTitres = '';
-                    const addTitre = (icon, nom, color) => {
-                        tempTitres += `<div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${color}; padding: 6px 10px; font-size: 0.75em; color: ${color}; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 0 4px 4px 0; margin-bottom: 4px;"><span>${icon} ${nom}</span><span style="font-size: 1.2em;">🏆</span></div>`;
-                    };
+                    const addTitre = (icon, nom, color) => { tempTitres += `<div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${color}; padding: 6px 10px; font-size: 0.75em; color: ${color}; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 0 4px 4px 0; margin-bottom: 4px;"><span>${icon} ${nom}</span><span style="font-size: 1.2em;">🏆</span></div>`; };
 
                     if (String(userId) === String(N1_Sec)) addTitre('🛡️', 'LE FER DE LANCE (SÉCURITÉ)', 'var(--ed-blue)');
                     if (String(userId) === String(N1_Log)) addTitre('📦', 'MAÎTRE LOGISTICIEN (MISSIONS)', 'var(--ed-orange)');
@@ -3126,16 +3062,17 @@
                     if (tempTitres !== '') titresHtml = tempTitres;
                 }
 
-                // Affichage Impact BGS et Titres
+                // Application
                 const rawPct = totalSquad > 0 ? ((totalPilote / totalSquad) * 100) : 0;
                 const partAff = rawPct >= 99.95 ? '100%' : (rawPct > 0 ? (rawPct % 1 === 0 ? rawPct.toFixed(0) : rawPct.toFixed(1)) + '%' : '0%');
-
                 document.getElementById('m-modal-bgs-part').innerText = partAff;
                 document.getElementById('m-modal-bgs-circle').style.background = `conic-gradient(var(--ed-orange) 0% ${Math.min(100, rawPct)}%, rgba(255,113,0,0.1) ${Math.min(100, rawPct)}% 100%)`;
                 document.getElementById('m-modal-ops-count').innerText = opsCount;
                 document.getElementById('m-modal-specialiste-titres').innerHTML = titresHtml;
+                const elMeds = document.getElementById('m-modal-medailles-veteran');
+                if(elMeds) elMeds.innerHTML = medaillesVets !== '' ? medaillesVets : '<div style="color: #666; font-style: italic; font-size: 0.8em;">Aucun ruban de campagne.</div>';
 
-                // --- 4. RANGS DE LA FÉDÉRATION ---
+                // --- RANGS DE LA FÉDÉRATION ---
                 const formatRank = (rankArray, rankVal, progVal) => {
                     const rName = rankArray[rankVal || 0] || 'INCONNU';
                     return `${rName} <span style="color:var(--ed-orange); font-size:0.85em; margin-left:5px;">(${progVal || 0}%)</span>`;
@@ -3149,34 +3086,28 @@
                 document.getElementById('m-modal-rank-fed').innerHTML = profil.rang_fed > 0 ? formatRank(TABLES_ED_RANGS.federation, profil.rang_fed, profil.prog_fed) : '<span style="color:#666;">AUCUN</span>';
                 document.getElementById('m-modal-rank-emp').innerHTML = profil.rang_emp > 0 ? formatRank(TABLES_ED_RANGS.empire, profil.rang_emp, profil.prog_emp) : '<span style="color:#666;">AUCUN</span>';
 
-                // --- 5. CASIER LÉGAL ---
+                // --- CASIER LÉGAL ---
                 const noto = profil.notoriete || 0;
                 const casierContainer = document.getElementById('m-modal-casier-container');
                 const notorietyText = document.getElementById('m-modal-notoriety');
                 if (noto > 0) {
-                    casierContainer.style.background = 'rgba(255, 51, 51, 0.1)';
-                    casierContainer.style.borderColor = '#FF3333';
+                    casierContainer.style.background = 'rgba(255, 51, 51, 0.1)'; casierContainer.style.borderColor = '#FF3333';
                     notorietyText.innerHTML = `<span style="color: #FF3333; text-shadow: 0 0 5px rgba(255,51,51,0.5);">RECHERCHÉ (${noto})</span>`;
                 } else {
-                    casierContainer.style.background = 'rgba(0, 255, 102, 0.05)';
-                    casierContainer.style.borderColor = '#00FF66';
+                    casierContainer.style.background = 'rgba(0, 255, 102, 0.05)'; casierContainer.style.borderColor = '#00FF66';
                     notorietyText.innerHTML = `<span style="color: #00FF66;">CASIER VIERGE</span>`;
                 }
 
-                // --- NOUVEAU 5.5 : FINANCES ---
+                // --- FINANCES ---
                 const patrimoine = profil.patrimoine_total || ((profil.solde_vaisseau || 0) + (profil.solde_fc || 0) + (profil.valeur_vaisseaux || 0));
                 const fmtFinance = new Intl.NumberFormat('fr-FR');
                 const elFinance = document.getElementById('m-modal-finance');
                 if (elFinance) {
-                    if (patrimoine > 0) {
-                        elFinance.innerHTML = `${fmtFinance.format(patrimoine)} <span style="color: var(--ed-green); font-size: 0.8em;">CR</span>`;
-                    } else {
-                        // Si le pilote n'a pas encore synchronisé ses données ou cache son solde
-                        elFinance.innerHTML = '<span style="color: #666; font-style: italic; font-size: 0.8em;">DONNÉES CRYPTÉES</span>';
-                    }
+                    if (patrimoine > 0) elFinance.innerHTML = `${fmtFinance.format(patrimoine)} <span style="color: var(--ed-green); font-size: 0.8em;">CR</span>`;
+                    else elFinance.innerHTML = '<span style="color: #666; font-style: italic; font-size: 0.8em;">DONNÉES CRYPTÉES</span>';
                 }
 
-                // --- 6. RÉPUTATIONS ESCADRON ---
+                // --- RÉPUTATIONS ESCADRON ---
                 const conteneurReps = document.getElementById('m-modal-reputations-container');
                 const objectifs = resObj.data || [];
 
@@ -3248,7 +3179,6 @@
                     conteneurReps.style.display = 'none';
                 }
 
-                // 7. Ouverture Modale
                 document.getElementById('modal-profil-pilote').style.display = 'flex';
 
             } catch (err) {
@@ -3482,6 +3412,201 @@
                 console.error(e);
                 cont.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 20px;">Erreur de liaison.</div>';
             }
+        }
+
+        // ==========================================
+        // SYSTÈME DE NOTIFICATIONS VISUELLES
+        // ==========================================
+
+        // 1. VÉRIFICATION DES NOTES D'INFO (QG)
+        async function verifierNouvellesNotesMobile() {
+            if (!profilCommandant) return;
+            try {
+                const { data } = await supabaseApp.from('journal_activite').select('created_at').eq('escadron_id', profilCommandant.escadron_id).order('created_at', { ascending: false }).limit(1);
+                if (data && data.length > 0) {
+                    const derniereNoteDate = new Date(data[0].created_at).getTime();
+                    const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_read_notes') || '0');
+                    const btn = document.getElementById('m-btn-journal-tactique');
+                    if (btn && derniereNoteDate > dateDerniereLecture) {
+                        btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
+                        btn.style.borderColor = '#FF3333'; // Passe en rouge !
+                        
+                        // Allume l'onglet QG en bas si on n'y est pas
+                        if (document.getElementById('tab-qg').style.display !== 'flex') {
+                            document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // 2. OUVERTURE DU JOURNAL DES NOTES (ÉTEINT L'ALERTE)
+        async function ouvrirJournalTactiqueMobile() {
+            if (typeof sonClic === 'function') sonClic();
+            
+            // On valide la lecture et on remet le bouton en bleu
+            localStorage.setItem('edteam_last_read_notes', Date.now().toString());
+            const btn = document.getElementById('m-btn-journal-tactique');
+            if (btn) {
+                btn.style.animation = 'none';
+                btn.style.borderColor = 'var(--ed-blue)';
+            }
+
+            document.getElementById('modal-journal-tactique').style.display = 'flex';
+            
+            const cont = document.getElementById('m-journal-tactique-content');
+            cont.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.85em; text-align: center; margin-top: 20px; animation: alertPulse 1.5s infinite;">Téléchargement des notes...</div>';
+
+            try {
+                const { data, error } = await supabaseApp.from('journal_activite')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .order('created_at', { ascending: false })
+                    .limit(40);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(item => {
+                        const d = new Date(item.created_at);
+                        const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        const col = item.couleur || 'var(--ed-blue)';
+                        
+                        html += `
+                        <div style="background: rgba(0,0,0,0.6); border-left: 3px solid ${col}; padding: 10px 12px; border-radius: 0 4px 4px 0; margin-bottom: 5px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+                                <span style="color: ${col}; font-weight: bold; font-size: 0.85em; letter-spacing: 1px;">[ ${item.type_action} ]</span>
+                                <span style="color: #888; font-size: 0.75em;">${dateStr}</span>
+                            </div>
+                            <div style="color: #ddd; font-size: 0.9em; line-height: 1.4; margin-bottom: 8px;">
+                                ${item.details}
+                            </div>
+                            <div style="color: #555; font-size: 0.75em; text-align: right; font-style: italic;">
+                                CMDR ${item.cmdr_nom.toUpperCase()}
+                            </div>
+                        </div>`;
+                    });
+                    cont.innerHTML = html;
+                } else {
+                    cont.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Aucune note d\'information enregistrée.</div>';
+                }
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 20px;">Erreur de liaison.</div>';
+            }
+        }
+
+        // 3. OUVERTURE DU JOURNAL DES EXPLOITS (BGS)
+        window.ouvrirJournalExploitsMobile = function() {
+            if (typeof sonClic === 'function') sonClic();
+            
+            // On valide la lecture et on remet le bouton en bleu
+            localStorage.setItem('edteam_last_read_exploits', Date.now().toString());
+            const btn = document.getElementById('m-btn-journal-exploits');
+            if (btn) {
+                btn.style.animation = 'none';
+                btn.style.borderColor = 'var(--ed-blue)';
+            }
+
+            document.getElementById('modal-journal-exploits').style.display = 'flex';
+        };
+
+        // Les fonctions existantes de Galnet et Gazette qu'on met à jour avec l'alerte
+        async function chargerGalnetMobile() {
+            try {
+                const response = await fetch('https://cms.zaonce.net/fr-FR/jsonapi/node/galnet_article?sort=-created&page[limit]=1');
+                const payload = await response.json();
+                if (payload && payload.data && payload.data.length > 0) {
+                    const article = payload.data[0].attributes;
+                    cacheGalnetArticle = { title: article.title, date: article.created, body: article.body ? article.body.value : "Contenu indisponible." };
+                    const d = new Date(article.created); d.setFullYear(d.getFullYear() + 1286);
+                    document.getElementById('m-galnet-date').innerText = "DERNIÈRE ÉDITION : " + d.toLocaleDateString('fr-FR');
+
+                    // Alerte Galnet
+                    const articleTs = new Date(article.created).getTime();
+                    const lastRead = parseInt(localStorage.getItem('edteam_last_read_galnet') || '0');
+                    const btn = document.getElementById('m-btn-galnet');
+                    if (btn && articleTs > lastRead) {
+                        btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
+                        btn.style.borderColor = '#FF3333';
+                        
+                        // Allume l'onglet QG en bas si on n'y est pas
+                        if (document.getElementById('tab-qg').style.display !== 'flex') {
+                            document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
+                        }
+                    }
+                }
+            } catch (e) { document.getElementById('m-galnet-date').innerText = "Erreur de liaison."; }
+        }
+
+        function ouvrirGalnetMobile() {
+            if (!cacheGalnetArticle) return;
+            sonClic();
+            enregistrerTelemetrie('action', 'lecture_galnet');
+            
+            // Valider lecture
+            localStorage.setItem('edteam_last_read_galnet', Date.now().toString());
+            const btn = document.getElementById('m-btn-galnet');
+            if (btn) { btn.style.animation = 'none'; btn.style.borderColor = 'var(--ed-orange)'; }
+            
+            document.getElementById('m-galnet-title-modal').innerText = cacheGalnetArticle.title;
+            const d = new Date(cacheGalnetArticle.date); d.setFullYear(d.getFullYear() + 1286);
+            document.getElementById('m-galnet-date-modal').innerText = d.toLocaleDateString('fr-FR');
+            document.getElementById('m-galnet-body-modal').innerHTML = cacheGalnetArticle.body;
+            document.getElementById('modal-galnet').style.display = 'flex';
+        }
+
+        async function chargerGazetteListMobile() {
+            if (!profilCommandant) return;
+            try {
+                const { data } = await supabaseApp.from('gazette_hebdo').select('*').eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT').order('created_at', { ascending: false });
+
+                if (data && data.length > 0) {
+                    cacheGazettesMobile = data;
+                    const d = new Date(data[0].created_at).toLocaleDateString('fr-FR');
+                    document.getElementById('m-gazette-date').innerText = "DERNIÈRE ÉDITION : " + d;
+                    
+                    const select = document.getElementById('m-gazette-selector');
+                    select.innerHTML = '';
+                    data.forEach((g, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = g.id;
+                        opt.innerText = (i === 0 ? "🔴 " : "📜 ") + new Date(g.created_at).toLocaleDateString('fr-FR') + " : " + g.titre.substring(0, 25) + "...";
+                        select.appendChild(opt);
+                    });
+                    afficherGazetteSelectionnee(data[0].id);
+
+                    // Alerte Gazette
+                    const articleTs = new Date(data[0].created_at).getTime();
+                    const lastRead = parseInt(localStorage.getItem('edteam_last_read_gazette') || '0');
+                    const btn = document.getElementById('m-btn-gazette');
+                    if (btn && articleTs > lastRead) {
+                        btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
+                        btn.style.borderColor = '#FF3333';
+                        
+                        // Allume l'onglet QG en bas si on n'y est pas
+                        if (document.getElementById('tab-qg').style.display !== 'flex') {
+                            document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
+                        }
+                    }
+                } else {
+                    document.getElementById('m-gazette-date').innerText = "Aucune archive disponible.";
+                    document.getElementById('m-gazette-selector').innerHTML = '<option>Archives vides</option>';
+                }
+            } catch(e) {}
+        }
+
+        function ouvrirGazetteMobile() { 
+            sonClic(); 
+            enregistrerTelemetrie('action', 'lecture_gazette');
+            
+            // Valider lecture
+            localStorage.setItem('edteam_last_read_gazette', Date.now().toString());
+            const btn = document.getElementById('m-btn-gazette');
+            if (btn) { btn.style.animation = 'none'; btn.style.borderColor = 'var(--ed-blue)'; }
+
+            document.getElementById('modal-gazette').style.display = 'flex'; 
         }
 
     </script>
