@@ -697,7 +697,45 @@
 
                         <!-- RUBANS DE CAMPAGNE (MÉDAILLES) -->
                         <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px;">
-                            <h4 style="margin: 0 0 10px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px;">MES ÉTATS DE SERVICE (OPERATIONS CLÔTURÉES)</h4>
+                            <h4 style="margin: 0 0 10px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; position: relative;">
+                                <span>MES ÉTATS DE SERVICE (OPÉRATIONS CLÔTURÉES)</span>
+                                
+                                <!-- LE CONTENEUR DU BOUTON D'AIDE -->
+                                <div style="position: relative; display: inline-block;"
+                                    onmouseenter="document.getElementById('legend-placard').style.display='block'; if(typeof sonHover==='function') sonHover();"
+                                    onmouseleave="document.getElementById('legend-placard').style.display='none';">
+                                    
+                                    <span style="color: var(--ed-blue); cursor: help; font-size: 0.9em; border: 1px solid var(--ed-blue); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; box-shadow: 0 0 5px rgba(0,240,255,0.2);">
+                                        ?
+                                    </span>
+                                    
+                                    <!-- LE PANNEAU D'INFORMATION CACHÉ (S'affiche au survol du conteneur) -->
+                                    <div id="legend-placard" style="display: none; position: absolute; top: 30px; right: 0; width: 340px; background: rgba(5, 5, 10, 0.95); border: 1px solid var(--ed-blue); box-shadow: 0 5px 20px rgba(0,0,0,0.9), 0 0 15px rgba(0,240,255,0.2); padding: 15px; border-radius: 4px; z-index: 100; font-size: 0.85em; text-transform: none; font-family: 'Share Tech Mono', monospace; text-align: left; pointer-events: none; backdrop-filter: blur(5px);">
+                                        <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px; border-bottom: 1px dashed var(--ed-blue); padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase;">> MANUEL : LECTURE DES PLAQUES</div>
+                                        
+                                        <div style="margin-bottom: 10px; line-height: 1.4;">
+                                            <strong style="color: #fff;">🎨 COULEUR (ÉMAIL) : TYPE D'OPÉRATION</strong><br>
+                                            <span style="color: #FF3333;">Rouge</span> = Guerre &nbsp;|&nbsp; <span style="color: #00FF66;">Vert</span> = Hausse<br>
+                                            <span style="color: #00F0FF;">Bleu</span> = Élection &nbsp;|&nbsp; <span style="color: #FF7100;">Orange</span> = Baisse
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 10px; line-height: 1.4;">
+                                            <strong style="color: #fff;">⏸️ BARRETTES VERTICALES : CONSTANCE</strong><br>
+                                            <span style="color: #ccc;">1 barrette = 1 jour de présence unique.</span>
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 10px; line-height: 1.4;">
+                                            <strong style="color: #fff;">⭐ ÉTOILES (BROCHES) : EFFORT ABSOLU</strong><br>
+                                            <span style="color: #ccc;">Points d'implication (Bronze > Argent > Or > Diamant).</span>
+                                        </div>
+                                        
+                                        <div style="line-height: 1.4;">
+                                            <strong style="color: #fff;">🔲 ENCADREMENT : RANG ESCADRON</strong><br>
+                                            <span style="color: #ccc;">Bronze (Top 10), Argent (Top 5), Or (Top 3), <strong style="color:#00FFFF; text-shadow: 0 0 5px #00FFFF;">Diamant (1er)</strong>.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </h4>
                             <div id="ribbons-container" class="ribbon-container">
                                 <div style="color: #555; font-style: italic; font-size: 0.9em;">Analyse des archives de l'Amirauté...</div>
                             </div>
@@ -798,9 +836,47 @@
 
                             <!-- ÉTATS DE SERVICE BGS (MÉDAILLES) -->
                             <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 4px; flex-grow: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px;">
-                                    <span style="color: #888; font-weight: bold; letter-spacing: 1px;">> ÉTATS DE SERVICE</span>
-                                    <span style="color: #ccc; font-size: 0.85em;">OPERATIONS : <strong id="modal-ops-count" style="color: #fff; font-size: 1.2em;">-</strong></span>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px; position: relative;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="color: #888; font-weight: bold; letter-spacing: 1px;">> ÉTATS DE SERVICE</span>
+                                        
+                                        <!-- LE CONTENEUR DU BOUTON D'AIDE -->
+                                        <div style="position: relative; display: inline-block;"
+                                             onmouseenter="document.getElementById('legend-modal-pilote').style.display='block'; if(typeof sonHover==='function') sonHover();"
+                                             onmouseleave="document.getElementById('legend-modal-pilote').style.display='none';">
+                                             
+                                            <span style="color: var(--ed-blue); cursor: help; font-size: 0.9em; border: 1px solid var(--ed-blue); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; box-shadow: 0 0 5px rgba(0,240,255,0.2);">
+                                                ?
+                                            </span>
+                                            
+                                            <!-- LE PANNEAU D'INFORMATION CACHÉ -->
+                                            <div id="legend-modal-pilote" style="display: none; position: absolute; top: 25px; left: 0; width: 340px; background: rgba(5, 5, 10, 0.98); border: 1px solid var(--ed-blue); box-shadow: 0 5px 20px rgba(0,0,0,0.9), 0 0 15px rgba(0,240,255,0.2); padding: 15px; border-radius: 4px; z-index: 99999; font-size: 0.85em; text-transform: none; font-family: 'Share Tech Mono', monospace; text-align: left; pointer-events: none;">
+                                                <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px; border-bottom: 1px dashed var(--ed-blue); padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase;">> MANUEL : LECTURE DES PLAQUES</div>
+                                                
+                                                <div style="margin-bottom: 10px; line-height: 1.4;">
+                                                    <strong style="color: #fff;">🎨 COULEUR : TYPE D'OPÉRATION</strong><br>
+                                                    <span style="color: #FF3333;">Rouge</span> = Guerre &nbsp;|&nbsp; <span style="color: #00FF66;">Vert</span> = Hausse<br>
+                                                    <span style="color: #00F0FF;">Bleu</span> = Élection &nbsp;|&nbsp; <span style="color: #FF7100;">Orange</span> = Baisse
+                                                </div>
+                                                
+                                                <div style="margin-bottom: 10px; line-height: 1.4;">
+                                                    <strong style="color: #fff;">⏸️ BARRETTES : CONSTANCE</strong><br>
+                                                    <span style="color: #ccc;">1 barrette = 1 jour de présence.</span>
+                                                </div>
+                                                
+                                                <div style="margin-bottom: 10px; line-height: 1.4;">
+                                                    <strong style="color: #fff;">⭐ ÉTOILES : EFFORT ABSOLU</strong><br>
+                                                    <span style="color: #ccc;">Points d'implication (Bronze > Argent > Or > Diamant).</span>
+                                                </div>
+                                                
+                                                <div style="line-height: 1.4;">
+                                                    <strong style="color: #fff;">🔲 ENCADREMENT : RANG ESCADRON</strong><br>
+                                                    <span style="color: #ccc;">Bronze (Top 10), Argent (Top 5), Or (Top 3), <strong style="color:#00FFFF; text-shadow: 0 0 5px #00FFFF;">Diamant (1er)</strong>.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span style="color: #ccc; font-size: 0.85em;">OPÉRATIONS : <strong id="modal-ops-count" style="color: #fff; font-size: 1.2em;">-</strong></span>
                                 </div>
                                 <div id="modal-medailles-veteran" class="ribbon-container" style="max-height: 240px; overflow-y: auto; padding-right: 5px;">
                                     <!-- Les médailles (rubans) seront injectées ici -->
@@ -1438,60 +1514,172 @@
         // ONGLET 0 : MEMBRES DE L'ESCADRON & RECRUTEMENT
         // ==========================================
         async function chargerEffectifsEscadron() {
-    const containerEffectifs = document.getElementById('liste-effectifs');
-    if (!containerEffectifs) return;
+            const containerEffectifs = document.getElementById('liste-effectifs');
+            if (!containerEffectifs) return;
 
-    try {
-        const { data: effectifs, error } = await supabaseApp.from('profils_publics')
-            .select('*')
-            .eq('escadron_id', profilCommandant.escadron_id)
-            .eq('est_approuve', true)
-            .order('est_amiral', { ascending: false });
+            try {
+                // 1. On télécharge les profils des pilotes
+                const { data: effectifs, error } = await supabaseApp.from('profils_publics')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .eq('est_approuve', true)
+                    .order('est_amiral', { ascending: false });
 
-        if (error) throw error;
+                if (error) throw error;
 
-        let htmlEff = '';
-        effectifs.forEach(p => {
-            const gradeStr = p.est_amiral ? 'AMIRAL' : 'PILOTE';
-            const color = p.est_amiral ? '#FF3333' : 'var(--ed-orange)';
-            
-            let badges = '';
-            if (!p.est_amiral) {
-                if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
-                if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
+                // 2. TÉLÉCHARGEMENT GROUPÉ DES ARCHIVES BGS (Pour éviter de saturer la base de données)
+                const { data: squadOrdres } = await supabaseApp.from('ordres_bgs')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .eq('statut', 'ARCHIVÉ');
+                    
+                let allEfforts = [];
+                if (squadOrdres && squadOrdres.length > 0) {
+                    const ordreIds = squadOrdres.map(o => String(o.id));
+                    const { data: fetchedEfforts } = await supabaseApp.from('efforts_bgs')
+                        .select('*')
+                        .in('ordre_id', ordreIds);
+                    if (fetchedEfforts) allEfforts = fetchedEfforts;
+                }
+
+                // 3. PRÉCALCUL DES SCORES GLOBAUX POUR DÉTERMINER LES RANGS (Top 1, Top 3, etc.)
+                let scoresParOrdre = {};
+                if(squadOrdres) {
+                    squadOrdres.forEach(ordre => {
+                        scoresParOrdre[ordre.id] = {};
+                        const effortsOrdre = allEfforts.filter(e => String(e.ordre_id) === String(ordre.id));
+                        effortsOrdre.forEach(e => {
+                            const val = Math.abs(Number(e.valeur) || 0);
+                            let pts = val;
+                            if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
+                            
+                            const uId = String(e.user_id);
+                            if (!scoresParOrdre[ordre.id][uId]) {
+                                scoresParOrdre[ordre.id][uId] = { pts: 0, dates: new Set() };
+                            }
+                            scoresParOrdre[ordre.id][uId].pts += pts;
+                            if (e.date_action) scoresParOrdre[ordre.id][uId].dates.add(e.date_action.substring(0, 10));
+                        });
+                    });
+                }
+
+                let htmlEff = '';
+
+                // 4. GÉNÉRATION DE LA LIGNE POUR CHAQUE PILOTE
+                effectifs.forEach(p => {
+                    const gradeStr = p.est_amiral ? 'AMIRAL' : 'PILOTE';
+                    const color = p.est_amiral ? '#FF3333' : 'var(--ed-orange)';
+                    
+                    let badges = '';
+                    if (!p.est_amiral) {
+                        if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
+                        if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
+                    }
+
+                    const nomPilote = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
+
+                    let cardStyle = '';
+                    let textCouleur = '#fff';
+                    let indicateurMoi = '';
+                    let infoIconColor = 'var(--ed-orange)';
+                    
+                    if (p.user_id === profilCommandant.user_id) {
+                        cardStyle = 'border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue), 0 0 15px rgba(0, 240, 255, 0.1); background: rgba(0, 240, 255, 0.05);';
+                        textCouleur = 'var(--ed-blue)';
+                        indicateurMoi = '<span style="color: var(--ed-blue); font-size: 0.7em; margin-left: 10px; letter-spacing: 1px;">[ VOUS ]</span>';
+                        infoIconColor = 'var(--ed-blue)';
+                    }
+
+                    // --- CALCUL DES MEILLEURES PLAQUES BGS POUR CE PILOTE ---
+                    let rubansPilote = [];
+                    if(squadOrdres) {
+                        squadOrdres.forEach(ordre => {
+                            const scoresOrdre = scoresParOrdre[ordre.id];
+                            if(!scoresOrdre || !scoresOrdre[p.user_id]) return;
+                            
+                            const monScore = scoresOrdre[p.user_id].pts;
+                            if(monScore > 0) {
+                                const nbJours = scoresOrdre[p.user_id].dates.size;
+                                
+                                // Calcul du rang du pilote sur cette opération
+                                let userScoresArray = Object.entries(scoresOrdre).map(([idStr, data]) => ({idStr, score: data.pts}));
+                                userScoresArray.sort((a, b) => b.score - a.score);
+                                let monRang = userScoresArray.findIndex(u => u.idStr === String(p.user_id)) + 1;
+                                
+                                let distinction = "RUBAN DE CAMPAGNE";
+                                if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                                else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                                else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                                else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
+                                else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
+                                else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
+                                else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                                else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                                else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                                else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                                else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                                else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
+                                
+                                let encadrement = "STANDARD";
+                                if (monRang === 1) encadrement = "DIAMANT (1er)";
+                                else if (monRang <= 3) encadrement = "OR (Top 3)";
+                                else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
+                                else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+
+                                // Remplacement radical par des entités HTML pures pour éviter tout bug Javascript au survol
+                                const systemeSafe = (ordre.systeme_cible || '').toUpperCase().replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                                const typeSafe = (ordre.type_ordre || '').toUpperCase().replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                                const distinctionSafe = distinction.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                                
+                                // Tooltip ultra sécurisé
+                                const tooltip = `<div style=&quot;text-align:center;&quot;>CAMPAGNE : <strong style=&quot;color:#fff;&quot;>${systemeSafe}</strong><br><span style=&quot;color:#ccc; font-size:0.85em;&quot;>Mission : ${typeSafe}<br>Score : <strong style=&quot;color:var(--ed-blue);&quot;>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=&quot;color:#FFD700;&quot;>${distinctionSafe}</strong><br>Cadre : <strong style=&quot;color:#fff;&quot;>${encadrement}</strong></span></div>`;
+                                
+                                rubansPilote.push({
+                                    score: monScore,
+                                    // Pas d'action onClick ici car on est déjà dans une carte cliquable
+                                    html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                                });
+                            }
+                        });
+                    }
+                    
+                    // On trie les plaques du pilote (Les plus gros scores d'abord)
+                    rubansPilote.sort((a, b) => b.score - a.score);
+                    
+                    // On prend uniquement les 5 meilleures plaques
+                    const top5Rubans = rubansPilote.slice(0, 5);
+                    let plaquesHtml = top5Rubans.map(r => r.html).join('');
+                    
+                    // S'il a plus de 5 plaques, on ajoute un petit indicateur texte
+                    if(rubansPilote.length > 5) {
+                        plaquesHtml += `<div style="color: #666; font-size: 0.8em; font-weight: bold; margin-left: 5px;" title="+${rubansPilote.length - 5} autres décorations...">+${rubansPilote.length - 5}</div>`;
+                    }
+
+                    // --- INJECTION HTML FINALE (Alignée à droite avec le "i") ---
+                    htmlEff += `
+                    <div class="pilot-card" style="${cardStyle}" onclick="ouvrirProfilPilote('${p.user_id}')">
+                        <div style="display: flex; align-items: center;">
+                            <span style="color: ${color}; font-weight: bold; border: 1px solid ${color}; padding: 3px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 15px;">${gradeStr}</span>
+                            <span style="color: ${textCouleur}; font-size: 1.2em; font-weight: bold; letter-spacing: 1px;">CMDR ${nomPilote} ${indicateurMoi}</span>
+                            ${badges}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="display: flex; align-items: center; gap: 4px; pointer-events: none;">
+                                <!-- On désactive les pointer-events ici pour que cliquer sur la plaque ouvre quand même la fiche -->
+                                ${plaquesHtml}
+                            </div>
+                            <div style="color: ${infoIconColor}; font-size: 1.5em; opacity: 0.5;">🛈</div>
+                        </div>
+                    </div>`;
+                });
+                
+                containerEffectifs.innerHTML = htmlEff || '<div style="color: #666; font-style: italic; text-align: center;">Aucun pilote actif.</div>';
+
+            } catch (e) {
+                console.error("Erreur effectifs:", e);
+                containerEffectifs.innerHTML = '<div style="color: red; text-align: center;">Erreur de chargement des effectifs.</div>';
             }
-
-            const nomPilote = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
-
-            let cardStyle = '';
-            let textCouleur = '#fff';
-            let indicateurMoi = '';
-            let infoIconColor = 'var(--ed-orange)';
-            
-            if (p.user_id === profilCommandant.user_id) {
-                cardStyle = 'border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue), 0 0 15px rgba(0, 240, 255, 0.1); background: rgba(0, 240, 255, 0.05);';
-                textCouleur = 'var(--ed-blue)';
-                indicateurMoi = '<span style="color: var(--ed-blue); font-size: 0.7em; margin-left: 10px; letter-spacing: 1px;">[ VOUS ]</span>';
-                infoIconColor = 'var(--ed-blue)';
-            }
-
-            htmlEff += `
-            <div class="pilot-card" style="${cardStyle}" onclick="ouvrirProfilPilote('${p.user_id}')">
-                <div style="display: flex; align-items: center;">
-                    <span style="color: ${color}; font-weight: bold; border: 1px solid ${color}; padding: 3px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 15px;">${gradeStr}</span>
-                    <span style="color: ${textCouleur}; font-size: 1.2em; font-weight: bold; letter-spacing: 1px;">CMDR ${nomPilote} ${indicateurMoi}</span>
-                    ${badges}
-                </div>
-                <div style="color: ${infoIconColor}; font-size: 1.5em; opacity: 0.5;">🛈</div>
-            </div>`;
-        });
-        containerEffectifs.innerHTML = htmlEff || '<div style="color: #666; font-style: italic; text-align: center;">Aucun pilote actif.</div>';
-
-    } catch (e) {
-        console.error("Erreur effectifs:", e);
-        containerEffectifs.innerHTML = '<div style="color: red; text-align: center;">Erreur de chargement des effectifs.</div>';
-    }
-}
+        }
 
         const ranksCombat = ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
         const ranksTrade = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
@@ -1500,6 +1688,165 @@
         const ranksFed = ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"];
         const ranksEmp = ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"];
         const ranksMercenary = ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+
+        // ==========================================
+        // FORGE À RUBANS MILITAIRES (PLAQUES MÉTALLIQUES PLATES)
+        // ==========================================
+        window.forgerRubanSVG = function(typeOrdre, jours, points, rang, tooltipText, onclickAction = '') {
+            let bg1, bg2, accent;
+            const t = (typeOrdre || '').toUpperCase();
+            
+            if (t.includes('GUERRE')) { bg1 = '#800000'; bg2 = '#330000'; accent = '#FF3333'; } 
+            else if (t.includes('HAUSSE')) { bg1 = '#004D00'; bg2 = '#001A00'; accent = '#33FF33'; } 
+            else if (t.includes('BAISSE')) { bg1 = '#993D00'; bg2 = '#4D1F00'; accent = '#FF9933'; } 
+            else if (t.includes('ELECTION')) { bg1 = '#002060'; bg2 = '#000A20'; accent = '#00FFFF'; } 
+            else { bg1 = '#404040'; bg2 = '#1A1A1A'; accent = '#CCCCCC'; } 
+
+            const randId = Math.random().toString(36).substring(7);
+
+            let nbStripes = Math.min(jours, 10);
+            let stripes = '';
+            if (nbStripes > 0) {
+                let spacing = 100 / (nbStripes + 1);
+                for(let i=1; i<=nbStripes; i++) {
+                    stripes += `<rect x="${spacing*i - 2}" y="0" width="4" height="28" fill="${accent}" opacity="0.85"/><line x1="${spacing*i - 2}" y1="0" x2="${spacing*i - 2}" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="${spacing*i + 2}" y1="0" x2="${spacing*i + 2}" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>`;
+                }
+            }
+
+            let stars = '';
+            const drawStar = (cx, cy, gradId, glow, scale=0.65) => `<g transform="translate(${cx}, ${cy}) scale(${scale})"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#${gradId})" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px ${glow})"/></g>`;
+
+            const renderStars = (count, gradId, glow) => {
+                if (count === 1) return drawStar(50, 14, gradId, glow, 0.65);
+                if (count === 2) return drawStar(35, 14, gradId, glow, 0.65) + drawStar(65, 14, gradId, glow, 0.65);
+                if (count === 3) return drawStar(25, 14, gradId, glow, 0.55) + drawStar(50, 14, gradId, glow, 0.55) + drawStar(75, 14, gradId, glow, 0.55);
+                return '';
+            };
+
+            let starGrads = '';
+            if (points >= 10) {
+                if (points >= 100) {
+                    starGrads = `<linearGradient id="gradDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
+                    let count = points >= 200 ? 3 : (points >= 150 ? 2 : 1);
+                    stars = renderStars(count, `gradDia_${randId}`, 'rgba(0,255,255,1)');
+                } else if (points >= 70) {
+                    starGrads = `<linearGradient id="gradGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="40%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
+                    let count = points >= 90 ? 3 : (points >= 80 ? 2 : 1);
+                    stars = renderStars(count, `gradGold_${randId}`, 'rgba(255,215,0,0.9)');
+                } else if (points >= 40) {
+                    starGrads = `<linearGradient id="gradSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
+                    let count = points >= 60 ? 3 : (points >= 50 ? 2 : 1);
+                    stars = renderStars(count, `gradSilv_${randId}`, 'rgba(255,255,255,0.8)');
+                } else if (points >= 10) {
+                    starGrads = `<linearGradient id="gradBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
+                    let count = points >= 30 ? 3 : (points >= 20 ? 2 : 1);
+                    stars = renderStars(count, `gradBro_${randId}`, 'rgba(205,127,50,0.8)');
+                }
+            }
+
+            let frame = ''; let frameGrads = '';
+            if (rang === 1) {
+                frameGrads = `<linearGradient id="frameDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameDia_${randId})" stroke-width="2" filter="drop-shadow(0 0 4px #00FFFF)"/>`;
+            } else if (rang <= 3) {
+                frameGrads = `<linearGradient id="frameGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="50%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameGold_${randId})" stroke-width="2" filter="drop-shadow(0 0 3px #FFD700)"/>`;
+            } else if (rang <= 5) {
+                frameGrads = `<linearGradient id="frameSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameSilv_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #FFFFFF)"/>`;
+            } else if (rang <= 10) {
+                frameGrads = `<linearGradient id="frameBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameBro_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #CD7F32)"/>`;
+            } else {
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>`;
+            }
+
+            // GESTION DU CLIC : Si une action est demandée, on l'attache et on ferme l'infobulle
+            let clickHandler = onclickAction ? `onclick="${onclickAction}; if(typeof hideHoloTooltip === 'function') hideHoloTooltip();"` : '';
+
+            return `
+            <div style="position: relative; cursor: help; transition: 0.1s;" 
+                 ${clickHandler}
+                 onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${tooltipText}', '#fff')" 
+                 onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
+                 onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
+                 onmouseover="this.style.transform='scale(1.15)'; this.style.zIndex='50';"
+                 onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+                
+                <svg viewBox="0 0 100 28" style="width: 90px; height: 25px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
+                    <defs>
+                        <linearGradient id="gradBg_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="${bg1}" />
+                            <stop offset="100%" stop-color="${bg2}" />
+                        </linearGradient>
+
+                        <linearGradient id="metalGlare_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
+                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
+                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
+                            <stop offset="50%" stop-color="transparent" />
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+                        </linearGradient>
+
+                        ${starGrads}
+                        ${frameGrads}
+                    </defs>
+                    
+                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_${randId})"/>
+                    ${stripes}
+                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_${randId})" pointer-events="none"/>
+                    ${frame}
+                    ${stars}
+                </svg>
+            </div>`;
+        };
+
+        // ==========================================
+        // MOTEUR DE PAGINATION DES PLAQUES MILITAIRES
+        // ==========================================
+        window.cachePlaquesBgs = [];
+        window.afficherPagePlacard = function(pageIndex) {
+            const pageSize = 15; // 15 plaques = environ 3 lignes complètes
+            const totalPages = Math.ceil(window.cachePlaquesBgs.length / pageSize);
+            
+            if (pageIndex < 0) pageIndex = 0;
+            if (pageIndex >= totalPages) pageIndex = totalPages - 1;
+            
+            const start = pageIndex * pageSize;
+            const end = start + pageSize;
+            const pageItems = window.cachePlaquesBgs.slice(start, end);
+
+            // La boîte prend désormais 100% de la largeur (wrap automatique)
+            let html = `
+            <div style="display: flex; justify-content: flex-start; margin-top: 5px; width: 100%;">
+                <div style="background: rgba(0,0,0,0.8); border: 2px solid #111; padding: 12px 15px; border-radius: 2px; box-shadow: inset 0 0 20px rgba(0,0,0,0.9); width: 100%; box-sizing: border-box;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px; width: 100%;">
+                        ${pageItems.join('')}
+                    </div>
+                </div>
+            </div>`;
+
+            // Si on a plus de 15 médailles, on affiche les boutons de navigation
+            if (totalPages > 1) {
+                html += `
+                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; font-size: 0.85em; font-family: 'Share Tech Mono', monospace;">
+                    <button onclick="if(typeof sonClic==='function') sonClic(); window.afficherPagePlacard(${pageIndex - 1})" 
+                            style="background: rgba(255,113,0,0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 4px 12px; cursor: pointer; transition: 0.2s; font-weight: bold; ${pageIndex === 0 ? 'opacity: 0.3; pointer-events: none;' : ''}"
+                            onmouseover="this.style.background='var(--ed-orange)'; this.style.color='#000';" onmouseout="this.style.background='rgba(255,113,0,0.1)'; this.style.color='var(--ed-orange)';">
+                        &lt; PRÉCÉDENT
+                    </button>
+                    <span style="color: #888; font-weight: bold; letter-spacing: 2px;">PAGE <span style="color: #fff;">${pageIndex + 1}</span> / ${totalPages}</span>
+                    <button onclick="if(typeof sonClic==='function') sonClic(); window.afficherPagePlacard(${pageIndex + 1})" 
+                            style="background: rgba(255,113,0,0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 4px 12px; cursor: pointer; transition: 0.2s; font-weight: bold; ${pageIndex === totalPages - 1 ? 'opacity: 0.3; pointer-events: none;' : ''}"
+                            onmouseover="this.style.background='var(--ed-orange)'; this.style.color='#000';" onmouseout="this.style.background='rgba(255,113,0,0.1)'; this.style.color='var(--ed-orange)';">
+                        SUIVANT &gt;
+                    </button>
+                </div>`;
+            }
+
+            const conteneur = document.getElementById('ribbons-container');
+            if (conteneur) conteneur.innerHTML = html;
+        };
 
         // =========================================
         // FORGE VECTORIELLE DES MÉDAILLES GLOBALES
@@ -1585,48 +1932,84 @@
                             opsCount = uniqueOps.size;
 
                             // 2. Calcul des Médailles de Vétéran (Campagnes clôturées uniquement)
-                            let tempMedailles = '';
+                            let rubansAAfficher = [];
                             const ordresClotures = squadOrdres.filter(o => o.statut === 'ARCHIVÉ');
                             
                             ordresClotures.forEach(ordre => {
-                                const effortsDeCetOrdre = effortsEscadron.filter(e => String(e.ordre_id) === String(ordre.id));
-                                let poidsTotalOrdre = 0;
-                                let poidsPiloteCible = 0;
-
-                                effortsDeCetOrdre.forEach(e => {
+                                const effortsOrdre = effortsEscadron.filter(e => String(e.ordre_id) === String(ordre.id));
+                                let userScores = {};
+                                let joursUniques = new Set();
+                                
+                                effortsOrdre.forEach(e => {
                                     const val = Math.abs(Number(e.valeur) || 0);
                                     let pts = val;
                                     if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
                                     
-                                    poidsTotalOrdre += pts;
-                                    if (String(e.user_id) === String(userId)) {
-                                        poidsPiloteCible += pts;
+                                    const uId = String(e.user_id);
+                                    if (!userScores[uId]) userScores[uId] = 0;
+                                    userScores[uId] += pts;
+                                    
+                                    // On cible l'utilisateur de la fiche en cours de consultation (userId)
+                                    if (uId === String(userId) && e.date_action) {
+                                        joursUniques.add(e.date_action.substring(0, 10));
                                     }
                                 });
 
-                                // Si le pilote a fourni au moins 1% de l'effort total de cette campagne précise
-                                const pctImplication = poidsTotalOrdre > 0 ? (poidsPiloteCible / poidsTotalOrdre) * 100 : 0;
-                                if (pctImplication >= 1) {
-                                    const nomSysteme = ordre.systeme_cible.toUpperCase();
-                                    const pctAffiche = Math.round(pctImplication) + '%';
-                                    
-                                    // Création de l'hologramme épuré (sans la mention de clic)
-                                    const tooltipText = `<strong style=\\'color:#FFD700\\'>CAMPAGNE DE ${nomSysteme}</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Contribution personnelle : <strong style=\\'color:var(--ed-orange)\\'>${pctAffiche}</strong> de l\\'effort total.</span>`;
-                                    
-                                    // Événements de la souris pour la bulle holographique
-                                    const tooltipEvents = `onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, '${tooltipText}', '#FFD700')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)"`;
+                                const monScore = userScores[String(userId)] || 0;
+                                const nbJours = joursUniques.size;
 
-                                    // Utilisation de la structure de médaille CSS (sans l'attribut onclick)
-                                    tempMedailles += `
-                                    <div class="medal-wrapper" ${tooltipEvents}>
-                                        <div class="medal-ribbon"></div>
-                                        <div class="medal-coin"></div>
-                                        <div class="medal-text">${nomSysteme}</div>
-                                    </div>`;
+                                if (monScore > 0) {
+                                    let userScoresArray = Object.entries(userScores).map(([idStr, score]) => ({idStr, score}));
+                                    userScoresArray.sort((a, b) => b.score - a.score);
+                                    let monRang = userScoresArray.findIndex(u => u.idStr === String(userId)) + 1;
+                                    if (monScore === 0) monRang = 999;
+
+                                    let distinction = "RUBAN DE CAMPAGNE";
+                                    if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                                    else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                                    else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                                    else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
+                                    else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
+                                    else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
+                                    else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                                    else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                                    else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                                    else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                                    else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                                    else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
+                                    
+                                    let encadrement = "STANDARD";
+                                    if (monRang === 1) encadrement = "DIAMANT (1er)";
+                                    else if (monRang <= 3) encadrement = "OR (Top 3)";
+                                    else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
+                                    else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+                                    
+                                    const distinctionSafe = distinction.replace(/'/g, "\\'");
+                                    const systemeSafe = ordre.systeme_cible.toUpperCase().replace(/'/g, "\\'");
+                                    const typeSafe = (ordre.type_ordre || '').replace(/'/g, "\\'");
+                                    
+                                    const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
+                                    
+                                    // On ajoute la plaque en omettant la variable 'onclickAction'
+                                    rubansAAfficher.push({
+                                        score: monScore,
+                                        html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                                    });
                                 }
                             });
 
-                            if (tempMedailles !== '') medaillesHtml = tempMedailles;
+                            rubansAAfficher.sort((a, b) => b.score - a.score);
+                            
+                            if (rubansAAfficher.length > 0) {
+                                medaillesHtml = `
+                                <div style="display: flex; justify-content: flex-start; width: 100%;">
+                                    <div style="background: rgba(0,0,0,0.8); border: 2px solid #111; padding: 10px 15px; border-radius: 2px; box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.5);">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 2px;">
+                                            ${rubansAAfficher.map(r => r.html).join('')}
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }
                         }
                     }
                 } catch(err) { console.error("Erreur calcul BGS:", err); }
@@ -4419,12 +4802,21 @@
                         if (!uid) return '';
                         const nomPilote = (dicoPilotes[uid] || 'INCONNU').toUpperCase();
                         
-                        // Attention au 's' : la fonction est window.forgerMedailleSVG
                         const miniSvg = window.forgerMedailleSVG(typeCode, couleurBorder);
-                        const safeDesc = description.replace(/'/g, "\\'"); 
                         
+                        // On purge les guillemets doubles accidentels par sécurité
+                        const safeTitre = titre.replace(/"/g, "'");
+                        const safeDesc = description.replace(/"/g, "'");
+                        
+                        // ON UTILISE EXCLUSIVEMENT DES GUILLEMETS SIMPLES (') POUR LE STYLE CSS
+                        const tooltipHtml = `<strong style='color:${couleurBorder}; font-size:1.1em; letter-spacing:1px;'>${safeTitre}</strong><br><span style='color:#ccc; font-size:0.9em; display:block; max-width:280px; white-space:normal; margin-top:6px; line-height:1.4; text-transform:none;'>${safeDesc}</span>`;
+
+                        // ON ENCODE LA CHAINE JS AVEC &quot; POUR QUE LES APOSTROPHES NE CRASHENT PLUS RIEN
                         return `
-                        <div class="epic-medal-container" title="Dossier : ${titre}" onclick="ouvrirZoomMedaille('${typeCode}', '${couleurBorder}', '${titre}', '${sousTitre}', '${safeDesc}', '${nomPilote}')">
+                        <div class="epic-medal-container" style="cursor: help;"
+                             onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, &quot;${tooltipHtml}&quot;, '${couleurBorder}')"
+                             onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                             onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
                             ${miniSvg}
                             <div class="epic-medal-title">${sousTitre}</div>
                             <div class="epic-medal-cmdr" style="border-bottom: 2px solid ${couleurBorder};">${nomPilote}</div>
@@ -4536,59 +4928,84 @@
                 const conteneurMedailles = document.getElementById('ribbons-container');
                 const ordresClotures = ordres.filter(o => o.statut === 'ARCHIVÉ');
                 
-                let medaillesHtml = '';
-                let medaillesCompte = 0;
+                let rubansAAfficher = [];
 
-                ordresClotures.forEach(o => {
-                    const effortsOrdre = effortsBruts.filter(e => String(e.ordre_id) === String(o.id));
-                    let poidsSquad = 0;
-                    let poidsMoi = 0;
-
-                    // On recalcule le poids exact de la participation pour cet ordre archivé
+                ordresClotures.forEach(ordre => {
+                    const effortsOrdre = effortsBruts.filter(e => String(e.ordre_id) === String(ordre.id));
+                    
+                    let userScores = {};
+                    let joursUniques = new Set();
+                    
                     effortsOrdre.forEach(e => {
                         const val = Math.abs(Number(e.valeur) || 0);
                         let pts = val;
-                        // On applique le diviseur pour l'économie/sécurité/science
                         if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
                         
-                        poidsSquad += pts;
+                        const uId = String(e.user_id);
+                        if (!userScores[uId]) userScores[uId] = 0;
+                        userScores[uId] += pts;
                         
-                        // ICI LA CORRECTION : On vérifie TOUJOURS le joueur connecté, peu importe le filtre sélectionné !
-                        if (e.user_id === profilCommandant.user_id) {
-                            poidsMoi += pts;
+                        if (uId === String(profilCommandant.user_id) && e.date_action) {
+                            joursUniques.add(e.date_action.substring(0, 10));
                         }
                     });
 
-                    // Calcul du pourcentage réel d'implication personnelle
-                    const pctImplication = poidsSquad > 0 ? (poidsMoi / poidsSquad) * 100 : 0;
+                    const monScore = userScores[String(profilCommandant.user_id)] || 0;
+                    const nbJours = joursUniques.size;
 
-                    // CONDITION ABSOLUE : Il faut AU MOINS 1% d'effort personnel
-                    if (pctImplication >= 1) {
-                        const nomSysteme = o.systeme_cible.toUpperCase();
+                    // Si le joueur a fait le moindre effort, on lui donne la plaque
+                    if (monScore > 0) {
+                        // Calcul du classement exact (monRang)
+                        let userScoresArray = Object.entries(userScores).map(([idStr, score]) => ({idStr, score}));
+                        userScoresArray.sort((a, b) => b.score - a.score);
+                        let monRang = userScoresArray.findIndex(u => u.idStr === String(profilCommandant.user_id)) + 1;
+                        if (monScore === 0) monRang = 999;
+
+                        let distinction = "RUBAN DE CAMPAGNE";
+                        if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                        else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                        else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                        else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
+                        else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
+                        else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
+                        else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                        else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                        else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                        else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                        else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                        else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
                         
-                        medaillesHtml += `
-                        <div class="medal-wrapper" onclick="ouvrirDossierVeteran('${o.id}')" onmouseenter="if(typeof sonHover==='function') sonHover()" title="Consulter les états de service de la campagne de ${nomSysteme}">
-                            <div class="medal-ribbon"></div>
-                            <div class="medal-coin"></div>
-                            <div class="medal-text">${nomSysteme}</div>
-                        </div>`;
-                        medaillesCompte++;
+                        let encadrement = "STANDARD";
+                        if (monRang === 1) encadrement = "DIAMANT (1er)";
+                        else if (monRang <= 3) encadrement = "OR (Top 3)";
+                        else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
+                        else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+                        
+                        const distinctionSafe = distinction.replace(/'/g, "\\'");
+                        const systemeSafe = ordre.systeme_cible.toUpperCase().replace(/'/g, "\\'");
+                        const typeSafe = (ordre.type_ordre || '').replace(/'/g, "\\'");
+                        
+                        // On a supprimé le "[ Cliquez pour ouvrir... ]" à la fin du tooltip
+                        const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
+                        
+                        // On ne passe plus l'instruction 'ouvrirDossierVeteran'
+                        rubansAAfficher.push({
+                            score: monScore,
+                            html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                        });
                     }
                 });
 
-                if (conteneurMedailles) {
-                    if (medaillesCompte === 0) {
-                        conteneurMedailles.innerHTML = `<div style="color: #555; font-style: italic; font-size: 0.9em;">Aucun état de service remarquable pour le moment. (Requis : 1% d'effort sur une campagne)</div>`;
-                    } else {
-                        conteneurMedailles.innerHTML = medaillesHtml;
-                    }
-                }
+                // Tri des plaques (les plus gros scores d'abord)
+                rubansAAfficher.sort((a, b) => b.score - a.score);
 
                 if (conteneurMedailles) {
-                    if (medaillesCompte === 0) {
-                        conteneurMedailles.innerHTML = `<div style="color: #555; font-style: italic; font-size: 0.9em;">Aucun état de service remarquable pour le moment.</div>`;
+                    if (rubansAAfficher.length === 0) {
+                        conteneurMedailles.innerHTML = `<div style="color: #555; font-style: italic; font-size: 0.9em; padding-top: 10px;">Aucun état de service militaire enregistré.</div>`;
                     } else {
-                        conteneurMedailles.innerHTML = medaillesHtml;
+                        // On stocke les plaques en mémoire et on affiche la page 1
+                        window.cachePlaquesBgs = rubansAAfficher.map(r => r.html);
+                        window.afficherPagePlacard(0);
                     }
                 }
 
@@ -5615,6 +6032,101 @@
             let link = document.querySelector("link[rel~='icon']");
             if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
             link.href = base64Str;
+        };
+
+        // ==========================================
+        // FORGE À RUBANS MILITAIRES (PLAQUES MÉTALLIQUES PLATES)
+        // ==========================================
+        window.forgerRubanSVG = function(typeOrdre, jours, points, rang, tooltipText) {
+            let bg1, bg2, accent;
+            const t = (typeOrdre || '').toUpperCase();
+            
+            if (t.includes('GUERRE')) { bg1 = '#800000'; bg2 = '#330000'; accent = '#FF3333'; } 
+            else if (t.includes('HAUSSE')) { bg1 = '#004D00'; bg2 = '#001A00'; accent = '#33FF33'; } 
+            else if (t.includes('BAISSE')) { bg1 = '#993D00'; bg2 = '#4D1F00'; accent = '#FF9933'; } 
+            else if (t.includes('ELECTION')) { bg1 = '#002060'; bg2 = '#000A20'; accent = '#00FFFF'; } 
+            else { bg1 = '#404040'; bg2 = '#1A1A1A'; accent = '#CCCCCC'; } 
+
+            const randId = Math.random().toString(36).substring(7);
+            let nbStripes = Math.min(jours, 10);
+            let stripes = '';
+            if (nbStripes > 0) {
+                let spacing = 100 / (nbStripes + 1);
+                for(let i=1; i<=nbStripes; i++) {
+                    stripes += `<rect x="${spacing*i - 2}" y="0" width="4" height="28" fill="${accent}" opacity="0.85"/><line x1="${spacing*i - 2}" y1="0" x2="${spacing*i - 2}" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="${spacing*i + 2}" y1="0" x2="${spacing*i + 2}" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>`;
+                }
+            }
+
+            let stars = '';
+            const drawStar = (cx, cy, gradId, glow, scale=0.65) => `<g transform="translate(${cx}, ${cy}) scale(${scale})"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#${gradId})" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px ${glow})"/></g>`;
+            const renderStars = (count, gradId, glow) => {
+                if (count === 1) return drawStar(50, 14, gradId, glow, 0.65);
+                if (count === 2) return drawStar(35, 14, gradId, glow, 0.65) + drawStar(65, 14, gradId, glow, 0.65);
+                if (count === 3) return drawStar(25, 14, gradId, glow, 0.55) + drawStar(50, 14, gradId, glow, 0.55) + drawStar(75, 14, gradId, glow, 0.55);
+                return '';
+            };
+
+            let starGrads = '';
+            if (points >= 10) {
+                if (points >= 100) {
+                    starGrads = `<linearGradient id="gradDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
+                    let count = points >= 200 ? 3 : (points >= 150 ? 2 : 1);
+                    stars = renderStars(count, `gradDia_${randId}`, 'rgba(0,255,255,1)');
+                } else if (points >= 70) {
+                    starGrads = `<linearGradient id="gradGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="40%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
+                    let count = points >= 90 ? 3 : (points >= 80 ? 2 : 1);
+                    stars = renderStars(count, `gradGold_${randId}`, 'rgba(255,215,0,0.9)');
+                } else if (points >= 40) {
+                    starGrads = `<linearGradient id="gradSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
+                    let count = points >= 60 ? 3 : (points >= 50 ? 2 : 1);
+                    stars = renderStars(count, `gradSilv_${randId}`, 'rgba(255,255,255,0.8)');
+                } else if (points >= 10) {
+                    starGrads = `<linearGradient id="gradBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
+                    let count = points >= 30 ? 3 : (points >= 20 ? 2 : 1);
+                    stars = renderStars(count, `gradBro_${randId}`, 'rgba(205,127,50,0.8)');
+                }
+            }
+
+            let frame = ''; let frameGrads = '';
+            if (rang === 1) {
+                frameGrads = `<linearGradient id="frameDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameDia_${randId})" stroke-width="2" filter="drop-shadow(0 0 4px #00FFFF)"/>`;
+            } else if (rang <= 3) {
+                frameGrads = `<linearGradient id="frameGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="50%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameGold_${randId})" stroke-width="2" filter="drop-shadow(0 0 3px #FFD700)"/>`;
+            } else if (rang <= 5) {
+                frameGrads = `<linearGradient id="frameSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameSilv_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #FFFFFF)"/>`;
+            } else if (rang <= 10) {
+                frameGrads = `<linearGradient id="frameBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameBro_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #CD7F32)"/>`;
+            } else {
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>`;
+            }
+
+            return `
+            <div style="cursor: help; transition: 0.1s;" 
+                 onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${tooltipText}', '#fff')" 
+                 onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
+                 onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
+                 onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10';"
+                 onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+                <svg viewBox="0 0 100 28" style="width: 90px; height: 25px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
+                    <defs>
+                        <linearGradient id="gradBg_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="${bg1}" /><stop offset="100%" stop-color="${bg2}" />
+                        </linearGradient>
+                        <linearGradient id="metalGlare_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/><stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/><stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/><stop offset="50%" stop-color="transparent" /><stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+                        </linearGradient>
+                        ${starGrads}${frameGrads}
+                    </defs>
+                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_${randId})"/>
+                    ${stripes}
+                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_${randId})" pointer-events="none"/>
+                    ${frame}${stars}
+                </svg>
+            </div>`;
         };
 
     </script>

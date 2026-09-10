@@ -116,6 +116,18 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;}
         .modal-content { background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; max-width: 600px; color: #ccc; position: relative; }
         .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold; }
+    
+        /* ANIMATION DES LIGNES NON-LUES DU JOURNAL TACTIQUE */
+        @keyframes alerteLigneRouge {
+            0% { box-shadow: inset 4px 0 0 #FF3333, inset 0 0 10px rgba(255,51,51,0.1); background-color: rgba(255,51,51,0.05); }
+            50% { box-shadow: inset 4px 0 0 #FF7777, inset 0 0 20px rgba(255,51,51,0.3); background-color: rgba(255,51,51,0.15); }
+            100% { box-shadow: inset 4px 0 0 #FF3333, inset 0 0 10px rgba(255,51,51,0.1); background-color: rgba(255,51,51,0.05); }
+        }
+        .ligne-non-lue {
+            -webkit-animation: alerteLigneRouge 1.5s infinite !important;
+            animation: alerteLigneRouge 1.5s infinite !important;
+        }
+
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -1107,36 +1119,47 @@
         </div>
     </div>
 
-    <!-- MODALE : DÉTAIL DU JOURNAL TACTIQUE (PETITE MODALE STANDARD) -->
+    <!-- MODALE : DÉTAIL DU JOURNAL TACTIQUE (ENRICHIE) -->
     <div class="modal-overlay" id="modal-detail-journal" onclick="fermerModal('modal-detail-journal', event)" style="z-index: 4800; backdrop-filter: blur(5px);">
-        <div class="modal-content" style="max-width: 600px; width: 95%; background-color: #03080A; border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); position: relative; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
+        <div class="modal-content" style="max-width: 650px; width: 95%; background-color: #03080A; border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); position: relative; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
             
-            <!-- LE FILTRE ÉCRAN EXACTEMENT COMME SUR COMMUNICATIONS.HTML -->
+            <!-- LE FILTRE ÉCRAN TACTIQUE -->
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; z-index: 50;"></div>
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 51;"></div>
 
             <!-- CROIX DE FERMETURE -->
             <div class="modal-close" style="position: absolute; z-index: 9999; top: 15px; right: 20px; color: #ccc; cursor: pointer; font-size: 1.5em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='#ccc';" onclick="fermerModal('modal-detail-journal')">X</div>
             
-            <!-- CONTENU DE LA MODALE -->
-            <div style="padding: 30px; position: relative; z-index: 20; max-height: 70vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed #333; padding-bottom: 15px; margin-bottom: 20px; margin-top: 10px;">
+            <!-- EN-TÊTE MILITAIRE -->
+            <div style="padding: 20px 30px; border-bottom: 1px dashed #333; background: rgba(255,255,255,0.02); position: relative; z-index: 20;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
-                        <div id="detail-journal-type" style="font-size: 1.3em; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; text-shadow: 0 0 10px currentColor;">[ TYPE ]</div>
-                        <div style="color: #fff; font-weight: bold; letter-spacing: 1px; font-size: 1.1em;">
-                            SOURCE : <span id="detail-journal-cmdr" style="color: var(--ed-blue);">CMDR ...</span>
-                        </div>
+                        <div id="detail-journal-id" style="color: #888; font-size: 0.8em; letter-spacing: 2px; margin-bottom: 5px;">RAPPORT TACTIQUE #----</div>
+                        <div id="detail-journal-type" style="font-size: 1.4em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px currentColor;">[ TYPE ]</div>
                     </div>
-                    <div id="detail-journal-date" style="color: #666; font-family: monospace; font-size: 0.9em; text-align: right; margin-top: 5px;">
-                        00/00 - 00:00:00
+                    <div style="text-align: right;">
+                        <div id="detail-journal-date" style="color: #ccc; font-family: 'Share Tech Mono', monospace; font-size: 1em; letter-spacing: 1px;">00/00 - 00:00:00</div>
+                        <div id="detail-journal-class" style="color: #00FF66; font-size: 0.7em; font-weight: bold; letter-spacing: 1px; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 2px; display: inline-block; margin-top: 5px; background: rgba(0,255,102,0.1);">CLASSIFICATION : ---</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CORPS DU MESSAGE -->
+            <div style="padding: 30px; position: relative; z-index: 20; max-height: 50vh; overflow-y: auto;">
+                
+                <div style="color: #fff; font-weight: bold; letter-spacing: 1px; font-size: 1.1em; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #888; font-size: 0.85em;">> SOURCE :</span> 
+                    <span id="detail-journal-cmdr" style="color: var(--ed-blue); font-size: 1.2em; text-shadow: 0 0 5px currentColor;">CMDR ...</span>
+                    <span style="color: #00FF66; font-size: 0.7em; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 2px; margin-left: auto;">VÉRIFIÉE</span>
+                </div>
+
+                <div id="detail-journal-box" style="background: rgba(0,0,0,0.4); border: 1px solid #333; border-left: 3px solid var(--ed-blue); padding: 15px; border-radius: 0 4px 4px 0; margin-bottom: 25px;">
+                    <div id="detail-journal-texte" style="color: #ccc; font-size: 1.05em; line-height: 1.6; white-space: pre-wrap; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 2px currentColor;">
+                        Chargement des données cryptées...
                     </div>
                 </div>
                 
-                <div id="detail-journal-texte" style="color: #ccc; font-size: 1.1em; line-height: 1.6; white-space: pre-wrap; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 2px currentColor;">
-                    Chargement des données cryptées...
-                </div>
-                
-                <button class="auth-btn" style="width: 100%; margin-top: 25px; margin-bottom: 0; background: rgba(255,255,255,0.05); border-color: #555; color: #aaa; position: relative; z-index: 60;" onclick="fermerModal('modal-detail-journal')" onmouseenter="if(typeof sonHover==='function') sonHover()">[ FERMER LA LIAISON ]</button>
+                <button class="auth-btn" style="width: 100%; margin: 0; background: rgba(255,255,255,0.05); border-color: #555; color: #aaa; position: relative; z-index: 60; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#aaa';" onclick="fermerModal('modal-detail-journal')" onmouseenter="if(typeof sonHover==='function') sonHover()">[ FERMER LE RAPPORT ]</button>
             </div>
         </div>
     </div>
@@ -3394,12 +3417,145 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             } catch (e) { console.error(e); }
         }
 
-        window.ouvrirFicheActivite = function(userId) {
+        // ==========================================
+        // FORGE À RUBANS MILITAIRES (PLAQUES MÉTALLIQUES PLATES)
+        // ==========================================
+        window.forgerRubanSVG = function(typeOrdre, jours, points, rang, tooltipText) {
+            let bg1, bg2, accent;
+            const t = (typeOrdre || '').toUpperCase();
+            
+            // 1. L'ÉMAIL (Couleurs profondes)
+            if (t.includes('GUERRE')) { bg1 = '#800000'; bg2 = '#330000'; accent = '#FF3333'; } 
+            else if (t.includes('HAUSSE')) { bg1 = '#004D00'; bg2 = '#001A00'; accent = '#33FF33'; } 
+            else if (t.includes('BAISSE')) { bg1 = '#993D00'; bg2 = '#4D1F00'; accent = '#FF9933'; } 
+            else if (t.includes('ELECTION')) { bg1 = '#002060'; bg2 = '#000A20'; accent = '#00FFFF'; } 
+            else { bg1 = '#404040'; bg2 = '#1A1A1A'; accent = '#CCCCCC'; } 
+
+            const randId = Math.random().toString(36).substring(7);
+
+            // 2. LES BARRETTES (Gravées dans la plaque)
+            let nbStripes = Math.min(jours, 10);
+            let stripes = '';
+            if (nbStripes > 0) {
+                let spacing = 100 / (nbStripes + 1);
+                for(let i=1; i<=nbStripes; i++) {
+                    stripes += `
+                    <rect x="${spacing*i - 2}" y="0" width="4" height="28" fill="${accent}" opacity="0.85"/>
+                    <line x1="${spacing*i - 2}" y1="0" x2="${spacing*i - 2}" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/>
+                    <line x1="${spacing*i + 2}" y1="0" x2="${spacing*i + 2}" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
+                    `;
+                }
+            }
+
+            // 3. LES ÉTOILES (Gestion de 1, 2 ou 3 étoiles avec reflets et halos distincts)
+            let stars = '';
+            const drawStar = (cx, cy, gradId, glow, scale=0.65) => `<g transform="translate(${cx}, ${cy}) scale(${scale})"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#${gradId})" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px ${glow})"/></g>`;
+
+            const renderStars = (count, gradId, glow) => {
+                if (count === 1) return drawStar(50, 14, gradId, glow, 0.65);
+                if (count === 2) return drawStar(35, 14, gradId, glow, 0.65) + drawStar(65, 14, gradId, glow, 0.65);
+                if (count === 3) return drawStar(25, 14, gradId, glow, 0.55) + drawStar(50, 14, gradId, glow, 0.55) + drawStar(75, 14, gradId, glow, 0.55);
+                return '';
+            };
+
+            let starGrads = '';
+            if (points >= 10) {
+                if (points >= 100) {
+                    // DIAMANT : Blanc éclatant au centre, bordures Cyan, Halo puissant
+                    starGrads = `<linearGradient id="gradDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
+                    let count = points >= 200 ? 3 : (points >= 150 ? 2 : 1);
+                    stars = renderStars(count, `gradDia_${randId}`, 'rgba(0,255,255,1)');
+                } else if (points >= 70) {
+                    // OR : Jaune impérial très contrasté
+                    starGrads = `<linearGradient id="gradGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="40%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
+                    let count = points >= 90 ? 3 : (points >= 80 ? 2 : 1);
+                    stars = renderStars(count, `gradGold_${randId}`, 'rgba(255,215,0,0.9)');
+                } else if (points >= 40) {
+                    // ARGENT : Blanc/Gris froid
+                    starGrads = `<linearGradient id="gradSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
+                    let count = points >= 60 ? 3 : (points >= 50 ? 2 : 1);
+                    stars = renderStars(count, `gradSilv_${randId}`, 'rgba(255,255,255,0.8)');
+                } else if (points >= 10) {
+                    // BRONZE : Cuivré profond
+                    starGrads = `<linearGradient id="gradBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
+                    let count = points >= 30 ? 3 : (points >= 20 ? 2 : 1);
+                    stars = renderStars(count, `gradBro_${randId}`, 'rgba(205,127,50,0.8)');
+                }
+            }
+
+            // 4. L'ENCADREMENT MÉTALLIQUE (En fonction du Rang dans le classement)
+            let frame = '';
+            let frameGrads = '';
+            
+            if (rang === 1) {
+                // DIAMANT (1er)
+                frameGrads = `<linearGradient id="frameDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameDia_${randId})" stroke-width="2" filter="drop-shadow(0 0 4px #00FFFF)"/>`;
+            } else if (rang <= 3) {
+                // OR (Top 3)
+                frameGrads = `<linearGradient id="frameGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="50%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameGold_${randId})" stroke-width="2" filter="drop-shadow(0 0 3px #FFD700)"/>`;
+            } else if (rang <= 5) {
+                // ARGENT (Top 5)
+                frameGrads = `<linearGradient id="frameSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameSilv_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #FFFFFF)"/>`;
+            } else if (rang <= 10) {
+                // BRONZE (Top 10)
+                frameGrads = `<linearGradient id="frameBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameBro_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #CD7F32)"/>`;
+            } else {
+                // GRIS STANDARD (Au-delà du Top 10)
+                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>`;
+            }
+
+            return `
+            <div style="cursor: help; transition: 0.1s;" 
+                 onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${tooltipText}', '#fff')" 
+                 onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
+                 onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
+                 onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10';"
+                 onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+                
+                <svg viewBox="0 0 100 28" style="width: 90px; height: 25px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
+                    <defs>
+                        <linearGradient id="gradBg_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="${bg1}" />
+                            <stop offset="100%" stop-color="${bg2}" />
+                        </linearGradient>
+
+                        <linearGradient id="metalGlare_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
+                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
+                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
+                            <stop offset="50%" stop-color="transparent" />
+                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+                        </linearGradient>
+
+                        ${starGrads}
+                        ${frameGrads}
+                    </defs>
+                    
+                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_${randId})"/>
+                    ${stripes}
+                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_${randId})" pointer-events="none"/>
+                    ${frame}
+                    ${stars}
+                </svg>
+            </div>`;
+        };
+
+        window.ouvrirFicheActivite = async function(userId) {
             if (typeof sonClic === 'function') sonClic();
             const p = window.cacheProfilsPersonnel.find(x => x.user_id === userId);
             const param = window.cacheParamsPersonnel[userId] || {};
             if (!p) return;
 
+            const nomCmdr = p.cmdr_nom ? `CMDR ${p.cmdr_nom.toUpperCase()}` : `RECRUE (${p.user_id.substring(0, 8)})`;
+            document.getElementById('fiche-activite-titre').innerHTML = `FICHE MILITAIRE // ${nomCmdr}`;
+            document.getElementById('fiche-activite-corps').innerHTML = '<div style="color:var(--ed-blue); text-align:center; padding:30px; font-weight:bold; letter-spacing:2px; animation: alertPulse 1.5s infinite;">EXTRACTION DES ÉTATS DE SERVICE...</div>';
+            document.getElementById('modal-fiche-activite').style.display = 'flex';
+
+            // --- VARIABLES ANALYTIQUES ---
             const tel = param.telemetrie_usage || {};
             const pages = tel.visites_pages || { qg: 0, bgs: 0, comms: 0, commerce: 0 };
             const actions = tel.interactions || { onglets_bgs_missions: 0, onglets_bgs_journal: 0, scans_systeme_bgs: 0, scans_commerce: 0 };
@@ -3407,11 +3563,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const factionsFav = param.factions_favorites || [];
 
             const dateVisite = tel.derniere_visite_web ? new Date(tel.derniere_visite_web).toLocaleString('fr-FR') : "JAMAIS CONNECTÉ SUR LE WEB";
-            const nomCmdr = p.cmdr_nom ? `CMDR ${p.cmdr_nom.toUpperCase()}` : `RECRUE (${p.user_id.substring(0, 8)})`;
-
-            document.getElementById('fiche-activite-titre').innerHTML = `FICHE D'ACTIVITÉ // ${nomCmdr}`;
-
-            // CALCULS ANALYTIQUES
+            
             const totalVisites = (pages.qg || 0) + (pages.bgs || 0) + (pages.comms || 0) + (pages.commerce || 0);
             const totalActions = (actions.onglets_bgs_missions || 0) + (actions.onglets_bgs_journal || 0) + (actions.scans_systeme_bgs || 0) + (actions.scans_commerce || 0) + (actions.lecture_gazette || 0) + (actions.lecture_galnet || 0) + (actions.gestion_flotte || 0) + (actions.logistique_carrier || 0) + (actions.fiches_pilotes || 0);
             const totalTempsSec = (temps.qg || 0) + (temps.bgs || 0) + (temps.comms || 0) + (temps.commerce || 0);
@@ -3419,13 +3571,124 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const ratioAct = totalVisites > 0 ? (totalActions / totalVisites).toFixed(1) : 0;
             const badgeRatio = ratioAct >= 1 ? `<span style="color:#00FF66;">${ratioAct} ACT/VIS. (ACTIF)</span>` : `<span style="color:var(--ed-orange);">${ratioAct} ACT/VIS. (SPECTATEUR)</span>`;
 
+            // --- FETCH DES MISSIONS BGS POUR LE PLACARD ---
+            let placardHtml = '<div style="color: #666; font-size: 0.8em; font-style: italic; text-align: center; padding: 10px;">Aucun état de service militaire enregistré.</div>';
+            
+            try {
+                const { data: mesEfforts } = await supabaseApp.from('efforts_bgs').select('ordre_id').eq('user_id', userId);
+                
+                if (mesEfforts && mesEfforts.length > 0) {
+                    const orderIds = [...new Set(mesEfforts.map(e => e.ordre_id))];
+                    
+                    const [resOrdres, resAllEfforts] = await Promise.all([
+                        supabaseApp.from('ordres_bgs').select('id, systeme_cible, type_ordre').in('id', orderIds),
+                        supabaseApp.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action, date_action').in('ordre_id', orderIds)
+                    ]);
+                    
+                    const ordres = resOrdres.data || [];
+                    const allEfforts = resAllEfforts.data || [];
+
+                    const calculerPts = (e) => {
+                        const val = Math.abs(Number(e.valeur) || 0);
+                        const action = String(e.type_action || '').toUpperCase();
+                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action) || val > 10000) return val / 2000000;
+                        return val; 
+                    };
+
+                    let rubans = [];
+
+                    ordres.forEach(ordre => {
+                        const effortsOrdre = allEfforts.filter(e => String(e.ordre_id) === String(ordre.id));
+                        
+                        let userScores = {};
+                        let joursUniques = new Set();
+                        
+                        effortsOrdre.forEach(e => {
+                            const pts = calculerPts(e);
+                            const uId = String(e.user_id);
+                            if (!userScores[uId]) userScores[uId] = 0;
+                            userScores[uId] += pts;
+                            
+                            if (uId === String(userId) && e.date_action) {
+                                joursUniques.add(e.date_action.substring(0, 10));
+                            }
+                        });
+
+                        const monScore = userScores[String(userId)] || 0;
+                        const nbJours = joursUniques.size;
+                        
+                        // Calcul du classement exact (monRang)
+                        let userScoresArray = Object.entries(userScores).map(([idStr, score]) => ({idStr, score}));
+                        userScoresArray.sort((a, b) => b.score - a.score);
+                        let monRang = userScoresArray.findIndex(u => u.idStr === String(userId)) + 1;
+                        if (monScore === 0) monRang = 999; // Sécurité
+
+                        // Génération du Ruban SVG si participation
+                        if (monScore > 0) {
+                            let distinction = "RUBAN DE CAMPAGNE";
+                            if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                            else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                            else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                            else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
+                            else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
+                            else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
+                            else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                            else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                            else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                            else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                            else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                            else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
+                            
+                            let encadrement = "STANDARD";
+                            if (monRang === 1) encadrement = "DIAMANT (1er)";
+                            else if (monRang <= 3) encadrement = "OR (Top 3)";
+                            else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
+                            else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+                            
+                            const distinctionSafe = distinction.replace(/'/g, "\\'");
+                            const systemeSafe = ordre.systeme_cible.toUpperCase().replace(/'/g, "\\'");
+                            const typeSafe = (ordre.type_ordre || '').replace(/'/g, "\\'");
+                            
+                            const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
+                            
+                            rubans.push({
+                                score: monScore, // Tri décroissant
+                                html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                            });
+                        }
+                    });
+
+                    rubans.sort((a, b) => b.score - a.score);
+
+                    if (rubans.length > 0) {
+                        placardHtml = `
+                        <div style="display: flex; justify-content: center; margin-top: 15px; width: 100%;">
+                            <div style="background: rgba(0,0,0,0.8); border: 2px solid #111; padding: 10px 15px; border-radius: 2px; box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.5);">
+                                <div style="display: flex; flex-wrap: wrap; gap: 2px; max-width: 280px; justify-content: center;">
+                                    ${rubans.map(r => r.html).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                }
+            } catch(e) {
+                console.error("Erreur rubans :", e);
+            }
+
+            // --- INJECTION HTML GLOBALE ---
             const html = `
                 <div style="background: rgba(0,0,0,0.5); border-left: 3px solid var(--ed-blue); padding: 10px 15px; font-size: 0.9em;">
                     <span style="color: #888;">DERNIÈRE CONNEXION WEB :</span>
                     <span style="color: #fff; font-weight: bold; margin-left: 8px;">${dateVisite}</span>
                 </div>
 
-                <!-- NOUVEAU : ANALYSE COMPORTEMENTALE -->
+                <!-- LE PLACARD MILITAIRE -->
+                <div style="border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px;">
+                    <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1px; display: block; font-size: 0.85em; text-align: center;">> ÉTATS DE SERVICE (CAMPAGNES BGS) <</span>
+                    ${placardHtml}
+                </div>
+
+                <!-- ANALYSE COMPORTEMENTALE -->
                 <div style="border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px;">
                     <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 10px; font-size: 0.85em;">ANALYSE COMPORTEMENTALE :</span>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85em;">
@@ -3447,57 +3710,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         <div><span style="color: #888;">COMMERCE :</span> <strong style="color: #fff;">${pages.commerce || 0} VIS.</strong> <span style="color:#555;">(${formaterTemps(temps.commerce)})</span></div>
                     </div>
                 </div>
-
-                <div style="border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px;">
-                    <span style="color: #00FF66; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 10px; font-size: 0.85em;">INTERACTIONS & USAGE PRÉCIS :</span>
-                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85em;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">FACTIONS SURVEILLÉES (RADAR BGS) :</span>
-                            <strong style="color: var(--ed-orange);">${factionsFav.length}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">SCANS DE SYSTÈMES BGS :</span>
-                            <strong style="color: #fff;">${actions.scans_systeme_bgs || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">CONSULTATIONS DU JOURNAL D'EFFORTS :</span>
-                            <strong style="color: #fff;">${actions.onglets_bgs_journal || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">CONSULTATIONS DES ORDRES BGS :</span>
-                            <strong style="color: #fff;">${actions.onglets_bgs_missions || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">SCANS COMMERCIAUX DÉCLENCHÉS :</span>
-                            <strong style="color: #fff;">${actions.scans_commerce || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">LECTURES DE LA GAZETTE :</span>
-                            <strong style="color: #fff;">${actions.lecture_gazette || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">LECTURES DU GALNET :</span>
-                            <strong style="color: #fff;">${actions.lecture_galnet || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">GESTION DE LA FLOTTE :</span>
-                            <strong style="color: #fff;">${actions.gestion_flotte || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">LOGISTIQUE CARRIER :</span>
-                            <strong style="color: #fff;">${actions.logistique_carrier || 0}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #888;">FICHES DE PILOTES :</span>
-                            <strong style="color: #fff;">${actions.fiches_pilotes || 0}</strong>
-                        </div>
-
-                    </div>
-                </div>
             `;
 
             document.getElementById('fiche-activite-corps').innerHTML = html;
-            document.getElementById('modal-fiche-activite').style.display = 'flex';
         };
 
         window.revoquerAccesTerminal = async function(userId, cmdrNom) {
@@ -4784,8 +4999,23 @@ const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&qu
             }
         };
 
+        // Fonction pour éteindre et mémoriser la lecture d'une ligne
+        window.marquerLigneLue = function(id) {
+            const idStr = String(id); // Forcer l'ID en texte
+            let readLogs = JSON.parse(localStorage.getItem('edteam_read_logs') || '[]');
+            if (!readLogs.includes(idStr)) {
+                readLogs.push(idStr);
+                // On garde en mémoire les 200 derniers clics max
+                if (readLogs.length > 200) readLogs.shift();
+                localStorage.setItem('edteam_read_logs', JSON.stringify(readLogs));
+            }
+            const row = document.getElementById(`log-row-${id}`);
+            if (row) row.classList.remove('ligne-non-lue');
+        };
+
         // --- AFFICHAGE DU JOURNAL (TRONCATURE GARANTIE) ---
         window.afficherPageJournal = function() {
+            const readLogs = JSON.parse(localStorage.getItem('edteam_read_logs') || '[]');
             const conteneur = document.getElementById('flux-activite-container');
             const pagination = document.getElementById('flux-pagination');
             const indic = document.getElementById('flux-page-indic');
@@ -4844,15 +5074,20 @@ const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&qu
                     apercu = apercu.substring(0, 120) + '...';
                 }
 
+                // --- NOUVEAU : GESTION DE L'ALERTE NON-LUE ---
+                const estNonLu = !readLogs.includes(String(log.id)); // Forcer la comparaison en texte
+                const classNonLue = estNonLu ? 'ligne-non-lue' : '';
+
                 let evtClic = '';
                 if (isDiscord) {
-                    evtClic = `ouvrirDetailDiscord('CMDR ${log.cmdr_nom.toUpperCase()}', '${jour} ${heure}', '${safeDetails}')`;
+                    evtClic = `marquerLigneLue('${log.id}'); ouvrirDetailDiscord('CMDR ${log.cmdr_nom.toUpperCase()}', '${jour} ${heure}', '${safeDetails}')`;
                 } else {
-                    evtClic = `ouvrirDetailJournal('${typeAction}', 'CMDR ${log.cmdr_nom.toUpperCase()}', '${jour} ${heure}', '${safeDetails}', '${col}')`;
+                    // ON AJOUTE log.id À LA FIN DES PARAMÈTRES ICI :
+                    evtClic = `marquerLigneLue('${log.id}'); ouvrirDetailJournal('${typeAction}', 'CMDR ${log.cmdr_nom.toUpperCase()}', '${jour} ${heure}', '${safeDetails}', '${col}', '${log.id}')`;
                 }
                 
                 html += `
-                <div onclick="${evtClic}" style="cursor: pointer; display: block; width: 100%; box-sizing: border-box; padding: 5px 8px; font-family: 'Share Tech Mono', monospace; font-size: 0.95em; line-height: 1.5; letter-spacing: 0.5px; transition: 0.2s; border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 2px currentColor;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='transparent';">
+                <div id="log-row-${log.id}" class="${classNonLue}" onclick="${evtClic}" style="cursor: pointer; display: block; width: 100%; box-sizing: border-box; padding: 5px 8px; font-family: 'Share Tech Mono', monospace; font-size: 0.95em; line-height: 1.5; letter-spacing: 0.5px; transition: 0.2s; border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 2px currentColor;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="if(!this.classList.contains('ligne-non-lue')) this.style.background='transparent';">
                     <span style="color: #666;">[${jour} ${heure}]</span> 
                     <strong style="color: var(--ed-blue);">CMDR ${log.cmdr_nom.toUpperCase()}</strong> 
                     <span style="color: #555; font-weight: bold; margin: 0 4px;">></span> 
@@ -4967,21 +5202,52 @@ const txtRapport = c.rapport ? c.rapport.replace(/'/g, "\\'").replace(/"/g, "&qu
             osc.stop(t + 0.05);
         };
 
-        // --- VISIONNEUSE DE TRANSMISSION (PETITE MODALE STANDARD) ---
-        window.ouvrirDetailJournal = function(type, cmdr, date, texte, couleur) {
+        // --- VISIONNEUSE DE TRANSMISSION ENRICHIE ---
+        window.ouvrirDetailJournal = function(type, cmdr, date, texte, couleur, id) {
             if (typeof sonClic === 'function') sonClic();
             const modal = document.getElementById('modal-detail-journal');
-            const elType = document.getElementById('detail-journal-type');
             
+            // Éléments
+            const elType = document.getElementById('detail-journal-type');
+            const elId = document.getElementById('detail-journal-id');
+            const elClass = document.getElementById('detail-journal-class');
+            const elCmdr = document.getElementById('detail-journal-cmdr');
+            const elBox = document.getElementById('detail-journal-box');
+            
+            // Stylisation principale (Bordures et Titres)
             elType.innerHTML = `> ${type}`;
             elType.style.color = couleur;
             modal.querySelector('.modal-content').style.borderColor = couleur;
             modal.querySelector('.modal-content').style.boxShadow = `0 0 30px ${couleur}40`;
+            elBox.style.borderLeftColor = couleur;
             
-            document.getElementById('detail-journal-cmdr').innerText = cmdr;
+            // RP : ID unique
+            elId.innerText = `RAPPORT TACTIQUE #${id || 'XXXX'}`;
+            
+            // RP : Moteur de classification basé sur la couleur d'alerte
+            let classifText = "STANDARD";
+            let classifCol = "#00FF66"; // Vert par défaut
+            
+            if (couleur === '#FF3333' || couleur === 'var(--ed-red)') {
+                classifText = "SÉCURITÉ MAXIMALE"; classifCol = "#FF3333";
+            } else if (couleur === '#FF7100' || couleur === '#FFD700' || couleur === 'var(--ed-orange)') {
+                classifText = "PRIORITÉ HAUTE"; classifCol = "#FF7100";
+            } else if (couleur === '#B026FF') {
+                classifText = "SYSTÈME / DIRECTIVE"; classifCol = "#B026FF";
+            } else if (couleur === '#00F0FF' || couleur === 'var(--ed-blue)') {
+                classifText = "INFORMATIONS SENSIBLES"; classifCol = "#00F0FF";
+            }
+
+            elClass.innerText = `CLASSIFICATION : ${classifText}`;
+            elClass.style.color = classifCol;
+            elClass.style.borderColor = classifCol;
+            // Astuce pour générer un fond très léger avec la couleur Hex
+            elClass.style.background = classifCol.length === 7 ? `${classifCol}20` : 'rgba(255,255,255,0.1)';
+            
+            // Injection des textes
+            elCmdr.innerText = cmdr;
+            elCmdr.style.color = couleur;
             document.getElementById('detail-journal-date').innerText = date;
-            
-            // Affichage immédiat du texte (Zéro animation)
             document.getElementById('detail-journal-texte').innerText = texte;
             
             modal.style.display = 'flex';
