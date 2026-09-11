@@ -2428,12 +2428,24 @@
                 enregistrerTelemetrie('page', 'bgs');
                 synchroniserTelemetrie();
 
-                // TÉLÉCHARGEMENT DU LOGO DE L'ESCADRON
+                // TÉLÉCHARGEMENT DU LOGO DE L'ESCADRON (AVEC MISE EN CACHE NAVIGATEUR)
                 if (profilCommandant.escadron_id) {
-                    supabaseApp.from('logos_escadrons').select('logo_base64').eq('escadron_id', profilCommandant.escadron_id).single()
-                        .then(({ data: logoData }) => {
-                            if (logoData && logoData.logo_base64) appliquerLogoSurInterface(logoData.logo_base64);
-                        }).catch(() => {});
+                    const cacheKey = 'logo_escadron_' + profilCommandant.escadron_id;
+                    const cachedLogo = localStorage.getItem(cacheKey);
+                    
+                    if (cachedLogo) {
+                        // Le logo est déjà dans le navigateur du pilote, zéro requête Supabase !
+                        if (typeof appliquerLogoSurInterface === 'function') appliquerLogoSurInterface(cachedLogo);
+                    } else {
+                        // On télécharge le logo une seule fois et on le stocke
+                        supabaseApp.from('logos_escadrons').select('logo_base64').eq('escadron_id', profilCommandant.escadron_id).single()
+                            .then(({ data: logoData }) => {
+                                if (logoData && logoData.logo_base64) {
+                                    localStorage.setItem(cacheKey, logoData.logo_base64);
+                                    if (typeof appliquerLogoSurInterface === 'function') appliquerLogoSurInterface(logoData.logo_base64);
+                                }
+                            }).catch(() => {});
+                    }
                 }
 
                 // AFFICHAGE DU BOUTON AMIRAUTÉ (Si Officier ou Directeur)
@@ -3138,7 +3150,7 @@
             try {
                 const [resOrdres, resEfforts, resConflits] = await Promise.all([
                     supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF').order('date_emission', { ascending: false }),
-                    supabaseApp.from('efforts_bgs').select('*'),
+                    supabaseApp.from('efforts_bgs').select('*').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
                     supabaseApp.from('conflits_systemes').select('*') // <-- ON RÉCUPÈRE LES CONFLITS
                 ]);
 
@@ -3725,7 +3737,7 @@
 
             } catch (err) { console.error(err); }
             isSystemLooping = false;
-            setTimeout(systemLoop, 10000); // <-- LE MOTEUR RESPIRE (10 SECONDES)
+            setTimeout(systemLoop, 60000); // <-- LE MOTEUR RESPIRE (60 SECONDES - OPTIMISÉ POUR BANDE PASSANTE)
         }
 
         // --- MÉCANIQUES DU FAILSAFE ET AUDIO ---
@@ -4646,7 +4658,7 @@
                 // 1. TÉLÉCHARGEMENT SÉCURISÉ DES DONNÉES
                 const [resOrdres, resEfforts, resProfils] = await Promise.all([
                     supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS'),
-                    supabaseApp.from('efforts_bgs').select('*'),
+                    supabaseApp.from('efforts_bgs').select('*').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
                     supabaseApp.from('profils_publics').select('*') 
                 ]);
 
