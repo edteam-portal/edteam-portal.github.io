@@ -1241,43 +1241,37 @@
             
             // NOUVEAU : Lancement du radar des pilotes en jeu (Balayage toutes les 15s)
             actualiserPilotesEnLigne();
-            setInterval(actualiserPilotesEnLigne, 15000);
+            setInterval(actualiserPilotesEnLigne, 60000); // Scan toutes les 60s
         }
 
         // NOUVEAU MOTEUR : RADAR DES PILOTES CONNECTÉS
         async function actualiserPilotesEnLigne() {
             try {
-                // On croise les identités (profils_publics) avec les données de vol (parametres_app)
-                const { data: profils } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom');
-                const { data: params } = await supabaseApp.from('parametres_app').select('user_id, last_heartbeat, vaisseau_nom, vaisseau_modele, position_actuelle');
-
-                if (!profils || !params) return;
-
                 const nowSec = Math.floor(Date.now() / 1000);
-                let onlineCount = 0;
-                let htmlListe = '';
+                const limiteSec = nowSec - 60; // On cherche ceux actifs il y a moins de 60s
 
-                params.forEach(p => {
-                    // Tolérance de 60 secondes pour considérer un vaisseau en ligne
-                    if (p.last_heartbeat && (nowSec - p.last_heartbeat < 60)) {
-                        onlineCount++;
-                        const profil = profils.find(pr => pr.user_id === p.user_id);
-                        const cmdrNom = profil && profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : 'INCONNU';
-                        const vNom = p.vaisseau_nom ? p.vaisseau_nom.toUpperCase() : 'INCONNU';
-                        const vModele = p.vaisseau_modele || '';
-                        const sys = p.position_actuelle || 'ESPACE PROFOND';
-                        
-                        htmlListe += `
-                        <div style="background: rgba(0,255,102,0.1); border-left: 3px solid var(--ed-green); padding: 8px 10px; border-radius: 0 4px 4px 0; margin-bottom: 6px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <span style="color: #fff; font-weight: bold; font-size: 0.9em;">CMDR ${cmdrNom}</span>
-                                <span style="color: var(--ed-green); font-size: 0.7em; border: 1px solid var(--ed-green); padding: 1px 4px; border-radius: 2px;">EN VOL</span>
-                            </div>
-                            <div style="color: #aaa; font-size: 0.8em; margin-bottom: 2px;">📍 ${sys}</div>
-                            <div style="color: var(--ed-blue); font-size: 0.8em;">🚀 ${vNom} <span style="color:#666;">(${vModele})</span></div>
-                        </div>`;
-                    }
-                });
+                // 1. On demande à Supabase UNIQUEMENT les vaisseaux actuellement en vol
+                const { data: params } = await supabaseApp.from('parametres_app')
+                    .select('user_id, last_heartbeat, vaisseau_nom, vaisseau_modele, position_actuelle')
+                    .gte('last_heartbeat', limiteSec);
+
+                if (!params || params.length === 0) {
+                    document.getElementById('m-online-text').innerText = `0 PILOTE`;
+                    document.getElementById('m-online-dot').style.background = '#666';
+                    document.getElementById('m-online-dot').style.boxShadow = 'none';
+                    document.getElementById('m-online-btn').style.borderColor = '#444';
+                    document.getElementById('m-online-btn').style.background = 'transparent';
+                    document.getElementById('m-pilotes-liste').innerHTML = '<div style="color: #666; font-size: 0.9em; text-align: center; padding: 20px; font-style: italic;">Aucun signal détecté sur le radar.</div>';
+                    return;
+                }
+
+                // 2. On récupère les noms UNIQUEMENT pour ces pilotes actifs
+                const activeUserIds = params.map(p => p.user_id);
+                const { data: profils } = await supabaseApp.from('profils_publics')
+                    .select('user_id, cmdr_nom')
+                    .in('user_id', activeUserIds);
+
+                if (!profils) return;
 
                 // Mise à jour de la pastille en haut
                 document.getElementById('m-online-text').innerText = `${onlineCount} PILOTE(S)`;
@@ -2945,15 +2939,29 @@
             try {
                 const escadronCible = profilCommandant.escadron_id || 'ISS';
                 
-                const [resProfil, resOrdres, resEfforts, resObj] = await Promise.all([
+                // OPTIMISATION MOBILE : On ne télécharge que les ordres actifs pour la jauge BGS, fini l'historique lourd !
+                const [resProfil, resOrdresActifs, resObj] = await Promise.all([
                     supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single(),
-                    supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', escadronCible),
-                    supabaseApp.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action'),
+                    supabaseApp.from('ordres_bgs').select('id').eq('escadron_id', escadronCible).eq('statut', 'ACTIF'),
                     supabaseApp.from('objectifs_reputation').select('faction_nom').eq('escadron_id', escadronCible)
                 ]);
                 
                 const profil = resProfil.data;
                 if (!profil) { alert("Erreur: Profil indisponible."); return; }
+
+                // On ne récupère les efforts que pour l'opération en cours (Jauge)
+                let effortsEscadron = [];
+                if (resOrdresActifs.data && resOrdresActifs.data.length > 0) {
+                    const ordreIds = resOrdresActifs.data.map(o => String(o.id));
+                    const { data: efforts } = await supabaseApp.from('efforts_bgs')
+                        .select('user_id, ordre_id, valeur, type_action')
+                        .in('ordre_id', ordreIds);
+                    if (efforts) effortsEscadron = efforts;
+                }
+
+                // Variables de relais pour la suite du code
+                const resOrdres = { data: resOrdresActifs.data };
+                const resEfforts = { data: effortsEscadron };
 
                 // --- EN-TÊTE ---
                 document.getElementById('m-modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : 'INCONNU');
@@ -3070,7 +3078,7 @@
                 document.getElementById('m-modal-ops-count').innerText = opsCount;
                 document.getElementById('m-modal-specialiste-titres').innerHTML = titresHtml;
                 const elMeds = document.getElementById('m-modal-medailles-veteran');
-                if(elMeds) elMeds.innerHTML = medaillesVets !== '' ? medaillesVets : '<div style="color: #666; font-style: italic; font-size: 0.8em;">Aucun ruban de campagne.</div>';
+                if(elMeds) elMeds.innerHTML = '<div style="color: #666; font-style: italic; font-size: 0.8em;">Historique classé. Accès restreint sur PADD mobile.</div>';
 
                 // --- RANGS DE LA FÉDÉRATION ---
                 const formatRank = (rankArray, rankVal, progVal) => {
