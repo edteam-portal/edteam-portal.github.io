@@ -667,8 +667,8 @@
                     </select>
 
                     <select id="filtre-ordre" class="tactical-filter">
-                        <option value="ALL">[ TOUTES OPÉRATIONS ]</option>
-                        <!-- Les campagnes seront injectées ici par JS -->
+                        <option value="ACTIF" selected>[ OPÉRATIONS EN COURS ]</option>
+                        <!-- Les campagnes spécifiques seront injectées ici par JS -->
                     </select>
                 </div>
 
@@ -3148,15 +3148,28 @@
             };
 
             try {
-                const [resOrdres, resEfforts, resConflits] = await Promise.all([
-                    supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF').order('date_emission', { ascending: false }),
-                    supabaseApp.from('efforts_bgs').select('*').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-                    supabaseApp.from('conflits_systemes').select('*') // <-- ON RÉCUPÈRE LES CONFLITS
-                ]);
-
+                // 1. On télécharge D'ABORD les ordres actifs (très léger)
+                const resOrdres = await supabaseApp.from('ordres_bgs')
+                    .select('*')
+                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
+                    .eq('statut', 'ACTIF')
+                    .order('date_emission', { ascending: false });
+                
                 const ordresData = resOrdres.data || [];
+                const activeOrdreIds = ordresData.map(o => o.id);
+
+                // 2. LE SAUVETAGE EGRESS : On ne télécharge QUE les efforts liés à ces ordres actifs !
+                let resEfforts = { data: [] };
+                if (activeOrdreIds.length > 0) {
+                    resEfforts = await supabaseApp.from('efforts_bgs')
+                        .select('*')
+                        .in('ordre_id', activeOrdreIds); // Fini de télécharger tout l'historique !
+                }
+
+                const resConflits = await supabaseApp.from('conflits_systemes').select('*');
+
                 const effortsData = resEfforts.data || [];
-                const conflitsData = resConflits.data || []; // <-- ON STOCKE LES CONFLITS
+                const conflitsData = resConflits.data || [];
 
                 window.cacheOrdresBgs = ordresData;
                 window.cacheEffortsBgs = effortsData;
@@ -4731,12 +4744,12 @@
                 // 2. PEUPLEMENT DU FILTRE DES ORDRES (AVEC NUMÉRO D'OPÉRATION)
                 const selectOrdre = document.getElementById('filtre-ordre');
                 if (selectOrdre && selectOrdre.options.length <= 1) {
-                    // NOUVEAU : Tri des ordres du plus récent (ID le plus grand) au plus ancien
-                    const ordresTries = [...ordres].sort((a, b) => b.id - a.id);
-                    ordresTries.forEach(o => {
+                    // NOUVEAU : On ne liste QUE les ordres actifs !
+                    const ordresActifs = ordres.filter(o => o.statut === 'ACTIF').sort((a, b) => b.id - a.id);
+                    ordresActifs.forEach(o => {
                         const opt = document.createElement('option');
                         opt.value = o.id;
-                        opt.innerText = `[ ${o.statut} #${o.id} ] ${o.systeme_cible} (${o.type_ordre})`;
+                        opt.innerText = `[ #${o.id} ] ${o.systeme_cible} (${o.type_ordre})`;
                         selectOrdre.appendChild(opt);
                     });
                 }
@@ -4747,7 +4760,16 @@
                 const now = Date.now();
                 
                 let effortsFiltres = effortsBruts.filter(e => {
-                    if (filtreOrdre !== 'ALL' && String(e.ordre_id) !== String(filtreOrdre)) return false;
+                    // NOUVEAU FILTRE : OPÉRATIONS EN COURS (Toutes les actives)
+                    if (filtreOrdre === 'ACTIF') {
+                        const ordreLie = ordres.find(o => String(o.id) === String(e.ordre_id));
+                        if (!ordreLie || ordreLie.statut !== 'ACTIF') return false;
+                    } 
+                    // FILTRE SPÉCIFIQUE : Si le joueur sélectionne un ordre précis dans la liste
+                    else if (String(e.ordre_id) !== String(filtreOrdre)) {
+                        return false;
+                    }
+                    
                     if (filtrePilote === 'ME' && e.user_id !== profilCommandant.user_id) return false;
                     
                     let dateStr = e.date_action;
