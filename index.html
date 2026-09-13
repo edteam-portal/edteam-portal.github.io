@@ -2856,7 +2856,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             } catch (err) { console.error(err); }
             isSystemLooping = false;
-            setTimeout(systemLoop, 3000);
+            setTimeout(systemLoop, 60000);
         }
         
         window.copierNav = function(texte, element, event) { if (event) event.stopPropagation(); navigator.clipboard.writeText(texte).then(() => { sonClic(); const texteOriginal = element.innerHTML; element.innerHTML = "[ COPIÉ ]"; element.style.color = "#00FF00"; setTimeout(() => { element.innerHTML = texteOriginal; element.style.color = ""; }, 1500); }); };
