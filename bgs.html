@@ -4668,14 +4668,38 @@
             const filtreOrdre = document.getElementById('filtre-ordre').value;
 
             try {
-                // 1. TÉLÉCHARGEMENT SÉCURISÉ DES DONNÉES
-                const [resOrdres, resEfforts, resProfils] = await Promise.all([
-                    supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS'),
-                    supabaseApp.from('efforts_bgs').select('*').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+                // 1. TÉLÉCHARGEMENT SÉCURISÉ ET OPTIMISÉ DES DONNÉES
+                const resOrdres = await supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id || 'ISS');
+                const ordres = resOrdres.data || [];
+
+                let queryEfforts = supabaseApp.from('efforts_bgs').select('*');
+
+                // Si le filtre est sur "ACTIF", on ne demande à Supabase QUE les exploits liés aux ordres actifs !
+                if (filtreOrdre === 'ACTIF') {
+                    const activeOrdreIds = ordres.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
+                    if (activeOrdreIds.length > 0) {
+                        queryEfforts = queryEfforts.in('ordre_id', activeOrdreIds);
+                    } else {
+                        // Aucun ordre actif = pas besoin de surcharger le réseau pour rien
+                        queryEfforts = queryEfforts.eq('ordre_id', 'none'); 
+                    }
+                } 
+                // S'il choisit un ordre spécifique, on télécharge SEULEMENT celui-ci
+                else if (filtreOrdre !== 'ALL') {
+                    queryEfforts = queryEfforts.eq('ordre_id', filtreOrdre);
+                } 
+                // Sinon (sur ALL), on télécharge les 30 derniers jours comme avant
+                else {
+                    queryEfforts = queryEfforts.gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+                }
+
+                // On exécute la requête ciblée
+                const [resEfforts, resProfils] = await Promise.all([
+                    queryEfforts,
                     supabaseApp.from('profils_publics').select('*') 
                 ]);
 
-                const ordres = resOrdres.data || [];
+                // On extrait les données directement (sans redéclarer "ordres")
                 const effortsBruts = resEfforts.data || [];
                 const profils = resProfils.data || [];
 
@@ -4760,18 +4784,13 @@
                 const now = Date.now();
                 
                 let effortsFiltres = effortsBruts.filter(e => {
-                    // NOUVEAU FILTRE : OPÉRATIONS EN COURS (Toutes les actives)
-                    if (filtreOrdre === 'ACTIF') {
-                        const ordreLie = ordres.find(o => String(o.id) === String(e.ordre_id));
-                        if (!ordreLie || ordreLie.statut !== 'ACTIF') return false;
-                    } 
-                    // FILTRE SPÉCIFIQUE : Si le joueur sélectionne un ordre précis dans la liste
-                    else if (String(e.ordre_id) !== String(filtreOrdre)) {
-                        return false;
-                    }
+                    // Le filtrage principal a déjà été fait côté serveur Supabase !
+                    // On ne garde que les petits filtres locaux secondaires :
                     
+                    // 1. Filtre par Commandant
                     if (filtrePilote === 'ME' && e.user_id !== profilCommandant.user_id) return false;
                     
+                    // 2. Filtres temporels (Tick, 7j, 30j)
                     let dateStr = e.date_action;
                     if (!dateStr) return false;
                     if (dateStr.includes(' ')) dateStr = dateStr.replace(' ', 'T');
@@ -4781,7 +4800,7 @@
 
                     if (filtrePeriode === 'TICK' && dateEffort < tickRef.getTime()) return false;
                     if (filtrePeriode === '7J' && now - dateEffort > 7 * 24 * 60 * 60 * 1000) return false;
-                    if (filtrePeriode === '30J' && now - dateEffort > 30 * 24 * 60 * 60 * 1000) return false;
+                    // Note : Le filtre 30J n'est plus utile ici car le serveur Supabase limite déjà à 30J sur le "ALL".
 
                     return true;
                 });
