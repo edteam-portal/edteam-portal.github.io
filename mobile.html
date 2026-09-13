@@ -1596,11 +1596,16 @@
             if (!profilCommandant) return;
             const fmt = new Intl.NumberFormat('fr-FR');
 
-            // --- ON RÉCUPÈRE LES CONFLITS AU DÉBUT ---
+            // --- ON RÉCUPÈRE LES CONFLITS AU DÉBUT (FILTRÉS) ---
             let conflitsData = [];
             try {
-                const resConflit = await supabaseApp.from('conflits_systemes').select('*');
-                if (resConflit.data) conflitsData = resConflit.data;
+                // On récupère juste les systèmes ciblés par nos ordres
+                const { data: ordresSys } = await supabaseApp.from('ordres_bgs').select('systeme_cible').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF');
+                if (ordresSys && ordresSys.length > 0) {
+                    const systemesActifs = ordresSys.map(o => o.systeme_cible);
+                    const resConflit = await supabaseApp.from('conflits_systemes').select('*').in('systeme', systemesActifs);
+                    if (resConflit.data) conflitsData = resConflit.data;
+                }
             } catch(e) { console.warn("Mobile BGS: Erreur conflits"); }
 
             // -------------------------------------------------------------
@@ -3237,7 +3242,7 @@
                         .then(() => { window.telemetrieDirty = false; });
                 } catch(e) {}
             }
-        }, 15000);
+        }, 120000);
 
         // 5. Réparation des Modales de Grades Militaires
         window.ouvrirModalGradesMobile = function(domaine) {
