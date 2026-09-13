@@ -439,10 +439,6 @@
             </div>
             <span class="nav-text">BGS & FACTIONS</span>
         </a>
-        <a href="commerce.html" id="nav-commerce-link" class="nav-link" onmouseenter="sonHover()">
-            <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-            <span class="nav-text">COMMERCE FURTIF</span>
-        </a>
     
         <!-- LIEN SUPPORT DISCORD -->
         <a href="https://discord.gg/max5W9FreN" target="_blank" class="nav-link" style="margin-top: auto; margin-bottom: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()">
@@ -3166,7 +3162,12 @@
                         .in('ordre_id', activeOrdreIds); // Fini de télécharger tout l'historique !
                 }
 
-                const resConflits = await supabaseApp.from('conflits_systemes').select('*');
+                // OPTIMISATION EGRESS : On ne télécharge QUE les conflits de nos systèmes actifs
+                const systemesActifs = ordresData.map(o => o.systeme_cible);
+                let resConflits = { data: [] };
+                if (systemesActifs.length > 0) {
+                    resConflits = await supabaseApp.from('conflits_systemes').select('*').in('systeme', systemesActifs);
+                }
 
                 const effortsData = resEfforts.data || [];
                 const conflitsData = resConflits.data || [];
@@ -3573,11 +3574,8 @@
             
             try {
                 // 1. TÉLÉCHARGEMENT DES DONNÉES (Profil, Paramètres et la Boîte de réception)
-                const [resParam, resProfil, resRadar] = await Promise.all([
-                    supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
-                    supabaseApp.from('profils').select('*').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id)
-                ]);
+                // OPTIMISATION EGRESS : On ignore les gros scans commerciaux, on ne prend que la télémétrie vitale
+                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE'])
 
                 let paramData = resParam.data || {};
                 let profilData = resProfil.data || profilCommandant;
@@ -5054,7 +5052,13 @@
 
                 if (conteneurMedailles) {
                     if (rubansAAfficher.length === 0) {
-                        conteneurMedailles.innerHTML = `<div style="color: #555; font-style: italic; font-size: 0.9em; padding-top: 10px;">Aucun état de service militaire enregistré.</div>`;
+                        conteneurMedailles.innerHTML = `<div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); padding: 10px 15px; margin-top: 10px;">
+                            <strong style="color: var(--ed-blue); letter-spacing: 1px;">> ARCHIVES CLASSÉES DÉFENSE</strong><br>
+                            <span style="color: #ccc; font-size: 0.9em; line-height: 1.5; display: inline-block; margin-top: 5px;">
+                                EDTEAM procède actuellement à une optmisation de la base de données sécurisée (Réseau).<br>
+                                Vos états de service sont <strong style="color: #00FF66;">sauvegardés</strong> et seront de nouveau affichés lors du déploiement de la prochaine mise à jour du terminal.
+                            </span>
+                        </div>`;
                     } else {
                         // On stocke les plaques en mémoire et on affiche la page 1
                         window.cachePlaquesBgs = rubansAAfficher.map(r => r.html);

@@ -318,10 +318,6 @@
             </div>
             <span class="nav-text">BGS & FACTIONS</span>
         </a>
-        <a href="commerce.html" id="nav-commerce-link" class="nav-link" onmouseenter="sonHover()">
-            <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-            <span class="nav-text">COMMERCE FURTIF</span>
-        </a>
 
         <!-- LIEN SUPPORT DISCORD -->
         <a href="https://discord.gg/max5W9FreN" target="_blank" class="nav-link" style="margin-top: auto; margin-bottom: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()">
@@ -2405,7 +2401,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const [resParam, resProfil, resRadar] = await Promise.all([
                     supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
                     supabaseApp.from('profils').select('*').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id)
+                    // OPTIMISATION EGRESS : On filtre pour ne prendre que les télémétries légères
+                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE'])
                 ]);
 
                 let paramData = resParam.data || {};
