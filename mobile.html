@@ -330,10 +330,6 @@
                 </div>
             </div>
 
-            <div id="m-online-btn" onclick="ouvrirModalPilotes()" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--ed-green); background: rgba(0,255,102,0.1); cursor: pointer;">
-                <span id="m-online-dot" style="width: 7px; height: 7px; border-radius: 50%; background: var(--ed-green); box-shadow: 0 0 6px var(--ed-green);"></span>
-                <span id="m-online-text" style="color: #fff; font-size: 0.75em; font-weight: bold;">-- PILOTES</span>
-            </div>
         </header>
 
         <!-- CONTENU -->
@@ -722,19 +718,6 @@
             </button>
         </nav>
 
-    </div>
-
-    <!-- MODAL PILOTES EN JEU -->
-    <div class="modal-overlay" id="modal-pilotes" onclick="fermerModalPilotes(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 500; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 450px; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-green); padding-bottom: 10px; margin-bottom: 15px;">
-                <span style="color: var(--ed-green); font-weight: bold; letter-spacing: 2px;">🟢 PILOTES CONNECTES</span>
-                <span style="color: var(--ed-green); font-weight: bold; cursor: pointer;" onclick="fermerModalPilotes()">✕</span>
-            </div>
-            <div id="m-pilotes-liste" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Balayage spatial...</div>
-            </div>
-        </div>
     </div>
 
     <!-- MODAL HIÉRARCHIE DES GRADES -->
@@ -1239,63 +1222,6 @@
             verifierNouvellesNotesMobile(); // <--- NOUVELLE LIGNE AJOUTÉE ICI
             demarrerTickTimer();
             
-            // NOUVEAU : Lancement du radar des pilotes en jeu (Balayage toutes les 15s)
-            actualiserPilotesEnLigne();
-            setInterval(actualiserPilotesEnLigne, 60000); // Scan toutes les 60s
-        }
-
-        // NOUVEAU MOTEUR : RADAR DES PILOTES CONNECTÉS
-        async function actualiserPilotesEnLigne() {
-            try {
-                const nowSec = Math.floor(Date.now() / 1000);
-                const limiteSec = nowSec - 60; // On cherche ceux actifs il y a moins de 60s
-
-                // 1. On demande à Supabase UNIQUEMENT les vaisseaux actuellement en vol
-                const { data: params } = await supabaseApp.from('parametres_app')
-                    .select('user_id, last_heartbeat, vaisseau_nom, vaisseau_modele, position_actuelle')
-                    .gte('last_heartbeat', limiteSec);
-
-                if (!params || params.length === 0) {
-                    document.getElementById('m-online-text').innerText = `0 PILOTE`;
-                    document.getElementById('m-online-dot').style.background = '#666';
-                    document.getElementById('m-online-dot').style.boxShadow = 'none';
-                    document.getElementById('m-online-btn').style.borderColor = '#444';
-                    document.getElementById('m-online-btn').style.background = 'transparent';
-                    document.getElementById('m-pilotes-liste').innerHTML = '<div style="color: #666; font-size: 0.9em; text-align: center; padding: 20px; font-style: italic;">Aucun signal détecté sur le radar.</div>';
-                    return;
-                }
-
-                // 2. On récupère les noms UNIQUEMENT pour ces pilotes actifs
-                const activeUserIds = params.map(p => p.user_id);
-                const { data: profils } = await supabaseApp.from('profils_publics')
-                    .select('user_id, cmdr_nom')
-                    .in('user_id', activeUserIds);
-
-                if (!profils) return;
-
-                // Mise à jour de la pastille en haut
-                document.getElementById('m-online-text').innerText = `${onlineCount} PILOTE(S)`;
-                const dot = document.getElementById('m-online-dot');
-                const btn = document.getElementById('m-online-btn');
-                
-                if (onlineCount > 0) {
-                    dot.style.background = 'var(--ed-green)';
-                    dot.style.boxShadow = '0 0 8px var(--ed-green)';
-                    btn.style.borderColor = 'var(--ed-green)';
-                    btn.style.background = 'rgba(0,255,102,0.1)';
-                } else {
-                    dot.style.background = '#666';
-                    dot.style.boxShadow = 'none';
-                    btn.style.borderColor = '#444';
-                    btn.style.background = 'transparent';
-                    htmlListe = '<div style="color: #666; font-size: 0.9em; text-align: center; padding: 20px; font-style: italic;">Aucun signal détecté sur le radar.</div>';
-                }
-
-                document.getElementById('m-pilotes-liste').innerHTML = htmlListe;
-
-            } catch (err) {
-                console.warn("SYS.EDTEAM MOBILE : Erreur radar pilotes.");
-            }
         }
 
         async function deconnexionMobile() {
@@ -2216,18 +2142,6 @@
 
             input.value = '';
             await supabaseApp.from('transmissions').insert([payload]);
-        }
-
-        // CE QU'IL FAUT METTRE À LA PLACE
-        function ouvrirModalPilotes() { 
-            sonClic();
-            document.getElementById('modal-pilotes').style.display = 'flex'; 
-        }
-        
-        function fermerModalPilotes(e) { 
-            if (e && e.target.id !== 'modal-pilotes' && !e.target.innerText.includes('✕')) return; 
-            sonClic();
-            document.getElementById('modal-pilotes').style.display = 'none'; 
         }
 
         // OUVERTURE DE L'ONGLET STATISTIQUES (DIRECTEUR)
