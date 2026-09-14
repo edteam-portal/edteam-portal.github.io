@@ -301,89 +301,6 @@
         </div>
     </div>
 
-    <!-- ÉCRAN DE VERROUILLAGE FAIL-SAFE (UNIFIÉ) -->
-    <div class="failsafe-overlay" id="failsafe-modal">
-        <div class="failsafe-content" style="max-width: 750px; text-align: left; padding: 30px; position: relative;">
-            <h2 style="text-align: center; margin-bottom: 5px; color: #FF0000; font-size: 2.2em; letter-spacing: 4px; margin-top: 0;">⚠️ PROTOCOLE DE SÉCURITÉ ⚠️</h2>
-            <p id="failsafe-status-text" style="text-align: center; color: var(--ed-orange); font-size: 1.1em; font-weight: bold; margin-bottom: 25px; text-transform: uppercase;">AUCUN SIGNAL REÇU DEPUIS VOTRE VAISSEAU</p>
-
-            <!-- PAGE 0 : MENU PRINCIPAL -->
-            <div id="fs-page-main" class="fs-page" style="display: block;">
-                <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95em;">Pour accéder au terminal, votre système doit être correctement synchronisé. Identifiez votre problème :</p>
-
-                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-edmc')" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                    <strong style="color: #fff;">[ 1 ]</strong> JE N'AI PAS LANCÉ EDMC (OU JE NE L'AI PAS INSTALLÉ)
-                </button>
-                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-plugin')" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                    <strong style="color: #fff;">[ 2 ]</strong> JE N'AI PAS ENCORE AJOUTÉ LE PLUGIN "SYS.EDTEAM"
-                </button>
-                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em;" onclick="navFailsafe('fs-page-key')" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                    <strong style="color: #fff;">[ 3 ]</strong> LE PLUGIN EST LÀ, MAIS JE N'AI PAS MIS MA CLÉ
-                </button>
-                <button class="fs-auth-btn" style="text-align: left; padding: 15px; margin-bottom: 12px; font-size: 1em; border-color: var(--ed-orange); color: var(--ed-orange);" onclick="navFailsafe('fs-page-game')" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                    <strong style="color: #fff;">[ 4 ]</strong> TOUT EST LÀ, MAIS JE N'AI PAS ENCORE LANCÉ LE JEU
-                </button>
-                
-                <!-- BOUTON DÉCONNEXION URGENT ! -->
-                <button class="fs-auth-btn" style="text-align: center; padding: 10px; margin-top: 20px; font-size: 0.9em; border-color: #555; color: #aaa; background: transparent;" onclick="if(typeof deconnexion==='function') deconnexion()" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                    [ DÉCONNEXION DU TERMINAL ]
-                </button>
-            </div>
-
-            <!-- PAGE 1 : MANUEL EDMC -->
-            <div id="fs-page-edmc" class="fs-page" style="display: none;">
-                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 1 ] : MOTEUR EDMC</h3>
-                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">L'application <strong>Elite Dangerous Market Connector (EDMC)</strong> est obligatoire.<br><br>
-                1. Téléchargez EDMC via le lien sécurisé ci-dessous et installez-le.<br>
-                2. Lancez l'application sur votre PC.<br>
-                3. Connectez-y votre compte Frontier / Elite Dangerous.</p>
-                <div style="text-align: center; margin: 20px 0;">
-                    <a href="https://github.com/EDCD/EDMarketConnector/releases/latest" target="_blank" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">🌐 TÉLÉCHARGER EDMC</a>
-                </div>
-                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
-            </div>
-
-            <!-- PAGE 2 : MANUEL PLUGIN -->
-            <div id="fs-page-plugin" class="fs-page" style="display: none;">
-                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 2 ] : LE PLUGIN EDTEAM</h3>
-                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Pour que EDMC puisse nous parler, il lui faut notre module de communication privé.<br><br>
-                1. Téléchargez le fichier ZIP ci-dessous.<br>
-                2. Sur EDMC, allez dans <strong>Fichier > Paramètres > Plugins</strong>.<br>
-                3. Cliquez sur "Ouvrir".<br>
-                4. Décompressez le dossier SYS_EDTEAM à l'intérieur.<br>
-                5. <strong>Fermez et relancez complètement EDMC.</strong></p>
-                <div style="text-align: center; margin: 20px 0;">
-                    <a href="SYS_EDTEAM.zip" download="SYS_EDTEAM.zip" class="fs-auth-btn" style="display: inline-block; padding: 12px 25px; border-color: #00FF66; color: #00FF66; background: rgba(0, 255, 102, 0.1);" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#00FF66'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.color='#00FF66';">📦 TÉLÉCHARGER LE PLUGIN</a>
-                </div>
-                <button class="fs-auth-btn" style="margin-top: 10px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
-            </div>
-
-            <!-- PAGE 3 : MANUEL CLÉ -->
-            <div id="fs-page-key" class="fs-page" style="display: none;">
-                <h3 style="color: var(--ed-blue); border-bottom: 1px solid var(--ed-blue); padding-bottom: 5px;">[ DIAGNOSTIC 3 ] : LA CLÉ DE LIAISON</h3>
-                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Si le module est installé, il faut l'autoriser à transmettre en votre nom.<br><br>
-                1. Copiez la clé ci-dessous.<br>
-                2. Dans EDMC, allez dans <strong>Fichier > Paramètres</strong>.<br>
-                3. Allez dans l'onglet <strong>SYS.EDTEAM</strong>.<br>
-                4. Collez la clé et validez (OK).</p>
-                <div style="text-align: center; background: rgba(0, 0, 0, 0.8); border: 1px dashed var(--ed-blue); padding: 10px; margin-top: 15px;">
-                    <strong id="failsafe-api-key" style="color:var(--ed-orange); font-size: 1.2em; cursor:pointer; letter-spacing: 2px;" onclick="if(typeof copierNav==='function') copierNav(this.innerText, this, event)">[ CHARGEMENT DE LA CLÉ... ]</strong>
-                </div>
-                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
-            </div>
-
-            <!-- PAGE 4 : MANUEL LANCEMENT JEU -->
-            <div id="fs-page-game" class="fs-page" style="display: none;">
-                <h3 style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 5px;">[ DIAGNOSTIC 4 ] : INITIALISATION</h3>
-                <p style="color: #ccc; font-size: 0.9em; line-height: 1.6;">Le réseau a besoin que vous soyez connecté à votre vaisseau dans Elite Dangerous pour lire et enregistrer votre Nom de Commandant.<br><br>
-                1. Lancez votre jeu Elite Dangerous <strong>depuis votre bureau</strong>.<br>
-                2. Entrez dans votre vaisseau (Jeu Ouvert, Groupe Privé ou Solo).<br>
-                3. Rafraîchissez cette page (F5) dès que vous êtes dans le cockpit.</p>
-                <button class="fs-auth-btn" style="margin-top: 20px; border-color: #555; color: #aaa; background: transparent;" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';" onclick="navFailsafe('fs-page-main')">< RETOUR AU MENU</button>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL GESTION DU COMPTE -->
     <div class="modal-overlay" id="modal-gestion-compte" onclick="fermerModal('modal-gestion-compte', event)" style="z-index: 3500;">
         <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
@@ -535,56 +452,10 @@
         let cacheTraitesDiplo = [];
 
         // =========================================
-        // BOUCLE DE SÉCURITÉ (FAILSAFE)
+        // BOUCLE DE SÉCURITÉ (FAILSAFE ULTRA-LÉGER)
         // =========================================
         let isSystemLooping = false;
-        
-        async function systemLoop() {
-            if(isSystemLooping || !profilCommandant) return;
-            isSystemLooping = true;
-            
-            try {
-                // Téléchargement ultra-léger : on ne prend QUE le heartbeat
-                const { data: paramData } = await supabaseApp.from('parametres_app')
-                    .select('last_heartbeat')
-                    .eq('user_id', profilCommandant.user_id)
-                    .single();
-
-                const failsafeModal = document.getElementById('failsafe-modal');
-                let edmcEnLigne = false;
-                
-                // Le fameux verrou avec sa tolérance de 120 secondes
-                if (paramData && paramData.last_heartbeat && profilCommandant.cmdr_nom) {
-                    if (Math.floor(Date.now() / 1000) - paramData.last_heartbeat < 120) { 
-                        edmcEnLigne = true; 
-                    }
-                }
-                
-                if (failsafeModal) {
-                    if (!edmcEnLigne) {
-                        failsafeModal.style.display = 'flex';
-                        if (wasEdmcOnline) { 
-                            document.querySelectorAll('.fs-page').forEach(el => el.style.display = 'none');
-                            document.getElementById('fs-page-main').style.display = 'block';
-                            if(typeof startAlarm === 'function') startAlarm(); 
-                            wasEdmcOnline = false; 
-                        }
-                    } else {
-                        failsafeModal.style.display = 'none';
-                        if (!wasEdmcOnline) { 
-                            if(typeof stopAlarm === 'function') stopAlarm(); 
-                            if(typeof sonReconnect === 'function') sonReconnect(); 
-                            wasEdmcOnline = true; 
-                        }
-                    }
-                }
-            } catch (err) { 
-                console.error("Erreur de la boucle de sécurité :", err); 
-            }
-            
-            isSystemLooping = false;
-            setTimeout(systemLoop, 60000); // Vérification toutes les 60 secondes
-        }
+        let wasEdmcOnline = true; // <-- La variable manquante est ici !
 
         window.addEventListener('load', async () => {
             try {
@@ -868,8 +739,8 @@
                 if (filtreCol) query = query.eq(filtreCol, filtreVal);
 
                 // ---> AJOUT : On ignore les messages fantômes (avant le tick) <---
-                if (memoireServeur && memoireServeur.getTime() > 0) {
-                    query = query.gte('created_at', memoireServeur.toISOString());
+                if (typeof dernierTick !== 'undefined' && dernierTick.getTime() > 0) {
+                    query = query.gte('created_at', dernierTick.toISOString());
                 }
 
                 const { data } = await query;
