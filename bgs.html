@@ -3494,11 +3494,12 @@
             isSystemLooping = true;
             
             try {
-                // 1. TÉLÉCHARGEMENT DES DONNÉES (Profil, Paramètres et la Boîte de réception)
+                // 1. TÉLÉCHARGEMENT DES DONNÉES
                 const [resParam, resProfil, resRadar] = await Promise.all([
                     supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
                     supabaseApp.from('profils').select('*').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE'])
+                    // CORRECTION EGRESS : On ne télécharge QUE les 10 dernières lignes du radar, pas tout l'historique !
+                    supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE']).order('id', { ascending: false }).limit(10)
                 ]);
 
                 let paramData = resParam.data || {};
