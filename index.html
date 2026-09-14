@@ -2509,8 +2509,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const failsafeModal = document.getElementById('failsafe-modal');
                 let edmcEnLigne = false;
                 
+                // SÉCURITÉ CALIBRÉE SUR LE NOUVEAU RYTHME (120 secondes)
                 if (paramData.last_heartbeat && profilData.cmdr_nom) {
-                    if (Math.floor(Date.now() / 1000) - paramData.last_heartbeat < 25) { edmcEnLigne = true; }
+                    if (Math.floor(Date.now() / 1000) - paramData.last_heartbeat < 120) { edmcEnLigne = true; }
                 }
                 
                 if (failsafeModal) {

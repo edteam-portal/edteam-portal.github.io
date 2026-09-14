@@ -3578,8 +3578,11 @@
             
             try {
                 // 1. TÉLÉCHARGEMENT DES DONNÉES (Profil, Paramètres et la Boîte de réception)
-                // OPTIMISATION EGRESS : On ignore les gros scans commerciaux, on ne prend que la télémétrie vitale
+                const [resParam, resProfil, resRadar] = await Promise.all([
+                    supabaseApp.from('parametres_app').select('*').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
+                    supabaseApp.from('profils').select('*').eq('user_id', profilCommandant.user_id).single(),
                     supabaseApp.from('radar_commercial').select('*').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE'])
+                ]);
 
                 let paramData = resParam.data || {};
                 let profilData = resProfil.data || profilCommandant;
