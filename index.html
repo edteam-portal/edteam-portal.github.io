@@ -2028,7 +2028,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         }
         // --------------------------------------------------------------
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
+        const supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
         let profilCommandant = null;
         let isSystemLooping = false;
@@ -3579,7 +3579,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     
                     const [resOrdres, resAllEfforts] = await Promise.all([
                         supabaseApp.from('ordres_bgs').select('id, systeme_cible, type_ordre').in('id', orderIds),
-                        supabaseApp.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action, date_action').in('ordre_id', orderIds)
+                        supabaseApp.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action').in('ordre_id', orderIds)
                     ]);
                     
                     const ordres = resOrdres.data || [];
@@ -3606,13 +3606,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             if (!userScores[uId]) userScores[uId] = 0;
                             userScores[uId] += pts;
                             
-                            if (uId === String(userId) && e.date_action) {
-                                joursUniques.add(e.date_action.substring(0, 10));
-                            }
                         });
 
                         const monScore = userScores[String(userId)] || 0;
-                        const nbJours = joursUniques.size;
                         
                         // Calcul du classement exact (monRang)
                         let userScoresArray = Object.entries(userScores).map(([idStr, score]) => ({idStr, score}));
@@ -3650,7 +3646,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             
                             rubans.push({
                                 score: monScore, // Tri décroissant
-                                html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                                html: window.forgerRubanSVG(ordre.type_ordre, 0, monScore, monRang, tooltip)
                             });
                         }
                     });

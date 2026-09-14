@@ -2392,7 +2392,7 @@
         };
 
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haWx2ZGlnZmRveWZjeWRtYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQzNTAsImV4cCI6MjEwMDIwMDM1MH0.rWEATcSWDyyyeKXWAkCySCZPwTsIFgDRJ7KB1u4OE00';
+        const supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
         let profilCommandant = null;
         let isSystemLooping = false;
@@ -3158,12 +3158,12 @@
                 const ordresData = resOrdres.data || [];
                 const activeOrdreIds = ordresData.map(o => o.id);
 
-                // 2. LE SAUVETAGE EGRESS : On ne télécharge QUE les efforts liés à ces ordres actifs !
+                // 2. LE SAUVETAGE EGRESS V2 : On ne télécharge que les colonnes vitales pour les ordres actifs !
                 let resEfforts = { data: [] };
                 if (activeOrdreIds.length > 0) {
                     resEfforts = await supabaseApp.from('efforts_bgs')
-                        .select('*')
-                        .in('ordre_id', activeOrdreIds); // Fini de télécharger tout l'historique !
+                        .select('id, user_id, ordre_id, valeur, type_action, date_action')
+                        .in('ordre_id', activeOrdreIds);
                 }
 
                 // OPTIMISATION EGRESS : On ne télécharge QUE les conflits de nos systèmes actifs
