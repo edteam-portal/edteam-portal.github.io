@@ -5964,27 +5964,6 @@
             } catch (e) { console.error("Erreur journal :", e); }
         };
 
-        // AFFICHAGE DU LOGO ESCADRON (Header + Favicon)
-        window.appliquerLogoSurInterface = function(base64Str) {
-            const mainLogo = document.querySelector('.hud-header .app-logo');
-            if (mainLogo) {
-                if (mainLogo.tagName.toLowerCase() === 'svg') {
-                    const img = document.createElement('img');
-                    img.src = base64Str;
-                    img.className = 'app-logo';
-                    img.style.objectFit = 'contain';
-                    img.style.filter = 'none'; // <-- ON COUPE L'OMBRE ICI
-                    mainLogo.parentNode.replaceChild(img, mainLogo);
-                } else {
-                    mainLogo.src = base64Str;
-                    mainLogo.style.filter = 'none'; // <-- ET ICI AUSSI
-                }
-            }
-            let link = document.querySelector("link[rel~='icon']");
-            if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
-            link.href = base64Str;
-        };
-
         // ==========================================
         // FORGE À RUBANS MILITAIRES (PLAQUES MÉTALLIQUES PLATES)
         // ==========================================
