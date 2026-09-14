@@ -656,8 +656,11 @@
                         }
                     }).subscribe();
 
-            // ---> AJOUTE LE LANCEMENT DU SCANNEUR JUSTE ICI <---
-                await verifierOngletsNonLus();
+                // ---> AJOUTE LE LANCEMENT DU SCANNEUR JUSTE ICI <---
+            await verifierOngletsNonLus();
+            
+            // Démarrage du radar et de la sécurité Failsafe
+            if (!isSystemLooping) systemLoop();
 
             } catch(e) {
                 console.error("Erreur critique au démarrage :", e);
