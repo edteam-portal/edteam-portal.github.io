@@ -1440,20 +1440,10 @@
 
                 if (error) throw error;
 
-                // 2. TÉLÉCHARGEMENT GROUPÉ DES ARCHIVES BGS (Pour éviter de saturer la base de données)
-                const { data: squadOrdres } = await supabaseApp.from('ordres_bgs')
-                    .select('*')
-                    .eq('escadron_id', profilCommandant.escadron_id)
-                    .eq('statut', 'ARCHIVÉ');
-                    
+                // 2. ARCHIVES DÉSACTIVÉES TEMPORAIREMENT (STOP EGRESS)
+                // En attente du chantier "États de Service"
+                const squadOrdres = [];
                 let allEfforts = [];
-                if (squadOrdres && squadOrdres.length > 0) {
-                    const ordreIds = squadOrdres.map(o => String(o.id));
-                    const { data: fetchedEfforts } = await supabaseApp.from('efforts_bgs')
-                        .select('*')
-                        .in('ordre_id', ordreIds);
-                    if (fetchedEfforts) allEfforts = fetchedEfforts;
-                }
 
                 // 3. PRÉCALCUL DES SCORES GLOBAUX POUR DÉTERMINER LES RANGS (Top 1, Top 3, etc.)
                 let scoresParOrdre = {};
@@ -2454,13 +2444,6 @@
                             if (envIcon) envIcon.classList.add('alerte-enveloppe');
                             try { if (typeof playUI === 'function') playUI('receive'); } catch(e) {}
                         }
-                    }).subscribe();
-
-                    // NOUVEAU : ÉCOUTE EN TEMPS RÉEL DES EFFORTS BGS
-                supabaseApp.channel('live_efforts_bgs')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'efforts_bgs' }, payload => {
-                        // Réagit à toute insertion ou mise à jour sans condition bloquante
-                        if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                     }).subscribe();
 
             } else {
