@@ -1819,72 +1819,42 @@
 
                             opsCount = uniqueOps.size;
 
-                            // 2. Calcul des Médailles de Vétéran (Campagnes clôturées uniquement)
+                            // 2. LECTURE INSTANTANÉE DES MÉDAILLES VIA LE PALMARÈS
                             let rubansAAfficher = [];
-                            const ordresClotures = squadOrdres.filter(o => o.statut === 'ARCHIVÉ');
-                            
-                            ordresClotures.forEach(ordre => {
-                                const effortsOrdre = effortsEscadron.filter(e => String(e.ordre_id) === String(ordre.id));
-                                let userScores = {};
-                                let joursUniques = new Set();
-                                
-                                effortsOrdre.forEach(e => {
-                                    const val = Math.abs(Number(e.valeur) || 0);
-                                    let pts = val;
-                                    if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
-                                    
-                                    const uId = String(e.user_id);
-                                    if (!userScores[uId]) userScores[uId] = 0;
-                                    userScores[uId] += pts;
-                                    
-                                    // On cible l'utilisateur de la fiche en cours de consultation (userId)
-                                    if (uId === String(userId) && e.date_action) {
-                                        joursUniques.add(e.date_action.substring(0, 10));
-                                    }
-                                });
-
-                                const monScore = userScores[String(userId)] || 0;
-                                const nbJours = joursUniques.size;
-
-                                if (monScore > 0) {
-                                    let userScoresArray = Object.entries(userScores).map(([idStr, score]) => ({idStr, score}));
-                                    userScoresArray.sort((a, b) => b.score - a.score);
-                                    let monRang = userScoresArray.findIndex(u => u.idStr === String(userId)) + 1;
-                                    if (monScore === 0) monRang = 999;
-
+                            if (profil.palmares_bgs && Array.isArray(profil.palmares_bgs)) {
+                                profil.palmares_bgs.forEach(medaille => {
                                     let distinction = "RUBAN DE CAMPAGNE";
-                                    if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
-                                    else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
-                                    else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
-                                    else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
-                                    else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
-                                    else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
-                                    else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
-                                    else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
-                                    else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
-                                    else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
-                                    else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
-                                    else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
+                                    if (medaille.score >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                                    else if (medaille.score >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                                    else if (medaille.score >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                                    else if (medaille.score >= 90) distinction = "3 ÉTOILES D'OR";
+                                    else if (medaille.score >= 80) distinction = "2 ÉTOILES D'OR";
+                                    else if (medaille.score >= 70) distinction = "1 ÉTOILE D'OR";
+                                    else if (medaille.score >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                                    else if (medaille.score >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                                    else if (medaille.score >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                                    else if (medaille.score >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                                    else if (medaille.score >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                                    else if (medaille.score >= 10) distinction = "1 ÉTOILE DE BRONZE";
                                     
                                     let encadrement = "STANDARD";
-                                    if (monRang === 1) encadrement = "DIAMANT (1er)";
-                                    else if (monRang <= 3) encadrement = "OR (Top 3)";
-                                    else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
-                                    else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+                                    if (medaille.rang === 1) encadrement = "DIAMANT (1er)";
+                                    else if (medaille.rang <= 3) encadrement = "OR (Top 3)";
+                                    else if (medaille.rang <= 5) encadrement = "ARGENT (Top 5)";
+                                    else if (medaille.rang <= 10) encadrement = "BRONZE (Top 10)";
                                     
+                                    const systemeSafe = (medaille.systeme || '').toUpperCase().replace(/'/g, "\\'");
+                                    const typeSafe = (medaille.type_ordre || '').replace(/'/g, "\\'");
                                     const distinctionSafe = distinction.replace(/'/g, "\\'");
-                                    const systemeSafe = ordre.systeme_cible.toUpperCase().replace(/'/g, "\\'");
-                                    const typeSafe = (ordre.type_ordre || '').replace(/'/g, "\\'");
                                     
-                                    const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
+                                    const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${Number(medaille.score).toFixed(1)} PTS</strong> en ${medaille.jours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
                                     
-                                    // On ajoute la plaque en omettant la variable 'onclickAction'
                                     rubansAAfficher.push({
-                                        score: monScore,
-                                        html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                                        score: medaille.score,
+                                        html: window.forgerRubanSVG(medaille.type_ordre, medaille.jours, medaille.score, medaille.rang, tooltip)
                                     });
-                                }
-                            });
+                                });
+                            }
 
                             rubansAAfficher.sort((a, b) => b.score - a.score);
                             
@@ -4840,75 +4810,44 @@
 
                 // 5. RUBANS DE CAMPAGNE (MÉDAILLES CLIQUABLES)
                 const conteneurMedailles = document.getElementById('ribbons-container');
-                const ordresClotures = ordres.filter(o => o.statut === 'ARCHIVÉ');
-                
                 let rubansAAfficher = [];
 
-                ordresClotures.forEach(ordre => {
-                    const effortsOrdre = effortsBruts.filter(e => String(e.ordre_id) === String(ordre.id));
-                    
-                    let userScores = {};
-                    let joursUniques = new Set();
-                    
-                    effortsOrdre.forEach(e => {
-                        const val = Math.abs(Number(e.valeur) || 0);
-                        let pts = val;
-                        if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(e.type_action)) pts = val / 2000000;
-                        
-                        const uId = String(e.user_id);
-                        if (!userScores[uId]) userScores[uId] = 0;
-                        userScores[uId] += pts;
-                        
-                        if (uId === String(profilCommandant.user_id) && e.date_action) {
-                            joursUniques.add(e.date_action.substring(0, 10));
-                        }
-                    });
-
-                    const monScore = userScores[String(profilCommandant.user_id)] || 0;
-                    const nbJours = joursUniques.size;
-
-                    // Si le joueur a fait le moindre effort, on lui donne la plaque
-                    if (monScore > 0) {
-                        // Calcul du classement exact (monRang)
-                        let userScoresArray = Object.entries(userScores).map(([idStr, score]) => ({idStr, score}));
-                        userScoresArray.sort((a, b) => b.score - a.score);
-                        let monRang = userScoresArray.findIndex(u => u.idStr === String(profilCommandant.user_id)) + 1;
-                        if (monScore === 0) monRang = 999;
-
+                if (profilCommandant.palmares_bgs && Array.isArray(profilCommandant.palmares_bgs)) {
+                    profilCommandant.palmares_bgs.forEach(medaille => {
                         let distinction = "RUBAN DE CAMPAGNE";
-                        if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
-                        else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
-                        else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
-                        else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
-                        else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
-                        else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
-                        else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
-                        else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
-                        else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
-                        else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
-                        else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
-                        else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
+                        if (medaille.score >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                        else if (medaille.score >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                        else if (medaille.score >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                        else if (medaille.score >= 90) distinction = "3 ÉTOILES D'OR";
+                        else if (medaille.score >= 80) distinction = "2 ÉTOILES D'OR";
+                        else if (medaille.score >= 70) distinction = "1 ÉTOILE D'OR";
+                        else if (medaille.score >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                        else if (medaille.score >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                        else if (medaille.score >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                        else if (medaille.score >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                        else if (medaille.score >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                        else if (medaille.score >= 10) distinction = "1 ÉTOILE DE BRONZE";
                         
                         let encadrement = "STANDARD";
-                        if (monRang === 1) encadrement = "DIAMANT (1er)";
-                        else if (monRang <= 3) encadrement = "OR (Top 3)";
-                        else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
-                        else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+                        if (medaille.rang === 1) encadrement = "DIAMANT (1er)";
+                        else if (medaille.rang <= 3) encadrement = "OR (Top 3)";
+                        else if (medaille.rang <= 5) encadrement = "ARGENT (Top 5)";
+                        else if (medaille.rang <= 10) encadrement = "BRONZE (Top 10)";
                         
+                        const systemeSafe = (medaille.systeme || '').toUpperCase().replace(/'/g, "\\'");
+                        const typeSafe = (medaille.type_ordre || '').replace(/'/g, "\\'");
                         const distinctionSafe = distinction.replace(/'/g, "\\'");
-                        const systemeSafe = ordre.systeme_cible.toUpperCase().replace(/'/g, "\\'");
-                        const typeSafe = (ordre.type_ordre || '').replace(/'/g, "\\'");
                         
-                        // On a supprimé le "[ Cliquez pour ouvrir... ]" à la fin du tooltip
-                        const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
+                        const tooltip = `<div style=\\'text-align:center;\\'>CAMPAGNE : <strong style=\\'color:#fff;\\'>${systemeSafe}</strong><br><span style=\\'color:#ccc; font-size:0.85em;\\'>Mission : ${typeSafe}<br>Score : <strong style=\\'color:var(--ed-blue);\\'>${Number(medaille.score).toFixed(1)} PTS</strong> en ${medaille.jours} jour(s)<br>Distinction : <strong style=\\'color:#FFD700;\\'>${distinctionSafe}</strong><br>Cadre : <strong style=\\'color:#fff;\\'>${encadrement}</strong></span></div>`;
                         
-                        // On ne passe plus l'instruction 'ouvrirDossierVeteran'
                         rubansAAfficher.push({
-                            score: monScore,
-                            html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
+                            score: medaille.score,
+                            html: window.forgerRubanSVG(medaille.type_ordre, medaille.jours, medaille.score, medaille.rang, tooltip)
                         });
-                    }
-                });
+                    });
+                }
+                
+                rubansAAfficher.sort((a, b) => b.score - a.score);
 
                 // Tri des plaques (les plus gros scores d'abord)
                 rubansAAfficher.sort((a, b) => b.score - a.score);
