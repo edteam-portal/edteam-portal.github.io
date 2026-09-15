@@ -1493,56 +1493,40 @@
                         infoIconColor = 'var(--ed-blue)';
                     }
 
-                    // --- CALCUL DES MEILLEURES PLAQUES BGS POUR CE PILOTE ---
+                    // --- NOUVEAU SYSTÈME : LECTURE DIRECTE DU PALMARÈS ---
                     let rubansPilote = [];
-                    if(squadOrdres) {
-                        squadOrdres.forEach(ordre => {
-                            const scoresOrdre = scoresParOrdre[ordre.id];
-                            if(!scoresOrdre || !scoresOrdre[p.user_id]) return;
+                    if (p.palmares_bgs && Array.isArray(p.palmares_bgs)) {
+                        p.palmares_bgs.forEach(medaille => {
+                            let distinction = "RUBAN DE CAMPAGNE";
+                            if (medaille.score >= 200) distinction = "3 ÉTOILES DE DIAMANT";
+                            else if (medaille.score >= 150) distinction = "2 ÉTOILES DE DIAMANT";
+                            else if (medaille.score >= 100) distinction = "1 ÉTOILE DE DIAMANT";
+                            else if (medaille.score >= 90) distinction = "3 ÉTOILES D'OR";
+                            else if (medaille.score >= 80) distinction = "2 ÉTOILES D'OR";
+                            else if (medaille.score >= 70) distinction = "1 ÉTOILE D'OR";
+                            else if (medaille.score >= 60) distinction = "3 ÉTOILES D'ARGENT";
+                            else if (medaille.score >= 50) distinction = "2 ÉTOILES D'ARGENT";
+                            else if (medaille.score >= 40) distinction = "1 ÉTOILE D'ARGENT";
+                            else if (medaille.score >= 30) distinction = "3 ÉTOILES DE BRONZE";
+                            else if (medaille.score >= 20) distinction = "2 ÉTOILES DE BRONZE";
+                            else if (medaille.score >= 10) distinction = "1 ÉTOILE DE BRONZE";
                             
-                            const monScore = scoresOrdre[p.user_id].pts;
-                            if(monScore > 0) {
-                                const nbJours = scoresOrdre[p.user_id].dates.size;
-                                
-                                // Calcul du rang du pilote sur cette opération
-                                let userScoresArray = Object.entries(scoresOrdre).map(([idStr, data]) => ({idStr, score: data.pts}));
-                                userScoresArray.sort((a, b) => b.score - a.score);
-                                let monRang = userScoresArray.findIndex(u => u.idStr === String(p.user_id)) + 1;
-                                
-                                let distinction = "RUBAN DE CAMPAGNE";
-                                if (monScore >= 200) distinction = "3 ÉTOILES DE DIAMANT";
-                                else if (monScore >= 150) distinction = "2 ÉTOILES DE DIAMANT";
-                                else if (monScore >= 100) distinction = "1 ÉTOILE DE DIAMANT";
-                                else if (monScore >= 90) distinction = "3 ÉTOILES D'OR";
-                                else if (monScore >= 80) distinction = "2 ÉTOILES D'OR";
-                                else if (monScore >= 70) distinction = "1 ÉTOILE D'OR";
-                                else if (monScore >= 60) distinction = "3 ÉTOILES D'ARGENT";
-                                else if (monScore >= 50) distinction = "2 ÉTOILES D'ARGENT";
-                                else if (monScore >= 40) distinction = "1 ÉTOILE D'ARGENT";
-                                else if (monScore >= 30) distinction = "3 ÉTOILES DE BRONZE";
-                                else if (monScore >= 20) distinction = "2 ÉTOILES DE BRONZE";
-                                else if (monScore >= 10) distinction = "1 ÉTOILE DE BRONZE";
-                                
-                                let encadrement = "STANDARD";
-                                if (monRang === 1) encadrement = "DIAMANT (1er)";
-                                else if (monRang <= 3) encadrement = "OR (Top 3)";
-                                else if (monRang <= 5) encadrement = "ARGENT (Top 5)";
-                                else if (monRang <= 10) encadrement = "BRONZE (Top 10)";
+                            let encadrement = "STANDARD";
+                            if (medaille.rang === 1) encadrement = "DIAMANT (1er)";
+                            else if (medaille.rang <= 3) encadrement = "OR (Top 3)";
+                            else if (medaille.rang <= 5) encadrement = "ARGENT (Top 5)";
+                            else if (medaille.rang <= 10) encadrement = "BRONZE (Top 10)";
 
-                                // Remplacement radical par des entités HTML pures pour éviter tout bug Javascript au survol
-                                const systemeSafe = (ordre.systeme_cible || '').toUpperCase().replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-                                const typeSafe = (ordre.type_ordre || '').toUpperCase().replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-                                const distinctionSafe = distinction.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-                                
-                                // Tooltip ultra sécurisé
-                                const tooltip = `<div style=&quot;text-align:center;&quot;>CAMPAGNE : <strong style=&quot;color:#fff;&quot;>${systemeSafe}</strong><br><span style=&quot;color:#ccc; font-size:0.85em;&quot;>Mission : ${typeSafe}<br>Score : <strong style=&quot;color:var(--ed-blue);&quot;>${monScore.toFixed(1)} PTS</strong> en ${nbJours} jour(s)<br>Distinction : <strong style=&quot;color:#FFD700;&quot;>${distinctionSafe}</strong><br>Cadre : <strong style=&quot;color:#fff;&quot;>${encadrement}</strong></span></div>`;
-                                
-                                rubansPilote.push({
-                                    score: monScore,
-                                    // Pas d'action onClick ici car on est déjà dans une carte cliquable
-                                    html: window.forgerRubanSVG(ordre.type_ordre, nbJours, monScore, monRang, tooltip)
-                                });
-                            }
+                            const systemeSafe = (medaille.systeme || '').toUpperCase().replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                            const typeSafe = (medaille.type_ordre || '').toUpperCase().replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                            const distinctionSafe = distinction.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                            
+                            const tooltip = `<div style=&quot;text-align:center;&quot;>CAMPAGNE : <strong style=&quot;color:#fff;&quot;>${systemeSafe}</strong><br><span style=&quot;color:#ccc; font-size:0.85em;&quot;>Mission : ${typeSafe}<br>Score : <strong style=&quot;color:var(--ed-blue);&quot;>${Number(medaille.score).toFixed(1)} PTS</strong> en ${medaille.jours} jour(s)<br>Distinction : <strong style=&quot;color:#FFD700;&quot;>${distinctionSafe}</strong><br>Cadre : <strong style=&quot;color:#fff;&quot;>${encadrement}</strong></span></div>`;
+                            
+                            rubansPilote.push({
+                                score: medaille.score,
+                                html: window.forgerRubanSVG(medaille.type_ordre, medaille.jours, medaille.score, medaille.rang, tooltip)
+                            });
                         });
                     }
                     
@@ -2646,11 +2630,10 @@
             if (!confirmation) return;
 
             try {
-                const { error } = await supabaseApp.from('ordres_bgs')
-                    .update({ statut: 'ARCHIVÉ' })
-                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
-                    .eq('systeme_cible', nomSysteme)
-                    .eq('statut', 'ACTIF');
+                const { error } = await supabaseApp.rpc('cloturer_systeme_bgs_et_distribuer', { 
+                    p_systeme: nomSysteme, 
+                    p_escadron_id: profilCommandant.escadron_id || 'ISS' 
+                });
 
                 if (error) throw error;
                 
@@ -2719,7 +2702,9 @@
             if (!confirmation) return;
             
             try {
-                const { error } = await supabaseApp.from('ordres_bgs').update({ statut: 'ARCHIVÉ' }).eq('id', idOrdre);
+                const { error } = await supabaseApp.rpc('cloturer_ordre_bgs_et_distribuer', { 
+                    p_ordre_id: idOrdre 
+                });
                 if (error) throw error;
                 
                 // NOUVEAU : Envoi au journal
