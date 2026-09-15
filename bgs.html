@@ -1812,7 +1812,8 @@
                     
                     if (squadOrdres && squadOrdres.length > 0) {
                         const ordreIds = squadOrdres.map(o => String(o.id));
-                        const { data: allEfforts } = await supabaseApp.from('efforts_bgs').select('*');
+                        // ARCHIVES DÉSACTIVÉES TEMPORAIREMENT (STOP EGRESS)
+                        const allEfforts = []; 
                         
                         if (allEfforts) {
                             const effortsEscadron = allEfforts.filter(e => ordreIds.includes(String(e.ordre_id)));
