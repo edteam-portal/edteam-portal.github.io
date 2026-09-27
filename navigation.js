@@ -779,7 +779,7 @@ window.demarrerSystemLoop = async function systemLoop() {
         });
 
         // Purge des étiquettes d'états secondaires
-        const junkTags = ['PARAM_UPDATE', 'QG_RANK_COMBAT', 'QG_RANK_TRADE', 'QG_RANK_EXPLOR', 'QG_RANK_FEDERA', 'QG_RANK_EMPIRE', 'QG_RANK_EXOBIO', 'QG_PROG_COMBAT', 'QG_PROG_TRADE', 'QG_PROG_EXPLOR', 'QG_PROG_FEDERA', 'QG_PROG_EMPIRE', 'QG_PROG_EXOBIO', 'QG_WEALTH', 'QG_SHIPS_VALUE', 'QG_REBUY', 'QG_POWERPLAY', 'QG_FLEET', 'QG_CARRIER_STATS', 'QG_ACTIVE_SHIP_ID'];
+        const junkTags = ['PARAM_UPDATE', 'QG_RANK_COMBAT', 'QG_RANK_TRADE', 'QG_RANK_EXPLOR', 'QG_RANK_FEDERA', 'QG_RANK_EMPIRE', 'QG_RANK_EXOBIO', 'QG_PROG_COMBAT', 'QG_PROG_TRADE', 'QG_PROG_EXPLOR', 'QG_PROG_FEDERA', 'QG_PROG_EMPIRE', 'QG_PROG_EXOBIO', 'QG_WEALTH', 'QG_SHIPS_VALUE', 'QG_REBUY', 'QG_POWERPLAY', 'QG_FLEET', 'QG_CARRIER_STATS', 'QG_ACTIVE_SHIP_ID', 'QG_SQUADRON_FACTION'];
         junkTags.forEach(tag => { processLatest(tag, () => {}); });
         radarData.filter(d => d.target_commodity && d.target_commodity.startsWith('QG_MODULES_')).forEach(i => idsToDelete.push(i.id));
 
