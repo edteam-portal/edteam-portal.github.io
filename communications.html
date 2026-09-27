@@ -164,7 +164,6 @@
             <nav class="tab-bar" style="margin-bottom: 0;">
             <button id="btn-tab-global" class="tab-btn active" onclick="changerCanal('GLOBAL', this)" onmouseenter="sonHover()">FRÉQUENCE OUVERTE</button>
             <button id="btn-tab-escadron" class="tab-btn" style="display: none;" onclick="changerCanal('ESCADRON', this)" onmouseenter="sonHover()">CANAL ESCADRON</button>
-            <button id="btn-tab-coalition" class="tab-btn" onclick="changerCanal('COALITION', this)" onmouseenter="sonHover()" style="display: none; border-color: #B026FF; color: #B026FF;">RÉSEAU COALITION</button>
             <button id="btn-tab-prive" class="tab-btn" onclick="changerCanal('PRIVE', this)" onmouseenter="sonHover()">TRANSMISSIONS PRIVÉES <span id="badge-unread" style="color:#FF3333; display:none;">(•)</span></button>
             </nav>
         </div>
@@ -212,8 +211,7 @@
         let canalActif = 'GLOBAL';
         let isUrgent = false;
         let listePilotes = [];
-        let maCoalitionId = null;
-        
+
         // ==========================================
         // HORLOGE GALACTIQUE (SYNCHRO LOCALE SILENCIEUSE)
         // ==========================================
@@ -279,20 +277,6 @@
                     
                     const btnEscadron = document.getElementById('btn-tab-escadron');
                     if (btnEscadron) btnEscadron.style.display = 'inline-block';
-                    
-                    try {
-                        // VÉRIFICATION COALITION SÉCURISÉE
-                        const { data: coalData } = await supabaseApp.from('coalition_membres')
-                            .select('coalition_id')
-                            .eq('escadron_tag', data.escadron_id)
-                            .maybeSingle();
-                            
-                        if (coalData) {
-                            maCoalitionId = coalData.coalition_id;
-                            const btnCoalition = document.getElementById('btn-tab-coalition');
-                            if (btnCoalition) btnCoalition.style.display = 'inline-block';
-                        }
-                    } catch(err) { console.warn("Liaison coalition ignorée."); }
                 }
 
                 // --- INJECTION DES DONNÉES DANS LE HEADER ---
@@ -411,8 +395,6 @@
                     query = query.eq('canal', 'GLOBAL');
                 } else if (canalActif === 'ESCADRON') {
                     query = query.eq('canal', 'ESCADRON').eq('escadron_id', profilCommandant.escadron_id);
-                } else if (canalActif === 'COALITION') {
-                    query = query.eq('canal', 'COALITION').eq('coalition_id', maCoalitionId);
                 } else if (canalActif === 'PRIVE') {
                     query = query.eq('canal', 'PRIVE').or(`destinataire_id.eq.${profilCommandant.user_id},expediteur_id.eq.${profilCommandant.user_id}`);
                 }
@@ -477,7 +459,6 @@
 
             await verifierCanal('GLOBAL', null, null, 'btn-tab-global');
             if (profilCommandant.escadron_id) await verifierCanal('ESCADRON', 'escadron_id', profilCommandant.escadron_id, 'btn-tab-escadron');
-            if (maCoalitionId) await verifierCanal('COALITION', 'coalition_id', maCoalitionId, 'btn-tab-coalition');
         }
 
         function afficherMessage(msg, animate = true) {
@@ -623,8 +604,7 @@
                 est_urgent: isUrgent
             };
 
-            if (canalActif === 'ESCADRON' || canalActif === 'COALITION') payload.escadron_id = profilCommandant.escadron_id;
-            if (canalActif === 'COALITION') payload.coalition_id = maCoalitionId;
+            if (canalActif === 'ESCADRON') payload.escadron_id = profilCommandant.escadron_id;
             if (canalActif === 'PRIVE') payload.destinataire_id = destId;
 
             try {
@@ -632,7 +612,7 @@
                 if (error) throw error;
                 
                 // NOUVEAU : Enregistrement direct dans le journal tactique (Canaux publics uniquement)
-                if (canalActif === 'GLOBAL' || canalActif === 'ESCADRON' || canalActif === 'COALITION') {
+                if (canalActif === 'GLOBAL' || canalActif === 'ESCADRON') {
                     supabaseApp.from('journal_activite').insert([{
                         escadron_id: profilCommandant.escadron_id,
                         user_id: profilCommandant.user_id,
@@ -672,7 +652,6 @@
                     let afficherDirectement = false;
                     if (canalActif === 'GLOBAL' && msg.canal === 'GLOBAL') afficherDirectement = true;
                     if (canalActif === 'ESCADRON' && msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) afficherDirectement = true;
-                    if (canalActif === 'COALITION' && msg.canal === 'COALITION' && msg.coalition_id === maCoalitionId) afficherDirectement = true;
                     if (canalActif === 'PRIVE' && msg.canal === 'PRIVE' && (msg.destinataire_id === profilCommandant.user_id || msg.expediteur_id === profilCommandant.user_id)) afficherDirectement = true;
 
                     if (afficherDirectement) {
@@ -687,7 +666,6 @@
                         let idOnglet = null;
                         if (msg.canal === 'GLOBAL') idOnglet = 'btn-tab-global';
                         else if (msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) idOnglet = 'btn-tab-escadron';
-                        else if (msg.canal === 'COALITION' && msg.coalition_id === maCoalitionId) idOnglet = 'btn-tab-coalition';
                         else if (msg.canal === 'PRIVE' && msg.destinataire_id === profilCommandant.user_id) {
                             idOnglet = 'btn-tab-prive';
                             document.getElementById('badge-unread').style.display = 'inline';

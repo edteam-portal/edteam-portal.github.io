@@ -10,6 +10,14 @@ let covasEnCours = false;
 let systemeCourant = "";
 let covasSessionId = 0; // NOUVEAU: Identifiant de session pour bloquer les superpositions
 
+// Resolution unique du client Supabase (evite de repeter ce fallback a chaque endroit du fichier ;
+// aucun autre fichier ne definit getDb, ce n'etait qu'un garde-fou mort dans le code d'origine)
+function getDb() {
+    if (typeof supabaseApp !== 'undefined' && supabaseApp) return supabaseApp;
+    if (window.supabaseApp) return window.supabaseApp;
+    return null;
+}
+
 // 1. MOTEUR AUDIO IMPÉRIAL
 function playBipHolographique() {
     if (!covasAudioCtx) covasAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -114,10 +122,7 @@ async function declencherAnalyseTactique(nomSysteme) {
     if (currentSession !== covasSessionId) return;
 
     try {
-        let db;
-        if (typeof getDb === 'function') db = getDb();
-        else if (typeof supabaseApp !== 'undefined') db = supabaseApp;
-        else if (typeof window.supabaseApp !== 'undefined') db = window.supabaseApp;
+        let db = getDb();
 
         if (!db) throw new Error("Base de données introuvable.");
         const escadronId = profilCommandant.escadron_id || 'ISS';
@@ -318,7 +323,7 @@ window.traiterCiblageTactique = function(payloadBrut) {
 window.lastSystemeCovas = ""; // Mémorise le dernier système visité pour éviter les doublons
 
 window.initCovasRealtime = async function() {
-    let db = typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp;
+    let db = getDb();
 
     // SÉCURITÉ : On attend l'identification du commandant
     if (!db || typeof profilCommandant === 'undefined' || !profilCommandant) {
@@ -445,10 +450,7 @@ document.body.addEventListener('click', activerCovasAudio, { once: true });
 // 6. COMPTEUR DE PRÉSENCE EN TEMPS RÉEL (WEB APP)
 // ==========================================
 window.initialiserCompteurPresence = function() {
-    let db;
-    if (typeof getDb === 'function') db = getDb();
-    else if (typeof supabaseApp !== 'undefined') db = supabaseApp;
-    else if (typeof window.supabaseApp !== 'undefined') db = window.supabaseApp;
+    let db = getDb();
 
     if (!db || typeof profilCommandant === 'undefined' || !profilCommandant) {
         setTimeout(window.initialiserCompteurPresence, 2000);
@@ -548,8 +550,8 @@ setTimeout(window.initialiserCompteurPresence, 3000);
 
 async function verifierCibleTactique(nomCmdr, tagEscadron) {
     try {
-        let db = typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp;
-        
+        let db = getDb();
+
         const requeteProfil = db.from('profils').select('escadron_id').ilike('cmdr_nom', nomCmdr).limit(1);
         const requeteDiplo = (profilCommandant.escadron_id && tagEscadron) 
             ? db.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('tag', tagEscadron.toUpperCase()).limit(1) 
