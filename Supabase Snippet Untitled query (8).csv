@@ -1,0 +1,8 @@
+table_name,constraint_name,constraint_type,columns
+efforts_bgs,efforts_bgs_pkey,PRIMARY KEY,id
+journal_activite,journal_activite_pkey,PRIMARY KEY,id
+ordres_bgs,ordres_bgs_pkey,PRIMARY KEY,id
+profils,profils_pkey,PRIMARY KEY,id
+profils,profils_user_id_unique,UNIQUE,user_id
+radar_commercial,radar_commercial_pkey,PRIMARY KEY,id
+transmissions,transmissions_pkey,PRIMARY KEY,id

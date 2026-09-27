@@ -1,0 +1,100 @@
+schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check
+public,commandes_terminal,Acces Web commandes,PERMISSIVE,{public},ALL,((auth.uid() = user_id) OR (get_user_id_from_key() = user_id)),((auth.uid() = user_id) OR (get_user_id_from_key() = user_id))
+public,conflits_systemes,Lecture publique conflits,PERMISSIVE,"{anon,authenticated}",SELECT,true,null
+public,conflits_systemes,Mise a jour conflits,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,efforts_bgs,Lecture des efforts (Escadron),PERMISSIVE,{authenticated},SELECT,"((EXISTS ( SELECT 1
+   FROM ordres_bgs
+  WHERE ((ordres_bgs.id = efforts_bgs.ordre_id) AND (ordres_bgs.escadron_id = ( SELECT profils.escadron_id
+           FROM profils
+          WHERE (profils.user_id = auth.uid())))))) OR (( SELECT profils.est_directeur
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true))",null
+public,efforts_bgs,Purge par le Commandement,PERMISSIVE,{authenticated},DELETE,"((EXISTS ( SELECT 1
+   FROM ordres_bgs
+  WHERE ((ordres_bgs.id = efforts_bgs.ordre_id) AND (ordres_bgs.escadron_id = ( SELECT profils.escadron_id
+           FROM profils
+          WHERE ((profils.user_id = auth.uid()) AND ((profils.est_amiral = true) OR (profils.est_officier = true)))))))) OR (( SELECT profils.est_directeur
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true))",null
+public,efforts_bgs,Télémétrie BGS EDMC,PERMISSIVE,{public},INSERT,null,(get_user_id_from_key() = user_id)
+public,escadrons,Lecture escadrons,PERMISSIVE,{authenticated},SELECT,true,null
+public,etat_serveur,Lecture publique de l'etat serveur,PERMISSIVE,{public},SELECT,true,null
+public,gazette_hebdo,Lecture de la Gazette,PERMISSIVE,{public},SELECT,true,null
+public,gazette_hebdo,Publication par l'Amirauté,PERMISSIVE,{public},INSERT,null,"((( SELECT profils.est_amiral
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true) OR (( SELECT profils.est_directeur
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true))"
+public,inventaire_fc,Acces Web inventaire,PERMISSIVE,{public},ALL,((auth.uid() = user_id) OR (get_user_id_from_key() = user_id)),((auth.uid() = user_id) OR (get_user_id_from_key() = user_id))
+public,journal_activite,Insertion publique,PERMISSIVE,{public},INSERT,null,true
+public,journal_activite,Lecture publique,PERMISSIVE,{public},SELECT,true,null
+public,journal_transactions,EDMC_Insert_Journal,PERMISSIVE,{public},INSERT,null,(get_user_id_from_key() = user_id)
+public,journal_transactions,Web_Lecture_Journal,PERMISSIVE,{authenticated},SELECT,(auth.uid() = user_id),null
+public,journal_transactions,Web_Suppression_Journal,PERMISSIVE,{authenticated},DELETE,(auth.uid() = user_id),null
+public,moyennes_galactiques,Alimentation par sondes EDMC,PERMISSIVE,{public},ALL,(get_user_id_from_key() IS NOT NULL),(get_user_id_from_key() IS NOT NULL)
+public,moyennes_galactiques,Lecture encyclopedie,PERMISSIVE,{public},SELECT,true,null
+public,ordres_bgs,Administration des ordres,PERMISSIVE,{authenticated},ALL,"(EXISTS ( SELECT 1
+   FROM profils
+  WHERE ((profils.user_id = auth.uid()) AND (((profils.escadron_id = ordres_bgs.escadron_id) AND ((profils.est_amiral = true) OR (profils.est_officier = true))) OR (profils.est_directeur = true)))))","(EXISTS ( SELECT 1
+   FROM profils
+  WHERE ((profils.user_id = auth.uid()) AND (((profils.escadron_id = ordres_bgs.escadron_id) AND ((profils.est_amiral = true) OR (profils.est_officier = true))) OR (profils.est_directeur = true)))))"
+public,ordres_bgs,Lecture des ordres,PERMISSIVE,{authenticated},SELECT,"((escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid()))) OR auth_est_directeur())",null
+public,ordres_bgs,Lecture des ordres par le plugin EDMC,PERMISSIVE,{public},SELECT,"((statut = 'ACTIF'::text) AND (escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = get_user_id_from_key()))))",null
+public,parametres_app,Lecture des parametres,PERMISSIVE,{public},SELECT,((auth.uid() = user_id) OR (get_user_id_from_key() = user_id) OR auth_est_directeur()),null
+public,parametres_app,Modification des parametres,PERMISSIVE,{public},ALL,((auth.uid() = user_id) OR (get_user_id_from_key() = user_id)),((auth.uid() = user_id) OR (get_user_id_from_key() = user_id))
+public,profils,Le plugin peut s'identifier,PERMISSIVE,{public},SELECT,"((cle_api)::text = ((current_setting('request.headers'::text, true))::json ->> 'x-commandant-key'::text))",null
+public,profils,Lecture de son propre profil,PERMISSIVE,{authenticated},SELECT,(auth.uid() = user_id),null
+public,profils,Lecture totale pour le directeur,PERMISSIVE,{public},SELECT,auth_est_directeur(),null
+public,profils,Suppression réservée au Directeur,PERMISSIVE,{authenticated},DELETE,auth_est_directeur(),null
+public,radar_commercial,Insertion_EDMC_Radar,PERMISSIVE,{public},INSERT,null,(get_user_id_from_key() = user_id)
+public,radar_commercial,Insertion_Web_Radar_Restreinte,PERMISSIVE,{authenticated},INSERT,null,((auth.uid() = user_id) AND (target_commodity = 'APP_PARAMS'::text))
+public,radar_commercial,Lecture_Radar,PERMISSIVE,{public},SELECT,((auth.uid() = user_id) OR (get_user_id_from_key() = user_id)),null
+public,radar_commercial,Suppression_Radar,PERMISSIVE,{public},DELETE,((auth.uid() = user_id) OR (get_user_id_from_key() = user_id)),null
+public,radar_commercial,Update_EDMC_Radar,PERMISSIVE,{public},UPDATE,(get_user_id_from_key() = user_id),(get_user_id_from_key() = user_id)
+public,registre_tactique,Insertion registre tactique,PERMISSIVE,{public},INSERT,null,(auth.uid() = auteur_id)
+public,registre_tactique,Lecture du registre tactique,PERMISSIVE,{public},SELECT,"((escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid()))) AND ((est_valide = true) OR (auteur_id = auth.uid()) OR (( SELECT profils.est_officier
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true) OR (( SELECT profils.est_amiral
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true)))",null
+public,registre_tactique,Purge par l'Etat-Major,PERMISSIVE,{public},DELETE,"((escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid()))) AND ((( SELECT profils.est_officier
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true) OR (( SELECT profils.est_amiral
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true)))",null
+public,registre_tactique,Soumission d'un rapport,PERMISSIVE,{public},INSERT,null,"((auteur_id = auth.uid()) AND (escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid()))))"
+public,registre_tactique,Suppression registre tactique,PERMISSIVE,{public},DELETE,"((auth.uid() = auteur_id) OR (EXISTS ( SELECT 1
+   FROM profils
+  WHERE ((profils.user_id = auth.uid()) AND ((profils.est_amiral = true) OR (profils.est_officier = true) OR (profils.est_directeur = true))))))",null
+public,registre_tactique,Validation par l'Etat-Major,PERMISSIVE,{public},UPDATE,"((escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid()))) AND ((( SELECT profils.est_officier
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true) OR (( SELECT profils.est_amiral
+   FROM profils
+  WHERE (profils.user_id = auth.uid())) = true)))",null
+public,stations_favorites,Gestion des favoris personnels,PERMISSIVE,{authenticated},ALL,(auth.uid() = user_id),(auth.uid() = user_id)
+public,traites_diplomatiques,Gestion reservee aux diplomates,PERMISSIVE,{authenticated},ALL,"(EXISTS ( SELECT 1
+   FROM profils
+  WHERE ((profils.user_id = auth.uid()) AND (((profils.escadron_id = traites_diplomatiques.escadron_id) AND ((profils.est_amiral = true) OR (profils.est_officier = true) OR (profils.est_diplomate = true))) OR (profils.est_directeur = true)))))","(EXISTS ( SELECT 1
+   FROM profils
+  WHERE ((profils.user_id = auth.uid()) AND (((profils.escadron_id = traites_diplomatiques.escadron_id) AND ((profils.est_amiral = true) OR (profils.est_officier = true) OR (profils.est_diplomate = true))) OR (profils.est_directeur = true)))))"
+public,traites_diplomatiques,Lecture des traités,PERMISSIVE,{authenticated},SELECT,"((escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid()))) OR auth_est_directeur())",null
+public,transmissions,Envoi de transmissions,PERMISSIVE,{authenticated},INSERT,null,(auth.uid() = expediteur_id)
+public,transmissions,Lecture des transmissions,PERMISSIVE,{authenticated},SELECT,"((auth.uid() = expediteur_id) OR (auth.uid() = destinataire_id) OR (canal = 'GLOBAL'::text) OR ((canal = 'ESCADRON'::text) AND (escadron_id = ( SELECT profils.escadron_id
+   FROM profils
+  WHERE (profils.user_id = auth.uid())))))",null
+public,transmissions,Modification de ses propres transmissions reçues,PERMISSIVE,{authenticated},UPDATE,(auth.uid() = destinataire_id),null
+public,transmissions,Suppression de ses propres transmissions,PERMISSIVE,{authenticated},DELETE,((auth.uid() = destinataire_id) OR (auth.uid() = expediteur_id)),null

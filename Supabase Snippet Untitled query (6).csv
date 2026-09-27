@@ -1,0 +1,43 @@
+table_name,column_name,data_type,is_nullable,column_default
+radar_commercial,id,integer,NO,nextval('radar_commercial_id_seq'::regclass)
+radar_commercial,system_name,text,NO,null
+radar_commercial,target_commodity,text,YES,null
+radar_commercial,created_at,timestamp with time zone,YES,"timezone('utc'::text, now())"
+radar_commercial,trafic_hebdo,integer,YES,0
+radar_commercial,date_maj,text,YES,'Inconnue'::text
+radar_commercial,station_name,text,YES,null
+radar_commercial,type_operation,text,YES,null
+radar_commercial,prix_unitaire,bigint,YES,null
+radar_commercial,volume_disponible,bigint,YES,null
+radar_commercial,is_planetary,boolean,YES,false
+radar_commercial,distance,double precision,YES,0
+radar_commercial,prix_moyen,numeric,YES,0
+radar_commercial,user_id,uuid,YES,null
+registre_tactique,id,bigint,NO,null
+registre_tactique,created_at,timestamp with time zone,NO,now()
+registre_tactique,escadron_id,text,YES,null
+registre_tactique,cmdr_cible,text,YES,null
+registre_tactique,systeme_rencontre,text,YES,null
+registre_tactique,niveau_menace,text,YES,"'''KOS'', ''SUSPECT'', ''ALLIE'''::text"
+registre_tactique,rapport,text,YES,null
+registre_tactique,auteur_nom,text,YES,null
+registre_tactique,auteur_id,uuid,YES,null
+registre_tactique,est_valide,boolean,YES,false
+traites_diplomatiques,id,bigint,NO,null
+traites_diplomatiques,created_at,timestamp with time zone,NO,now()
+traites_diplomatiques,escadron_id,text,YES,null
+traites_diplomatiques,faction_cible,text,YES,null
+traites_diplomatiques,type_relation,text,YES,null
+traites_diplomatiques,directives,text,YES,null
+traites_diplomatiques,signataire_nom,text,YES,null
+traites_diplomatiques,tag,text,YES,null
+transmissions,id,uuid,NO,uuid_generate_v4()
+transmissions,created_at,timestamp with time zone,YES,now()
+transmissions,expediteur_id,uuid,NO,null
+transmissions,expediteur_nom,text,NO,null
+transmissions,escadron_id,text,YES,null
+transmissions,destinataire_id,uuid,YES,null
+transmissions,canal,text,NO,null
+transmissions,message,text,NO,null
+transmissions,est_urgent,boolean,YES,false
+transmissions,lu,boolean,YES,false

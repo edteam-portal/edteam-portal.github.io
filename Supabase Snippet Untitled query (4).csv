@@ -1,0 +1,101 @@
+table_name,column_name,data_type,is_nullable,column_default
+conflits_systemes,id,text,NO,null
+conflits_systemes,systeme,text,NO,null
+conflits_systemes,type_conflit,text,YES,null
+conflits_systemes,faction1_nom,text,YES,null
+conflits_systemes,faction1_score,integer,YES,0
+conflits_systemes,faction1_enjeu,text,YES,null
+conflits_systemes,faction2_nom,text,YES,null
+conflits_systemes,faction2_score,integer,YES,0
+conflits_systemes,faction2_enjeu,text,YES,null
+conflits_systemes,mis_a_jour,timestamp with time zone,YES,now()
+efforts_bgs,id,bigint,NO,null
+efforts_bgs,created_at,timestamp with time zone,NO,now()
+efforts_bgs,user_id,uuid,YES,null
+efforts_bgs,ordre_id,bigint,YES,null
+efforts_bgs,type_action,text,YES,null
+efforts_bgs,date_action,timestamp with time zone,YES,now()
+efforts_bgs,valeur,numeric,YES,null
+efforts_bgs,systeme,text,YES,null
+efforts_bgs,faction,text,YES,null
+efforts_bgs,details,text,YES,null
+journal_activite,id,bigint,NO,null
+journal_activite,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())"
+journal_activite,escadron_id,text,NO,null
+journal_activite,user_id,uuid,YES,null
+journal_activite,cmdr_nom,text,NO,null
+journal_activite,type_action,text,NO,null
+journal_activite,details,text,NO,null
+journal_activite,couleur,text,YES,'#00F0FF'::text
+ordres_bgs,id,bigint,NO,null
+ordres_bgs,created_at,timestamp with time zone,NO,now()
+ordres_bgs,escadron_id,text,YES,'ISS'::text
+ordres_bgs,systeme_cible,text,YES,null
+ordres_bgs,faction_cible,text,YES,null
+ordres_bgs,type_ordre,text,YES,null
+ordres_bgs,date_emission,timestamp with time zone,YES,now()
+ordres_bgs,statut,text,YES,'ACTIF'::text
+ordres_bgs,population,bigint,YES,'0'::bigint
+ordres_bgs,briefing_amiral,text,YES,null
+ordres_bgs,plafonds_custom,jsonb,YES,null
+ordres_bgs,auteur_id,uuid,YES,null
+ordres_bgs,priorite,integer,YES,3
+parametres_app,id,integer,NO,nextval('parametres_app_id_seq'::regclass)
+parametres_app,mode_flotte,text,YES,'FC'::text
+parametres_app,fc_nom,text,YES,'CARRIER INCONNU'::text
+parametres_app,fc_capacite,integer,YES,25000
+parametres_app,vaisseau_nom,text,YES,'VAISSEAU INCONNU'::text
+parametres_app,vaisseau_capacite,integer,YES,0
+parametres_app,cibles_achat,jsonb,YES,"'[""Gold"", ""Silver"", ""Palladium"", ""Agronomic Treatment""]'::jsonb"
+parametres_app,user_id,uuid,YES,null
+parametres_app,possede_fc,boolean,YES,false
+parametres_app,position_actuelle,text,YES,'SYSTÈME INCONNU'::text
+parametres_app,vaisseau_modele,text,YES,null
+parametres_app,factions_favorites,jsonb,YES,'[]'::jsonb
+parametres_app,last_heartbeat,bigint,YES,null
+parametres_app,covas_status,text,YES,null
+parametres_app,flotte_json,jsonb,YES,'[]'::jsonb
+parametres_app,modules_json,jsonb,YES,'[]'::jsonb
+parametres_app,carrier_stats_json,jsonb,YES,'[]'::jsonb
+parametres_app,id_vaisseau_actif,text,YES,null
+profils,id,uuid,NO,gen_random_uuid()
+profils,user_id,uuid,YES,null
+profils,email,text,YES,null
+profils,cle_api,uuid,YES,gen_random_uuid()
+profils,est_approuve,boolean,YES,false
+profils,created_at,timestamp with time zone,YES,now()
+profils,escadron_id,text,YES,''::text
+profils,est_amiral,boolean,YES,false
+profils,cmdr_nom,text,YES,null
+profils,solde_vaisseau,bigint,YES,null
+profils,solde_fc,bigint,YES,null
+profils,rang_combat,integer,YES,0
+profils,prog_combat,integer,YES,0
+profils,rang_commerce,integer,YES,0
+profils,prog_commerce,integer,YES,0
+profils,rang_explo,integer,YES,0
+profils,prog_explore,integer,YES,0
+profils,rang_exobio,integer,YES,0
+profils,prog_exobio,integer,YES,0
+profils,rang_fed,integer,YES,0
+profils,prog_fed,integer,YES,0
+profils,rang_emp,integer,YES,0
+profils,prog_emp,integer,YES,0
+profils,patrimoine_total,bigint,YES,'0'::bigint
+profils,valeur_vaisseaux,bigint,YES,'0'::bigint
+profils,cout_rachat,bigint,YES,'0'::bigint
+profils,est_directeur,boolean,YES,false
+profils,est_officier,boolean,YES,false
+profils,est_diplomate,boolean,YES,false
+profils,notoriete,integer,YES,0
+profils,rang_mercenary,integer,YES,0
+profils,prog_mercenary,integer,YES,0
+profils,reputations,jsonb,YES,'{}'::jsonb
+profils,palmares_bgs,jsonb,YES,null
+profils,faction_choisie,text,YES,null
+profils,puissance_nom,text,YES,null
+profils,puissance_rang,integer,YES,0
+profils,puissance_merites_cycle,integer,YES,0
+profils,puissance_merites_total,integer,YES,0
+profils_publics,id,uuid,YES,null
+profils_publics,user_id,uuid,YES,null
