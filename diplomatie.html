@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=1"></script>
     <script src="navigation.js?v=2"></script>
 
     <style>
@@ -294,8 +295,8 @@
                         cursorStyle = 'cursor: grab;';
                     }
 
-                    const tagStr = t.tag ? ` [${t.tag.toUpperCase()}]` : '';
-                    const pillHtml = `<div class="diplo-pill" style="border-color: ${color}; color: ${color}; ${cursorStyle}" ${dragAttr} onclick="afficherDetailsTraite('${t.id}', '${t.type_relation}')">${icon} ${t.faction_cible.toUpperCase()}${tagStr}</div>`;
+                    const tagStr = t.tag ? ` [${escapeHtml(t.tag.toUpperCase())}]` : '';
+                    const pillHtml = `<div class="diplo-pill" style="border-color: ${color}; color: ${color}; ${cursorStyle}" ${dragAttr} onclick="afficherDetailsTraite('${t.id}', '${t.type_relation}')">${icon} ${escapeHtml(t.faction_cible.toUpperCase())}${tagStr}</div>`;
 
                     if (t.type_relation === 'ALLIE') htmlAllies += pillHtml;
                     else if (t.type_relation === 'PNA') htmlPNA += pillHtml;
@@ -337,12 +338,12 @@
                 </div>`;
             }
 
-            const directives = traite.directives ? traite.directives.replace(/\n/g, '<br>') : '<span style="color: #666; font-style: italic;">Aucune directive tactique spécifiée.</span>';
-            const signataire = (traite.signataire_nom || 'COMMANDEMENT').toUpperCase();
+            const directives = traite.directives ? escapeHtml(traite.directives).replace(/\n/g, '<br>') : '<span style="color: #666; font-style: italic;">Aucune directive tactique spécifiée.</span>';
+            const signataire = escapeHtml((traite.signataire_nom || 'COMMANDEMENT').toUpperCase());
 
             panel.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                    <div style="font-size: 1.4em; font-weight: bold; color: #fff; letter-spacing: 1px;">> DOSSIER : ${traite.faction_cible.toUpperCase()} ${traite.tag ? `[${traite.tag.toUpperCase()}]` : ''}</div>
+                    <div style="font-size: 1.4em; font-weight: bold; color: #fff; letter-spacing: 1px;">> DOSSIER : ${escapeHtml(traite.faction_cible.toUpperCase())} ${traite.tag ? `[${escapeHtml(traite.tag.toUpperCase())}]` : ''}</div>
                     ${btnActions}
                 </div>
                 <div style="color: #ccc; font-size: 0.95em; line-height: 1.6; background: rgba(0,0,0,0.5); padding: 15px; border-left: 3px solid ${color};">

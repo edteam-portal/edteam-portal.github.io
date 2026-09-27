@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=1"></script>
     <script src="navigation.js?v=2"></script>
 
     <style>
@@ -513,41 +514,51 @@
             
             if (profilCommandant.escadron_id) {
                 const nomExpediteur = msg.expediteur_nom ? msg.expediteur_nom.toUpperCase() : "";
-                
+                // Registre JS pour le contenu des tooltips (indexe par id de message, evite le
+                // piege du double-decodage HTML qu'un simple escapeHtml() ne survivrait pas
+                // si le texte etait serialise directement dans l'attribut onmouseenter).
+                window.__tagTooltip = window.__tagTooltip || {};
+
                 // 1. Recherche dans le Registre Tactique (Individuel)
                 const fiche = cacheRegistreTactique.find(f => f.cmdr_cible.toUpperCase() === nomExpediteur);
                 if (fiche) {
-                    const txtRapport = fiche.rapport ? fiche.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
+                    const txtRapport = escapeHtml(fiche.rapport || 'Aucun rapport').replace(/\r?\n/g, '<br>');
                     if (fiche.niveau_menace === 'KOS') {
+                        window.__tagTooltip[msg.id + '_kos'] = `> CIBLE K.O.S<br><span style="color:#fff; font-weight:normal;">${txtRapport}</span>`;
                         // AJOUT DE L'ANIMATION DE CLIGNOTEMENT (alertPulse)
-                        tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help; animation: alertPulse 1.2s infinite;" onmouseenter="showHoloTooltip(event, '> CIBLE K.O.S<br><span style=\\'color:#fff; font-weight:normal;\\'>${txtRapport}</span>', '#FF3333')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🔴 K.O.S]</span>`;
+                        tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px solid #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help; animation: alertPulse 1.2s infinite;" onmouseenter="showHoloTooltip(event, window.__tagTooltip['${msg.id}_kos'], '#FF3333')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🔴 K.O.S]</span>`;
                     } else if (fiche.niveau_menace === 'SUSPECT') {
-                        tagsRenseignement += `<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> INDIVIDU SUSPECT<br><span style=\\'color:#fff; font-weight:normal;\\'>${txtRapport}</span>', 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🟠 SUSPECT]</span>`;
+                        window.__tagTooltip[msg.id + '_suspect'] = `> INDIVIDU SUSPECT<br><span style="color:#fff; font-weight:normal;">${txtRapport}</span>`;
+                        tagsRenseignement += `<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, window.__tagTooltip['${msg.id}_suspect'], 'var(--ed-orange)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🟠 SUSPECT]</span>`;
                     } else if (fiche.niveau_menace === 'ALLIE') {
-                        tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> ALLIÉ V.I.P<br><span style=\\'color:#fff; font-weight:normal;\\'>${txtRapport}</span>', '#00FF66')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🟢 V.I.P]</span>`;
+                        window.__tagTooltip[msg.id + '_allie_reg'] = `> ALLIÉ V.I.P<br><span style="color:#fff; font-weight:normal;">${txtRapport}</span>`;
+                        tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, window.__tagTooltip['${msg.id}_allie_reg'], '#00FF66')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🟢 V.I.P]</span>`;
                     }
                 }
-                
+
                 // 2. Recherche Diplomatique (Croisement Tag et Nom)
                 const profilExpediteur = listePilotes.find(p => p.user_id === msg.expediteur_id);
                 if (profilExpediteur && profilExpediteur.escadron_id) {
-                    
-                    const traite = cacheTraitesDiplo.find(t => 
-                        (t.tag && t.tag.toUpperCase() === profilExpediteur.escadron_id.toUpperCase()) || 
+
+                    const traite = cacheTraitesDiplo.find(t =>
+                        (t.tag && t.tag.toUpperCase() === profilExpediteur.escadron_id.toUpperCase()) ||
                         (t.faction_cible && t.faction_cible.toUpperCase() === profilExpediteur.escadron_id.toUpperCase())
                     );
-                    
+
                     if (traite) {
-                        const tagAffiche = traite.tag ? traite.tag.toUpperCase() : traite.faction_cible.substring(0, 4).toUpperCase();
-                        const facName = traite.faction_cible ? traite.faction_cible.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "INCONNUE";
+                        const tagAffiche = escapeHtml(traite.tag ? traite.tag.toUpperCase() : traite.faction_cible.substring(0, 4).toUpperCase());
+                        const facName = escapeHtml(traite.faction_cible || 'INCONNUE');
 
                         if (traite.type_relation === 'HOSTILE') {
+                            window.__tagTooltip[msg.id + '_hostile'] = `> TRAITÉ HOSTILE<br><span style="color:#fff; font-weight:normal;">${facName}</span>`;
                             // AJOUT DE L'ANIMATION DE CLIGNOTEMENT (alertPulse)
-                            tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px dashed #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help; animation: alertPulse 1.2s infinite;" onmouseenter="showHoloTooltip(event, '> TRAITÉ HOSTILE<br><span style=\\'color:#fff; font-weight:normal;\\'>${facName}</span>', '#FF3333')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[⚔️ ${tagAffiche}]</span>`;
+                            tagsRenseignement += `<span style="background: rgba(255,51,51,0.15); color: #FF3333; border: 1px dashed #FF3333; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help; animation: alertPulse 1.2s infinite;" onmouseenter="showHoloTooltip(event, window.__tagTooltip['${msg.id}_hostile'], '#FF3333')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[⚔️ ${tagAffiche}]</span>`;
                         } else if (traite.type_relation === 'PNA') {
-                            tagsRenseignement += `<span style="background: rgba(0,240,255,0.15); color: var(--ed-blue); border: 1px dashed var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> P.N.A (NON-AGRESSION)<br><span style=\\'color:#fff; font-weight:normal;\\'>${facName}</span>', 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🛡️ ${tagAffiche}]</span>`;
+                            window.__tagTooltip[msg.id + '_pna'] = `> P.N.A (NON-AGRESSION)<br><span style="color:#fff; font-weight:normal;">${facName}</span>`;
+                            tagsRenseignement += `<span style="background: rgba(0,240,255,0.15); color: var(--ed-blue); border: 1px dashed var(--ed-blue); padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, window.__tagTooltip['${msg.id}_pna'], 'var(--ed-blue)')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🛡️ ${tagAffiche}]</span>`;
                         } else if (traite.type_relation === 'ALLIE') {
-                            tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px dashed #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, '> ALLIÉ (COALITION)<br><span style=\\'color:#fff; font-weight:normal;\\'>${facName}</span>', '#00FF66')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🤝 ${tagAffiche}]</span>`;
+                            window.__tagTooltip[msg.id + '_allie_traite'] = `> ALLIÉ (COALITION)<br><span style="color:#fff; font-weight:normal;">${facName}</span>`;
+                            tagsRenseignement += `<span style="background: rgba(0,255,102,0.15); color: #00FF66; border: 1px dashed #00FF66; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: help;" onmouseenter="showHoloTooltip(event, window.__tagTooltip['${msg.id}_allie_traite'], '#00FF66')" onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">[🤝 ${tagAffiche}]</span>`;
                         }
                     }
                 }
@@ -571,13 +582,13 @@
                 <div style="flex-shrink: 0; margin-right: 8px; display: flex; align-items: baseline; flex-wrap: wrap;">
                     <span class="msg-time">[${timeStr}]</span>
                     ${tagsRenseignement}
-                    <span class="msg-author" style="color: ${auteurColor};">CMDR ${msg.expediteur_nom} ></span>
+                    <span class="msg-author" style="color: ${auteurColor};">CMDR ${escapeHtml(msg.expediteur_nom)} ></span>
                     <span class="msg-channel">${canalTag}</span>
                 </div>
-                
+
                 <!-- COLONNE DROITE : Le message -->
                 <div class="msg-text" style="flex-grow: 1; word-break: break-word;">
-                    ${urgentTag}${msg.message}
+                    ${urgentTag}${escapeHtml(msg.message)}
                 </div>
                 
                 ${deleteBtn}

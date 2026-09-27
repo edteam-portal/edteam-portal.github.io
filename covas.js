@@ -485,8 +485,8 @@ window.initialiserCompteurPresence = function() {
                     if (!instances || !instances.length) return;
                     
                     const p = instances[0]; 
-                    const nomCmdr = p.cmdr ? String(p.cmdr).toUpperCase() : 'COMMANDANT';
-                    const nomSquad = p.escadron ? String(p.escadron).toUpperCase() : '';
+                    const nomCmdr = escapeHtml(p.cmdr ? String(p.cmdr).toUpperCase() : 'COMMANDANT');
+                    const nomSquad = escapeHtml(p.escadron ? String(p.escadron).toUpperCase() : '');
                     
                     let badges = '';
                     if (p.amiral) badges += '<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
@@ -569,7 +569,9 @@ async function verifierCibleTactique(nomCmdr, tagEscadron) {
 }
 
 function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered) {
-    if (typeof playSonCiblageTactique === 'function') playSonCiblageTactique(); 
+    nom = escapeHtml(nom);
+    tag = escapeHtml(tag);
+    if (typeof playSonCiblageTactique === 'function') playSonCiblageTactique();
     
     const overlay = document.getElementById('tactical-overlay');
     const contenu = document.getElementById('tactical-contenu');
@@ -595,17 +597,20 @@ function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered)
         mainTitle = '⚠️ ALERTE TACTIQUE';
         pulseAnim = (tacticalFiche.niveau_menace === 'KOS');
         
-        let nomAuteur = tacticalFiche.auteur_nom ? tacticalFiche.auteur_nom.toUpperCase() : 'INCONNU';
-        let txtRapport = tacticalFiche.rapport ? tacticalFiche.rapport.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "Aucun rapport";
+        let nomAuteur = escapeHtml(tacticalFiche.auteur_nom ? tacticalFiche.auteur_nom.toUpperCase() : 'INCONNU');
+        let txtRapport = escapeHtml(tacticalFiche.rapport || 'Aucun rapport').replace(/\r?\n/g, '<br>');
 
-        let tooltipContent = `> RAPPORT TACTIQUE<br><span style=\\'color:#fff; font-weight:normal; font-style:italic;\\'>&quot; ${txtRapport} &quot;</span><br><br><span style=\\'color:${tColor}; font-size:0.85em; font-weight:bold;\\'>SIGNALÉ PAR : CMDR ${nomAuteur}</span>`;
+        // Contenu stocke dans un registre JS (evite le piege du double-decodage HTML
+        // qu'un simple escapeHtml() ne survivrait pas si le texte etait serialise
+        // directement dans l'attribut onmouseenter).
+        window.__tacticalTooltip = `> RAPPORT TACTIQUE<br><span style="color:#fff; font-weight:normal; font-style:italic;">" ${txtRapport} "</span><br><br><span style="color:${tColor}; font-size:0.85em; font-weight:bold;">SIGNALÉ PAR : CMDR ${nomAuteur}</span>`;
 
         htmlBlocs += `
         <div class="covas-ligne" style="${rowStyle}">
             <span style="color: #888;">DOSSIER INDIVIDUEL :</span>
             <strong style="color: #000; background: ${tColor}; padding: 2px 8px; border-radius: 2px; cursor: help; box-shadow: 0 0 8px ${tColor};"
                     onclick="event.stopPropagation()"
-                    onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${tooltipContent}', '${tColor}')" 
+                    onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, window.__tacticalTooltip, '${tColor}')"
                     onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
                     onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
                 ${tLabel} ⓘ

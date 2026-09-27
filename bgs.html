@@ -15,6 +15,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="shared-utils.js?v=1"></script>
     <script src="navigation.js?v=2"></script>
 
     <style>
@@ -1302,7 +1303,7 @@
                                 <!-- Colonne Gauche : Faction + Badge -->
                                 <div style="display: flex; flex-direction: column; justify-content: center; flex-grow: 1; padding-right: 15px;">
                                     <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                                        <span style="color: #fff; font-size: 0.95em; font-weight: bold;">${ordre.faction_cible}</span>
+                                        <span style="color: #fff; font-size: 0.95em; font-weight: bold;">${escapeHtml(ordre.faction_cible)}</span>
                                         <span style="color: ${color}; font-size: 0.8em; margin-left: 8px; font-weight: bold;">[ ${ordre.type_ordre} ]</span>
                                     </div>
                                     ${badgePrio}
@@ -1557,7 +1558,7 @@
                     listeTriee.forEach(uid => {
                         const pts = pointsParPilote[uid];
                         const pct = totalPoints > 0 ? ((pts / totalPoints) * 100).toFixed(1) : 0;
-                        const nom = dicoNoms[uid] ? dicoNoms[uid].toUpperCase() : 'INCONNU';
+                        const nom = escapeHtml(dicoNoms[uid] ? dicoNoms[uid].toUpperCase() : 'INCONNU');
                         
                         const estMoi = (String(uid) === String(profilCommandant.user_id));
                         const colorNom = estMoi ? couleur : '#fff';
@@ -1895,7 +1896,7 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                 <div>
                                     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                                        <span class="copy-click" onclick="copierNav('${ordre.faction_cible.replace(/'/g, "\\'").toUpperCase()}', this, event)" style="color: #fff; font-size: 1.15em; font-weight: bold;" title="Copier la faction">${ordre.faction_cible.toUpperCase()}</span>
+                                        <span class="copy-click" onclick="copierNav('${ordre.faction_cible.replace(/'/g, "\\'").toUpperCase()}', this, event)" style="color: #fff; font-size: 1.15em; font-weight: bold;" title="Copier la faction">${escapeHtml(ordre.faction_cible.toUpperCase())}</span>
                                         <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold; margin-left: 2px;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
                                         ${conflitBadge}
                                     </div>
@@ -2663,7 +2664,7 @@
 
                 dernierSystemeBGS = edsmData;
                 
-                document.getElementById('bgs-detail-title').innerHTML = `> RAPPORT TACTIQUE : <span class="copy-click" style="color: #fff;" onclick="copierNav('${edsmData.name.replace(/'/g, "\\'")}', this, event)" title="Copier le nom du système">${edsmData.name.toUpperCase()}</span>`;
+                document.getElementById('bgs-detail-title').innerHTML = `> RAPPORT TACTIQUE : <span class="copy-click" style="color: #fff;" onclick="copierNav('${edsmData.name.replace(/'/g, "\\'")}', this, event)" title="Copier le nom du système">${escapeHtml(edsmData.name.toUpperCase())}</span>`;
                 afficherTableauBGS(edsmData);
                 dessinerGraphiqueBGS(edsmData);
                 
@@ -3368,7 +3369,7 @@
                              onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
                             ${miniSvg}
                             <div class="epic-medal-title">${sousTitre}</div>
-                            <div class="epic-medal-cmdr" style="border-bottom: 2px solid ${couleurBorder};">${nomPilote}</div>
+                            <div class="epic-medal-cmdr" style="border-bottom: 2px solid ${couleurBorder};">${escapeHtml(nomPilote)}</div>
                         </div>`;
                     };
 
@@ -3546,11 +3547,11 @@
                             const minStr = d.getMinutes().toString().padStart(2, '0');
                             const horodatageComplet = `${jourStr}/${moisStr} ${heureStr}:${minStr}`;
 
-                            const cmdr = (dicoPilotes[a.user_id] || 'INCONNU');
-                            
+                            const cmdr = escapeHtml(dicoPilotes[a.user_id] || 'INCONNU');
+
                             const ordreConcerne = ordres.find(o => String(o.id) === String(a.ordre_id));
-                            const cibleSys = ordreConcerne ? ordreConcerne.systeme_cible.toUpperCase() : (a.systeme ? a.systeme.toUpperCase() : "SECTEUR LOCAL");
-                            const cibleFac = ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : (a.faction ? a.faction.toUpperCase() : "SOUTIEN FLOTTE");
+                            const cibleSys = escapeHtml(ordreConcerne ? ordreConcerne.systeme_cible.toUpperCase() : (a.systeme ? a.systeme.toUpperCase() : "SECTEUR LOCAL"));
+                            const cibleFac = escapeHtml(ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : (a.faction ? a.faction.toUpperCase() : "SOUTIEN FLOTTE"));
                             
                             let typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "LIBRE";
                             let badgeOrdreTexte = ordreConcerne ? `#${ordreConcerne.id} | ${typeOrdre}` : "SOUTIEN LIBRE";
@@ -3704,7 +3705,7 @@
             document.getElementById('vet-modal-part-pilote').innerHTML = `
                 <div>
                     <span style="color: var(--ed-orange); font-weight: bold; font-size: 0.9em; letter-spacing: 1px;">VOTRE CONTRIBUTION PERSONNELLE</span>
-                    <div style="color: #888; font-size: 0.8em; margin-top: 2px;">CMDR ${(profilCommandant.cmdr_nom || '').toUpperCase()}</div>
+                    <div style="color: #888; font-size: 0.8em; margin-top: 2px;">CMDR ${escapeHtml((profilCommandant.cmdr_nom || '').toUpperCase())}</div>
                 </div>
                 <div style="color: #FFD700; font-size: 1.5em; font-weight: bold; text-shadow: 0 0 10px rgba(255,215,0,0.5);">
                     ${partMoiPct}% <span style="font-size: 0.6em; color: #aaa;">DE L'EFFORT TOTAL</span>
