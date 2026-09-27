@@ -1587,12 +1587,15 @@
                 etatsAccordions[el.id] = el.style.display;
             });
 
-            const genererJaugeHTML = (titre, valeurTexte, couleur, pourcentage, seuilAtteint, alerteTexte = '', couleurOp = '', tooltipInfo = '') => {
-                const width = Math.min(100, pourcentage);
-                const shadow = width > 0 ? `box-shadow: 0 0 8px ${couleur};` : "";
+            const genererJaugeHTML = (titre, valeurTexte, couleur, pourcentageTotal, pourcentageVous, seuilAtteint, alerteTexte = '', couleurOp = '', tooltipInfo = '') => {
+                const widthTotal = Math.min(100, pourcentageTotal);
+                const widthVous = Math.max(0, Math.min(widthTotal, pourcentageVous));
+                const widthAutres = Math.max(0, widthTotal - widthVous);
+                const shadow = widthTotal > 0 ? `box-shadow: 0 0 8px ${couleur};` : "";
                 const couleurBarre = seuilAtteint ? '#4CAF50' : couleur;
+                const couleurAutres = seuilAtteint ? '#4CAF5055' : `${couleur}55`;
                 const shadowBarre = seuilAtteint ? 'box-shadow: 0 0 12px #4CAF50;' : shadow;
-                
+
                 let bgStyle = "background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);";
                 let titreHighlight = titre;
 
@@ -1601,7 +1604,7 @@
                     titreHighlight = `${titre} <span style="margin-left: 15px; color: ${couleurOp}; font-size: 0.85em; letter-spacing: 1px; animation: alertPulse 1.5s infinite;">${alerteTexte}</span>`;
                 }
 
-                const tooltipEvents = `onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: var(--ed-orange);\\'>OBJECTIF PERSONNEL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Remplissez cette barre pour atteindre votre rendement BGS maximum.</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"`;
+                const tooltipEvents = `onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: var(--ed-orange);\\'>OBJECTIF DE L\\'ESCADRON</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Cumule sur toute la duree de l\\'operation. Segment clair = votre contribution, segment fonce = le reste de l\\'escadron.</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"`;
 
                 let styleTitre = "color: #fff; font-weight: bold; display: flex; align-items: center;";
                 let eventsTitre = "";
@@ -1616,8 +1619,9 @@
                         <span style="${styleTitre}" ${eventsTitre}>${titreHighlight}</span>
                         <span style="background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.9em;">${valeurTexte}</span>
                     </div>
-                    <div class="bgs-bar-bg" style="width: 100%; height: 12px; background: #050200; border: 1px solid rgba(255,255,255,0.15); cursor: help;" ${tooltipEvents}>
-                        <div class="bgs-bar-fill" style="height: 100%; width: ${width}%; background: ${couleurBarre}; ${shadowBarre} transition: width 0.5s ease-out;"></div>
+                    <div class="bgs-bar-bg" style="width: 100%; height: 12px; background: #050200; border: 1px solid rgba(255,255,255,0.15); cursor: help; position: relative; overflow: hidden;" ${tooltipEvents}>
+                        <div class="bgs-bar-fill" style="position: absolute; left: 0; top: 0; height: 100%; width: ${widthVous}%; background: ${couleurBarre}; ${shadowBarre} transition: width 0.5s ease-out;"></div>
+                        <div style="position: absolute; left: ${widthVous}%; top: 0; height: 100%; width: ${widthAutres}%; background: ${couleurAutres}; transition: width 0.5s ease-out;"></div>
                     </div>
                 </div>`;
             };
@@ -1677,8 +1681,6 @@
                 });
 
                 const timeNow = Date.now();
-                let tickRef = dernierTick;
-                if (new Date() > prochainTick) tickRef = prochainTick;
 
                 let html = '';
 
@@ -1720,136 +1722,125 @@
                     let htmlAccordionsFactions = '';
 
                     for (const ordre of factionsDuSysteme) {
-                        const capsCalcules = calculerPlafonds(ordre.population || 0);
-                        const capsQuotidien = { ...capsCalcules, ...(ordre.plafonds_custom || {}) };
-
-                        const dateEmission = new Date(ordre.date_emission || ordre.created_at || timeNow);
-                        const joursOrdre = Math.max(1, Math.ceil((timeNow - dateEmission.getTime()) / (24 * 60 * 60 * 1000)));
-
-                        const capsGlobaux = {};
-                        for (const [cle, val] of Object.entries(capsQuotidien)) {
-                            capsGlobaux[cle] = val * joursOrdre;
-                        }
-
                         const effortsOrdreEscadron = effortsData.filter(e => String(e.ordre_id) === String(ordre.id));
                         const effortsOrdreMoi = effortsOrdreEscadron.filter(e => e.user_id === profilCommandant.user_id);
 
-                        const effortsQuotidienEscadron = effortsOrdreEscadron.filter(e => {
-                            if (!e.date_action) return false;
-                            let ds = e.date_action.replace(' ', 'T');
-                            if (!ds.includes('Z') && !ds.includes('+')) ds += 'Z';
-                            return new Date(ds) > tickRef;
-                        });
+                        // Plafond total de l'operation = plafond de reference (calibre pour 1 pilote)
+                        // x nombre de participants distincts a cet ordre. Cumule depuis le debut de
+                        // l'operation : plus de remise a zero quotidienne, plus de multiplication par
+                        // le nombre de jours ecoules (un escadron peu actif n'est plus penalise).
+                        const nbParticipants = Math.max(1, new Set(effortsOrdreEscadron.map(e => e.user_id)).size);
+                        const capsBase = { ...calculerPlafonds(ordre.population || 0), ...(ordre.plafonds_custom || {}) };
+                        const capsTotal = {};
+                        for (const [cle, val] of Object.entries(capsBase)) {
+                            capsTotal[cle] = val * nbParticipants;
+                        }
 
-                        const effortsQuotidienMoi = effortsOrdreMoi.filter(e => {
-                            if (!e.date_action) return false;
-                            let ds = e.date_action.replace(' ', 'T');
-                            if (!ds.includes('Z') && !ds.includes('+')) ds += 'Z';
-                            return new Date(ds) > tickRef;
-                        });
-
-                        const totauxQ = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
                         const totauxG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
-                        const totauxMoiQ = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
                         const totauxMoiG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
 
-                        effortsQuotidienEscadron.forEach(e => { if (totauxQ[e.type_action] !== undefined) totauxQ[e.type_action] += Number(e.valeur); });
                         effortsOrdreEscadron.forEach(e => { if (totauxG[e.type_action] !== undefined) totauxG[e.type_action] += Number(e.valeur); });
-                        effortsQuotidienMoi.forEach(e => { if (totauxMoiQ[e.type_action] !== undefined) totauxMoiQ[e.type_action] += Number(e.valeur); });
                         effortsOrdreMoi.forEach(e => { if (totauxMoiG[e.type_action] !== undefined) totauxMoiG[e.type_action] += Number(e.valeur); });
 
-                        const getRatioQ = (type) => Math.min(100, (totauxMoiQ[type] / capsQuotidien[type]) * 100);
+                        const getRatio = (type) => Math.min(100, (totauxG[type] / capsTotal[type]) * 100);
+                        const getRatioVous = (type) => Math.min(100, (totauxMoiG[type] / capsTotal[type]) * 100);
                         const formatCR = (val) => new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(val) + " CR";
                         const formatNum = (val) => new Intl.NumberFormat('fr-FR').format(val);
                         const fmtDual = (valMoi, valSquad, cap, unite = '') => {
                             const u = unite ? ` ${unite}` : '';
-                            return `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${valMoi} / ${cap}${u}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <span style="color:#fff;">${valSquad}${u}</span>`;
+                            return `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${valMoi}${u}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <strong style="color:#fff;">${valSquad} / ${cap}${u}</strong>`;
                         };
 
-                        let colorPrinc = '#00FF66'; let colorFond = 'rgba(0, 255, 102, 0.02)'; let colorSec = '#00F0FF'; let labelDirective = "AUGMENTER L'INFLUENCE";
-                        if (ordre.type_ordre === 'BAISSE') { colorPrinc = '#FF3333'; colorFond = 'rgba(255, 51, 51, 0.02)'; colorSec = '#FF7100'; labelDirective = "RÉDUIRE L'INFLUENCE"; }
-                        else if (ordre.type_ordre === 'GUERRE') { colorPrinc = '#FF7100'; colorFond = 'rgba(255, 113, 0, 0.02)'; colorSec = '#FF3333'; labelDirective = "REMPORTER LE CONFLIT"; }
-                        else if (ordre.type_ordre === 'ELECTION') { colorPrinc = '#00F0FF'; colorFond = 'rgba(0, 240, 255, 0.02)'; colorSec = '#00FF66'; labelDirective = "GAGNER L'ÉLECTION"; }
+                        let colorPrinc = '#00FF66'; let colorFond = 'rgba(0, 255, 102, 0.02)';
+                        if (ordre.type_ordre === 'BAISSE') { colorPrinc = '#FF3333'; colorFond = 'rgba(255, 51, 51, 0.02)'; }
+                        else if (ordre.type_ordre === 'GUERRE') { colorPrinc = '#FF7100'; colorFond = 'rgba(255, 113, 0, 0.02)'; }
+                        else if (ordre.type_ordre === 'ELECTION') { colorPrinc = '#00F0FF'; colorFond = 'rgba(0, 240, 255, 0.02)'; }
 
-                        let sommeRatiosQ = 0; let diviseur = 1; let htmlJauges = '';
+                        let sommeRatios = 0; let diviseur = 1; let htmlJauges = '';
                         let poidsTotalEscadron = 0; let poidsTotalMoi = 0;
 
                         if (ordre.type_ordre === 'HAUSSE') {
-                            sommeRatiosQ = getRatioQ('MISSIONS') + getRatioQ('ECONOMIE') + getRatioQ('SECURITE') + getRatioQ('SCIENCE');
+                            sommeRatios = getRatio('MISSIONS') + getRatio('ECONOMIE') + getRatio('SECURITE') + getRatio('SCIENCE');
                             diviseur = 4;
                             poidsTotalEscadron = totauxG['MISSIONS'] + (totauxG['ECONOMIE']/2000000) + (totauxG['SECURITE']/2000000) + (totauxG['SCIENCE']/2000000);
                             poidsTotalMoi = totauxMoiG['MISSIONS'] + (totauxMoiG['ECONOMIE']/2000000) + (totauxMoiG['SECURITE']/2000000) + (totauxMoiG['SCIENCE']/2000000);
 
-                            htmlJauges = 
-                                genererJaugeHTML('📝 LOGISTIQUE (Missions)', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capsQuotidien['MISSIONS']), 'INF'), 'var(--ed-orange)', getRatioQ('MISSIONS'), getRatioQ('MISSIONS') >= 100) +
-                                genererJaugeHTML('💰 ÉCONOMIE (Commerce & Minage)', fmtDual(formatCR(totauxMoiQ['ECONOMIE']), formatCR(totauxQ['ECONOMIE']), formatCR(capsQuotidien['ECONOMIE'])), '#00FF66', getRatioQ('ECONOMIE'), getRatioQ('ECONOMIE') >= 100) +
-                                genererJaugeHTML('💥 SÉCURITÉ (Primes & Conflits)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capsQuotidien['SECURITE'])), 'var(--ed-blue)', getRatioQ('SECURITE'), getRatioQ('SECURITE') >= 100) +
-                                genererJaugeHTML('🔬 SCIENCE (Carto. & Exobio)', fmtDual(formatCR(totauxMoiQ['SCIENCE']), formatCR(totauxQ['SCIENCE']), formatCR(capsQuotidien['SCIENCE'])), '#B026FF', getRatioQ('SCIENCE'), getRatioQ('SCIENCE') >= 100);
+                            htmlJauges =
+                                genererJaugeHTML('📝 LOGISTIQUE (Missions)', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capsTotal['MISSIONS']), 'INF'), 'var(--ed-orange)', getRatio('MISSIONS'), getRatioVous('MISSIONS'), getRatio('MISSIONS') >= 100) +
+                                genererJaugeHTML('💰 ÉCONOMIE (Commerce & Minage)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100) +
+                                genererJaugeHTML('💥 SÉCURITÉ (Primes & Conflits)', fmtDual(formatCR(totauxMoiG['SECURITE']), formatCR(totauxG['SECURITE']), formatCR(capsTotal['SECURITE'])), 'var(--ed-blue)', getRatio('SECURITE'), getRatioVous('SECURITE'), getRatio('SECURITE') >= 100) +
+                                genererJaugeHTML('🔬 SCIENCE (Carto. & Exobio)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
 
                         } else if (ordre.type_ordre === 'BAISSE') {
-                            const valMoiSabotage = totauxMoiQ['VOLS'] + totauxMoiQ['PIRATAGE'];
-                            const valSquadSabotage = totauxQ['VOLS'] + totauxQ['PIRATAGE'];
-                            const capSabotage = capsQuotidien['VOLS'];
-                            const ratioSabotageQ = Math.min(100, (valMoiSabotage / capSabotage) * 100);
+                            const valMoiSabotage = totauxMoiG['VOLS'] + totauxMoiG['PIRATAGE'];
+                            const valSquadSabotage = totauxG['VOLS'] + totauxG['PIRATAGE'];
+                            const capSabotage = capsTotal['VOLS'];
+                            const ratioSabotage = Math.min(100, (valSquadSabotage / capSabotage) * 100);
+                            const ratioSabotageVous = Math.min(100, (valMoiSabotage / capSabotage) * 100);
 
-                            sommeRatiosQ = getRatioQ('MEURTRES') + ratioSabotageQ + getRatioQ('CONTREBANDE') + getRatioQ('ECHECS');
+                            sommeRatios = getRatio('MEURTRES') + ratioSabotage + getRatio('CONTREBANDE') + getRatio('ECHECS');
                             diviseur = 4;
                             poidsTotalEscadron = totauxG['MEURTRES'] + (totauxG['VOLS'] + totauxG['PIRATAGE']) + (totauxG['CONTREBANDE']/2000000) + totauxG['ECHECS'];
                             poidsTotalMoi = totauxMoiG['MEURTRES'] + (totauxMoiG['VOLS'] + totauxMoiG['PIRATAGE']) + (totauxMoiG['CONTREBANDE']/2000000) + totauxMoiG['ECHECS'];
 
-                            htmlJauges = 
-                                genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiQ['MEURTRES']), formatNum(totauxQ['MEURTRES']), formatNum(capsQuotidien['MEURTRES'])), 'var(--ed-red)', getRatioQ('MEURTRES'), getRatioQ('MEURTRES') >= 100) +
-                                genererJaugeHTML('🔋 SABOTAGE AU SOL (Régulateurs & Données)', fmtDual(formatNum(valMoiSabotage), formatNum(valSquadSabotage), formatNum(capSabotage)), 'var(--ed-red)', ratioSabotageQ, ratioSabotageQ >= 100) +
-                                genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiQ['CONTREBANDE']), formatCR(totauxQ['CONTREBANDE']), formatCR(capsQuotidien['CONTREBANDE'])), 'var(--ed-red)', getRatioQ('CONTREBANDE'), getRatioQ('CONTREBANDE') >= 100) +
-                                genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiQ['ECHECS']), formatNum(totauxQ['ECHECS']), formatNum(capsQuotidien['ECHECS'])), 'var(--ed-red)', getRatioQ('ECHECS'), getRatioQ('ECHECS') >= 100);
+                            htmlJauges =
+                                genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiG['MEURTRES']), formatNum(totauxG['MEURTRES']), formatNum(capsTotal['MEURTRES'])), 'var(--ed-red)', getRatio('MEURTRES'), getRatioVous('MEURTRES'), getRatio('MEURTRES') >= 100) +
+                                genererJaugeHTML('🔋 SABOTAGE AU SOL (Régulateurs & Données)', fmtDual(formatNum(valMoiSabotage), formatNum(valSquadSabotage), formatNum(capSabotage)), 'var(--ed-red)', ratioSabotage, ratioSabotageVous, ratioSabotage >= 100) +
+                                genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiG['CONTREBANDE']), formatCR(totauxG['CONTREBANDE']), formatCR(capsTotal['CONTREBANDE'])), 'var(--ed-red)', getRatio('CONTREBANDE'), getRatioVous('CONTREBANDE'), getRatio('CONTREBANDE') >= 100) +
+                                genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiG['ECHECS']), formatNum(totauxG['ECHECS']), formatNum(capsTotal['ECHECS'])), 'var(--ed-red)', getRatio('ECHECS'), getRatioVous('ECHECS'), getRatio('ECHECS') >= 100);
 
                         } else if (ordre.type_ordre === 'GUERRE') {
-                            const capBondsQ = capsQuotidien['GUERRE_BONDS'] || capsQuotidien['SECURITE'];
-                            const capMissQ = capsQuotidien['GUERRE_MISSIONS'] || capsQuotidien['MISSIONS'];
-                            const capCzQ = capsQuotidien['CZ_VICTOIRES'] || 5;
+                            const capBonds = capsTotal['GUERRE_BONDS'] || capsTotal['SECURITE'];
+                            const capMiss = capsTotal['GUERRE_MISSIONS'] || capsTotal['MISSIONS'];
+                            const capCz = capsTotal['CZ_VICTOIRES'] || (5 * nbParticipants);
 
-                            // Comptage simple du nombre de batailles
-                            let nbCzMoiQ = 0;
-                            effortsQuotidienMoi.forEach(e => {
-                                if (e.type_action === 'CZ_VICTOIRES') nbCzMoiQ++;
+                            // Comptage simple du nombre de batailles (cumule depuis le debut de l'ordre)
+                            let nbCzMoi = 0;
+                            effortsOrdreMoi.forEach(e => {
+                                if (e.type_action === 'CZ_VICTOIRES') nbCzMoi++;
                             });
 
-                            let nbCzSquadQ = 0;
-                            effortsQuotidienEscadron.forEach(e => {
-                                if (e.type_action === 'CZ_VICTOIRES') nbCzSquadQ++;
+                            let nbCzSquad = 0;
+                            effortsOrdreEscadron.forEach(e => {
+                                if (e.type_action === 'CZ_VICTOIRES') nbCzSquad++;
                             });
 
-                            // La variable qui génère le texte épuré (sans les tags H/M/S)
-                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoiQ} / ${capCzQ} BATAILLE${capCzQ > 1 ? 'S' : ''}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <span style="color:#fff;">${nbCzSquadQ} BATAILLE${nbCzSquadQ > 1 ? 'S' : ''}</span>`;
+                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoi}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <strong style="color:#fff;">${nbCzSquad} / ${capCz} BATAILLE${capCz > 1 ? 'S' : ''}</strong>`;
 
-                            // Les points (1.6 / 1.3 / 1.0) restent le moteur des calculs de pourcentages et du "TOTAL PTS"
-                            const ratioBondsQ = Math.min(100, (totauxMoiQ['SECURITE'] / capBondsQ) * 100);
-                            const ratioMissQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capMissQ) * 100);
-                            const ratioCzQ = Math.min(100, (totauxMoiQ['CZ_VICTOIRES'] / capCzQ) * 100);
+                            const ratioBonds = Math.min(100, (totauxG['SECURITE'] / capBonds) * 100);
+                            const ratioBondsVous = Math.min(100, (totauxMoiG['SECURITE'] / capBonds) * 100);
+                            const ratioMiss = Math.min(100, (totauxG['MISSIONS'] / capMiss) * 100);
+                            const ratioMissVous = Math.min(100, (totauxMoiG['MISSIONS'] / capMiss) * 100);
+                            const ratioCz = Math.min(100, (nbCzSquad / capCz) * 100);
+                            const ratioCzVous = Math.min(100, (nbCzMoi / capCz) * 100);
 
-                            sommeRatiosQ = ratioBondsQ + ratioMissQ + ratioCzQ;
+                            sommeRatios = ratioBonds + ratioMiss + ratioCz;
                             diviseur = 3;
                             poidsTotalEscadron = (totauxG['SECURITE'] / 2000000) + totauxG['MISSIONS'] + totauxG['CZ_VICTOIRES'];
                             poidsTotalMoi = (totauxMoiG['SECURITE'] / 2000000) + totauxMoiG['MISSIONS'] + totauxMoiG['CZ_VICTOIRES'];
 
-                            htmlJauges = 
-                                genererJaugeHTML('🏆 VICTOIRES EN CZ (Batailles)', texteCzDual, '#FFD700', ratioCzQ, ratioCzQ >= 100) +
-                                genererJaugeHTML('⚔️ OBLIGATIONS DE COMBAT (Bons)', fmtDual(formatCR(totauxMoiQ['SECURITE']), formatCR(totauxQ['SECURITE']), formatCR(capBondsQ)), 'var(--ed-orange)', ratioBondsQ, ratioBondsQ >= 100) +
-                                genererJaugeHTML('🎯 MISSIONS MILITAIRES', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capMissQ), 'CONTRATS'), 'var(--ed-red)', ratioMissQ, ratioMissQ >= 100);
+                            htmlJauges =
+                                genererJaugeHTML('🏆 VICTOIRES EN CZ (Batailles)', texteCzDual, '#FFD700', ratioCz, ratioCzVous, ratioCz >= 100) +
+                                genererJaugeHTML('⚔️ OBLIGATIONS DE COMBAT (Bons)', fmtDual(formatCR(totauxMoiG['SECURITE']), formatCR(totauxG['SECURITE']), formatCR(capBonds)), 'var(--ed-orange)', ratioBonds, ratioBondsVous, ratioBonds >= 100) +
+                                genererJaugeHTML('🎯 MISSIONS MILITAIRES', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capMiss), 'CONTRATS'), 'var(--ed-red)', ratioMiss, ratioMissVous, ratioMiss >= 100);
 
                         } else if (ordre.type_ordre === 'ELECTION') {
-                            const capElecQ = capsQuotidien['ELECTION_MISSIONS'] || capsQuotidien['MISSIONS'];
-                            const ratioElecQ = Math.min(100, (totauxMoiQ['MISSIONS'] / capElecQ) * 100);
-                            sommeRatiosQ = ratioElecQ;
+                            const capElec = capsTotal['ELECTION_MISSIONS'] || capsTotal['MISSIONS'];
+                            const ratioElec = Math.min(100, (totauxG['MISSIONS'] / capElec) * 100);
+                            const ratioElecVous = Math.min(100, (totauxMoiG['MISSIONS'] / capElec) * 100);
+                            sommeRatios = ratioElec;
                             diviseur = 1;
                             poidsTotalEscadron = totauxG['MISSIONS'];
                             poidsTotalMoi = totauxMoiG['MISSIONS'];
 
-                            htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiQ['MISSIONS']), formatNum(totauxQ['MISSIONS']), formatNum(capElecQ), 'INF'), 'var(--ed-blue)', ratioElecQ, ratioElecQ >= 100);
+                            htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capElec), 'INF'), 'var(--ed-blue)', ratioElec, ratioElecVous, ratioElec >= 100);
                         }
 
-                        const impactQuotidien = Math.min(100, Math.round(sommeRatiosQ / diviseur));
+                        const avancementGlobal = Math.min(100, Math.round(sommeRatios / diviseur));
                         const partPilote = poidsTotalEscadron > 0 ? Math.min(100, Math.round((poidsTotalMoi / poidsTotalEscadron) * 100)) : 0;
+                        const avancementVousLargeur = Math.min(avancementGlobal, Math.round(avancementGlobal * partPilote / 100));
+                        const avancementAutresLargeur = Math.max(0, avancementGlobal - avancementVousLargeur);
+                        const enRetard = avancementGlobal < 30;
 
                         // --- NOUVEAU : DÉTECTION DU SCORE DE GUERRE/ÉLECTION ---
                         let conflitBadge = '';
@@ -1887,51 +1878,33 @@
 
                         htmlAccordionsFactions += `
                         <div style="border: 1px solid ${colorPrinc}; background: ${colorFond}; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-                                <div>
+                            <div style="padding: 14px 18px; cursor: pointer; transition: 0.2s;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                                     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                                        <span class="copy-click" onclick="copierNav('${ordre.faction_cible.replace(/'/g, "\\'").toUpperCase()}', this, event)" style="color: #fff; font-size: 1.15em; font-weight: bold;" title="Copier la faction">${escapeHtml(ordre.faction_cible.toUpperCase())}</span>
+                                        <span class="copy-click" onclick="event.stopPropagation(); copierNav('${ordre.faction_cible.replace(/'/g, "\\'").toUpperCase()}', this, event)" style="color: #fff; font-size: 1.15em; font-weight: bold;" title="Copier la faction">${escapeHtml(ordre.faction_cible.toUpperCase())}</span>
                                         <span style="color: ${colorPrinc}; border: 1px solid ${colorPrinc}; padding: 1px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold; margin-left: 2px;">[ #${ordre.id} // ${ordre.type_ordre} ]</span>
+                                        ${enRetard ? `<span style="background: rgba(255,113,0,0.15); color: var(--ed-orange); border: 1px solid var(--ed-orange); font-size: 0.7em; font-weight: bold; padding: 2px 8px; border-radius: 2px; letter-spacing: 1px;">EN RETARD</span>` : ''}
                                         ${conflitBadge}
                                     </div>
+
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <span style="color: #fff; font-weight: bold; font-size: 1.15em;">${avancementGlobal}%</span>
+                                        <span onclick="event.stopPropagation(); ouvrirModalOrdreDetails('${ordre.id}', '${colorPrinc}')"
+                                              onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:${colorPrinc}\\'>EFFORT GLOBAL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Cliquez pour ouvrir le dossier tactique de cette mission<br>et consulter les participations individuelles.</span>', '${colorPrinc}')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
+                                              style="cursor: pointer; color: #888; font-size: 0.75em; font-weight: bold; letter-spacing: 1px; text-decoration: underline dotted;">${formatNum(Math.round(poidsTotalEscadron))} PTS</span>
+                                        <span style="font-size: 1.4em; color: ${colorPrinc};" id="icon-${ordre.id}">▼</span>
+                                    </div>
                                 </div>
 
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    
-                                    <!-- 1. QUOTA 24H -->
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: help;"
-                                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:${colorSec}\\'>QUOTA QUOTIDIEN</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Progression actuelle pour atteindre le plafond<br>d\\'efficacité journalier recommandé (sur 24h).</span>', '${colorSec}')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: conic-gradient(${colorSec} 0% ${impactQuotidien}%, rgba(255,255,255,0.05) ${impactQuotidien}% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px ${colorSec}30; transition: 0.3s;" onmouseover="this.style.boxShadow='0 0 15px ${colorSec}'" onmouseout="this.style.boxShadow='0 0 10px ${colorSec}30'">
-                                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
-                                                <span style="font-weight: bold; color: #fff; font-size: 0.8em;">${impactQuotidien}%</span>
-                                            </div>
-                                        </div>
-                                        <span style="color: #888; font-size: 0.6em; font-weight: bold; letter-spacing: 1px;">QUOTA (24H)</span>
-                                    </div>
-
-                                    <!-- 2. TOTAL ESCADRON (PTS) -->
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;"
-                                         onclick="event.stopPropagation(); ouvrirModalOrdreDetails('${ordre.id}', '${colorPrinc}')"
-                                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:${colorPrinc}\\'>EFFORT GLOBAL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Cliquez pour ouvrir le dossier tactique de cette mission<br>et consulter les participations individuelles.</span>', '${colorPrinc}')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                                        <div style="width: 44px; height: 44px; border-radius: 50%; border: 1px dashed ${colorPrinc}; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px ${colorPrinc}20; transition: 0.3s;" onmouseover="this.style.boxShadow='inset 0 0 10px ${colorPrinc}50, 0 0 10px ${colorPrinc}50'" onmouseout="this.style.boxShadow='0 0 10px ${colorPrinc}20'">
-                                            <span style="font-weight: bold; color: #fff; font-size: 0.8em;">${formatNum(Math.round(poidsTotalEscadron))}</span>
-                                        </div>
-                                        <span style="color: #888; font-size: 0.6em; font-weight: bold; letter-spacing: 1px;">TOTAL PTS</span>
-                                    </div>
-
-                                    <!-- 3. VOTRE PART -->
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: help;"
-                                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '<strong style=\\'color:var(--ed-orange)\\'>IMPACT PERSONNEL</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Le pourcentage de votre contribution<br>sur l\\'effort total de l\\'escadron.</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: conic-gradient(var(--ed-orange) 0% ${partPilote}%, rgba(255,113,0,0.1) ${partPilote}% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(255,113,0,0.3); transition: 0.3s;" onmouseover="this.style.boxShadow='0 0 15px var(--ed-orange)'" onmouseout="this.style.boxShadow='0 0 10px rgba(255,113,0,0.3)'">
-                                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #050200; display: flex; align-items: center; justify-content: center;">
-                                                <span style="font-weight: bold; color: var(--ed-orange); font-size: 0.8em;">${partPilote}%</span>
-                                            </div>
-                                        </div>
-                                        <span style="color: var(--ed-orange); font-size: 0.6em; font-weight: bold; letter-spacing: 1px;">VOTRE PART</span>
-                                    </div>
-
-                                    <div style="font-size: 1.4em; color: ${colorPrinc}; margin-left: 5px;" id="icon-${ordre.id}">▼</div>
+                                <!-- BARRE COMPILEE : segment clair = vous, segment fonce = le reste de l'escadron -->
+                                <div style="position: relative; height: 16px; width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-top: 10px;">
+                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: ${avancementVousLargeur}%; background: ${colorPrinc}; box-shadow: 0 0 8px ${colorPrinc};"></div>
+                                    <div style="position: absolute; left: ${avancementVousLargeur}%; top: 0; height: 100%; width: ${avancementAutresLargeur}%; background: ${colorPrinc}55;"></div>
                                 </div>
+                                <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                                    <span style="font-size: 0.75em; color: #aaa;">VOTRE PART : <strong style="color: ${colorPrinc};">${partPilote}%</strong> de l'effort de l'escadron sur cette faction</span>
+                                </div>
+                            </div>
                             </div>
 
                             <div id="details-${ordre.id}" style="display: none; flex-direction: column; gap: 10px; padding: 15px 18px; border-top: 1px dashed rgba(255,255,255,0.1); background: rgba(0,0,0,0.4);">
