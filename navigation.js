@@ -105,12 +105,16 @@ function injecterArchitectureGlobale() {
                     </div>
                 </div>
 
-                <div id="online-counter" 
-                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: default; white-space: nowrap; box-sizing: border-box;">
-                    <div style="color: #888; font-size: 0.75em; font-weight: bold;">PILOTES</div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="online-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #00FF66; box-shadow: 0 0 6px #00FF66;"></span>
-                        <span id="online-count-val" style="color: #fff; font-size: 1.25em; font-weight: bold; line-height: 1;">--</span>
+                <div id="stats-pilotes-box"
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: help; white-space: nowrap; box-sizing: border-box;"
+                    onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>depuis le dernier tick hebdomadaire (jeudi 10h UTC),<br>tous escadrons confondus.</span>', '#00FF66')"
+                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                    onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                    <div style="color: #888; font-size: 0.75em; font-weight: bold;">FLOTTE</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span><span id="stats-inscrits-val" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">INSCRITS</span></span>
+                        <span style="color:#333;">|</span>
+                        <span><span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">ACTIFS</span></span>
                     </div>
                 </div>
 
@@ -289,29 +293,42 @@ window.actualiserHeader = function(profilData) {
     }
 };
 
-// Radar Pilotes
-(function initRadarPilotes() {
-    async function balayerPilotesActifs() {
+// Statistiques globales de l'escadron (inscrits + actifs depuis le tick hebdo, tous
+// escadrons confondus). Remplace l'ancien compteur "en ligne maintenant" (peu de pilotes
+// connectes simultanement rend ce chiffre demoralisant sans raison reelle) par une mesure
+// d'engagement plus stable : combien de pilotes ont agi cette semaine, au total.
+(function initStatsPilotes() {
+    async function chargerStatsPilotes() {
         if (typeof supabaseApp === 'undefined') return;
+        const elInscrits = document.getElementById('stats-inscrits-val');
+        const elActifs = document.getElementById('stats-actifs-val');
+        if (!elInscrits && !elActifs) return;
+
+        const cacheKey = 'edteam_stats_pilotes_cache';
         try {
-            const limiteTemps = Math.floor(Date.now() / 1000) - 300;
-            const { count, error } = await supabaseApp.from('parametres_app')
-                .select('*', { count: 'exact', head: true })
-                .gte('last_heartbeat', limiteTemps);
+            const raw = sessionStorage.getItem(cacheKey);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Date.now() - parsed.ts < 30000) {
+                    if (elInscrits) elInscrits.innerText = parsed.data.total_inscrits;
+                    if (elActifs) elActifs.innerText = parsed.data.actifs_semaine;
+                    return;
+                }
+            }
+        } catch (e) { /* sessionStorage indisponible : on retombe sur le reseau */ }
+
+        try {
+            const { data, error } = await supabaseApp.rpc('stats_pilotes_globales');
             if (error) throw error;
-            
-            const nbPilotes = count || 0;
-            const elCount = document.getElementById('online-count-val');
-            const elDot = document.getElementById('online-dot');
-            
-            if (elCount) { elCount.innerText = nbPilotes; elCount.style.color = nbPilotes > 0 ? '#fff' : '#666'; }
-            if (elDot) { elDot.style.background = nbPilotes > 0 ? '#00FF66' : '#666'; elDot.style.boxShadow = nbPilotes > 0 ? '0 0 6px #00FF66' : 'none'; }
-        } catch (e) {}
+            const stats = (data && data[0]) || { total_inscrits: 0, actifs_semaine: 0 };
+
+            if (elInscrits) elInscrits.innerText = stats.total_inscrits;
+            if (elActifs) elActifs.innerText = stats.actifs_semaine;
+
+            try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: stats })); } catch (e) {}
+        } catch (e) { /* silencieux : le bloc reste sur "--" */ }
     }
-    setTimeout(() => {
-        balayerPilotesActifs();
-        setInterval(balayerPilotesActifs, 60000);
-    }, 2000);
+    setTimeout(chargerStatsPilotes, 2000);
 })();
 
 // ==========================================
