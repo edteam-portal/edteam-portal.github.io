@@ -124,15 +124,6 @@ function injecterArchitectureGlobale() {
                     <div><span style="color: #888;">CARRIER :</span> <span id="solde-fc" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-blue);">CR</span></div>
                 </div>
 
-                <div id="tick-container" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 1px solid rgba(255, 113, 0, 0.3); background: rgba(255, 113, 0, 0.05); border-radius: 4px; padding: 4px 15px; cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
-                     onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'TICK GALACTIQUE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Heure estimée de la mise à jour<br>quotidienne des serveurs d\\'Elite Dangerous.</span>', 'var(--ed-orange)')" 
-                     onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
-                     onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
-                     onmouseover="this.style.background='rgba(255, 113, 0, 0.15)'; this.style.borderColor='var(--ed-orange)';"
-                     onmouseout="this.style.background='rgba(255, 113, 0, 0.05)'; this.style.borderColor='rgba(255, 113, 0, 0.3)';">
-                    <div style="color: #888; font-size: 0.75em; font-weight: bold;">ESTIMATION DU TICK</div>
-                    <div id="tick-countdown" style="color: var(--ed-orange); font-size: 1.1em; font-weight: bold; letter-spacing: 1px;">--H --M --S</div>
-                </div>
             </div>
             <div id="nav-commandant" style="font-size: 0.75em; letter-spacing: 1px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; flex-grow: 1; white-space: nowrap; height: 100%; gap: 6px; padding-right: 5px; box-sizing: border-box;">
                 <span class="info-btn" style="color: var(--ed-blue);" onclick="ouvrirModal('modal-cle-api', event)">[ SÉCURITÉ & CLÉ EDMC ]</span>
@@ -259,49 +250,8 @@ if (document.readyState === 'loading') {
 }
 
 // ==========================================
-// 2. MOTEUR GLOBAL (TICK + PROFIL + RADAR)
+// 2. MOTEUR GLOBAL (PROFIL + RADAR)
 // ==========================================
-
-// Horloge Galactique (Synchro Locale Silencieuse)
-(function initHorlogeGlobale() {
-    let dernierTick = new Date(0);
-    let prochainTick = new Date();
-
-    function updateAffichage() {
-        const el = document.getElementById('tick-countdown');
-        if (!el) return;
-        
-        const diff = prochainTick.getTime() - Date.now();
-        if (diff <= 0) {
-            el.innerText = "[ TICK EN COURS... ]";
-            el.style.color = "var(--ed-red)";
-            return;
-        }
-
-        const h = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
-        const m = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
-        const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
-        
-        el.innerText = `${h}H ${m}M ${s}S`;
-        el.style.color = "var(--ed-orange)";
-    }
-
-    async function synchroniserHorloge() {
-        try {
-            const { data, error } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
-            if (!error && data && data.dernier_tick) {
-                dernierTick = new Date(data.dernier_tick);
-            }
-        } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
-        
-        if (dernierTick.getTime() === 0 || isNaN(dernierTick.getTime())) dernierTick = new Date(); 
-        prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
-    }
-
-    setInterval(updateAffichage, 1000);
-    setInterval(synchroniserHorloge, 3600000); 
-    synchroniserHorloge();
-})();
 
 // Profil Header
 window.actualiserHeader = function(profilData) {

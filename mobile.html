@@ -260,9 +260,7 @@
 
         /* Force l'apparition d'un scroll sur les fenêtres qui n'en ont pas par défaut */
         #modal-diplo-details > .card,
-        #modal-ordre-details > .card,
-        #modal-info-tick > .card,
-        #modal-info-tick-comms > .card {
+        #modal-ordre-details > .card {
             overflow-y: auto !important;
         }
     
@@ -488,12 +486,6 @@
             <!-- ========================================== -->
             <div id="tab-bgs" style="display: none; flex-direction: column; gap: 14px;">
                 
-                <!-- TICK BGS (Toujours en haut pour l'alerte) -->
-                <div class="card" style="border-color: var(--ed-orange); text-align: center; padding: 12px; cursor: pointer; transition: 0.2s;" onclick="window.ouvrirModalInfoTick(event)">
-                    <span style="color: #888; font-size: 0.75em; letter-spacing: 2px; display: block; margin-bottom: 4px;">HORLOGE GALACTIQUE (TICK) ℹ️</span>
-                    <span id="m-tick-timer" style="color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px; display: block; white-space: nowrap;">--H --M --S</span>
-                </div>
-
                 <!-- JOURNAL DES EXPLOITS (DÉPLACÉ TOUT EN HAUT) -->
                 <div id="m-btn-journal-exploits" class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirJournalExploitsMobile()">
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -534,23 +526,6 @@
             <!-- ========================================== -->
             <div id="tab-comms" style="display: none; flex-direction: column; gap: 10px; height: calc(100vh - 160px);">
 
-                <!-- NOUVEAU BANDEAU DE SÉCURITÉ MOBILE (COMMS) -->
-                <div id="m-comms-tick-box" style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.4); padding: 8px 10px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.3s;" onclick="ouvrirModalInfoTickComms()">
-                    
-                    <!-- Ligne 1 : Le titre discret -->
-                    <span id="m-comms-tick-title" style="color: var(--ed-blue); font-size: 0.7em; font-weight: normal; letter-spacing: 2px; margin-bottom: 2px;">
-                    PURGE DANS
-                    </span>
-                    
-                    <!-- Ligne 2 : Le compteur / Tick en cours -->
-                    <div id="m-comms-tick-label" style="color: var(--ed-blue); font-size: 1.1em; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; width: 100%; white-space: nowrap;">
-                        <span id="m-comms-countdown" style="white-space: nowrap;">--H --M --S</span>
-                    </div>
-                    
-                    <span style="color: #666; font-size: 0.65em; font-style: normal; margin-top: 2px;">[ SECURITE & CONFIDENTIALITE ]</span>
-                </div>
-                <!-- FIN DU BANDEAU -->
-                
                 <div style="display: flex; gap: 6px;">
                     <button id="btn-chan-global" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: var(--ed-blue); color: var(--ed-blue); background: rgba(0, 240, 255, 0.12);" onclick="changerCanalComms('GLOBAL')">GLOBAL</button>
                     <button id="btn-chan-squad" class="m-btn" style="flex: 1; padding: 8px 4px; font-size: 0.75em; border-color: #555; color: #888; background: transparent;" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
@@ -818,38 +793,6 @@
         </div>
     </div>
 
-    <!-- MODAL INFO TICK COMMS (ROLEPLAY) -->
-    <div class="modal-overlay" id="modal-info-tick-comms" onclick="fermerModalInfoTickComms(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 450px; border-color: var(--ed-red); box-shadow: 0 0 30px rgba(255,51,51,0.2);" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px; margin-bottom: 15px;">
-                <span style="color: var(--ed-red); font-weight: bold; letter-spacing: 2px;">> SYNCHRONISATION</span>
-                <span style="color: var(--ed-red); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-info-tick-comms').style.display='none'">✕</span>
-            </div>
-            <div style="color: #ccc; font-size: 0.9em; line-height: 1.5; text-align: justify;">
-                <strong style="color: #fff; display: block; margin-bottom: 8px;">SÉCURITÉ & CONFIDENTIALITÉ :</strong>
-                Pour prévenir toute interception, nos canaux de communication sont synchronisés sur la pulsation du réseau galactique (Tick quotidien). À la fin de chaque cycle, les algorithmes de cryptage sont réinitialisés et <strong>les messages sont effacés</strong>.
-            </div>
-            <div style="margin-top: 15px; text-align: center;">
-                <button class="m-btn" style="width: 100%; border-color: #555; color: #aaa; background: transparent;" onclick="document.getElementById('modal-info-tick-comms').style.display='none'">[ COMPRIS ]</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL INFO TICK BGS -->
-    <div class="modal-overlay" id="modal-info-tick" onclick="fermerModalInfoTick(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 450px; border-color: var(--ed-orange); box-shadow: 0 0 30px rgba(255,113,0,0.2);" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px;">
-                <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;">HORLOGE GALACTIQUE</span>
-                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-info-tick').style.display='none'">✕</span>
-            </div>
-            <div style="color: #ccc; font-size: 0.9em; line-height: 1.5; text-align: justify;">
-                Heure du Tick synchronisée via le réseau EDCD.<br><br><strong style="color: var(--ed-orange);">Vos efforts d'influence sont réinitialisés à chaque tick.</strong>
-            </div>
-            <div style="margin-top: 15px; text-align: center;">
-                <button class="m-btn" style="width: 100%; border-color: #555; color: #aaa; background: transparent;" onclick="document.getElementById('modal-info-tick').style.display='none'">[ COMPRIS ]</button>
-            </div>
-        </div>
-    </div>
 
     <!-- MODAL GALNET MOBILE -->
     <div class="modal-overlay" id="modal-galnet" onclick="document.getElementById('modal-galnet').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
@@ -1190,8 +1133,7 @@
             chargerBGSMobile();
             initialiserCommsMobile();
             verifierNouvellesNotesMobile(); // <--- NOUVELLE LIGNE AJOUTÉE ICI
-            demarrerTickTimer();
-            
+
         }
 
         async function deconnexionMobile() {
@@ -1395,99 +1337,6 @@
                 
             } catch (error) {
                 console.error("SYS.EDTEAM MOBILE : Erreur de rendu QG ->", error);
-            }
-        }
-
-        // ==========================================
-        // HORLOGE GALACTIQUE MOBILE (SYNCHRO LOCALE)
-        // ==========================================
-        let prochainTick = new Date();
-        let memoireServeur = new Date(0);
-        let horlogeInterval = null;
-
-        async function demarrerTickTimer() {
-            try {
-                // Lecture silencieuse de la date officielle sur Supabase
-                const { data, error } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
-                if (!error && data && data.dernier_tick) {
-                    memoireServeur = new Date(data.dernier_tick);
-                }
-            } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
-
-            // Sécurité si BDD vierge
-            if (memoireServeur.getTime() === 0) memoireServeur = new Date();
-
-            prochainTick = new Date(memoireServeur.getTime() + 24 * 60 * 60 * 1000);
-
-            // Relance de l'affichage
-            if (horlogeInterval) clearInterval(horlogeInterval);
-            horlogeInterval = setInterval(mettreAJourCompteurMobile, 1000);
-            mettreAJourCompteurMobile();
-        }
-
-        function mettreAJourCompteurMobile() {
-            const elBgs = document.getElementById('m-tick-timer');
-            const elComms = document.getElementById('m-comms-countdown');
-            const boxComms = document.getElementById('m-comms-tick-box');
-            const labelComms = document.getElementById('m-comms-tick-label');
-            const titleComms = document.getElementById('m-comms-tick-title'); // Le nouveau petit titre
-            
-            if (!elBgs && !elComms) return;
-
-            const maintenant = new Date();
-            let diff = prochainTick.getTime() - maintenant.getTime();
-
-            // ZONE ROUGE (ATTENTE DU TICK)
-            if (diff <= 0) {
-                const txt = "[ TICK EN COURS... ]";
-                if (elBgs) { 
-                    elBgs.innerText = txt; 
-                    elBgs.style.color = "var(--ed-blue)"; 
-                    elBgs.style.fontSize = "1.2em"; 
-                    elBgs.style.letterSpacing = "1px"; 
-                }
-                if (elComms) { 
-                    elComms.innerText = txt; 
-                    elComms.style.color = "var(--ed-red)"; 
-                }
-                
-                // Moteur de clignotement rouge sur l'onglet Comms
-                if (boxComms && labelComms && titleComms) {
-                    boxComms.style.background = "rgba(255, 51, 51, 0.05)";
-                    boxComms.style.borderColor = "rgba(255, 51, 51, 0.4)";
-                    labelComms.style.color = "var(--ed-red)";
-                    titleComms.style.color = "var(--ed-red)";
-                    labelComms.style.animation = "alertPulse 1.5s infinite"; 
-                    titleComms.style.animation = "alertPulse 1.5s infinite";
-                }
-                return;
-            }
-
-            // AFFICHAGE CLASSIQUE (ZONE BLEUE)
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
-            const m = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
-            const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
-            const timeStr = `${h}H ${m}M ${s}S`;
-
-            if (elBgs) { 
-                elBgs.innerText = timeStr; 
-                elBgs.style.color = "var(--ed-orange)"; 
-                elBgs.style.fontSize = "1.6em"; 
-                elBgs.style.letterSpacing = "3px"; 
-            }
-            if (elComms) { 
-                elComms.innerText = timeStr; 
-                elComms.style.color = "var(--ed-blue)"; 
-            }
-            
-            // On fige le bandeau Comms en Bleu (Pacifique)
-            if (boxComms && labelComms && titleComms) {
-                boxComms.style.background = "rgba(0, 240, 255, 0.05)";
-                boxComms.style.borderColor = "rgba(0, 240, 255, 0.4)";
-                labelComms.style.color = "var(--ed-blue)";
-                titleComms.style.color = "var(--ed-blue)";
-                labelComms.style.animation = "none"; 
-                titleComms.style.animation = "none"; 
             }
         }
 
@@ -1953,21 +1802,11 @@
                     .or(`and(expediteur_id.eq.${profilCommandant.user_id},destinataire_id.eq.${targetId}),and(expediteur_id.eq.${targetId},destinataire_id.eq.${profilCommandant.user_id})`)
                     .order('created_at', { ascending: true })
                     .limit(40);
-                    
-                // ---> FILTRE ANTI-ANCIENS MESSAGES <---
-                if (memoireServeur && memoireServeur.getTime() > 0) {
-                    query = query.gte('created_at', memoireServeur.toISOString());
-                }
 
                 const { data: messages } = await query;
                 afficherFluxComms(messages);
             } else {
                 let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(40);
-                
-                // ---> FILTRE ANTI-ANCIENS MESSAGES <---
-                if (memoireServeur && memoireServeur.getTime() > 0) {
-                    query = query.gte('created_at', memoireServeur.toISOString());
-                }
 
                 if (canalActif === 'ESCADRON') {
                     query = query.eq('canal', 'ESCADRON').eq('escadron_id', profilCommandant.escadron_id);
@@ -2523,30 +2362,6 @@
         sonClic();
         document.getElementById('modal-ordre-details').style.display = 'none';
     };
-
-    window.ouvrirModalInfoTick = function(e) {
-            if (e) e.stopPropagation(); // Empêche un autre élément de bloquer le clic
-            if (typeof sonClic === 'function') sonClic();
-            const modal = document.getElementById('modal-info-tick');
-            if (modal) modal.style.display = 'flex';
-        };
-        
-    window.fermerModalInfoTick = function(e) {
-            if (e && e.target.id !== 'modal-info-tick' && !e.target.innerText.includes('✕')) return;
-            if (typeof sonClic === 'function') sonClic();
-            const modal = document.getElementById('modal-info-tick');
-            if (modal) modal.style.display = 'none';
-        };
-
-    window.ouvrirModalInfoTickComms = function() {
-            if (typeof sonClic === 'function') sonClic();
-            document.getElementById('modal-info-tick-comms').style.display = 'flex';
-        };
-    window.fermerModalInfoTickComms = function(e) {
-            if (e && e.target.id !== 'modal-info-tick-comms' && !e.target.innerText.includes('✕')) return;
-            if (typeof sonClic === 'function') sonClic();
-            document.getElementById('modal-info-tick-comms').style.display = 'none';
-        };
 
         // ==========================================
         // GALNET NEWS (API FRONTIER)

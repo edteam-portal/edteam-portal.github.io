@@ -532,7 +532,6 @@
 
                     <select id="filtre-periode" class="tactical-filter">
                         <option value="ALL">TOUT L'HISTORIQUE</option>
-                        <option value="TICK">DEPUIS LE DERNIER TICK</option>
                         <option value="TICK_HEBDO" selected>DEPUIS LE TICK HEBDO (JEUDI)</option>
                         <option value="7J">7 DERNIERS JOURS</option>
                         <option value="30J">30 DERNIERS JOURS</option>
@@ -1141,7 +1140,6 @@
                 if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
                 
                 // Démarrage des radars spécifiques au BGS
-                if (typeof synchroniserHorlogeBGS === 'function') synchroniserHorlogeBGS();
                 if (typeof afficherOrdresBGS === 'function') afficherOrdresBGS();
                 if (typeof window.ecouterEffortsBGS === 'function') window.ecouterEffortsBGS();
 
@@ -1423,29 +1421,6 @@
             };
         }
 
-        // ==========================================
-        // HORLOGE GALACTIQUE BGS (SYNCHRO LOCALE)
-        // ==========================================
-        // On déclare les variables GLOBALEMENT pour que les missions et le journal puissent les lire !
-        let dernierTick = new Date(0);
-        let prochainTick = new Date();
-
-        (function initHorlogeGalactique() {
-            async function synchroniserHorloge() {
-                try {
-                    // 1. Lecture silencieuse de la date officielle sur Supabase
-                    const { data, error } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
-                    if (!error && data && data.dernier_tick) {
-                        dernierTick = new Date(data.dernier_tick);
-                    }
-                } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
-                
-                if (dernierTick.getTime() === 0 || isNaN(dernierTick.getTime())) dernierTick = new Date(); 
-                prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
-            }
-
-            setTimeout(synchroniserHorloge, 1500);
-        })();
 
         function togglePinSystem(nomSysteme, event) {
             if (event) event.stopPropagation();
@@ -3109,16 +3084,13 @@
             if (conteneur) conteneur.innerHTML = html;
         };
 
-        // Calcule le dernier "tick hebdomadaire" (ancré sur le jeudi, à la même heure que le tick
-        // journalier connu) plutôt que le tick quotidien. Recule jour par jour depuis aujourd'hui
-        // jusqu'à trouver un jeudi dont l'heure de tick est déjà passée.
-        function calculerDernierTickHebdo(tickRef) {
-            const heure = tickRef.getUTCHours();
-            const minute = tickRef.getUTCMinutes();
-            const seconde = tickRef.getUTCSeconds();
+        // Calcule le dernier "tick hebdomadaire" : ancre fixe tous les jeudis a 10h00 UTC,
+        // independante du tick quotidien du jeu (retire, cf. discussion). Recule jour par jour
+        // depuis aujourd'hui jusqu'a trouver un jeudi 10h00 UTC deja passe.
+        function calculerDernierTickHebdo() {
             const maintenant = new Date();
 
-            let candidat = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), heure, minute, seconde));
+            let candidat = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 10, 0, 0));
             while (candidat.getUTCDay() !== 4 || candidat.getTime() > Date.now()) {
                 candidat.setUTCDate(candidat.getUTCDate() - 1);
             }
@@ -3250,9 +3222,7 @@
                 }
 
                 // 3. FILTRAGE TEMPOREL, OPÉRATIONNEL ET PILOTE
-                let tickRef = dernierTick;
-                if (new Date() > prochainTick) tickRef = prochainTick;
-                const tickHebdoRef = calculerDernierTickHebdo(tickRef);
+                const tickHebdoRef = calculerDernierTickHebdo();
                 const now = Date.now();
                 
                 let effortsFiltres = effortsBruts.filter(e => {
@@ -3270,7 +3240,6 @@
                     const dateEffort = new Date(dateStr).getTime();
                     if (isNaN(dateEffort)) return false;
 
-                    if (filtrePeriode === 'TICK' && dateEffort < tickRef.getTime()) return false;
                     if (filtrePeriode === 'TICK_HEBDO' && dateEffort < tickHebdoRef.getTime()) return false;
                     if (filtrePeriode === '7J' && now - dateEffort > 7 * 24 * 60 * 60 * 1000) return false;
                     // Note : Le filtre 30J n'est plus utile ici car le serveur Supabase limite déjà à 30J sur le "ALL".
