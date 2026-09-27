@@ -1170,7 +1170,7 @@
         }
 
         async function verifierProfilMobile(user) {
-            const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', user.id).single();
+            const { data, error } = await chargerProfilAvecCache(supabaseApp, user.id);
             if (error || !data || !data.est_approuve) {
                 document.getElementById('auth-view').style.display = 'flex';
                 document.getElementById('app-main').style.display = 'none';
@@ -1503,7 +1503,7 @@
                 const { data: ordresSys } = await supabaseApp.from('ordres_bgs').select('systeme_cible').eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('statut', 'ACTIF');
                 if (ordresSys && ordresSys.length > 0) {
                     const systemesActifs = ordresSys.map(o => o.systeme_cible);
-                    const resConflit = await supabaseApp.from('conflits_systemes').select('*').in('systeme', systemesActifs);
+                    const resConflit = await supabaseApp.from('conflits_systemes').select('systeme, faction1_nom, faction2_nom').in('systeme', systemesActifs);
                     if (resConflit.data) conflitsData = resConflit.data;
                 }
             } catch(e) { console.warn("Mobile BGS: Erreur conflits"); }
@@ -2630,7 +2630,7 @@
             
             try {
                 const { data } = await supabaseApp.from('registre_tactique')
-                    .select('*')
+                    .select('cmdr_cible, systeme_rencontre, niveau_menace, rapport, auteur_nom')
                     .eq('escadron_id', profilCommandant.escadron_id)
                     .eq('est_valide', true)
                     .order('created_at', { ascending: false });
