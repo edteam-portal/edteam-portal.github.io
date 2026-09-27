@@ -1590,13 +1590,13 @@
             const genererJaugeHTML = (titre, valeurTexte, couleur, pourcentageTotal, pourcentageVous, seuilAtteint, alerteTexte = '', couleurOp = '', tooltipInfo = '') => {
                 const widthTotal = Math.min(100, pourcentageTotal);
                 const widthVous = Math.max(0, Math.min(widthTotal, pourcentageVous));
-                const widthAutres = Math.max(0, widthTotal - widthVous);
-                const shadow = widthTotal > 0 ? `box-shadow: 0 0 8px ${couleur};` : "";
                 const couleurBarre = seuilAtteint ? '#4CAF50' : couleur;
-                const couleurAutres = seuilAtteint ? '#4CAF5055' : `${couleur}55`;
-                const shadowBarre = seuilAtteint ? 'box-shadow: 0 0 12px #4CAF50;' : shadow;
 
-                let bgStyle = "background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);";
+                // Le remplissage devient le fond de toute la carte (comme une jauge de carburant),
+                // plutot qu'une fine barre separee : plus visible au milieu des cadres et badges.
+                // Zone vive (forte opacite) = votre contribution, zone attenuee = le reste de l'escadron,
+                // au-dela de ${widthTotal}% : fond neutre (ce qu'il reste a accomplir).
+                let bgStyle = `background: linear-gradient(to right, ${couleurBarre}4d 0%, ${couleurBarre}4d ${widthVous}%, ${couleurBarre}22 ${widthVous}%, ${couleurBarre}22 ${widthTotal}%, rgba(0,0,0,0.5) ${widthTotal}%, rgba(0,0,0,0.5) 100%); border: 1px solid rgba(255,255,255,0.05); transition: background 0.5s ease-out;`;
                 let titreHighlight = titre;
 
                 if (alerteTexte !== '') {
@@ -1604,7 +1604,7 @@
                     titreHighlight = `${titre} <span style="margin-left: 15px; color: ${couleurOp}; font-size: 0.85em; letter-spacing: 1px; animation: alertPulse 1.5s infinite;">${alerteTexte}</span>`;
                 }
 
-                const tooltipEvents = `onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: var(--ed-orange);\\'>OBJECTIF DE L\\'ESCADRON</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Cumule sur toute la duree de l\\'operation. Segment clair = votre contribution, segment fonce = le reste de l\\'escadron.</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"`;
+                const tooltipEvents = `onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '🎯 <strong style=\\'color: var(--ed-orange);\\'>OBJECTIF DE L\\'ESCADRON</strong><br><span style=\\'color:#ccc; font-size:0.9em;\\'>Cumule sur toute la duree de l\\'operation. Zone vive = votre contribution, zone attenuee = le reste de l\\'escadron.</span>', 'var(--ed-orange)')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"`;
 
                 let styleTitre = "color: #fff; font-weight: bold; display: flex; align-items: center;";
                 let eventsTitre = "";
@@ -1614,14 +1614,10 @@
                 }
 
                 return `
-                <div style="${bgStyle} padding: 12px 15px; border-radius: 4px; width: 100%; box-sizing: border-box;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                <div style="${bgStyle} padding: 12px 15px; border-radius: 4px; width: 100%; box-sizing: border-box; cursor: help;" ${tooltipEvents}>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; flex-wrap: wrap; gap: 8px;">
                         <span style="${styleTitre}" ${eventsTitre}>${titreHighlight}</span>
                         <span style="background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.9em;">${valeurTexte}</span>
-                    </div>
-                    <div class="bgs-bar-bg" style="width: 100%; height: 12px; background: #050200; border: 1px solid rgba(255,255,255,0.15); cursor: help; position: relative; overflow: hidden;" ${tooltipEvents}>
-                        <div class="bgs-bar-fill" style="position: absolute; left: 0; top: 0; height: 100%; width: ${widthVous}%; background: ${couleurBarre}; ${shadowBarre} transition: width 0.5s ease-out;"></div>
-                        <div style="position: absolute; left: ${widthVous}%; top: 0; height: 100%; width: ${widthAutres}%; background: ${couleurAutres}; transition: width 0.5s ease-out;"></div>
                     </div>
                 </div>`;
             };
@@ -1839,7 +1835,6 @@
                         const avancementGlobal = Math.min(100, Math.round(sommeRatios / diviseur));
                         const partPilote = poidsTotalEscadron > 0 ? Math.min(100, Math.round((poidsTotalMoi / poidsTotalEscadron) * 100)) : 0;
                         const avancementVousLargeur = Math.min(avancementGlobal, Math.round(avancementGlobal * partPilote / 100));
-                        const avancementAutresLargeur = Math.max(0, avancementGlobal - avancementVousLargeur);
                         const enRetard = avancementGlobal < 30;
 
                         // --- NOUVEAU : DÉTECTION DU SCORE DE GUERRE/ÉLECTION ---
@@ -1876,9 +1871,13 @@
                             }
                         }
 
+                        // Fond en degrade = jauge d'avancement de toute la carte (zone vive = vous,
+                        // zone attenuee = le reste de l'escadron, au-dela : fond neutre du systeme).
+                        const fondJaugeFaction = `linear-gradient(to right, ${colorPrinc}4d 0%, ${colorPrinc}4d ${avancementVousLargeur}%, ${colorPrinc}22 ${avancementVousLargeur}%, ${colorPrinc}22 ${avancementGlobal}%, ${colorFond} ${avancementGlobal}%, ${colorFond} 100%)`;
+
                         htmlAccordionsFactions += `
-                        <div style="border: 1px solid ${colorPrinc}; background: ${colorFond}; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                            <div style="padding: 14px 18px; cursor: pointer; transition: 0.2s;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                        <div style="border: 1px solid ${colorPrinc}; background: ${fondJaugeFaction}; border-radius: 4px; overflow: hidden; margin-bottom: 10px; transition: background 0.5s ease-out;">
+                            <div style="padding: 14px 18px; cursor: pointer; transition: 0.2s;" onclick="toggleOrdreDetails('details-${ordre.id}', 'icon-${ordre.id}')" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
                                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                                     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                                         <span class="copy-click" onclick="event.stopPropagation(); copierNav('${ordre.faction_cible.replace(/'/g, "\\'").toUpperCase()}', this, event)" style="color: #fff; font-size: 1.15em; font-weight: bold;" title="Copier la faction">${escapeHtml(ordre.faction_cible.toUpperCase())}</span>
@@ -1896,12 +1895,7 @@
                                     </div>
                                 </div>
 
-                                <!-- BARRE COMPILEE : segment clair = vous, segment fonce = le reste de l'escadron -->
-                                <div style="position: relative; height: 16px; width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-top: 10px;">
-                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: ${avancementVousLargeur}%; background: ${colorPrinc}; box-shadow: 0 0 8px ${colorPrinc};"></div>
-                                    <div style="position: absolute; left: ${avancementVousLargeur}%; top: 0; height: 100%; width: ${avancementAutresLargeur}%; background: ${colorPrinc}55;"></div>
-                                </div>
-                                <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                                <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
                                     <span style="font-size: 0.75em; color: #aaa;">VOTRE PART : <strong style="color: ${colorPrinc};">${partPilote}%</strong> de l'effort de l'escadron sur cette faction</span>
                                 </div>
                             </div>
