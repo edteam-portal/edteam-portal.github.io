@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=1"></script>
     <script src="navigation.js?v=2"></script>
 
     <style>
@@ -492,7 +493,7 @@
                         if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
                     }
 
-                    const nomPilote = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
+                    const nomPilote = p.cmdr_nom ? escapeHtml(p.cmdr_nom.toUpperCase()) : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
 
                     let cardStyle = '';
                     let textCouleur = '#fff';
@@ -810,7 +811,7 @@
                 if (elMedailles) elMedailles.innerHTML = medaillesHtml;
 
                 // --- 3. INJECTION DES DONNÉES DU PROFIL ---
-                document.getElementById('modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? profil.cmdr_nom.toUpperCase() : '<span style="color: #888; font-size: 0.7em;">[ EN ATTENTE EDMC ]</span>');
+                document.getElementById('modal-cmdr-nom').innerHTML = 'CMDR ' + (profil.cmdr_nom ? escapeHtml(profil.cmdr_nom.toUpperCase()) : '<span style="color: #888; font-size: 0.7em;">[ EN ATTENTE EDMC ]</span>');
                 
                 let badges = '';
                 if (profil.est_amiral) {
