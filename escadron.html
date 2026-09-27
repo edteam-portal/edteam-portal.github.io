@@ -885,7 +885,7 @@
             }
 
             // 2. VÉRIFICATION DU PROFIL EN BASE DE DONNÉES (REQUÊTE UNIQUE CONSOLIDÉE)
-            const { data } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
             
             // SÉCURITÉ ANTI-RECRUE
             const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');

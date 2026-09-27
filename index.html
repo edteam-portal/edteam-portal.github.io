@@ -1556,7 +1556,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
         async function verifierApprobation(user) {
             const msg = document.getElementById('auth-msg');
-            const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', user.id).single();
+            const { data, error } = await chargerProfilAvecCache(supabaseApp, user.id);
             
             // Sécurité : Si le profil n'a pas encore eu le temps d'être généré par la BDD, on retente dans 1 seconde
             if (error || !data) {
@@ -2724,7 +2724,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             try {
                 const { data, error } = await supabaseApp.from('registre_tactique')
-                    .select('*')
+                    .select('id, cmdr_cible, systeme_rencontre, niveau_menace, rapport, auteur_nom, auteur_id')
                     .eq('escadron_id', profilCommandant.escadron_id)
                     .eq('est_valide', true)
                     .order('created_at', { ascending: false });
@@ -2902,7 +2902,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             isSasLooping = true;
             try {
                 const { data, error } = await supabaseApp.from('radar_commercial')
-                    .select('*')
+                    .select('id, target_commodity, station_name')
                     .eq('user_id', userId)
                     .in('target_commodity', ['CMDR_NAME', 'SQUADRON_INFO']);
                 
@@ -3336,11 +3336,20 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         };
 
         // 3. Abonnement Temps Réel (Le flux se met à jour tout seul !)
+        // Filtre cote serveur (escadron + GLOBAL) : necessite que journal_activite soit
+        // ajoutee a la publication supabase_realtime et que sa RLS soit scopee (Phase 0 SQL).
+        // On ajoute directement la ligne recue au cache local plutot que de refaire un
+        // select('*') complet a chaque evenement (economie d'egress).
         supabaseApp.channel('realtime-journal')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'journal_activite' }, payload => {
-                if (payload.new.escadron_id === profilCommandant.escadron_id) {
-                    chargerFluxActivite();
-                }
+            .on('postgres_changes', {
+                event: 'INSERT', schema: 'public', table: 'journal_activite',
+                filter: `escadron_id=in.(${profilCommandant.escadron_id},GLOBAL)`
+            }, payload => {
+                window.journalDataCache = window.journalDataCache || [];
+                window.journalDataCache.unshift(payload.new);
+                if (window.journalDataCache.length > 100) window.journalDataCache.length = 100;
+                window.journalCurrentPage = 1;
+                if (typeof afficherPageJournal === 'function') afficherPageJournal();
             })
             .subscribe();
 

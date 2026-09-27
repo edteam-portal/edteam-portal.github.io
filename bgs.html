@@ -1040,18 +1040,15 @@
                 return; 
             }
 
-            // SÉCURITÉ ANTI-RECRUE
+            // SÉCURITÉ ANTI-RECRUE + VÉRIFICATION DU PROFIL (requête unique, fusionnée)
             const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-            const { data: profData } = await supabaseApp.from('profils').select('est_amiral, est_officier').eq('user_id', session.user.id).single();
-            
-            if (rangJeu === 4 && (!profData || (!profData.est_amiral && !profData.est_officier))) {
-                window.location.href = 'index.html'; 
-                return; 
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+
+            if (rangJeu === 4 && (!data || (!data.est_amiral && !data.est_officier))) {
+                window.location.href = 'index.html';
+                return;
             }
-            
-            // 2. VÉRIFICATION DU PROFIL EN BASE DE DONNÉES
-            const { data } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
-            
+
             if (data && data.est_approuve) {
                 profilCommandant = data;
                 window.profilCommandant = data;
@@ -1651,7 +1648,7 @@
                 const systemesActifs = ordresData.map(o => o.systeme_cible);
                 let resConflits = { data: [] };
                 if (systemesActifs.length > 0) {
-                    resConflits = await supabaseApp.from('conflits_systemes').select('*').in('systeme', systemesActifs);
+                    resConflits = await supabaseApp.from('conflits_systemes').select('systeme, faction1_nom, faction1_score, faction2_nom, faction2_score, mis_a_jour').in('systeme', systemesActifs);
                 }
 
                 const effortsData = resEfforts.data || [];
@@ -2035,14 +2032,15 @@
                     }
                 }
 
-                // REFRESH TEMPOREL RÉTABLI
+                // REFRESH TEMPOREL RÉTABLI (10 min au lieu de 5 : les ordres BGS changent rarement
+                // a cette echelle de temps, ca divise par 2 l'egress recurrent de ce polling)
                 if (!window.bgsLoopActive) {
                     window.bgsLoopActive = true;
                     setInterval(() => {
                         if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
                             afficherOrdresBGS();
                         }
-                    }, 300000);
+                    }, 600000);
                 }
 
             } catch (e) {

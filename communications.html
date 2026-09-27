@@ -248,7 +248,7 @@
                 const { data: { session } } = await supabaseApp.auth.getSession();
                 if (!session) { window.location.href = 'index.html'; return; }
                 
-                const { data, error } = await supabaseApp.from('profils').select('*').eq('user_id', session.user.id).single();
+                const { data, error } = await chargerProfilAvecCache(supabaseApp, session.user.id);
                 
                 if (error || !data || !data.est_approuve) {
                     window.location.href = 'index.html';
