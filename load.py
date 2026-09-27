@@ -258,18 +258,27 @@ def maj_powerplay(puissance, rang, merites_cycle, merites_total):
     infos['puissance_merites_cycle'] = merites_cycle
     infos['puissance_merites_total'] = merites_total
 
+    # NE PAS ecrire directement dans 'profils' (aucune policy RLS UPDATE dessus,
+    # l'ecriture serait bloquee silencieusement). On passe par 'radar_commercial'
+    # comme les autres stats (finances, rangs) : un trigger cote serveur
+    # (automatisation_finances_radar) repercute ensuite vers profils.puissance_*.
+    payload = {
+        "user_id": uid,
+        "system_name": "QG_DATA",
+        "station_name": str(puissance) if puissance else '',
+        "target_commodity": "QG_POWERPLAY",
+        "type_operation": "INFO",
+        "prix_unitaire": int(rang),
+        "volume_disponible": int(merites_cycle),
+        "prix_moyen": float(merites_total),
+        "distance": 0
+    }
     try:
-        requests.patch(
-            f"{SUPABASE_URL}/rest/v1/profils?user_id=eq.{uid}",
-            headers=get_headers(),
-            json={
-                "puissance_nom": puissance,
-                "puissance_rang": int(rang),
-                "puissance_merites_cycle": int(merites_cycle),
-                "puissance_merites_total": int(merites_total)
-            },
-            timeout=5
-        )
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/radar_commercial?select=id&target_commodity=eq.QG_POWERPLAY&user_id=eq.{uid}", headers=get_headers(), timeout=5)
+        if res.status_code == 200 and len(res.json()) > 0:
+            requests.patch(f"{SUPABASE_URL}/rest/v1/radar_commercial?id=eq.{res.json()[0]['id']}", headers=get_headers(), json=payload, timeout=5)
+        else:
+            requests.post(f"{SUPABASE_URL}/rest/v1/radar_commercial", headers=get_headers(), json=payload, timeout=5)
     except: pass
 
 def notifier_journal_activite(type_act, details_txt, couleur_txt="#00F0FF"):
