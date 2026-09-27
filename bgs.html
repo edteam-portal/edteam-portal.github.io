@@ -526,21 +526,22 @@
                     <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; margin-right: auto;">> BANQUE DE DONNÉES</div>
                     
                     <select id="filtre-pilote" class="tactical-filter">
-                        <option value="ALL">[ TOUT L'ESCADRON ]</option>
+                        <option value="ALL" selected>[ TOUT L'ESCADRON ]</option>
                         <option value="ME">> MON DOSSIER PERSONNEL</option>
                     </select>
-                    
+
                     <select id="filtre-periode" class="tactical-filter">
                         <option value="ALL">TOUT L'HISTORIQUE</option>
                         <option value="TICK">DEPUIS LE DERNIER TICK</option>
+                        <option value="TICK_HEBDO" selected>DEPUIS LE TICK HEBDO (JEUDI)</option>
                         <option value="7J">7 DERNIERS JOURS</option>
                         <option value="30J">30 DERNIERS JOURS</option>
                     </select>
 
                     <select id="filtre-ordre" class="tactical-filter">
-                        <option value="ACTIF" selected>[ DIRECTIVES EN COURS ]</option>
+                        <option value="ACTIF">[ DIRECTIVES EN COURS ]</option>
                         <option value="LIBRE">[ ACTIONS LIBRES & COLONISATION ]</option>
-                        <option value="ALL">[ TOUTES LES ACTIVITÉS ]</option>
+                        <option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option>
                     </select>
                 </div>
 
@@ -3142,6 +3143,22 @@
             if (conteneur) conteneur.innerHTML = html;
         };
 
+        // Calcule le dernier "tick hebdomadaire" (ancré sur le jeudi, à la même heure que le tick
+        // journalier connu) plutôt que le tick quotidien. Recule jour par jour depuis aujourd'hui
+        // jusqu'à trouver un jeudi dont l'heure de tick est déjà passée.
+        function calculerDernierTickHebdo(tickRef) {
+            const heure = tickRef.getUTCHours();
+            const minute = tickRef.getUTCMinutes();
+            const seconde = tickRef.getUTCSeconds();
+            const maintenant = new Date();
+
+            let candidat = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), heure, minute, seconde));
+            while (candidat.getUTCDay() !== 4 || candidat.getTime() > Date.now()) {
+                candidat.setUTCDate(candidat.getUTCDate() - 1);
+            }
+            return candidat;
+        }
+
         async function chargerRegistreTactique() {
             if (!profilCommandant) return;
 
@@ -3269,6 +3286,7 @@
                 // 3. FILTRAGE TEMPOREL, OPÉRATIONNEL ET PILOTE
                 let tickRef = dernierTick;
                 if (new Date() > prochainTick) tickRef = prochainTick;
+                const tickHebdoRef = calculerDernierTickHebdo(tickRef);
                 const now = Date.now();
                 
                 let effortsFiltres = effortsBruts.filter(e => {
@@ -3287,6 +3305,7 @@
                     if (isNaN(dateEffort)) return false;
 
                     if (filtrePeriode === 'TICK' && dateEffort < tickRef.getTime()) return false;
+                    if (filtrePeriode === 'TICK_HEBDO' && dateEffort < tickHebdoRef.getTime()) return false;
                     if (filtrePeriode === '7J' && now - dateEffort > 7 * 24 * 60 * 60 * 1000) return false;
                     // Note : Le filtre 30J n'est plus utile ici car le serveur Supabase limite déjà à 30J sur le "ALL".
 
