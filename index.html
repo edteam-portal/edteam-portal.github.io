@@ -3013,6 +3013,15 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                     if (updErr) throw updErr;
 
+                    await supabaseApp.from('journal_activite').insert([{
+                        escadron_id: 'GLOBAL',
+                        user_id: user.id,
+                        cmdr_nom: window.sasCacheCmdr,
+                        type_action: 'NOUVELLE RECRUE',
+                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint le réseau en tant que commandant indépendant.`,
+                        couleur: '#00FF66'
+                    }]);
+
                     window.location.reload();
                     return;
                 }
@@ -3028,8 +3037,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 
                 if (error) throw error;
 
+                // Plus aucune validation manuelle : toute soumission valide est approuvee
+                // immediatement (troupe, Amiral, ou repli indépendant depuis ce chemin).
                 if (reponse === 'PILOTE_ACCEPTE_ET_VERIFIE_TRUE') {
-                    // Écriture directe du message de recrutement
                     await supabaseApp.from('journal_activite').insert([{
                         escadron_id: window.sasCacheSquad,
                         user_id: user.id,
@@ -3042,25 +3052,32 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     return;
                 }
 
-                if (reponse === 'REJET_INDEPENDANT' || reponse === 'REJET_ESCADRON_NON_ACCREDITE') {
-                    await supabaseApp.auth.signOut();
-                    window.location.reload();
-                    return;
-                }
-                if (reponse === 'AMIRAL_ATTENTE') {
-                    // Écriture du message de mise en attente
+                if (reponse === 'AMIRAL_ACCEPTE') {
                     await supabaseApp.from('journal_activite').insert([{
                         escadron_id: window.sasCacheSquad,
                         user_id: user.id,
                         cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'SÉCURITÉ',
-                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} réclame le commandement de la flotte. En attente du Directeur.`,
-                        couleur: 'var(--ed-orange)'
+                        type_action: 'COMMANDEMENT',
+                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a pris le commandement de l'escadron ${window.sasCacheSquad}.`,
+                        couleur: '#00FF66'
                     }]);
                     window.location.reload();
                     return;
                 }
-                
+
+                if (reponse === 'PILOTE_ACCEPTE_INDEPENDANT') {
+                    await supabaseApp.from('journal_activite').insert([{
+                        escadron_id: 'GLOBAL',
+                        user_id: user.id,
+                        cmdr_nom: window.sasCacheCmdr,
+                        type_action: 'NOUVELLE RECRUE',
+                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint le réseau en tant que commandant indépendant.`,
+                        couleur: '#00FF66'
+                    }]);
+                    window.location.reload();
+                    return;
+                }
+
             } catch (e) {
                 console.error("Erreur de soumission :", e);
                 btn.innerText = "ERREUR DE TRANSMISSION";
