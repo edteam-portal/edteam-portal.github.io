@@ -212,25 +212,6 @@
         let isUrgent = false;
         let listePilotes = [];
 
-        // ==========================================
-        // HORLOGE GALACTIQUE (SYNCHRO LOCALE SILENCIEUSE)
-        // ==========================================
-        let dernierTick = new Date(0);
-        let prochainTick = new Date();
-
-        async function synchroniserHorloge() {
-            try {
-                // Lecture silencieuse de la date officielle sur Supabase
-                const { data, error } = await supabaseApp.from('etat_serveur').select('dernier_tick').eq('id', 1).single();
-                if (!error && data && data.dernier_tick) {
-                    dernierTick = new Date(data.dernier_tick);
-                }
-            } catch (err) { console.warn("SYS.EDTEAM : Erreur lecture Supabase."); }
-            
-            if (dernierTick.getTime() === 0 || isNaN(dernierTick.getTime())) dernierTick = new Date(); 
-            prochainTick = new Date(dernierTick.getTime() + 24 * 60 * 60 * 1000);
-        }
-        
         // Caches du Renseignement Tactique
         let cacheRegistreTactique = [];
         let cacheTraitesDiplo = [];
@@ -290,7 +271,6 @@
                 // --- SÉQUENCE D'ALLUMAGE SÉCURISÉE ---
                 await chargerListePilotes();
                 await chargerRenseignementLocal();
-                await synchroniserHorloge(); // <-- Synchronisation silencieuse du Tick via Supabase
                 await chargerHistorique();    // <-- Affiche uniquement les messages propres
                 ecouterTransmissions();
                 ecouterEffortsBGS(); // <-- Activation du radar d'efforts filtré
@@ -385,11 +365,6 @@
             
             try {
                 let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(50);
-                
-                // FILTRE DE PURGE : Seuls les messages émis depuis le dernier Tick sont chargés
-                if (dernierTick && dernierTick.getTime() > 0) {
-                    query = query.gte('created_at', dernierTick.toISOString());
-                }
 
                 if (canalActif === 'GLOBAL') {
                     query = query.eq('canal', 'GLOBAL');
@@ -444,11 +419,6 @@
                 const lastRead = parseInt(localStorage.getItem('edteam_last_read_' + canal) || '0');
                 let query = supabaseApp.from('transmissions').select('created_at').eq('canal', canal).order('created_at', { ascending: false }).limit(1);
                 if (filtreCol) query = query.eq(filtreCol, filtreVal);
-
-                // ---> AJOUT : On ignore les messages fantômes (avant le tick) <---
-                if (typeof dernierTick !== 'undefined' && dernierTick.getTime() > 0) {
-                    query = query.gte('created_at', dernierTick.toISOString());
-                }
 
                 const { data } = await query;
                 // S'il y a un message plus récent que notre dernière visite, ça clignote !
