@@ -190,16 +190,16 @@ def patch_parametres(payload):
 def maj_generique_global(target, system, station, type_op, val=0, vol=0):
     uid = get_user_id()
     if not uid: return
-    
+
     payload = {
         "user_id": uid,
-        "system_name": str(system), 
-        "station_name": str(station), 
-        "target_commodity": target, 
-        "type_operation": type_op, 
-        "prix_unitaire": int(val), 
-        "volume_disponible": int(vol), 
-        "distance": 0, 
+        "system_name": str(system),
+        "station_name": str(station),
+        "target_commodity": target,
+        "type_operation": type_op,
+        "prix_unitaire": int(val),
+        "volume_disponible": int(vol),
+        "distance": 0,
         "prix_moyen": 0
     }
     try:
@@ -208,6 +208,38 @@ def maj_generique_global(target, system, station, type_op, val=0, vol=0):
             requests.patch(f"{SUPABASE_URL}/rest/v1/radar_commercial?id=eq.{res.json()[0]['id']}", headers=get_headers(), json=payload, timeout=5)
         else:
             requests.post(f"{SUPABASE_URL}/rest/v1/radar_commercial", headers=get_headers(), json=payload, timeout=5)
+    except: pass
+
+def maj_generique_batch(items):
+    """Variante groupee de maj_generique_global : un seul GET pour verifier l'existence
+    de plusieurs lignes (target_commodity=in.(...)) au lieu d'un GET par thread.
+    items : liste de dicts {target, system, station, type_op, val, vol}."""
+    uid = get_user_id()
+    if not uid or not items: return
+    try:
+        in_list = ",".join(it["target"] for it in items)
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/radar_commercial?select=id,target_commodity&target_commodity=in.({in_list})&user_id=eq.{uid}", headers=get_headers(), timeout=5)
+        existants = {}
+        if res.status_code == 200:
+            for row in res.json():
+                existants[row['target_commodity']] = row['id']
+
+        for it in items:
+            payload = {
+                "user_id": uid,
+                "system_name": str(it["system"]),
+                "station_name": str(it["station"]),
+                "target_commodity": it["target"],
+                "type_operation": it["type_op"],
+                "prix_unitaire": int(it.get("val", 0)),
+                "volume_disponible": int(it.get("vol", 0)),
+                "distance": 0,
+                "prix_moyen": 0
+            }
+            if it["target"] in existants:
+                requests.patch(f"{SUPABASE_URL}/rest/v1/radar_commercial?id=eq.{existants[it['target']]}", headers=get_headers(), json=payload, timeout=5)
+            else:
+                requests.post(f"{SUPABASE_URL}/rest/v1/radar_commercial", headers=get_headers(), json=payload, timeout=5)
     except: pass
 
 def maj_powerplay(puissance, rang, merites_cycle, merites_total):
@@ -550,20 +582,17 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         threading.Thread(target=maj_generique_global, args=("QG_NOTORIETE", "QG_DATA", "NOTORIETE", "INFO", entry.get('Notoriety'))).start()
 
     if event in ['Rank', 'Progress']:
-        if event == 'Rank':
-            for r in ['Combat', 'Trade', 'Explore', 'Federation', 'Empire', 'Exobiologist']:
-                if entry.get(r) is not None: 
-                    threading.Thread(target=maj_generique_global, args=(f"QG_RANK_{r.upper()[:6]}", "QG_DATA", r.upper(), "INFO", entry.get(r))).start()
-            val_mercenary = entry.get('Soldier') if entry.get('Soldier') is not None else entry.get('Mercenary')
-            if val_mercenary is not None:
-                threading.Thread(target=maj_generique_global, args=("QG_RANK_MERCEN", "QG_DATA", "MERCENARY", "INFO", val_mercenary)).start()
-        elif event == 'Progress':
-            for r in ['Combat', 'Trade', 'Explore', 'Federation', 'Empire', 'Exobiologist']:
-                if entry.get(r) is not None: 
-                    threading.Thread(target=maj_generique_global, args=(f"QG_PROG_{r.upper()[:6]}", "QG_DATA", r.upper(), "INFO", entry.get(r))).start()
-            prog_mercenary = entry.get('Soldier') if entry.get('Soldier') is not None else entry.get('Mercenary')
-            if prog_mercenary is not None:
-                threading.Thread(target=maj_generique_global, args=("QG_PROG_MERCEN", "QG_DATA", "MERCENARY", "INFO", prog_mercenary)).start()
+        prefix = "RANK" if event == 'Rank' else "PROG"
+        items = []
+        for r in ['Combat', 'Trade', 'Explore', 'Federation', 'Empire', 'Exobiologist']:
+            if entry.get(r) is not None:
+                items.append({"target": f"QG_{prefix}_{r.upper()[:6]}", "system": "QG_DATA", "station": r.upper(), "type_op": "INFO", "val": entry.get(r)})
+        val_mercenary = entry.get('Soldier') if entry.get('Soldier') is not None else entry.get('Mercenary')
+        if val_mercenary is not None:
+            items.append({"target": f"QG_{prefix}_MERCEN", "system": "QG_DATA", "station": "MERCENARY", "type_op": "INFO", "val": val_mercenary})
+        if items:
+            # Un seul thread, un seul GET groupe (au lieu de jusqu'a 7 threads x 1 GET chacun)
+            threading.Thread(target=maj_generique_batch, args=(items,)).start()
 
     elif event == 'Loadout':
         ship_name = entry.get('ShipName', 'VAISSEAU TACTIQUE')
