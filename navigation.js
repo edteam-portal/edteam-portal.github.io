@@ -107,14 +107,14 @@ function injecterArchitectureGlobale() {
 
                 <div id="stats-pilotes-box"
                     style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: help; white-space: nowrap; box-sizing: border-box;"
-                    onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>depuis le dernier tick hebdomadaire (jeudi 10h UTC),<br>tous escadrons confondus.</span>', '#00FF66')"
+                    onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>durant les 30 derniers jours,<br>tous escadrons confondus.</span>', '#00FF66')"
                     onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
                     onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
                     <div style="color: #888; font-size: 0.75em; font-weight: bold;">FLOTTE</div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span><span id="stats-inscrits-val" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">INSCRITS</span></span>
                         <span style="color:#333;">|</span>
-                        <span><span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">ACTIFS</span></span>
+                        <span><span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">ACTIFS (30J)</span></span>
                     </div>
                 </div>
 
