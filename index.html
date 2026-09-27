@@ -2339,7 +2339,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             try {
                 // On récupère TOUS les profils non approuvés (pour correspondre au badge)
-                const { data, error } = await supabaseApp.from('profils').select('*').eq('est_approuve', false);
+                const { data, error } = await supabaseApp.from('profils').select('user_id, cmdr_nom, escadron_id').eq('est_approuve', false);
                 if (error) throw error;
 
                 if (data && data.length > 0) {
@@ -2348,8 +2348,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         
                         if (p.cmdr_nom) {
                             // CAS 1 : LE DOSSIER EST COMPLET (Le pilote a transmis ses infos)
-                            const nomAffichage = `CMDR ${p.cmdr_nom.toUpperCase()}`;
-                            const squadAffichage = p.escadron_id ? `[ Escadron: ${p.escadron_id} ]` : `[ Pilote Indépendant ]`;
+                            const nomAffichage = `CMDR ${escapeHtml(p.cmdr_nom.toUpperCase())}`;
+                            const squadAffichage = p.escadron_id ? `[ Escadron: ${escapeHtml(p.escadron_id)} ]` : `[ Pilote Indépendant ]`;
 
                             html += `
                             <div style="background: rgba(0,0,0,0.6); border: 1px solid #00FF66; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -2431,7 +2431,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             try {
                 const [resProfils, resParams, resOrdres, resTransmissions] = await Promise.all([
-                    supabaseApp.from('profils').select('*').eq('est_approuve', true).order('cmdr_nom'),
+                    // 'reputations' exclue : ecrite cote serveur mais jamais lue par aucune page (fonctionnalite retiree)
+                    supabaseApp.from('profils').select('id, user_id, email, cle_api, est_approuve, created_at, escadron_id, est_amiral, cmdr_nom, solde_vaisseau, solde_fc, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_fed, prog_fed, rang_emp, prog_emp, patrimoine_total, valeur_vaisseaux, cout_rachat, est_directeur, est_officier, est_diplomate, notoriete, rang_mercenary, prog_mercenary, palmares_bgs, faction_choisie, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total').eq('est_approuve', true).order('cmdr_nom'),
                     supabaseApp.from('parametres_app').select('user_id, last_heartbeat, factions_favorites, telemetrie_usage'),
                     supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }),
                     supabaseApp.from('transmissions').select('id', { count: 'exact', head: true })
