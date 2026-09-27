@@ -1646,6 +1646,23 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 if (typeof window.chargerFluxActivite === 'function') window.chargerFluxActivite();
                 if (typeof window.ecouterEffortsBGS === 'function') window.ecouterEffortsBGS();
                 chargerRegistreRenseignement(); // <-- AJOUTER CETTE LIGNE
+
+                // Abonnement Temps Réel au journal (déplacé ici : profilCommandant.escadron_id
+                // n'est disponible qu'une fois le profil chargé, pas au chargement du script)
+                if (supabaseApp && data.escadron_id !== undefined) {
+                    supabaseApp.channel('realtime-journal')
+                        .on('postgres_changes', {
+                            event: 'INSERT', schema: 'public', table: 'journal_activite',
+                            filter: `escadron_id=in.(${data.escadron_id},GLOBAL)`
+                        }, payload => {
+                            window.journalDataCache = window.journalDataCache || [];
+                            window.journalDataCache.unshift(payload.new);
+                            if (window.journalDataCache.length > 100) window.journalDataCache.length = 100;
+                            window.journalCurrentPage = 1;
+                            if (typeof window.afficherPageJournal === 'function') window.afficherPageJournal();
+                        })
+                        .subscribe();
+                }
                 
             } else {
                 // LE PILOTE N'EST PAS APPROUVÉ (SAS OU ATTENTE)
@@ -3336,25 +3353,14 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             window.afficherPageJournal();
         };
 
-        // 3. Abonnement Temps Réel (Le flux se met à jour tout seul !)
-        // Filtre cote serveur (escadron + GLOBAL) : necessite que journal_activite soit
-        // ajoutee a la publication supabase_realtime et que sa RLS soit scopee (Phase 0 SQL).
-        // On ajoute directement la ligne recue au cache local plutot que de refaire un
-        // select('*') complet a chaque evenement (economie d'egress).
-        supabaseApp.channel('realtime-journal')
-            .on('postgres_changes', {
-                event: 'INSERT', schema: 'public', table: 'journal_activite',
-                filter: `escadron_id=in.(${profilCommandant.escadron_id},GLOBAL)`
-            }, payload => {
-                window.journalDataCache = window.journalDataCache || [];
-                window.journalDataCache.unshift(payload.new);
-                if (window.journalDataCache.length > 100) window.journalDataCache.length = 100;
-                window.journalCurrentPage = 1;
-                if (typeof afficherPageJournal === 'function') afficherPageJournal();
-            })
-            .subscribe();
+        // NOTE : l'abonnement Realtime au journal (table journal_activite, filtre
+        // escadron_id=in.(...,GLOBAL)) est maintenant mis en place dans window.onload,
+        // une fois profilCommandant/escadron_id effectivement charges (cf. plus haut) --
+        // le placer ici, au chargement du script, provoquait un TypeError (profilCommandant
+        // encore null) qui empechait toutes les definitions suivantes (dont
+        // window.ouvrirDetailJournal) de s'executer.
 
-            // --- DÉPLOIEMENT DES MISES À JOUR (RÉSERVÉ DIRECTEUR) ---
+        // --- DÉPLOIEMENT DES MISES À JOUR (RÉSERVÉ DIRECTEUR) ---
         window.publierMiseAJourEDTEAM = async function() {
             if(typeof sonClic === 'function') sonClic();
             const titre = document.getElementById('dev-update-title').value.trim();
