@@ -1674,30 +1674,22 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 if (mainUi) mainUi.style.display = 'none';
 
                 // 2. LOGIQUE DU SAS
-                if (data.cmdr_nom) {
-                    // Le dossier est déjà transmis, on bloque l'accès proprement
-                    document.getElementById('sas-screen').style.display = 'none';
-                    document.getElementById('auth-screen').style.display = 'flex';
-                    
-                    const msg = document.getElementById('auth-msg');
-                    msg.style.color = "var(--ed-orange)";
-                    msg.innerText = "> ACCÈS RESTREINT : EN ATTENTE DE VALIDATION.";
-                    
-                } else {
-                    // Le dossier est vide. On lance le radar pour écouter EDMC.
-                    document.getElementById('auth-screen').style.display = 'none';
-                    document.getElementById('sas-screen').style.display = 'flex';
-                    document.getElementById('sas-api-key').innerText = data.cle_api;
-                    
-                    navSas('sas-page-main'); // <-- FORCE L'AFFICHAGE DES BOUTONS ET DU RADAR
-                    
-                    // On s'assure que les diagnostics sont bien visibles pour une nouvelle recrue
-                    const diagSection = document.getElementById('sas-diagnostics-section');
-                    if (diagSection) diagSection.style.display = 'block';
-                    
-                    if(typeof startSasMusic === 'function') startSasMusic();
-                    sasLoop(user.id);
-                }
+                // Plus aucune validation manuelle : tant que est_approuve est false,
+                // on renvoie toujours vers le SAS (un cmdr_nom déjà présent en base ne
+                // signifie plus "en attente d'un admin", juste une tentative précédente
+                // non finalisée).
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('sas-screen').style.display = 'flex';
+                document.getElementById('sas-api-key').innerText = data.cle_api;
+
+                navSas('sas-page-main'); // <-- FORCE L'AFFICHAGE DES BOUTONS ET DU RADAR
+
+                // On s'assure que les diagnostics sont bien visibles pour une nouvelle recrue
+                const diagSection = document.getElementById('sas-diagnostics-section');
+                if (diagSection) diagSection.style.display = 'block';
+
+                if(typeof startSasMusic === 'function') startSasMusic();
+                sasLoop(user.id);
             }
         }
 

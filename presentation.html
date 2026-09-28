@@ -3,8 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYS.EDTEAM // Accréditation Navale</title>
-    
+    <title>SYS.EDTEAM — Outil communautaire gratuit pour escadrons Elite Dangerous</title>
+    <meta name="description" content="SYS.EDTEAM est l'outil communautaire gratuit pour les escadrons Elite Dangerous : suivi BGS en temps réel, QG de flotte, radar de commerce et assistant COVAS embarqué. Installation en 2 minutes via EDMC.">
+    <link rel="icon" href="icon-192.png" type="image/png">
+
+    <!-- Open Graph / Discord & réseaux sociaux -->
+    <!-- TODO : remplacer l'URL ci-dessous par le nom de domaine définitif une fois choisi -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SYS.EDTEAM">
+    <meta property="og:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
+    <meta property="og:description" content="Suivi BGS en temps réel, QG de flotte, radar de commerce et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
+    <meta property="og:image" content="https://VOTRE-DOMAINE-ICI.fr/images/qg.png">
+    <meta property="og:url" content="https://VOTRE-DOMAINE-ICI.fr/presentation.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
+    <meta name="twitter:description" content="Suivi BGS en temps réel, QG de flotte, radar de commerce et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
+    <meta name="twitter:image" content="https://VOTRE-DOMAINE-ICI.fr/images/qg.png">
+    <link rel="canonical" href="https://VOTRE-DOMAINE-ICI.fr/presentation.html">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SYS.EDTEAM",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Windows (plugin EDMC) + Web",
+        "description": "Outil communautaire gratuit pour escadrons Elite Dangerous : suivi BGS en temps réel, QG de flotte, radar de commerce et assistant COVAS embarqué.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "url": "https://VOTRE-DOMAINE-ICI.fr/presentation.html"
+    }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
@@ -30,9 +59,6 @@
             scroll-behavior: smooth;
         }
 
-        /* Bloquer le scroll tant que le sas est actif */
-        body.locked { overflow: hidden; height: 100vh; }
-
         .scanline {
             position: fixed; top: 0; left: 0; width: 100%; height: 2px;
             background: var(--ed-blue);
@@ -51,37 +77,24 @@
         .sub-data { display: block; color: #555; font-size: 0.8em; letter-spacing: 4px; margin-bottom: 10px; font-weight: bold; }
 
         /* =========================================
-           LE SAS D'ENTRÉE (SPLASH SCREEN ROLEPLAY)
+           WIDGET AMBIANCE SONORE (non-bloquant)
            ========================================= */
-        #sas-entree {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #010203;
-            background-image: radial-gradient(circle at center, #0a1118 0%, #000 100%);
-            z-index: 100000; /* Toujours au-dessus de tout */
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center;
-            transition: opacity 1.5s ease-in-out, visibility 1.5s;
+        #ambiance-toggle {
+            position: fixed; bottom: 25px; right: 25px; z-index: 500;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(1, 2, 3, 0.85); border: 1px solid var(--ed-blue);
+            color: #ddd; font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85em; letter-spacing: 1px; text-transform: uppercase;
+            padding: 12px 20px; border-radius: 4px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0,240,255,0.05);
+            backdrop-filter: blur(6px);
+            transition: all 0.3s ease-out;
         }
-        
-        #sas-entree .logo-sas {
-            width: 120px; height: 120px; margin-bottom: 30px;
-            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
-            animation: pulse-logo 2s infinite alternate ease-in-out;
-        }
+        #ambiance-toggle:hover { border-color: #fff; box-shadow: 0 0 30px rgba(0, 240, 255, 0.4); }
+        #ambiance-toggle.active { border-color: var(--ed-orange); }
 
-        .sas-box {
-            border: 1px solid var(--ed-blue);
-            background: rgba(0, 240, 255, 0.03);
-            padding: 40px 60px;
-            box-shadow: inset 0 0 40px rgba(0,240,255,0.05), 0 0 50px rgba(0,0,0,0.8);
-            border-radius: 4px;
-        }
-
-        .sas-warning {
-            color: var(--ed-orange);
-            font-size: 0.9em; letter-spacing: 2px;
-            margin-bottom: 30px; margin-top: 20px;
-            animation: pulse-logo 1.5s infinite alternate;
+        @media (max-width: 768px) {
+            #ambiance-toggle { bottom: 15px; right: 15px; padding: 10px 14px; font-size: 0.75em; }
         }
 
         /* =========================================
@@ -191,7 +204,6 @@
             .holo-card, .feature-grid.reverse .holo-card { transform: none !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
             .main-title { font-size: 3em; }
             .steps-container { grid-template-columns: 1fr; }
-            .sas-box { padding: 30px 20px; }
         }
 
         /* =========================================
@@ -199,12 +211,6 @@
            ========================================= */
         @media (max-width: 768px) {
             .container { padding: 0 20px; }
-            
-            /* SAS D'ENTRÉE */
-            #sas-entree .logo-sas { width: 80px; height: 80px; margin-bottom: 20px; }
-            .sas-box { padding: 25px 15px; width: 90%; }
-            .sas-box h2 { font-size: 1.8em !important; }
-            .sas-warning { font-size: 0.75em; }
 
             /* HERO SECTION */
             .logo-giant { width: 80px; height: 80px; margin-bottom: 20px; }
@@ -232,36 +238,20 @@
 
     </style>
 </head>
-<!-- On bloque le défilement au démarrage pour piéger le joueur dans le SAS -->
-<body class="locked">
+<body>
 
     <div class="scanline"></div>
 
     <!-- =========================================
-         LE SAS D'ONBOARDING
+         WIDGET AMBIANCE SONORE (optionnel, non-bloquant)
          ========================================= -->
-    <div id="sas-entree">
-        <svg class="logo-sas" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
-            <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
-            <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
-        </svg>
-        
-        <div class="sas-box">
-            <h2 class="neon-blue" style="font-size: 2.5em; letter-spacing: 4px; margin-bottom: 15px;">RÉSEAU SÉCURISÉ TACTIQUE</h2>
-            <p style="color: #aaa; font-size: 1.2em; margin-bottom: 5px;">Accréditation locale requise pour l'accès aux données.</p>
-            
-            <div class="sas-warning">
-                >_ SYSTÈME AUDIO SPATIALISÉ DÉTECTÉ. CASQUE RECOMMANDÉ.
-            </div>
-
-            <button class="btn-massive btn-cyan" onclick="deverrouillerTerminal()">[ ÉTABLIR LA LIAISON ]</button>
-        </div>
+    <div id="ambiance-toggle" onclick="toggleAmbiance()" title="Casque recommandé pour la meilleure expérience">
+        <span id="ambiance-icon">🔊</span>
+        <span id="ambiance-label">ACTIVER L'AMBIANCE SONORE</span>
     </div>
 
-
     <!-- =========================================
-         LE RESTE DU SITE (Caché en dessous du SAS)
+         LE RESTE DU SITE
          ========================================= -->
     <header class="hero-section">
         <div class="container">
@@ -271,14 +261,25 @@
                 <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
             </svg>
             
-            <span class="sub-data">// SYSTÈME OPÉRATIONNEL DE L'AMIRAUTÉ</span>
+            <span class="sub-data">// OUTIL COMMUNAUTAIRE GRATUIT POUR ELITE DANGEROUS</span>
             <h1 class="main-title neon-blue">UNIFIEZ LA FLOTTE.<br><span class="neon-orange">GAGNEZ LA GUERRE.</span></h1>
-            <p class="sub-title">Le renseignement est votre meilleure arme. Découvrez <strong>SYS.EDTEAM</strong>, le réseau tactique qui connecte l'ordinateur de bord de votre vaisseau au commandement central de l'escadron en temps réel.</p>
-            
+            <p class="sub-title">Le renseignement est votre meilleure arme. Découvrez <strong>SYS.EDTEAM</strong>, le réseau tactique qui connecte l'ordinateur de bord de votre vaisseau <strong>Elite Dangerous</strong> au commandement central de l'escadron, en temps réel.</p>
+
             <!-- Lien vers le vrai site / l'appli -->
-            <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
+            <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
+                <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
+                <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan" style="font-size: 1.4em; padding: 25px 40px;">[ REJOINDRE LE DISCORD ]</a>
+            </div>
         </div>
     </header>
+
+    <section style="padding: 40px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); background: rgba(0,240,255,0.02);">
+        <div class="container" style="max-width: 1100px; display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; text-align: center; font-size: 1.05em; color: #999;">
+            <span>✓ 100% gratuit, projet de fan sans lien officiel avec Frontier Developments</span>
+            <span>✓ Aucune donnée personnelle collectée — uniquement votre journal de vol Elite Dangerous</span>
+            <span>✓ Installation via le plugin <strong style="color:#ccc;">EDMC</strong>, aucun logiciel lourd</span>
+        </div>
+    </section>
 
     <section class="section" style="background: rgba(0,0,0,0.7); box-shadow: inset 0 0 100px #000;">
         <div class="container" style="text-align: center; max-width: 1000px;">
@@ -446,13 +447,17 @@
 
             <div style="text-align: center; margin-top: 120px;">
                 <p style="color: #fff; font-size: 1.8em; margin-bottom: 40px; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,0.5);">L'AMIRAUTÉ N'ATTEND PLUS QUE VOUS.</p>
-                <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
+                <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
+                    <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
+                    <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan">[ REJOINDRE LE DISCORD ]</a>
+                </div>
             </div>
         </div>
     </section>
 
     <footer style="text-align: center; padding: 60px; background: #000; color: #555; font-size: 0.9em; letter-spacing: 3px;">
-        SYSTÈME DE COMMANDEMENT SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS
+        SYSTÈME DE COMMANDEMENT SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS<br>
+        <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" style="color: var(--ed-blue); text-decoration: none;">Discord</a>
     </footer>
 
     <!-- =========================================
@@ -487,31 +492,35 @@
             { step: 96, note: 293.66, dur: 32 }  
         ];
 
-        // --- LA FONCTION MAGIQUE DU SAS ---
-        function deverrouillerTerminal() {
-            // 1. Initialiser le contexte Audio (le navigateur autorise le son car l'utilisateur a cliqué sur un bouton)
+        // --- WIDGET AMBIANCE SONORE (non-bloquant) ---
+        function toggleAmbiance() {
+            const toggle = document.getElementById('ambiance-toggle');
+            const icon = document.getElementById('ambiance-icon');
+            const label = document.getElementById('ambiance-label');
+
             if (!majesticCtx) majesticCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (majesticCtx.state === 'suspended') majesticCtx.resume();
-            
-            // 2. Lancer la Symphonie
-            isMajesticPlaying = true;
-            initMajesticEngine();
-            
-            // Petit son de validation UI pour le clic
-            playUIValidation();
 
-            // 3. Faire disparaître le Sas en fondu
-            const sas = document.getElementById('sas-entree');
-            sas.style.opacity = '0';
-            
-            // 4. Débloquer le scroll du site
-            document.body.classList.remove('locked');
-
-            // 5. Retirer le Sas du DOM après le fondu pour ne pas bloquer les clics sur la page
-            setTimeout(() => {
-                sas.style.visibility = 'hidden';
-                sas.style.display = 'none';
-            }, 1500);
+            if (!isMajesticPlaying) {
+                isMajesticPlaying = true;
+                initMajesticEngine();
+                playUIValidation();
+                toggle.classList.add('active');
+                icon.textContent = '🔉';
+                label.textContent = "COUPER L'AMBIANCE SONORE";
+            } else {
+                isMajesticPlaying = false;
+                clearTimeout(scheduleTimer);
+                if (masterGain) {
+                    const t = majesticCtx.currentTime;
+                    masterGain.gain.cancelScheduledValues(t);
+                    masterGain.gain.setValueAtTime(masterGain.gain.value, t);
+                    masterGain.gain.linearRampToValueAtTime(0, t + 0.5);
+                }
+                toggle.classList.remove('active');
+                icon.textContent = '🔊';
+                label.textContent = "ACTIVER L'AMBIANCE SONORE";
+            }
         }
 
         // Bruitage technologique au clic du bouton

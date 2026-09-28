@@ -2,3 +2,4 @@ supabase_sql/
 supabase_reference/
 .claudeprompt.txt
 /load.py
+.mcp.json
