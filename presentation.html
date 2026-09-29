@@ -276,7 +276,7 @@
     <section style="padding: 40px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); background: rgba(0,240,255,0.02);">
         <div class="container" style="max-width: 1100px; display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; text-align: center; font-size: 1.05em; color: #999;">
             <span>✓ 100% gratuit, projet de fan sans lien officiel avec Frontier Developments</span>
-            <span>✓ Aucune donnée personnelle collectée — uniquement votre journal de vol Elite Dangerous</span>
+            <span>✓ Uniquement vos données de jeu et votre email — <a href="#vos-donnees" style="color:#ccc;">voir le détail</a></span>
             <span>✓ Installation via le plugin <strong style="color:#ccc;">EDMC</strong>, aucun logiciel lourd</span>
         </div>
     </section>
@@ -400,7 +400,7 @@
                     <span class="sub-data">// MODULE 06 : CRYPTOGRAPHIE</span>
                     <h3 class="neon-blue">SÉCURITÉ MILITAIRE</h3>
                     <p>Coordonnez-vous via les <strong>Communications Holographiques</strong> intégrées. Canal privé, canal d'escadron ou fréquences de coalition.</p>
-                    <p>Pour prévenir toute interception par l'ennemi, l'intégralité du registre de communication est purgée et détruite automatiquement à chaque nouveau cycle galactique (Tick). Ne laissez aucune trace.</p>
+                    <p>Pour prévenir toute interception par l'ennemi, l'intégralité du registre de communication est purgée et détruite automatiquement chaque semaine, le jeudi. Ne laissez aucune trace.</p>
                 </div>
                 <div class="holo-container">
                     <div class="holo-card"><img src="images/comms.png" alt="Communications Sécurisées"></div>
@@ -422,6 +422,30 @@
         </div>
     </section>
 
+    <section id="vos-donnees" class="section" style="background: rgba(0,0,0,0.7); border-top: 1px dashed rgba(255,255,255,0.08);">
+        <div class="container" style="max-width: 1000px;">
+            <h2 class="section-title neon-blue" style="margin-bottom: 40px; text-align: center;">VOS DONNÉES, EN CLAIR</h2>
+            <div style="color: #bbb; font-size: 1.2em; line-height: 1.7;">
+                <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">CE QUE NOUS RECEVONS</p>
+                <ul style="margin: 0 0 30px 20px;">
+                    <li>À l'inscription : votre <strong>adresse email</strong> et votre mot de passe (chiffré, géré par Supabase).</li>
+                    <li>Depuis le plugin, à partir du journal d'Elite Dangerous : nom de CMDR, système actuel, nom et modèle du vaisseau, soldes (vaisseau et Fleet Carrier), patrimoine, rangs et progression, statut Powerplay (puissance, rang, mérites), escadron, réputations dans le système, CMDR ciblés et actions BGS.</li>
+                </ul>
+                <p style="margin-bottom: 30px;"><strong style="color:#fff;">Ce que nous ne recevons pas :</strong> vos identifiants Frontier, le contenu de vos discussions en jeu, ni aucun fichier de votre ordinateur.</p>
+
+                <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">QUI VOIT QUOI</p>
+                <ul style="margin: 0 0 30px 20px;">
+                    <li>Vos données de jeu (position, soldes, flotte) ne sont lisibles que par vous.</li>
+                    <li>Si vous êtes dans un escadron, votre fiche est consultable par les membres de cet escadron.</li>
+                    <li>Les autres pilotes ne voient que votre nom de CMDR dans la liste des destinataires. Dans le tableau Powerplay, ils voient votre nom, votre rang et vos mérites, uniquement si vous êtes de la même puissance.</li>
+                    <li>Le Directeur de l'application peut consulter les fiches pour l'administrer.</li>
+                </ul>
+
+                <p style="margin-bottom: 0;">Le plugin ne tourne que lorsque EDMC est lancé, et vous pouvez le retirer à tout moment. Vous pouvez modifier votre email, votre mot de passe ou <strong style="color:#fff;">supprimer votre compte</strong> depuis « Gestion du compte » : vos données sont alors effacées.</p>
+            </div>
+        </div>
+    </section>
+
     <section class="section" style="background: rgba(0,240,255,0.02); border-top: 1px solid var(--ed-blue);">
         <div class="container">
             <h2 class="section-title neon-blue" style="margin-bottom: 40px;">INITIALISATION EN 3 ÉTAPES</h2>
@@ -431,7 +455,7 @@
                 <div class="step-box">
                     <div class="step-number">01</div>
                     <div class="step-title">ACCRÉDITATION WEB</div>
-                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Rendez-vous sur le Terminal et créez votre profil sécurisé. Le commandement validera votre demande d'accès.</p>
+                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Rendez-vous sur le Terminal et créez votre profil sécurisé. L'accréditation est immédiate.</p>
                 </div>
                 <div class="step-box">
                     <div class="step-number">02</div>
