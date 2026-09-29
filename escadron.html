@@ -445,7 +445,7 @@
                                                 
                                                 <div style="line-height: 1.4;">
                                                     <strong style="color: #fff;">🔲 ENCADREMENT : RANG ESCADRON</strong><br>
-                                                    <span style="color: #ccc;">Argent (3e), Or (2e), <strong style="color:#00FFFF; text-shadow: 0 0 5px #00FFFF;">Diamant (1er)</strong>. Pas de cadre au-delà du podium.</span>
+                                                    <span style="color: #ccc;">Argent (3e), Or (2e), <strong style="color:#00FFFF; text-shadow: 0 0 5px #00FFFF;">Diamant (1er)</strong>. Pas de cadre au-delà du podium. Le chiffre dans le coin de la plaque indique ce rang.</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -618,8 +618,8 @@
 
             const renderStars = (count, gradId, glow) => {
                 if (count === 1) return drawStar(50, 14, gradId, glow, 0.65);
-                if (count === 2) return drawStar(35, 14, gradId, glow, 0.65) + drawStar(65, 14, gradId, glow, 0.65);
-                if (count === 3) return drawStar(25, 14, gradId, glow, 0.55) + drawStar(50, 14, gradId, glow, 0.55) + drawStar(75, 14, gradId, glow, 0.55);
+                if (count === 2) return drawStar(40, 14, gradId, glow, 0.6) + drawStar(68, 14, gradId, glow, 0.6);
+                if (count === 3) return drawStar(33, 14, gradId, glow, 0.5) + drawStar(56, 14, gradId, glow, 0.5) + drawStar(79, 14, gradId, glow, 0.5);
                 return '';
             };
 
@@ -658,6 +658,13 @@
                 frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>`;
             }
 
+            // Disque de podium (rang 1, 2, 3) dans le coin : le cadre montre la place, le chiffre la confirme
+            let podium = '';
+            if (rang >= 1 && rang <= 3) {
+                const pc = rang === 1 ? '#00FFFF' : (rang === 2 ? '#FFD700' : '#C0C0C0');
+                podium = `<circle cx="8" cy="8.5" r="6.2" fill="#050505" stroke="${pc}" stroke-width="1.3"/><text x="8" y="12" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-size="9.5" font-weight="bold" fill="${pc}">${rang}</text>`;
+            }
+
             let clickHandler = onclickAction ? `onclick="${onclickAction}; if(typeof hideHoloTooltip === 'function') hideHoloTooltip();"` : '';
 
             return `
@@ -669,7 +676,7 @@
                  onmouseover="this.style.transform='scale(1.15)'; this.style.zIndex='50';"
                  onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
                 
-                <svg viewBox="0 0 100 28" style="width: 90px; height: 25px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
+                <svg viewBox="0 0 100 28" style="width: 120px; height: 33px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
                     <defs>
                         <linearGradient id="gradBg_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stop-color="${bg1}" />
@@ -693,6 +700,7 @@
                     <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_${randId})" pointer-events="none"/>
                     ${frame}
                     ${stars}
+                    ${podium}
                 </svg>
             </div>`;
         };
