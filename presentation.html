@@ -8,18 +8,19 @@
     <link rel="icon" href="icon-192.png" type="image/png">
 
     <!-- Open Graph / Discord & réseaux sociaux -->
-    <!-- TODO : remplacer l'URL ci-dessous par le nom de domaine définitif une fois choisi -->
+    <!-- URL actuelle : GitHub Pages. À mettre à jour (canonical, og:url, og:image, sitemap, robots.txt) si un nom de domaine personnalisé est choisi -->
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="SYS.EDTEAM">
     <meta property="og:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
     <meta property="og:description" content="Suivi BGS en temps réel, QG de commandement, Powerplay 2.0, diplomatie et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
-    <meta property="og:image" content="https://VOTRE-DOMAINE-ICI.fr/images/qg.png">
-    <meta property="og:url" content="https://VOTRE-DOMAINE-ICI.fr/presentation.html">
+    <meta property="og:image" content="https://edteam-portal.github.io/images/qg.png">
+    <meta property="og:url" content="https://edteam-portal.github.io/presentation.html">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
     <meta name="twitter:description" content="Suivi BGS en temps réel, QG de commandement, Powerplay 2.0, diplomatie et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
-    <meta name="twitter:image" content="https://VOTRE-DOMAINE-ICI.fr/images/qg.png">
-    <link rel="canonical" href="https://VOTRE-DOMAINE-ICI.fr/presentation.html">
+    <meta name="twitter:image" content="https://edteam-portal.github.io/images/qg.png">
+    <link rel="canonical" href="https://edteam-portal.github.io/presentation.html">
 
     <script type="application/ld+json">
     {
@@ -30,7 +31,66 @@
         "operatingSystem": "Windows (plugin EDMC) + Web",
         "description": "Outil communautaire gratuit pour escadrons Elite Dangerous : suivi BGS en temps réel, QG de commandement, Powerplay 2.0, diplomatie et assistant COVAS embarqué.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-        "url": "https://VOTRE-DOMAINE-ICI.fr/presentation.html"
+        "url": "https://edteam-portal.github.io/presentation.html",
+        "inLanguage": "fr"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "inLanguage": "fr",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Qu'est-ce que sys.edteam ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie, renseignement tactique et communications."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Est-ce vraiment gratuit ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui. SYS.EDTEAM est un projet de fan, gratuit et sans lien officiel avec Frontier Developments."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Comment l'installer ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Créez votre compte sur le site, téléchargez le plugin SYS.EDTEAM.zip et placez-le dans le dossier de votre utilitaire EDMC, puis copiez votre clé dans les réglages d'EDMC. Comptez environ deux minutes."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Faut-il appartenir à un escadron ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications et au journal tactique."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quelles données sont collectées ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section « Vos données »."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Fonctionne-t-il sur mobile ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui. Un compagnon mobile permet de consulter les directives BGS de l'escadron, le statut et les communications depuis un téléphone."
+                }
+            }
+        ]
     }
     </script>
 
@@ -500,6 +560,26 @@
                     <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
                     <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan">[ REJOINDRE LE DISCORD ]</a>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section" style="background: rgba(0,0,0,0.7); border-top: 1px dashed rgba(255,255,255,0.08);">
+        <div class="container" style="max-width: 1000px;">
+            <h2 class="section-title neon-blue" style="margin-bottom: 40px; text-align: center;">QUESTIONS FRÉQUENTES</h2>
+            <div style="color: #bbb; font-size: 1.2em; line-height: 1.7;">
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QU'EST-CE QUE SYS.EDTEAM ?</h3>
+                <p style="margin: 0 0 26px;">SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie, renseignement tactique et communications.</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">EST-CE VRAIMENT GRATUIT ?</h3>
+                <p style="margin: 0 0 26px;">Oui. SYS.EDTEAM est un projet de fan, gratuit et sans lien officiel avec Frontier Developments.</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT L'INSTALLER ?</h3>
+                <p style="margin: 0 0 26px;">Créez votre compte sur le site, téléchargez le plugin SYS.EDTEAM.zip et placez-le dans le dossier de votre utilitaire EDMC, puis copiez votre clé dans les réglages d'EDMC. Comptez environ deux minutes.</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FAUT-IL APPARTENIR À UN ESCADRON ?</h3>
+                <p style="margin: 0 0 26px;">Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications et au journal tactique.</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QUELLES DONNÉES SONT COLLECTÉES ?</h3>
+                <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FONCTIONNE-T-IL SUR MOBILE ?</h3>
+                <p style="margin: 0 0 26px;">Oui. Un compagnon mobile permet de consulter les directives BGS de l'escadron, le statut et les communications depuis un téléphone.</p>
             </div>
         </div>
     </section>

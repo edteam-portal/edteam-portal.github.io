@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- TODO : remplacer VOTRE-DOMAINE-ICI.fr par le nom de domaine définitif une fois choisi -->
+<!-- URL actuelle : GitHub Pages. À mettre à jour si un nom de domaine personnalisé est choisi -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://VOTRE-DOMAINE-ICI.fr/presentation.html</loc>
+        <loc>https://edteam-portal.github.io/presentation.html</loc>
+        <lastmod>2026-09-29</lastmod>
         <changefreq>monthly</changefreq>
         <priority>1.0</priority>
     </url>
