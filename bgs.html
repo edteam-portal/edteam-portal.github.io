@@ -3101,7 +3101,7 @@
                     }
                 } else if (filtreOrdre === 'LIBRE') {
                     // Cible spécifiquement les actions sans ordre (soutien libre & chantiers de colonisation)
-                    queryEfforts = queryEfforts.is('ordre_id', null);
+                    queryEfforts = queryEfforts.is('ordre_id', null).gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
                 } else if (filtreOrdre !== 'ALL') {
                     queryEfforts = queryEfforts.eq('ordre_id', filtreOrdre);
                 } else {
