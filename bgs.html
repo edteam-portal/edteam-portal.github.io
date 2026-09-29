@@ -617,6 +617,21 @@
                     </div>
                 </div>
 
+                <!-- ZONE 3B : REPARTITION DE L'INVESTISSEMENT (CYCLE EN COURS, ORDRES ET ACTIONS LIBRES CONFONDUS) -->
+                <div id="panel-investissement" class="data-row" style="background: rgba(3, 14, 20, 0.88); padding: 20px; border-color: rgba(0,240,255,0.55); position: relative; overflow: hidden; box-shadow: 0 0 28px rgba(0,240,255,0.14), inset 0 0 70px rgba(0,240,255,0.06);">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,240,255,0.05) 0px, rgba(0,240,255,0.05) 1px, transparent 1px, transparent 4px); pointer-events: none;"></div>
+                    <h4 style="margin: 0 0 15px 0; color: var(--ed-blue); letter-spacing: 2px; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; position: relative; text-shadow: 0 0 8px rgba(0,240,255,0.5);">> RÉPARTITION DE L'INVESTISSEMENT (CYCLE EN COURS)</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center; justify-content: center; position: relative;">
+                        <div style="position: relative; width: 310px; height: 310px; filter: drop-shadow(0 0 14px rgba(0,240,255,0.35));">
+                            <canvas id="pieInvestissement"></canvas>
+                        </div>
+                        <div id="pie-legende" style="flex: 1; min-width: 270px; max-width: 460px; font-size: 0.95em;">
+                            <div style="color: #555; font-style: italic;">Analyse de l'investissement en cours...</div>
+                        </div>
+                    </div>
+                    <div style="position: relative; color: #667; font-size: 0.75em; margin-top: 14px; text-align: center; letter-spacing: 1px;">Ordres et actions libres confondus, depuis le dernier cycle (jeudi 07:00 UTC). Barème : 2 M CR = 1 point, 1 mission = 1 point, colonisation 1 point pour 400 t.</div>
+                </div>
+
                 <!-- ZONE 4 : JOURNAL DES EXPLOITS (LIVE FEED) -->
                 <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; border-color: var(--ed-blue);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; margin-bottom: 15px;">
@@ -780,7 +795,7 @@
 
             // 4. Lancement du module correspondant
             if (tabId === 'ordres') afficherOrdresBGS();
-            if (tabId === 'classement') chargerRegistreTactique();
+            if (tabId === 'classement') { chargerRegistreTactique(); if (typeof chargerRepartitionInvestissement === 'function') chargerRepartitionInvestissement(); }
         };
 
         // --- 1. SON DU TERMINAL (Cliquetis mécanique) ---
@@ -3073,6 +3088,114 @@
             }
             return candidat;
         }
+
+        // ==========================================
+        // CAMEMBERT HOLOGRAPHIQUE : PART DE CHAQUE PILOTE DANS L'EFFORT DU CYCLE (ORDRES + ACTIONS LIBRES)
+        // ==========================================
+        let pieInvestChart = null;
+        function pointsInvestissement(type, valeur) {
+            const v = Math.abs(Number(valeur) || 0);
+            if (type === 'ECHECS') return 0;
+            if (type === 'COLONISATION') return v / 400;
+            if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
+            return v > 10000 ? v / 2000000 : v;
+        }
+
+        window.chargerRepartitionInvestissement = async function() {
+            const cv = document.getElementById('pieInvestissement');
+            const legende = document.getElementById('pie-legende');
+            if (!cv || !legende || !profilCommandant || !profilCommandant.escadron_id) return;
+
+            try {
+                const debut = calculerDernierTickHebdo();
+                const [resE, resP] = await Promise.all([
+                    supabaseApp.from('efforts_bgs').select('user_id, type_action, valeur').gte('date_action', debut.toISOString()),
+                    supabaseApp.from('profils_publics').select('user_id, cmdr_nom').eq('escadron_id', profilCommandant.escadron_id).eq('est_approuve', true)
+                ]);
+                const noms = {};
+                (resP.data || []).forEach(p => { noms[p.user_id] = p.cmdr_nom || 'INCONNU'; });
+
+                const scores = {};
+                (resE.data || []).forEach(e => {
+                    if (!(e.user_id in noms)) return;
+                    scores[e.user_id] = (scores[e.user_id] || 0) + pointsInvestissement(e.type_action, e.valeur);
+                });
+                const classement = Object.entries(scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+                const total = classement.reduce((t, [, v]) => t + v, 0);
+
+                if (pieInvestChart) { pieInvestChart.destroy(); pieInvestChart = null; }
+
+                if (total <= 0) {
+                    legende.innerHTML = '<div style="color: #667; font-style: italic; text-align: center;">Aucun effort enregistré sur ce cycle pour le moment.</div>';
+                    return;
+                }
+
+                const palette = ['#00F0FF', '#FF7100', '#00FF66', '#B026FF', '#FFD700', '#FF3333'];
+                const tranches = classement.slice(0, 6).map(([uid, v], i) => ({ uid, nom: noms[uid], v, couleur: palette[i] }));
+                const reste = classement.slice(6).reduce((t, [, v]) => t + v, 0);
+                if (reste > 0) tranches.push({ uid: null, nom: 'AUTRES', v: reste, couleur: '#5F7078' });
+
+                const hex2rgba = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+                const donnees = tranches.map(t => Math.round(t.v * 10) / 10);
+
+                // Anneau exterieur fin (decoratif) + anneau principal translucide, total au centre
+                const pluginCentre = {
+                    id: 'centreTotal',
+                    afterDraw(chart) {
+                        const meta = chart.getDatasetMeta(1);
+                        if (!meta || !meta.data[0]) return;
+                        const { x, y } = meta.data[0];
+                        const c = chart.ctx;
+                        c.save();
+                        c.textAlign = 'center';
+                        c.fillStyle = '#00F0FF'; c.shadowColor = '#00F0FF'; c.shadowBlur = 10;
+                        c.font = "bold 26px 'Share Tech Mono', monospace";
+                        c.fillText(new Intl.NumberFormat('fr-FR').format(Math.round(total)), x, y + 4);
+                        c.shadowBlur = 0; c.fillStyle = '#7fb6bf';
+                        c.font = "12px 'Share Tech Mono', monospace";
+                        c.fillText('POINTS DU CYCLE', x, y + 24);
+                        c.restore();
+                    }
+                };
+
+                pieInvestChart = new Chart(cv.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: tranches.map(t => t.nom),
+                        datasets: [
+                            { data: donnees, backgroundColor: tranches.map(t => hex2rgba(t.couleur, 0.18)), borderColor: tranches.map(t => hex2rgba(t.couleur, 0.55)), borderWidth: 1, weight: 0.35 },
+                            { data: donnees, backgroundColor: tranches.map(t => hex2rgba(t.couleur, 0.42)), borderColor: tranches.map(t => t.couleur), borderWidth: 2, hoverOffset: 8, weight: 1.6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '66%',
+                        animation: { duration: 900 },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                filter: item => item.datasetIndex === 1,
+                                backgroundColor: 'rgba(3,14,20,0.95)', titleColor: '#00F0FF', bodyColor: '#fff', borderColor: '#00F0FF', borderWidth: 1,
+                                callbacks: { label: c => ' ' + Math.round((c.raw / total) * 1000) / 10 + ' %  (' + new Intl.NumberFormat('fr-FR').format(Math.round(c.raw)) + ' pts)' }
+                            }
+                        }
+                    },
+                    plugins: [pluginCentre]
+                });
+
+                const maPart = scores[profilCommandant.user_id] ? Math.round((scores[profilCommandant.user_id] / total) * 1000) / 10 : 0;
+                legende.innerHTML = tranches.map(t => {
+                    const pct = Math.round((t.v / total) * 1000) / 10;
+                    const moi = t.uid && t.uid === profilCommandant.user_id;
+                    return '<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed rgba(0,240,255,0.12);">'
+                        + '<span style="width: 12px; height: 12px; background: ' + hex2rgba(t.couleur, 0.5) + '; border: 1px solid ' + t.couleur + '; box-shadow: 0 0 6px ' + t.couleur + ';"></span>'
+                        + '<span style="flex: 1; color: ' + (moi ? '#00F0FF' : '#ddd') + '; font-weight: ' + (moi ? 'bold' : 'normal') + ';">' + escapeHtml(String(t.nom).toUpperCase()) + (moi ? ' [ VOUS ]' : '') + '</span>'
+                        + '<span style="color: ' + t.couleur + '; font-weight: bold;">' + pct + ' %</span></div>';
+                }).join('')
+                + '<div style="margin-top: 12px; color: #7fb6bf; letter-spacing: 1px;">VOTRE PART : <strong style="color: #00F0FF;">' + maPart + ' %</strong> DE L\'EFFORT DE L\'ESCADRON</div>';
+            } catch (e) {
+                console.error('Erreur répartition investissement :', e);
+            }
+        };
 
         async function chargerRegistreTactique() {
             if (!profilCommandant) return;

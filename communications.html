@@ -91,7 +91,7 @@
         .msg-time { color: #555; margin-right: 10px; font-size: 0.85em; }
         .msg-author { font-weight: bold; margin-right: 8px; }
         .msg-channel { margin-right: 8px; font-size: 0.85em; letter-spacing: 1px; }
-        .msg-text { color: #ccc; word-break: break-word; flex-grow: 1; }
+        .msg-text { color: #ccc; word-break: break-word; flex-grow: 1; white-space: pre-line; }
         .msg-delete { color: #666; cursor: pointer; font-size: 0.8em; margin-left: 10px; opacity: 0; transition: 0.2s; }
         .msg-line:hover .msg-delete { opacity: 1; }
         .msg-delete:hover { color: var(--ed-red); }
@@ -534,7 +534,7 @@
                 <div style="flex-shrink: 0; margin-right: 8px; display: flex; align-items: baseline; flex-wrap: wrap;">
                     <span class="msg-time">[${timeStr}]</span>
                     ${tagsRenseignement}
-                    <span class="msg-author" style="color: ${auteurColor};">CMDR ${escapeHtml(msg.expediteur_nom)} ></span>
+                    <span class="msg-author" style="color: ${auteurColor};">${msg.expediteur_id === '00000000-0000-4000-8000-0000000000ff' ? '' : 'CMDR '}${escapeHtml(msg.expediteur_nom)} ></span>
                     <span class="msg-channel">${canalTag}</span>
                 </div>
 
