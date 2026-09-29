@@ -474,12 +474,33 @@
             try {
                 // 1. On télécharge les profils (PROJECTION STRICTE ANTI-EGRESS)
                 const { data: effectifs, error } = await supabaseApp.from('profils_publics')
-                    .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, palmares_bgs')
+                    .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate')
                     .eq('escadron_id', profilCommandant.escadron_id)
                     .eq('est_approuve', true)
                     .order('est_amiral', { ascending: false });
 
                 if (error) throw error;
+
+                // Palmares : resume calcule cote serveur (5 meilleures plaques + total) au lieu de tout telecharger
+                let resumes = null;
+                try {
+                    const { data: rs, error: errRs } = await supabaseApp.rpc('palmares_resume_escadron');
+                    if (!errRs && Array.isArray(rs)) { resumes = {}; rs.forEach(r => { resumes[r.user_id] = r; }); }
+                } catch (e) { resumes = null; }
+                if (!resumes) {
+                    // Repli : ancienne methode (fonction serveur pas encore installee)
+                    const { data: pal } = await supabaseApp.from('profils_publics')
+                        .select('user_id, palmares_bgs')
+                        .eq('escadron_id', profilCommandant.escadron_id)
+                        .eq('est_approuve', true);
+                    resumes = {};
+                    (pal || []).forEach(r => { const arr = Array.isArray(r.palmares_bgs) ? r.palmares_bgs : []; resumes[r.user_id] = { top5: arr, total: arr.length }; });
+                }
+                effectifs.forEach(p => {
+                    const r = resumes[p.user_id];
+                    p.palmares_bgs = r && Array.isArray(r.top5) ? r.top5 : [];
+                    p.palmares_total = r ? (r.total || p.palmares_bgs.length) : 0;
+                });
 
                 let htmlEff = '';
 
@@ -552,8 +573,9 @@
                     let plaquesHtml = top5Rubans.map(r => r.html).join('');
                     
                     // S'il a plus de 5 plaques, on ajoute un petit indicateur texte
-                    if(rubansPilote.length > 5) {
-                        plaquesHtml += `<div style="color: #666; font-size: 0.8em; font-weight: bold; margin-left: 5px;" title="+${rubansPilote.length - 5} autres décorations...">+${rubansPilote.length - 5}</div>`;
+                    const totalPlaques = Math.max(rubansPilote.length, p.palmares_total || 0);
+                    if(totalPlaques > 5) {
+                        plaquesHtml += `<div style="color: #666; font-size: 0.8em; font-weight: bold; margin-left: 5px;" title="+${totalPlaques - 5} autres décorations...">+${totalPlaques - 5}</div>`;
                     }
 
                     // --- INJECTION HTML FINALE (Alignée à droite avec le "i") ---
