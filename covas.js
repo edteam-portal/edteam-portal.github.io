@@ -552,7 +552,8 @@ async function verifierCibleTactique(nomCmdr, tagEscadron) {
     try {
         let db = getDb();
 
-        const requeteProfil = db.from('profils').select('escadron_id').ilike('cmdr_nom', nomCmdr).limit(1);
+        // Fonction serveur : 'profils' est cloisonne par escadron, on ne demande que "inscrit ou non"
+        const requeteProfil = db.rpc('pilote_inscrit', { p_nom: nomCmdr });
         const requeteDiplo = (profilCommandant.escadron_id && tagEscadron) 
             ? db.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('tag', tagEscadron.toUpperCase()).limit(1) 
             : Promise.resolve({ data: null });
@@ -562,7 +563,7 @@ async function verifierCibleTactique(nomCmdr, tagEscadron) {
 
         const [resProfil, resDiplo, resTact] = await Promise.all([requeteProfil, requeteDiplo, requeteTactique]);
 
-        const isRegistered = (resProfil.data && resProfil.data.length > 0);
+        const isRegistered = (resProfil.data === true);
         let diploStatus = (resDiplo.data && resDiplo.data.length > 0) ? resDiplo.data[0] : null;
         const tacticalFiche = (resTact.data && resTact.data.length > 0) ? resTact.data[0] : null;
 

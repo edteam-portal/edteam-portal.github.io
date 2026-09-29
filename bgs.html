@@ -1040,6 +1040,12 @@
             const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
             const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
 
+            // PAS D'ESCADRON = PAS D'ACCÈS (pilote indépendant)
+            if (!data || !data.escadron_id || data.escadron_id === 'INDEPENDANT') {
+                window.location.href = 'index.html';
+                return;
+            }
+
             if (rangJeu === 4 && (!data || (!data.est_amiral && !data.est_officier))) {
                 window.location.href = 'index.html';
                 return;

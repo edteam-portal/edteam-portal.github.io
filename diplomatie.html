@@ -218,6 +218,12 @@
                 return;
             }
 
+            // PAS D'ESCADRON = PAS D'ACCÈS (pilote indépendant)
+            if (!data.escadron_id || data.escadron_id === 'INDEPENDANT') {
+                window.location.href = 'index.html';
+                return;
+            }
+
             // Contrôle d'accréditation anti-recrue
             const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
             if (rangJeu === 4 && (!data.est_amiral && !data.est_officier)) {
