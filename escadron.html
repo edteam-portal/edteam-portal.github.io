@@ -445,7 +445,7 @@
                                                 
                                                 <div style="line-height: 1.4;">
                                                     <strong style="color: #fff;">🔲 ENCADREMENT : RANG ESCADRON</strong><br>
-                                                    <span style="color: #ccc;">Bronze (Top 10), Argent (Top 5), Or (Top 3), <strong style="color:#00FFFF; text-shadow: 0 0 5px #00FFFF;">Diamant (1er)</strong>.</span>
+                                                    <span style="color: #ccc;">Argent (3e), Or (2e), <strong style="color:#00FFFF; text-shadow: 0 0 5px #00FFFF;">Diamant (1er)</strong>. Pas de cadre au-delà du podium.</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -528,9 +528,8 @@
                             
                             let encadrement = "STANDARD";
                             if (medaille.rang === 1) encadrement = "DIAMANT (1er)";
-                            else if (medaille.rang <= 3) encadrement = "OR (Top 3)";
-                            else if (medaille.rang <= 5) encadrement = "ARGENT (Top 5)";
-                            else if (medaille.rang <= 10) encadrement = "BRONZE (Top 10)";
+                            else if (medaille.rang === 2) encadrement = "OR (2e)";
+                            else if (medaille.rang === 3) encadrement = "ARGENT (3e)";
 
                             const systemeSafe = (medaille.systeme || '').toUpperCase().replace(/'/g, "\\'");
                             const typeSafe = (medaille.type_ordre || '').replace(/'/g, "\\'");
@@ -649,15 +648,12 @@
             if (rang === 1) {
                 frameGrads = `<linearGradient id="frameDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
                 frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameDia_${randId})" stroke-width="2" filter="drop-shadow(0 0 4px #00FFFF)"/>`;
-            } else if (rang <= 3) {
+            } else if (rang === 2) {
                 frameGrads = `<linearGradient id="frameGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="50%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
                 frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameGold_${randId})" stroke-width="2" filter="drop-shadow(0 0 3px #FFD700)"/>`;
-            } else if (rang <= 5) {
+            } else if (rang === 3) {
                 frameGrads = `<linearGradient id="frameSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
                 frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameSilv_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #FFFFFF)"/>`;
-            } else if (rang <= 10) {
-                frameGrads = `<linearGradient id="frameBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
-                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameBro_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #CD7F32)"/>`;
             } else {
                 frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>`;
             }
@@ -774,9 +770,8 @@
                         
                         let encadrement = "STANDARD";
                         if (medaille.rang === 1) encadrement = "DIAMANT (1er)";
-                        else if (medaille.rang <= 3) encadrement = "OR (Top 3)";
-                        else if (medaille.rang <= 5) encadrement = "ARGENT (Top 5)";
-                        else if (medaille.rang <= 10) encadrement = "BRONZE (Top 10)";
+                        else if (medaille.rang === 2) encadrement = "OR (2e)";
+                        else if (medaille.rang === 3) encadrement = "ARGENT (3e)";
                         
                         const systemeSafe = (medaille.systeme || '').toUpperCase().replace(/'/g, "\\'");
                         const typeSafe = (medaille.type_ordre || '').replace(/'/g, "\\'");
