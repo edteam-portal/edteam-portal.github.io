@@ -1746,11 +1746,8 @@
             if (!select) return;
 
             try {
-                const { data: profils } = await supabaseApp.from('profils_publics')
-                    .select('user_id, cmdr_nom')
-                    .eq('est_approuve', true)
-                    .neq('user_id', profilCommandant.user_id)
-                    .order('cmdr_nom');
+                const { data: annuaire } = await supabaseApp.rpc('annuaire_pilotes');
+                const profils = (annuaire || []).filter(p => p.user_id !== profilCommandant.user_id);
 
                 if (profils && profils.length > 0) {
                     let opts = '<option value="">-- CHOISIR UN DESTINATAIRE --</option>';

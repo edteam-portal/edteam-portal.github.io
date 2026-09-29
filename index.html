@@ -3010,7 +3010,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         escadron_id: 'GLOBAL',
                         user_id: user.id,
                         cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'NOUVELLE RECRUE',
+                        type_action: 'NOUVEAU SUR EDTEAM',
                         details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint le réseau en tant que commandant indépendant.`,
                         couleur: '#00FF66'
                     }]);
@@ -3037,7 +3037,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         escadron_id: window.sasCacheSquad,
                         user_id: user.id,
                         cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'NOUVELLE RECRUE',
+                        type_action: 'NOUVEAU SUR EDTEAM',
                         details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint nos rangs.`,
                         couleur: '#00FF66'
                     }]);
@@ -3063,7 +3063,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         escadron_id: 'GLOBAL',
                         user_id: user.id,
                         cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'NOUVELLE RECRUE',
+                        type_action: 'NOUVEAU SUR EDTEAM',
                         details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint le réseau en tant que commandant indépendant.`,
                         couleur: '#00FF66'
                     }]);
@@ -3650,10 +3650,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             try {
                 // Cloisonnement OPSEC : lecture stricte sur les partisans de la MÊME puissance
-                const { data, error } = await supabaseApp.from('profils_publics')
-                    .select('cmdr_nom, escadron_id, puissance_rang, puissance_merites_cycle, puissance_merites_total')
-                    .eq('puissance_nom', maPuissance)
-                    .order('puissance_merites_cycle', { ascending: false });
+                // (fonction serveur : ne renvoie que les colonnes du tableau, triees par merites)
+                const { data, error } = await supabaseApp.rpc('tableau_partisans');
 
                 if (error) throw error;
 

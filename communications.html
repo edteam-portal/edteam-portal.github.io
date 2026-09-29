@@ -327,8 +327,8 @@
         }
 
         async function chargerListePilotes() {
-            // CORRECTION CRUCIALE : On interroge 'profils_publics' car 'profils' est protégé par Supabase !
-            const { data } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom, escadron_id');
+            // Annuaire minimal via fonction serveur (id, nom, tag) : 'profils' est cloisonné par escadron
+            const { data } = await supabaseApp.rpc('annuaire_pilotes');
             if (data) {
                 listePilotes = data;
                 const select = document.getElementById('select-destinataire');
