@@ -858,7 +858,7 @@
                     <span id="pp-modal-power-name" style="color: var(--ed-blue); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;">ALLÉGEANCE : INCONNUE</span>
                 </div>
                 <div style="text-align: right;">
-                    <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 4px;">PROCHAIN CYCLE HEBDOMADAIRE (TICK) :</span>
+                    <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 4px;">PROCHAIN CYCLE POWERPLAY :</span>
                     <span id="pp-modal-countdown" style="color: #FFD700; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">JEUDI 07:00 UTC</span>
                 </div>
             </div>
@@ -3550,7 +3550,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         // ==========================================
         // SALLE DE COMMANDEMENT POWERPLAY 2.0 (OPSEC)
         // ==========================================
-        function calculerCompteReboursTick() {
+        function calculerCompteReboursCycle() {
             const now = new Date();
             const prochainJeudi = new Date(Date.UTC(
                 now.getUTCFullYear(),
@@ -3575,7 +3575,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const countdownEl = document.getElementById('pp-modal-countdown');
             const bodyEl = document.getElementById('pp-modal-body');
 
-            countdownEl.innerText = calculerCompteReboursTick();
+            countdownEl.innerText = calculerCompteReboursCycle();
 
             if (!profilCommandant || !profilCommandant.puissance_nom) {
                 titrePuissance.innerText = "COMMANDEMENT POWERPLAY 2.0";

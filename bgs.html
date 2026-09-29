@@ -532,7 +532,7 @@
 
                     <select id="filtre-periode" class="tactical-filter">
                         <option value="ALL">TOUT L'HISTORIQUE</option>
-                        <option value="TICK_HEBDO" selected>DEPUIS LE TICK HEBDO (JEUDI)</option>
+                        <option value="TICK_HEBDO" selected>DEPUIS LE DERNIER CYCLE (JEUDI)</option>
                         <option value="7J">7 DERNIERS JOURS</option>
                         <option value="30J">30 DERNIERS JOURS</option>
                     </select>
@@ -632,40 +632,6 @@
             
         </main>
 
-    </div>
-
-    <!-- MODAL ALERTE DU TICK BGS -->
-    <div class="modal-overlay" id="modal-tick-alert" onclick="fermerModal('modal-tick-alert', event)" style="z-index: 3500;">
-        <div class="modal-content" style="max-width: 620px; text-align: left; border: 1px solid var(--ed-blue); box-shadow: 0 0 35px rgba(0, 240, 255, 0.3);" onclick="event.stopPropagation()">
-            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-tick-alert')">X</div>
-            
-            <div style="color: var(--ed-blue); font-size: 1.3em; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid var(--ed-blue); padding-bottom: 10px; margin-bottom: 15px;">
-                ⚡ NOUVEAU CYCLE GALACTIQUE // TICK BGS DÉTECTÉ
-            </div>
-
-            <p style="color: #fff; font-size: 1em; line-height: 1.5; margin-bottom: 15px;">
-                Le <strong>Tick Galactique de Frontier</strong> vient de survenir (ou est en cours de propagation sur les serveurs de la simulation).
-            </p>
-
-            <div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); padding: 12px 15px; margin-bottom: 20px; font-size: 0.88em; line-height: 1.6; color: #ccc;">
-                <div style="margin-bottom: 8px;">
-                    <strong style="color: var(--ed-orange);">> JAUGES QUOTIDIENNES (24H) :</strong><br>
-                    Remises à zéro pour entamer les quotas de la nouvelle journée.
-                </div>
-                <div style="margin-bottom: 8px;">
-                    <strong style="color: #00FF66;">> HISTORIQUE GLOBAL & VOTRE PART :</strong><br>
-                    Intacts et toujours cumulés sur toute la durée de l'opération.
-                </div>
-                <div>
-                    <strong style="color: #fff;">> CONFLITS (GUERRES & ÉLECTIONS) :</strong><br>
-                    Les scores de la manche précédente sont en cours de validation par Frontier.
-                </div>
-            </div>
-
-            <button class="fs-auth-btn fs-btn-cyan" style="margin: 0;" onclick="fermerModal('modal-tick-alert'); if(typeof sonClic==='function') sonClic();" onmouseenter="if(typeof sonHover==='function') sonHover()">
-                [ ACQUITTER ET DÉMARRER LA SESSION ]
-            </button>
-        </div>
     </div>
 
     <!-- MODAL : CITATION D'HONNEUR & ÉTATS DE SERVICE -->
@@ -3090,13 +3056,12 @@
             if (conteneur) conteneur.innerHTML = html;
         };
 
-        // Calcule le dernier "tick hebdomadaire" : ancre fixe tous les jeudis a 10h00 UTC,
-        // independante du tick quotidien du jeu (retire, cf. discussion). Recule jour par jour
-        // depuis aujourd'hui jusqu'a trouver un jeudi 10h00 UTC deja passe.
+        // Calcule le dernier cycle hebdomadaire : ancre fixe tous les jeudis a 07h00 UTC (meme heure que le
+        // compte a rebours Powerplay). Recule jour par jour depuis aujourd'hui jusqu'a trouver un jeudi 07h00 UTC deja passe.
         function calculerDernierTickHebdo() {
             const maintenant = new Date();
 
-            let candidat = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 10, 0, 0));
+            let candidat = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 7, 0, 0));
             while (candidat.getUTCDay() !== 4 || candidat.getTime() > Date.now()) {
                 candidat.setUTCDate(candidat.getUTCDate() - 1);
             }
