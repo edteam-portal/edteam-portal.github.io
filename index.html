@@ -363,12 +363,9 @@
                             <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 12px; text-align: left; padding: 15px 20px; background: rgba(0, 240, 255, 0.03); border: 1px dashed var(--ed-blue); border-radius: 4px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(0, 240, 255, 0.2); padding-bottom: 8px;">
                                     <span style="color: var(--ed-blue); font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">STATUT : PILOTE INDÉPENDANT</span>
-                                    <span style="color: #888; font-size: 0.8em; font-style: italic;">SOUTIEN LIBRE ACTIF</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                                    <label style="color: #ccc; font-size: 0.85em; white-space: nowrap;">FACTION SOUTENUE :</label>
-                                    <input type="text" id="input-faction-coeur" class="auth-input" style="flex: 1; min-width: 200px; margin: 0; padding: 8px 12px; font-size: 0.95em; text-transform: uppercase;" placeholder="NOM DE LA FACTION MINEURE">
-                                    <button class="auth-btn" style="width: auto; margin: 0; padding: 8px 20px; font-size: 0.85em; border-color: var(--ed-blue); color: var(--ed-blue);" onclick="sauvegarderFactionCoeur()" onmouseenter="if(typeof sonHover==='function') sonHover()">ENREGISTRER</button>
+                                <div style="color: #ccc; font-size: 0.85em; line-height: 1.5;">
+                                    Les modules BGS, Diplomatie et Escadron sont réservés aux membres d'un escadron.
                                 </div>
                             </div>
                         </div>
@@ -680,6 +677,9 @@
             <div style="color: #5865F2; border-bottom: 1px solid #5865F2; padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">📢 TRANSMISSION DE L'AMIRAUTÉ</div>
             <p style="color: #ccc; font-size: 0.9em; margin-bottom: 15px; line-height: 1.5;">Votre publication.</p>
             <textarea id="input-annonce-amiral" class="search-input" style="width: 100%; border: 1px solid #333; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.8); color: #fff; font-family: inherit; resize: vertical; min-height: 120px; box-sizing: border-box; border-radius: 3px;" placeholder="Texte de l'annonce..."></textarea>
+            <label id="annonce-portee-reseau" style="display: none; align-items: center; gap: 10px; color: #FFD700; font-size: 0.9em; margin-bottom: 20px; cursor: pointer;">
+                <input type="checkbox" id="annonce-vers-tous"> 📡 COMMUNIQUÉ À TOUS LES PILOTES (y compris sans escadron) — Directeur uniquement
+            </label>
             <button id="btn-envoyer-annonce" style="background: rgba(88, 101, 242, 0.1); border: 1px solid #5865F2; color: #5865F2; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; font-family: inherit; font-size: 1.1em; letter-spacing: 2px; border-radius: 3px;" onmouseover="this.style.background='#5865F2'; this.style.color='#fff'; this.style.boxShadow='0 0 15px #5865F2';" onmouseout="this.style.background='rgba(88, 101, 242, 0.1)'; this.style.color='#5865F2'; this.style.boxShadow='none';" onclick="publierAnnonceAmiral()" onmouseenter="if(typeof sonHover==='function') sonHover()">DIFFUSER SUR LE RÉSEAU</button>
         </div>
     </div>
@@ -2248,6 +2248,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         btnAnnonce.style.display = 'none';
                     }
                 }
+                const porteeReseau = document.getElementById('annonce-portee-reseau');
+                if (porteeReseau) porteeReseau.style.display = profilCommandant.est_directeur ? 'flex' : 'none';
 
                 // VERROUILLAGE DU BOUTON (Seule l'Amirauté peut cliquer sur le logo pour le modifier)
                 const btnLogo = document.getElementById('btn-logo-escadron');
@@ -2305,40 +2307,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // Le pilote est un mercenaire indépendant
                 divActif.style.display = 'none';
                 divMercenaire.style.display = 'flex';
-
-                const inputCoeur = document.getElementById('input-faction-coeur');
-                if (inputCoeur && profilCommandant.faction_choisie) {
-                    inputCoeur.value = profilCommandant.faction_choisie;
-                }
-            }
-        }
-
-        async function sauvegarderFactionCoeur() {
-            if (typeof sonClic === 'function') sonClic();
-            const input = document.getElementById('input-faction-coeur');
-            const faction = input ? input.value.trim() : '';
-            if (!profilCommandant) return;
-
-            try {
-                const { error } = await supabaseApp.from('profils')
-                    .update({ faction_choisie: faction })
-                    .eq('user_id', profilCommandant.user_id);
-
-                if (error) throw error;
-                profilCommandant.faction_choisie = faction;
-
-                if (typeof afficherAlerte === 'function') {
-                    afficherAlerte(
-                        "FACTION ENREGISTRÉE", 
-                        `Toutes vos ventes, primes et missions seront créditées en soutien libre pour :<br><br><strong style="color:var(--ed-blue);">${faction || 'AUCUNE'}</strong>`, 
-                        "var(--ed-blue)"
-                    );
-                }
-            } catch (e) {
-                console.error("Erreur sauvegarde faction :", e);
-                if (typeof afficherAlerte === 'function') {
-                    afficherAlerte("ERREUR", "Impossible d'enregistrer la faction.", "#FF3333");
-                }
             }
         }
 
@@ -2996,35 +2964,14 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 
                 const estIndependant = !window.sasCacheSquad;
 
-                if (estIndependant) {
-                    // Activation immédiate pour le pilote indépendant (0 attente)
-                    const { error: updErr } = await supabaseApp.from('profils').update({
-                        cmdr_nom: window.sasCacheCmdr,
-                        escadron_id: '',
-                        est_approuve: true
-                    }).eq('user_id', user.id);
-
-                    if (updErr) throw updErr;
-
-                    await supabaseApp.from('journal_activite').insert([{
-                        escadron_id: 'GLOBAL',
-                        user_id: user.id,
-                        cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'NOUVEAU SUR EDTEAM',
-                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint le réseau en tant que commandant indépendant.`,
-                        couleur: '#00FF66'
-                    }]);
-
-                    window.location.reload();
-                    return;
-                }
-
+                // Independants comme membres passent par la fonction serveur (profils n'est pas modifiable
+                // directement depuis le navigateur : aucune regle UPDATE, l'ecriture directe echouait en silence).
                 // Pour les membres d'escadron, procédure d'enrôlement habituelle
                 const rank = window.sasCacheRank !== undefined ? window.sasCacheRank : 4;
                 const { data: reponse, error } = await supabaseApp.rpc('soumettre_dossier', {
                     p_user_id: user.id,
                     p_cmdr_nom: window.sasCacheCmdr,
-                    p_escadron_id: window.sasCacheSquad,
+                    p_escadron_id: window.sasCacheSquad || '',
                     p_rank: rank
                 });
                 
@@ -3032,15 +2979,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                 // Plus aucune validation manuelle : toute soumission valide est approuvee
                 // immediatement (troupe, Amiral, ou repli indépendant depuis ce chemin).
+                // (la ligne "NOUVEAU SUR EDTEAM" du journal GLOBAL est ecrite par la fonction serveur)
                 if (reponse === 'PILOTE_ACCEPTE_ET_VERIFIE_TRUE') {
-                    await supabaseApp.from('journal_activite').insert([{
-                        escadron_id: window.sasCacheSquad,
-                        user_id: user.id,
-                        cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'NOUVEAU SUR EDTEAM',
-                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint nos rangs.`,
-                        couleur: '#00FF66'
-                    }]);
                     window.location.reload();
                     return;
                 }
@@ -3059,14 +2999,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 }
 
                 if (reponse === 'PILOTE_ACCEPTE_INDEPENDANT') {
-                    await supabaseApp.from('journal_activite').insert([{
-                        escadron_id: 'GLOBAL',
-                        user_id: user.id,
-                        cmdr_nom: window.sasCacheCmdr,
-                        type_action: 'NOUVEAU SUR EDTEAM',
-                        details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a rejoint le réseau en tant que commandant indépendant.`,
-                        couleur: '#00FF66'
-                    }]);
                     window.location.reload();
                     return;
                 }
@@ -3296,7 +3228,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 else if (typeAction.includes('M.A.J') || typeAction.includes('SYSTÈME')) col = '#B026FF';
                 else if (typeAction.includes('DIPLOMATIE')) col = '#FFD700';
                 else if (typeAction.includes('MISSION BGS')) col = '#FF7100';
-                else if (typeAction.includes('RECRUE') || typeAction.includes('COMMANDEMENT')) col = '#00FF66';
+                else if (typeAction.includes('RECRUE') || typeAction.includes('NOUVEAU SUR') || typeAction.includes('COMMANDEMENT')) col = '#00FF66';
+                else if (typeAction.includes('COMMUNIQUÉ')) col = '#FFD700';
+                else if (typeAction.includes('BILAN RÉSEAU')) col = '#00F0FF';
                 else if (typeAction.includes('DISTINCTION')) col = '#FFD700';
                 else if (typeAction.includes('RENSEIGNEMENT') || typeAction.includes('ALERTE SÉCURITÉ')) col = '#FF3333';
                 else if (typeAction.includes('RÉPUTATION')) col = '#00F0FF';
@@ -3395,7 +3329,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 // On insère l'information comme un exploit classique, mais sous couvert de l'IA système
                 const { error } = await supabaseApp.from('journal_activite').insert([{
-                    escadron_id: profilCommandant.escadron_id, 
+                    escadron_id: 'GLOBAL', 
                     user_id: profilCommandant.user_id,
                     cmdr_nom: 'SYS.EDTEAM', // L'expéditeur sera affiché en tant que "Système"
                     type_action: 'M.A.J // ' + titre.toUpperCase(),
@@ -3533,8 +3467,22 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             btn.innerText = "TRANSMISSION EN COURS...";
             btn.style.pointerEvents = "none";
 
-            // On utilise la fonction existante : le mot-clé 'ANNONCE DISCORD' fera réagir l'interface !
-            await window.enregistrerJournalActivite('ANNONCE DISCORD', texte, '#5865F2');
+            const versTous = profilCommandant && profilCommandant.est_directeur
+                && document.getElementById('annonce-vers-tous') && document.getElementById('annonce-vers-tous').checked;
+            if (versTous) {
+                // Communiqué général : journal GLOBAL, visible de tous les pilotes (règle réservée au Directeur)
+                await supabaseApp.from('journal_activite').insert([{
+                    escadron_id: 'GLOBAL',
+                    user_id: profilCommandant.user_id,
+                    cmdr_nom: profilCommandant.cmdr_nom || 'DIRECTEUR',
+                    type_action: 'COMMUNIQUÉ RÉSEAU',
+                    details: texte,
+                    couleur: '#FFD700'
+                }]);
+            } else {
+                // On utilise la fonction existante : le mot-clé 'ANNONCE DISCORD' fera réagir l'interface !
+                await window.enregistrerJournalActivite('ANNONCE DISCORD', texte, '#5865F2');
+            }
 
             if (typeof sonSucces === 'function') sonSucces();
             btn.innerText = "ANNONCE DIFFUSÉE";
