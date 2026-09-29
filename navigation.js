@@ -754,7 +754,8 @@ window.demarrerSystemLoop = async function systemLoop() {
             }
         };
 
-        processLatest('HEARTBEAT', item => { paramUpdates.last_heartbeat = parseInt(item.station_name); paramModifie = true; });
+        // HEARTBEAT : ancien plugin uniquement (retire en v2.3) - on purge sans reecrire parametres_app
+        processLatest('HEARTBEAT', () => {});
         processLatest('SHIP_BALANCE', item => { profilUpdates.solde_vaisseau = item.prix_unitaire; profilModifie = true; });
         processLatest('FC_BALANCE', item => { profilUpdates.solde_fc = item.prix_unitaire; profilModifie = true; });
         processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });

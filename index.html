@@ -1876,7 +1876,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 };
 
                 // A. Le navigateur gère uniquement la télémétrie locale
-                processLatest('HEARTBEAT', item => { paramUpdates.last_heartbeat = parseInt(item.station_name); paramModifie = true; });
+                // HEARTBEAT : ancien plugin uniquement (retire en v2.3) - on purge sans reecrire parametres_app
+                processLatest('HEARTBEAT', null);
                 processLatest('PARAM_UPDATE', item => { try { Object.assign(paramUpdates, JSON.parse(item.station_name)); paramModifie = true; } catch(e){} });
                 // Sauvegarde du Rang et CONTRÔLE D'INTÉGRITÉ
                 processLatest('SQUADRON_INFO', async (item) => { 
