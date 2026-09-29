@@ -2906,7 +2906,7 @@
         async function verifierNouvellesNotesMobile() {
             if (!profilCommandant) return;
             try {
-                const { data } = await supabaseApp.from('journal_activite').select('created_at').eq('escadron_id', profilCommandant.escadron_id).order('created_at', { ascending: false }).limit(1);
+                const { data } = await supabaseApp.from('journal_activite').select('created_at').in('escadron_id', [profilCommandant.escadron_id || '', 'GLOBAL']).order('created_at', { ascending: false }).limit(1);
                 if (data && data.length > 0) {
                     const derniereNoteDate = new Date(data[0].created_at).getTime();
                     const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_read_notes') || '0');
@@ -2944,7 +2944,7 @@
             try {
                 const { data, error } = await supabaseApp.from('journal_activite')
                     .select('*')
-                    .eq('escadron_id', profilCommandant.escadron_id)
+                    .in('escadron_id', [profilCommandant.escadron_id || '', 'GLOBAL'])
                     .order('created_at', { ascending: false })
                     .limit(40);
 
