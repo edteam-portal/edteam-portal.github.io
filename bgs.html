@@ -3383,6 +3383,14 @@
                 const conteneurMedailles = document.getElementById('ribbons-container');
                 let rubansAAfficher = [];
 
+                // Le palmares n'est plus inclus dans le profil charge a chaque page : on le lit ici, une seule fois
+                if (profilCommandant.palmares_bgs === undefined) {
+                    try {
+                        const { data: pal } = await supabaseApp.from('profils').select('palmares_bgs').eq('user_id', profilCommandant.user_id).maybeSingle();
+                        profilCommandant.palmares_bgs = (pal && pal.palmares_bgs) || [];
+                    } catch (e) { profilCommandant.palmares_bgs = []; }
+                }
+
                 if (profilCommandant.palmares_bgs && Array.isArray(profilCommandant.palmares_bgs)) {
                     profilCommandant.palmares_bgs.forEach(medaille => {
                         let distinction = "RUBAN DE CAMPAGNE";
