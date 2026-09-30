@@ -162,6 +162,8 @@
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.</div>';
 
         if (window.edteamSon) window.edteamSon.majUI();
+        // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
+        if (/[?&]nouveautes(=|&|$)/.test(location.search)) setTimeout(function () { window.edteamOuvrirNouveautes(); }, 800);
         if (dansApp()) charger(urlDonnees(), function () { window.edteamMajPointNouveautes(); });
 
         // Fenetre du compagnon mobile
