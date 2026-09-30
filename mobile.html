@@ -858,6 +858,9 @@
             
             <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
                 
+                <!-- Carrière BGS & Powerplay (remplie par remplirCartesCarriereFicheMobile) -->
+                <div id="m-modal-carrieres" style="display: none; flex-direction: column; gap: 10px;"></div>
+
                 <!-- Casier Légal & Impact BGS (Côte à côte) -->
                 <div style="display: flex; gap: 10px;">
                     <!-- Casier Légal -->
@@ -2238,8 +2241,14 @@
                 const escadronCible = profilCommandant.escadron_id || 'ISS';
                 
                 // OPTIMISATION MOBILE : On ne télécharge que les ordres actifs pour la jauge BGS, fini l'historique lourd !
+                const COLS_FICHE = 'user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, notoriete, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total';
+                const lireFiche = async () => {
+                    let rep = await supabaseApp.from('profils_publics').select(COLS_FICHE + ', rang_bgs, points_bgs').eq('user_id', userId).single();
+                    if (rep.error) rep = await supabaseApp.from('profils_publics').select(COLS_FICHE).eq('user_id', userId).single(); // repli : colonnes BGS pas exposées
+                    return rep;
+                };
                 const [resProfil, resOrdresActifs] = await Promise.all([
-                    supabaseApp.from('profils_publics').select('*').eq('user_id', userId).single(),
+                    lireFiche(),
                     supabaseApp.from('ordres_bgs').select('id').eq('escadron_id', escadronCible).eq('statut', 'ACTIF')
                 ]);
                 
@@ -2270,7 +2279,7 @@
                     else badges += '<span style="background: rgba(255,113,0,0.1); color: var(--ed-orange); border: 1px solid var(--ed-orange); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">PILOTE</span>';
                     if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
                 }
-                document.getElementById('m-modal-cmdr-roles').innerHTML = badges;
+                document.getElementById('m-modal-cmdr-roles').innerHTML = badges + remplirCartesCarriereFicheMobile(profil);
 
                 // --- INJECTION DES DISTINCTIONS (PINS) ---
                 const cacheName = 'edteam_specialists_' + escadronCible;
@@ -2768,6 +2777,55 @@
                 if (p.puissance_nom && p.puissance_rang) { badgePP.innerHTML = htmlPastilleRang(p.puissance_rang); badgePP.style.display = 'flex'; }
                 else badgePP.style.display = 'none';
             }
+        }
+
+        // Fiche d'un pilote : cartes Carrière BGS et Powerplay ; renvoie les pastilles de rang pour l'en-tête
+        function remplirCartesCarriereFicheMobile(profil) {
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            const zone = document.getElementById('m-modal-carrieres');
+            const stylePastille = 'font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;';
+            let html = '';
+            let pastilles = '';
+
+            if (profil.rang_bgs !== undefined && profil.rang_bgs !== null) {
+                const pr = progressionRangBgs(profil.rang_bgs, Number(profil.points_bgs) || 0);
+                const suite = pr.max === null ? 'RANG MAXIMAL ATTEINT' : 'PROCHAIN : RANG ' + (pr.rang + 1) + ' À ' + fmt(pr.max) + ' PTS';
+                html += `
+                <div style="border: 1px solid rgba(255,113,0,0.4); background: rgba(255,113,0,0.05); padding: 10px 12px; border-radius: 4px;">
+                    <div style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; margin-bottom: 6px;">> CARRIÈRE BGS</div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                        <span style="color: #fff; font-size: 1.2em; font-weight: bold;">RANG ${pr.rang}</span>
+                        <span style="color: #FFD700; font-weight: bold;">${fmt(Math.floor(pr.points))} <span style="color: #888; font-size: 0.75em; font-weight: normal;">POINTS</span></span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 8px;">
+                        <div style="width: ${pr.pct.toFixed(1)}%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 6px var(--ed-orange);"></div>
+                    </div>
+                    <div style="color: #888; font-size: 0.7em; margin-top: 5px;">${suite}</div>
+                </div>`;
+                pastilles += `<span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); ${stylePastille}">RANG ${pr.rang} · BGS</span>`;
+            }
+
+            if (profil.puissance_nom) {
+                const cycle = Number(profil.puissance_merites_cycle) || 0;
+                const total = Number(profil.puissance_merites_total) || 0;
+                const rangPP = Number(profil.puissance_rang) || 0;
+                html += `
+                <div style="border: 1px solid rgba(0,240,255,0.4); background: rgba(0,240,255,0.05); padding: 10px 12px; border-radius: 4px;">
+                    <div style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; margin-bottom: 6px;">> POWERPLAY</div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                        <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere;">${escapeHtml(String(profil.puissance_nom).toUpperCase())}</span>
+                        <span style="color: var(--ed-blue); font-weight: bold; flex-shrink: 0;">RANG ${rangPP}</span>
+                    </div>
+                    <div style="display: flex; gap: 18px; margin-top: 8px; font-size: 0.8em;">
+                        <div><span style="color: #888;">CYCLE :</span> <span style="color: #FFD700; font-weight: bold;">${cycle > 0 ? '+' + fmt(cycle) : '—'}</span></div>
+                        <div><span style="color: #888;">CUMUL :</span> <span style="color: #fff; font-weight: bold;">${fmt(total)}</span></div>
+                    </div>
+                </div>`;
+                pastilles += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.08); ${stylePastille}">RANG ${rangPP} · POWERPLAY</span>`;
+            }
+
+            if (zone) { zone.innerHTML = html; zone.style.display = html ? 'flex' : 'none'; }
+            return pastilles;
         }
 
         async function ouvrirSalleBgsMobile() {
