@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-09-30-performance', date: '2026-09-30T14:12:00Z', type: 'AMELIORE',
         titre: 'QG plus léger pour votre ordinateur',
-        texte: 'Les halos lumineux qui pulsent sur l'accueil (Renseignement tactique, pastille « En ligne ») sont désormais dessinés sans redessin permanent : le QG consomme quasiment rien au repos, là où il occupait une part notable d'un cœur du processeur.',
+        texte: 'Les halos lumineux qui pulsent sur l\'accueil (Renseignement tactique, pastille « En ligne ») sont désormais dessinés sans redessin permanent : le QG consomme quasiment rien au repos, là où il occupait une part notable d\'un cœur du processeur.',
         important: false
     },
     {
