@@ -548,12 +548,20 @@
                 <!-- ZONE 2 & 3 : DOSSIER ANALYTIQUE ET RECONNAISSANCE -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;">
                     
-                    <!-- COLONNE GAUCHE : FORCE DE FRAPPE (Remplace le Radar) -->
-                    <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; display: flex; flex-direction: column;">
-                        <h4 style="margin: 0 0 15px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px;">FORCE DE FRAPPE (IMPACT GLOBAL DE L'ESCADRON)</h4>
-                        <div style="position: relative; flex-grow: 1; min-height: 300px; width: 100%;">
-                            <canvas id="impactGlobalChart"></canvas>
+                    <!-- COLONNE GAUCHE : FORCE DE FRAPPE (camembert holographique : part de chacun dans l'effort, selon les filtres) -->
+                    <div id="panel-force-frappe" class="data-row" style="background: rgba(3, 14, 20, 0.88); padding: 20px; display: flex; flex-direction: column; border-color: rgba(0,240,255,0.55); position: relative; overflow: hidden; box-shadow: 0 0 28px rgba(0,240,255,0.14), inset 0 0 70px rgba(0,240,255,0.06);">
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,240,255,0.05) 0px, rgba(0,240,255,0.05) 1px, transparent 1px, transparent 4px); pointer-events: none;"></div>
+                        <h4 style="margin: 0 0 6px 0; color: var(--ed-blue); letter-spacing: 2px; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; position: relative; text-shadow: 0 0 8px rgba(0,240,255,0.5);">FORCE DE FRAPPE (IMPACT GLOBAL DE L'ESCADRON)</h4>
+                        <div id="pie-sous-titre" style="position: relative; color: #6f9aa3; font-size: 0.75em; letter-spacing: 1px; margin-bottom: 14px;"></div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center; justify-content: center; position: relative; flex-grow: 1; min-height: 270px;">
+                            <div style="position: relative; width: 250px; height: 250px; filter: drop-shadow(0 0 14px rgba(0,240,255,0.35));">
+                                <canvas id="pieInvestissement"></canvas>
+                            </div>
+                            <div id="pie-legende" style="flex: 1; min-width: 210px; font-size: 0.9em;">
+                                <div style="color: #555; font-style: italic;">Analyse de l'investissement en cours...</div>
+                            </div>
                         </div>
+                        <div style="position: relative; color: #667; font-size: 0.7em; margin-top: 12px; text-align: center; letter-spacing: 1px;">Ordres et actions libres confondus. Barème : 2 M CR = 1 point, 1 mission = 1 point, colonisation 1 point pour 400 t, échecs non comptés.</div>
                     </div>
 
                     <!-- COLONNE DROITE : RECONNAISSANCE & SPÉCIALISTES -->
@@ -615,21 +623,6 @@
                         </div>
 
                     </div>
-                </div>
-
-                <!-- ZONE 3B : REPARTITION DE L'INVESTISSEMENT (CYCLE EN COURS, ORDRES ET ACTIONS LIBRES CONFONDUS) -->
-                <div id="panel-investissement" class="data-row" style="background: rgba(3, 14, 20, 0.88); padding: 20px; border-color: rgba(0,240,255,0.55); position: relative; overflow: hidden; box-shadow: 0 0 28px rgba(0,240,255,0.14), inset 0 0 70px rgba(0,240,255,0.06);">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,240,255,0.05) 0px, rgba(0,240,255,0.05) 1px, transparent 1px, transparent 4px); pointer-events: none;"></div>
-                    <h4 style="margin: 0 0 15px 0; color: var(--ed-blue); letter-spacing: 2px; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; position: relative; text-shadow: 0 0 8px rgba(0,240,255,0.5);">> RÉPARTITION DE L'INVESTISSEMENT (CYCLE EN COURS)</h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center; justify-content: center; position: relative;">
-                        <div style="position: relative; width: 310px; height: 310px; filter: drop-shadow(0 0 14px rgba(0,240,255,0.35));">
-                            <canvas id="pieInvestissement"></canvas>
-                        </div>
-                        <div id="pie-legende" style="flex: 1; min-width: 270px; max-width: 460px; font-size: 0.95em;">
-                            <div style="color: #555; font-style: italic;">Analyse de l'investissement en cours...</div>
-                        </div>
-                    </div>
-                    <div style="position: relative; color: #667; font-size: 0.75em; margin-top: 14px; text-align: center; letter-spacing: 1px;">Ordres et actions libres confondus, depuis le dernier cycle (jeudi 07:00 UTC). Barème : 2 M CR = 1 point, 1 mission = 1 point, colonisation 1 point pour 400 t.</div>
                 </div>
 
                 <!-- ZONE 4 : JOURNAL DES EXPLOITS (LIVE FEED) -->
@@ -795,7 +788,7 @@
 
             // 4. Lancement du module correspondant
             if (tabId === 'ordres') afficherOrdresBGS();
-            if (tabId === 'classement') { chargerRegistreTactique(); if (typeof chargerRepartitionInvestissement === 'function') chargerRepartitionInvestissement(); }
+            if (tabId === 'classement') chargerRegistreTactique();
         };
 
         // --- 1. SON DU TERMINAL (Cliquetis mécanique) ---
@@ -2876,7 +2869,6 @@
         // =========================================
         // MOTEUR DU REGISTRE TACTIQUE
         // =========================================
-        let impactGlobalChartInstance = null;
         let memoireOrdresArchives = [];
         let memoireEffortsBruts = [];
         let memoireDicoPilotes = {};
@@ -3090,7 +3082,7 @@
         }
 
         // ==========================================
-        // CAMEMBERT HOLOGRAPHIQUE : PART DE CHAQUE PILOTE DANS L'EFFORT DU CYCLE (ORDRES + ACTIONS LIBRES)
+        // FORCE DE FRAPPE : CAMEMBERT HOLOGRAPHIQUE (ORDRES + ACTIONS LIBRES, SELON LES FILTRES)
         // ==========================================
         let pieInvestChart = null;
         function pointsInvestissement(type, valeur) {
@@ -3101,101 +3093,106 @@
             return v > 10000 ? v / 2000000 : v;
         }
 
-        window.chargerRepartitionInvestissement = async function() {
+        function afficherForceDeFrappe(efforts, noms, filtrePilote) {
             const cv = document.getElementById('pieInvestissement');
             const legende = document.getElementById('pie-legende');
-            if (!cv || !legende || !profilCommandant || !profilCommandant.escadron_id) return;
+            const sousTitre = document.getElementById('pie-sous-titre');
+            if (!cv || !legende) return;
+            if (pieInvestChart) { pieInvestChart.destroy(); pieInvestChart = null; }
 
-            try {
-                const debut = calculerDernierTickHebdo();
-                const [resE, resP] = await Promise.all([
-                    supabaseApp.from('efforts_bgs').select('user_id, type_action, valeur').gte('date_action', debut.toISOString()),
-                    supabaseApp.from('profils_publics').select('user_id, cmdr_nom').eq('escadron_id', profilCommandant.escadron_id).eq('est_approuve', true)
-                ]);
-                const noms = {};
-                (resP.data || []).forEach(p => { noms[p.user_id] = p.cmdr_nom || 'INCONNU'; });
+            const modeActivite = (filtrePilote === 'ME');
+            const selP = document.getElementById('filtre-periode');
+            const selO = document.getElementById('filtre-ordre');
+            const txtP = selP && selP.selectedOptions[0] ? selP.selectedOptions[0].text.replace(/[\[\]]/g, '').trim() : '';
+            const txtO = selO && selO.selectedOptions[0] ? selO.selectedOptions[0].text.replace(/[\[\]]/g, '').trim() : '';
+            if (sousTitre) sousTitre.innerText = (modeActivite ? 'MON INVESTISSEMENT PAR ACTIVITÉ' : 'PART DE CHAQUE PILOTE') + '  ·  ' + txtP + '  ·  ' + txtO;
 
-                const scores = {};
-                (resE.data || []).forEach(e => {
-                    if (!(e.user_id in noms)) return;
-                    scores[e.user_id] = (scores[e.user_id] || 0) + pointsInvestissement(e.type_action, e.valeur);
-                });
-                const classement = Object.entries(scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
-                const total = classement.reduce((t, [, v]) => t + v, 0);
+            const CATEGORIES = { MISSIONS: 'MISSIONS', ECONOMIE: 'ÉCONOMIE', SECURITE: 'SÉCURITÉ', SCIENCE: 'SCIENCE', COLONISATION: 'COLONISATION',
+                MEURTRES: 'OP. NOIRES', VOLS: 'OP. NOIRES', CONTREBANDE: 'OP. NOIRES', PIRATAGE: 'OP. NOIRES',
+                CZ_VICTOIRES: 'CONFLITS', GUERRE_MISSIONS: 'CONFLITS', GUERRE_BONDS: 'CONFLITS', ELECTION_MISSIONS: 'ÉLECTIONS' };
+            const scores = {};
+            (efforts || []).forEach(e => {
+                const pts = pointsInvestissement(e.type_action, e.valeur);
+                if (pts <= 0) return;
+                let cle;
+                if (modeActivite) cle = CATEGORIES[e.type_action] || 'AUTRES';
+                else { if (!(e.user_id in noms)) return; cle = e.user_id; }
+                scores[cle] = (scores[cle] || 0) + pts;
+            });
+            const classement = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const total = classement.reduce((t, [, v]) => t + v, 0);
 
-                if (pieInvestChart) { pieInvestChart.destroy(); pieInvestChart = null; }
-
-                if (total <= 0) {
-                    legende.innerHTML = '<div style="color: #667; font-style: italic; text-align: center;">Aucun effort enregistré sur ce cycle pour le moment.</div>';
-                    return;
-                }
-
-                const palette = ['#00F0FF', '#FF7100', '#00FF66', '#B026FF', '#FFD700', '#FF3333'];
-                const tranches = classement.slice(0, 6).map(([uid, v], i) => ({ uid, nom: noms[uid], v, couleur: palette[i] }));
-                const reste = classement.slice(6).reduce((t, [, v]) => t + v, 0);
-                if (reste > 0) tranches.push({ uid: null, nom: 'AUTRES', v: reste, couleur: '#5F7078' });
-
-                const hex2rgba = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
-                const donnees = tranches.map(t => Math.round(t.v * 10) / 10);
-
-                // Anneau exterieur fin (decoratif) + anneau principal translucide, total au centre
-                const pluginCentre = {
-                    id: 'centreTotal',
-                    afterDraw(chart) {
-                        const meta = chart.getDatasetMeta(1);
-                        if (!meta || !meta.data[0]) return;
-                        const { x, y } = meta.data[0];
-                        const c = chart.ctx;
-                        c.save();
-                        c.textAlign = 'center';
-                        c.fillStyle = '#00F0FF'; c.shadowColor = '#00F0FF'; c.shadowBlur = 10;
-                        c.font = "bold 26px 'Share Tech Mono', monospace";
-                        c.fillText(new Intl.NumberFormat('fr-FR').format(Math.round(total)), x, y + 4);
-                        c.shadowBlur = 0; c.fillStyle = '#7fb6bf';
-                        c.font = "12px 'Share Tech Mono', monospace";
-                        c.fillText('POINTS DU CYCLE', x, y + 24);
-                        c.restore();
-                    }
-                };
-
-                pieInvestChart = new Chart(cv.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: tranches.map(t => t.nom),
-                        datasets: [
-                            { data: donnees, backgroundColor: tranches.map(t => hex2rgba(t.couleur, 0.18)), borderColor: tranches.map(t => hex2rgba(t.couleur, 0.55)), borderWidth: 1, weight: 0.35 },
-                            { data: donnees, backgroundColor: tranches.map(t => hex2rgba(t.couleur, 0.42)), borderColor: tranches.map(t => t.couleur), borderWidth: 2, hoverOffset: 8, weight: 1.6 }
-                        ]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, cutout: '66%',
-                        animation: { duration: 900 },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                filter: item => item.datasetIndex === 1,
-                                backgroundColor: 'rgba(3,14,20,0.95)', titleColor: '#00F0FF', bodyColor: '#fff', borderColor: '#00F0FF', borderWidth: 1,
-                                callbacks: { label: c => ' ' + Math.round((c.raw / total) * 1000) / 10 + ' %  (' + new Intl.NumberFormat('fr-FR').format(Math.round(c.raw)) + ' pts)' }
-                            }
-                        }
-                    },
-                    plugins: [pluginCentre]
-                });
-
-                const maPart = scores[profilCommandant.user_id] ? Math.round((scores[profilCommandant.user_id] / total) * 1000) / 10 : 0;
-                legende.innerHTML = tranches.map(t => {
-                    const pct = Math.round((t.v / total) * 1000) / 10;
-                    const moi = t.uid && t.uid === profilCommandant.user_id;
-                    return '<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed rgba(0,240,255,0.12);">'
-                        + '<span style="width: 12px; height: 12px; background: ' + hex2rgba(t.couleur, 0.5) + '; border: 1px solid ' + t.couleur + '; box-shadow: 0 0 6px ' + t.couleur + ';"></span>'
-                        + '<span style="flex: 1; color: ' + (moi ? '#00F0FF' : '#ddd') + '; font-weight: ' + (moi ? 'bold' : 'normal') + ';">' + escapeHtml(String(t.nom).toUpperCase()) + (moi ? ' [ VOUS ]' : '') + '</span>'
-                        + '<span style="color: ' + t.couleur + '; font-weight: bold;">' + pct + ' %</span></div>';
-                }).join('')
-                + '<div style="margin-top: 12px; color: #7fb6bf; letter-spacing: 1px;">VOTRE PART : <strong style="color: #00F0FF;">' + maPart + ' %</strong> DE L\'EFFORT DE L\'ESCADRON</div>';
-            } catch (e) {
-                console.error('Erreur répartition investissement :', e);
+            if (total <= 0) {
+                legende.innerHTML = '<div style="color: #667; font-style: italic; text-align: center;">Aucun effort enregistré pour ces filtres.</div>';
+                return;
             }
-        };
+
+            const palette = ['#00F0FF', '#FF7100', '#00FF66', '#B026FF', '#FFD700', '#FF3333'];
+            const nomDe = (cle) => modeActivite ? cle : (noms[cle] || 'INCONNU');
+            const tranches = classement.slice(0, 6).map(([cle, v], i) => ({ cle, nom: nomDe(cle), v, couleur: palette[i] }));
+            const reste = classement.slice(6).reduce((t, [, v]) => t + v, 0);
+            if (reste > 0) tranches.push({ cle: null, nom: 'AUTRES', v: reste, couleur: '#5F7078' });
+
+            const hex2rgba = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            const donnees = tranches.map(t => Math.round(t.v * 10) / 10);
+
+            const pluginCentre = {
+                id: 'centreTotal',
+                afterDraw(chart) {
+                    const meta = chart.getDatasetMeta(1);
+                    if (!meta || !meta.data[0]) return;
+                    const { x, y } = meta.data[0];
+                    const c = chart.ctx;
+                    c.save();
+                    c.textAlign = 'center';
+                    c.fillStyle = '#00F0FF'; c.shadowColor = '#00F0FF'; c.shadowBlur = 10;
+                    c.font = "bold 24px 'Share Tech Mono', monospace";
+                    c.fillText(new Intl.NumberFormat('fr-FR').format(Math.round(total)), x, y + 4);
+                    c.shadowBlur = 0; c.fillStyle = '#7fb6bf';
+                    c.font = "11px 'Share Tech Mono', monospace";
+                    c.fillText('POINTS', x, y + 22);
+                    c.restore();
+                }
+            };
+
+            pieInvestChart = new Chart(cv.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: tranches.map(t => t.nom),
+                    datasets: [
+                        { data: donnees, backgroundColor: tranches.map(t => hex2rgba(t.couleur, 0.18)), borderColor: tranches.map(t => hex2rgba(t.couleur, 0.55)), borderWidth: 1, weight: 0.35 },
+                        { data: donnees, backgroundColor: tranches.map(t => hex2rgba(t.couleur, 0.42)), borderColor: tranches.map(t => t.couleur), borderWidth: 2, hoverOffset: 8, weight: 1.6 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '66%',
+                    animation: { duration: 700 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            filter: item => item.datasetIndex === 1,
+                            backgroundColor: 'rgba(3,14,20,0.95)', titleColor: '#00F0FF', bodyColor: '#fff', borderColor: '#00F0FF', borderWidth: 1,
+                            callbacks: { label: c => ' ' + Math.round((c.raw / total) * 1000) / 10 + ' %  (' + new Intl.NumberFormat('fr-FR').format(Math.round(c.raw)) + ' pts)' }
+                        }
+                    }
+                },
+                plugins: [pluginCentre]
+            });
+
+            let html = tranches.map(t => {
+                const pct = Math.round((t.v / total) * 1000) / 10;
+                const moi = !modeActivite && t.cle && t.cle === profilCommandant.user_id;
+                return '<div style="display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed rgba(0,240,255,0.12);">'
+                    + '<span style="width: 12px; height: 12px; background: ' + hex2rgba(t.couleur, 0.5) + '; border: 1px solid ' + t.couleur + '; box-shadow: 0 0 6px ' + t.couleur + ';"></span>'
+                    + '<span style="flex: 1; color: ' + (moi ? '#00F0FF' : '#ddd') + '; font-weight: ' + (moi ? 'bold' : 'normal') + ';">' + escapeHtml(String(t.nom).toUpperCase()) + (moi ? ' [ VOUS ]' : '') + '</span>'
+                    + '<span style="color: ' + t.couleur + '; font-weight: bold;">' + pct + ' %</span></div>';
+            }).join('');
+            if (!modeActivite) {
+                const maPart = scores[profilCommandant.user_id] ? Math.round((scores[profilCommandant.user_id] / total) * 1000) / 10 : 0;
+                html += '<div style="margin-top: 12px; color: #7fb6bf; letter-spacing: 1px;">VOTRE PART : <strong style="color: #00F0FF;">' + maPart + ' %</strong></div>';
+            }
+            legende.innerHTML = html;
+        }
 
         async function chargerRegistreTactique() {
             if (!profilCommandant) return;
@@ -3375,7 +3372,7 @@
 
                 if (Object.keys(scoresPilotes).length === 0) {
                     if (conteneurSpecialistes) conteneurSpecialistes.innerHTML = '<div style="color: #666; font-style: italic; text-align: center;">Aucun effort enregistré sur cette période.</div>';
-                    if (impactGlobalChartInstance) impactGlobalChartInstance.destroy();
+                    afficherForceDeFrappe([], dicoPilotes, filtrePilote);
                 } else {
                     const trouverMeilleur = (categorie) => {
                         let max = 0; let topPilote = null;
@@ -3445,61 +3442,8 @@
                         </div>`;
                     }
 
-                    // HISTOGRAMME FORCE DE FRAPPE
-                    const chartEl = document.getElementById('impactGlobalChart');
-                    if (chartEl) {
-                        const ctxBar = chartEl.getContext('2d');
-                        if (impactGlobalChartInstance) impactGlobalChartInstance.destroy();
-
-                        // Tri par ordre alphabétique sur le nom du CMDR
-                        const pilotesTries = Object.entries(scoresPilotes).sort((a, b) => {
-                            const nomA = dicoPilotes[a[0]] || 'INCONNU';
-                            const nomB = dicoPilotes[b[0]] || 'INCONNU';
-                            return nomA.localeCompare(nomB);
-                        });
-                        
-                        const labelsBar = [];
-                        const dataBar = [];
-                        pilotesTries.forEach(([uid, scores]) => {
-                            labelsBar.push(dicoPilotes[uid] || 'INCONNU');
-                            dataBar.push(Math.round(scores.total));
-                        });
-
-                        Chart.defaults.color = '#888';
-                        Chart.defaults.font.family = "'Share Tech Mono', monospace";
-
-                        impactGlobalChartInstance = new Chart(ctxBar, {
-                            type: 'bar',
-                            data: {
-                                labels: labelsBar,
-                                datasets: [{
-                                    label: 'Poids Relatif',
-                                    data: dataBar,
-                                    backgroundColor: 'rgba(0, 240, 255, 0.2)',
-                                    borderColor: 'var(--ed-blue)',
-                                    borderWidth: 1,
-                                    hoverBackgroundColor: 'var(--ed-blue)',
-                                    hoverBorderColor: '#fff'
-                                }]
-                            },
-                            options: {
-                                indexAxis: 'y',
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { 
-                                    legend: { display: false },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(10,5,0,0.95)', titleColor: 'var(--ed-blue)', bodyColor: '#fff', borderColor: 'var(--ed-blue)', borderWidth: 1,
-                                        callbacks: { label: function(context) { return ' Score de contribution: ' + context.raw; } }
-                                    }
-                                },
-                                scales: {
-                                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } },
-                                    y: { grid: { display: false }, ticks: { color: '#ccc', font: { family: "'Share Tech Mono', monospace" } } }
-                                }
-                            }
-                        });
-                    }
+                    // FORCE DE FRAPPE : camembert holographique (memes efforts filtres que le reste du journal)
+                    afficherForceDeFrappe(effortsFiltres, dicoPilotes, filtrePilote);
                 }
 
                 // 5. RUBANS DE CAMPAGNE (MÉDAILLES CLIQUABLES)
