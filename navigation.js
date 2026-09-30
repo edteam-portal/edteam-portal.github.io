@@ -813,3 +813,137 @@ window.demarrerSystemLoop = async function systemLoop() {
 
 // Rétrocompatibilité d'appel
 window.systemLoop = window.demarrerSystemLoop;
+
+// ==========================================
+// RADAR DE COMMUNICATIONS GLOBAL : alertes de messages sur toutes les pages qui chargent navigation.js
+// (urgent = alerte plein ecran ; prive = petite fenetre ; enveloppe du menu si message plus recent que la derniere visite)
+// ==========================================
+(function radarCommunications() {
+    const PAGE = (window.location.pathname.split('/').pop() || 'index.html');
+    // La page Communications gere deja ses propres alertes (onglets clignotants, sons)
+    if (PAGE === 'communications.html') return;
+
+    let radarActif = false;
+    const moi = () => ((typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : window.profilCommandant) || null;
+
+    function injecterAlertes() {
+        if (document.getElementById('comms-alert-massive')) return;
+        const style = document.createElement('style');
+        style.textContent = '@keyframes commsRadarPulse { 0%, 100% { background: rgba(255,0,0,0.9); } 50% { background: rgba(120,0,0,0.92); } } @keyframes commsRadarBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }';
+        document.head.appendChild(style);
+
+        const conteneur = document.createElement('div');
+        conteneur.innerHTML = `
+        <div id="comms-alert-massive" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.9); z-index: 100000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Share Tech Mono', monospace; cursor: pointer; animation: commsRadarPulse 1s infinite;" onclick="this.style.display='none'; if(typeof sonClic==='function') sonClic();">
+            <div style="border: 4px solid #fff; padding: 40px 60px; background: rgba(0,0,0,0.8); box-shadow: 0 0 50px #FF0000; max-width: 90%;">
+                <h1 style="color: #FF0000; font-size: 3.5em; margin: 0; letter-spacing: 5px; text-shadow: 0 0 20px #FF0000;">⚠️ TRANSMISSION URGENTE ⚠️</h1>
+                <p id="comms-massive-sender" style="color: #fff; font-size: 1.5em; letter-spacing: 2px; margin-top: 20px;">> EXPÉDITEUR : CMDR INCONNU</p>
+                <p id="comms-massive-text" style="color: var(--ed-orange); font-size: 1.3em; margin-top: 30px; max-width: 800px; line-height: 1.5; border-left: 5px solid #FF0000; padding-left: 20px; text-align: left;">Message text...</p>
+                <p style="color: #888; font-size: 0.9em; margin-top: 40px; animation: commsRadarBlink 1.5s infinite;">[ CLIQUEZ N'IMPORTE OÙ POUR ACQUITTER ]</p>
+            </div>
+        </div>
+        <div id="comms-alert-toast" style="position: fixed; bottom: 30px; right: -400px; width: 350px; max-width: 90%; background: rgba(10,5,0,0.95); border: 1px solid var(--ed-blue); border-left: 4px solid var(--ed-blue); padding: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.2); z-index: 99999; font-family: 'Share Tech Mono', monospace; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-sizing: border-box;" onclick="this.style.right='-400px'; if(typeof sonClic==='function') sonClic(); window.location.href='communications.html';">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-blue); padding-bottom: 5px; margin-bottom: 10px;">
+                <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">> MESSAGE PRIVÉ ENTRANT</span>
+                <span style="color: #888; font-size: 0.8em;">MAINTENANT</span>
+            </div>
+            <div style="color: #fff; font-size: 0.95em; margin-bottom: 5px;">
+                De : <span id="comms-toast-sender" style="color: var(--ed-orange); font-weight: bold;">CMDR ...</span>
+            </div>
+            <div style="color: #888; font-size: 0.8em; font-style: italic;">[ Cliquez pour ouvrir le terminal ]</div>
+        </div>`;
+        while (conteneur.firstChild) document.body.appendChild(conteneur.firstChild);
+    }
+
+    function sonAlerteComms(urgent) {
+        try {
+            let ctx = typeof audioCtx !== 'undefined' && audioCtx ? audioCtx : new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume();
+            const t = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            if (urgent) {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(800, t);
+                osc.frequency.setValueAtTime(1200, t + 0.2);
+                osc.frequency.setValueAtTime(800, t + 0.4);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(t); osc.stop(t + 0.6);
+            } else {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1500, t);
+                osc.frequency.exponentialRampToValueAtTime(800, t + 0.1);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(t); osc.stop(t + 0.2);
+            }
+        } catch (e) {}
+    }
+
+    function initialiserEcoute() {
+        const profil = moi();
+        if (!profil || radarActif) return;
+        radarActif = true;
+
+        // Au demarrage : y a-t-il un message plus recent que la derniere visite sur la page Communications ?
+        let filtreCanaux = 'canal.eq.GLOBAL,destinataire_id.eq.' + profil.user_id;
+        if (profil.escadron_id) filtreCanaux += ',escadron_id.eq.' + profil.escadron_id;
+        supabaseApp.from('transmissions')
+            .select('created_at')
+            .or(filtreCanaux)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .then(({ data }) => {
+                if (data && data.length > 0) {
+                    const dateDernierMsgServeur = new Date(data[0].created_at).getTime();
+                    const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_msg_time') || '0');
+                    if (dateDernierMsgServeur > dateDerniereLecture) {
+                        const envIcon = document.getElementById('nav-comms-link');
+                        if (envIcon) envIcon.classList.add('alerte-enveloppe');
+                    }
+                }
+            });
+
+        // En direct
+        supabaseApp.channel('radar:transmissions')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
+                const msg = payload.new;
+                const p = moi();
+                if (!p || msg.expediteur_id === p.user_id) return;
+
+                const pourMoi = (msg.destinataire_id === p.user_id);
+                const escadron = (msg.canal === 'ESCADRON' && msg.escadron_id === p.escadron_id);
+                const global = (msg.canal === 'GLOBAL');
+                if (!(pourMoi || escadron || global)) return;
+
+                const envIcon = document.getElementById('nav-comms-link');
+                if (envIcon) envIcon.classList.add('alerte-enveloppe');
+
+                if (msg.est_urgent) {
+                    sonAlerteComms(true);
+                    document.getElementById('comms-massive-sender').innerText = '> EXPÉDITEUR : ' + (msg.expediteur_id === '00000000-0000-4000-8000-0000000000ff' ? '' : 'CMDR ') + msg.expediteur_nom + ' [ Canal: ' + msg.canal + ' ]';
+                    document.getElementById('comms-massive-text').innerText = msg.message;
+                    document.getElementById('comms-alert-massive').style.display = 'flex';
+                } else if (pourMoi) {
+                    sonAlerteComms(false);
+                    document.getElementById('comms-toast-sender').innerText = msg.expediteur_nom;
+                    const toast = document.getElementById('comms-alert-toast');
+                    toast.style.right = '30px';
+                    setTimeout(() => { toast.style.right = '-400px'; }, 8000);
+                }
+            })
+            .subscribe();
+    }
+
+    function demarrer() {
+        injecterAlertes();
+        const attente = setInterval(() => {
+            if (moi()) { clearInterval(attente); initialiserEcoute(); }
+        }, 1000);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
+    else demarrer();
+})();
