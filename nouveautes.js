@@ -49,9 +49,6 @@
         + '#ft-nouv .nv-d{color:#666;font-size:.72rem;margin-left:auto}'
         + '#ft-nouv .nv-txt{font-size:.84rem;line-height:1.65;color:#bbb;margin-top:5px}'
         + '#ft-nouv .nv-action{margin-top:6px;color:#FFD700;font-size:.82rem}'
-        + '#ft-nouv .nv-lien{margin-top:6px;font-size:.78rem}'
-        + '#ft-nouv .nv-lien a{color:var(--ed-blue,#00F0FF);cursor:pointer;text-decoration:none;letter-spacing:1px}'
-        + '#ft-nouv .nv-lien a:hover{color:#fff}'
         + '#ft-nouv .nv-x{position:absolute;top:14px;right:18px;color:var(--ed-orange,#FF7100);cursor:pointer;font-weight:bold;font-size:1.2rem}'
         + '#ft-nouv .nv-x:hover{color:#fff}'
         + '#ft-nouv .nv-vide{color:#888;text-align:center;font-style:italic;padding:30px 0}';
@@ -79,7 +76,6 @@
                         + '<span class="nv-d">' + jj(d) + '</span></div>'
                         + '<div class="nv-txt">' + esc(e.texte) + '</div>'
                         + (e.action ? '<div class="nv-action">▶ ACTION REQUISE : ' + esc(e.action) + '</div>' : '')
-                        + (e.aide ? '<div class="nv-lien"><a data-aide="' + esc(e.aide) + '">EN SAVOIR PLUS ›</a></div>' : '')
                         + '</div>';
                 }).join('');
                 corps += '<details' + (i === 0 ? ' open' : '') + '><summary><span class="nv-sem">SEMAINE DU ' + jj(debut) + ' AU ' + jj(fin) + '</span>'
@@ -95,9 +91,7 @@
             + '<div class="nv-corps">' + corps + '</div></div>';
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) {
-            if (e.target === ov) { fermer(); return; }
-            var a = e.target.closest ? e.target.closest('[data-aide]') : null;
-            if (a && typeof window.edteamOuvrirAide === 'function') { fermer(); window.edteamOuvrirAide(a.getAttribute('data-aide')); }
+            if (e.target === ov) fermer();
         });
         ov.querySelector('.nv-x').addEventListener('click', fermer);
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fermer(); });
