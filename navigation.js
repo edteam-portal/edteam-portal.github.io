@@ -146,6 +146,9 @@ function injecterArchitectureGlobale() {
                 </div>
 
             </div>
+            <div style="display: flex; align-items: flex-start; justify-content: flex-end; flex-grow: 1; padding-right: 5px;">
+                <button type="button" class="son-btn" data-son-toggle></button>
+            </div>
         </header>
     `;
 
@@ -203,6 +206,7 @@ function injecterArchitectureGlobale() {
     const mainUi = document.getElementById('main-ui');
     if (mainUi && !document.querySelector('.hud-header')) {
         mainUi.insertAdjacentHTML('afterbegin', headerGlobalHTML);
+        if (window.edteamSon) window.edteamSon.majUI();
     }
 
     if (!document.getElementById('modal-gestion-compte')) {
