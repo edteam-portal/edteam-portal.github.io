@@ -15,7 +15,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=1"></script>
+    <script src="shared-utils.js?v=2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -118,11 +118,28 @@
             align-items: center;
             gap: 4px;
             font-family: inherit;
-            font-size: 0.75em;
-            letter-spacing: 1px;
+            font-size: 0.68em;
+            letter-spacing: 0.5px;
             cursor: pointer;
             transition: 0.2s;
         }
+
+        /* Blocs repliables du QG (rangs, finances) */
+        .m-repliable summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--ed-orange);
+            font-size: 0.9em;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+        }
+        .m-repliable summary::-webkit-details-marker { display: none; }
+        .m-repliable summary::after { content: '+'; font-size: 1.3em; line-height: 1; }
+        .m-repliable[open] summary::after { content: '−'; }
 
         .nav-tab-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
         
@@ -338,41 +355,84 @@
             <!-- ========================================== -->
             <!-- ONGLET 1 : QG & ACTIFS                     -->
             <!-- ========================================== -->
-            <div id="tab-qg" style="display: flex; flex-direction: column; gap: 14px;">
+            <div id="tab-qg" style="display: flex; flex-direction: column; gap: 12px;">
 
-                <!-- JOURNAL D'ACTIVITÉ / TACTIQUE -->
-                <div id="m-btn-journal-tactique" class="card" style="border-color: var(--ed-blue); padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirJournalTactiqueMobile()">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5));">📋</span>
-                        <div>
-                            <span style="color: var(--ed-blue); font-size: 0.95em; font-weight: bold; letter-spacing: 1px;">JOURNAL D'ACTIVITÉ</span>
-                            <span style="display: block; color: #888; font-size: 0.75em;">Notes et informations de l'escadron</span>
+                <!-- 1. IDENTITÉ : escadron, grade, rangs Fédération / Empire -->
+                <div class="card" style="padding: 12px 14px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed var(--ed-orange-dim);">
+                        <span id="m-qg-squad" style="color: var(--ed-orange); font-size: 1.05em; font-weight: bold; letter-spacing: 2px;">[ INDÉPENDANT ]</span>
+                        <span id="m-qg-grade" style="font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; text-align: center; padding: 2px 8px; border-radius: 3px;">GRADE : ---</span>
+                    </div>
+                    <div style="display: flex; font-size: 0.8em;">
+                        <div style="text-align: center; flex: 1; min-width: 0; padding: 0 4px;">
+                            <span style="color: #888; display: block; margin-bottom: 4px; letter-spacing: 1px; font-size: 0.85em;">FÉDÉRATION</span>
+                            <strong id="m-rank-fed" style="color: var(--ed-blue); overflow-wrap: anywhere;">---</strong>
+                        </div>
+                        <div style="text-align: center; flex: 1; min-width: 0; padding: 0 4px; border-left: 1px dashed #333;">
+                            <span style="color: #888; display: block; margin-bottom: 4px; letter-spacing: 1px; font-size: 0.85em;">EMPIRE</span>
+                            <strong id="m-rank-emp" style="color: var(--ed-orange); overflow-wrap: anywhere;">---</strong>
                         </div>
                     </div>
-                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
                 </div>
 
-                <!-- DOSSIER & GRADE -->
-                <div class="card">
-                    <div class="card-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px dashed var(--ed-orange-dim);">
-                        <span id="m-qg-squad" style="color: var(--ed-orange); font-size: 1.05em; font-weight: bold; letter-spacing: 2px;">[ INDÉPENDANT ]</span>
-                        
-                        <!-- REMPLACEMENT DE LA PUISSANCE PAR LE GRADE -->
-                        <span id="m-qg-grade" style="font-size: 0.85em; font-weight: bold; letter-spacing: 1.5px; text-align: center; padding: 2px 8px; border-radius: 3px;">GRADE : ---</span>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-around; font-size: 0.85em; margin-bottom: 12px; border-bottom: 1px dashed #333; padding-bottom: 10px;">
-                        <div style="text-align: center; flex: 1;">
-                            <span style="color: #888; display: block; margin-bottom: 6px; letter-spacing: 1px;">FÉDÉRATION</span>
-                            <strong id="m-rank-fed" style="color: var(--ed-blue);">---</strong>
+                <!-- CARRIÈRE : RANG BGS & POWERPLAY (cartes cliquables, mêmes données que le PC) -->
+                <div id="m-cartes-carriere" style="display: flex; gap: 10px;">
+                    <div id="m-carte-bgs" class="card" onclick="ouvrirSalleBgsMobile()" style="display: none; flex: 1; min-width: 0; position: relative; border-color: var(--ed-orange); padding: 12px 8px; flex-direction: column; align-items: center; text-align: center; gap: 6px; cursor: pointer; background: rgba(255,113,0,0.05);">
+                        <svg viewBox="0 0 100 100" style="width: 30px; height: 30px; stroke: var(--ed-orange); fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px var(--ed-orange));">
+                            <polyline points="20,38 50,14 80,38" /><polyline points="20,58 50,34 80,58" /><polyline points="20,78 50,54 80,78" stroke-dasharray="6 6" />
+                        </svg>
+                        <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1.5px;">BGS</span>
+                        <span id="m-bgs-texte" style="color: #fff; font-size: 0.7em; letter-spacing: 1px;">RANG --</span>
+                        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                            <div id="m-bgs-barre" style="width: 0%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 6px var(--ed-orange);"></div>
                         </div>
-                        <div style="text-align: center; flex: 1; border-left: 1px dashed #333;">
-                            <span style="color: #888; display: block; margin-bottom: 6px; letter-spacing: 1px;">EMPIRE</span>
-                            <strong id="m-rank-emp" style="color: var(--ed-orange);">---</strong>
-                        </div>
+                        <div id="m-bgs-badge" style="position: absolute; top: -6px; right: -6px; background: var(--ed-orange); color: #000; min-width: 30px; border-radius: 8px; font-weight: bold; font-size: 0.85em; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3px 6px; box-shadow: 0 0 10px var(--ed-orange); display: none;"></div>
                     </div>
+                    <div id="m-carte-pp" class="card" onclick="ouvrirSallePowerplayMobile()" style="flex: 1; min-width: 0; position: relative; border-color: var(--ed-blue); padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; cursor: pointer; background: rgba(0,240,255,0.05);">
+                        <svg viewBox="0 0 100 100" style="width: 30px; height: 30px; stroke: var(--ed-blue); fill: none; stroke-width: 4; filter: drop-shadow(0 0 4px var(--ed-blue));">
+                            <polygon points="50,8 90,28 90,72 50,92 10,72 10,28" /><polygon points="50,22 74,36 74,64 50,78 26,64 26,36" stroke-dasharray="4 4" /><circle cx="50" cy="50" r="8" fill="var(--ed-blue)" />
+                        </svg>
+                        <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1.5px;">POWERPLAY</span>
+                        <span id="m-pp-nom" style="color: #fff; font-size: 0.7em; letter-spacing: 1px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NON ALIGNÉ</span>
+                        <div id="m-pp-badge" style="position: absolute; top: -6px; right: -6px; background: var(--ed-blue); color: #000; min-width: 30px; border-radius: 8px; font-weight: bold; font-size: 0.85em; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3px 6px; box-shadow: 0 0 10px var(--ed-blue); display: none;"></div>
+                    </div>
+                </div>
 
-                    <!-- RANGS OFFICIELS -->
+                <!-- 3. NOUVEAUTÉS (remplie par majCarteNouveautesMobile) -->
+                <div id="m-carte-nouveautes" class="card" onclick="ouvrirNouveautesMobile()" style="display: none; border-color: var(--ed-green); padding: 10px 12px; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; background: rgba(0,255,102,0.05);">
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                        <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(0,255,102,0.5));">✨</span>
+                        <div style="min-width: 0;">
+                            <span style="color: var(--ed-green); font-size: 0.9em; font-weight: bold; letter-spacing: 1px;">NOUVEAUTÉS <span id="m-nouv-point" style="display: none; background: var(--ed-red); color: #fff; font-size: 0.7em; padding: 1px 6px; border-radius: 8px; margin-left: 4px; vertical-align: middle;"></span></span>
+                            <span id="m-nouv-titre" style="display: block; color: #aaa; font-size: 0.75em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                        </div>
+                    </div>
+                    <span style="color: var(--ed-green); font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
+                <!-- 4. COMMUNICATIONS : journal de l'escadron, Galnet, EDNews (trois tuiles) -->
+                <div style="display: flex; gap: 8px;">
+                    <div id="m-btn-journal-tactique" class="card" onclick="ouvrirJournalTactiqueMobile()" style="flex: 1; min-width: 0; border-color: var(--ed-blue); padding: 12px 4px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(0,240,255,0.05); box-shadow: inset 0 0 10px rgba(0,240,255,0.1);">
+                        <span style="font-size: 1.5em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); margin-bottom: 6px;">📋</span>
+                        <span style="color: var(--ed-blue); font-size: 0.75em; font-weight: bold; letter-spacing: 1px;">JOURNAL</span>
+                        <span style="display: block; color: #888; font-size: 0.6em; margin-top: 4px;">Escadron</span>
+                    </div>
+                    <div id="m-btn-galnet" class="card" onclick="ouvrirGalnetMobile()" style="flex: 1; min-width: 0; border-color: var(--ed-orange); padding: 12px 4px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(255,113,0,0.05);">
+                        <span style="font-size: 1.5em; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5)); margin-bottom: 6px;">📡</span>
+                        <span style="color: var(--ed-orange); font-size: 0.75em; font-weight: bold; letter-spacing: 1px;">GALNET</span>
+                        <span id="m-galnet-date" style="display: block; color: #888; font-size: 0.6em; margin-top: 4px;">Connexion...</span>
+                    </div>
+                    <div id="m-btn-gazette" class="card" onclick="ouvrirGazetteMobile()" style="flex: 1; min-width: 0; border-color: var(--ed-blue); padding: 12px 4px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(0,240,255,0.05); box-shadow: inset 0 0 10px rgba(0,240,255,0.1);">
+                        <span style="font-size: 1.5em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); margin-bottom: 6px;">📰</span>
+                        <span style="color: var(--ed-blue); font-size: 0.75em; font-weight: bold; letter-spacing: 1px;">EDNEWS</span>
+                        <span id="m-gazette-date" style="display: block; color: #888; font-size: 0.6em; margin-top: 4px;">Archives...</span>
+                    </div>
+                </div>
+
+                <!-- 5. RANGS DE PILOTE (repliable) -->
+                <details class="m-repliable card" style="padding: 0;">
+                    <summary>RANGS DE PILOTE</summary>
+                    <div style="padding: 0 14px 14px 14px;">
                     <span style="color: #888; font-size: 0.75em; letter-spacing: 1px; display: block; margin-bottom: 6px;">ÉVALUATION DE LA FÉDÉRATION DES PILOTES :</span>
                     <div class="rank-grid">
                         <div class="rank-item" onclick="ouvrirModalGradesMobile('combat')" style="cursor: pointer;">
@@ -417,29 +477,15 @@
                             <strong id="m-legal-status-text" style="color: #00FF66; font-size: 1em; text-align: center;">CASIER VIERGE</strong>
                         </div>
                     </div>
-                </div>
+                    </div>
+                </details>
 
-                <!-- ACTUALITÉS (GALNET & EDNEWS CÔTE À CÔTE) -->
-                <div style="display: flex; gap: 10px;">
-                    <!-- GALNET -->
-                    <div id="m-btn-galnet" class="card" style="flex: 1; border-color: var(--ed-orange); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(255, 113, 0, 0.05);" onclick="ouvrirGalnetMobile()">
-                        <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(255,113,0,0.5)); margin-bottom: 6px;">📡</span>
-                        <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">GALNET</span>
-                        <span id="m-galnet-date" style="display: block; color: #888; font-size: 0.65em; margin-top: 4px;">Connexion...</span>
-                    </div>
-                    <!-- EDNEWS -->
-                    <div id="m-btn-gazette" class="card" style="flex: 1; border-color: var(--ed-blue); padding: 12px 5px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);" onclick="ouvrirGazetteMobile()">
-                        <span style="font-size: 1.6em; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); margin-bottom: 6px;">📰</span>
-                        <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">EDNEWS</span>
-                        <span id="m-gazette-date" style="display: block; color: #888; font-size: 0.65em; margin-top: 4px;">Archives...</span>
-                    </div>
-                </div>
+                <!-- 6. RAPPORT FINANCIER (repliable) -->
+                <details class="m-repliable card" style="padding: 0; border-color: var(--ed-blue-dim); box-shadow: inset 3px 0 0 var(--ed-blue);">
+                    <summary style="color: var(--ed-blue);">RAPPORT FINANCIER</summary>
+                    <div style="padding: 0 14px 14px 14px;">
 
-                <!-- BILAN FINANCIER CONSOLIDÉ -->
-                <div class="card" style="border-color: var(--ed-blue-dim); box-shadow: inset 3px 0 0 var(--ed-blue);">
-                    <div class="card-header" style="color: var(--ed-blue); border-bottom-color: var(--ed-blue-dim);">
-                        <span>> RAPPORT FINANCIER</span>
-                    </div>
+                    
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px;">
                             <span style="color: #888; font-size: 0.85em;">VAISSEAU</span>
@@ -462,15 +508,18 @@
                             <span id="m-rebuy-cout" style="color: var(--ed-red); font-weight: bold;">--- CR</span>
                         </div>
                     </div>
-                </div>
                 
-                <button class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.85em; margin-top: 15px;" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')">
-                    🎧 [ SUPPORT DISCORD ]
-                </button>
-                <button class="m-btn" style="background: transparent; border-color: #555; color: #888; font-size: 0.85em; margin-top: 5px;" onclick="deconnexionMobile()">
-                    [ DÉCONNEXION DU PADD ]
-                </button>
+                    </div>
+                </details>
+
+                <!-- 7. PIED : Discord, déconnexion -->
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button class="m-btn" style="flex: 1; background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.75em; padding: 10px 6px;" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')">🎧 DISCORD</button>
+                    <button class="m-btn" style="flex: 1; background: transparent; border-color: #555; color: #888; font-size: 0.75em; padding: 10px 6px;" onclick="deconnexionMobile()">DÉCONNEXION</button>
+                </div>
             </div>
+
+
 
             <!-- ========================================== -->
             <!-- ONGLET 2 : RADAR D'INFLUENCE               -->
@@ -509,17 +558,23 @@
                     </div>
                 </div>
 
-                <!-- MEMBRES DE L'ESCADRON -->
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ONGLET : ESCADRON                          -->
+            <!-- ========================================== -->
+            <div id="tab-escadron" style="display: none; flex-direction: column; gap: 14px;">
                 <div class="card">
                     <div class="card-header">
-                        <span>> ESCADRON</span>
-                        <span id="m-squad-count" style="color: var(--ed-green); font-size: 0.85em;">-- MEMBRES</span>
+                        <span id="m-esc-nom">> ESCADRON</span>
+                        <span id="m-squad-count" style="color: var(--ed-green); font-size: 0.85em;">-- PILOTES</span>
                     </div>
-                    <div id="m-squad-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px;">
+                    <button class="m-btn" style="width: 100%; font-size: 0.8em; padding: 10px; margin-bottom: 12px;" onclick="ouvrirSalleBgsMobile()">CLASSEMENT BGS DE L'ESCADRON</button>
+                    <div id="m-squad-members-list" style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Chargement de l'équipage...</div>
                     </div>
                 </div>
-
             </div>
 
             <!-- ========================================== -->
@@ -554,92 +609,6 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- ONGLET 5 : STATISTIQUES (DIRECTEUR VIP)    -->
-            <!-- ========================================== -->
-            <div id="tab-statistiques" style="display: none; flex-direction: column; gap: 14px;">
-                <div class="card" style="border-color: var(--ed-red); padding-top: 15px;">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-red); padding-bottom: 10px; margin-bottom: 20px;">
-                        <span style="color: var(--ed-red); font-weight: bold; letter-spacing: 1px;">⚙️ ADMINISTRATION</span>
-                    </div>
-
-                    <!-- 1. AUDIT D'ADOPTION -->
-                    <div style="margin-bottom: 25px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span style="color: var(--ed-orange); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">> AUDIT D'ADOPTION</span>
-                            <button class="m-btn" style="padding: 3px 10px; font-size: 0.7em; border-color: var(--ed-green); color: var(--ed-green); background: rgba(0,255,102,0.1);" onclick="window.chargerAuditDirecteur()">ACTUALISER</button>
-                        </div>
-
-                        <!-- GRILLE DES 6 INDICATEURS GLOBAUX -->
-                        <div id="dir-stats-kpi-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
-                                <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">1. PRÉSENCE (7J)</div>
-                                <div id="kpi-presence" style="color: var(--ed-green); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- / --</div>
-                            </div>
-                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
-                                <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">2. COMMUNICATIONS</div>
-                                <div id="kpi-comms" style="color: var(--ed-blue); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- ACCÈS</div>
-                            </div>
-                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
-                                <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">3. RADAR BGS</div>
-                                <div id="kpi-radar" style="color: var(--ed-orange); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- FAC.</div>
-                            </div>
-                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
-                                <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">4. MISSIONS BGS</div>
-                                <div id="kpi-ordres" style="color: var(--ed-green); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- ORDRES</div>
-                            </div>
-                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
-                                <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">5. JOURNAL BGS</div>
-                                <div id="kpi-journal" style="color: var(--ed-blue); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- LECTURES</div>
-                            </div>
-                            <div style="background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden;">
-                                <div style="color: #888; font-size: 0.65em; letter-spacing: 0.5px; text-overflow: ellipsis; overflow: hidden;">6. COMMERCE</div>
-                                <div id="kpi-commerce" style="color: var(--ed-orange); font-size: 1em; font-weight: bold; margin-top: 4px; text-overflow: ellipsis; overflow: hidden;">-- SCANS</div>
-                            </div>
-                        </div>
-                        
-                        <!-- DÉTAIL DES INTERACTIONS GLOBALES (FIXE) -->
-                        <div style="margin-top: 15px; border: 1px solid #333; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden;">
-                            <!-- En-tête sans le onclick ni l'effet de survol -->
-                            <div style="padding: 10px 15px; background: rgba(0, 240, 255, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.2);">
-                                <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">> DÉTAIL DES INTERACTIONS</span>
-                            </div>
-                            
-                            <!-- Contenu affiché par défaut (display: flex au lieu de none) -->
-                            <div id="global-interactions-content" style="display: flex; flex-direction: column; gap: 6px; padding: 12px; font-size: 0.85em;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">RATIO D'ACTION GLOBAL :</span>
-                                    <strong id="tot-int-ratio">--</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 6px;">
-                                    <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">TEMPS MOYEN / PILOTE :</span>
-                                    <strong id="tot-int-temps" style="color: #fff;">--</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">CONSULTATIONS JOURNAL :</span><strong id="tot-int-journal" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">CONSULTATIONS ORDRES :</span><strong id="tot-int-ordres" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">SCANS DE SYSTÈMES BGS :</span><strong id="tot-int-scans-bgs" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">SCANS COMMERCIAUX :</span><strong id="tot-int-scans-com" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">LECTURES EDNEWS :</span><strong id="tot-int-gazette" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">LECTURES GALNET :</span><strong id="tot-int-galnet" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">GESTION DE LA FLOTTE :</span><strong id="tot-int-flotte" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">LOGISTIQUE CARRIER :</span><strong id="tot-int-carrier" style="color: #fff;">0</strong></div>
-                                <div style="display: flex; justify-content: space-between;"><span style="color: #888;">FICHES DE PILOTES :</span><strong id="tot-int-fiches" style="color: #fff;">0</strong></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. REGISTRE DES PILOTES -->
-                    <div style="border-top: 1px dashed rgba(255, 51, 51, 0.3); padding-top: 15px;">
-                        <div style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px;">> REGISTRE DES PILOTES</div>
-                        <div id="dir-liste-globale-pilotes" style="display: flex; flex-direction: column; gap: 8px; padding-right: 5px;">
-                            <div style="color: #666; font-size: 0.8em; text-align: center; padding: 10px;">Chargement du registre...</div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
         </main>
 
         <!-- BARRE BASSE -->
@@ -656,17 +625,45 @@
                 <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                 <span>BGS</span>
             </button>
+            <button id="nav-btn-escadron" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('escadron')">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>ESCADRON</span>
+            </button>
             <button id="nav-btn-comms" class="nav-tab-btn" onclick="switchMobileTab('comms')">
                 <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>COMMS</span>
             </button>
-            <!-- NOUVEAU : ONGLET DIRECTEUR (Caché par défaut) -->
-            <button id="nav-btn-statistiques" class="nav-tab-btn" style="display: none;" onclick="window.ouvrirTabStatistiquesMobile()">
-                <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-4" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span style="color: var(--ed-red);">STATS</span>
-            </button>
         </nav>
 
+    </div>
+
+    <!-- MODALES CARRIÈRE MOBILE : RANG BGS & POWERPLAY (remplies par ouvrirSalleBgsMobile / ouvrirSallePowerplayMobile) -->
+    <div class="modal-overlay" id="modal-bgs" onclick="fermerModalCarriere('bgs')" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-orange);" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); display: flex; justify-content: space-between; align-items: center; background: rgba(255,113,0,0.1); flex-shrink: 0;">
+                <div style="min-width: 0;">
+                    <span style="color: #888; font-size: 0.7em; letter-spacing: 2px; display: block;">OPÉRATIONS BGS DE L'ESCADRON</span>
+                    <span id="bgs-m-titre" style="color: var(--ed-orange); font-weight: bold; font-size: 1.05em; letter-spacing: 1px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">COMMANDEMENT BGS</span>
+                </div>
+                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em; padding-left: 12px;" onclick="fermerModalCarriere('bgs')">✕</span>
+            </div>
+            <div style="padding: 8px 15px; color: #888; font-size: 0.75em; border-bottom: 1px dashed #333; flex-shrink: 0;">PROCHAIN CYCLE : <span id="bgs-m-countdown" style="color: #FFD700; font-weight: bold;"></span></div>
+            <div id="bgs-m-corps" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-pp" onclick="fermerModalCarriere('pp')" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.1); flex-shrink: 0;">
+                <div style="min-width: 0;">
+                    <span style="color: #888; font-size: 0.7em; letter-spacing: 2px; display: block;">COMMANDEMENT POWERPLAY 2.0</span>
+                    <span id="pp-m-titre" style="color: var(--ed-blue); font-weight: bold; font-size: 1.05em; letter-spacing: 1px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">POWERPLAY</span>
+                </div>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em; padding-left: 12px;" onclick="fermerModalCarriere('pp')">✕</span>
+            </div>
+            <div style="padding: 8px 15px; color: #888; font-size: 0.75em; border-bottom: 1px dashed #333; flex-shrink: 0;">PROCHAIN CYCLE : <span id="pp-m-countdown" style="color: #FFD700; font-weight: bold;"></span></div>
+            <div id="pp-m-corps" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;"></div>
+        </div>
     </div>
 
     <!-- MODAL HIÉRARCHIE DES GRADES -->
@@ -781,18 +778,6 @@
     </div>
 </div>
 
-    <!-- MODALE : AUDIT INDIVIDUEL D'UN PILOTE -->
-    <div class="modal-overlay" id="modal-audit-pilote" onclick="document.getElementById('modal-audit-pilote').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 400px; border-color: var(--ed-green); box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-green); padding-bottom: 10px; margin-bottom: 15px;">
-                <span id="audit-pilote-nom" style="color: var(--ed-green); font-weight: bold; letter-spacing: 1px; font-size: 1.1em;">CMDR ...</span>
-                <span style="color: var(--ed-green); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-audit-pilote').style.display='none'">✕</span>
-            </div>
-            <div id="audit-pilote-contenu" style="overflow-y: auto; max-height: 70vh; padding-right: 5px;">
-                <!-- Le contenu de la fiche s'injectera ici -->
-            </div>
-        </div>
-    </div>
 
 
     <!-- MODAL GALNET MOBILE -->
@@ -1064,12 +1049,8 @@
         document.body.addEventListener('click', initAudio, { once: true });
         document.body.addEventListener('touchstart', initAudio, { once: true });
 
-        // --- MISE À JOUR TÉLÉMÉTRIE V2 (PURGE DES ANCIENNES DONNÉES) ---
-        if (localStorage.getItem('edteam_telemetrie_v2') !== 'true') {
-            localStorage.removeItem('edteam_telemetrie');
-            localStorage.setItem('edteam_telemetrie_v2', 'true');
-        }
-        // --------------------------------------------------------------
+        // Télémétrie locale retirée (stats via Google Analytics) : on efface les anciens compteurs du navigateur
+        try { localStorage.removeItem('edteam_telemetrie'); localStorage.removeItem('edteam_telemetrie_v2'); } catch (e) {}
 
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
         const supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
@@ -1119,6 +1100,7 @@
             document.getElementById('app-main').style.display = 'flex';
 
             chargerQGMobile();
+            initNouveautesMobile();
             chargerGalnetMobile();
             chargerGazetteListMobile();
             chargerRegistreTactiqueMobile();
@@ -1134,25 +1116,18 @@
         }
 
         function switchMobileTab(tabId) {
-            window.moduleActifChrono = (tabId === 'radar' ? 'bgs' : tabId);
             sonClic();
             // NOUVEAU : On remonte l'écran tout en haut pour ne pas chercher les boutons
             window.scrollTo(0, 0);
 
             // On cache tous les onglets
-            document.getElementById('tab-qg').style.display = 'none';
-            document.getElementById('tab-radar').style.display = 'none';
-            document.getElementById('tab-bgs').style.display = 'none';
-            document.getElementById('tab-comms').style.display = 'none';
-
-            // NOUVEL ONGLET
-            const tabStats = document.getElementById('tab-statistiques');
-            if(tabStats) tabStats.style.display = 'none';
+            ['qg', 'radar', 'bgs', 'escadron', 'comms'].forEach(id => { document.getElementById('tab-' + id).style.display = 'none'; });
 
             // On désélectionne tous les boutons
             document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
             
             // On active le bouton cliqué
+            suivreVueMobile(tabId);
             const btnClic = document.getElementById('nav-btn-' + tabId);
             btnClic.classList.add('active');
             btnClic.classList.remove('alerte-nav-mobile'); // <-- NOUVELLE LIGNE : Éteint l'alerte !
@@ -1208,9 +1183,9 @@
                     elGrade.style.background = bgGrade;
                 }
 
-                // Onglet Directeur (Affiché uniquement pour lui)
-            const navStats = document.getElementById('nav-btn-statistiques');
-            if (navStats) navStats.style.display = profilCommandant.est_directeur ? 'flex' : 'none';
+                // Cartes Carrière : rang BGS et Powerplay
+                majCartesCarriereMobile();
+
 
                 // 2. Traduction des rangs
                 function lireRang(index, table, pct) {
@@ -1283,13 +1258,21 @@
                     document.getElementById('m-rebuy-cout').innerText = rebuy > 0 ? `${fmt.format(rebuy)} CR` : '--- CR';
                 }
 
-                // 5. Effectif escadron (S'affiche dans l'onglet BGS)
+                // 5. Effectif escadron (onglet ESCADRON, visible seulement pour les membres d'un escadron)
+                const navEsc = document.getElementById('nav-btn-escadron');
+                if (navEsc) navEsc.style.display = profilCommandant.escadron_id ? 'flex' : 'none';
+                const nomEsc = document.getElementById('m-esc-nom');
+                if (nomEsc && profilCommandant.escadron_id) nomEsc.innerText = '> ' + profilCommandant.escadron_id.toUpperCase();
                 if (profilCommandant.escadron_id) {
-                    const { data: membres } = await supabaseApp.from('profils_publics')
-                        .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id')
+                    const { data: membresBruts } = await supabaseApp.from('profils_publics')
+                        .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id, rang_bgs')
                         .eq('escadron_id', profilCommandant.escadron_id)
-                        .eq('est_approuve', true)
-                        .order('cmdr_nom');
+                        .eq('est_approuve', true);
+                    // Amiral d'abord, puis rang BGS décroissant, puis nom
+                    const membres = membresBruts ? [...membresBruts].sort((a, b) =>
+                        (b.est_amiral ? 1 : 0) - (a.est_amiral ? 1 : 0) ||
+                        (b.rang_bgs || 1) - (a.rang_bgs || 1) ||
+                        (a.cmdr_nom || '').localeCompare(b.cmdr_nom || '')) : null;
 
                     if (membres && document.getElementById('m-squad-members-list')) {
                         const countEl = document.getElementById('m-squad-count');
@@ -1314,8 +1297,11 @@
 
                             htmlMembres += `
                                 <div onclick="ouvrirProfilPiloteMobile('${m.user_id}')" style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.4); border: 1px solid #333; padding:8px 10px; border-radius:4px; font-size:0.85em; margin-bottom:6px; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='rgba(255,113,0,0.1)'; this.style.borderColor='var(--ed-orange)';" onmouseup="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='#333';">
-                                    <span style="color:#fff; font-weight:bold;">CMDR ${escapeHtml((m.cmdr_nom || 'RECRUE').toUpperCase())}</span>
-                                    <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">
+                                    <div style="min-width:0;">
+                                        <span style="color:#fff; font-weight:bold; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">CMDR ${escapeHtml((m.cmdr_nom || 'RECRUE').toUpperCase())}</span>
+                                        <span style="color:var(--ed-orange); font-size:0.7em; letter-spacing:1px;">RANG BGS ${m.rang_bgs || 1}</span>
+                                    </div>
+                                    <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; flex-shrink:0;">
                                         ${badges.join('')}
                                     </div>
                                 </div>`;
@@ -1882,320 +1868,6 @@
             await supabaseApp.from('transmissions').insert([payload]);
         }
 
-        // OUVERTURE DE L'ONGLET STATISTIQUES (DIRECTEUR)
-        window.ouvrirTabStatistiquesMobile = function() {
-            switchMobileTab('statistiques');
-            chargerRegistreGlobalMobile();
-            chargerAuditDirecteur();
-        };
-
-        // 1. REGISTRE DES PILOTES (PAR ESCADRON, DÉPLIABLE)
-        async function chargerRegistreGlobalMobile() {
-            const cont = document.getElementById('dir-liste-globale-pilotes');
-            if (!cont) return;
-            
-            try {
-                const { data: membres, error } = await supabaseApp.from('profils_publics')
-                    .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate, est_directeur')
-                    .eq('est_approuve', true)
-                    .order('cmdr_nom');
-
-                if (error) throw error;
-
-                if (membres && membres.length > 0) {
-                    const groupes = {};
-                    membres.forEach(m => {
-                        const squad = m.escadron_id || 'INDÉPENDANT';
-                        if (!groupes[squad]) groupes[squad] = [];
-                        groupes[squad].push(m);
-                    });
-
-                    const escadronsTries = Object.keys(groupes).sort((a, b) => {
-                        if (a === 'INDÉPENDANT') return 1;
-                        if (b === 'INDÉPENDANT') return -1;
-                        return a.localeCompare(b);
-                    });
-
-                    let html = '';
-                    let sqIndex = 0;
-
-                    escadronsTries.forEach(squad => {
-                        sqIndex++;
-                        const contentId = 'squad-pilotes-mobile-' + sqIndex;
-                        const iconId = 'squad-icon-mobile-' + sqIndex;
-                        
-                        // ON CRÉE LA CARTE PLIABLE POUR L'ESCADRON
-                        html += `
-                            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 8px; border-color: rgba(0, 240, 255, 0.3);">
-                                <div onclick="const c = document.getElementById('${contentId}'); const i = document.getElementById('${iconId}'); if(c.style.display === 'none'){ c.style.display = 'flex'; i.innerText = '[-]'; } else { c.style.display = 'none'; i.innerText = '[+]'; } if(typeof sonClic === 'function') sonClic();" style="cursor: pointer; padding: 12px 15px; background: rgba(0, 240, 255, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-blue-dim);">
-                                    <span style="color: var(--ed-blue); font-size: 0.85em; font-weight: bold; letter-spacing: 2px;">> ${squad.toUpperCase()} <span style="color:#888; font-weight:normal;">(${groupes[squad].length})</span></span>
-                                    <span id="${iconId}" style="color: var(--ed-blue); font-weight: bold; font-size: 1.2em;">[+]</span>
-                                </div>
-                                <div id="${contentId}" style="display: none; flex-direction: column; gap: 4px; padding: 10px;">
-                        `;
-
-                        groupes[squad].forEach(m => {
-                            const nom = m.cmdr_nom ? m.cmdr_nom.toUpperCase() : 'PILOTE';
-                            const nomHtml = escapeHtml(nom);
-                            let badges = [];
-                            if (m.est_directeur) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">DIR</span>');
-                            if (m.est_amiral) badges.push('<span style="color:var(--ed-red); border:1px solid var(--ed-red); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">AMIRAL</span>');
-                            if (m.est_officier && !m.est_amiral) badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">OFFICIER</span>');
-                            if (m.est_diplomate && !m.est_amiral) badges.push('<span style="color:var(--ed-blue); border:1px solid var(--ed-blue); padding:1px 4px; border-radius:2px; font-size:0.65em; font-weight:bold;">DIPLOMATE</span>');
-
-                            // ON AJOUTE LE ONCLICK POUR OUVRIR LA MODALE D'AUDIT
-                            html += `
-                                <div onclick="ouvrirAuditPiloteMobile('${m.user_id}', '${nom.replace(/'/g, "\\'")}')" style="background: rgba(0,0,0,0.4); border-left: 3px solid #333; padding: 8px 10px; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.borderColor='var(--ed-green)';" onmouseup="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='#333';">
-                                    <span style="color: #fff; font-weight: bold; font-size: 0.85em;">CMDR ${nomHtml}</span>
-                                    <div style="display: flex; gap: 4px;">
-                                        ${badges.join('')}
-                                    </div>
-                                </div>
-                            `;
-                        });
-
-                        html += `</div></div>`; // Fermeture du bloc squad
-                    });
-
-                    cont.innerHTML = html;
-                } else {
-                    cont.innerHTML = '<div style="color: #666; font-size: 0.8em; text-align: center;">Aucun pilote enregistré dans la base.</div>';
-                }
-            } catch (e) {
-                cont.innerHTML = '<div style="color: var(--ed-red); font-size: 0.8em; text-align: center;">Impossible de charger le registre des pilotes.</div>';
-            }
-        }
-
-        // 2. AUDIT TACTIQUE (CALCUL DES KPI SEULEMENT)
-        window.chargerAuditDirecteur = async function() {
-            try {
-                const [resProfils, resParams, resTransmissions, resOrdres] = await Promise.all([
-                    supabaseApp.from('profils').select('user_id, cmdr_nom, email, created_at').eq('est_approuve', true),
-                    supabaseApp.from('parametres_app').select('user_id, last_heartbeat, telemetrie_usage, factions_favorites'),
-                    supabaseApp.from('transmissions').select('id', { count: 'exact', head: true }),
-                    supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }).eq('statut', 'ACTIF')
-                ]);
-
-                const profils = resProfils.data || [];
-                const params = resParams.data || [];
-                const nbMsg = resTransmissions.count || 0;
-                const nbOrdres = resOrdres.count || 0;
-
-                const paramsMap = {};
-                let totalPresence7J = 0; let totalCommsAcces = 0; let totalBgsScans = 0;
-                let totalJournalLectures = 0; let totalCommerceScans = 0; let totalCommerceVisites = 0;
-                const setFactions = new Set();
-
-                // Variables pour les moyennes
-                let globalTotalVisites = 0;
-                let globalTotalTemps = 0;
-                let globalInt = { ordres: 0, journal: 0, scans_bgs: 0, scans_com: 0, gazette: 0, galnet: 0, flotte: 0, carrier: 0, fiches: 0 };
-
-                const nowMs = Date.now();
-                const septJoursMs = 7 * 24 * 3600 * 1000;
-
-                params.forEach(p => {
-                    paramsMap[p.user_id] = p; // <--- Sans la déclaration au-dessus, le code plantait ici !
-                    const tel = p.telemetrie_usage || {};
-                    const vis = tel.visites_pages || {};
-                    const act = tel.interactions || {};
-                    const temps = tel.temps_passe || {}; // NOUVEAU : Récupération du temps
-
-                    if (tel.derniere_visite_web && (nowMs - new Date(tel.derniere_visite_web).getTime() <= septJoursMs)) {
-                        totalPresence7J++;
-                    }
-
-                    // Sommes pour les moyennes
-                    globalTotalVisites += (vis.qg || 0) + (vis.bgs || 0) + (vis.comms || 0) + (vis.commerce || 0);
-                    globalTotalTemps += (temps.qg || 0) + (temps.bgs || 0) + (temps.comms || 0) + (temps.commerce || 0);
-
-                    totalCommsAcces += (vis.comms || 0);
-                    totalBgsScans += (act.scans_systeme_bgs || 0);
-                    
-                    // Alimentation du tableau global détaillé
-                    globalInt.ordres += act.onglets_bgs_missions || 0;
-                    globalInt.journal += act.onglets_bgs_journal || 0;
-                    globalInt.scans_bgs += act.scans_systeme_bgs || 0;
-                    globalInt.scans_com += act.scans_commerce || 0;
-                    globalInt.gazette += act.lecture_gazette || 0;
-                    globalInt.galnet += act.lecture_galnet || 0;
-                    globalInt.flotte += act.gestion_flotte || 0;
-                    globalInt.carrier += act.logistique_carrier || 0;
-                    globalInt.fiches += act.fiches_pilotes || 0;
-
-                    if (p.factions_favorites) {
-                        let favs = typeof p.factions_favorites === 'string' ? JSON.parse(p.factions_favorites) : p.factions_favorites;
-                        if (Array.isArray(favs)) {
-                            favs.forEach(f => {
-                                const nom = f.faction || f.nom || f.name;
-                                if (nom) setFactions.add(nom.toUpperCase());
-                            });
-                        }
-                    }
-
-                    totalJournalLectures += (act.onglets_bgs_journal || 0);
-                    totalCommerceScans += (act.scans_commerce || 0);
-                    totalCommerceVisites += (vis.commerce || 0);
-                });
-
-                // On sauvegarde dans le cache global pour la modale individuelle
-                window.cacheAuditDirecteurParams = paramsMap;
-
-                // Mise à jour de la grille des 6 KPI
-                document.getElementById('kpi-presence').innerText = `${totalPresence7J} / ${profils.length}`;
-                document.getElementById('kpi-comms').innerText = `${totalCommsAcces} VIS. (${nbMsg})`;
-                document.getElementById('kpi-radar').innerText = `${setFactions.size} FAC. (${totalBgsScans})`;
-                document.getElementById('kpi-ordres').innerText = `${nbOrdres} ORDRES`;
-                document.getElementById('kpi-journal').innerText = `${totalJournalLectures} LECTURES`;
-                document.getElementById('kpi-commerce').innerText = `${totalCommerceScans} SC. (${totalCommerceVisites})`;
-
-                // NOUVEAU : Mise à jour du bloc déroulant global + Moyennes
-                if (document.getElementById('tot-int-ordres')) {
-                    // Calculs
-                    let globalTotalActions = globalInt.ordres + globalInt.journal + globalInt.scans_bgs + globalInt.scans_com + globalInt.gazette + globalInt.galnet + globalInt.flotte + globalInt.carrier + globalInt.fiches;
-                    const ratioMoyen = globalTotalVisites > 0 ? (globalTotalActions / globalTotalVisites).toFixed(1) : 0;
-                    const tempsMoyen = profils.length > 0 ? Math.floor(globalTotalTemps / profils.length) : 0;
-                    const badgeRatio = ratioMoyen >= 1 ? `<span style="color:#00FF66;">${ratioMoyen} ACT/VIS.</span>` : `<span style="color:var(--ed-orange);">${ratioMoyen} ACT/VIS.</span>`;
-
-                    // Injection
-                    document.getElementById('tot-int-ratio').innerHTML = badgeRatio;
-                    document.getElementById('tot-int-temps').innerText = formaterTemps(tempsMoyen);
-
-                    document.getElementById('tot-int-ordres').innerText = globalInt.ordres;
-                    document.getElementById('tot-int-journal').innerText = globalInt.journal;
-                    document.getElementById('tot-int-scans-bgs').innerText = globalInt.scans_bgs;
-                    document.getElementById('tot-int-scans-com').innerText = globalInt.scans_com;
-                    document.getElementById('tot-int-gazette').innerText = globalInt.gazette;
-                    document.getElementById('tot-int-galnet').innerText = globalInt.galnet;
-                    document.getElementById('tot-int-flotte').innerText = globalInt.flotte;
-                    document.getElementById('tot-int-carrier').innerText = globalInt.carrier;
-                    document.getElementById('tot-int-fiches').innerText = globalInt.fiches;
-                }
-
-            } catch (e) {
-                console.error("Erreur calcul audit", e);
-            }
-        };
-
-        // 3. OUVERTURE DE L'AUDIT INDIVIDUEL (NOUVELLE MODALE COMPLÈTE)
-        window.ouvrirAuditPiloteMobile = function(userId, cmdrNom) {
-            if (typeof sonClic === 'function') sonClic();
-            
-            const param = (window.cacheAuditDirecteurParams || {})[userId] || {};
-            const tel = param.telemetrie_usage || {};
-            const visites = tel.visites_pages || {};
-            const actions = tel.interactions || {};
-            const temps = tel.temps_passe || {};
-
-            // Récupération sécurisée des factions favorites
-            let factionsFav = param.factions_favorites || [];
-            if (typeof factionsFav === 'string') {
-                try { factionsFav = JSON.parse(factionsFav); } catch(e) { factionsFav = []; }
-            }
-
-            const nowSec = Math.floor(Date.now() / 1000);
-            const enJeu = param.last_heartbeat && (nowSec - param.last_heartbeat < 30);
-            const statutJeu = enJeu 
-                ? '<span style="color: var(--ed-green); font-weight: bold; font-size: 0.9em; border: 1px solid var(--ed-green); background: rgba(0,255,102,0.1); padding: 2px 6px; border-radius: 3px;">🟢 EN VOL</span>' 
-                : '<span style="color: #888; font-size: 0.9em; border: 1px solid #444; padding: 2px 6px; border-radius: 3px;">⚪ HORS LIGNE</span>';
-
-            let derniereVisite = 'Jamais';
-            if (tel.derniere_visite_web) {
-                const d = new Date(tel.derniere_visite_web);
-                derniereVisite = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            }
-
-            // CALCULS ANALYTIQUES
-            const totalActions = (actions.onglets_bgs_missions || 0) + (actions.onglets_bgs_journal || 0) + (actions.scans_systeme_bgs || 0) + (actions.scans_commerce || 0) + (actions.lecture_gazette || 0) + (actions.lecture_galnet || 0) + (actions.gestion_flotte || 0) + (actions.logistique_carrier || 0) + (actions.fiches_pilotes || 0);
-            const totalVisites = (visites.qg || 0) + (visites.bgs || 0) + (visites.comms || 0) + (visites.commerce || 0);
-            const totalTempsSec = (temps.qg || 0) + (temps.bgs || 0) + (temps.comms || 0) + (temps.commerce || 0);
-            
-            const ratioAct = totalVisites > 0 ? (totalActions / totalVisites).toFixed(1) : 0;
-            const badgeRatio = ratioAct >= 1 ? `<span style="color:#00FF66;">${ratioAct} ACT/V (ACTIF)</span>` : `<span style="color:var(--ed-orange);">${ratioAct} ACT/V (SPECT.)</span>`;
-
-            document.getElementById('audit-pilote-nom').innerText = "AUDIT : CMDR " + cmdrNom;
-
-            const html = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: #888; font-size: 0.85em; font-weight: bold; letter-spacing: 1px;">STATUT EDMC :</span>
-                    ${statutJeu}
-                </div>
-                
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; color: #888; font-size: 0.85em; margin-bottom: 8px;">
-                        <span>Dernier accès :</span>
-                        <strong style="color: var(--ed-blue); font-size: 1.1em;">${derniereVisite}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; color: #888; font-size: 0.85em; margin-bottom: 8px;">
-                        <span>Ratio Action/Visite :</span>
-                        <strong>${badgeRatio}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; color: #888; font-size: 0.85em;">
-                        <span>Temps total réseau :</span>
-                        <strong style="color: #fff; font-size: 1.1em;">${formaterTemps(totalTempsSec)}</strong>
-                    </div>
-                </div>
-
-                <div style="color: #ccc; font-size: 0.85em; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px;">> PAGES CONSULTÉES & TEMPS :</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85em;">
-                    <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 3px; border-left: 2px solid var(--ed-blue);">
-                        <span style="color: #888; display: block; margin-bottom: 4px;">QG : <strong style="color:#fff;">${visites.qg || 0}</strong></span>
-                        <span style="color:#555; font-size: 0.85em;">${formaterTemps(temps.qg)}</span>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 3px; border-left: 2px solid var(--ed-orange);">
-                        <span style="color: #888; display: block; margin-bottom: 4px;">BGS : <strong style="color:#fff;">${visites.bgs || 0}</strong></span>
-                        <span style="color:#555; font-size: 0.85em;">${formaterTemps(temps.bgs)}</span>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 3px; border-left: 2px solid var(--ed-blue);">
-                        <span style="color: #888; display: block; margin-bottom: 4px;">COMMS : <strong style="color:#fff;">${visites.comms || 0}</strong></span>
-                        <span style="color:#555; font-size: 0.85em;">${formaterTemps(temps.comms)}</span>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 3px; border-left: 2px solid var(--ed-orange);">
-                        <span style="color: #888; display: block; margin-bottom: 4px;">COMMERCE : <strong style="color:#fff;">${visites.commerce || 0}</strong></span>
-                        <span style="color:#555; font-size: 0.85em;">${formaterTemps(temps.commerce)}</span>
-                    </div>
-                </div>
-                
-                <div style="color: #00FF66; font-size: 0.85em; font-weight: bold; margin-top: 15px; margin-bottom: 8px; letter-spacing: 1px;">> INTERACTIONS & USAGE PRÉCIS :</div>
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85em;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">FACTIONS SURVEILLÉES :</span>
-                        <strong style="color: var(--ed-orange);">${factionsFav.length}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">SCANS DE SYSTÈMES BGS :</span>
-                        <strong style="color: #fff;">${actions.scans_systeme_bgs || 0}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">CONSULTATIONS DU JOURNAL :</span>
-                        <strong style="color: #fff;">${actions.onglets_bgs_journal || 0}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">CONSULTATIONS DES ORDRES :</span>
-                        <strong style="color: #fff;">${actions.onglets_bgs_missions || 0}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">SCANS COMMERCIAUX :</span>
-                        <strong style="color: #fff;">${actions.scans_commerce || 0}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; border-top: 1px dashed #333; padding-top: 6px; margin-top: 2px;">
-                        <span style="color: #888;">EDNEWS / GALNET :</span>
-                        <strong style="color: #fff;">${actions.lecture_gazette || 0} / ${actions.lecture_galnet || 0}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">FLOTTE / CARRIER :</span>
-                        <strong style="color: #fff;">${actions.gestion_flotte || 0} / ${actions.logistique_carrier || 0}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888;">FICHES PILOTES :</span>
-                        <strong style="color: #fff;">${actions.fiches_pilotes || 0}</strong>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('audit-pilote-contenu').innerHTML = html;
-            document.getElementById('modal-audit-pilote').style.display = 'flex';
-        };
 
     // --- AFFICHAGE DES DÉTAILS DIPLOMATIQUES (MOBILE) ---
     window.ouvrirModalDiplomatie = function(index, couleur, label) {
@@ -2377,7 +2049,6 @@
         function ouvrirGalnetMobile() {
             if (!cacheGalnetArticle) return;
             sonClic();
-            enregistrerTelemetrie('action', 'lecture_galnet');
             
             document.getElementById('m-galnet-title-modal').innerText = cacheGalnetArticle.title;
             const d = new Date(cacheGalnetArticle.date); d.setFullYear(d.getFullYear() + 1286);
@@ -2425,7 +2096,6 @@
 
         function ouvrirGazetteMobile() { 
             sonClic(); 
-            enregistrerTelemetrie('action', 'lecture_gazette');
             document.getElementById('modal-gazette').style.display = 'flex'; 
         }
 
@@ -2563,7 +2233,6 @@
 
         window.ouvrirProfilPiloteMobile = async function(userId) {
             if (typeof sonClic === 'function') sonClic();
-            enregistrerTelemetrie('action', 'fiches_pilotes');
             
             try {
                 const escadronCible = profilCommandant.escadron_id || 'ISS';
@@ -2786,58 +2455,8 @@
         };
 
         // ==========================================
-        // MÉCANIQUES TÉLÉMÉTRIE, CHRONO & GRADES
+        // GRADES MILITAIRES
         // ==========================================
-
-        // 1. Déclaration de la fonction de télémétrie (Répare Galnet et Gazette)
-        window.enregistrerTelemetrie = function(type, cle) {
-            try {
-                let tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
-                if (!tel.visites_pages) tel.visites_pages = { qg: 0, bgs: 0, comms: 0, commerce: 0 };
-                if (!tel.interactions) tel.interactions = { 
-                    onglets_bgs_missions: 0, onglets_bgs_journal: 0, scans_systeme_bgs: 0, scans_commerce: 0,
-                    lecture_gazette: 0, lecture_galnet: 0, gestion_flotte: 0, logistique_carrier: 0, fiches_pilotes: 0
-                };
-                
-                tel.derniere_visite_web = new Date().toISOString();
-
-                if (type === 'page' && tel.visites_pages[cle] !== undefined) tel.visites_pages[cle]++;
-                if (type === 'action' && tel.interactions[cle] !== undefined) tel.interactions[cle]++;
-
-                localStorage.setItem('edteam_telemetrie', JSON.stringify(tel));
-                window.telemetrieDirty = true;
-            } catch(e) {}
-        };
-
-        // 2. Formatage du temps (Répare l'audit des pilotes)
-        window.formaterTemps = function(secondes) {
-            if (!secondes) return "0 MIN";
-            if (secondes < 60) return "< 1 MIN";
-            const min = Math.floor(secondes / 60);
-            if (min < 60) return `${min} MIN`;
-            const h = Math.floor(min / 60);
-            const m = min % 60;
-            return `${h}H ${m}M`;
-        };
-
-        // 3. Chronomètre local (Mesure le temps passé)
-        window.moduleActifChrono = 'qg';
-        setInterval(() => {
-            try {
-                if (!profilCommandant) return;
-                let tel = JSON.parse(localStorage.getItem('edteam_telemetrie') || '{}');
-                if (!tel.temps_passe) tel.temps_passe = { qg: 0, bgs: 0, comms: 0, commerce: 0 };
-                
-                let pageActuelle = window.moduleActifChrono;
-                tel.temps_passe[pageActuelle] = (tel.temps_passe[pageActuelle] || 0) + 10; 
-
-                localStorage.setItem('edteam_telemetrie', JSON.stringify(tel));
-                window.telemetrieDirty = true;
-            } catch(e) {}
-        }, 10000);
-
-        // 4. Synchronisation télémétrique neutralisée (Colonne détruite sur BDD)
-        window.telemetrieDirty = false;
 
         // 5. Réparation des Modales de Grades Militaires
         window.ouvrirModalGradesMobile = function(domaine) {
@@ -3015,7 +2634,6 @@
         function ouvrirGalnetMobile() {
             if (!cacheGalnetArticle) return;
             sonClic();
-            enregistrerTelemetrie('action', 'lecture_galnet');
             
             // Valider lecture
             localStorage.setItem('edteam_last_read_galnet', Date.now().toString());
@@ -3071,7 +2689,6 @@
 
         function ouvrirGazetteMobile() { 
             sonClic(); 
-            enregistrerTelemetrie('action', 'lecture_gazette');
             
             // Valider lecture
             localStorage.setItem('edteam_last_read_gazette', Date.now().toString());
@@ -3081,6 +2698,490 @@
             document.getElementById('modal-gazette').style.display = 'flex'; 
         }
 
+
+        // ==========================================
+        // CARRIÈRE : RANG BGS (1 à 100, permanent) & POWERPLAY : cartes du QG + fenêtres
+        // Mêmes règles et mêmes lectures serveur que le PC (scripts SQL 16, 17, 18).
+        // Seuil du rang n = round(15 * (n-1)^1.6) points cumulés.
+        // ==========================================
+        function seuilRangBgs(n) { return n <= 1 ? 0 : Math.round(15 * Math.pow(n - 1, 1.6)); }
+
+        function progressionRangBgs(rang, points) {
+            rang = Math.min(100, Math.max(1, rang || 1));
+            points = points || 0;
+            if (rang >= 100) return { rang, points, min: seuilRangBgs(100), max: null, pct: 100, reste: 0 };
+            const min = seuilRangBgs(rang), max = seuilRangBgs(rang + 1);
+            return { rang, points, min, max, pct: Math.max(0, Math.min(100, ((points - min) / (max - min)) * 100)), reste: Math.max(0, Math.ceil(max - points)) };
+        }
+
+        function htmlPastilleRang(n) {
+            return '<span style="font-size: 0.6em; letter-spacing: 1px; line-height: 1;">RANG</span><span style="line-height: 1.1;">' + (Number(n) || 0) + '</span>';
+        }
+
+        // Le cycle change le jeudi 07:00 UTC
+        function calculerCompteReboursCycle() {
+            const now = new Date();
+            const prochainJeudi = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + ((4 - now.getUTCDay() + 7) % 7 || 7), 7, 0, 0));
+            if (now.getUTCDay() === 4 && now.getUTCHours() < 7) prochainJeudi.setUTCDate(now.getUTCDate());
+            const diff = Math.max(0, prochainJeudi - now);
+            const j = Math.floor(diff / 86400000), h = Math.floor((diff / 3600000) % 24), m = Math.floor((diff / 60000) % 60);
+            return `${j}J ${h}H ${m}M`;
+        }
+
+        // Jeudi (UTC) qui clôture le cycle en cours, en millisecondes
+        function clotureCycleCourantMs() {
+            const decale = new Date(Date.now() - 7 * 3600000);
+            let ajout = (4 - decale.getUTCDay() + 7) % 7;
+            if (ajout === 0) ajout = 7;
+            return Date.UTC(decale.getUTCFullYear(), decale.getUTCMonth(), decale.getUTCDate()) + ajout * 86400000;
+        }
+
+        function fermerModalCarriere(id) {
+            const m = document.getElementById('modal-' + id);
+            if (m) m.style.display = 'none';
+        }
+
+        // Cartes du QG : BGS (membres d'escadron ayant accès au BGS) et Powerplay (toujours visible)
+        function majCartesCarriereMobile() {
+            const p = profilCommandant;
+            if (!p) return;
+            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
+            const accesBgs = !!p.escadron_id && !(rangJeu === 4 && !p.est_amiral && !p.est_officier);
+
+            const carteBgs = document.getElementById('m-carte-bgs');
+            if (carteBgs) {
+                carteBgs.style.display = accesBgs ? 'flex' : 'none';
+                if (accesBgs) {
+                    const pr = progressionRangBgs(p.rang_bgs, Number(p.points_bgs) || 0);
+                    document.getElementById('m-bgs-texte').innerText = pr.max === null ? 'RANG MAXIMAL' : Math.floor(pr.points) + ' / ' + pr.max;
+                    document.getElementById('m-bgs-barre').style.width = pr.pct.toFixed(1) + '%';
+                    const b = document.getElementById('m-bgs-badge');
+                    b.innerHTML = htmlPastilleRang(pr.rang);
+                    b.style.display = 'flex';
+                }
+            }
+
+            const nomPP = document.getElementById('m-pp-nom');
+            const badgePP = document.getElementById('m-pp-badge');
+            if (nomPP) nomPP.innerText = p.puissance_nom ? p.puissance_nom.toUpperCase() : 'NON ALIGNÉ';
+            if (badgePP) {
+                if (p.puissance_nom && p.puissance_rang) { badgePP.innerHTML = htmlPastilleRang(p.puissance_rang); badgePP.style.display = 'flex'; }
+                else badgePP.style.display = 'none';
+            }
+        }
+
+        async function ouvrirSalleBgsMobile() {
+            sonClic();
+            suivreEvenementMobile('ouvrir_bgs');
+            const modal = document.getElementById('modal-bgs');
+            const titre = document.getElementById('bgs-m-titre');
+            const corps = document.getElementById('bgs-m-corps');
+            document.getElementById('bgs-m-countdown').innerText = calculerCompteReboursCycle();
+
+            if (!profilCommandant || !profilCommandant.escadron_id) {
+                titre.innerText = 'COMMANDEMENT BGS';
+                corps.innerHTML = `<div style="border: 1px dashed #555; padding: 25px; text-align: center; border-radius: 4px; color: #ccc; line-height: 1.6;">Le rang BGS est réservé aux membres d'un escadron.</div>`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            titre.innerText = profilCommandant.escadron_id.toUpperCase();
+            corps.innerHTML = '<div style="color: #888; text-align: center; padding: 30px; font-style: italic;">Consultation de votre dossier de carrière...</div>';
+            modal.style.display = 'flex';
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+
+            try {
+                const [resMoi, resTab] = await Promise.all([
+                    supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
+                    supabaseApp.rpc('tableau_escadron_bgs')
+                ]);
+                if (resMoi.error) throw resMoi.error;
+                const rang = resMoi.data.rang_bgs || 1;
+                const points = Number(resMoi.data.points_bgs) || 0;
+                const pr = progressionRangBgs(rang, points);
+                const tableau = resTab.error ? [] : (resTab.data || []);
+
+                // Bannière de promotion : mémoire du navigateur, aucune écriture en base
+                let banniere = '';
+                try {
+                    const cle = 'edteam_rang_bgs_vu_' + profilCommandant.user_id;
+                    const vu = parseInt(localStorage.getItem(cle) || '0');
+                    if (vu > 0 && rang > vu) {
+                        banniere = `<div style="background: rgba(255,215,0,0.1); border: 1px solid #FFD700; padding: 10px 14px; border-radius: 4px; color: #FFD700; font-weight: bold; letter-spacing: 1px; text-align: center; font-size: 0.85em;">NOUVEAU RANG : VOUS ÊTES PASSÉ AU RANG BGS ${rang}</div>`;
+                    }
+                    localStorage.setItem(cle, String(rang));
+                } catch (e) {}
+
+                const suite = pr.max === null
+                    ? `<span style="color: #FFD700; font-weight: bold;">RANG MAXIMAL ATTEINT</span>`
+                    : `<span style="color: #888;">PROCHAIN : RANG ${rang + 1} À</span> <span style="color: #fff; font-weight: bold;">${fmt(pr.max)}</span> <span style="color: #888;">PTS · IL VOUS EN MANQUE</span> <span style="color: #FFD700; font-weight: bold;">${fmt(pr.reste)}</span>`;
+
+                let html = `
+                ${banniere}
+                <div style="background: rgba(255,113,0,0.05); border-left: 3px solid var(--ed-orange); padding: 12px 14px; border-radius: 0 4px 4px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div style="min-width: 0;">
+                            <span style="color: #888; font-size: 0.7em; letter-spacing: 1px;">VOTRE CARRIÈRE BGS :</span>
+                            <div style="color: #fff; font-weight: bold; margin-top: 3px; overflow-wrap: anywhere;">CMDR ${escapeHtml((profilCommandant.cmdr_nom || 'INCONNU').toUpperCase())}</div>
+                            <div style="color: var(--ed-orange); font-weight: bold; font-size: 0.9em; margin-top: 2px;">[ RANG ${rang} ]</div>
+                        </div>
+                        <div style="text-align: right; flex-shrink: 0;">
+                            <span style="color: #888; font-size: 0.7em; display: block;">POINTS :</span>
+                            <span style="color: #FFD700; font-size: 1.3em; font-weight: bold;">${fmt(Math.floor(points))}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden;">
+                            <div style="width: ${pr.pct.toFixed(1)}%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange);"></div>
+                        </div>
+                        <div style="font-size: 0.75em; margin-top: 6px; line-height: 1.5;">${suite}</div>
+                    </div>
+                </div>
+
+                <div id="bgs-m-progression"></div>
+
+                <div>
+                    <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em; border-bottom: 1px dashed rgba(255,113,0,0.3); padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; gap: 6px;">
+                        <span>TABLEAU DE L'ESCADRON</span><span>${tableau.length} PILOTE(S)</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">`;
+
+                tableau.forEach((t, index) => {
+                    const estMoi = (t.cmdr_nom && profilCommandant.cmdr_nom && t.cmdr_nom.toUpperCase() === profilCommandant.cmdr_nom.toUpperCase());
+                    html += `
+                        <div style="background: ${estMoi ? 'rgba(255,113,0,0.12)' : 'rgba(0,0,0,0.5)'}; border: 1px solid ${estMoi ? 'var(--ed-orange)' : '#333'}; padding: 8px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.85em;">
+                            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; min-width: 26px;">#${index + 1}</span>
+                                <span style="color: #fff; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((t.cmdr_nom || 'INCONNU').toUpperCase())}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                                <span style="color: var(--ed-orange); font-size: 0.75em; border: 1px solid rgba(255,113,0,0.5); padding: 1px 5px; border-radius: 2px;">RANG ${t.rang_bgs || 1}</span>
+                                <span style="color: #FFD700; font-weight: bold;">${fmt(Math.floor(Number(t.points_bgs) || 0))}</span>
+                            </div>
+                        </div>`;
+                });
+
+                html += `</div></div>
+
+                <details style="border: 1px solid rgba(255,113,0,0.25); background: rgba(255,113,0,0.03); padding: 12px 14px; border-radius: 4px;">
+                    <summary style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em; cursor: pointer;">COMMENT ÇA MARCHE</summary>
+                    <ul style="margin: 10px 0 0 16px; padding: 0; color: #ccc; font-size: 0.8em; line-height: 1.7;">
+                        <li>Chaque effort accompli pour l'escadron, qu'il réponde à une directive ou non, rapporte des <strong style="color:#fff;">points</strong>.</li>
+                        <li>Vos points s'additionnent pour <strong style="color:#fff;">toute votre carrière</strong> et déterminent votre rang BGS, de 1 à 100. <strong style="color:#fff;">Un rang gagné ne se perd jamais.</strong></li>
+                        <li>Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts. Le rang 100 (23 394 points) est réservé aux plus fidèles.</li>
+                        <li>Une ligne dorée apparaît dans le journal tactique à chaque dizaine atteinte (10, 20… 100).</li>
+                        <li>Ce rang est distinct de votre rôle dans l'escadron et de votre rang Powerplay.</li>
+                    </ul>
+                </details>`;
+
+                corps.innerHTML = html;
+                chargerProgressionBgsMobile();
+            } catch (err) {
+                console.error('Erreur Commandement BGS (mobile) :', err);
+                corps.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Échec de la consultation du dossier de carrière.</div>';
+            }
+        }
+
+        // Histogramme par cycle (barres), commun à "Ma progression" BGS et Powerplay
+        function htmlBarresCycles(cycles, clotureCourante, couleurPleine, couleurPale, glow) {
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            const gains = cycles.map(c => c.gain).filter(g => g !== null);
+            const maxGain = Math.max(1, ...gains);
+            const meilleur = gains.length ? Math.max(...gains) : 0;
+            return cycles.map(c => {
+                const enCours = c.semaine === clotureCourante;
+                const hauteur = c.gain ? Math.max(3, Math.round(70 * c.gain / maxGain)) : 2;
+                const couleur = enCours ? couleurPleine : (c.gain && c.gain === meilleur ? '#FFD700' : couleurPale);
+                const valeur = c.gain === null ? '?' : (c.gain > 0 ? '+' + fmt(Math.round(c.gain)) : '0');
+                return `
+                <div style="flex: 1; min-width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;">
+                    <span style="color: #ccc; font-size: 0.65em;">${valeur}</span>
+                    <div style="width: 100%; max-width: 34px; height: ${hauteur}px; background: ${couleur}; border-radius: 2px 2px 0 0;${enCours ? ' box-shadow: 0 0 8px ' + glow + ';' : ''}"></div>
+                    <span style="color: ${enCours ? couleurPleine : '#888'}; font-size: 0.65em; white-space: nowrap;">${enCours ? 'EN COURS' : c.semaine.slice(8, 10) + '/' + c.semaine.slice(5, 7)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // "Ma progression" BGS : points gagnés par cycle (8 derniers), fonction serveur progression_bgs_hebdo
+        async function chargerProgressionBgsMobile() {
+            const zone = document.getElementById('bgs-m-progression');
+            if (!zone) return;
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            try {
+                const { data, error } = await supabaseApp.rpc('progression_bgs_hebdo', { p_cycles: 8 });
+                if (error) throw error;
+                const parSemaine = {};
+                (data || []).forEach(l => { parSemaine[l.semaine] = Number(l.points) || 0; });
+
+                const clotureT = clotureCycleCourantMs();
+                const clotureCourante = new Date(clotureT).toISOString().slice(0, 10);
+                const cycles = [];
+                for (let i = 7; i >= 0; i--) {
+                    const cle = new Date(clotureT - i * 7 * 86400000).toISOString().slice(0, 10);
+                    cycles.push({ semaine: cle, gain: parSemaine[cle] || 0 });
+                }
+                const gains = cycles.map(c => c.gain);
+                const somme = gains.reduce((a, b) => a + b, 0);
+                if (somme <= 0) {
+                    zone.innerHTML = `
+                    <div style="border: 1px dashed rgba(255,113,0,0.3); padding: 12px 14px; border-radius: 4px;">
+                        <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em;">MA PROGRESSION</div>
+                        <div style="color: #888; font-size: 0.8em; line-height: 1.5; margin-top: 8px;">Aucun effort enregistré sur les 8 derniers cycles. Vos points gagnés chaque semaine s'afficheront ici.</div>
+                    </div>`;
+                    return;
+                }
+                const meilleur = Math.max(...gains);
+                const moyenne = Math.round(somme / cycles.length);
+                zone.innerHTML = `
+                <div style="border: 1px solid rgba(255,113,0,0.25); background: rgba(255,113,0,0.03); padding: 12px 14px; border-radius: 4px;">
+                    <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em; border-bottom: 1px dashed rgba(255,113,0,0.3); padding-bottom: 8px; margin-bottom: 12px;">MA PROGRESSION</div>
+                    <div style="display: flex; gap: 4px; align-items: flex-end; min-height: 100px; overflow-x: auto;">${htmlBarresCycles(cycles, clotureCourante, 'var(--ed-orange)', 'rgba(255,113,0,0.45)', 'rgba(255,113,0,0.5)')}</div>
+                    <div style="display: flex; gap: 6px 18px; flex-wrap: wrap; margin-top: 12px; font-size: 0.75em;">
+                        <div><span style="color: #888;">MEILLEUR :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(Math.round(meilleur))}</span></div>
+                        <div><span style="color: #888;">MOYENNE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
+                        <div><span style="color: #888;">TOTAL (8 CYCLES) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(Math.round(somme))}</span></div>
+                    </div>
+                </div>`;
+            } catch (err) {
+                console.error('Erreur progression BGS (mobile) :', err);
+                zone.innerHTML = '';
+            }
+        }
+
+        // "Ma progression" Powerplay : mérites gagnés par cycle, d'après merites_cycles (chacun ne lit que ses lignes).
+        // Un cycle sans relevé = aucun gain ; autre puissance = gain non comparable ("?").
+        async function chargerProgressionPowerplayMobile() {
+            const zone = document.getElementById('pp-m-progression');
+            if (!zone) return;
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            const jourMs = 86400000;
+            try {
+                const { data, error } = await supabaseApp.from('merites_cycles')
+                    .select('semaine, puissance, merites_total, releve_le')
+                    .order('semaine', { ascending: false }).limit(10);
+                if (error) throw error;
+                const lignes = (data || []).slice().reverse();
+                if (!lignes.length) { zone.innerHTML = ''; return; }
+
+                const clotureCourante = new Date(clotureCycleCourantMs()).toISOString().slice(0, 10);
+                const parSemaine = {};
+                lignes.forEach(l => { parSemaine[l.semaine] = l; });
+                const derniere = lignes[lignes.length - 1];
+                const cycles = [];
+                let prev = lignes[0];
+                const finT = Math.max(Date.parse(derniere.semaine + 'T00:00:00Z'), Date.parse(clotureCourante + 'T00:00:00Z'));
+                for (let t = Date.parse(lignes[0].semaine + 'T00:00:00Z') + 7 * jourMs; t <= finT; t += 7 * jourMs) {
+                    const cle = new Date(t).toISOString().slice(0, 10);
+                    const l = parSemaine[cle];
+                    if (l) {
+                        cycles.push({ semaine: cle, gain: l.puissance === prev.puissance ? Math.max(0, l.merites_total - prev.merites_total) : null });
+                        prev = l;
+                    } else {
+                        cycles.push({ semaine: cle, gain: 0 });
+                    }
+                }
+
+                const releveMin = Math.max(0, Math.round((Date.now() - Date.parse(derniere.releve_le)) / 60000));
+                const ilYa = releveMin < 60 ? releveMin + ' min' : releveMin < 1440 ? Math.floor(releveMin / 60) + ' h' : Math.floor(releveMin / 1440) + ' j';
+                const enteteReleve = `<span style="color: #888; font-size: 0.85em; font-weight: normal; letter-spacing: 0;">Dernier relevé : il y a ${ilYa}</span>`;
+
+                if (!cycles.length) {
+                    zone.innerHTML = `
+                    <div style="border: 1px dashed rgba(0,240,255,0.3); padding: 12px 14px; border-radius: 4px;">
+                        <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"><span>MA PROGRESSION</span>${enteteReleve}</div>
+                        <div style="color: #888; font-size: 0.8em; line-height: 1.5; margin-top: 8px;">L'historique se construit cycle après cycle : chaque jeudi 07:00 UTC, vos mérites gagnés dans la semaine s'ajoutent ici.</div>
+                    </div>`;
+                    return;
+                }
+
+                const affiches = cycles.slice(-8);
+                const gains = affiches.map(c => c.gain).filter(g => g !== null);
+                const meilleur = gains.length ? Math.max(...gains) : 0;
+                const moyenne = gains.length ? Math.round(gains.reduce((a, b) => a + b, 0) / gains.length) : 0;
+                const somme = gains.reduce((a, b) => a + b, 0);
+
+                zone.innerHTML = `
+                <div style="border: 1px solid rgba(0,240,255,0.25); background: rgba(0,240,255,0.03); padding: 12px 14px; border-radius: 4px;">
+                    <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; border-bottom: 1px dashed rgba(0,240,255,0.3); padding-bottom: 8px; margin-bottom: 12px;">
+                        <span>MA PROGRESSION</span>${enteteReleve}
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: flex-end; min-height: 100px; overflow-x: auto;">${htmlBarresCycles(affiches, clotureCourante, 'var(--ed-blue)', 'rgba(0,240,255,0.45)', 'rgba(0,240,255,0.5)')}</div>
+                    <div style="display: flex; gap: 6px 18px; flex-wrap: wrap; margin-top: 12px; font-size: 0.75em;">
+                        <div><span style="color: #888;">MEILLEUR :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(meilleur)}</span></div>
+                        <div><span style="color: #888;">MOYENNE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
+                        <div><span style="color: #888;">TOTAL (${gains.length} CYCLE${gains.length > 1 ? 'S' : ''}) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(somme)}</span></div>
+                    </div>
+                </div>`;
+            } catch (err) {
+                console.error('Erreur progression Powerplay (mobile) :', err);
+                zone.innerHTML = '';
+            }
+        }
+
+        async function ouvrirSallePowerplayMobile() {
+            sonClic();
+            suivreEvenementMobile('ouvrir_powerplay');
+            const modal = document.getElementById('modal-pp');
+            const titre = document.getElementById('pp-m-titre');
+            const corps = document.getElementById('pp-m-corps');
+            document.getElementById('pp-m-countdown').innerText = calculerCompteReboursCycle();
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+
+            if (!profilCommandant || !profilCommandant.puissance_nom) {
+                titre.innerText = 'COMMANDEMENT POWERPLAY 2.0';
+                corps.innerHTML = `
+                    <div style="border: 1px dashed #555; padding: 25px; text-align: center; border-radius: 4px;">
+                        <span style="color: var(--ed-orange); letter-spacing: 1.5px; font-weight: bold; display: block; margin-bottom: 10px;">AUCUNE ALLÉGEANCE DÉTECTÉE</span>
+                        <p style="color: #ccc; font-size: 0.85em; line-height: 1.6; margin: 0;">Pour accéder aux classements tactiques et coordonner l'effort du cycle, engagez-vous auprès d'une puissance dans le panneau Powerplay en jeu et relancez votre vol.</p>
+                    </div>`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            titre.innerText = profilCommandant.puissance_nom.toUpperCase();
+            corps.innerHTML = '<div style="color: #888; text-align: center; padding: 30px; font-style: italic;">Accréditation des partisans et chiffrement du tableau...</div>';
+            modal.style.display = 'flex';
+
+            try {
+                // Cloisonnement : lecture stricte des partisans de la MÊME puissance (fonction serveur)
+                const { data, error } = await supabaseApp.rpc('tableau_partisans');
+                if (error) throw error;
+
+                const partisans = data || [];
+                const monScoreCycle = profilCommandant.puissance_merites_cycle || 0;
+                const monRang = profilCommandant.puissance_rang || 0;
+                const monTotal = profilCommandant.puissance_merites_total || monScoreCycle;
+
+                let html = `
+                <div style="background: rgba(0,240,255,0.05); border-left: 3px solid var(--ed-blue); padding: 12px 14px; border-radius: 0 4px 4px 0;">
+                    <span style="color: #888; font-size: 0.7em; letter-spacing: 1px;">VOTRE STATUT MILITAIRE :</span>
+                    <div style="color: #fff; font-weight: bold; margin-top: 3px; overflow-wrap: anywhere;">CMDR ${escapeHtml((profilCommandant.cmdr_nom || 'INCONNU').toUpperCase())}
+                        <span style="color: var(--ed-blue); font-size: 0.85em; margin-left: 6px;">[ RANG ${monRang} ]</span>
+                    </div>
+                    <div style="display: flex; gap: 24px; margin-top: 10px;">
+                        <div><span style="color: #888; font-size: 0.7em; display: block;">MÉRITES DU CYCLE :</span><span style="color: #FFD700; font-size: 1.2em; font-weight: bold;">${monScoreCycle > 0 ? '+' + fmt(monScoreCycle) : '—'}</span></div>
+                        <div><span style="color: #888; font-size: 0.7em; display: block;">CUMUL GLOBAL :</span><span style="color: #ccc; font-size: 1.2em; font-weight: bold;">${fmt(monTotal)}</span></div>
+                    </div>
+                </div>
+
+                ${monScoreCycle > 0 ? '' : `<div style="color: #888; font-size: 0.75em; line-height: 1.5;">Mesure du cycle en cours : vos mérites de la semaine s'affichent dès votre premier relevé après le début du cycle (jeudi 07:00 UTC). Le cumul global et le rang sont déjà à jour.</div>`}
+
+                <div id="pp-m-progression"></div>
+
+                <div>
+                    <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1.5px; font-size: 0.85em; border-bottom: 1px dashed rgba(0,240,255,0.3); padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; gap: 6px;">
+                        <span>PARTISANS DU RÉSEAU</span><span>${partisans.length} PILOTE(S)</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">`;
+
+                [...partisans].sort((a, b) =>
+                    ((b.puissance_merites_cycle || 0) - (a.puissance_merites_cycle || 0)) ||
+                    ((b.puissance_merites_total || 0) - (a.puissance_merites_total || 0))
+                ).forEach((p, index) => {
+                    const estMoi = (p.cmdr_nom && profilCommandant.cmdr_nom && p.cmdr_nom.toUpperCase() === profilCommandant.cmdr_nom.toUpperCase());
+                    const tagSquad = p.escadron_id ? escapeHtml(p.escadron_id) : 'INDÉPENDANT';
+                    html += `
+                    <div style="background: ${estMoi ? 'rgba(0,240,255,0.12)' : 'rgba(0,0,0,0.5)'}; border: 1px solid ${estMoi ? 'var(--ed-blue)' : '#333'}; padding: 8px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.85em;">
+                        <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                            <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; min-width: 26px;">#${index + 1}</span>
+                            <div style="min-width: 0;">
+                                <div style="color: #fff; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((p.cmdr_nom || 'INCONNU').toUpperCase())}</div>
+                                <div style="color: #888; font-size: 0.75em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">[ ${tagSquad} ] <span style="color: var(--ed-blue);">RANG ${p.puissance_rang || 0}</span></div>
+                            </div>
+                        </div>
+                        <div style="text-align: right; flex-shrink: 0;">
+                            <div style="color: #FFD700; font-weight: bold;">${(p.puissance_merites_cycle || 0) > 0 ? '+' + fmt(p.puissance_merites_cycle) : '—'} <span style="font-size: 0.75em; color: #888;">CYCLE</span></div>
+                            <div style="color: #ccc; font-size: 0.75em; margin-top: 2px;">${fmt(p.puissance_merites_total || 0)} <span style="color: #888;">CUMUL</span></div>
+                        </div>
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+                corps.innerHTML = html;
+                chargerProgressionPowerplayMobile();
+            } catch (err) {
+                console.error('Erreur Powerplay (mobile) :', err);
+                corps.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Échec de la liaison avec le réseau de la puissance.</div>';
+            }
+        }
+
+        // ==========================================
+        // NOUVEAUTÉS (mêmes données et même panneau que le PC : nouveautes-data.js + nouveautes.js)
+        // ==========================================
+        const CLE_NOUV_VU = 'edteam_nouv_vu';
+
+        function chargerScriptMobile(src, cb) {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = () => { if (cb) cb(); };
+            s.onerror = () => { /* fichier indisponible (hors ligne) : on n'affiche simplement rien */ };
+            document.head.appendChild(s);
+        }
+
+        // Non lues = plus récentes que la dernière lecture ; sans lecture mémorisée : celles des 14 derniers jours
+        function nouveautesNonLues() {
+            const liste = Array.isArray(window.EDTEAM_NOUVEAUTES) ? window.EDTEAM_NOUVEAUTES : [];
+            let vu = null;
+            try { vu = localStorage.getItem(CLE_NOUV_VU); } catch (e) {}
+            const seuil = vu || new Date(Date.now() - 14 * 86400000).toISOString();
+            return liste.filter(e => e.date > seuil);
+        }
+
+        function majCarteNouveautesMobile() {
+            const carte = document.getElementById('m-carte-nouveautes');
+            const liste = Array.isArray(window.EDTEAM_NOUVEAUTES) ? window.EDTEAM_NOUVEAUTES.slice().sort((a, b) => a.date < b.date ? 1 : -1) : [];
+            if (!carte || !liste.length) return;
+            carte.style.display = 'flex';
+            document.getElementById('m-nouv-titre').innerText = liste[0].titre || '';
+            const n = nouveautesNonLues().length;
+            const point = document.getElementById('m-nouv-point');
+            point.style.display = n ? 'inline-block' : 'none';
+            point.innerText = n + (n > 1 ? ' NOUVELLES' : ' NOUVELLE');
+        }
+
+        function initNouveautesMobile() {
+            window.edteamMajPointNouveautes = majCarteNouveautesMobile; // appelé par nouveautes.js quand tout est lu
+            chargerScriptMobile('nouveautes-data.js?h=' + Math.floor(Date.now() / 3600000), majCarteNouveautesMobile);
+        }
+
+        function ouvrirNouveautesMobile() {
+            sonClic();
+            suivreEvenementMobile('ouvrir_nouveautes');
+            if (window.edteamNouveautes) { window.edteamNouveautes.ouvrir(); return; }
+            chargerScriptMobile('nouveautes.js?v=2', () => { if (window.edteamNouveautes) window.edteamNouveautes.ouvrir(); });
+        }
+
+        // ==========================================
+        // GOOGLE ANALYTICS (GA4) : audience anonyme, aucune donnée de compte envoyée (ni pseudo, ni e-mail, ni identifiant)
+        // Renseignez l'identifiant de mesure (G-XXXXXXXXXX) dans GA_ID : tant qu'il est vide, rien n'est chargé ni envoyé.
+        // ==========================================
+        const GA_ID = 'G-26FQZ7SDX4'; // même propriété GA4 que les pages PC (navigation.js)
+
+        function initAnalyticsMobile() {
+            if (!GA_ID) return;
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = function () { window.dataLayer.push(arguments); };
+            window.gtag('js', new Date());
+            window.gtag('config', GA_ID, { send_page_view: false, anonymize_ip: true });
+            chargerScriptMobile('https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID));
+            suivreVueMobile('qg');
+        }
+
+        // Un "écran vu" par onglet de la barre basse
+        function suivreVueMobile(onglet) {
+            if (!window.gtag) return;
+            window.gtag('event', 'page_view', {
+                page_title: 'EDTEAM mobile - ' + onglet,
+                page_location: location.origin + location.pathname + '#' + onglet
+            });
+        }
+
+        // Ouverture d'une fenêtre ou d'une fonction (BGS, Powerplay, Nouveautés...)
+        function suivreEvenementMobile(nom) {
+            if (window.gtag) window.gtag('event', nom);
+        }
+
+        initAnalyticsMobile();
     </script>
 
     <!-- MODAL LECTURE RAPPORT TACTIQUE (MOBILE) -->

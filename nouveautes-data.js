@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-09-30-mobile', date: '2026-09-30T19:00:00Z', type: 'AMELIORE',
+        titre: 'Version mobile remise à niveau',
+        texte: 'Le compagnon mobile retrouve les nouveautés du site : votre rang BGS et votre progression Powerplay (avec le classement de l\'escadron), un espace Nouveautés, et un QG réorganisé (identité, carrière, communications, rangs et finances repliables). Les membres d\'un escadron disposent d\'un nouvel onglet Escadron, qui liste les pilotes avec leur rang BGS.',
+        important: false
+    },
+    {
         id: '2026-09-30-performance', date: '2026-09-30T14:12:00Z', type: 'AMELIORE',
         titre: 'QG plus léger pour votre ordinateur',
         texte: 'Les halos lumineux qui pulsent sur l\'accueil (Renseignement tactique, pastille « En ligne ») sont désormais dessinés sans redessin permanent : le QG consomme quasiment rien au repos, là où il occupait une part notable d\'un cœur du processeur.',
