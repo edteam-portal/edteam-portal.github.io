@@ -2,30 +2,42 @@
 // Lit nouveautes-data.js, retient les entrees du dernier cycle ECOULE (jeudi 07:00 UTC -> jeudi 07:00 UTC) et envoie UN message.
 //   node scripts/nouveautes-discord.js            envoie (secret DISCORD_WEBHOOK_NOUVEAUTES requis ; sinon affiche le message et s'arrete sans erreur)
 //   node scripts/nouveautes-discord.js --dry      affiche le message sans rien envoyer
-//   NOUVEAUTES_NOW=2026-10-01T08:00:00Z node scripts/nouveautes-discord.js --dry     simule une date d'execution
+//   --court    version courte : titre + premiere phrase de chaque nouveaute (le detail reste sur le site)
+//   --forcer   (ou NOUVEAUTES_FORCER=1) ignore la date du premier envoi (tests manuels)
+//   NOUVEAUTES_NOW=2026-10-08T08:00:00Z node scripts/nouveautes-discord.js --dry     simule une date d'execution
+// Premier resume : jeudi 08/10/2026 (cycle du 01/10 au 08/10). Les nouveautes livrees avant ont deja ete annoncees a la main.
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const https = require('https');
 
 const SITE = 'https://edteam-portal.github.io/index.html';
+const PREMIER_ENVOI = new Date('2026-10-08T00:00:00Z');   // aucun resume avant cette date
 const dry = process.argv.includes('--dry');
+const court = process.argv.includes('--court') || process.env.NOUVEAUTES_FORMAT === 'court';
+const forcer = process.argv.includes('--forcer') || process.env.NOUVEAUTES_FORCER === '1' || process.env.NOUVEAUTES_FORCER === 'true';
 const maintenant = process.env.NOUVEAUTES_NOW ? new Date(process.env.NOUVEAUTES_NOW) : new Date();
 
-const ctx = { window: {} };
-vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'nouveautes-data.js'), 'utf8'), ctx);
-const toutes = Array.isArray(ctx.window.EDTEAM_NOUVEAUTES) ? ctx.window.EDTEAM_NOUVEAUTES : [];
+const jj = d => ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2);
 
 // Dernier jeudi 07:00 UTC deja passe = fin du cycle ecoule ; debut = 7 jours avant
 const fin = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 7, 0, 0));
 while (fin.getUTCDay() !== 4 || fin > maintenant) fin.setUTCDate(fin.getUTCDate() - 1);
 const debut = new Date(fin.getTime() - 7 * 86400000);
 
+if (!forcer && fin < PREMIER_ENVOI) {
+    console.log(`Premier résumé prévu pour le cycle qui se termine le 08/10 : le cycle du ${jj(debut)} au ${jj(fin)} n'est pas envoyé.`);
+    process.exit(0);
+}
+
+const ctx = { window: {} };
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'nouveautes-data.js'), 'utf8'), ctx);
+const toutes = Array.isArray(ctx.window.EDTEAM_NOUVEAUTES) ? ctx.window.EDTEAM_NOUVEAUTES : [];
+
 const semaine = toutes
     .filter(e => new Date(e.date) >= debut && new Date(e.date) < fin)
     .sort((a, b) => (a.date < b.date ? -1 : 1));
 
-const jj = d => ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2);
 const ICONES = { NOUVEAU: '🟢 **NOUVEAU**', AMELIORE: '🔵 **AMÉLIORÉ**', CORRIGE: '🟠 **CORRIGÉ**' };
 
 if (!semaine.length) {
@@ -33,12 +45,17 @@ if (!semaine.length) {
     process.exit(0);
 }
 
-function bloc(e, court) {
+function premierePhrase(t) {
+    const m = t.match(/^.*?[.!?](\s|$)/);
+    return (m ? m[0] : t).trim();
+}
+function bloc(e, courte) {
     let t = e.texte;
-    if (court && t.length > 220) t = t.slice(0, 217).replace(/\s+\S*$/, '') + '…';
+    if (courte) t = premierePhrase(t);
+    else if (t.length > 900) t = t.slice(0, 897).replace(/\s+\S*$/, '') + '…';
     return `${ICONES[e.type] || ICONES.NOUVEAU} ${e.titre}\n${t}` + (e.action ? `\n▶ **Action requise :** ${e.action}` : '');
 }
-let description = semaine.map(e => bloc(e, false)).join('\n\n');
+let description = semaine.map(e => bloc(e, court)).join('\n\n');
 if (description.length > 3800) description = semaine.map(e => bloc(e, true)).join('\n\n');   // trop long : versions courtes
 description = description.slice(0, 3900);
 
@@ -53,7 +70,7 @@ const message = {
     }]
 };
 
-console.log(`--- Message (${semaine.length} nouveauté(s), cycle du ${jj(debut)} au ${jj(fin)}) ---`);
+console.log(`--- Message (${semaine.length} nouveauté(s), cycle du ${jj(debut)} au ${jj(fin)}${court ? ', version courte' : ''}) ---`);
 console.log(message.embeds[0].title + '\n\n' + description + '\n\n' + message.embeds[0].footer.text);
 console.log('--- fin ---');
 
