@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-09-30-mobile', date: '2026-09-30T19:00:00Z', type: 'AMELIORE',
         titre: 'Version mobile remise à niveau',
-        texte: 'Le compagnon mobile retrouve les nouveautés du site : votre rang BGS et votre progression Powerplay (avec le classement de l\'escadron), un espace Nouveautés, et un QG réorganisé (identité, carrière, communications, rangs et finances repliables). Les membres d\'un escadron disposent d\'un nouvel onglet Escadron, qui liste les pilotes avec leur rang BGS. La fiche d\'un pilote affiche désormais son rang BGS et son statut Powerplay.',
+        texte: 'Le compagnon mobile retrouve les nouveautés du site : votre rang BGS et votre progression Powerplay (avec le classement de l\'escadron), un espace Nouveautés, et un QG réorganisé (identité, carrière, communications, rangs et finances repliables). Les membres d\'un escadron disposent d\'un nouvel onglet Escadron, qui liste les pilotes avec leur rang BGS. La fiche d\'un pilote affiche désormais son rang BGS et son statut Powerplay. Le bas du QG donne accès à l\'Aide / FAQ et à l\'interrupteur de son.',
         important: false
     },
     {

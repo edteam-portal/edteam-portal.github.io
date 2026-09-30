@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=2"></script>
+    <script src="son.js?v=1"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -512,10 +513,12 @@
                     </div>
                 </details>
 
-                <!-- 7. PIED : Discord, déconnexion -->
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
-                    <button class="m-btn" style="flex: 1; background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.75em; padding: 10px 6px;" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')">🎧 DISCORD</button>
-                    <button class="m-btn" style="flex: 1; background: transparent; border-color: #555; color: #888; font-size: 0.75em; padding: 10px 6px;" onclick="deconnexionMobile()">DÉCONNEXION</button>
+                <!-- 7. PIED : Aide, Discord, son, déconnexion -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-top: 6px;">
+                    <button class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.75em; padding: 10px 6px;" onclick="ouvrirAideMobile()">? AIDE / FAQ</button>
+                    <button class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; font-size: 0.75em; padding: 10px 6px;" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')">🎧 DISCORD</button>
+                    <button type="button" data-son-toggle class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; padding: 10px 14px; display: flex; align-items: center; justify-content: center;"></button>
+                    <button class="m-btn" style="grid-column: 1 / -1; background: transparent; border-color: #555; color: #888; font-size: 0.75em; padding: 10px 6px;" onclick="deconnexionMobile()">DÉCONNEXION</button>
                 </div>
             </div>
 
@@ -2036,71 +2039,16 @@
         // GALNET NEWS (API FRONTIER)
         // ==========================================
         let cacheGalnetArticle = null;
-        async function chargerGalnetMobile() {
-            try {
-                const response = await fetch('https://cms.zaonce.net/fr-FR/jsonapi/node/galnet_article?sort=-created&page[limit]=1');
-                const payload = await response.json();
-                if (payload && payload.data && payload.data.length > 0) {
-                    const article = payload.data[0].attributes;
-                    cacheGalnetArticle = { title: article.title, date: article.created, body: article.body ? article.body.value : "Contenu indisponible." };
-                    const d = new Date(article.created); d.setFullYear(d.getFullYear() + 1286);
-                    document.getElementById('m-galnet-date').innerText = "DERNIÈRE ÉDITION : " + d.toLocaleDateString('fr-FR');
-                }
-            } catch (e) { document.getElementById('m-galnet-date').innerText = "Erreur de liaison."; }
-        }
-
-        function ouvrirGalnetMobile() {
-            if (!cacheGalnetArticle) return;
-            sonClic();
-            
-            document.getElementById('m-galnet-title-modal').innerText = cacheGalnetArticle.title;
-            const d = new Date(cacheGalnetArticle.date); d.setFullYear(d.getFullYear() + 1286);
-            document.getElementById('m-galnet-date-modal').innerText = d.toLocaleDateString('fr-FR');
-            document.getElementById('m-galnet-body-modal').innerHTML = cacheGalnetArticle.body;
-            document.getElementById('modal-galnet').style.display = 'flex';
-        }
-
         // ==========================================
         // GAZETTES & ARCHIVES
         // ==========================================
         let cacheGazettesMobile = [];
-        async function chargerGazetteListMobile() {
-            if (!profilCommandant) return;
-            try {
-                const { data } = await supabaseApp.from('gazette_hebdo').select('*').eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT').order('created_at', { ascending: false });
-
-                if (data && data.length > 0) {
-                    cacheGazettesMobile = data;
-                    const d = new Date(data[0].created_at).toLocaleDateString('fr-FR');
-                    document.getElementById('m-gazette-date').innerText = "DERNIÈRE ÉDITION : " + d;
-                    
-                    const select = document.getElementById('m-gazette-selector');
-                    select.innerHTML = '';
-                    data.forEach((g, i) => {
-                        const opt = document.createElement('option');
-                        opt.value = g.id;
-                        opt.innerText = (i === 0 ? "🔴 " : "📜 ") + new Date(g.created_at).toLocaleDateString('fr-FR') + " : " + g.titre.substring(0, 25) + "...";
-                        select.appendChild(opt);
-                    });
-                    afficherGazetteSelectionnee(data[0].id); // Précharge la 1ère
-                } else {
-                    document.getElementById('m-gazette-date').innerText = "Aucune archive disponible.";
-                    document.getElementById('m-gazette-selector').innerHTML = '<option>Archives vides</option>';
-                }
-            } catch(e) {}
-        }
-
         window.afficherGazetteSelectionnee = function(id) {
             const article = cacheGazettesMobile.find(g => String(g.id) === String(id));
             if (!article) return;
             document.getElementById('m-gazette-title-modal').innerText = article.titre;
             document.getElementById('m-gazette-body-modal').innerHTML = article.contenu;
         };
-
-        function ouvrirGazetteMobile() { 
-            sonClic(); 
-            document.getElementById('modal-gazette').style.display = 'flex'; 
-        }
 
         // ==========================================
         // REGISTRE TACTIQUE (CIBLES VIP)
@@ -3200,6 +3148,13 @@
         function initNouveautesMobile() {
             window.edteamMajPointNouveautes = majCarteNouveautesMobile; // appelé par nouveautes.js quand tout est lu
             chargerScriptMobile('nouveautes-data.js?h=' + Math.floor(Date.now() / 3600000), majCarteNouveautesMobile);
+        }
+
+        function ouvrirAideMobile() {
+            sonClic();
+            suivreEvenementMobile('ouvrir_aide');
+            if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
+            chargerScriptMobile('aide.js?v=2', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {
