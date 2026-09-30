@@ -1131,6 +1131,15 @@
             }
         });
 
+        // --- Libelles pour les lignes du journal tactique (directives) ---
+        function libelleTypeOrdre(t) {
+            const m = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' };
+            const cle = String(t || '').toUpperCase();
+            return m[cle] || cle;
+        }
+        function libellePriorite(p) { return ({ 1: 'critique', 2: 'haute', 3: 'normale' })[Number(p)] || 'normale'; }
+        function texteDirective(d) { return libelleTypeOrdre(d.type_ordre) + ' pour ' + String(d.faction_cible || '').toUpperCase(); }
+
         async function transmettreOrdre() {
             if (typeof sonClic === 'function') sonClic();
             const btn = document.getElementById('btn-transmettre');
@@ -1176,7 +1185,8 @@
                 if (error) throw error;
                 
                 // NOUVEAU : Envoi au journal
-                window.enregistrerJournalActivite('NOUVELLE MISSION BGS', "Nouvel ordre de mission publié par l'Amirauté.", 'var(--ed-orange)');
+                const detailsNouvelle = 'Système ' + sys + ' : ' + directivesAEnvoyer.map(d => texteDirective(d) + ' (priorité ' + libellePriorite(d.priorite) + ')').join(' · ') + '.';
+                window.enregistrerJournalActivite('NOUVELLE MISSION BGS', detailsNouvelle, 'var(--ed-orange)');
                 
                 if (typeof sonSucces === 'function') sonSucces();
                 btn.innerText = "CAMPAGNE DÉPLOYÉE";
@@ -1319,6 +1329,14 @@
             );
             if (!confirmation) return;
 
+            // On lit les directives actives avant la cloture pour pouvoir les citer dans le journal
+            let activesSysteme = [];
+            try {
+                const { data: act } = await supabaseApp.from('ordres_bgs').select('faction_cible, type_ordre')
+                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS').eq('systeme_cible', nomSysteme).eq('statut', 'ACTIF');
+                activesSysteme = act || [];
+            } catch (e) { activesSysteme = []; }
+
             try {
                 const { error } = await supabaseApp.rpc('cloturer_systeme_bgs_et_distribuer', { 
                     p_systeme: nomSysteme, 
@@ -1328,7 +1346,8 @@
                 if (error) throw error;
                 
                 // NOUVEAU : Envoi au journal
-                window.enregistrerJournalActivite('DIRECTIVE CLÔTURÉE', 'Fin des opérations globales pour le système ' + nomSysteme + '.', '#00FF66');
+                const detailsSysteme = 'Système ' + String(nomSysteme).toUpperCase() + ' : clôture de ' + (activesSysteme.length ? activesSysteme.map(texteDirective).join(' · ') : 'toutes les directives') + '. Plaques de campagne attribuées.';
+                window.enregistrerJournalActivite('DIRECTIVE CLÔTURÉE', detailsSysteme, '#00FF66');
 
                 if (typeof sonSucces === 'function') sonSucces();
                 chargerOrdresAmiraute(); 
@@ -1347,6 +1366,12 @@
             );
             if (!confirmation) return;
             
+            let ordreClos = null;
+            try {
+                const { data: o } = await supabaseApp.from('ordres_bgs').select('systeme_cible, faction_cible, type_ordre').eq('id', idOrdre).maybeSingle();
+                ordreClos = o || null;
+            } catch (e) { ordreClos = null; }
+
             try {
                 const { error } = await supabaseApp.rpc('cloturer_ordre_bgs_et_distribuer', { 
                     p_ordre_id: idOrdre 
@@ -1354,7 +1379,10 @@
                 if (error) throw error;
                 
                 // NOUVEAU : Envoi au journal
-                window.enregistrerJournalActivite('DIRECTIVE CLÔTURÉE', 'Fin des opérations pour une directive tactique.', '#00FF66');
+                const detailsClos = ordreClos
+                    ? 'Système ' + String(ordreClos.systeme_cible || '').toUpperCase() + ' : ' + texteDirective(ordreClos) + ' clôturée. Plaques de campagne attribuées.'
+                    : 'Fin des opérations pour une directive tactique.';
+                window.enregistrerJournalActivite('DIRECTIVE CLÔTURÉE', detailsClos, '#00FF66');
 
                 if(typeof sonSucces === 'function') sonSucces();
                 
@@ -2106,6 +2134,12 @@
             );
             if (!confirmation) return;
 
+            let ordreSupprime = null;
+            try {
+                const { data: o } = await supabaseApp.from('ordres_bgs').select('systeme_cible, faction_cible, type_ordre').eq('id', idOrdre).maybeSingle();
+                ordreSupprime = o || null;
+            } catch (e) { ordreSupprime = null; }
+
             try {
                 const { error: errEfforts } = await supabaseApp.from('efforts_bgs').delete().eq('ordre_id', idOrdre);
                 if (errEfforts) throw errEfforts;
@@ -2114,7 +2148,10 @@
                 if (errOrdre) throw errOrdre;
 
                 // NOUVEAU : Envoi au journal
-                window.enregistrerJournalActivite('DIRECTIVE ANNULÉE', 'Un ordre de mission a été révoqué et purgé.', '#FF3333');
+                const detailsAnnule = ordreSupprime
+                    ? 'Système ' + String(ordreSupprime.systeme_cible || '').toUpperCase() + ' : ' + texteDirective(ordreSupprime) + ' annulée, efforts associés purgés.'
+                    : 'Un ordre de mission a été révoqué et purgé.';
+                window.enregistrerJournalActivite('DIRECTIVE ANNULÉE', detailsAnnule, '#FF3333');
 
                 if (typeof sonSucces === 'function') sonSucces();
                 
@@ -3746,6 +3783,7 @@
         };
 
         let ordreEditionEnCoursId = null;
+        let ordreEditionOrigine = null;
 
         window.ouvrirEditionOrdre = async function(id) {
             if (typeof sonClic === 'function') sonClic();
@@ -3755,6 +3793,7 @@
                 if (error) throw error;
 
                 ordreEditionEnCoursId = id;
+                ordreEditionOrigine = data;
                 document.getElementById('edit-ordre-id').innerText = `#${id} (${data.faction_cible})`;
                 document.getElementById('edit-ordre-type').value = data.type_ordre || 'HAUSSE';
                 document.getElementById('edit-ordre-priorite').value = data.priorite || 3;
@@ -3783,7 +3822,13 @@
                 if (error) throw error;
 
                 // NOUVEAU : Envoi au journal
-                window.enregistrerJournalActivite('DIRECTIVE MODIFIÉE', 'Mise à jour des paramètres d\'une opération en cours.', 'var(--ed-blue)');
+                const o = ordreEditionOrigine || {};
+                const changements = [];
+                if (o.type_ordre && o.type_ordre !== payload.type_ordre) changements.push('type ' + libelleTypeOrdre(o.type_ordre) + ' → ' + libelleTypeOrdre(payload.type_ordre));
+                if (o.priorite && Number(o.priorite) !== payload.priorite) changements.push('priorité ' + libellePriorite(o.priorite) + ' → ' + libellePriorite(payload.priorite));
+                if ((o.briefing_amiral || '') !== payload.briefing_amiral) changements.push('briefing mis à jour');
+                const detailsModif = 'Système ' + String(o.systeme_cible || '?').toUpperCase() + ' · ' + String(o.faction_cible || '').toUpperCase() + ' : ' + (changements.length ? changements.join(', ') : 'paramètres confirmés') + '.';
+                window.enregistrerJournalActivite('DIRECTIVE MODIFIÉE', detailsModif, 'var(--ed-blue)');
 
                 if (typeof sonSucces === 'function') sonSucces();
                 btn.innerText = "DIRECTIVE MODIFIÉE";
