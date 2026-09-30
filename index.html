@@ -15,7 +15,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=1"></script>
-    <script src="navigation.js?v=3"></script>
+    <script src="navigation.js?v=5"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -2073,6 +2073,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // Rang BGS de carrière : bouton cockpit (membres d'escadron ayant accès au BGS)
                 majBoutonBgs(profilData);
 
+                // Rappel discret du compagnon mobile (une seule fois tous les 45 jours, ordinateur uniquement)
+                if (typeof window.edteamAstuceMobile === 'function') window.edteamAstuceMobile();
+
                 // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
                 const notoriete = parseInt(profilData.notoriete) || 0;
                 
@@ -2971,10 +2974,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
     <!-- ========================================== -->
 
-    <!-- CRÉDITS FOOTER -->
-    <div style="position: fixed; bottom: 8px; left: 0; width: 100%; text-align: center; color: #555; font-size: 0.75em; letter-spacing: 1px; z-index: 5000; pointer-events: none; font-family: 'Share Tech Mono', monospace; opacity: 0.7;">
-        Application de fan - edteam.portal 2026
-    </div>
 
     <!-- MOTEUR GALNET NEWS (API OFFICIELLE FRONTIER) -->
     <script>
@@ -3940,5 +3939,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
+    <script src="footer.js?v=2"></script>
 </body>
 </html>
