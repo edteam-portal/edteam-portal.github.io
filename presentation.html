@@ -87,7 +87,7 @@
                 "name": "Comment sont récompensés les pilotes ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Par quatre systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (huit titres), le Pilier de la semaine (une distinction chaque jeudi, sur la fiche du pilote et dans le journal tactique) et la Force de frappe (la part de chaque pilote dans l'effort de l'escadron)."
+                    "text": "Par cinq systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (huit titres), le Pilier de la semaine (une distinction chaque jeudi, sur la fiche du pilote et dans le journal tactique), la Force de frappe (la part de chaque pilote dans l'effort de l'escadron) et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts)."
                 }
             },
             {
@@ -371,7 +371,7 @@
                     <p>Le <strong>Journal Tactique</strong> diffuse en direct les directives (avec le système, la faction, le type d'ordre et la priorité), les distinctions, les communiqués du réseau et le bilan hebdomadaire. Tout ce dont un commandant a besoin pour préparer son prochain déploiement, réuni sur un terminal unique.</p>
                 </div>
                 <div class="holo-container">
-                    <div class="holo-card"><img src="images/qg.png" alt="Quartier Général"></div>
+                    <div class="holo-card"><img src="images/qg.png" alt="Quartier Général : boutons Powerplay et BGS avec le rang du pilote, rangs militaires et journal tactique"></div>
                 </div>
             </div>
 
@@ -459,7 +459,7 @@
                     <p>Le <strong>Tableau des Partisans</strong> classe les pilotes du réseau alignés sur la même puissance que vous, par mérites du cycle puis par cumul global. Cloisonnement oblige : vous ne voyez que votre propre puissance, et uniquement le nom, l'escadron, le rang et les mérites de chacun. Jamais de position, ni de flotte.</p>
                 </div>
                 <div class="holo-container">
-                    <div class="holo-card"><img src="images/powerplay.png" alt="Tableau des partisans Powerplay"></div>
+                    <div class="holo-card"><img src="images/powerplay.png" alt="Salle Powerplay : mérites du cycle, progression par cycle et tableau des partisans"></div>
                 </div>
             </div>
 
@@ -518,7 +518,7 @@
     <section id="distinctions" class="section" style="background: rgba(0,240,255,0.02); border-top: 1px solid var(--ed-blue);">
         <div class="container">
             <h2 class="section-title neon-orange" style="margin-bottom: 20px;">RECONNAISSANCE &amp; DISTINCTIONS</h2>
-            <p style="text-align: center; color: #aaa; font-size: 1.3em; line-height: 1.6; max-width: 900px; margin: 0 auto 80px auto;">Chaque effort compte, et ici, il se voit. Quatre systèmes complémentaires reconnaissent votre implication, du pilote occasionnel au pilier de l'escadron.</p>
+            <p style="text-align: center; color: #aaa; font-size: 1.3em; line-height: 1.6; max-width: 900px; margin: 0 auto 80px auto;">Chaque effort compte, et ici, il se voit. Cinq systèmes complémentaires reconnaissent votre implication, du pilote occasionnel au pilier de l'escadron.</p>
 
             <div class="feature-grid">
                 <div class="feature-text">
@@ -528,7 +528,7 @@
                     <p>Chaque plaque raconte l'opération d'un coup d'œil : le type d'ordre, les jours d'activité, l'ampleur de l'effort et la place obtenue au classement de l'escadron.</p>
                 </div>
                 <div class="holo-container">
-                    <div class="holo-card"><img src="images/fiche-pilote.png" alt="Fiche de pilote avec ses plaques d'états de service et ses distinctions hebdomadaires" loading="lazy"></div>
+                    <div class="holo-card"><img src="images/fiche-pilote.png" alt="Fiche de pilote avec ses rangs BGS et Powerplay, ses plaques d'états de service et ses distinctions hebdomadaires" loading="lazy"></div>
                 </div>
             </div>
 
@@ -967,7 +967,7 @@
                 </div>
             </div>
 
-            <div class="feature-grid reverse" style="margin-bottom: 0;">
+            <div class="feature-grid reverse">
                 <div class="feature-text">
                     <span class="sub-data" style="color: var(--ed-orange);">// DISTINCTION 04 : INVESTISSEMENT DU CYCLE</span>
                     <h3 class="neon-orange">VOTRE PART DANS L'EFFORT COMMUN</h3>
@@ -976,6 +976,36 @@
                 </div>
                 <div class="holo-container">
                     <div class="holo-card"><img src="images/investissement.png" alt="Force de frappe : camembert holographique de la part de chaque pilote dans l'effort de l'escadron" loading="lazy"></div>
+                </div>
+            </div>
+
+            <div class="feature-grid" style="margin-bottom: 0;">
+                <div class="feature-text">
+                    <span class="sub-data">// DISTINCTION 05 : RANG BGS DE CARRIÈRE</span>
+                    <h3 class="neon-blue">VOTRE RANG, GAGNÉ POUR TOUJOURS</h3>
+                    <p>Chaque effort accompli pour l'escadron, <strong>directive ou action libre</strong>, rapporte des points qui s'additionnent pour toute votre carrière. Ils déterminent votre <strong>rang BGS</strong>, de 1 à 100.</p>
+                    <p>Un rang gagné ne se perd jamais. Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts : le rang 100 est réservé aux plus fidèles.</p>
+                    <p style="color: #888; font-size: 0.9em;">Une barre de progression indique ce qu'il reste à accomplir avant le rang suivant, dans la fenêtre BGS du QG et sur la fiche du pilote. Une ligne dorée apparaît dans le journal tactique à chaque dizaine atteinte.</p>
+                </div>
+                <div class="holo-container">
+                    <div class="holo-card" style="box-sizing: border-box; padding: 28px 26px; background: rgba(5, 8, 12, 0.96); font-family: 'Share Tech Mono', monospace;" role="img" aria-label="Exemple de progression du rang BGS : rang 12, 751 points sur 799 pour le rang 13, et repères de points pour les rangs 2, 10, 25, 50 et 100">
+                        <div style="color: #888; font-size: 0.8em; letter-spacing: 2px; margin-bottom: 6px;">EXEMPLE : CARRIÈRE BGS</div>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+                            <span style="color: #fff; font-size: 1.6em; font-weight: bold; letter-spacing: 2px;">RANG 12</span>
+                            <span style="color: #FFD700; font-weight: bold;">751 <span style="color: #888; font-size: 0.75em; font-weight: normal;">POINTS</span></span>
+                        </div>
+                        <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; margin: 12px 0 6px;">
+                            <div style="width: 54%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange);"></div>
+                        </div>
+                        <div style="color: #888; font-size: 0.75em; margin-bottom: 20px;">PROCHAIN : RANG 13 À 799 POINTS</div>
+                        <div style="border-top: 1px dashed rgba(255,113,0,0.35); padding-top: 14px; color: #ccc; font-size: 0.9em; line-height: 1.9;">
+                            <div style="display: flex; justify-content: space-between;"><span>RANG 2</span><span style="color: #fff;">15 pts</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>RANG 10</span><span style="color: #fff;">505 pts</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>RANG 25</span><span style="color: #fff;">2 423 pts</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>RANG 50</span><span style="color: #fff;">7 593 pts</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>RANG 100</span><span style="color: #FFD700;">23 394 pts</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -996,7 +1026,7 @@
                 <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">QUI VOIT QUOI</p>
                 <ul style="margin: 0 0 30px 20px;">
                     <li>Vos données de jeu (position, soldes, flotte) ne sont lisibles que par vous.</li>
-                    <li>Si vous êtes dans un escadron, votre fiche est consultable par les membres de cet escadron.</li>
+                    <li>Si vous êtes dans un escadron, votre fiche est consultable par les membres de cet escadron. Votre rang BGS et vos points de carrière y figurent, ainsi que dans le tableau de l'escadron.</li>
                     <li>Les autres pilotes ne voient que votre nom de CMDR dans la liste des destinataires. Dans le tableau Powerplay, ils voient votre nom, votre rang et vos mérites (du cycle et cumulés), uniquement si vous êtes de la même puissance. Votre historique par cycle (« Ma progression ») n'est lisible que par vous.</li>
                     <li>Le Directeur de l'application peut consulter les fiches pour l'administrer.</li>
                 </ul>
@@ -1054,7 +1084,7 @@
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QUELLES DONNÉES SONT COLLECTÉES ?</h3>
                 <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT SONT RÉCOMPENSÉS LES PILOTES ?</h3>
-                <p style="margin: 0 0 26px;">Par quatre systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (huit titres), le Pilier de la semaine (une distinction chaque jeudi, sur la fiche du pilote et dans le journal tactique) et la Force de frappe (la part de chaque pilote dans l'effort de l'escadron).</p>
+                <p style="margin: 0 0 26px;">Par cinq systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (huit titres), le Pilier de la semaine (une distinction chaque jeudi, sur la fiche du pilote et dans le journal tactique), la Force de frappe (la part de chaque pilote dans l'effort de l'escadron) et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts).</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FONCTIONNE-T-IL SUR MOBILE ?</h3>
                 <p style="margin: 0 0 26px;">Oui. Un compagnon mobile permet de consulter les directives BGS de l'escadron, le statut et les communications depuis un téléphone.</p>
             </div>
