@@ -1895,7 +1895,7 @@
             if (!cont) return;
             
             try {
-                const { data: membres, error } = await supabaseApp.from('profils')
+                const { data: membres, error } = await supabaseApp.from('profils_publics')
                     .select('user_id, cmdr_nom, escadron_id, est_amiral, est_officier, est_diplomate, est_directeur')
                     .eq('est_approuve', true)
                     .order('cmdr_nom');
