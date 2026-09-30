@@ -2,7 +2,8 @@
 // Lit nouveautes-data.js, retient les entrees du dernier cycle ECOULE (jeudi 07:00 UTC -> jeudi 07:00 UTC) et envoie UN message.
 //   node scripts/nouveautes-discord.js            envoie (secret DISCORD_WEBHOOK_NOUVEAUTES requis ; sinon affiche le message et s'arrete sans erreur)
 //   node scripts/nouveautes-discord.js --dry      affiche le message sans rien envoyer
-//   --court    version courte : titre + premiere phrase de chaque nouveaute (le detail reste sur le site)
+//   (par defaut : version COURTE = titre + premiere phrase de chaque nouveaute ; le detail est sur le site, via le lien du message)
+//   --complet  version longue : texte entier de chaque nouveaute
 //   --forcer   (ou NOUVEAUTES_FORCER=1) ignore la date du premier envoi (tests manuels)
 //   NOUVEAUTES_NOW=2026-10-08T08:00:00Z node scripts/nouveautes-discord.js --dry     simule une date d'execution
 // Premier resume : jeudi 08/10/2026 (cycle du 01/10 au 08/10). Les nouveautes livrees avant ont deja ete annoncees a la main.
@@ -12,9 +13,10 @@ const vm = require('vm');
 const https = require('https');
 
 const SITE = 'https://edteam-portal.github.io/index.html';
+const LIEN_DETAIL = SITE + '?nouveautes=1';   // ouvre directement le panneau Nouveautes du site
 const PREMIER_ENVOI = new Date('2026-10-08T00:00:00Z');   // aucun resume avant cette date
 const dry = process.argv.includes('--dry');
-const court = process.argv.includes('--court') || process.env.NOUVEAUTES_FORMAT === 'court';
+const court = !(process.argv.includes('--complet') || process.env.NOUVEAUTES_FORMAT === 'complet');
 const forcer = process.argv.includes('--forcer') || process.env.NOUVEAUTES_FORCER === '1' || process.env.NOUVEAUTES_FORCER === 'true';
 const maintenant = process.env.NOUVEAUTES_NOW ? new Date(process.env.NOUVEAUTES_NOW) : new Date();
 
@@ -57,20 +59,21 @@ function bloc(e, courte) {
 }
 let description = semaine.map(e => bloc(e, court)).join('\n\n');
 if (description.length > 3800) description = semaine.map(e => bloc(e, true)).join('\n\n');   // trop long : versions courtes
-description = description.slice(0, 3900);
+description = description.slice(0, 3700);
+description += '\n\n📖 **Le détail de chaque nouveauté est sur le site :** [ouvrir les Nouveautés](' + LIEN_DETAIL + ')';
 
 const message = {
     username: 'SYS.EDTEAM',
     embeds: [{
         title: `📰 NOUVEAUTÉS DE LA SEMAINE · du ${jj(debut)} au ${jj(fin)}`,
-        url: SITE,
+        url: LIEN_DETAIL,
         description,
         color: 0xFF7100,
-        footer: { text: 'Retrouvez le détail dans le bouton « Nouveautés » en bas de chaque page du site.' }
+        footer: { text: 'Bouton « Nouveautés » en bas de chaque page du site.' }
     }]
 };
 
-console.log(`--- Message (${semaine.length} nouveauté(s), cycle du ${jj(debut)} au ${jj(fin)}${court ? ', version courte' : ''}) ---`);
+console.log(`--- Message (${semaine.length} nouveauté(s), cycle du ${jj(debut)} au ${jj(fin)}${court ? ', version courte' : ', version complète'}) ---`);
 console.log(message.embeds[0].title + '\n\n' + description + '\n\n' + message.embeds[0].footer.text);
 console.log('--- fin ---');
 
