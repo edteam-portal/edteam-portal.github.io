@@ -15,7 +15,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=1"></script>
-    <script src="navigation.js?v=2"></script>
+    <script src="navigation.js?v=3"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -2099,136 +2099,10 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     <!-- MODULE D'INTERCEPTION DES COMMUNICATIONS   -->
     <!-- ========================================== -->
     
-    <!-- 1. HTML DES ALERTES (Caché par défaut) -->
-    <!-- ALERTE MASSIVE (URGENCE) -->
-    <div id="comms-alert-massive" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.9); z-index: 100000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Share Tech Mono', monospace; cursor: pointer; animation: failsafe-pulse 1s infinite;" onclick="this.style.display='none'; if(typeof sonClic==='function') sonClic();">
-        <div style="border: 4px solid #fff; padding: 40px 60px; background: rgba(0,0,0,0.8); box-shadow: 0 0 50px #FF0000;">
-            <h1 style="color: #FF0000; font-size: 3.5em; margin: 0; letter-spacing: 5px; text-shadow: 0 0 20px #FF0000;">⚠️ TRANSMISSION URGENTE ⚠️</h1>
-            <p id="comms-massive-sender" style="color: #fff; font-size: 1.5em; letter-spacing: 2px; margin-top: 20px;">> EXPÉDITEUR : CMDR INCONNU</p>
-            <p id="comms-massive-text" style="color: var(--ed-orange); font-size: 1.3em; margin-top: 30px; max-width: 800px; line-height: 1.5; border-left: 5px solid #FF0000; padding-left: 20px; text-align: left;">Message text...</p>
-            <p style="color: #888; font-size: 0.9em; margin-top: 40px; animation: alertPulse 1.5s infinite;">[ CLIQUEZ N'IMPORTE OÙ POUR ACQUITTER ]</p>
-        </div>
-    </div>
-
-    <!-- ALERTE SUBTILE (MESSAGE PRIVÉ STANDARD) -->
-    <div id="comms-alert-toast" style="position: fixed; bottom: 30px; right: -400px; width: 350px; background: rgba(10,5,0,0.95); border: 1px solid var(--ed-blue); border-left: 4px solid var(--ed-blue); padding: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.2); z-index: 99999; font-family: 'Share Tech Mono', monospace; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;" onclick="this.style.right='-400px'; if(typeof sonClic==='function') sonClic(); window.location.href='communications.html';">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-blue); padding-bottom: 5px; margin-bottom: 10px;">
-            <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">> MESSAGE PRIVÉ ENTRANT</span>
-            <span style="color: #888; font-size: 0.8em;">MAINTENANT</span>
-        </div>
-        <div style="color: #fff; font-size: 0.95em; margin-bottom: 5px;">
-            De : <span id="comms-toast-sender" style="color: var(--ed-orange); font-weight: bold;">CMDR ...</span>
-        </div>
-        <div style="color: #888; font-size: 0.8em; font-style: italic;">[ Cliquez pour ouvrir le terminal ]</div>
-    </div>
+    <!-- (Alertes de messages : desormais gerees par navigation.js, sur toutes les pages) -->
 
     <!-- 2. MOTEUR D'ÉCOUTE JAVASCRIPT -->
     <script>
-        let commsRadarActif = false;
-
-        // Fonction sonore spécifique aux communications
-        function sonAlerteComms(urgent) {
-            try {
-                let ctx = typeof audioCtx !== 'undefined' ? audioCtx : new (window.AudioContext || window.webkitAudioContext)();
-                if (ctx.state === 'suspended') ctx.resume();
-                
-                const t = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                
-                if (urgent) {
-                    // Alarme stridente
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(800, t);
-                    osc.frequency.setValueAtTime(1200, t + 0.2);
-                    osc.frequency.setValueAtTime(800, t + 0.4);
-                    gain.gain.setValueAtTime(0.1, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(t); osc.stop(t + 0.6);
-                } else {
-                    // Bip de notification discret
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1500, t);
-                    osc.frequency.exponentialRampToValueAtTime(800, t + 0.1);
-                    gain.gain.setValueAtTime(0.05, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(t); osc.stop(t + 0.2);
-                }
-            } catch(e) {}
-        }
-
-        function initialiserEcouteComms() {
-            if (!profilCommandant || commsRadarActif) return;
-            commsRadarActif = true;
-            console.log("> Radar de communications synchronisé.");
-
-            // ---> NOUVEAU : VÉRIFICATION DE TOUS LES CANAUX AU DÉMARRAGE <---
-            let filtreCanaux = `canal.eq.GLOBAL,destinataire_id.eq.${profilCommandant.user_id}`;
-            if (profilCommandant.escadron_id) filtreCanaux += `,escadron_id.eq.${profilCommandant.escadron_id}`;
-
-            supabaseApp.from('transmissions')
-                .select('created_at')
-                .or(filtreCanaux)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .then(({ data }) => {
-                    if (data && data.length > 0) {
-                        const dateDernierMsgServeur = new Date(data[0].created_at).getTime();
-                        const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_msg_time') || '0');
-                        
-                        // Si le message sur le serveur est plus récent que ta dernière visite
-                        if (dateDernierMsgServeur > dateDerniereLecture) {
-                            const envIcon = document.getElementById('nav-comms-link');
-                            if (envIcon) envIcon.classList.add('alerte-enveloppe');
-                        }
-                    }
-                });
-            // -------------------------------------------------------------------------
-
-            supabaseApp.channel('public:transmissions')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
-                    const msg = payload.new;
-                    
-                    // On ignore nos propres messages
-                    if (msg.expediteur_id === profilCommandant.user_id) return;
-
-                    const isForMe = (msg.destinataire_id === profilCommandant.user_id);
-                    const isEscadron = (msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id);
-                    const isGlobal = (msg.canal === 'GLOBAL');
-
-                    // Si le message me concerne (Privé, ou Escadron, ou Global)
-                    if (isForMe || isEscadron || isGlobal) {
-                        
-                        if (msg.est_urgent) {
-                            // DÉCLENCHEMENT ALERTE MASSIVE
-                            sonAlerteComms(true);
-                            document.getElementById('comms-massive-sender').innerText = `> EXPÉDITEUR : CMDR ${msg.expediteur_nom} [ Canal: ${msg.canal} ]`;
-                            document.getElementById('comms-massive-text').innerText = msg.message;
-                            document.getElementById('comms-alert-massive').style.display = 'flex';
-                        } 
-                        else if (isForMe) {
-                            // DÉCLENCHEMENT NOTIFICATION PRIVÉE SUBTILE
-                            sonAlerteComms(false);
-                            document.getElementById('comms-toast-sender').innerText = msg.expediteur_nom;
-                            document.getElementById('comms-alert-toast').style.right = '30px';
-                            // Disparition automatique après 8 secondes
-                            setTimeout(() => { document.getElementById('comms-alert-toast').style.right = '-400px'; }, 8000);
-                        }
-                    }
-                })
-                .subscribe();
-        }
-
-        // Boucle de vérification légère pour attendre le chargement du profil
-        const commsCheckInterval = setInterval(() => {
-            if (typeof profilCommandant !== 'undefined' && profilCommandant !== null) {
-                initialiserEcouteComms();
-                clearInterval(commsCheckInterval);
-            }
-        }, 1000);
-
         async function actualiserAffichageRH() {
             if (!profilCommandant) return;
             const divActif = document.getElementById('qg-squad-actif');
