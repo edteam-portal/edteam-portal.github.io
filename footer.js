@@ -109,7 +109,7 @@
     window.edteamOuvrirNouveautes = function () {
         function lancer() {
             if (window.edteamNouveautes) { window.edteamNouveautes.ouvrir(); return; }
-            charger('nouveautes.js?v=1', function () { if (window.edteamNouveautes) window.edteamNouveautes.ouvrir(); });
+            charger('nouveautes.js?v=2', function () { if (window.edteamNouveautes) window.edteamNouveautes.ouvrir(); });
         }
         if (window.EDTEAM_NOUVEAUTES) lancer(); else charger(urlDonnees(), lancer);
     };
