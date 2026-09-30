@@ -180,10 +180,12 @@
             width: 160px; height: 160px; margin-bottom: 50px;
             filter: drop-shadow(0 0 40px rgba(0, 240, 255, 0.6));
             animation: pulse-logo 3s infinite alternate ease-in-out;
+            will-change: transform, opacity;
         }
+        /* Pulsation par opacite + echelle (composees par le GPU) : animer filter/drop-shadow forcait un redessin flou a chaque image. */
         @keyframes pulse-logo {
-            0% { filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4)); transform: scale(0.98); }
-            100% { filter: drop-shadow(0 0 60px rgba(0, 240, 255, 1)); transform: scale(1.02); }
+            0% { opacity: 0.8; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1.02); }
         }
 
         .main-title { font-size: 6em; letter-spacing: 8px; line-height: 1.1; margin-bottom: 30px; }
