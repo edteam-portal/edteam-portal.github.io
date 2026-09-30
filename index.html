@@ -397,7 +397,38 @@
                         </div>
                         
                         <!-- Pastille de rang -->
-                        <div id="badge-pp-rang" style="display: none; position: absolute; top: -6px; right: -6px; background: var(--ed-blue); color: #000; min-width: 24px; height: 24px; border-radius: 12px; font-weight: bold; font-size: 0.85em; align-items: center; justify-content: center; box-shadow: 0 0 10px var(--ed-blue); padding: 0 4px; box-sizing: border-box;">R0</div>
+                        <div id="badge-pp-rang" style="display: none; position: absolute; top: -6px; right: -6px; background: var(--ed-blue); color: #000; min-width: 24px; height: 24px; border-radius: 12px; font-weight: bold; font-size: 0.85em; align-items: center; justify-content: center; box-shadow: 0 0 10px var(--ed-blue); padding: 0 4px; box-sizing: border-box;">RANG 0</div>
+                    </div>
+
+                    <!-- BOUTON CARRÉ BGS : RANG DE CARRIÈRE (membres d'escadron, même structure que Powerplay) -->
+                    <div id="btn-qg-bgs" onclick="ouvrirSalleBgs()"
+                         onmouseenter="showHoloTooltip(event, 'COMMANDEMENT BGS<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Rang de carrière, progression et tableau de l\'escadron</span>', '#FF7100')"
+                         onmouseleave="hideHoloTooltip()"
+                         style="display: none; position: relative; width: 140px; background: rgba(255, 113, 0, 0.05); border: 1px solid var(--ed-orange); border-radius: 6px; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 6px; box-shadow: 0 0 15px rgba(255, 113, 0, 0.15); overflow: visible;"
+                         onmouseover="this.style.background='rgba(255, 113, 0, 0.15)'; this.style.boxShadow='0 0 25px rgba(255, 113, 0, 0.4)';"
+                         onmouseout="this.style.background='rgba(255, 113, 0, 0.05)'; this.style.boxShadow='0 0 15px rgba(255, 113, 0, 0.15)';">
+
+                        <!-- Emblème vectoriel : chevrons de grade -->
+                        <div style="width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;">
+                            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; stroke: var(--ed-orange); fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px var(--ed-orange));">
+                                <polyline points="20,38 50,14 80,38" />
+                                <polyline points="20,58 50,34 80,58" />
+                                <polyline points="20,78 50,54 80,78" stroke-dasharray="6 6" />
+                            </svg>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <span style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; line-height: 1.2;">BGS</span>
+                            <span id="qg-bgs-progression-texte" style="color: #fff; font-size: 0.7em; font-weight: bold; letter-spacing: 1px;">RANG --</span>
+                        </div>
+
+                        <!-- Barre de progression vers le rang suivant -->
+                        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                            <div id="qg-bgs-barre" style="width: 0%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 6px var(--ed-orange); transition: width 0.4s;"></div>
+                        </div>
+
+                        <!-- Pastille de rang -->
+                        <div id="badge-bgs-rang" style="display: none; position: absolute; top: -6px; right: -6px; background: var(--ed-orange); color: #000; min-width: 24px; height: 24px; border-radius: 12px; font-weight: bold; font-size: 0.8em; align-items: center; justify-content: center; box-shadow: 0 0 10px var(--ed-orange); padding: 0 6px; box-sizing: border-box; white-space: nowrap;">RANG 1</div>
                     </div>
 
                     <!-- 2. BOUTON CARRÉ TACTIQUE (HAUTE VISIBILITÉ MILITAIRE) -->
@@ -844,6 +875,30 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE COMMANDEMENT BGS : RANG DE CARRIÈRE (même structure que la salle Powerplay) -->
+    <div class="modal-overlay" id="modal-bgs" onclick="fermerModal('modal-bgs', event)" style="z-index: 4550;">
+        <div class="modal-content" style="max-width: 900px; width: 95%; background: rgba(8, 5, 0, 0.98); border: 1px solid var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.2); display: flex; flex-direction: column; max-height: 85vh; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
+            <div class="modal-close" style="position: absolute; top: 15px; right: 20px; color: var(--ed-orange); z-index: 60;" onclick="fermerModal('modal-bgs')">X</div>
+
+            <!-- En-tête -->
+            <div style="padding: 20px 25px; border-bottom: 1px solid rgba(255, 113, 0, 0.3); background: rgba(255, 113, 0, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <span style="color: #888; font-size: 0.8em; letter-spacing: 2px; display: block; margin-bottom: 4px;">OPÉRATIONS BGS DE L'ESCADRON</span>
+                    <span id="bgs-modal-escadron" style="color: var(--ed-orange); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;">COMMANDEMENT BGS</span>
+                </div>
+                <div style="text-align: right; margin-right: 30px;">
+                    <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 4px;">PROCHAIN CYCLE :</span>
+                    <span id="bgs-modal-countdown" style="color: #FFD700; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">JEUDI 07:00 UTC</span>
+                </div>
+            </div>
+
+            <!-- Contenu dynamique -->
+            <div id="bgs-modal-body" style="padding: 25px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Injecté par JavaScript -->
             </div>
         </div>
     </div>
@@ -1856,7 +1911,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // 1. TÉLÉCHARGEMENT DES DONNÉES (PROJECTION STRICTE ANTI-EGRESS)
                 const [resParam, resProfil, resRadar] = await Promise.all([
                     supabaseApp.from('parametres_app').select('position_actuelle').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
-                    supabaseApp.from('profils').select('cmdr_nom, solde_vaisseau, solde_fc, valeur_vaisseaux, cout_rachat, notoriete, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total, faction_choisie').eq('user_id', profilCommandant.user_id).single(),
+                    supabaseApp.from('profils').select('cmdr_nom, solde_vaisseau, solde_fc, valeur_vaisseaux, cout_rachat, notoriete, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total, faction_choisie, rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
                     supabaseApp.from('radar_commercial').select('id, target_commodity, station_name, prix_unitaire').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE']).order('id', { ascending: false }).limit(10)
                 ]);
 
@@ -2005,7 +2060,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         elPpNom.innerText = profilData.puissance_nom.toUpperCase();
                         elPpNom.style.color = "var(--ed-blue)";
                         if (elPpBadge) {
-                            elPpBadge.innerText = 'R' + (profilData.puissance_rang || 0);
+                            elPpBadge.innerText = 'RANG ' + (profilData.puissance_rang || 0);
                             elPpBadge.style.display = 'flex';
                         }
                     } else {
@@ -2014,6 +2069,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         if (elPpBadge) elPpBadge.style.display = 'none';
                     }
                 }
+
+                // Rang BGS de carrière : bouton cockpit (membres d'escadron ayant accès au BGS)
+                majBoutonBgs(profilData);
 
                 // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
                 const notoriete = parseInt(profilData.notoriete) || 0;
@@ -3444,6 +3502,226 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             return `${j}J ${h}H ${m}M`;
         }
 
+        // ==========================================
+        // COMMANDEMENT BGS : RANG DE CARRIÈRE (1 à 100), permanent
+        // Seuil du rang n = round(15 * (n-1)^1.6) points cumulés (même formule que le serveur, script SQL 17).
+        // ==========================================
+        function seuilRangBgs(n) { return n <= 1 ? 0 : Math.round(15 * Math.pow(n - 1, 1.6)); }
+
+        function progressionRangBgs(rang, points) {
+            rang = Math.min(100, Math.max(1, rang || 1));
+            points = points || 0;
+            if (rang >= 100) return { rang, points, min: seuilRangBgs(100), max: null, pct: 100, reste: 0 };
+            const min = seuilRangBgs(rang), max = seuilRangBgs(rang + 1);
+            return { rang, points, min, max, pct: Math.max(0, Math.min(100, ((points - min) / (max - min)) * 100)), reste: Math.max(0, Math.ceil(max - points)) };
+        }
+
+        // Bouton cockpit : visible pour les membres d'escadron ayant accès au BGS (même règle que le menu BGS)
+        function majBoutonBgs(profil) {
+            const btn = document.getElementById('btn-qg-bgs');
+            if (!btn || !profil) return;
+            const roles = (typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : {};
+            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
+            const acces = !!roles.escadron_id && !(rangJeu === 4 && !roles.est_amiral && !roles.est_officier);
+            if (!acces) { btn.style.display = 'none'; return; }
+            const pr = progressionRangBgs(profil.rang_bgs, Number(profil.points_bgs) || 0);
+            btn.style.display = 'flex';
+            const texte = document.getElementById('qg-bgs-progression-texte');
+            if (texte) texte.innerText = pr.max === null ? 'RANG MAXIMAL' : Math.floor(pr.points) + ' / ' + pr.max;
+            const barre = document.getElementById('qg-bgs-barre');
+            if (barre) barre.style.width = pr.pct.toFixed(1) + '%';
+            const badge = document.getElementById('badge-bgs-rang');
+            if (badge) { badge.innerText = 'RANG ' + pr.rang; badge.style.display = 'flex'; }
+        }
+
+        async function ouvrirSalleBgs() {
+            if (typeof sonClic === 'function') sonClic();
+            const modal = document.getElementById('modal-bgs');
+            const titre = document.getElementById('bgs-modal-escadron');
+            const compteur = document.getElementById('bgs-modal-countdown');
+            const corps = document.getElementById('bgs-modal-body');
+            compteur.innerText = calculerCompteReboursCycle();
+
+            if (!profilCommandant || !profilCommandant.escadron_id) {
+                titre.innerText = 'COMMANDEMENT BGS';
+                corps.innerHTML = `<div style="background: rgba(0,0,0,0.5); border: 1px dashed #555; padding: 30px; text-align: center; border-radius: 4px; color: #ccc; line-height: 1.6;">Le rang BGS est réservé aux membres d'un escadron.</div>`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            titre.innerText = profilCommandant.escadron_id.toUpperCase();
+            corps.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-style: italic;">Consultation de votre dossier de carrière...</div>';
+            modal.style.display = 'flex';
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+
+            try {
+                const [resMoi, resTab] = await Promise.all([
+                    supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
+                    supabaseApp.rpc('tableau_escadron_bgs')
+                ]);
+                if (resMoi.error) throw resMoi.error;
+                const rang = resMoi.data.rang_bgs || 1;
+                const points = Number(resMoi.data.points_bgs) || 0;
+                const pr = progressionRangBgs(rang, points);
+                const tableau = resTab.error ? [] : (resTab.data || []);
+
+                // Bannière de promotion : mémoire du navigateur, aucune écriture en base
+                let banniere = '';
+                try {
+                    const cle = 'edteam_rang_bgs_vu_' + profilCommandant.user_id;
+                    const vu = parseInt(localStorage.getItem(cle) || '0');
+                    if (vu > 0 && rang > vu) {
+                        banniere = `<div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; padding: 12px 18px; border-radius: 4px; color: #FFD700; font-weight: bold; letter-spacing: 2px; text-align: center; box-shadow: 0 0 15px rgba(255,215,0,0.25);">NOUVEAU RANG : VOUS ÊTES PASSÉ AU RANG BGS ${rang}</div>`;
+                    }
+                    localStorage.setItem(cle, String(rang));
+                } catch (e) {}
+
+                const suite = pr.max === null
+                    ? `<span style="color: #FFD700; font-weight: bold;">RANG MAXIMAL ATTEINT</span>`
+                    : `<span style="color: #888;">PROCHAIN : RANG ${rang + 1} À</span> <span style="color: #fff; font-weight: bold;">${fmt(pr.max)}</span> <span style="color: #888;">POINTS · IL VOUS EN MANQUE</span> <span style="color: #FFD700; font-weight: bold;">${fmt(pr.reste)}</span>`;
+
+                let html = `
+                ${banniere}
+                <!-- CARTE PERSONNELLE DU PILOTE -->
+                <div style="background: rgba(255, 113, 0, 0.05); border-left: 3px solid var(--ed-orange); padding: 15px 20px; border-radius: 0 4px 4px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">VOTRE CARRIÈRE BGS :</span>
+                            <div style="color: #fff; font-size: 1.2em; font-weight: bold; margin-top: 3px;">
+                                CMDR ${(profilCommandant.cmdr_nom || 'INCONNU').toUpperCase()}
+                                <span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ RANG ${rang} ]</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: #888; font-size: 0.8em; display: block;">POINTS DE CARRIÈRE :</span>
+                            <span style="color: #FFD700; font-size: 1.3em; font-weight: bold;">${fmt(Math.floor(points))}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 14px;">
+                        <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden;">
+                            <div style="width: ${pr.pct.toFixed(1)}%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange);"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 0.8em;">
+                            <span style="color: var(--ed-orange); font-weight: bold;">RANG ${rang}</span>
+                            <span>${suite}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MA PROGRESSION (chargée après l'affichage) -->
+                <div id="bgs-progression"></div>
+
+                <!-- TABLEAU DE L'ESCADRON -->
+                <div>
+                    <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed rgba(255, 113, 0, 0.3); padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                        <span>TABLEAU DE L'ESCADRON</span>
+                        <span>${tableau.length} PILOTE(S)</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">`;
+
+                tableau.forEach((p, index) => {
+                    const estMoi = (p.cmdr_nom && profilCommandant.cmdr_nom && p.cmdr_nom.toUpperCase() === profilCommandant.cmdr_nom.toUpperCase());
+                    html += `
+                        <div style="background: ${estMoi ? 'rgba(255, 113, 0, 0.12)' : 'rgba(0,0,0,0.5)'}; border: 1px solid ${estMoi ? 'var(--ed-orange)' : '#333'}; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.95em;">
+                            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${index + 1}</span>
+                                <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
+                                <span style="color: var(--ed-orange); font-size: 0.8em; border: 1px solid rgba(255,113,0,0.5); padding: 1px 6px; border-radius: 2px;">RANG ${p.rang_bgs || 1}</span>
+                            </div>
+                            <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
+                                ${fmt(Math.floor(Number(p.points_bgs) || 0))} <span style="font-size: 0.8em; color: #888;">POINTS</span>
+                            </div>
+                        </div>`;
+                });
+
+                html += `</div></div>
+
+                <!-- COMMENT ÇA MARCHE -->
+                <details open style="border: 1px solid rgba(255,113,0,0.25); background: rgba(255,113,0,0.03); padding: 14px 18px; border-radius: 4px;">
+                    <summary style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; cursor: pointer;">COMMENT ÇA MARCHE</summary>
+                    <ul style="margin: 12px 0 0 18px; color: #ccc; font-size: 0.9em; line-height: 1.7;">
+                        <li>Chaque effort accompli pour l'escadron, qu'il réponde à une directive ou non, rapporte des <strong style="color:#fff;">points</strong> : 1 point pour 2 millions de crédits (économie, sécurité, science), 1 point pour 400 tonnes de colonisation, et des points selon l'importance de l'action pour les missions et les zones de combat. Les échecs ne rapportent rien.</li>
+                        <li>Vos points s'additionnent pour <strong style="color:#fff;">toute votre carrière</strong> et déterminent votre rang BGS, de 1 à 100. <strong style="color:#fff;">Un rang gagné ne se perd jamais</strong>, même si une directive est supprimée.</li>
+                        <li>Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts. Le rang 100 (23 394 points) est réservé aux plus fidèles.</li>
+                        <li>Une ligne dorée apparaît dans le journal tactique de l'escadron à chaque dizaine atteinte (10, 20… 100).</li>
+                        <li>Ce rang est distinct de votre rôle dans l'escadron (Amiral, Officier…) et de votre rang Powerplay.</li>
+                    </ul>
+                </details>`;
+
+                corps.innerHTML = html;
+                chargerProgressionBgs();
+            } catch (err) {
+                console.error('Erreur Commandement BGS :', err);
+                corps.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Échec de la consultation du dossier de carrière.</div>';
+            }
+        }
+
+        // "Ma progression" BGS : points gagnés par cycle (8 derniers), d'après la fonction serveur progression_bgs_hebdo
+        async function chargerProgressionBgs() {
+            const zone = document.getElementById('bgs-progression');
+            if (!zone) return;
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            const jourMs = 86400000;
+            try {
+                const { data, error } = await supabaseApp.rpc('progression_bgs_hebdo', { p_cycles: 8 });
+                if (error) throw error;
+                const parSemaine = {};
+                (data || []).forEach(l => { parSemaine[l.semaine] = Number(l.points) || 0; });
+
+                // Jeudi (UTC) qui clôture le cycle en cours (le cycle change le jeudi 07:00 UTC)
+                const decale = new Date(Date.now() - 7 * 3600000);
+                let ajout = (4 - decale.getUTCDay() + 7) % 7;
+                if (ajout === 0) ajout = 7;
+                const clotureT = Date.UTC(decale.getUTCFullYear(), decale.getUTCMonth(), decale.getUTCDate()) + ajout * jourMs;
+                const clotureCourante = new Date(clotureT).toISOString().slice(0, 10);
+
+                const cycles = [];
+                for (let i = 7; i >= 0; i--) {
+                    const cle = new Date(clotureT - i * 7 * jourMs).toISOString().slice(0, 10);
+                    cycles.push({ semaine: cle, gain: parSemaine[cle] || 0 });
+                }
+                const gains = cycles.map(c => c.gain);
+                const somme = gains.reduce((a, b) => a + b, 0);
+                if (somme <= 0) {
+                    zone.innerHTML = `
+                    <div style="border: 1px dashed rgba(255,113,0,0.3); padding: 14px 18px; border-radius: 4px;">
+                        <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;">MA PROGRESSION</div>
+                        <div style="color: #888; font-size: 0.85em; line-height: 1.5; margin-top: 8px;">Aucun effort enregistré sur les 8 derniers cycles. Vos points gagnés chaque semaine s'afficheront ici.</div>
+                    </div>`;
+                    return;
+                }
+                const maxGain = Math.max(1, ...gains);
+                const meilleur = Math.max(...gains);
+                const moyenne = Math.round(somme / cycles.length);
+
+                const barres = cycles.map(c => {
+                    const enCours = c.semaine === clotureCourante;
+                    const hauteur = c.gain > 0 ? Math.max(3, Math.round(70 * c.gain / maxGain)) : 2;
+                    const couleur = enCours ? 'var(--ed-orange)' : (c.gain > 0 && c.gain === meilleur ? '#FFD700' : 'rgba(255,113,0,0.45)');
+                    return `
+                    <div style="flex: 1; min-width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;">
+                        <span style="color: #ccc; font-size: 0.7em;">${c.gain > 0 ? '+' + fmt(Math.round(c.gain)) : '0'}</span>
+                        <div style="width: 100%; max-width: 46px; height: ${hauteur}px; background: ${couleur}; border-radius: 2px 2px 0 0;${enCours ? ' box-shadow: 0 0 8px rgba(255,113,0,0.5);' : ''}"></div>
+                        <span style="color: ${enCours ? 'var(--ed-orange)' : '#888'}; font-size: 0.7em; white-space: nowrap;">${enCours ? 'EN COURS' : c.semaine.slice(8, 10) + '/' + c.semaine.slice(5, 7)}</span>
+                    </div>`;
+                }).join('');
+
+                zone.innerHTML = `
+                <div style="border: 1px solid rgba(255,113,0,0.25); background: rgba(255,113,0,0.03); padding: 14px 18px; border-radius: 4px;">
+                    <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed rgba(255,113,0,0.3); padding-bottom: 8px; margin-bottom: 14px;">MA PROGRESSION</div>
+                    <div style="display: flex; gap: 6px; align-items: flex-end; min-height: 110px; overflow-x: auto;">${barres}</div>
+                    <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-top: 14px; font-size: 0.85em;">
+                        <div><span style="color: #888;">MEILLEUR CYCLE :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(Math.round(meilleur))}</span></div>
+                        <div><span style="color: #888;">MOYENNE PAR CYCLE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
+                        <div><span style="color: #888;">TOTAL (8 CYCLES) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(Math.round(somme))}</span></div>
+                    </div>
+                </div>`;
+            } catch (err) {
+                console.error('Erreur progression BGS :', err);
+                zone.innerHTML = '';
+            }
+        }
+
         // "Ma progression" : mérites gagnés par cycle, d'après merites_cycles (chaque pilote ne lit que ses propres lignes).
         // Un cycle sans relevé = aucun gain (le total ne bouge que si le plugin a vu des mérites).
         async function chargerProgressionPowerplay() {
@@ -3632,7 +3910,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             <span style="color: ${rangNumero <= 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${rangNumero}</span>
                             <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
                             <span style="font-size: 0.85em;">${tagSquad}</span>
-                            <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">R${p.puissance_rang || 0}</span>
+                            <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">RANG ${p.puissance_rang || 0}</span>
                         </div>
                         <div style="text-align: right;">
                             <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
