@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-09-30-plugin-2-4', date: '2026-09-30T21:40:00Z', type: 'NOUVEAU',
+        titre: 'Plugin SYS_EDTEAM 2.4 : mérites Powerplay à jour',
+        texte: 'Le plugin relève vos mérites Powerplay au plus toutes les cinq minutes et retrouve, au démarrage, l\'historique de vos cycles passés à partir de vos journaux de jeu : votre progression par cycle se remplit donc même pour les semaines jouées sans EDMC. Coller une nouvelle clé dans les paramètres du plugin est désormais pris en compte sans relancer EDMC. La mise à jour se fait toute seule au prochain lancement d\'EDMC.',
+        important: true,
+        action: 'Redémarrez EDMC une fois la mise à jour terminée'
+    },
+    {
         id: '2026-09-30-mobile', date: '2026-09-30T19:00:00Z', type: 'AMELIORE',
         titre: 'Version mobile remise à niveau',
         texte: 'Le compagnon mobile retrouve les nouveautés du site : votre rang BGS et votre progression Powerplay (avec le classement de l\'escadron), un espace Nouveautés, et un QG réorganisé (identité, carrière, communications, rangs et finances repliables). Les membres d\'un escadron disposent d\'un nouvel onglet Escadron, qui liste les pilotes avec leur rang BGS. La fiche d\'un pilote affiche désormais son rang BGS et son statut Powerplay. Le bas du QG donne accès à l\'Aide / FAQ et à l\'interrupteur de son.',
