@@ -3497,7 +3497,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     <div style="display: flex; gap: 20px; text-align: right;">
                         <div>
                             <span style="color: #888; font-size: 0.8em; display: block;">MÉRITES DU CYCLE :</span>
-                            <span style="color: #FFD700; font-size: 1.3em; font-weight: bold;">+${new Intl.NumberFormat('fr-FR').format(monScoreCycle)}</span>
+                            <span style="color: #FFD700; font-size: 1.3em; font-weight: bold;">${monScoreCycle > 0 ? '+' + new Intl.NumberFormat('fr-FR').format(monScoreCycle) : '—'}</span>
                         </div>
                         <div>
                             <span style="color: #888; font-size: 0.8em; display: block;">CUMUL GLOBAL :</span>
@@ -3505,6 +3505,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         </div>
                     </div>
                 </div>
+
+                ${monScoreCycle > 0 ? '' : `
+                <div style="color: #888; font-size: 0.85em; line-height: 1.5; padding: 0 5px;">
+                    Mesure du cycle en cours : vos mérites de la semaine s'affichent dès votre premier relevé après le début du cycle (jeudi 07:00 UTC). Le cumul global et le rang sont déjà à jour.
+                </div>`}
 
                 <!-- TABLEAU D'HONNEUR DES PARTISANS -->
                 <div style="margin-top: 10px;">
@@ -3532,7 +3537,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">R${p.puissance_rang || 0}</span>
                         </div>
                         <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
-                            +${meritesFormat} <span style="font-size: 0.8em; color: #888;">MÉRITES</span>
+                            ${(p.puissance_merites_cycle || 0) > 0 ? '+' + meritesFormat : '—'} <span style="font-size: 0.8em; color: #888;">MÉRITES</span>
                         </div>
                     </div>`;
                 });
