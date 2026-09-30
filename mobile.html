@@ -1752,6 +1752,7 @@
 
                 if (profils && profils.length > 0) {
                     let opts = '<option value="">-- CHOISIR UN DESTINATAIRE --</option>';
+                    opts += '<option value="00000000-0000-4000-8000-0000000000ff">📡 TRANSMISSIONS OFFICIELLES</option>';
                     profils.forEach(p => {
                         opts += `<option value="${p.user_id}">CMDR ${escapeHtml((p.cmdr_nom || 'PILOTE').toUpperCase())}</option>`;
                     });
@@ -1844,7 +1845,7 @@
 
             bubble.innerHTML = `
                 <div style="display: flex; justify-content: space-between; font-size: 0.8em;">
-                    <strong style="color: ${couleurNom};">CMDR ${securiserTexte(nomAffiche)}</strong>
+                    <strong style="color: ${couleurNom};">${m.expediteur_id === '00000000-0000-4000-8000-0000000000ff' ? '' : 'CMDR '}${securiserTexte(nomAffiche)}</strong>
                     <span style="color: #666;">${temps}</span>
                 </div>
                 <div style="color: #eee; line-height: 1.4; word-break: break-word;">${securiserTexte(m.message)}</div>
@@ -1876,6 +1877,10 @@
 
                 if (!targetId) {
                     alert("Veuillez choisir un destinataire avant de transmettre.");
+                    return;
+                }
+                if (targetId === '00000000-0000-4000-8000-0000000000ff') {
+                    alert("Cette fréquence officielle est en réception seule.");
                     return;
                 }
                 payload.destinataire_id = targetId;
