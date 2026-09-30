@@ -3444,6 +3444,96 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             return `${j}J ${h}H ${m}M`;
         }
 
+        // "Ma progression" : mérites gagnés par cycle, d'après merites_cycles (chaque pilote ne lit que ses propres lignes).
+        // Un cycle sans relevé = aucun gain (le total ne bouge que si le plugin a vu des mérites).
+        async function chargerProgressionPowerplay() {
+            const zone = document.getElementById('pp-progression');
+            if (!zone) return;
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            const jourMs = 86400000;
+            try {
+                const { data, error } = await supabaseApp.from('merites_cycles')
+                    .select('semaine, puissance, merites_total, releve_le')
+                    .order('semaine', { ascending: false }).limit(10);
+                if (error) throw error;
+                const lignes = (data || []).slice().reverse(); // du plus ancien au plus récent
+                if (!lignes.length) { zone.innerHTML = ''; return; }
+
+                // Jeudi (UTC) qui clôture le cycle en cours (même règle que le serveur : le cycle change le jeudi 07:00 UTC)
+                const decale = new Date(Date.now() - 7 * 3600000);
+                let ajout = (4 - decale.getUTCDay() + 7) % 7;
+                if (ajout === 0) ajout = 7;
+                const clotureCourante = new Date(Date.UTC(decale.getUTCFullYear(), decale.getUTCMonth(), decale.getUTCDate()) + ajout * jourMs).toISOString().slice(0, 10);
+
+                const parSemaine = {};
+                lignes.forEach(l => { parSemaine[l.semaine] = l; });
+                const derniere = lignes[lignes.length - 1];
+                const cycles = [];
+                let prev = lignes[0];
+                const finT = Math.max(Date.parse(derniere.semaine + 'T00:00:00Z'), Date.parse(clotureCourante + 'T00:00:00Z'));
+                for (let t = Date.parse(lignes[0].semaine + 'T00:00:00Z') + 7 * jourMs; t <= finT; t += 7 * jourMs) {
+                    const cle = new Date(t).toISOString().slice(0, 10);
+                    const l = parSemaine[cle];
+                    if (l) {
+                        // autre puissance = mérites repartis à zéro : gain non comparable
+                        cycles.push({ semaine: cle, gain: l.puissance === prev.puissance ? Math.max(0, l.merites_total - prev.merites_total) : null });
+                        prev = l;
+                    } else {
+                        cycles.push({ semaine: cle, gain: 0 });
+                    }
+                }
+
+                const releveMin = Math.max(0, Math.round((Date.now() - Date.parse(derniere.releve_le)) / 60000));
+                const ilYa = releveMin < 60 ? releveMin + ' min' : releveMin < 1440 ? Math.floor(releveMin / 60) + ' h' : Math.floor(releveMin / 1440) + ' j';
+                const enteteReleve = `<span style="color: #888; font-size: 0.8em; font-weight: normal; letter-spacing: 0;">Dernier relevé : il y a ${ilYa}</span>`;
+
+                if (!cycles.length) {
+                    zone.innerHTML = `
+                    <div style="border: 1px dashed rgba(0,240,255,0.3); padding: 14px 18px; border-radius: 4px; margin-bottom: 10px;">
+                        <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"><span>MA PROGRESSION</span>${enteteReleve}</div>
+                        <div style="color: #888; font-size: 0.85em; line-height: 1.5; margin-top: 8px;">L'historique se construit cycle après cycle : chaque jeudi 07:00 UTC, vos mérites gagnés dans la semaine s'ajoutent ici.</div>
+                    </div>`;
+                    return;
+                }
+
+                const affiches = cycles.slice(-8);
+                const gains = affiches.map(c => c.gain).filter(g => g !== null);
+                const maxGain = Math.max(1, ...gains);
+                const meilleur = gains.length ? Math.max(...gains) : 0;
+                const moyenne = gains.length ? Math.round(gains.reduce((a, b) => a + b, 0) / gains.length) : 0;
+                const somme = gains.reduce((a, b) => a + b, 0);
+
+                const barres = affiches.map(c => {
+                    const enCours = c.semaine === clotureCourante;
+                    const hauteur = c.gain ? Math.max(3, Math.round(70 * c.gain / maxGain)) : 2;
+                    const couleur = enCours ? 'var(--ed-blue)' : (c.gain && c.gain === meilleur ? '#FFD700' : 'rgba(0,240,255,0.45)');
+                    const valeur = c.gain === null ? '?' : (c.gain > 0 ? '+' + fmt(c.gain) : '0');
+                    return `
+                    <div style="flex: 1; min-width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;">
+                        <span style="color: #ccc; font-size: 0.7em;">${valeur}</span>
+                        <div style="width: 100%; max-width: 46px; height: ${hauteur}px; background: ${couleur}; border-radius: 2px 2px 0 0;${enCours ? ' box-shadow: 0 0 8px rgba(0,240,255,0.5);' : ''}"></div>
+                        <span style="color: ${enCours ? 'var(--ed-blue)' : '#888'}; font-size: 0.7em; white-space: nowrap;">${enCours ? 'EN COURS' : c.semaine.slice(8, 10) + '/' + c.semaine.slice(5, 7)}</span>
+                    </div>`;
+                }).join('');
+
+                zone.innerHTML = `
+                <div style="border: 1px solid rgba(0,240,255,0.25); background: rgba(0,240,255,0.03); padding: 14px 18px; border-radius: 4px; margin-bottom: 10px;">
+                    <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; border-bottom: 1px dashed rgba(0,240,255,0.3); padding-bottom: 8px; margin-bottom: 14px;">
+                        <span>MA PROGRESSION</span>${enteteReleve}
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: flex-end; min-height: 110px; overflow-x: auto;">${barres}</div>
+                    <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-top: 14px; font-size: 0.85em;">
+                        <div><span style="color: #888;">MEILLEUR CYCLE :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(meilleur)}</span></div>
+                        <div><span style="color: #888;">MOYENNE PAR CYCLE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
+                        <div><span style="color: #888;">TOTAL GAGNÉ (${gains.length} CYCLE${gains.length > 1 ? 'S' : ''}) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(somme)}</span></div>
+                    </div>
+                </div>`;
+            } catch (err) {
+                console.error('Erreur progression Powerplay :', err);
+                zone.innerHTML = '';
+            }
+        }
+
         async function ouvrirSallePowerplay() {
             if (typeof sonClic === 'function') sonClic();
             const modal = document.getElementById('modal-powerplay');
@@ -3511,6 +3601,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     Mesure du cycle en cours : vos mérites de la semaine s'affichent dès votre premier relevé après le début du cycle (jeudi 07:00 UTC). Le cumul global et le rang sont déjà à jour.
                 </div>`}
 
+                <!-- MA PROGRESSION (chargee apres l'affichage : historique des cycles) -->
+                <div id="pp-progression"></div>
+
                 <!-- TABLEAU D'HONNEUR DES PARTISANS -->
                 <div style="margin-top: 10px;">
                     <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between;">
@@ -3544,6 +3637,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                 html += `</div></div>`;
                 bodyEl.innerHTML = html;
+                chargerProgressionPowerplay();
 
             } catch (err) {
                 console.error("Erreur Powerplay :", err);
