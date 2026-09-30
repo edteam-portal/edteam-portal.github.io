@@ -25,6 +25,10 @@
         + '.ft-aide:hover{background:rgba(255,113,0,.18);box-shadow:0 0 12px rgba(255,113,0,.5);color:#fff}'
         + '.ft-son{padding:3px 8px;color:#999;background:transparent;border:1px solid #444}'
         + '.ft-son:hover{color:var(--ed-blue,#00F0FF);border-color:var(--ed-blue,#00F0FF)}'
+        + '.ft-nouv{position:relative;color:#FFD700;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.45)}'
+        + '.ft-nouv:hover{background:rgba(255,215,0,.16);box-shadow:0 0 12px rgba(255,215,0,.45);color:#fff}'
+        + '.ft-point{width:8px;height:8px;border-radius:50%;background:#FF7100;box-shadow:0 0 8px #FF7100;position:absolute;top:-3px;right:-3px}'
+        + '.ft-astuce.ft-haut{bottom:170px}'
         + '.ft-mobile{color:var(--ed-blue,#00F0FF);background:rgba(0,240,255,.06);border:1px solid rgba(0,240,255,.5)}'
         + '.ft-mobile:hover{background:rgba(0,240,255,.18);box-shadow:0 0 12px rgba(0,240,255,.5);color:#fff}'
         /* pages de l\'application : bandeau fixe dans la bande libre du bas (le conteneur fait 95vh) */
@@ -73,6 +77,67 @@
         s.onload = function () { if (window.edteamAide) window.edteamAide.ouvrir(section); };
         document.head.appendChild(s);
     };
+    // ---- Nouveautes : point discret sur le bouton, panneau charge a la demande (nouveautes.js), carte pour les entrees "importantes" ----
+    var CLE_VU = 'edteam_nouv_vu';
+    function dansApp() { return !!document.getElementById('main-ui'); }
+    function urlDonnees() { return 'nouveautes-data.js?h=' + Math.floor(Date.now() / 3600000); }   // recharge au plus une fois par heure
+    function charger(src, cb) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = function () { if (cb) cb(); };
+        s.onerror = function () { /* fichier absent (page hors ligne) : on n'affiche simplement rien */ };
+        document.head.appendChild(s);
+    }
+    function entreesNouv() {
+        var l = Array.isArray(window.EDTEAM_NOUVEAUTES) ? window.EDTEAM_NOUVEAUTES.slice() : [];
+        return l.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    }
+    // Non lues = plus recentes que la derniere lecture ; sans lecture memorisee : celles des 14 derniers jours
+    function nonLues() {
+        var vu = null;
+        try { vu = localStorage.getItem(CLE_VU); } catch (e) { /* stockage indisponible */ }
+        var seuil = vu || new Date(Date.now() - 14 * 86400000).toISOString();
+        return entreesNouv().filter(function (e) { return e.date > seuil; });
+    }
+    window.edteamMajPointNouveautes = function () {
+        var pt = document.querySelector('.ft-nouv .ft-point');
+        if (!pt) return;
+        var n = dansApp() ? nonLues().length : 0;
+        pt.style.display = n ? 'inline-block' : 'none';
+        pt.parentNode.title = n ? n + (n > 1 ? ' nouveautés non lues' : ' nouveauté non lue') : 'Nouveautés';
+    };
+    window.edteamOuvrirNouveautes = function () {
+        function lancer() {
+            if (window.edteamNouveautes) { window.edteamNouveautes.ouvrir(); return; }
+            charger('nouveautes.js?v=1', function () { if (window.edteamNouveautes) window.edteamNouveautes.ouvrir(); });
+        }
+        if (window.EDTEAM_NOUVEAUTES) lancer(); else charger(urlDonnees(), lancer);
+    };
+    // Petite carte discrete, seulement pour une entree marquee "important" et non lue, une seule fois par entree (appelee par l'accueil)
+    window.edteamCarteNouveautes = function () {
+        function afficher() {
+            try {
+                var e = nonLues().filter(function (x) { return x.important; })[0];
+                if (!e || window.innerWidth < 900) return;
+                if (localStorage.getItem('edteam_nouv_carte') === e.id) return;
+                localStorage.setItem('edteam_nouv_carte', e.id);
+                setTimeout(function () {
+                    var c = el('div', { class: 'ft-astuce ft-haut', role: 'status' },
+                        '<b>NOUVEAUTÉ IMPORTANTE</b><br>' + String(e.titre).replace(/</g, '&lt;')
+                        + (e.action ? '<br><span style="color:#FFD700">▶ ' + String(e.action).replace(/</g, '&lt;') + '</span>' : '')
+                        + '<div class="ft-acts"><button type="button" class="ft-voir">VOIR</button><button type="button" class="ft-non">FERMER</button></div>');
+                    function retirer() { c.classList.remove('ft-vu'); setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 500); }
+                    c.querySelector('.ft-voir').addEventListener('click', function () { retirer(); window.edteamOuvrirNouveautes(); });
+                    c.querySelector('.ft-non').addEventListener('click', retirer);
+                    document.body.appendChild(c);
+                    setTimeout(function () { c.classList.add('ft-vu'); }, 30);
+                    setTimeout(retirer, 20000);
+                }, 7000);
+            } catch (err) { /* rien */ }
+        }
+        if (window.EDTEAM_NOUVEAUTES) afficher(); else charger(urlDonnees(), afficher);
+    };
+
     window.edteamOuvrirMobile = function () {
         var o = document.getElementById('ft-mobile-overlay');
         if (o) o.style.display = 'flex';
@@ -87,15 +152,17 @@
         pied.className = 'ft-edteam ' + (enApp ? 'ft-fixe' : 'ft-flux');
         pied.innerHTML = ''
             + '<div class="ft-ligne">'
-            +   '<span class="ft-titre">SYSTÈME DE COMMANDEMENT SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
+            +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
             +   '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>'
+            +   '<button type="button" class="ft-btn ft-nouv" onclick="edteamOuvrirNouveautes()" title="Nouveautés">NOUVEAUTÉS<span class="ft-point" style="display:none"></span></button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
             +   '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>'
             + '</div>'
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.</div>';
 
         if (window.edteamSon) window.edteamSon.majUI();
+        if (dansApp()) charger(urlDonnees(), function () { window.edteamMajPointNouveautes(); });
 
         // Fenetre du compagnon mobile
         var ov = el('div', { id: 'ft-mobile-overlay', class: 'ft-overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Compagnon mobile' });

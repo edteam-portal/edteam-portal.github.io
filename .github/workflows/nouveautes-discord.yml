@@ -1,0 +1,25 @@
+name: Nouveautés Discord (résumé hebdomadaire)
+
+# Chaque jeudi à 08:00 UTC (juste après le changement de cycle de 07:00), envoie sur Discord le résumé des
+# nouveautés du cycle écoulé (fichier nouveautes-data.js). Lancement manuel possible depuis l'onglet Actions.
+# Prérequis : secret du dépôt DISCORD_WEBHOOK_NOUVEAUTES (URL du webhook du salon choisi). Sans lui, rien n'est envoyé.
+on:
+  schedule:
+    - cron: '0 8 * * 4'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  resume:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Envoyer le résumé
+        run: node scripts/nouveautes-discord.js
+        env:
+          DISCORD_WEBHOOK_NOUVEAUTES: ${{ secrets.DISCORD_WEBHOOK_NOUVEAUTES }}
