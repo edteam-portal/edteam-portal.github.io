@@ -3613,8 +3613,13 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                     <div style="display: flex; flex-direction: column; gap: 8px;">`;
 
-                partisans.forEach((p, index) => {
+                // Tri : mérites du cycle, puis cumul global (tant que le cycle n'est pas mesuré, le cumul départage)
+                [...partisans].sort((a, b) =>
+                    ((b.puissance_merites_cycle || 0) - (a.puissance_merites_cycle || 0)) ||
+                    ((b.puissance_merites_total || 0) - (a.puissance_merites_total || 0))
+                ).forEach((p, index) => {
                     const rangNumero = index + 1;
+                    const cumulFormat = new Intl.NumberFormat('fr-FR').format(p.puissance_merites_total || 0);
                     const tagSquad = p.escadron_id ? `[ ${p.escadron_id} ]` : `<span style="color: #888;">[ INDÉPENDANT ]</span>`;
                     const meritesFormat = new Intl.NumberFormat('fr-FR').format(p.puissance_merites_cycle || 0);
                     const estMoi = (p.cmdr_nom && profilCommandant.cmdr_nom && p.cmdr_nom.toUpperCase() === profilCommandant.cmdr_nom.toUpperCase());
@@ -3629,8 +3634,13 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             <span style="font-size: 0.85em;">${tagSquad}</span>
                             <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">R${p.puissance_rang || 0}</span>
                         </div>
-                        <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
-                            ${(p.puissance_merites_cycle || 0) > 0 ? '+' + meritesFormat : '—'} <span style="font-size: 0.8em; color: #888;">MÉRITES</span>
+                        <div style="text-align: right;">
+                            <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
+                                ${(p.puissance_merites_cycle || 0) > 0 ? '+' + meritesFormat : '—'} <span style="font-size: 0.8em; color: #888;">CYCLE</span>
+                            </div>
+                            <div style="color: #ccc; font-size: 0.8em; margin-top: 2px;">
+                                ${cumulFormat} <span style="font-size: 0.85em; color: #888;">CUMUL</span>
+                            </div>
                         </div>
                     </div>`;
                 });
