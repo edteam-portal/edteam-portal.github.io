@@ -12,6 +12,8 @@
               r: 'Dans le menu latéral, en bas, cliquez sur l\'icône en forme de <strong>clé</strong> (« Clé EDMC »). Copiez la clé affichée.<br>Dans EDMC, ouvrez les <strong>Paramètres</strong>, onglet <strong>SYS.EDTEAM</strong>, et collez-la dans le champ « Clé d\'Accès ».' },
             { q: 'Je n\'ai pas d\'escadron : que puis-je utiliser ?',
               r: 'Le QG, le Powerplay, les communications et le journal tactique. Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d\'un escadron.' },
+            { q: 'Comment couper le son du site ?',
+              r: 'Cliquez sur l\'icône <strong>haut-parleur</strong> en haut à droite de l\'écran, ou celle du pied de page. Elle coupe <strong>tous</strong> les sons (survol, clics, alertes de messages, assistant COVAS, musique d\'ambiance). Elle devient rouge quand le son est coupé, et votre choix est mémorisé sur cet appareil.' },
             { q: 'Rien ne se met à jour sur le site, pourquoi ?',
               r: 'Vérifiez dans l\'ordre :<br>• <strong>EDMC est lancé</strong> pendant que vous jouez (le plugin ne tourne que dans EDMC) ;<br>• la clé collée dans le plugin est la bonne ;<br>• EDMC affiche « SYS_EDTEAM » avec un numéro de version : si une mise à jour est annoncée, <strong>redémarrez EDMC</strong>.<br>Certaines informations n\'arrivent qu\'au lancement du jeu : relancez le jeu avec EDMC allumé.' }
         ] },
