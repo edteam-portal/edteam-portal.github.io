@@ -35,8 +35,9 @@
         ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-orange); }
         * { scrollbar-width: thin; scrollbar-color: var(--ed-orange) rgba(0,0,0,0.6); }
 
-        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-dim); animation: scan 10s linear infinite; pointer-events: none; z-index: 100; }
-        @keyframes scan { 0% { top: -10px; } 100% { top: 100%; } }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-dim); animation: scan 10s linear infinite; will-change: transform; pointer-events: none; z-index: 100; }
+        /* transform (et non top) : l'animation reste sur le GPU, sans recalcul de mise en page a chaque image */
+        @keyframes scan { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
         
         #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
         .boot-btn { margin-top: 40px; padding: 10px 30px; border: 1px solid var(--ed-orange); background: transparent; color: var(--ed-orange); font-size: 1.2em; font-family: 'Share Tech Mono', monospace; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
@@ -115,6 +116,12 @@
            ========================================= */
         .failsafe-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
         .failsafe-content { border: 2px solid #FF0000; background: rgba(10, 0, 0, 0.95); padding: 40px 60px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); animation: failsafe-pulse 2s infinite; }
+        /* Halo pulsant SANS redessin : l'ombre est fixe, seule son opacite varie (animation composee par le GPU).
+           Remplace l'animation de box-shadow, qui forcait un redessin a chaque image (16 % d'un coeur au repos mesures). */
+        .pulse-halo { position: relative; }
+        .pulse-halo::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 50px rgba(255,0,0,0.55); opacity: 0.3; will-change: opacity; animation: halo-opacite 2.5s ease-in-out infinite; }
+        .pulse-halo.pulse-vif::after { animation-duration: 1.5s; }
+        @keyframes halo-opacite { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         @keyframes failsafe-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.2); } 50% { box-shadow: 0 0 60px rgba(255,0,0,0.6); } }
         .fs-page { display: none; }
         
@@ -335,7 +342,7 @@
                                 <span id="gazette-banner-date" style="color: #aaa; font-size: 0.9em; font-weight: bold;">Recherche des archives...</span>
                             </div>
                         </div>
-                        <div id="gazette-badge-new" style="display: none; background: #FF3333; color: #fff; padding: 6px 15px; border-radius: 4px; font-weight: bold; letter-spacing: 2px; font-size: 0.9em; animation: failsafe-pulse 1.5s infinite;">NOUVELLE TRANSMISSION</div>
+                        <div id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; background: #FF3333; color: #fff; padding: 6px 15px; border-radius: 4px; font-weight: bold; letter-spacing: 2px; font-size: 0.9em;">NOUVELLE TRANSMISSION</div>
                     </div>
 
                 </div>
@@ -433,11 +440,11 @@
                     </div>
 
                     <!-- 2. BOUTON CARRÉ TACTIQUE (HAUTE VISIBILITÉ MILITAIRE) -->
-                    <div onclick="ouvrirBureauRenseignement()" 
+                    <div class="pulse-halo" onclick="ouvrirBureauRenseignement()" 
                          onmouseenter="showHoloTooltip(event, 'REGISTRE TACTIQUE<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Consulter, ajouter ou révoquer des cibles</span>', '#FF3333')"
                          onmouseleave="hideHoloTooltip()"
                          onmousemove="if(document.getElementById('holo-tooltip').style.display === 'block') { document.getElementById('holo-tooltip').style.left = (event.clientX - document.getElementById('holo-tooltip').offsetWidth - 15) + 'px'; document.getElementById('holo-tooltip').style.top = (event.clientY + 15) + 'px'; }"
-                         style="position: relative; width: 140px; background: rgba(255, 51, 51, 0.08); border: 1px solid #FF3333; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 8px; box-shadow: 0 0 15px rgba(255, 51, 51, 0.25), inset 0 0 15px rgba(255, 51, 51, 0.1); animation: failsafe-pulse 2.5s infinite;"
+                         style="position: relative; width: 140px; background: rgba(255, 51, 51, 0.08); border: 1px solid #FF3333; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 8px; box-shadow: 0 0 15px rgba(255, 51, 51, 0.25), inset 0 0 15px rgba(255, 51, 51, 0.1);"
                          onmouseover="this.style.background='rgba(255, 51, 51, 0.2)'; this.style.boxShadow='0 0 25px rgba(255, 51, 51, 0.5)';"
                          onmouseout="this.style.background='rgba(255, 51, 51, 0.08)'; this.style.boxShadow='0 0 15px rgba(255, 51, 51, 0.25), inset 0 0 15px rgba(255, 51, 51, 0.1)';">
                         
@@ -513,7 +520,7 @@
                                 <span style="color: #aaa; font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> JOURNAL TACTIQUE (FLUX EN DIRECT)</span>
                             </div>
                             <div style="display: flex; gap: 10px;">
-                                <span id="flux-status-live" style="color: #00FF66; font-size: 0.7em; font-weight: bold; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px; animation: failsafe-pulse 2s infinite;">EN LIGNE</span>
+                                <span id="flux-status-live" class="pulse-halo" style="display: inline-block; color: #00FF66; font-size: 0.7em; font-weight: bold; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px;">EN LIGNE</span>
                             </div>
                         </div>
                         

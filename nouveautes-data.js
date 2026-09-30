@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-09-30-performance', date: '2026-09-30T14:12:00Z', type: 'AMELIORE',
+        titre: 'QG plus léger pour votre ordinateur',
+        texte: 'Les halos lumineux qui pulsent sur l'accueil (Renseignement tactique, pastille « En ligne ») sont désormais dessinés sans redessin permanent : le QG consomme quasiment rien au repos, là où il occupait une part notable d'un cœur du processeur.',
+        important: false
+    },
+    {
         id: '2026-09-30-rang-bgs', date: '2026-09-30T13:30:00Z', type: 'NOUVEAU',
         titre: 'Rang BGS de carrière (1 à 100)',
         texte: 'Chaque effort accompli pour l\'escadron rapporte des points qui s\'additionnent pour toute votre carrière et déterminent votre rang BGS, de 1 à 100. Un rang gagné ne se perd jamais. Un nouveau bouton BGS, à côté de Powerplay sur le QG, ouvre votre progression, vos points par semaine et le classement de l\'escadron.',
