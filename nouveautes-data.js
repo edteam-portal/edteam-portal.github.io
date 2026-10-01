@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-espaces', date: '2026-10-01T20:05:00Z', type: 'AMELIORE',
+        titre: 'Espacement harmonisé entre les cadres',
+        texte: 'L\'espace entre les cadres est maintenant le même sur toutes les pages (Quartier général, BGS, Escadron, Diplomatie, Colonisation, Budget), pour une présentation plus régulière. Rien ne change dans le fonctionnement.',
+        important: false
+    },
+    {
         id: '2026-10-carte-zoom', date: '2026-10-01T19:54:00Z', type: 'AMELIORE',
         titre: 'Colonisation : carte agrandie avec zoom, liste des systèmes et journal repensé',
         texte: 'Sur la carte de la page Colonisation, vous pouvez maintenant zoomer à la molette (ou avec les boutons + et −), déplacer la carte en la faisant glisser, et revenir à la vue d\'ensemble avec le bouton TOUT. Une liste déroulante « SYSTÈME… », à côté des filtres, permet d\'aller directement à un système : la carte se centre dessus, il est repéré, et sa fenêtre de détail s\'ouvre. Pratique quand plusieurs systèmes sont très proches les uns des autres. La carte est aussi plus grande : elle occupe toute la colonne de gauche, avec « À apporter en priorité » puis les architectes à droite. Le journal des livraisons passe en pleine largeur sous les deux colonnes, une ligne par entrée, avec un bouton [ AGRANDIR ] qui l\'ouvre en plein écran, comme le journal de la page BGS. Enfin, en survolant un matériau de « À apporter en priorité », les systèmes qui en ont besoin s\'entourent d\'or sur la carte ; un clic liste les chantiers concernés, avec ce qu\'il reste à livrer et un bouton COPIER pour le nom du système (à coller dans la recherche de la carte galactique du jeu).',

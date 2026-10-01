@@ -107,10 +107,10 @@
         .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
 
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
-        .data-row { padding: 20px; margin-bottom: 15px; }   /* cadre : classe .bloc (style.css) */
+        .data-row { padding: 20px; margin-bottom: 12px; }   /* cadre : classe .bloc (style.css) */
         
         /* CARD PILOTE (Membres de l'escadron) */
-        .pilot-card { --coupe: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }   /* cadre : classe .bloc (style.css) */
+        .pilot-card { --coupe: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; cursor: pointer; transition: 0.2s; }   /* cadre : classe .bloc (style.css) */
         .pilot-card:hover { --teinte: rgba(255, 113, 0, 0.22); --lueur: rgba(255, 113, 0, 0.22); }
         .pilot-card.cy:hover { --teinte: rgba(0, 240, 255, 0.2); --lueur: rgba(0, 240, 255, 0.2); }
 
@@ -365,7 +365,7 @@
                 <span id="badge-onglet-escadron" style="display: none; background: #FF3333; color: #fff; border-radius: 10px; padding: 4px 10px; font-size: 0.9em; font-weight: bold; box-shadow: 0 0 8px #FF3333;">0</span>
             </div>
 
-            <div id="liste-effectifs" style="display: flex; flex-direction: column; gap: 10px;">
+            <div id="liste-effectifs" style="display: flex; flex-direction: column; gap: 12px;">
                 <div style="color: #666; font-style: italic; text-align: center; margin-top: 20px;">> CHARGEMENT DES EFFECTIFS...</div>
             </div>
             

@@ -108,7 +108,9 @@
         .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
 
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
-        .data-row { padding: 20px; margin-bottom: 15px; }   /* cadre : classe .bloc (style.css) */
+        .data-row { padding: 20px; margin-bottom: 12px; }
+        /* l'espace entre cadres vient du conteneur (gap 12 px) : pas de marge en plus, sinon elles s'additionnent */
+        #bgs-tab-ordres .data-row, #bgs-tab-suivi .data-row, #bgs-tab-classement .data-row { margin-bottom: 0; }   /* cadre : classe .bloc (style.css) */
         
         /* CARD PILOTE (Membres de l'escadron) */
         .pilot-card { background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
@@ -435,7 +437,7 @@
         <main class="data-window" id="display-area">
           
             <!-- ONGLET 1 : ORDRES (BGS CAP TRACKER) -->
-            <div id="bgs-tab-ordres" style="display: flex; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+            <div id="bgs-tab-ordres" style="display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-out;">
                 
                 <!-- EN-TÊTE MISSIONS ET BOUTON COMMANDEMENT -->
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 15px; margin-bottom: 10px;">
@@ -446,14 +448,14 @@
                 </div>
 
                 <!-- LE SOUS-CONTENEUR POUR LES JAUGES -->
-                <div id="bgs-conteneur-ordres" style="display: flex; flex-direction: column; gap: 15px;">
+                <div id="bgs-conteneur-ordres" style="display: flex; flex-direction: column; gap: 12px;">
                     <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">> SYNCHRONISATION DES DIRECTIVES DE L'AMIRAUTÉ EN COURS...</div>
                 </div>
 
             </div>
 
             <!-- ONGLET 2 : SUIVI D'INFLUENCE (MACRO / MICRO) -->
-            <div id="bgs-tab-suivi" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+            <div id="bgs-tab-suivi" style="display: none; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-out;">
                 
                 <!-- BARRE DE RECHERCHE & BOUTONS D'ACTION (UNIFIÉS) -->
                 <div class="data-row bloc" style="padding: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
@@ -476,7 +478,7 @@
                 </div>
 
                 <!-- TABLEAU DE BORD DES FAVORIS (MACRO) -->
-                <div id="bgs-favorites-container" style="display: flex; flex-direction: column; gap: 15px;">
+                <div id="bgs-favorites-container" style="display: flex; flex-direction: column; gap: 12px;">
                     <!-- Injecté par JS -->
                     <div style="color: #666; font-style: italic; padding: 20px;">> Chargement du réseau tactique...</div>
                 </div>
@@ -521,7 +523,7 @@
             </div>
 
             <!-- ONGLET 3 : REGISTRE TACTIQUE (NOUVEAU PARADIGME) -->
-            <div id="bgs-tab-classement" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
+            <div id="bgs-tab-classement" style="display: none; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-out;">
                 
                 <!-- ZONE 1 : FILTRES STRATÉGIQUES -->
                 <div class="data-row bloc" style="padding: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
@@ -547,7 +549,7 @@
                 </div>
 
                 <!-- ZONE 2 & 3 : DOSSIER ANALYTIQUE ET RECONNAISSANCE -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px;">
                     
                     <!-- COLONNE GAUCHE : FORCE DE FRAPPE (camembert holographique : part de chacun dans l'effort, selon les filtres) -->
                     <div id="panel-force-frappe" class="data-row bloc holo" style="padding: 20px; display: flex; flex-direction: column;">
@@ -566,7 +568,7 @@
                     </div>
 
                     <!-- COLONNE DROITE : RECONNAISSANCE & SPÉCIALISTES -->
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
                         
                         <!-- MUR DES SPÉCIALISTES -->
                         <div class="data-row bloc" style="padding: 20px;">
@@ -1930,7 +1932,7 @@
                     }
 
                     html += `
-                    <div class="data-row bloc${estEpingle ? ' or' : ''}" style="margin-bottom: 25px; transition: all 0.3s ease;">
+                    <div class="data-row bloc${estEpingle ? ' or' : ''}" style="margin-bottom: 0; transition: all 0.3s ease;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed ${colorThemeDim}; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                             
                             <!-- Zone Gauche : Infos du Système -->
