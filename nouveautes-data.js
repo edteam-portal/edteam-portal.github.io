@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-architecte', date: '2026-10-01T21:02:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : les systèmes et constructions de chaque architecte',
+        texte: 'Sur la page Colonisation, un clic sur un architecte (dans le bloc « Architectes de l\'escadron », ou sur son nom dans la fenêtre d\'un système) ouvre la liste de tous ses systèmes, avec pour chacun ses installations terminées et ses chantiers en cours (avancement et reste à livrer). Chaque système a un bouton COPIER pour son nom, un bouton pour le voir sur la carte et un bouton pour ouvrir son détail. Au survol d\'un architecte, ses systèmes s\'entourent d\'or sur la carte.',
+        important: false
+    },
+    {
         id: '2026-10-espaces', date: '2026-10-01T20:05:00Z', type: 'AMELIORE',
         titre: 'Espacement harmonisé entre les cadres',
         texte: 'L\'espace entre les cadres est maintenant le même sur toutes les pages (Quartier général, BGS, Escadron, Diplomatie, Colonisation, Budget), pour une présentation plus régulière. Rien ne change dans le fonctionnement.',
