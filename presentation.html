@@ -71,7 +71,7 @@
                 "name": "Faut-il appartenir à un escadron ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications et au journal tactique."
+                    "text": "Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit)."
                 }
             },
             {
@@ -101,426 +101,448 @@
         ]
     }
     </script>
-
+    <link rel="icon" href="icon-192.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --ed-orange: #FF7100;
-            --ed-blue: #00F0FF;
-            --ed-red: #FF3333;
-            --bg-dark: #010203;
-        }
+        :root { --ed-orange: #FF7100; --ed-blue: #00F0FF; --ed-red: #FF3333; --ed-green: #00FF66; --ed-gold: #FFD700; --bg-dark: #010203; }
 
         body, html {
-            margin: 0; padding: 0;
-            background-color: var(--bg-dark);
-            background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
-                radial-gradient(circle at 50% 10%, #0a1824 0%, #010203 100%);
-            background-size: 50px 50px, 50px 50px, 100% 100%;
-            background-attachment: fixed;
-            color: #ddd;
-            font-family: 'Share Tech Mono', monospace;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
+            margin: 0; padding: 0; background-color: var(--bg-dark);
+            background-image: linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px), radial-gradient(circle at 50% 10%, #0a1824 0%, #010203 100%);
+            background-size: 50px 50px, 50px 50px, 100% 100%; background-attachment: fixed;
+            color: #ddd; font-family: 'Share Tech Mono', monospace; overflow-x: hidden; scroll-behavior: smooth;
         }
-
-        .scanline {
-            position: fixed; top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--ed-blue);
-            box-shadow: 0 0 15px var(--ed-blue), 0 0 30px var(--ed-blue);
-            opacity: 0.15; z-index: 9999; pointer-events: none;
-            animation: scanline-anim 6s linear infinite;
-        }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-blue); box-shadow: 0 0 15px var(--ed-blue), 0 0 30px var(--ed-blue); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 6s linear infinite; }
         @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
-
-        .container { max-width: 1600px; margin: 0 auto; padding: 0 40px; }
-
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
         h1, h2, h3 { text-transform: uppercase; margin: 0; }
-        
         .neon-blue { color: #fff; text-shadow: 0 0 10px var(--ed-blue), 0 0 30px var(--ed-blue), 0 0 60px var(--ed-blue); }
         .neon-orange { color: #fff; text-shadow: 0 0 10px var(--ed-orange), 0 0 30px var(--ed-orange), 0 0 60px var(--ed-orange); }
-        .sub-data { display: block; color: #555; font-size: 0.8em; letter-spacing: 4px; margin-bottom: 10px; font-weight: bold; }
+        .sub-data { display: block; color: #667; font-size: 0.8em; letter-spacing: 4px; margin-bottom: 10px; font-weight: bold; }
+        a { color: inherit; }
 
-        /* =========================================
-           WIDGET AMBIANCE SONORE (non-bloquant)
-           ========================================= */
-        #ambiance-toggle {
-            position: fixed; bottom: 25px; right: 25px; z-index: 500;
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(1, 2, 3, 0.85); border: 1px solid var(--ed-blue);
-            color: #ddd; font-family: 'Share Tech Mono', monospace;
-            font-size: 0.85em; letter-spacing: 1px; text-transform: uppercase;
-            padding: 12px 20px; border-radius: 4px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0,240,255,0.05);
-            backdrop-filter: blur(6px);
-            transition: all 0.3s ease-out;
-        }
+        /* ---------- Ambiance sonore (identique a la page actuelle) ---------- */
+        #ambiance-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 500; display: flex; align-items: center; gap: 10px; background: rgba(1, 2, 3, 0.85); border: 1px solid var(--ed-blue); color: #ddd; font-family: inherit; font-size: 0.85em; letter-spacing: 1px; text-transform: uppercase; padding: 12px 20px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0,240,255,0.05); backdrop-filter: blur(6px); transition: all 0.3s ease-out; }
         #ambiance-toggle:hover { border-color: #fff; box-shadow: 0 0 30px rgba(0, 240, 255, 0.4); }
         #ambiance-toggle.active { border-color: var(--ed-orange); }
 
-        @media (max-width: 768px) {
-            #ambiance-toggle { bottom: 15px; right: 15px; padding: 10px 14px; font-size: 0.75em; }
-        }
+        /* ---------- Barre fixe ---------- */
+        .topbar { position: sticky; top: 0; z-index: 400; display: flex; align-items: center; gap: 26px; padding: 12px 40px; background: rgba(1,2,3,.82); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,240,255,.35); box-shadow: 0 6px 30px rgba(0,240,255,.08); }
+        .topbar .marque { display: flex; align-items: center; gap: 10px; color: #fff; letter-spacing: 3px; font-weight: bold; text-decoration: none; }
+        .topbar .marque svg { width: 30px; height: 30px; filter: drop-shadow(0 0 8px rgba(0,240,255,.6)); }
+        .topbar nav { display: flex; gap: 22px; margin-left: auto; font-size: .9em; letter-spacing: 2px; }
+        .topbar nav a { color: #9ab; text-decoration: none; padding: 6px 0; border-bottom: 1px solid transparent; transition: .25s; }
+        .topbar nav a:hover, .topbar nav a.on { color: #fff; border-color: var(--ed-blue); text-shadow: 0 0 10px var(--ed-blue); }
+        .btn-mini { background: rgba(0,240,255,.08); border: 1px solid var(--ed-blue); color: #fff; padding: 9px 18px; letter-spacing: 2px; font-size: .85em; text-decoration: none; font-weight: bold; box-shadow: 0 0 18px rgba(0,240,255,.25); transition: .25s; white-space: nowrap; }
+        .btn-mini:hover { background: var(--ed-blue); color: #000; box-shadow: 0 0 34px var(--ed-blue); }
 
-        /* =========================================
-           HERO SECTION
-           ========================================= */
-        .hero-section {
-            height: 100vh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; position: relative;
-            border-bottom: 1px solid var(--ed-blue);
-            box-shadow: 0 20px 80px rgba(0, 240, 255, 0.1);
-        }
-
-        .logo-giant {
-            width: 160px; height: 160px; margin-bottom: 50px;
-            filter: drop-shadow(0 0 40px rgba(0, 240, 255, 0.6));
-            animation: pulse-logo 3s infinite alternate ease-in-out;
-            will-change: transform, opacity;
-        }
-        /* Pulsation par opacite + echelle (composees par le GPU) : animer filter/drop-shadow forcait un redessin flou a chaque image. */
-        @keyframes pulse-logo {
-            0% { opacity: 0.8; transform: scale(0.98); }
-            100% { opacity: 1; transform: scale(1.02); }
-        }
-
-        .main-title { font-size: 6em; letter-spacing: 8px; line-height: 1.1; margin-bottom: 30px; }
-        .sub-title { font-size: 1.6em; color: #aaa; max-width: 1000px; line-height: 1.6; margin-bottom: 60px; letter-spacing: 2px; }
-
-        .btn-massive {
-            display: inline-block; background: rgba(255, 113, 0, 0.05); border: 2px solid var(--ed-orange);
-            color: #fff; padding: 25px 60px; font-family: inherit; font-size: 1.8em; font-weight: bold; letter-spacing: 5px;
-            text-decoration: none; text-transform: uppercase; cursor: pointer;
-            box-shadow: 0 0 30px rgba(255, 113, 0, 0.2), inset 0 0 20px rgba(255, 113, 0, 0.1);
-            transition: all 0.3s ease-out; position: relative; overflow: hidden; backdrop-filter: blur(5px);
-        }
-        .btn-massive::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: skewX(-20deg); transition: 0.5s;
-        }
+        /* ---------- Boutons (identiques) ---------- */
+        .btn-massive { display: inline-block; background: rgba(255, 113, 0, 0.05); border: 2px solid var(--ed-orange); color: #fff; padding: 20px 44px; font-family: inherit; font-size: 1.3em; font-weight: bold; letter-spacing: 4px; text-decoration: none; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 30px rgba(255, 113, 0, 0.2), inset 0 0 20px rgba(255, 113, 0, 0.1); transition: all 0.3s ease-out; position: relative; overflow: hidden; backdrop-filter: blur(5px); }
+        .btn-massive::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-20deg); transition: 0.5s; }
         .btn-massive:hover::before { left: 150%; }
-        .btn-massive:hover {
-            background: var(--ed-orange); color: #000; box-shadow: 0 0 60px var(--ed-orange), inset 0 0 20px #fff;
-            transform: scale(1.05); border-color: #fff;
-        }
-        
-        .btn-cyan {
-            border-color: var(--ed-blue);
-            background: rgba(0, 240, 255, 0.05);
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.1);
-        }
-        .btn-cyan:hover {
-            background: var(--ed-blue); color: #000; box-shadow: 0 0 60px var(--ed-blue), inset 0 0 20px #fff;
-        }
+        .btn-massive:hover { background: var(--ed-orange); color: #000; box-shadow: 0 0 60px var(--ed-orange), inset 0 0 20px #fff; transform: scale(1.04); border-color: #fff; }
+        .btn-cyan { border-color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.1); }
+        .btn-cyan:hover { background: var(--ed-blue); color: #000; box-shadow: 0 0 60px var(--ed-blue), inset 0 0 20px #fff; }
 
-        /* CORRECTIONS POUR ÉCRANS 14" ET PETITS PC */
-        @media (max-width: 1366px), (max-height: 800px) {
-            .logo-giant { width: 100px; height: 100px; margin-bottom: 25px; }
-            .main-title { font-size: 3.8em; letter-spacing: 5px; margin-bottom: 20px; }
-            .sub-title { font-size: 1.2em; margin-bottom: 35px; max-width: 800px; }
-            .btn-massive { padding: 15px 40px; font-size: 1.3em; }
-        }
+        /* ---------- Hero : texte + ecran holographique ---------- */
+        .hero { position: relative; padding: 46px 0 50px; border-bottom: 1px solid var(--ed-blue); box-shadow: 0 20px 80px rgba(0, 240, 255, 0.1); overflow: hidden; }
+        /* sol holographique : grille en perspective qui defile lentement */
+        .hero::before { content: ''; position: absolute; left: -20%; right: -20%; bottom: -10%; height: 55%; background: repeating-linear-gradient(90deg, rgba(0,240,255,.13) 0 1px, transparent 1px 70px), repeating-linear-gradient(0deg, rgba(0,240,255,.13) 0 1px, transparent 1px 70px); transform: perspective(500px) rotateX(62deg); transform-origin: 50% 100%; mask-image: linear-gradient(to top, #000 10%, transparent 90%); -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%); animation: sol 6s linear infinite; pointer-events: none; }
+        @keyframes sol { from { background-position: 0 0, 0 0; } to { background-position: 0 0, 0 70px; } }
+        .hero .container { position: relative; display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; }
+        .logo-giant { width: 72px; height: 72px; margin-bottom: 16px; filter: drop-shadow(0 0 40px rgba(0, 240, 255, 0.6)); animation: pulse-logo 3s infinite alternate ease-in-out; }
+        @keyframes pulse-logo { 0% { opacity: 0.8; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
+        .main-title { font-size: 3.3em; letter-spacing: 4px; line-height: 1.1; margin-bottom: 20px; }
+        .sub-title { font-size: 1.15em; color: #aab; line-height: 1.6; margin-bottom: 26px; letter-spacing: 1px; max-width: 640px; }
+        .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+        .hero-cta .btn-massive { font-size: 1.05em; padding: 16px 26px; letter-spacing: 3px; }
+        .hero-note { margin-top: 18px; color: #6f8590; font-size: .9em; letter-spacing: 1px; }
 
-        /* =========================================
-           SECTIONS & GRILLES LARGES
-           ========================================= */
-        .section { padding: 150px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); position: relative; }
-        .section-title { font-size: 3.5em; letter-spacing: 6px; text-align: center; margin-bottom: 100px; }
+        .ecran { position: relative; perspective: 1800px; }
+        .ecran .cadre { position: relative; border: 2px solid var(--ed-blue); border-radius: 6px; background: #000; box-shadow: -20px 24px 60px rgba(0,0,0,.9), 0 0 50px rgba(0,240,255,.28); transform: rotateY(-9deg) rotateX(3deg); transition: transform .6s cubic-bezier(.175,.885,.32,1.275), box-shadow .6s; aspect-ratio: 16 / 10; overflow: hidden; }
+        .ecran:hover .cadre { transform: none; box-shadow: 0 20px 80px rgba(0,240,255,.45), 0 0 40px rgba(0,240,255,.7); }
+        .cadre::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 5; }
+        .cadre .balayage { position: absolute; left: 0; right: 0; height: 90px; top: -90px; background: linear-gradient(to bottom, transparent, rgba(0,240,255,.16), transparent); z-index: 6; animation: balayage 5s linear infinite; pointer-events: none; }
+        @keyframes balayage { to { transform: translateY(420px); } }
+        .cadre img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; opacity: 0; transition: opacity .8s; filter: brightness(.95) contrast(1.08); }
+        .cadre img.mobile { object-fit: contain; object-position: center; background: radial-gradient(circle at 50% 40%, #0a1824, #000); }
+        .cadre img.on { opacity: 1; }
+        .legende { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 16px; }
+        .legende .titre { color: #fff; letter-spacing: 3px; font-size: .95em; text-shadow: 0 0 12px rgba(0,240,255,.5); }
+        .legende .points { display: flex; gap: 8px; }
+        .legende .points button { width: 26px; height: 5px; border: 0; padding: 0; background: rgba(0,240,255,.22); cursor: pointer; transition: .3s; }
+        .legende .points button.on { background: var(--ed-blue); box-shadow: 0 0 10px var(--ed-blue); width: 44px; }
 
-        .feature-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 80px; align-items: center; margin-bottom: 150px; }
+        .bande { padding: 22px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); background: rgba(0,240,255,0.02); }
+        .bande .container { display: flex; flex-wrap: wrap; gap: 14px 40px; justify-content: center; text-align: center; font-size: 1em; color: #99a; }
+
+        .section { padding: 90px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); position: relative; }
+        .section-title { font-size: 2.6em; letter-spacing: 5px; text-align: center; margin-bottom: 14px; }
+        .section-lead { text-align: center; color: #99a; font-size: 1.15em; max-width: 820px; margin: 0 auto 50px; line-height: 1.7; }
+
+        /* ---------- Installation compacte ---------- */
+        .install { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 18px; align-items: stretch; }
+        .etape { background: rgba(10, 15, 20, 0.8); border: 1px solid #2a3338; border-top: 3px solid var(--ed-blue); padding: 22px 24px; position: relative; overflow: hidden; transition: .35s; }
+        .etape::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top, rgba(0,240,255,0.12), transparent 70%); pointer-events: none; }
+        .etape:hover { border-color: #fff; transform: translateY(-6px); box-shadow: 0 14px 40px rgba(0,240,255,.25); }
+        .etape .n { position: absolute; right: 14px; top: 2px; font-size: 3.6em; font-weight: bold; color: var(--ed-blue); opacity: .15; }
+        .etape b { display: block; color: #fff; letter-spacing: 2px; margin-bottom: 8px; font-size: 1.05em; }
+        .etape span { color: #99a; line-height: 1.55; font-size: .95em; display: block; }
+        .install .go { display: flex; align-items: center; }
+
+        /* ---------- Profils ---------- */
+        .profils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        .profil { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: left; cursor: pointer; font-family: inherit; color: #ccd; background: rgba(10, 15, 20, 0.8); border: 1px solid #2a3338; padding: 26px 26px 22px; position: relative; transition: .3s; border-top: 3px solid var(--c); }
+        .profil::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top left, var(--cg), transparent 65%); pointer-events: none; }
+        .profil:hover, .profil.on { border-color: var(--c); box-shadow: 0 0 40px var(--cg), inset 0 0 30px var(--cg); transform: translateY(-5px); }
+        .profil .qui { color: var(--c); letter-spacing: 3px; font-size: .8em; font-weight: bold; }
+        .profil h3 { color: #fff; font-size: 1.45em; letter-spacing: 2px; margin: 8px 0 14px; }
+        .profil ul { margin: 0 0 16px; padding: 0; list-style: none; }
+        .profil li { padding: 4px 0 4px 20px; position: relative; line-height: 1.45; font-size: .98em; color: #aab; }
+        .profil li::before { content: '▸'; color: var(--c); position: absolute; left: 0; }
+        .profil .voir { margin-top: auto; color: var(--c); letter-spacing: 2px; font-size: .85em; font-weight: bold; }
+
+        /* ---------- Piliers a onglets ---------- */
+        .vue { display: flex; align-items: center; gap: 10px; justify-content: center; flex-wrap: wrap; margin: -20px 0 30px; color: #778; font-size: .85em; letter-spacing: 2px; }
+        .vue button { font-family: inherit; background: transparent; border: 1px solid #334; color: #99a; padding: 6px 14px; letter-spacing: 2px; cursor: pointer; transition: .25s; font-size: .95em; }
+        .vue button:hover { color: #fff; border-color: var(--ed-blue); }
+        .vue button.on { color: #000; background: var(--ed-blue); border-color: var(--ed-blue); box-shadow: 0 0 18px rgba(0,240,255,.5); }
+        .onglets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 26px; }
+        .onglet { font-family: inherit; text-align: left; cursor: pointer; background: rgba(10,15,20,.8); border: 1px solid #2a3338; border-bottom: 3px solid #2a3338; color: #99a; padding: 16px 18px; transition: .3s; }
+        .onglet .t { display: block; color: #fff; letter-spacing: 3px; font-size: 1.15em; font-weight: bold; }
+        .onglet .d { display: block; margin-top: 4px; font-size: .85em; letter-spacing: 1px; }
+        .onglet:hover { border-bottom-color: var(--p); }
+        .onglet.on { border-color: var(--p); border-bottom-width: 3px; box-shadow: 0 0 30px var(--pg), inset 0 0 24px var(--pg); }
+        .onglet.on .t { text-shadow: 0 0 14px var(--p); }
+        .scene { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: start; }
+        .liste { display: flex; flex-direction: column; gap: 8px; }
+        .module { font-family: inherit; text-align: left; cursor: pointer; background: rgba(10,15,20,.75); border: 1px solid #2a3338; border-left: 3px solid #2a3338; color: #aab; padding: 13px 16px; letter-spacing: 1.5px; transition: .25s; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+        .module:hover { color: #fff; border-left-color: var(--p); }
+        .module.on { color: #fff; border-color: var(--p); border-left-width: 5px; background: var(--pg); }
+        .module.off { opacity: .32; }
+        .module .pour { font-size: .7em; color: var(--p); border: 1px solid var(--p); padding: 1px 6px; letter-spacing: 1px; white-space: nowrap; }
+        .detail { background: rgba(10,15,20,.8); border: 1px solid #2a3338; padding: 26px; position: relative; backdrop-filter: blur(8px); box-shadow: inset 30px 0 80px var(--pg); border-left: 4px solid var(--p); }
+        .detail .ecran-d { perspective: 1800px; margin-bottom: 22px; }
+        .detail .cadre-d { position: relative; border: 2px solid var(--p); border-radius: 6px; background: #000; box-shadow: 0 0 40px var(--pg), 0 14px 40px rgba(0,0,0,.8); overflow: hidden; transition: .4s; }
+        .detail .cadre-d::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,.2) 50%); background-size: 100% 4px; pointer-events: none; }
+        .detail .cadre-d img { display: block; width: 100%; max-height: 520px; object-fit: cover; object-position: top left; }
+        .detail .cadre-d img.contain { object-fit: contain; object-position: center; max-height: 560px; background: radial-gradient(circle at 50% 40%, #0a1824, #000); }
+        .detail .vignettes { display: flex; gap: 10px; margin-top: 12px; }
+        .detail .vignettes button { width: 92px; height: 54px; border: 1px solid #334; padding: 0; cursor: pointer; background: #000 center/cover; opacity: .55; transition: .25s; }
+        .detail .vignettes button.on, .detail .vignettes button:hover { opacity: 1; border-color: var(--p); box-shadow: 0 0 14px var(--pg); }
+        .detail .kick { color: var(--p); letter-spacing: 4px; font-size: .8em; font-weight: bold; }
+        .detail h3 { color: #fff; font-size: 1.9em; letter-spacing: 3px; margin: 6px 0 14px; text-shadow: 0 0 22px var(--p); }
+        .detail p { font-size: 1.12em; line-height: 1.75; color: #bbc; margin: 0 0 12px; }
+        .detail .fiche-faux { padding: 18px; background: rgba(10,0,0,.95); }
+        .fondu { animation: fondu .45s ease; }
+        @keyframes fondu { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        /* ---------- Blocs depliables ---------- */
+        details.pli { border: 1px solid #2a3338; background: rgba(10,15,20,.75); margin-bottom: 14px; }
+        details.pli > summary { cursor: pointer; padding: 20px 26px; list-style: none; color: #fff; letter-spacing: 3px; font-size: 1.15em; display: flex; justify-content: space-between; gap: 14px; align-items: center; transition: .25s; }
+        details.pli > summary::-webkit-details-marker { display: none; }
+        details.pli > summary::after { content: '+'; color: var(--ed-blue); font-size: 1.5em; line-height: 1; }
+        details.pli[open] > summary::after { content: '–'; }
+        details.pli > summary:hover { background: rgba(0,240,255,.06); }
+        details.pli > summary small { color: #778; letter-spacing: 1px; font-size: .75em; margin-left: auto; margin-right: 12px; }
+        details.pli > .corps { padding: 0 6px 20px; }
+        details.pli .section { padding: 30px 0; border: 0; background: none !important; box-shadow: none !important; }
+        details.pli .section-title { font-size: 1.6em; margin-bottom: 24px; }
+
+        /* classes reprises des sections existantes (distinctions) */
+        .feature-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 50px; align-items: center; margin-bottom: 60px; }
         .feature-grid.reverse { grid-template-columns: 1.5fr 1fr; }
-
-        .feature-text { background: rgba(10, 15, 20, 0.8); padding: 50px; border-left: 4px solid var(--ed-blue); box-shadow: inset 30px 0 80px rgba(0,240,255,0.05); backdrop-filter: blur(10px); }
-        .feature-grid.reverse .feature-text { border-left: none; border-right: 4px solid var(--ed-orange); box-shadow: inset -30px 0 80px rgba(255,113,0,0.05); grid-column: 2; grid-row: 1; }
+        .feature-text { background: rgba(10, 15, 20, 0.8); padding: 34px; border-left: 4px solid var(--ed-blue); }
+        .feature-grid.reverse .feature-text { border-left: none; border-right: 4px solid var(--ed-orange); grid-column: 2; grid-row: 1; }
         .feature-grid.reverse .holo-container { grid-column: 1; grid-row: 1; }
+        .feature-text h3 { font-size: 1.8em; margin-bottom: 18px; letter-spacing: 3px; }
+        .feature-text p { font-size: 1.1em; line-height: 1.7; color: #bbb; }
+        .holo-card { position: relative; width: 100%; border: 2px solid var(--ed-blue); border-radius: 6px; background: #000; }
+        .holo-card img { width: 100%; display: block; }
+        .holo-container { padding: 14px; }
 
-        .feature-text h3 { font-size: 2.5em; margin-bottom: 25px; letter-spacing: 3px; line-height: 1.2; }
-        .feature-text p { font-size: 1.3em; line-height: 1.8; color: #bbb; margin-bottom: 20px; }
+        .final { text-align: center; padding: 100px 0; background: rgba(0,240,255,.03); border-top: 1px solid var(--ed-blue); }
+        .final p { color: #fff; font-size: 1.7em; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,.5); margin: 0 0 36px; }
+        .pied { text-align: center; color: #556; font-size: .85em; padding: 30px 20px 90px; letter-spacing: 1px; }
 
-        .holo-container { perspective: 2000px; width: 100%; padding: 40px; cursor: crosshair; }
-        .holo-card {
-            position: relative; width: 100%; border: 2px solid var(--ed-blue); border-radius: 6px;
-            box-shadow: -30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 240, 255, 0.2);
-            transform: rotateY(-12deg) rotateX(4deg) translateZ(0) scale(0.95);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); background-color: #000;
-        }
-        .feature-grid.reverse .holo-card { border-color: var(--ed-orange); box-shadow: 30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 113, 0, 0.2); transform: rotateY(12deg) rotateX(4deg) translateZ(0) scale(0.95); }
-        .holo-card::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
-            background-size: 100% 4px; pointer-events: none; z-index: 10;
-        }
-        .holo-card img { width: 100%; display: block; filter: brightness(0.9) contrast(1.1); }
-        .holo-container:hover .holo-card { transform: rotateY(0deg) rotateX(0deg) translateZ(50px) scale(1.05); box-shadow: 0 20px 80px rgba(0, 240, 255, 0.5), 0 0 40px rgba(0, 240, 255, 0.8); border-color: #fff; z-index: 20; }
-        .feature-grid.reverse .holo-container:hover .holo-card { transform: rotateY(0deg) rotateX(0deg) translateZ(50px) scale(1.05); box-shadow: 0 20px 80px rgba(255, 113, 0, 0.5), 0 0 40px rgba(255, 113, 0, 0.8); border-color: #fff; }
-        .holo-container:hover .holo-card img { filter: brightness(1.1) contrast(1.2); }
+        .revele { opacity: 0; transform: translateY(24px); transition: opacity .8s, transform .8s; }
+        .revele.in { opacity: 1; transform: none; }
 
-        .steps-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 80px; }
-        .step-box { background: rgba(10, 15, 20, 0.8); border: 1px solid #333; border-top: 4px solid var(--ed-blue); padding: 50px 40px; text-align: center; transition: 0.4s; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .step-box::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top, rgba(0,240,255,0.15), transparent 70%); pointer-events: none; }
-        .step-box:hover { border-color: #fff; box-shadow: 0 20px 60px rgba(0,240,255,0.3); transform: translateY(-15px); }
-        .step-number { font-size: 6em; color: var(--ed-blue); font-weight: bold; opacity: 0.15; margin-bottom: -40px; }
-        .step-title { color: #fff; font-size: 1.8em; margin-bottom: 25px; letter-spacing: 2px; font-weight: bold; }
-
-        @media (max-width: 1024px) {
-            .feature-grid, .feature-grid.reverse { grid-template-columns: 1fr; gap: 40px; margin-bottom: 80px; }
-            .feature-grid.reverse .feature-text { grid-column: 1; grid-row: auto; }
-            .feature-grid.reverse .holo-container { grid-column: 1; grid-row: auto; }
-            .holo-card, .feature-grid.reverse .holo-card { transform: none !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        /* Sans JavaScript : tous les modules restent lisibles (empiles). Avec JavaScript : un seul a la fois. */
+        .detail .panel + .panel { margin-top: 34px; padding-top: 30px; border-top: 1px dashed #334; }
+        .js .detail .panel:not(.on) { display: none; }
+        .js .liste .module:not(.vis) { display: none; }
+        .detail .cadre-d img:not(.on) { display: none; }
+        .no-js-note { display: none; }
+        .module .pour { display: none; }
+        .vue-filtree .module.vis:not(.off) .pour { display: inline-block; }
+        @media (max-width: 1100px) {
+            .hero .container { grid-template-columns: 1fr; gap: 40px; }
             .main-title { font-size: 3em; }
-            .steps-container { grid-template-columns: 1fr; }
+            .install { grid-template-columns: 1fr; }
+            .profils { grid-template-columns: 1fr; }
+            .onglets { grid-template-columns: 1fr 1fr; }
+            .scene { grid-template-columns: 1fr; }
+            .liste { flex-direction: row; overflow-x: auto; padding-bottom: 6px; }
+            .module { white-space: nowrap; }
+            .feature-grid, .feature-grid.reverse { grid-template-columns: 1fr; }
+            .feature-grid.reverse .feature-text, .feature-grid.reverse .holo-container { grid-column: 1; grid-row: auto; }
+            .topbar nav { display: none; }
+            .topbar .btn-mini { margin-left: auto; }
         }
-
-        /* =========================================
-           CORRECTIONS SPÉCIFIQUES SMARTPHONES
-           ========================================= */
         @media (max-width: 768px) {
-            .container { padding: 0 20px; }
-
-            /* HERO SECTION */
-            .logo-giant { width: 80px; height: 80px; margin-bottom: 20px; }
-            .main-title { font-size: 2.2em; letter-spacing: 3px; line-height: 1.3; margin-bottom: 15px; }
-            .sub-title { font-size: 1em; margin-bottom: 30px; letter-spacing: 1px; }
-            .btn-massive { padding: 15px 20px; font-size: 1.1em; width: 100%; box-sizing: border-box; text-align: center; }
-            
-            /* SECTIONS */
-            .section { padding: 60px 0; }
-            .section-title { font-size: 2em; margin-bottom: 40px; letter-spacing: 2px; }
-            
-            .feature-grid, .feature-grid.reverse { gap: 20px; margin-bottom: 60px; }
-            .feature-text { padding: 25px 20px; border-left-width: 2px; }
-            .feature-grid.reverse .feature-text { border-right-width: 2px; }
-            .feature-text h3 { font-size: 1.5em; letter-spacing: 2px; }
-            .feature-text p { font-size: 1em; line-height: 1.5; }
-            
-            .holo-container { padding: 10px; }
-            
-            /* ÉTAPES */
-            .step-box { padding: 30px 15px; }
-            .step-number { font-size: 4em; margin-bottom: -20px; }
-            .step-title { font-size: 1.3em; }
+            .container { padding: 0 18px; }
+            .topbar { padding: 10px 16px; }
+            .main-title { letter-spacing: 3px; }
+            .sub-title { font-size: 1em; }
+            .btn-massive { padding: 15px 18px; font-size: 1.05em; width: 100%; box-sizing: border-box; text-align: center; }
+            .section { padding: 56px 0; }
+            .section-title { font-size: 1.7em; letter-spacing: 2px; }
+            #ambiance-toggle { bottom: 15px; right: 15px; padding: 10px 14px; font-size: 0.75em; }
+            .onglets { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .onglet { padding: 12px 12px; }
+            .onglet .t { font-size: .95em; letter-spacing: 2px; }
+            .onglet .d { display: none; }
+            .btn-mini { font-size: .7em; padding: 8px 10px; letter-spacing: 1px; }
+            .topbar .marque { letter-spacing: 2px; font-size: .9em; }
+            .main-title { font-size: 1.8em; }
+            .logo-giant { width: 56px; height: 56px; }
         }
-
+        @media (prefers-reduced-motion: reduce) { .hero::before, .scanline, .balayage, .logo-giant { animation: none !important; } .revele { opacity: 1; transform: none; } }
     </style>
     <script src="son.js?v=1"></script>
 </head>
 <body>
-
     <div class="scanline"></div>
 
-    <!-- =========================================
-         WIDGET AMBIANCE SONORE (optionnel, non-bloquant)
-         ========================================= -->
     <div id="ambiance-toggle" onclick="toggleAmbiance()" title="Casque recommandé pour la meilleure expérience">
         <span id="ambiance-icon">🔊</span>
         <span id="ambiance-label">ACTIVER L'AMBIANCE SONORE</span>
     </div>
 
-    <!-- =========================================
-         LE RESTE DU SITE
-         ========================================= -->
-    <header class="hero-section">
-        <div class="container">
-            <svg class="logo-giant" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
-                <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
-                <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
-            </svg>
-            
-            <span class="sub-data">// OUTIL COMMUNAUTAIRE GRATUIT POUR ELITE DANGEROUS</span>
-            <h1 class="main-title neon-blue">UNIFIEZ LA FLOTTE.<br><span class="neon-orange">GAGNEZ LA GUERRE.</span></h1>
-            <p class="sub-title">Le renseignement est votre meilleure arme. Découvrez <strong>SYS.EDTEAM</strong>, le réseau tactique qui connecte l'ordinateur de bord de votre vaisseau <strong>Elite Dangerous</strong> au commandement central de l'escadron, en temps réel.</p>
+    <!-- BARRE FIXE : le bouton d'installation suit le lecteur partout -->
+    <div class="topbar">
+        <a class="marque" href="#haut">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF"/><polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100"/><polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9"/></svg>
+            SYS.EDTEAM
+        </a>
+        <nav>
+            <a href="#installer">INSTALLER</a>
+            <a href="#profils">QUI ÊTES-VOUS ?</a>
+            <a href="#piliers">FONCTIONS</a>
+            <a href="#vos-donnees">VOS DONNÉES</a>
+            <a href="#faq">FAQ</a>
+        </nav>
+        <a class="btn-mini" href="index.html">[ S'INSTALLER · 2 MIN ]</a>
+    </div>
 
-            <!-- Lien vers le vrai site / l'appli -->
-            <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
-                <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
-                <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan" style="font-size: 1.4em; padding: 25px 40px;">[ REJOINDRE LE DISCORD ]</a>
+    <!-- 1. HERO : le titre ET l'outil en action, des la premiere seconde -->
+    <header class="hero" id="haut">
+        <div class="container">
+            <div>
+                <svg class="logo-giant" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                    <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                    <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+                </svg>
+                <span class="sub-data">// OUTIL COMMUNAUTAIRE GRATUIT POUR ELITE DANGEROUS</span>
+                <h1 class="main-title neon-blue">UNIFIEZ LA FLOTTE.<br><span class="neon-orange">GAGNEZ LA GUERRE.</span></h1>
+                <p class="sub-title">Le réseau tactique qui relie le journal de votre vaisseau <strong>Elite Dangerous</strong> au commandement de l'escadron. <strong style="color:#fff;">Vous volez. Le système s'occupe du reste.</strong></p>
+                <div class="hero-cta">
+                    <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
+                    <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan" >[ DISCORD ]</a>
+                </div>
+                <div class="hero-note">✓ 2 minutes · ✓ 100 % gratuit · ✓ rien à saisir : tout est relevé par le plugin</div>
+            </div>
+            <div class="ecran">
+                <div class="cadre" id="vitrine"><div class="balayage"></div></div>
+                <div class="legende"><span class="titre" id="vitrine-titre"></span><span class="points" id="vitrine-points"></span></div>
             </div>
         </div>
     </header>
 
-    <section style="padding: 40px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); background: rgba(0,240,255,0.02);">
-        <div class="container" style="max-width: 1100px; display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; text-align: center; font-size: 1.05em; color: #999;">
-            <span>✓ 100% gratuit, projet de fan sans lien officiel avec Frontier Developments</span>
-            <span>✓ Uniquement vos données de jeu et votre email — <a href="#vos-donnees" style="color:#ccc;">voir le détail</a></span>
-            <span>✓ Installation via le plugin <strong style="color:#ccc;">EDMC</strong>, aucun logiciel lourd</span>
+    <div class="bande"><div class="container">
+        <span>✓ Projet de fan sans lien officiel avec Frontier Developments</span>
+        <span>✓ Uniquement vos données de jeu et votre email — <a href="#vos-donnees" style="color:#ccc;">voir le détail</a></span>
+        <span>✓ Plugin <strong style="color:#ccc;">EDMC</strong>, aucun logiciel lourd</span>
+    </div></div>
+
+    <!-- 2. INSTALLATION : tout de suite, en 3 lignes -->
+    <section class="section revele" id="installer" style="padding:60px 0;">
+        <div class="container">
+            <h2 class="section-title neon-blue" style="font-size:2em;">PRÊT EN MOINS DE 2 MINUTES</h2>
+            <p class="section-lead" style="margin-bottom:34px;">Pas besoin de tout lire avant d'essayer : trois étapes, puis vous décollez.</p>
+            <div class="install">
+                <div class="etape"><span class="n">01</span><b>ACCRÉDITATION WEB</b><span>Créez votre profil sécurisé sur le Terminal. Immédiat.</span></div>
+                <div class="etape"><span class="n">02</span><b>LIAISON NAVALE</b><span>Téléchargez <code>SYS.EDTEAM.zip</code> et placez-le dans le dossier de votre utilitaire <strong>EDMC</strong>.</span></div>
+                <div class="etape"><span class="n">03</span><b>SYNCHRONISATION</b><span>Copiez votre clé unique dans les réglages d'EDMC. Décollez.</span></div>
+                <div class="go"><a href="index.html" class="btn-massive" style="padding:18px 26px;font-size:1.05em;letter-spacing:3px;background:var(--ed-orange);color:#000;box-shadow:0 0 40px rgba(255,113,0,.7);">[ ACTIVER ]</a></div>
+            </div>
         </div>
     </section>
 
-    <section class="section" style="background: rgba(0,0,0,0.7); box-shadow: inset 0 0 100px #000;">
-        <div class="container" style="text-align: center; max-width: 1000px;">
-            <h2 class="section-title neon-orange" style="margin-bottom: 40px;">LA FIN DES EFFORTS FANTÔMES</h2>
-            <p style="font-size: 1.6em; line-height: 1.8; color: #bbb;">
-                Jusqu'à aujourd'hui, vous voliez à l'aveugle. Les directives se perdaient, la télémétrie était floue, et vos exploits individuels passaient inaperçus.<br><br>
-                <strong class="text-orange" style="font-size: 1.2em; text-shadow: 0 0 20px rgba(255,113,0,0.5);">L'ère du tableau Excel est révolue.</strong><br><br>
-                Désormais, chaque saut hyperspatial, chaque crédit gagné, et chaque tir de laser alimente le Background Simulation (BGS) en direct. <br><strong style="color: #fff;">Vous volez. Le système s'occupe du reste.</strong>
-            </p>
+    <!-- 3. QUI ETES-VOUS ? -->
+    <section class="section revele" id="profils" style="background: rgba(0,0,0,0.55);">
+        <div class="container">
+            <h2 class="section-title neon-orange">QU'EST-CE QUE ÇA VOUS APPORTE ?</h2>
+            <p class="section-lead">Choisissez votre profil : on vous montre ce qui vous concerne.</p>
+            <div class="profils">
+                <button class="profil" data-profil="solo" style="--c:#00F0FF;--cg:rgba(0,240,255,.10);">
+                    <span class="qui">// PILOTE SANS ESCADRON</span>
+                    <h3>Pilote solo</h3>
+                    <ul><li>Votre QG : finances, rangs, Powerplay et mérites</li><li>Votre budget personnel, strictement privé</li><li>Votre colonisation, dans un espace que vous seul voyez</li><li>Communications et compagnon mobile</li></ul>
+                    <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
+                </button>
+                <button class="profil" data-profil="squad" style="--c:#FF7100;--cg:rgba(255,113,0,.10);">
+                    <span class="qui">// MEMBRE D'UN ESCADRON</span>
+                    <h3>Équipier</h3>
+                    <ul><li>Les directives BGS : vous savez où frapper</li><li>La colonisation commune de l'escadron</li><li>Plaques, titres de spécialiste, Pilier de la semaine</li><li>Votre rang BGS, gagné pour toujours</li></ul>
+                    <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
+                </button>
+                <button class="profil" data-profil="officier" style="--c:#FFD700;--cg:rgba(255,215,0,.09);">
+                    <span class="qui">// AMIRAL · OFFICIER · DIPLOMATE</span>
+                    <h3>Commandement</h3>
+                    <ul><li>Vous définissez les théâtres d'opération</li><li>Registre des traités et renseignement tactique</li><li>Effectifs, rubans de campagne et palmarès</li><li>La part de chaque pilote dans l'effort commun</li></ul>
+                    <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
+                </button>
+            </div>
         </div>
     </section>
 
-    <section class="section">
+    <!-- 4. LES 4 PILIERS -->
+    <section class="section revele" id="piliers">
+        <div class="container">
+            <h2 class="section-title neon-blue">TOUT CE QUE LE RÉSEAU FAIT POUR VOUS</h2>
+            <p class="section-lead">Quatre piliers, une seule liaison. Cliquez : chaque écran est une vraie page de l'application.</p>
+            <div class="vue" id="vue"><span>VUE :</span>
+                <button data-v="tout" class="on">TOUT</button><button data-v="solo">SOLO</button><button data-v="squad">ÉQUIPIER</button><button data-v="officier">COMMANDEMENT</button>
+            </div>
+            <div class="onglets" id="onglets">
+                <button class="onglet" data-p="commander" style="--p:#00F0FF;--pg:rgba(0,240,255,.12);"><span class="t">COMMANDER</span><span class="d">Voir, décider, frapper</span></button>
+                <button class="onglet" data-p="construire" style="--p:#FF7100;--pg:rgba(255,113,0,.12);"><span class="t">CONSTRUIRE</span><span class="d">Coloniser, gérer ses crédits</span></button>
+                <button class="onglet" data-p="progresser" style="--p:#FFD700;--pg:rgba(255,215,0,.10);"><span class="t">PROGRESSER</span><span class="d">Plaques, titres, rang, Pilier</span></button>
+                <button class="onglet" data-p="connecte" style="--p:#00FF66;--pg:rgba(0,255,102,.10);"><span class="t">RESTER CONNECTÉ</span><span class="d">Mobile, messages, COVAS</span></button>
+            </div>
+            <div class="scene">
+                <div class="liste" id="liste">
+                <button class="module" data-p="commander" data-m="qg" data-for="solo squad officier"><span>Quartier général</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="commander" data-m="bgs" data-for="squad officier"><span>BGS tactique</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="commander" data-m="pp" data-for="solo squad officier"><span>Powerplay 2.0</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="commander" data-m="diplo" data-for="squad officier"><span>Diplomatie & renseignement</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="commander" data-m="esc" data-for="squad officier"><span>Escadron</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="construire" data-m="colo" data-for="solo squad officier"><span>Colonisation</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="construire" data-m="budget" data-for="solo squad officier"><span>Budget</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="progresser" data-m="plaques" data-for="squad officier"><span>États de service</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="progresser" data-m="spe" data-for="squad officier"><span>Spécialistes</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="progresser" data-m="pilier" data-for="squad officier"><span>Pilier de la semaine</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="progresser" data-m="force" data-for="squad officier"><span>Force de frappe</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="progresser" data-m="rang" data-for="squad officier"><span>Rang BGS de carrière</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="connecte" data-m="mobile" data-for="solo squad officier"><span>Compagnon mobile</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="connecte" data-m="comms" data-for="solo squad officier"><span>Communications</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="connecte" data-m="covas" data-for="squad officier"><span>IA embarquée (COVAS)</span><span class="pour">POUR VOUS</span></button>
+                </div>
+                <div class="detail" id="detail">
+                <article class="panel" id="module-qg" data-p="commander" data-m="qg">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/qg.png" alt="Quartier général"></div></div>
+                    <span class="kick">// MODULE 01 : SUPERVISION</span><h3>VISION STRATÉGIQUE</h3><p>Votre <strong>Quartier Général</strong> centralise vos données navales : finances en direct (vaisseau et Fleet Carrier), avancée de vos rangs militaires, actualités Galnet et EDNews de l'escadron.</p><p>Le <strong>Journal Tactique</strong> diffuse en direct les directives, les distinctions et le bilan hebdomadaire du réseau. Tout ce dont un commandant a besoin, sur un terminal unique.</p>
+                </article>
+                <article class="panel" id="module-bgs" data-p="commander" data-m="bgs">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/ordres.png" alt="BGS tactique" loading="lazy"></div></div>
+                    <span class="kick">// MODULE 02 : BGS TACTIQUE</span><h3>FRAPPEZ OÙ ÇA FAIT MAL</h3><p>Ne demandez plus sur le Discord <em>« Où est-ce qu'on se bat aujourd'hui ? »</em>. L'Amirauté définit les théâtres d'opération. Vous n'avez plus qu'à verrouiller la cible.</p><p>Visualisez l'objectif (Guerre, Élection, Hausse), suivez votre part d'impact personnel et la progression de l'escadron sur chaque objectif.</p>
+                </article>
+                <article class="panel" id="module-pp" data-p="commander" data-m="pp">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/powerplay.png" alt="Powerplay 2.0" loading="lazy"></div></div>
+                    <span class="kick">// MODULE 05 : POWERPLAY 2.0</span><h3>COMMANDEMENT GALACTIQUE</h3><p>Suivez votre allégeance, votre rang et vos mérites du cycle depuis le QG, avec le décompte avant le prochain cycle. La carte <strong>Ma progression</strong> garde la mémoire de vos cycles : mérites semaine après semaine, meilleur cycle, moyenne.</p><p>Le <strong>Tableau des Partisans</strong> classe les pilotes alignés sur votre puissance. Cloisonnement oblige : jamais de position, ni de flotte.</p>
+                </article>
+                <article class="panel" id="module-diplo" data-p="commander" data-m="diplo">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/diplomatie.png" alt="Diplomatie &amp; renseignement (écran 1)" loading="lazy"><img class="" data-i="1" src="images/renseignement.png" alt="Diplomatie &amp; renseignement (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/diplomatie.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/renseignement.png')" aria-label="Écran 2"></button></div></div>
+                    <span class="kick">// MODULE 06 : DIPLOMATIE & RENSEIGNEMENT</span><h3>SAVOIR QUI EST QUI</h3><p>Le <strong>Bureau Diplomatique</strong> tient le registre des traités de l'escadron : coalition d'alliés, pactes de non-agression et cibles hostiles.</p><p>Le <strong>Bureau du Renseignement Tactique</strong> recense les commandants K.O.S., les suspects et les alliés VIP signalés par vos ailiers. Ces fiches alimentent l'assistant COVAS en jeu.</p>
+                </article>
+                <article class="panel" id="module-esc" data-p="commander" data-m="esc">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/escadron.png" alt="Escadron" loading="lazy"></div></div>
+                    <span class="kick">// MODULE 07 : ESCADRON</span><h3>VOTRE ÉQUIPAGE</h3><p>La page Effectifs présente tous les pilotes de l'escadron avec leur grade (Amiral, Officier BGS, Diplomate) et les rubans de campagne gagnés au fil des opérations.</p><p>Ouvrez la fiche d'un ailier pour consulter son palmarès.</p>
+                </article>
+                <article class="panel" id="module-colo" data-p="construire" data-m="colo">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/colonisation.png" alt="Colonisation (écran 1)" loading="lazy"><img class="" data-i="1" src="images/colonisation-detail.png" alt="Colonisation (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/colonisation.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/colonisation-detail.png')" aria-label="Écran 2"></button></div></div>
+                    <span class="kick">// MODULE 08 : COLONISATION</span><h3>BÂTIR ENSEMBLE</h3><p>Une carte des systèmes colonisés, leur architecte, la faction qui les contrôle. Un clic ouvre les stations terminées et les chantiers en cours : avancement, marchandises restantes, temps estimé, et ce que chaque pilote a livré.</p><p><strong>Rien à saisir</strong> : le plugin relève tout seul. Vos livraisons comptent pour votre rang BGS (1 point pour 400 tonnes). Sans escadron, vous avez un espace personnel que vous seul voyez.</p>
+                </article>
+                <article class="panel" id="module-budget" data-p="construire" data-m="budget">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/budget.png" alt="Budget (écran 1)" loading="lazy"><img class="" data-i="1" src="images/budget-livre.png" alt="Budget (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/budget.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/budget-livre.png')" aria-label="Écran 2"></button></div></div>
+                    <span class="kick">// MODULE 09 : BUDGET</span><h3>VOS COMPTES, EN CLAIR</h3><p>Ce que vous avez gagné et dépensé, cycle après cycle (du jeudi au jeudi) : revenus, charges, résultat net, comparés à la période d'avant. Le livre de compte détaille chaque mouvement, avec filtres et export CSV.</p><p><strong>Strictement personnel</strong> : ni votre escadron, ni l'Amiral ne le voient. Tout est relevé automatiquement.</p>
+                </article>
+                <article class="panel" id="module-plaques" data-p="progresser" data-m="plaques">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/efforts.png" alt="États de service (écran 1)" loading="lazy"><img class="" data-i="1" src="images/fiche-pilote.png" alt="États de service (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/efforts.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/fiche-pilote.png')" aria-label="Écran 2"></button></div></div>
+                    <span class="kick">// MODULE 04 : ÉTATS DE SERVICE</span><h3>FORGEZ VOTRE LÉGENDE</h3><p>Quand l'Amirauté clôture une opération BGS, chaque pilote qui y a participé reçoit une <strong>plaque de campagne</strong>, accrochée à sa fiche pour toujours. Aucun seuil : une seule soirée d'effort suffit.</p><p>Chaque plaque raconte l'opération : type d'ordre, jours d'activité, ampleur de l'effort, place au classement.</p>
+                </article>
+                <article class="panel" id="module-spe" data-p="progresser" data-m="spe">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/specialistes.png" alt="Spécialistes" loading="lazy"></div></div>
+                    <span class="kick">// RECONNAISSANCE</span><h3>LE MEILLEUR DANS CHAQUE SPÉCIALITÉ</h3><p>Huit titres honorent le pilote en tête de l'escadron dans chaque domaine (Fer de Lance, Maître Logisticien, Magnat…). Le titre change de mains dès qu'un ailier prend la tête, et une annonce paraît dans le journal tactique.</p>
+                </article>
+                <article class="panel" id="module-pilier" data-p="progresser" data-m="pilier">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/pilier-distinction.png" alt="Pilier de la semaine" loading="lazy"></div></div>
+                    <span class="kick">// RECONNAISSANCE</span><h3>LE PILIER DE L'ESCADRON</h3><p>Chaque jeudi à 07:00 UTC, le pilote qui a le plus investi dans l'effort de l'escadron devient le <strong>Pilier de la semaine</strong>.</p><p>Il reçoit une distinction sur sa fiche et une ligne dorée dans le journal tactique.</p>
+                </article>
+                <article class="panel" id="module-force" data-p="progresser" data-m="force">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/investissement.png" alt="Force de frappe" loading="lazy"></div></div>
+                    <span class="kick">// RECONNAISSANCE</span><h3>VOTRE PART DANS L'EFFORT COMMUN</h3><p>Un camembert holographique du journal BGS montre en direct la <strong>part de chaque pilote</strong> dans l'effort de l'escadron. Il suit vos filtres, et sur votre dossier la répartition de votre effort par activité.</p><p>Il mesure l'effort fourni, pas l'influence exacte gagnée.</p>
+                </article>
+                <article class="panel" id="module-rang" data-p="progresser" data-m="rang">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/fiche-pilote.png" alt="Rang BGS de carrière" loading="lazy"></div></div>
+                    <span class="kick">// RECONNAISSANCE</span><h3>VOTRE RANG, GAGNÉ POUR TOUJOURS</h3><p>Chaque effort pour l'escadron (directive, action libre, livraison de colonisation) rapporte des points qui s'additionnent pour toute votre carrière et déterminent votre <strong>rang BGS, de 1 à 100</strong>.</p><p>Un rang gagné ne se perd jamais. Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts : le rang 100 est réservé aux plus fidèles.</p>
+                </article>
+                <article class="panel" id="module-mobile" data-p="connecte" data-m="mobile">
+                    <div class="ecran-d"><div class="cadre-d"><img class="contain on" data-i="0" src="images/mobile-poche.png" alt="Compagnon mobile" loading="lazy"></div></div>
+                    <span class="kick">// MODULE 11 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Connectez-vous depuis votre smartphone : directives BGS, chantiers de colonisation, budget, statut de la flotte, et messages avec vos ailiers, en plein vol.</p>
+                </article>
+                <article class="panel" id="module-comms" data-p="connecte" data-m="comms">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/comms.png" alt="Communications" loading="lazy"></div></div>
+                    <span class="kick">// MODULE 10 : CRYPTOGRAPHIE</span><h3>SÉCURITÉ MILITAIRE</h3><p>Fréquence ouverte à tout le réseau, canal d'escadron ou transmissions privées. Où que vous soyez sur le site, une alerte vous prévient.</p><p>Le registre de communication est <strong>purgé et détruit automatiquement chaque jeudi</strong>. Ne laissez aucune trace.</p>
+                </article>
+                <article class="panel" id="module-covas" data-p="connecte" data-m="covas">
+                    <div class="ecran-d"><div class="cadre-d"><div class="fiche-faux"><div style="color:#FF3333;font-size:1.1em;font-weight:bold;border-bottom:1px dashed #FF3333;padding-bottom:5px;margin-bottom:14px;letter-spacing:2px;display:flex;justify-content:space-between;"><span>⚠️ ALERTE TACTIQUE</span><span style="opacity:.5;">SYS.EDTEAM</span></div><div style="margin-bottom:16px;color:#ddd;">CIBLE VERROUILLÉE : <strong style="color:#fff;">CMDR GRIMLOCK VANE</strong> <span style="color:#FF7100;font-size:.85em;margin-left:8px;">[ CRVR ]</span></div><div style="padding:14px;background:rgba(0,0,0,.5);border:1px solid #333;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#888;font-size:.85em;">DOSSIER INDIVIDUEL :</span><strong style="color:#000;background:#FF3333;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #FF3333;">K.O.S (HOSTILE)</strong></div><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#888;font-size:.85em;">TRAITÉ ESCADRON <span style="color:#FF7100;">[ CRVR ]</span> :</span><strong style="color:#FF3333;">⚔️ CIBLE HOSTILE</strong></div><div style="display:flex;justify-content:space-between;"><span style="color:#888;font-size:.85em;">RÉSEAU EDTEAM :</span><strong style="color:#000;background:#00F0FF;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #00F0FF;">✓ RÉPERTORIÉ</strong></div></div><div style="color:#555;font-size:.8em;margin-top:16px;font-weight:bold;text-align:center;">[ ANALYSE COMPLÈTE... ] _</div></div></div></div>
+                    <span class="kick">// MODULE 03 : IA EMBARQUÉE</span><h3>ASSISTANCE HOLOGRAPHIQUE EN DIRECT</h3><p><strong>Scan au saut hyperspatial</strong> : factions hostiles, ordres de l'Amirauté actifs, vous êtes briefé avant même de dépasser l'étoile.</p><p><strong>Verrouillage tactique</strong> : ciblez un vaisseau, le COVAS affiche sa fiche et les statuts diplomatiques de son escadron. Ne tirez plus à l'aveugle.</p>
+                </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. LE RESTE, REPLIE : ce qui rassure ou approfondit, sans alourdir la page -->
+    <section class="section revele" id="vos-donnees" style="background: rgba(0,0,0,0.55);">
+        <div class="container" style="max-width:1100px;">
+            <h2 class="section-title neon-blue">POUR ALLER PLUS LOIN</h2>
+            <p class="section-lead">Tout est là, rien n'est caché : dépliez ce qui vous intéresse.</p>
+            <details class="pli"><summary>VOS DONNÉES, EN CLAIR <small>ce que nous recevons · qui voit quoi</small></summary><div class="corps">
+        <div class="container" style="max-width: 1000px;">
+            
+            <div style="color: #bbb; font-size: 1.2em; line-height: 1.7;">
+                <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">CE QUE NOUS RECEVONS</p>
+                <ul style="margin: 0 0 30px 20px;">
+                    <li>À l'inscription : votre <strong>adresse email</strong> et votre mot de passe (chiffré, géré par Supabase).</li>
+                    <li>Depuis le plugin, à partir du journal d'Elite Dangerous : nom de CMDR, système actuel, nom et modèle du vaisseau, soldes (vaisseau et Fleet Carrier), patrimoine, rangs et progression, statut Powerplay (puissance, rang, mérites), escadron, réputations dans le système, CMDR ciblés et actions BGS.</li>
+                    <li>Toujours depuis le plugin : à son démarrage, il relit en local vos journaux de jeu des dernières semaines pour retrouver les mérites Powerplay que vous avez gagnés sans EDMC, cycle par cycle. Seuls le total de mérites et le rang de chaque cycle sont envoyés, jamais le contenu de vos journaux.</li>
+                    <li>Pour la colonisation (plugin 2.5) : l'état des chantiers que vous consultez (station, système, avancement, marchandises), vos livraisons (marchandise, tonnage, date), les systèmes que vous revendiquez et leur position dans la galaxie, la faction qui les contrôle, et les stations terminées de votre escadron où vous vous amarrez (seulement dans un système déjà colonisé). Rien n'est enregistré pour un pilote sans escadron.</li>
+                    <li>Pour le budget (plugin 2.5) : chaque mouvement d'argent de votre compte (vente, achat, mission, prime, réparation, carburant…) avec sa date, son montant, sa catégorie et le lieu où il a eu lieu, ainsi que les totaux par cycle et votre solde. Ces données ne sont lisibles que par vous.</li>
+                </ul>
+                <p style="margin-bottom: 30px;"><strong style="color:#fff;">Ce que nous ne recevons pas :</strong> vos identifiants Frontier, le contenu de vos discussions en jeu, ni aucun fichier de votre ordinateur.</p>
+
+                <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">QUI VOIT QUOI</p>
+                <ul style="margin: 0 0 30px 20px;">
+                    <li>Vos données de jeu (position, soldes, flotte) ne sont lisibles que par vous.</li>
+                    <li>Si vous êtes dans un escadron, votre fiche est consultable par les membres de cet escadron. Votre rang BGS et vos points de carrière y figurent, ainsi que dans le tableau de l'escadron.</li>
+                    <li>Les autres pilotes ne voient que votre nom de CMDR dans la liste des destinataires. Dans le tableau Powerplay, ils voient votre nom, votre rang et vos mérites (du cycle et cumulés), uniquement si vous êtes de la même puissance. Votre historique par cycle (« Ma progression ») n'est lisible que par vous.</li>
+                    <li>Les membres d'un escadron voient les chantiers de colonisation de cet escadron, avec le nom des pilotes qui y ont livré et le tonnage de chacun. Les autres escadrons n'en voient rien. Un pilote sans escadron a son propre espace de colonisation, lisible par lui seul.</li>
+                    <li>Votre budget (revenus, charges, livre de compte) n'est lisible que par vous : ni les membres de votre escadron, ni l'Amiral, ni le Directeur ne le voient sur le site.</li>
+                    <li>Le Directeur de l'application peut consulter les fiches pour l'administrer.</li>
+                </ul>
+
+                <p style="margin-bottom: 0;">Le plugin ne tourne que lorsque EDMC est lancé, et vous pouvez le retirer à tout moment. Vous pouvez modifier votre email, votre mot de passe ou <strong style="color:#fff;">supprimer votre compte</strong> depuis « Gestion du compte » : vos données sont alors effacées.</p>
+            </div>
+        </div>
+    </div></details>
+            <details class="pli" id="distinctions"><summary>GALERIE DES DISTINCTIONS <small>plaques · spécialistes · Pilier · Force de frappe · rang</small></summary><div class="corps">
         <div class="container">
             
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// MODULE 01 : SUPERVISION</span>
-                    <h3 class="neon-blue">VISION STRATÉGIQUE</h3>
-                    <p>Votre <strong>Quartier Général</strong> centralise vos données navales : finances en direct (vaisseau et Fleet Carrier), avancée de vos rangs militaires, actualités Galnet et EDNews de l'escadron.</p>
-                    <p>Le <strong>Journal Tactique</strong> diffuse en direct les directives (avec le système, la faction, le type d'ordre et la priorité), les distinctions et le bilan hebdomadaire du réseau. Tout ce dont un commandant a besoin pour préparer son prochain déploiement, réuni sur un terminal unique.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/qg.png" alt="Quartier Général : boutons Powerplay et BGS avec le rang du pilote, rangs militaires et journal tactique"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse">
-                <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 02 : BGS TACTIQUE</span>
-                    <h3 class="neon-orange">FRAPPEZ OÙ ÇA FAIT MAL</h3>
-                    <p>Ne demandez plus sur le Discord <em>"Où est-ce qu'on se bat aujourd'hui ?"</em>. L'Amirauté définit les théâtres d'opération. Vous n'avez plus qu'à verrouiller la cible.</p>
-                    <p>Visualisez instantanément l'objectif (Guerre, Élection, Hausse), suivez votre part d'impact personnel et la progression de l'escadron sur chaque objectif.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/ordres.png" alt="Directives Tactiques"></div>
-                </div>
-            </div>
-
-            <!-- LE NOUVEAU BLOC : COVAS IA EMBARQUÉE -->
-            <div class="feature-grid">
-                <div class="feature-text" style="border-left-color: #00FF66; box-shadow: inset 30px 0 80px rgba(0,255,102,0.05);">
-                    <span class="sub-data" style="color: #00FF66;">// MODULE 03 : IA EMBARQUÉE</span>
-                    <h3 style="color: #00FF66; text-shadow: 0 0 20px rgba(0,255,102,0.4);">ASSISTANCE HOLOGRAPHIQUE EN DIRECT</h3>
-                    <p>Votre ordinateur de bord est désormais connecté aux archives de l'escadron. L'interface se superpose automatiquement à votre cockpit selon la situation :</p>
-                    
-                    <ul style="color: #bbb; font-size: 1.1em; line-height: 1.6; padding-left: 20px; margin-bottom: 20px;">
-                        <li style="margin-bottom: 15px;"><strong style="color: #fff;">SCAN AU SAUT HYPERSPATIAL :</strong> À la sortie du saut, le système analyse le secteur. Factions hostiles présentes ? Ordres de l'Amirauté actifs ? Vous êtes briefé avant même de dépasser l'étoile.</li>
-                        <li><strong style="color: #fff;">VERROUILLAGE TACTIQUE :</strong> Ciblez un vaisseau en super-navigation. Le COVAS croise son identité avec nos bases de données. Fiche individuelle et statuts diplomatiques de son escadron s'affichent instantanément. Ne tirez plus à l'aveugle.</li>
-                    </ul>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card" style="border-color: #00FF66; box-shadow: -30px 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 255, 102, 0.2);">
-                        
-                        <!-- FAUSSE IMAGE GÉNÉRÉE EN HTML/CSS (La Modale COVAS) -->
-                        <div style="background: rgba(10, 0, 0, 0.95); padding: 25px; font-family: 'Share Tech Mono', monospace; width: 100%; box-sizing: border-box; text-align: left; position: relative; z-index: 1;">
-                            
-                            <div style="color: var(--ed-red); font-size: 1.2em; font-weight: bold; border-bottom: 1px dashed var(--ed-red); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 2px; display: flex; justify-content: space-between;">
-                                <span>⚠️ ALERTE TACTIQUE</span>
-                                <span style="opacity: 0.5;">SYS.EDTEAM</span>
-                            </div>
-                            
-                            <div style="font-size: 1.1em; margin-bottom: 20px; color: #ddd;">
-                                CIBLE VERROUILLÉE : <strong style="color: #fff; letter-spacing: 1px;">CMDR GRIMLOCK VANE</strong> 
-                                <span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ CRVR ]</span>
-                            </div>
-                            
-                            <div style="padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid #333;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span style="color: #888; font-size: 0.85em;">DOSSIER INDIVIDUEL :</span>
-                                    <strong style="color: #000; background: var(--ed-red); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 10px var(--ed-red); animation: pulse-logo 1.5s infinite alternate;">K.O.S (HOSTILE) ⓘ</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span style="color: #888; font-size: 0.85em;">TRAITÉ ESCADRON <span style="color:var(--ed-orange);">[ CRVR ]</span> :</span>
-                                    <strong style="color: var(--ed-red);">⚔️ CIBLE HOSTILE</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
-                                    <span style="color: #888; font-size: 0.85em;">RÉSEAU EDTEAM :</span>
-                                    <strong style="color: #000; background: var(--ed-blue); padding: 2px 8px; border-radius: 2px; box-shadow: 0 0 10px var(--ed-blue);">✓ RÉPERTORIÉ</strong>
-                                </div>
-                            </div>
-                            
-                            <div style="color: #555; font-size: 0.8em; margin-top: 20px; font-weight: bold; text-align: center;">
-                                [ ANALYSE COMPLÈTE... ] <span style="animation: pulse-logo 1s infinite alternate;">_</span>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse">
-                <div class="feature-text">
-                    <span class="sub-data">// MODULE 04 : ÉTATS DE SERVICE</span>
-                    <h3 class="neon-blue">FORGEZ VOTRE LÉGENDE</h3>
-                    <p>Votre implication ne passera plus sous le radar. Le terminal analyse vos prouesses économiques ou militaires et attribue automatiquement le titre de <strong>Spécialiste de l'Escadron</strong> aux meilleurs (Fer de Lance, Maître Logisticien, Magnat...).</p>
-                    <p>Participez aux campagnes de guerre pour décrocher des Citations d'Honneur et voir votre pseudo trôner sur le tableau de la Force de Frappe.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/efforts.png" alt="Tableau d'Honneur"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// MODULE 05 : POWERPLAY 2.0</span>
-                    <h3 class="neon-blue">COMMANDEMENT GALACTIQUE</h3>
-                    <p>Suivez votre allégeance, votre rang et vos <strong>mérites du cycle</strong> directement depuis le QG, avec le décompte avant le prochain cycle. La carte <strong>Ma progression</strong> garde la mémoire de vos cycles : mérites gagnés semaine après semaine, meilleur cycle, moyenne, et heure du dernier relevé. Vos mérites sont à jour à quelques minutes près : le plugin les relève au plus toutes les cinq minutes.</p>
-                    <p>Le <strong>Tableau des Partisans</strong> classe les pilotes du réseau alignés sur la même puissance que vous, par mérites du cycle puis par cumul global. Cloisonnement oblige : vous ne voyez que votre propre puissance, et uniquement le nom, l'escadron, le rang et les mérites de chacun. Jamais de position, ni de flotte.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/powerplay.png" alt="Salle Powerplay : mérites du cycle, progression par cycle et tableau des partisans"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse">
-                <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 06 : DIPLOMATIE &amp; RENSEIGNEMENT</span>
-                    <h3 class="neon-orange">SAVOIR QUI EST QUI</h3>
-                    <p>Le <strong>Bureau Diplomatique</strong> tient le registre des traités de l'escadron : coalition d'alliés, pactes de non-agression et cibles hostiles.</p>
-                    <p>Le <strong>Bureau du Renseignement Tactique</strong> recense les commandants K.O.S., les suspects à surveiller et les alliés VIP signalés par vos ailiers. Ces fiches alimentent l'assistant COVAS en jeu.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/diplomatie.png" alt="Registre des traités et menaces"></div>
-                    <div class="holo-card" style="margin-top: 40px;"><img src="images/renseignement.png" alt="Bureau du renseignement tactique"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// MODULE 07 : ESCADRON</span>
-                    <h3 class="neon-blue">VOTRE ÉQUIPAGE</h3>
-                    <p>La page <strong>Effectifs</strong> présente tous les pilotes de l'escadron avec leur grade (Amiral, Officier BGS, Diplomate) et les <strong>rubans de campagne</strong> gagnés au fil des opérations.</p>
-                    <p>Ouvrez la fiche d'un ailier pour consulter son palmarès.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/escadron.png" alt="Effectifs de l'escadron"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse">
-                <div class="feature-text">
-                    <span class="sub-data">// MODULE 08 : CRYPTOGRAPHIE</span>
-                    <h3 class="neon-blue">SÉCURITÉ MILITAIRE</h3>
-                    <p>Coordonnez-vous via les <strong>Communications Holographiques</strong> intégrées. Fréquence ouverte à tout le réseau, canal d'escadron ou transmissions privées. Où que vous soyez sur le site, une alerte vous prévient : message urgent en plein écran, message privé en fenêtre, enveloppe animée dans le menu.</p>
-                    <p>Pour prévenir toute interception par l'ennemi, l'intégralité du registre de communication est purgée et détruite automatiquement chaque semaine, le jeudi. Ne laissez aucune trace.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/comms.png" alt="Communications Sécurisées"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid" style="margin-bottom: 0;">
-                <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// MODULE 09 : LIAISON DISTANTE</span>
-                    <h3 class="neon-orange">LE COMMANDEMENT DANS LA POCHE</h3>
-                    <p>Pas devant votre PC ? L'Amirauté vous accompagne partout.</p>
-                    <p>Connectez-vous depuis votre smartphone pour accéder à l'application <strong>Compagnon Mobile</strong>. Consultez les directives BGS de votre escadron, gardez un œil sur le statut de la flotte, ou communiquez avec vos ailiers en plein vol directement depuis votre téléphone.</p>
-                </div>
-                <div class="holo-container" style="display:flex; justify-content:center;">
-                    <div class="holo-card" style="max-width: 450px;"><img src="images/mobile.png" alt="PADD Mobile"></div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section id="distinctions" class="section" style="background: rgba(0,240,255,0.02); border-top: 1px solid var(--ed-blue);">
-        <div class="container">
-            <h2 class="section-title neon-orange" style="margin-bottom: 20px;">RECONNAISSANCE &amp; DISTINCTIONS</h2>
             <p style="text-align: center; color: #aaa; font-size: 1.3em; line-height: 1.6; max-width: 900px; margin: 0 auto 80px auto;">Chaque effort compte, et ici, il se voit. Cinq systèmes complémentaires reconnaissent votre implication, du pilote occasionnel au pilier de l'escadron.</p>
 
             <div class="feature-grid">
@@ -986,7 +1008,7 @@
                 <div class="feature-text">
                     <span class="sub-data">// DISTINCTION 05 : RANG BGS DE CARRIÈRE</span>
                     <h3 class="neon-blue">VOTRE RANG, GAGNÉ POUR TOUJOURS</h3>
-                    <p>Chaque effort accompli pour l'escadron, <strong>directive ou action libre</strong>, rapporte des points qui s'additionnent pour toute votre carrière. Ils déterminent votre <strong>rang BGS</strong>, de 1 à 100.</p>
+                    <p>Chaque effort accompli pour l'escadron, <strong>directive ou action libre</strong> (y compris les livraisons de colonisation, 1 point pour 400 tonnes), rapporte des points qui s'additionnent pour toute votre carrière. Ils déterminent votre <strong>rang BGS</strong>, de 1 à 100.</p>
                     <p>Un rang gagné ne se perd jamais. Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts : le rang 100 est réservé aux plus fidèles.</p>
                     <p style="color: #888; font-size: 0.9em;">Une barre de progression indique ce qu'il reste à accomplir avant le rang suivant, dans la fenêtre BGS du QG et sur la fiche du pilote. Une ligne dorée apparaît dans le journal tactique à chaque dizaine atteinte.</p>
                 </div>
@@ -1013,69 +1035,10 @@
             </div>
 
         </div>
-    </section>
-
-    <section id="vos-donnees" class="section" style="background: rgba(0,0,0,0.7); border-top: 1px dashed rgba(255,255,255,0.08);">
+    </div></details>
+            <details class="pli" id="faq"><summary>QUESTIONS FRÉQUENTES</summary><div class="corps">
         <div class="container" style="max-width: 1000px;">
-            <h2 class="section-title neon-blue" style="margin-bottom: 40px; text-align: center;">VOS DONNÉES, EN CLAIR</h2>
-            <div style="color: #bbb; font-size: 1.2em; line-height: 1.7;">
-                <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">CE QUE NOUS RECEVONS</p>
-                <ul style="margin: 0 0 30px 20px;">
-                    <li>À l'inscription : votre <strong>adresse email</strong> et votre mot de passe (chiffré, géré par Supabase).</li>
-                    <li>Depuis le plugin, à partir du journal d'Elite Dangerous : nom de CMDR, système actuel, nom et modèle du vaisseau, soldes (vaisseau et Fleet Carrier), patrimoine, rangs et progression, statut Powerplay (puissance, rang, mérites), escadron, réputations dans le système, CMDR ciblés et actions BGS.</li>
-                    <li>Toujours depuis le plugin : à son démarrage, il relit en local vos journaux de jeu des dernières semaines pour retrouver les mérites Powerplay que vous avez gagnés sans EDMC, cycle par cycle. Seuls le total de mérites et le rang de chaque cycle sont envoyés, jamais le contenu de vos journaux.</li>
-                </ul>
-                <p style="margin-bottom: 30px;"><strong style="color:#fff;">Ce que nous ne recevons pas :</strong> vos identifiants Frontier, le contenu de vos discussions en jeu, ni aucun fichier de votre ordinateur.</p>
-
-                <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">QUI VOIT QUOI</p>
-                <ul style="margin: 0 0 30px 20px;">
-                    <li>Vos données de jeu (position, soldes, flotte) ne sont lisibles que par vous.</li>
-                    <li>Si vous êtes dans un escadron, votre fiche est consultable par les membres de cet escadron. Votre rang BGS et vos points de carrière y figurent, ainsi que dans le tableau de l'escadron.</li>
-                    <li>Les autres pilotes ne voient que votre nom de CMDR dans la liste des destinataires. Dans le tableau Powerplay, ils voient votre nom, votre rang et vos mérites (du cycle et cumulés), uniquement si vous êtes de la même puissance. Votre historique par cycle (« Ma progression ») n'est lisible que par vous.</li>
-                    <li>Le Directeur de l'application peut consulter les fiches pour l'administrer.</li>
-                </ul>
-
-                <p style="margin-bottom: 0;">Le plugin ne tourne que lorsque EDMC est lancé, et vous pouvez le retirer à tout moment. Vous pouvez modifier votre email, votre mot de passe ou <strong style="color:#fff;">supprimer votre compte</strong> depuis « Gestion du compte » : vos données sont alors effacées.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="section" style="background: rgba(0,240,255,0.02); border-top: 1px solid var(--ed-blue);">
-        <div class="container">
-            <h2 class="section-title neon-blue" style="margin-bottom: 40px;">INITIALISATION EN 3 ÉTAPES</h2>
-            <p style="text-align: center; color: #aaa; font-size: 1.4em; margin-bottom: 80px;">Le déploiement prend moins de 2 minutes. Aucun logiciel lourd à installer.</p>
-
-            <div class="steps-container">
-                <div class="step-box">
-                    <div class="step-number">01</div>
-                    <div class="step-title">ACCRÉDITATION WEB</div>
-                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Rendez-vous sur le Terminal et créez votre profil sécurisé. L'accréditation est immédiate.</p>
-                </div>
-                <div class="step-box">
-                    <div class="step-number">02</div>
-                    <div class="step-title">LIAISON NAVALE</div>
-                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Téléchargez notre plugin furtif <code>SYS.EDTEAM.zip</code> et placez-le dans le dossier de votre utilitaire <strong>EDMC</strong>.</p>
-                </div>
-                <div class="step-box">
-                    <div class="step-number">03</div>
-                    <div class="step-title">SYNCHRONISATION</div>
-                    <p style="color: #999; font-size: 1.2em; line-height: 1.6;">Copiez votre clé de sécurité unique dans les réglages d'EDMC. Décollez. Le système fait le reste.</p>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 120px;">
-                <p style="color: #fff; font-size: 1.8em; margin-bottom: 40px; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,0.5);">L'AMIRAUTÉ N'ATTEND PLUS QUE VOUS.</p>
-                <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
-                    <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
-                    <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan">[ REJOINDRE LE DISCORD ]</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="faq" class="section" style="background: rgba(0,0,0,0.7); border-top: 1px dashed rgba(255,255,255,0.08);">
-        <div class="container" style="max-width: 1000px;">
-            <h2 class="section-title neon-blue" style="margin-bottom: 40px; text-align: center;">QUESTIONS FRÉQUENTES</h2>
+            
             <div style="color: #bbb; font-size: 1.2em; line-height: 1.7;">
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QU'EST-CE QUE SYS.EDTEAM ?</h3>
                 <p style="margin: 0 0 26px;">SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie, renseignement tactique et communications.</p>
@@ -1084,7 +1047,7 @@
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT L'INSTALLER ?</h3>
                 <p style="margin: 0 0 26px;">Créez votre compte sur le site, téléchargez le plugin SYS.EDTEAM.zip et placez-le dans le dossier de votre utilitaire EDMC, puis copiez votre clé dans les réglages d'EDMC. Comptez environ deux minutes.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FAUT-IL APPARTENIR À UN ESCADRON ?</h3>
-                <p style="margin: 0 0 26px;">Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications et au journal tactique.</p>
+                <p style="margin: 0 0 26px;">Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit).</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QUELLES DONNÉES SONT COLLECTÉES ?</h3>
                 <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT SONT RÉCOMPENSÉS LES PILOTES ?</h3>
@@ -1093,13 +1056,101 @@
                 <p style="margin: 0 0 26px;">Oui. Un compagnon mobile permet de consulter les directives BGS de l'escadron, le statut et les communications depuis un téléphone.</p>
             </div>
         </div>
+    </div></details>
+        </div>
     </section>
 
+    <section class="final">
+        <p>L'AMIRAUTÉ N'ATTEND PLUS QUE VOUS.</p>
+        <div style="display:flex;gap:26px;flex-wrap:wrap;justify-content:center;padding:0 20px;">
+            <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
+            <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan">[ REJOINDRE LE DISCORD ]</a>
+        </div>
+    </section>
     <footer id="footer-edteam"></footer>
 
-    <!-- =========================================
-         MOTEUR AUDIO & LOGIQUE DU SAS D'ENTRÉE
-         ========================================= -->
+    <script>
+    document.documentElement.classList.add('js');
+    const IMG = 'images/';
+    /* ---------- Vitrine du hero : 4 ecrans qui defilent ---------- */
+    (function () {
+        const ecrans = [['qg.png', 'QUARTIER GÉNÉRAL', false], ['colonisation.png', 'COLONISATION', false], ['budget.png', 'BUDGET PERSONNEL', false], ['mobile-poche.png', 'COMPAGNON MOBILE', true]];
+        const cadre = document.getElementById('vitrine'), titre = document.getElementById('vitrine-titre'), pts = document.getElementById('vitrine-points');
+        const imgs = ecrans.map((e, i) => { const im = document.createElement('img'); im.src = IMG + e[0]; im.alt = e[1]; if (e[2]) im.className = 'mobile'; cadre.insertBefore(im, cadre.firstChild); return im; });
+        const btns = ecrans.map((e, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', e[1]); b.onclick = () => aller(i, true); pts.appendChild(b); return b; });
+        let cur = 0, timer = null;
+        function aller(i, manuel) { cur = i; imgs.forEach((im, k) => im.classList.toggle('on', k === i)); btns.forEach((b, k) => b.classList.toggle('on', k === i)); titre.textContent = '> ' + ecrans[i][1]; if (manuel) { clearInterval(timer); depart(); } }
+        function depart() { timer = setInterval(() => aller((cur + 1) % ecrans.length), 4200); }
+        document.querySelector('.ecran').addEventListener('mouseenter', () => clearInterval(timer));
+        document.querySelector('.ecran').addEventListener('mouseleave', () => { clearInterval(timer); depart(); });
+        aller(0); depart();
+    })();
+
+    /* ---------- Piliers, modules, profils (les textes sont dans le HTML : ce code ne fait qu'afficher / masquer) ---------- */
+    (function () {
+        const PILIERS = [{"id":"commander","c":"#00F0FF","g":"rgba(0,240,255,.12)"},{"id":"construire","c":"#FF7100","g":"rgba(255,113,0,.12)"},{"id":"progresser","c":"#FFD700","g":"rgba(255,215,0,.10)"},{"id":"connecte","c":"#00FF66","g":"rgba(0,255,102,.10)"}];
+        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"force","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"comms","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
+        let pilier = 'commander', mod = 'qg', vue = 'tout';
+        const $ = id => document.getElementById(id);
+        const visible = m => vue === 'tout' || m.pour.indexOf(vue) >= 0;
+        function maj(anim) {
+            const p = PILIERS.find(x => x.id === pilier);
+            const racine = $('piliers'); racine.style.setProperty('--p', p.c); racine.style.setProperty('--pg', p.g);
+            racine.classList.toggle('vue-filtree', vue !== 'tout');
+            document.querySelectorAll('#onglets .onglet').forEach(b => b.classList.toggle('on', b.dataset.p === pilier));
+            document.querySelectorAll('#liste .module').forEach(b => {
+                const m = MODULES.find(x => x.id === b.dataset.m);
+                b.classList.toggle('vis', b.dataset.p === pilier);
+                b.classList.toggle('on', b.dataset.m === mod);
+                b.classList.toggle('off', !visible(m));
+            });
+            document.querySelectorAll('#detail .panel').forEach(a => {
+                const actif = a.dataset.m === mod;
+                a.classList.toggle('on', actif);
+                if (actif && anim) { a.classList.remove('fondu'); void a.offsetWidth; a.classList.add('fondu'); }
+            });
+        }
+        function choisirModule(id) { const m = MODULES.find(x => x.id === id); if (!m) return; pilier = m.p; mod = id; maj(true); }
+        function choisirVue(v) {
+            vue = v;
+            document.querySelectorAll('#vue button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+            document.querySelectorAll('.profil').forEach(b => b.classList.toggle('on', b.dataset.profil === v));
+            const courant = MODULES.find(m => m.id === mod);
+            if (!visible(courant)) { const m = MODULES.find(x => visible(x) && x.p === pilier) || MODULES.find(visible); pilier = m.p; mod = m.id; }
+            maj(true);
+        }
+        document.querySelectorAll('#onglets .onglet').forEach(b => b.onclick = () => {
+            pilier = b.dataset.p;
+            const m = MODULES.find(x => x.p === pilier && visible(x)) || MODULES.find(x => x.p === pilier);
+            mod = m.id; maj(true);
+        });
+        document.querySelectorAll('#liste .module').forEach(b => b.onclick = () => choisirModule(b.dataset.m));
+        document.querySelectorAll('#detail .vignettes button').forEach(b => b.onclick = () => {
+            const panneau = b.closest('.panel'), i = b.dataset.i;
+            panneau.querySelectorAll('.cadre-d img').forEach(im => im.classList.toggle('on', im.dataset.i === i));
+            panneau.querySelectorAll('.vignettes button').forEach(x => x.classList.toggle('on', x.dataset.i === i));
+        });
+        document.querySelectorAll('#vue button').forEach(b => b.onclick = () => choisirVue(b.dataset.v));
+        document.querySelectorAll('.profil').forEach(b => b.onclick = () => { choisirVue(b.dataset.profil); $('piliers').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+        maj(false);
+
+        /* un lien vers #faq, #vos-donnees ou #distinctions ouvre le bloc depliable correspondant */
+        function ouvrirAncre() {
+            const el = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+            if (el && el.tagName === 'DETAILS') { el.open = true; setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+        }
+        window.addEventListener('hashchange', ouvrirAncre); ouvrirAncre();
+
+        /* apparition douce des sections + lien actif dans la barre */
+        const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }), { threshold: .08 });
+        document.querySelectorAll('.revele').forEach(s => io.observe(s));
+        const liens = [...document.querySelectorAll('.topbar nav a')];
+        const io2 = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) liens.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
+        ['installer', 'profils', 'piliers', 'vos-donnees', 'faq'].forEach(id => { const el = document.getElementById(id); if (el) io2.observe(el); });
+    })();
+    </script>
+
+    <!-- MOTEUR AUDIO : repris tel quel de la page precedente (meme musique) -->
     <script>
         let majesticCtx = null;
         let isMajesticPlaying = false;
@@ -1438,6 +1489,6 @@
         }
     </script>
 
-    <script src="footer.js?v=6"></script>
+    <script src="footer.js?v=7"></script>
 </body>
 </html>

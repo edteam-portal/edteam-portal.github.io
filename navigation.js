@@ -46,29 +46,33 @@ function injecterArchitectureGlobale() {
         </div>
         <a href="index.html" class="nav-link ${page === 'index.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon" style="position: relative;">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"></path><polygon points="12 7.5 13.4 10.4 16.5 10.8 14.2 13 14.8 16.1 12 14.6 9.2 16.1 9.8 13 7.5 10.8 10.6 10.4"></polygon></svg>
                 <span id="badge-amiraute" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 10; text-align: center;">0</span>
             </div>
             <span class="nav-text">QUARTIER GÉNÉRAL</span>
         </a>
-        <a href="communications.html" id="nav-comms-link" class="nav-link ${page === 'communications.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="retirerAlerteEnveloppe()">
-            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
-            <span class="nav-text">COMMUNICATIONS</span>
+        <a href="budget.html" id="nav-link-budget" class="nav-link ${page === 'budget.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="7" ry="3"></ellipse><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"></path><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"></path></svg></div>
+            <span class="nav-text">BUDGET</span>
         </a>
         <a href="escadron.html" id="nav-link-escadron" class="nav-link ${page === 'escadron.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_escadron') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <span class="nav-text">ESCADRON</span>
         </a>
         <a href="diplomatie.html" id="nav-link-diplo" class="nav-link ${page === 'diplomatie.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_escadron') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
-            <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line><circle cx="12" cy="17" r="2"></circle></svg></div>
             <span class="nav-text">DIPLOMATIE</span>
         </a>
         <a href="bgs.html" id="nav-bgs-factions" class="nav-link ${page === 'bgs.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_bgs') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon" style="position: relative;">
-                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7" stroke-dasharray="1.6 1.6"></polyline></svg>
                 <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; text-align: center;">0</span>
             </div>
             <span class="nav-text">BGS</span>
+        </a>
+        <a href="colonisation.html" id="nav-link-colonisation" class="nav-link ${page === 'colonisation.html' ? 'active' : ''}" style="display: flex;" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="16" r="5.5"></circle><ellipse cx="11" cy="16" rx="9.5" ry="2.6" transform="rotate(-18 11 16)"></ellipse><line x1="11" y1="10.5" x2="11" y2="3"></line><path d="M11 3l8 2.5-8 2.5"></path></svg></div>
+            <span class="nav-text">COLONISATION</span>
         </a>
         <a href="https://discord.gg/max5W9FreN" target="_blank" rel="noopener" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #5865F2;" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'SUPPORT DISCORD<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Aide et discussion avec la communauté</span>', '#5865F2')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
             <div class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></div>
@@ -96,8 +100,18 @@ function injecterArchitectureGlobale() {
     // --- B. LE HEADER GLOBAL ---
     const headerGlobalHTML = `
         <style>
+            @media (max-width: 900px) { #beta-badge { margin-left: 5px !important; padding: 1px 4px !important; letter-spacing: 1px !important; } }
             .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
             .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+            .comms-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 34px; box-sizing: border-box; color: var(--ed-blue, #00F0FF); border: 1px solid rgba(0,240,255,.55); background: rgba(0,240,255,.08); box-shadow: 0 0 10px rgba(0,240,255,.18); border-radius: 4px; text-decoration: none; transition: .2s; cursor: pointer; }
+            .comms-btn .nav-icon { min-width: 0; }
+            .comms-btn .nav-icon svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+            .comms-btn:hover { color: #fff; border-color: #fff; background: rgba(0,240,255,.22); box-shadow: 0 0 14px rgba(0,240,255,.55); }
+            .comms-btn.active { color: #fff; border-color: var(--ed-blue, #00F0FF); background: rgba(0,240,255,.22); }
+            @keyframes commsAlerte { 0%, 100% { box-shadow: 0 0 6px rgba(0,240,255,.3); background: rgba(0,240,255,.12); } 50% { box-shadow: 0 0 22px rgba(0,240,255,1), 0 0 44px rgba(0,240,255,.55); background: rgba(0,240,255,.55); border-color: #fff; } }
+            @keyframes commsPastille { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+            .comms-btn.alerte-enveloppe { color: #fff; animation: commsAlerte .8s infinite; }
+            .comms-btn.alerte-enveloppe::after { content: ""; position: absolute; top: -5px; right: -5px; width: 11px; height: 11px; border-radius: 50%; background: #FF3333; box-shadow: 0 0 10px #FF3333; animation: commsPastille .8s infinite; }
         </style>
         <header class="hud-header" style="display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; flex-wrap: nowrap; gap: 15px; margin-bottom: 15px; width: 100%; border-bottom: 2px solid var(--ed-orange); padding-bottom: 15px; flex-shrink: 0;">
             <div style="display: flex; align-items: stretch; gap: 15px; flex-shrink: 0;">
@@ -108,7 +122,7 @@ function injecterArchitectureGlobale() {
                         <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
                     </svg>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM</h1>
+                        <h1 style="margin: 0; font-size: 1.6em; letter-spacing: 2px; font-weight: normal; color: inherit; line-height: 1; white-space: nowrap;">EDTEAM<a id="beta-badge" href="https://discord.gg/max5W9FreN" target="_blank" rel="noopener" onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'VERSION BÊTA<br><span style=&quot;color:#ccc; font-size:0.8em; font-weight:normal;&quot;>L’application évolue vite : des bugs peuvent subsister.<br>Un souci ? Signalez-le sur le Discord, ça nous aide à corriger.</span>', '#FF7100')" onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)" style="display: inline-block; margin-left: 10px; vertical-align: middle; font-size: 0.4em; letter-spacing: 2px; font-weight: bold; color: #FF7100; border: 1px solid #FF7100; background: rgba(255,113,0,0.1); padding: 2px 7px; border-radius: 3px; text-decoration: none; cursor: pointer; text-shadow: 0 0 6px rgba(255,113,0,0.5);">BÊTA</a></h1>
                         <span id="cmdr-name-display" style="font-size: 0.6em; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-top: 2px; white-space: nowrap;">CMDR [ EN ATTENTE ]</span>
                     </div>
                 </div>
@@ -146,7 +160,10 @@ function injecterArchitectureGlobale() {
                 </div>
 
             </div>
-            <div style="display: flex; align-items: flex-start; justify-content: flex-end; flex-grow: 1; padding-right: 5px;">
+            <div style="display: flex; align-items: flex-start; justify-content: flex-end; flex-grow: 1; padding-right: 5px; gap: 8px;">
+                <a href="communications.html" id="nav-comms-link" class="comms-btn ${page === 'communications.html' ? 'active' : ''}" title="Communications" aria-label="Communications" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="retirerAlerteEnveloppe()">
+                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="8" y1="10" x2="8.01" y2="10"></line><line x1="12" y1="10" x2="12.01" y2="10"></line><line x1="16" y1="10" x2="16.01" y2="10"></line></svg></div>
+                </a>
                 <button type="button" class="son-btn" data-son-toggle></button>
             </div>
         </header>
@@ -738,6 +755,8 @@ window.demarrerSystemLoop = async function systemLoop() {
     }
 
     if (window.isSystemLoopRunning) return;
+    // Onglet caché : aucune lecture. La boucle reprend d'elle-même, tout de suite, au retour sur l'onglet (écouteur plus bas).
+    if (document.hidden) { window.navBouclePause = true; return; }
     window.isSystemLoopRunning = true;
 
     try {
@@ -824,8 +843,17 @@ window.demarrerSystemLoop = async function systemLoop() {
     }
 
     window.isSystemLoopRunning = false;
-    setTimeout(window.demarrerSystemLoop, 60000);
+    window.navTimer = setTimeout(window.demarrerSystemLoop, 60000);
 };
+
+// Retour sur l'onglet après une pause : on reprend immédiatement (sans attendre la prochaine minute)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && window.navBouclePause) {
+        window.navBouclePause = false;
+        clearTimeout(window.navTimer);
+        if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+    }
+});
 
 // Rétrocompatibilité d'appel
 window.systemLoop = window.demarrerSystemLoop;

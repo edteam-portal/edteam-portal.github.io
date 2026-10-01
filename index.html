@@ -9,14 +9,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     
     <link rel="manifest" href="manifest.json?v=3">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     <title>SYS.EDTEAM — Connexion</title>
     <meta name="robots" content="noindex, follow">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=2"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=6"></script>
+    <script src="navigation.js?v=8"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -100,7 +100,9 @@
         .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
 
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
-        .data-row { display: flex; flex-direction: column; border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 6px; background: rgba(10, 5, 0, 0.6); padding: 18px 25px; margin-bottom: 12px; transition: all 0.15s ease-out; }
+        .data-row { display: flex; flex-direction: column; padding: 18px 25px; margin-bottom: 12px; transition: all 0.15s ease-out; }   /* cadre : classe .bloc (style.css) */
+        /* tuiles cliquables (Galnet, EDNews) : ancien cadre conserve volontairement */
+        .tuile-index { display: flex; flex-direction: column; border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 6px; background: rgba(10, 5, 0, 0.6); padding: 18px 25px; margin-bottom: 12px; transition: all 0.15s ease-out; }
         .row-top { display: flex; justify-content: space-between; font-size: 1.15em; margin-bottom: 8px; }
         .row-bottom { display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; align-items: flex-end; }
         
@@ -323,7 +325,7 @@
                 <div style="display: flex; gap: 15px; align-items: stretch; margin-bottom: 15px;">
                     
                     <!-- GALNET -->
-                    <div class="data-row" style="flex: 1; border-color: var(--ed-orange); box-shadow: inset 0 0 30px rgba(255, 113, 0, 0.1); padding: 15px 25px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%);" onclick="ouvrirModalGalnet()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-orange)';">
+                    <div class="tuile-index" style="flex: 1; border-color: var(--ed-orange); box-shadow: inset 0 0 30px rgba(255, 113, 0, 0.1); padding: 15px 25px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%);" onclick="ouvrirModalGalnet()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-orange)';">
                         <div style="display: flex; align-items: center; gap: 20px;">
                             <span style="font-size: 2.2em; filter: drop-shadow(0 0 10px rgba(255,113,0,0.5));">📡</span>
                             <div>
@@ -334,7 +336,7 @@
                     </div>
 
                     <!-- EDNEWS ESCADRON -->
-                    <div class="data-row" style="flex: 1; border-color: var(--ed-blue); box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.1); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%);" id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-blue)';">
+                    <div class="tuile-index" style="flex: 1; border-color: var(--ed-blue); box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.1); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%);" id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-blue)';">
                         <div style="display: flex; align-items: center; gap: 20px;">
                             <span style="font-size: 2.2em; filter: drop-shadow(0 0 10px rgba(0,240,255,0.5));">📰</span>
                             <div>
@@ -351,7 +353,7 @@
                 <div style="display: flex; gap: 15px; align-items: stretch;">
                     
                     <!-- 1. BLOC CARRIÈRE MILITAIRE (Prend tout l'espace disponible) -->
-                    <div class="data-row" style="flex: 1; cursor: default; border-color: #555; background: rgba(0, 0, 0, 0.4); margin-bottom: 0; display: flex; flex-direction: row; gap: 20px; align-items: center;">
+                    <div class="data-row bloc" style="flex: 1; cursor: default; margin-bottom: 0; display: flex; flex-direction: row; gap: 20px; align-items: center;">
 
                         <!-- COLONNE DROITE : LES INFOS -->
                         <div style="flex-grow: 1; display: flex; flex-direction: column;">
@@ -481,7 +483,7 @@
                     <div style="flex: 0.75; min-width: 380px; max-width: 440px; display: flex; flex-direction: column; gap: 15px;">
                         
                         <!-- BLOC 1A : FÉDÉRATION DES PILOTES -->
-                        <div class="data-row" style="cursor: default; margin-bottom: 0; flex: 1;">
+                        <div class="data-row bloc" style="cursor: default; margin-bottom: 0; flex: 1;">
                             <div class="row-top" style="border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 10px; margin-bottom: 15px;">
                                 <span style="color: var(--ed-orange); font-size: 1.1em; letter-spacing: 2px;">> FÉDÉRATION DES PILOTES</span>
                             </div>
@@ -496,7 +498,7 @@
                         </div>
 
                         <!-- BLOC 2A : RANGS AUXILIAIRES -->
-                        <div class="data-row" style="cursor: default; margin-bottom: 0; flex: 1;">
+                        <div class="data-row bloc" style="cursor: default; margin-bottom: 0; flex: 1;">
                             <div class="row-top" style="border-bottom: 1px dashed var(--ed-blue); padding-bottom: 10px; margin-bottom: 15px;">
                                 <span style="color: var(--ed-blue); font-size: 1.1em; letter-spacing: 2px;">> RANGS AUXILIAIRES</span>
                             </div>
@@ -514,8 +516,10 @@
                     </div>
 
                     <!-- COLONNE DROITE (FLUX D'ACTIVITÉ HOLOGRAPHIQUE) -->
-                    <div class="data-row" style="flex: 1.6; min-width: 0; cursor: default; margin-bottom: 0; display: flex; flex-direction: column; padding: 0; border-color: #555; background: rgba(0, 0, 0, 0.4);">
-                        <div style="border-bottom: 1px dashed #333; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%);">
+                    <div class="data-row bloc holo" style="flex: 1.6; min-width: 0; cursor: default; margin-bottom: 0; display: flex; flex-direction: column; padding: 0;">
+                        <!-- lignes de balayage sur tout l'ecran (comme le terminal des Communications) -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 51;"></div>
+                        <div style="border-bottom: 1px dashed rgba(0, 240, 255, 0.35); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(0,240,255,0.05) 0%, transparent 100%); position: relative; z-index: 52;">
                             <div style="display: flex; align-items: center; gap: 15px;">
                                 <span style="color: #aaa; font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> JOURNAL TACTIQUE (FLUX EN DIRECT)</span>
                             </div>
@@ -527,17 +531,13 @@
                         <!-- L'Écran du Flux -->
                         <div style="display: flex; flex-direction: column; flex-grow: 1; padding: 15px; position: relative; overflow: hidden; height: 490px;">
                             
-                            <!-- LE FILTRE ÉCRAN TACTIQUE (GRILLE + SCANLINE DOUCE COMME SUR COMMUNICATIONS) -->
-                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; z-index: 50;"></div>
-                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 51;"></div>
-                            
                             <!-- Conteneur des messages -->
                             <div id="flux-activite-container" style="display: flex; flex-direction: column; gap: 8px; overflow-y: hidden; flex-grow: 1; padding-right: 10px; padding-bottom: 50px; z-index: 20; position: relative;">
                                 <div style="color: #666; font-size: 0.85em; font-style: italic; text-align: center; padding: 20px;">Synchronisation des journaux réseau...</div>
                             </div>
 
                             <!-- CONTRÔLES DE PAGINATION (ÉPINGLÉS EN BAS - Z-INDEX 60 pour pouvoir cliquer) -->
-                            <div id="flux-pagination" style="display: none; justify-content: space-between; align-items: center; position: absolute; bottom: 15px; left: 15px; right: 15px; padding-top: 10px; border-top: 1px dashed #333; background: rgba(5, 2, 0, 0.95); z-index: 60;">
+                            <div id="flux-pagination" style="display: none; justify-content: space-between; align-items: center; position: absolute; bottom: 15px; left: 15px; right: 15px; padding-top: 10px; border-top: 1px dashed rgba(0, 240, 255, 0.35); background: rgba(3, 14, 20, 0.92); z-index: 60;">
                                 <button onclick="changerPageJournal(-1)" style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 0.8em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.color='var(--ed-blue)';">◀ RETOUR</button>
                                 <span id="flux-page-indic" style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px;">PAGE 1 / X</span>
                                 <button onclick="changerPageJournal(1)" style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 0.8em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.color='var(--ed-blue)';">SUITE ▶</button>
@@ -547,7 +547,7 @@
                 </div> <!-- FIN DE LA LIGNE GLOBALE HAUTE -->
 
                 <!-- BLOC 3 : RAPPORTS FINANCIERS AVANCÉS -->
-                <div class="data-row" style="cursor: default; border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue); background: rgba(0, 240, 255, 0.05);">
+                <div class="data-row bloc cy" style="cursor: default;">
                     <div class="row-top" style="border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px;">
                         <span style="color: var(--ed-blue); font-size: 1.2em; letter-spacing: 2px; font-weight: bold;">> RAPPORTS FINANCIERS AVANCÉS</span>
                     </div>
@@ -922,10 +922,12 @@
             }
         }
 
-        let gazettesCache = []; // Mémoire locale pour les archives
+        let gazettesCache = []; // Mémoire locale pour les archives (liste : sans le texte ; le texte d'une édition est lu à l'ouverture)
+        let gazettesTs = 0;     // dernier chargement de la liste : pas de relecture avant 2 minutes (sauf force)
 
         // --- LECTURE CLOISONNÉE PAR ESCADRON ---
-        async function chargerGazette() {
+        async function chargerGazette(force) {
+            if (!force && gazettesCache.length > 0 && (Date.now() - gazettesTs) < 120000) return;
             const bannerDate = document.getElementById('gazette-banner-date');
             const badgeNew = document.getElementById('gazette-badge-new');
             const badgeRead = document.getElementById('gazette-badge-read');
@@ -940,14 +942,16 @@
             }
 
             try {
-                // Le pilote ne télécharge que les gazettes de SON escadron
+                // Le pilote ne télécharge que la LISTE des gazettes de SON escadron (id, titre, date) : le texte pèse 95 % du poids, il est lu à l'ouverture d'une édition
                 const { data, error } = await supabaseApp.from('gazette_hebdo')
-                    .select('*')
+                    .select('id, semaine_id, titre, created_at')
                     .eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT')
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    .limit(60);
 
                 if (error) throw error;
                 gazettesCache = data || [];
+                gazettesTs = Date.now();
 
                 if (gazettesCache.length > 0) {
                     const latest = gazettesCache[0];
@@ -1011,15 +1015,31 @@
         }
 
         // --- AFFICHAGE DE LA GAZETTE SÉLECTIONNÉE ---
-        window.afficherArticleGazette = function(id) {
+        window.afficherArticleGazette = async function(id) {
             if(typeof sonClic === 'function') sonClic();
 
             // 1. On cherche l'article dans le cache chargé précédemment
             const article = gazettesCache.find(g => String(g.id) === String(id));
             if (!article) return;
 
-            // 2. On injecte le contenu dans la colonne de droite
             const contentDiv = document.getElementById('gazette-modal-content');
+            window.gazetteVoulue = String(id); // édition choisie en dernier : une réponse tardive d'une autre édition ne doit pas l'écraser
+
+            // Le texte n'est pas dans la liste : on ne le lit qu'une fois, à la première ouverture de l'édition
+            if (article.contenu === undefined) {
+                if (contentDiv) contentDiv.innerHTML = '<div style="color: #888; font-style: italic; padding: 20px;">Déchiffrement de l\'édition...</div>';
+                try {
+                    const { data: texte, error: erreurTexte } = await supabaseApp.from('gazette_hebdo').select('contenu').eq('id', id).maybeSingle();
+                    if (erreurTexte) throw erreurTexte;
+                    article.contenu = (texte && texte.contenu) || '';
+                } catch (e) {
+                    if (window.gazetteVoulue === String(id) && contentDiv) contentDiv.innerHTML = '<div style="color: #FF3333; padding: 20px;">Erreur de liaison réseau. Réessayez.</div>';
+                    return;
+                }
+                if (window.gazetteVoulue !== String(id)) return; // l'utilisateur a cliqué sur une autre édition entre-temps
+            }
+
+            // 2. On injecte le contenu dans la colonne de droite
             const dateEdition = new Date(article.created_at).toLocaleDateString('fr-FR');
             
             contentDiv.innerHTML = `
@@ -1218,9 +1238,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 if (compteSucces > 0) {
                     afficherAlerte("ÉDITIONS PUBLIÉES", `Mission accomplie Directeur. ${compteSucces} journaux d'escadron ont été imprimés et transmis sur le réseau.`, "#00FF66");
                     // Charger la Gazette dès le démarrage
-                chargerGazette();
+                chargerGazette(true);
                 // Charger le Flux holographique
-                if (typeof window.chargerFluxActivite === 'function') window.chargerFluxActivite();
+                if (typeof window.chargerFluxActivite === 'function') window.chargerFluxActivite(true);
             } else {
                     afficherAlerte("TERMINÉ", "Aucune nouvelle gazette à imprimer (soit elles existent déjà, soit aucun escadron n'est actif).", "var(--ed-blue)");
                 }
@@ -1848,15 +1868,31 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         // =========================================
         async function systemLoop() {
             if(isSystemLooping || !profilCommandant) return;
+            // Onglet caché : aucune lecture. La boucle reprend d'elle-même, tout de suite, au retour sur l'onglet (voir plus bas).
+            if (document.hidden) { window.qgBouclePause = true; return; }
             isSystemLooping = true;
-            
+
             try {
                 // 1. TÉLÉCHARGEMENT DES DONNÉES (PROJECTION STRICTE ANTI-EGRESS)
-                const [resParam, resProfil, resRadar] = await Promise.all([
-                    supabaseApp.from('parametres_app').select('position_actuelle').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
-                    supabaseApp.from('profils').select('cmdr_nom, solde_vaisseau, solde_fc, valeur_vaisseaux, cout_rachat, notoriete, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total, faction_choisie, rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.from('radar_commercial').select('id, target_commodity, station_name, prix_unitaire').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE']).order('id', { ascending: false }).limit(10)
-                ]);
+                // La boîte aux lettres du plugin est lue à chaque tour ; la fiche et la position ne le sont que s'il y a du nouveau
+                // dans la boîte, ou au plus toutes les 3 minutes (les mérites Powerplay sont de toute façon relevés au plus toutes les 5 minutes).
+                const resRadar = await supabaseApp.from('radar_commercial').select('id, target_commodity, station_name, prix_unitaire').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE']).order('id', { ascending: false }).limit(10);
+                let resParam, resProfil;
+                // "Du nouveau" = une ligne PLUS RÉCENTE que toutes celles déjà vues. Certaines lignes (étiquettes que ce code ne traite pas) restent
+                // dans la boîte : elles ne doivent pas forcer la relecture de la fiche à chaque tour.
+                const radarIdMax = (resRadar.data || []).reduce((m, d) => Math.max(m, d.id || 0), 0);
+                const radarNeuf = radarIdMax > (window.qgRadarIdVu || 0);
+                if (radarNeuf || !window.qgFicheCache || (Date.now() - window.qgFicheTs) >= 180000) {
+                    [resParam, resProfil] = await Promise.all([
+                        supabaseApp.from('parametres_app').select('position_actuelle').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
+                        supabaseApp.from('profils').select('cmdr_nom, solde_vaisseau, solde_fc, valeur_vaisseaux, cout_rachat, notoriete, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total, faction_choisie, rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single()
+                    ]);
+                    window.qgFicheCache = { resParam: resParam, resProfil: resProfil };
+                    window.qgFicheTs = Date.now();
+                } else {
+                    resParam = window.qgFicheCache.resParam;
+                    resProfil = window.qgFicheCache.resProfil;
+                }
 
                 let paramData = resParam.data || {};
                 let profilData = resProfil.data || profilCommandant;
@@ -2094,10 +2130,21 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     document.getElementById("qg-pct-ships").innerHTML = `<span style="color: #00FF66;">■</span> VAISSEAUX & MODULES (${pctShips}%)`;
                 }
 
+                // Le tour s'est déroulé jusqu'au bout : on retient la ligne la plus récente vue (sinon, en cas d'erreur, elle sera retraitée au tour suivant)
+                window.qgRadarIdVu = Math.max(window.qgRadarIdVu || 0, radarIdMax);
+
             } catch (err) { console.error(err); }
             isSystemLooping = false;
-            setTimeout(systemLoop, 60000);
+            window.qgTimer = setTimeout(systemLoop, 60000);
         }
+        // Retour sur l'onglet après une pause : on reprend immédiatement (sans attendre la prochaine minute)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && window.qgBouclePause) {
+                window.qgBouclePause = false;
+                clearTimeout(window.qgTimer);
+                systemLoop();
+            }
+        });
         
     </script>
 
@@ -2998,7 +3045,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     couleur: couleur
                 }]);
                 // On recharge le flux localement si on est sur la page
-                if (typeof chargerFluxActivite === 'function') chargerFluxActivite();
+                if (typeof chargerFluxActivite === 'function') chargerFluxActivite(true);
             } catch (e) {
                 console.error("Erreur journal :", e);
             }
@@ -3009,9 +3056,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         window.journalCurrentPage = 1;
         window.journalItemsPerPage = 5; // On bloque à 5 messages par page pour une taille parfaite
 
-        window.chargerFluxActivite = async function() {
+        window.chargerFluxActivite = async function(force) {
             const conteneur = document.getElementById('flux-activite-container');
             if (!conteneur || !profilCommandant) return;
+            // Le temps réel (realtime-journal) tient déjà la liste à jour : pas de relecture avant 2 minutes (clic répété sur l'onglet), sauf force
+            if (!force && window.journalDataCache && window.journalDataCache.length > 0 && (Date.now() - (window.journalTs || 0)) < 120000) return;
 
             try {
                 // On télécharge les 100 dernières entrées (au lieu de 20)
@@ -3024,7 +3073,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 if (error) throw error;
 
                 window.journalDataCache = data || [];
-                
+                window.journalTs = Date.now();
+
                 // Si la base de données s'est vidée et que l'on est sur une page qui n'existe plus, on corrige
                 const maxPage = Math.max(1, Math.ceil(window.journalDataCache.length / window.journalItemsPerPage));
                 if (window.journalCurrentPage > maxPage) window.journalCurrentPage = maxPage;
@@ -3794,6 +3844,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
-    <script src="footer.js?v=6"></script>
+    <script src="footer.js?v=7"></script>
 </body>
 </html>

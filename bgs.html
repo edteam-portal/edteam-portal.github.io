@@ -12,13 +12,13 @@
     <meta name="robots" content="noindex, nofollow">
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="shared-utils.js?v=2"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=6"></script>
+    <script src="navigation.js?v=8"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -108,7 +108,7 @@
         .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
 
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
-        .data-row { border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 4px; background: rgba(10, 5, 0, 0.6); padding: 20px; margin-bottom: 15px; }
+        .data-row { padding: 20px; margin-bottom: 15px; }   /* cadre : classe .bloc (style.css) */
         
         /* CARD PILOTE (Membres de l'escadron) */
         .pilot-card { background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
@@ -456,7 +456,7 @@
             <div id="bgs-tab-suivi" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
                 
                 <!-- BARRE DE RECHERCHE & BOUTONS D'ACTION (UNIFIÉS) -->
-                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="data-row bloc" style="padding: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
                     <div style="flex-grow: 1; min-width: 250px;">
                         <label style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">SYSTÈME CIBLE (SCAN EDSM)</label>
                         <input type="text" id="bgs-system-search" class="search-input" placeholder="Ex: ATHENA" style="width: 100%; border-color: var(--ed-blue); text-transform: uppercase;">
@@ -492,7 +492,7 @@
                         </div>
                         
                         <!-- TABLEAU DES FACTIONS (Pleine largeur) -->
-                        <div class="data-row" style="width: 100%; padding: 0; background: rgba(0,0,0,0.5); margin-bottom: 0; flex-shrink: 0;">
+                        <div class="data-row bloc" style="width: 100%; padding: 0; margin-bottom: 0; flex-shrink: 0;">
                             <!-- Ajout de max-height et overflow-y pour créer un scroll interne au tableau -->
                             <div style="overflow-x: auto; max-height: 250px; overflow-y: auto;">
                                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85em; position: relative;">
@@ -511,7 +511,7 @@
                         </div>
 
                         <!-- GRAPHIQUE 30 JOURS -->
-                        <div class="data-row" style="background: rgba(0,0,0,0.8); padding: 15px; margin-bottom: 0;">
+                        <div class="data-row bloc" style="padding: 15px; margin-bottom: 0;">
                             <div style="color: #888; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">> ÉVOLUTION DE L'INFLUENCE (30 DERNIERS JOURS)</div>
                             <div style="position: relative; height: 300px; width: 100%;"><canvas id="bgsChart"></canvas></div>
                         </div>
@@ -524,7 +524,7 @@
             <div id="bgs-tab-classement" style="display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-out;">
                 
                 <!-- ZONE 1 : FILTRES STRATÉGIQUES -->
-                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border-color: var(--ed-orange);">
+                <div class="data-row bloc" style="padding: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
                     <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; margin-right: auto;">> BANQUE DE DONNÉES</div>
                     
                     <select id="filtre-pilote" class="tactical-filter">
@@ -550,7 +550,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;">
                     
                     <!-- COLONNE GAUCHE : FORCE DE FRAPPE (camembert holographique : part de chacun dans l'effort, selon les filtres) -->
-                    <div id="panel-force-frappe" class="data-row" style="background: rgba(3, 14, 20, 0.88); padding: 20px; display: flex; flex-direction: column; border-color: rgba(0,240,255,0.55); position: relative; overflow: hidden; box-shadow: 0 0 28px rgba(0,240,255,0.14), inset 0 0 70px rgba(0,240,255,0.06);">
+                    <div id="panel-force-frappe" class="data-row bloc holo" style="padding: 20px; display: flex; flex-direction: column;">
                         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,240,255,0.05) 0px, rgba(0,240,255,0.05) 1px, transparent 1px, transparent 4px); pointer-events: none;"></div>
                         <h4 style="margin: 0 0 6px 0; color: var(--ed-blue); letter-spacing: 2px; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; position: relative; text-shadow: 0 0 8px rgba(0,240,255,0.5);">FORCE DE FRAPPE (IMPACT GLOBAL DE L'ESCADRON)</h4>
                         <div id="pie-sous-titre" style="position: relative; color: #6f9aa3; font-size: 0.75em; letter-spacing: 1px; margin-bottom: 14px;"></div>
@@ -569,7 +569,7 @@
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                         
                         <!-- MUR DES SPÉCIALISTES -->
-                        <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px;">
+                        <div class="data-row bloc" style="padding: 20px;">
                             <h4 style="margin: 0 0 15px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px;">MUR DES SPÉCIALISTES (TOP ESCADRON)</h4>
                             <div id="specialists-container">
                                 <div style="color: #555; font-style: italic; text-align: center; padding: 20px;">Calcul des experts en cours...</div>
@@ -578,7 +578,7 @@
                         </div>
 
                         <!-- RUBANS DE CAMPAGNE (MÉDAILLES) -->
-                        <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px;">
+                        <div class="data-row bloc" style="padding: 20px;">
                             <h4 style="margin: 0 0 10px 0; color: #888; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; position: relative;">
                                 <span>MES ÉTATS DE SERVICE (OPÉRATIONS CLÔTURÉES)</span>
                                 
@@ -627,7 +627,7 @@
                 </div>
 
                 <!-- ZONE 4 : JOURNAL DES EXPLOITS (LIVE FEED) -->
-                <div class="data-row" style="background: rgba(10, 5, 0, 0.8); padding: 20px; border-color: var(--ed-blue);">
+                <div class="data-row bloc cy" style="padding: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 5px; margin-bottom: 15px;">
                         <h4 style="margin: 0; color: var(--ed-blue); letter-spacing: 2px;">> JOURNAL DES EXPLOITS (COMMUNICATIONS INTERCEPTÉES)</h4>
                         <button style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 0.8em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';" onclick="ouvrirModal('modal-exploit-fullscreen', event)" onmouseenter="if(typeof sonHover==='function') sonHover()">[ AGRANDIR ]</button>
@@ -1650,7 +1650,7 @@
                 window.memoireEffortsGlobaux = totalEffortsActuel;
 
                 if (ordresData.length === 0) {
-                    container.innerHTML = '<div class="data-row" style="text-align: center; color: #888; border-color: #333; padding: 40px;">AUCUNE DIRECTIVE ACTIVE DANS CE SECTEUR.<br><span style="font-size: 0.8em; color: #555;">EN ATTENTE DES ORDRES DE L\'AMIRAUTÉ.</span></div>';
+                    container.innerHTML = '<div class="data-row bloc" style="text-align: center; color: #888; padding: 40px;">AUCUNE DIRECTIVE ACTIVE DANS CE SECTEUR.<br><span style="font-size: 0.8em; color: #555;">EN ATTENTE DES ORDRES DE L\'AMIRAUTÉ.</span></div>';
                     return;
                 }
 
@@ -1930,7 +1930,7 @@
                     }
 
                     html += `
-                    <div class="data-row" style="border-color: ${colorTheme}; box-shadow: ${cardShadow}; background: rgba(10, 5, 0, 0.7); margin-bottom: 25px; transition: all 0.3s ease;">
+                    <div class="data-row bloc${estEpingle ? ' or' : ''}" style="margin-bottom: 25px; transition: all 0.3s ease;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed ${colorThemeDim}; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                             
                             <!-- Zone Gauche : Infos du Système -->
@@ -4049,6 +4049,6 @@
         };
     </script>
 
-    <script src="footer.js?v=6"></script>
+    <script src="footer.js?v=7"></script>
 </body>
 </html>

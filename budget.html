@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <title>EDTEAM // BUDGET</title>
+    <meta name="robots" content="noindex, nofollow">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=2"></script>
+    <script src="son.js?v=1"></script>
+    <script src="navigation.js?v=8"></script>
+
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(255, 113, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-orange); }
+
+        /* =========================================
+           BALAYAGE HOLOGRAPHIQUE (SCANLINE)
+           ========================================= */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--ed-orange);
+            box-shadow: 0 0 15px var(--ed-orange-glow), 0 0 5px var(--ed-orange);
+            opacity: 0.15;
+            z-index: 9999;
+            pointer-events: none;
+            animation: scanline-anim 8s linear infinite;
+        }
+
+        @keyframes scanline-anim {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes enveloppeBlink {
+            0%, 100% { color: var(--ed-blue); filter: none; }
+            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
+        }
+        .alerte-enveloppe .nav-icon {
+            animation: enveloppeBlink 1s infinite !important;
+        }
+        .alerte-enveloppe .nav-text {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
+        /* =========================================
+           MENU LATÉRAL TACTIQUE
+           ========================================= */
+        #side-menu {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 60px;
+            background: rgba(10, 10, 10, 0.95); border-right: 1px solid var(--ed-orange-dim);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px;
+        }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-orange); }
+        
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); border-left: 3px solid var(--ed-orange); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }
+
+        /* =========================================
+           CONTENEUR CENTRAL DYNAMIQUE
+           ========================================= */
+        .hud-container { 
+            width: calc(100% - 60px); max-width: 1920px; height: 95vh; display: flex; flex-direction: column; 
+            margin-left: 60px; padding: 20px 30px; box-sizing: border-box;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        .hud-header { display: flex; flex-direction: column; margin-bottom: 15px; flex-shrink: 0; }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
+        
+        /* STYLE DU HEADER UNIFIÉ */
+        #fc-inventory-percent { font-size: 0.9em; color: #fff; letter-spacing: 2px; font-weight: bold; background: rgba(0, 240, 255, 0.08); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
+        .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+        
+        .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px; }
+        .tab-bar { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
+        .tab-btn:hover { background: rgba(255, 113, 0, 0.1); opacity: 0.8; }
+        .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
+
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .data-row { border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 4px; background: rgba(10, 5, 0, 0.6); padding: 20px; margin-bottom: 15px; }
+        
+        /* CARD PILOTE (Membres de l'escadron) */
+        .pilot-card { background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .pilot-card:hover { background: rgba(255, 113, 0, 0.1); border-color: var(--ed-orange); box-shadow: 0 0 10px rgba(255, 113, 0, 0.2); }
+
+        .rank-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,113,0,0.1); transition: 0.2s; }
+        .rank-row:hover { background: rgba(255,113,0,0.05); }
+        .rank-1 { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 1.2em; font-weight: bold; }
+        .rank-2 { color: #C0C0C0; font-size: 1.1em; font-weight: bold; }
+        .rank-3 { color: #CD7F32; font-size: 1.1em; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes alertPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
+
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;
+            padding: 40px; /* Force une belle marge noire tout autour de la modale */
+            box-sizing: border-box;
+        }
+        
+        .modal-content { 
+            background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; 
+            max-width: 600px; width: 100%; color: #ccc; position: relative; 
+            max-height: 100%; /* S'arrête exactement avant la marge de l'overlay */
+            overflow-y: auto; box-sizing: border-box;
+        }
+
+        /* Optimisation automatique pour les écrans 14" (Petite hauteur) */
+        @media (max-width: 1400px), (max-height: 800px) {
+            .modal-overlay { padding: 15px; } /* Marge réduite pour gagner de l'espace */
+            .modal-content { padding: 20px; } /* On réduit un peu l'espace vide à l'intérieur */
+        }
+
+        /* Fiche pilote : les colonnes se replient sur un écran étroit */
+        @media (max-width: 800px) {
+            #grille-fiche-pilote, #bandeau-fiche-pilote { grid-template-columns: 1fr !important; }
+        }
+
+        /* Correction spécifique pour la barre de scroll des modales PC */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.4); border-left: 1px solid rgba(255, 113, 0, 0.1); }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 4px; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold; }
+
+        .copy-click { cursor: pointer; transition: all 0.2s; padding: 2px 5px; border-radius: 3px; }
+        .copy-click:hover { background: rgba(255, 113, 0, 0.2); color: #fff !important; text-shadow: 0 0 5px var(--ed-orange); }
+
+        /* =========================================
+           MÉDAILLES DE CAMPAGNE (STYLE INARA)
+           ========================================= */
+        .medal-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 5px 2px; /* Marges réduites pour en aligner davantage */
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 90px;
+        }
+        
+        .medal-wrapper:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        .medal-wrapper:hover .medal-text {
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+
+        /* Le ruban supérieur */
+        .medal-ribbon {
+            width: 25px;
+            height: 15px;
+            background: linear-gradient(to right, #002244 20%, #B22222 20%, #B22222 40%, #FFD700 40%, #FFD700 60%, #B22222 60%, #B22222 80%, #002244 80%);
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            margin-bottom: -5px; /* Pour passer sous la médaille */
+            border-radius: 1px;
+        }
+
+        /* La pièce métallique */
+        .medal-coin {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            /* Dégradé radial pour l'effet bombé et métallique */
+            background: radial-gradient(ellipse at top left, #FFE55C 0%, #FFD700 30%, #B8860B 70%, #5C4305 100%);
+            border: 2px solid #DAA520;
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.6), /* Ombre interne */
+                inset 2px 2px 5px rgba(255,255,255,0.5), /* Reflet lumière */
+                0 4px 8px rgba(0,0,0,0.6); /* Ombre portée externe */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: #4A3500; /* Couleur sombre pour donner l'impression d'être gravé en creux */
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Étoile centrale de la médaille */
+        .medal-coin::after {
+            content: '★';
+            position: absolute;
+            font-size: 1.8em;
+            color: rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.4);
+        }
+
+        /* Le texte gravé sous la médaille */
+        .medal-text {
+            margin-top: 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            transition: color 0.2s, text-shadow 0.2s;
+            /* Coupure propre si le nom du système est trop long */
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* =========================================
+           MÉDAILLES ÉPIQUES (TOP SPÉCIALISTES)
+           ========================================= */
+        .epic-medal-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            width: 105px; /* Petite taille pour tenir sur 2 lignes */
+        }
+        
+        .epic-medal-container:hover {
+            transform: scale(1.1) translateY(-5px);
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4));
+        }
+
+        .epic-medal-svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        }
+
+        .epic-medal-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        }
+
+        .epic-medal-title {
+            font-size: 0.6em;
+            color: #888;
+            text-align: center;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            height: 18px; /* Hauteur fixe pour l'alignement */
+        }
+
+        .epic-medal-cmdr {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(180deg, rgba(30,30,30,0.9), rgba(0,0,0,0.9));
+            border: 1px solid #555;
+            padding: 3px 6px;
+            border-radius: 3px;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        }
+
+        .exploit-feed { height: 350px; overflow-y: auto; position: relative; background: rgba(0,0,0,0.6); border: 1px dashed #333; padding: 10px; font-size: 0.85em; }
+        .exploit-feed::-webkit-scrollbar { width: 6px; }
+        .exploit-feed::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.5); border-radius: 3px; }
+        .exploit-feed::-webkit-scrollbar-thumb:hover { background: var(--ed-blue); }
+        .exploit-line { margin-bottom: 8px; color: #ccc; font-family: 'Share Tech Mono', monospace; animation: slideInFeed 0.3s ease-out; }
+        .exploit-time { color: var(--ed-blue); margin-right: 10px; }
+        .exploit-cmdr { color: #fff; font-weight: bold; margin-right: 5px; }
+        @keyframes slideInFeed { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .exploit-line { margin-bottom: 8px; color: #ccc; font-family: 'Share Tech Mono', monospace; animation: slideInFeed 0.3s ease-out; }
+        .exploit-time { color: var(--ed-blue); margin-right: 10px; }
+        .exploit-cmdr { color: #fff; font-weight: bold; margin-right: 5px; }
+        @keyframes slideInFeed { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Animation fluide de la barre */
+        .progress-fill {
+            transition: width 0.5s ease-in-out, background-color 0.3s ease-in-out;
+            background-color: #F44336; /* Rouge par défaut */
+        }
+
+        /* Classe ajoutée par le JS quand le joueur a fait sa part */
+        .cap-atteint {
+            background-color: #4CAF50 !important; /* Vert succès */
+            box-shadow: 0 0 8px #4CAF50; /* Petit effet de halo (Optionnel) */
+        }
+
+        /* =========================================
+           MÉDAILLES DE CAMPAGNE ET PINS (MOBILE)
+           ========================================= */
+        .medal-wrapper { display: inline-flex; flex-direction: column; align-items: center; margin: 4px; width: 65px; }
+        .medal-ribbon { width: 18px; height: 10px; background: linear-gradient(to right, #002244 20%, #B22222 20%, #B22222 40%, #FFD700 40%, #FFD700 60%, #B22222 60%, #B22222 80%, #002244 80%); box-shadow: inset 0 -1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.5); border-radius: 1px; margin-bottom: -3px; z-index: 1; }
+        .medal-coin { width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(ellipse at top left, #FFE55C 0%, #FFD700 30%, #B8860B 70%, #5C4305 100%); border: 1px solid #DAA520; box-shadow: inset 0 0 8px rgba(0,0,0,0.6), inset 1px 1px 3px rgba(255,255,255,0.5), 0 2px 5px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: #4A3500; text-shadow: 1px 1px 0px rgba(255,255,255,0.3); z-index: 2; position: relative; }
+        .medal-coin::after { content: '★'; position: absolute; font-size: 1.1em; color: rgba(0,0,0,0.2); text-shadow: 1px 1px 0px rgba(255,255,255,0.4); }
+        .medal-text { margin-top: 5px; font-size: 0.6em; font-weight: bold; color: #FFD700; text-align: center; text-transform: uppercase; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+        /* ===== COLONISATION : pastilles d'état (style "EN LIGNE"), carte holographique. Animations par opacité / transform seulement (pas de coût processeur au repos) ===== */
+        @keyframes coloPouls { 0%,100% { opacity:.35; } 50% { opacity:1; } }
+        .c-pastille { display:inline-flex; align-items:center; gap:6px; font-size:.75em; font-weight:bold; letter-spacing:1px; padding:2px 9px; border-radius:3px; border:1px solid; white-space:nowrap; font-family:inherit; }
+        .c-pastille i { display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 6px currentColor; }
+        .c-pastille i.vif { animation:coloPouls 1.6s ease-in-out infinite; }
+        .c-filtre { cursor:pointer; background:transparent; }
+        .c-filtre.on { background:rgba(0,240,255,.18); box-shadow:0 0 8px rgba(0,240,255,.35); }
+        .noeud-carte { transition:opacity .2s; }
+        .colo-cols { column-count:2; column-gap:30px; }
+        @media (max-width:850px) { .colo-cols { column-count:1; } }
+
+        /* ===== BUDGET : modules d'instrument (coins coupes, liseré lumineux), anneaux, compte de resultat, livre de compte (modale) ===== */
+        .bd-row4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+        .bd-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+        @media (max-width:1100px) { .bd-row4 { grid-template-columns:1fr 1fr; } .bd-row2 { grid-template-columns:1fr; } }
+        @media (max-width:600px) { .bd-row4 { grid-template-columns:1fr; } }
+        .bd-big { font-size:2.1em; color:#fff; text-shadow:0 0 14px currentColor; line-height:1.1; white-space:nowrap; }
+        .bd-sm { font-size:.95em; margin-top:6px; letter-spacing:1px; }
+        .bd-up { color:#00FF66; } .bd-down { color:#FF3333; } .bd-cy { color:#00F0FF; } .bd-mut { color:#777; }
+        .bd-jauge { height:6px; background:rgba(255,255,255,.07); margin-top:10px; position:relative; }
+        .bd-jauge i { position:absolute; left:0; top:0; bottom:0; background:#FF3333; box-shadow:0 0 8px #FF3333; }
+        .bd-jauge b { position:absolute; right:0; top:0; bottom:0; background:#00FF66; box-shadow:0 0 8px #00FF66; }
+        .bd-tabs { display:flex; gap:5px; flex-wrap:wrap; align-items:center; margin-bottom:14px; border-bottom:2px solid var(--ed-orange); padding-bottom:0; }
+        .bd-tab { background:transparent; border:1px solid rgba(255,113,0,.22); border-bottom:none; color:var(--ed-orange); padding:8px 24px; font:inherit; font-size:1.05em; letter-spacing:2px; cursor:pointer; opacity:.5; clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px); }
+        .bd-tab:hover { opacity:.85; background:rgba(255,113,0,.1); }
+        .bd-tab.on { opacity:1; background:var(--ed-orange); color:#000; font-weight:bold; }
+        .bd-btn-livre { background:rgba(0,240,255,.1); border:1px solid var(--ed-blue); color:var(--ed-blue); font:inherit; font-size:1.05em; font-weight:bold; letter-spacing:3px; padding:10px 24px; cursor:pointer; clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); text-shadow:0 0 8px var(--ed-blue); box-shadow:0 0 14px rgba(0,240,255,.25); transition:.2s; }
+        .bd-btn-livre:hover { background:var(--ed-blue); color:#000; text-shadow:none; }
+        .bd-anneau-zone { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+        .bd-anneau { width:210px; height:210px; flex-shrink:0; }
+        .bd-anneau text { font-family:'Share Tech Mono',monospace; text-anchor:middle; }
+        .bd-seg { cursor:pointer; transition:opacity .15s, stroke-width .15s; }
+        .bd-dim .bd-seg { opacity:.25; } .bd-dim .bd-seg.hl { opacity:1; stroke-width:17; }
+        .bd-legende { flex:1; min-width:250px; font-size:1em; }
+        .bd-lg { display:grid; grid-template-columns:12px 1fr auto 44px; gap:8px; align-items:center; padding:4px 6px; cursor:pointer; border-left:2px solid transparent; }
+        .bd-lg:hover, .bd-lg.hl { background:rgba(255,113,0,.08); border-left-color:var(--ed-orange); }
+        .bd-lg i { width:10px; height:10px; }
+        .bd-lg .a { color:#fff; } .bd-lg .p { color:#777; text-align:right; }
+        .bd-table { width:100%; border-collapse:collapse; font-size:1.05em; }
+        .bd-table th, .bd-table td { padding:6px 8px; text-align:right; }
+        .bd-table th:first-child, .bd-table td:first-child { text-align:left; }
+        .bd-table th { color:#777; font-weight:normal; letter-spacing:2px; font-size:.9em; border-bottom:1px solid rgba(255,113,0,.22); }
+        .bd-table tr.sec td { color:var(--ed-blue); letter-spacing:4px; font-size:.95em; padding-top:14px; border-bottom:1px solid rgba(0,240,255,.22); }
+        .bd-table tr.l td:first-child { padding-left:20px; color:#bbb; }
+        .bd-table tr.l:hover { background:rgba(255,113,0,.05); }
+        .bd-table tr.tot td { color:#fff; font-weight:bold; border-top:1px solid rgba(255,113,0,.22); }
+        .bd-table tr.res td { font-size:1.3em; font-weight:bold; border-top:2px solid var(--ed-orange); padding-top:10px; text-shadow:0 0 10px currentColor; }
+        .bd-table .v { color:#fff; }
+        .bd-livre-modal { max-width:1250px; width:96%; max-height:92vh; display:flex; flex-direction:column; padding:22px 26px; background:rgba(10,5,0,.95); border:1px solid var(--ed-blue) !important; box-shadow:0 0 40px rgba(0,240,255,.35), 0 0 90px rgba(0,240,255,.12), inset 0 0 25px rgba(0,240,255,.07) !important; }
+        .bd-console { position:relative; display:flex; gap:14px; flex-wrap:nowrap; align-items:flex-end; margin:20px 0 10px; padding:22px 16px 14px; background:rgba(255,113,0,.06); border:1px solid var(--ed-orange); box-shadow:0 0 18px rgba(255,113,0,.28), inset 0 0 18px rgba(255,113,0,.08); }
+        @media (max-width:1000px) { .bd-console { flex-wrap:wrap; } .bd-grow { min-width:230px; } }
+        .bd-etiquette { position:absolute; top:-1px; left:14px; transform:translateY(-50%); background:var(--ed-orange); color:#000; font-weight:bold; letter-spacing:3px; font-size:.85em; padding:2px 12px; box-shadow:0 0 10px rgba(255,113,0,.5); }
+        .bd-groupe { display:flex; flex-direction:column; gap:5px; white-space:nowrap; }
+        .bd-groupe label { color:#b86a2a; letter-spacing:3px; font-size:.78em; }
+        .bd-grow { flex:1; min-width:150px; }
+        .bd-seg3 { display:flex; }
+        .bd-fb { background:#080400; border:1px solid rgba(255,113,0,.22); color:#d98a45; padding:9px 12px; font:inherit; font-size:1em; letter-spacing:1px; cursor:pointer; }
+        .bd-fb:hover { color:#fff; border-color:var(--ed-orange); }
+        .bd-seg3 .bd-fb { margin-left:-1px; }
+        .bd-fb.on { background:var(--ed-orange); color:#000; font-weight:bold; border-color:var(--ed-orange); box-shadow:0 0 12px rgba(255,113,0,.5); }
+        .bd-fb:disabled { opacity:.35; cursor:default; }
+        .bd-console select { background:#080400; border:1px solid var(--ed-orange); color:#fff; font:inherit; font-size:1em; padding:9px 10px; min-width:170px; }
+        .bd-recherche { position:relative; }
+        .bd-recherche svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:18px; height:18px; stroke:var(--ed-blue); fill:none; stroke-width:2; stroke-linecap:round; filter:drop-shadow(0 0 4px var(--ed-blue)); }
+        .bd-recherche input { width:100%; background:#080400; border:1px solid var(--ed-blue); color:#fff; font:inherit; font-size:1em; padding:9px 10px 9px 36px; box-shadow:0 0 10px rgba(0,240,255,.2); }
+        .bd-recherche input:focus { outline:none; box-shadow:0 0 16px rgba(0,240,255,.5); }
+        .bd-recherche input::placeholder { color:#557; letter-spacing:1px; }
+        .bd-actifs { min-height:26px; margin-bottom:8px; font-size:.95em; color:#999; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .bd-actifs .tag { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--ed-blue); color:var(--ed-blue); padding:2px 10px; background:rgba(0,240,255,.08); cursor:pointer; }
+        .bd-actifs .tag:hover { background:var(--ed-blue); color:#000; }
+        .bd-livre-corps { overflow-y:auto; min-height:0; flex:1; }
+        .bd-livre-corps table { width:100%; border-collapse:collapse; }
+        .bd-livre-corps th { position:sticky; top:0; background:#0a0500; color:#777; font-weight:normal; letter-spacing:2px; font-size:.9em; text-align:left; padding:6px 8px; border-bottom:1px solid rgba(255,113,0,.22); }
+        .bd-livre-corps th:last-child, .bd-livre-corps td.m { text-align:right; }
+        .bd-livre-corps td { padding:6px 8px; border-bottom:1px solid rgba(255,113,0,.07); font-size:1em; }
+        .bd-livre-corps td.dt { color:#777; white-space:nowrap; }
+        .bd-livre-corps td.lib { color:#ccc; }
+        .bd-livre-corps td.lib small { color:#666; display:block; }
+        .bd-livre-corps td.m { font-weight:bold; white-space:nowrap; }
+        .bd-livre-corps tr.ecart td { background:rgba(0,240,255,.05); color:#7fe; border-bottom:1px dashed rgba(0,240,255,.22); }
+        .bd-chip { display:inline-flex; align-items:center; gap:6px; color:#bbb; white-space:nowrap; }
+        .bd-chip i { width:8px; height:8px; display:inline-block; }
+        .bd-pager { display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:.95em; color:#777; flex-wrap:wrap; gap:8px; }
+    </style>
+
+    <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjMDIwMTAwIi8+PHBvbHlnb24gcG9pbnRzPSI0OCwxNSAxNSwzNSAzMCw1MCAxMCw3MCA0OCw4NSA0OCw2NSAzMCw1NSA0OCw0MCIgZmlsbD0iIzAwRjBGRiIvPjxwb2x5Z29uIHBvaW50cz0iNTIsMTUgODUsMzUgNzAsNTAgOTAsNzAgNTIsODUgNTIsNjUgNzAsNTUgNTIsNDAiIGZpbGw9IiNGRjcxMDAiLz48cG9seWdvbiBwb2ludHM9IjUwLDQ1IDQyLDU1IDUwLDY1IDU4LDU1IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjkiLz48L3N2Zz4=">
+
+    <!-- Icône lors de l'installation sur iPhone / iPad (iOS) -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+</head>
+<body>
+
+    <div class="scanline"></div>
+
+    <div id="holo-tooltip"></div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu"></nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+
+        <main class="data-window" id="display-area" style="padding-top: 5px;">
+            <div style="color: #666; font-style: italic; text-align: center; margin-top: 40px;">&gt; CHARGEMENT DU BUDGET...</div>
+        </main>
+
+    </div>
+
+    <!-- LIVRE DE COMPTE (fenêtre) -->
+    <div class="modal-overlay" id="modal-bud" onclick="if(event.target===this)fermerLivre()"></div>
+
+    <script>
+        const supabaseApp = window.supabaseApp;
+        let profilCommandant = null;
+        let DONNEES = null;       // { courant, cycles: [{ semaine, debut, fin, t: { categorie: { m, n } } }] } : plus récent d'abord
+        let MODE = 'precedent';   // onglet : courant | precedent | quatre | tout
+        const ST = { type: 'all', cat: '', q: '', p: 0, n: 50 };   // filtres du livre de compte
+        let seqLivre = 0, minuteurRecherche = null;
+
+        // ---------------------------------------------------------------
+        //  COULEURS, CATÉGORIES, FORMATS
+        // ---------------------------------------------------------------
+        const O = '#FF7100', B = '#00F0FF', G = '#00FF66', GOLD = '#FFD700', R = '#FF3333';
+        const esc = escapeHtml;
+        const REV = [['commerce', 'Commerce', '#00FF66'], ['missions', 'Missions', '#00F0FF'], ['primes', 'Primes et bons de combat', '#FFD700'], ['exploration', 'Exploration et bio', '#FF7100'], ['minage', 'Minage et butin', '#B388FF'], ['autres_revenus', 'Autres revenus', '#9a9a9a']];
+        const CHG = [['achats', 'Marchandises achetées', '#FF3333'], ['modules', 'Modules et vaisseaux', '#FF7100'], ['assurance', 'Assurance (rachat)', '#FFD700'], ['carburant', 'Carburant', '#00F0FF'], ['reparations', 'Réparations', '#B388FF'], ['munitions', 'Munitions et drones', '#00FF66'], ['amendes', 'Amendes et primes', '#ff77aa'], ['transferts', 'Transferts et taxis', '#4F8CFF'], ['autres_charges', 'Autres frais', '#9a9a9a']];
+        const CAT = {};
+        REV.forEach(c => { CAT[c[0]] = { n: c[1], c: c[2], t: 'in' }; });
+        CHG.forEach(c => { CAT[c[0]] = { n: c[1], c: c[2], t: 'out' }; });
+        CAT.ecart = { n: 'Écart non catégorisé', c: '#77eedd', t: 'gap' };
+
+        const fmtN = n => String(Math.round(Math.abs(Number(n) || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        function fmtM(v, signe) {
+            const x = Number(v) || 0, a = Math.abs(x);
+            const s = a >= 1e9 ? (a / 1e9).toFixed(2).replace('.', ',') + ' Md' : a >= 1e6 ? (a / 1e6).toFixed(1).replace('.', ',') + ' M' : fmtN(a) + ' cr';
+            return signe ? (x > 0 ? '+ ' : x < 0 ? '- ' : '') + s : s;
+        }
+        const jj = iso => { const d = new Date(iso + (String(iso).length === 10 ? 'T00:00:00Z' : '')); return isNaN(d) ? '' : ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + '/' + d.getUTCFullYear(); };
+        const jm = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + ' ' + ('0' + d.getUTCHours()).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2); };
+        function addDays(iso, n) { const d = new Date(String(iso).slice(0, 10) + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+        const pct = (a, b) => (b && b > 0) ? Math.round(100 * (a - b) / b) : null;
+
+        // ---------------------------------------------------------------
+        //  LECTURE (une seule requête pour tous les cycles, mémoire de 2 minutes)
+        // ---------------------------------------------------------------
+        async function chargerDonnees(force) {
+            const cle = 'edteam_budget_' + profilCommandant.user_id;
+            try {
+                const c = JSON.parse(sessionStorage.getItem(cle) || 'null');
+                if (!force && c && Date.now() - c.ts < 120000) return c.data;
+            } catch (e) {}
+            const { data, error } = await supabaseApp.rpc('budget_synthese', { p_nb: 80 });
+            if (error) throw error;
+            try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), data })); } catch (e) {}
+            return data;
+        }
+
+        // ---------------------------------------------------------------
+        //  PÉRIODES ET TOTAUX
+        // ---------------------------------------------------------------
+        function selection(mode) {
+            const c = DONNEES.courant;
+            let sems, prev = [];
+            if (mode === 'courant') { sems = [c]; prev = [addDays(c, -7)]; }
+            else if (mode === 'precedent') { sems = [addDays(c, -7)]; prev = [addDays(c, -14)]; }
+            else if (mode === 'quatre') { sems = [0, 7, 14, 21].map(n => addDays(c, -n)); prev = [28, 35, 42, 49].map(n => addDays(c, -n)); }
+            else { sems = (DONNEES.cycles || []).map(x => x.semaine).sort(); if (!sems.length) sems = [c]; }
+            const mini = sems.slice().sort()[0], maxi = sems.slice().sort().slice(-1)[0];
+            return { sems, prev, debut: addDays(mini, -7) + 'T07:00:00Z', fin: maxi + 'T07:00:00Z', libelle: jj(addDays(mini, -7)) + ' 07:00 UTC → ' + jj(maxi) + ' 07:00 UTC' };
+        }
+        function agreger(sems) {
+            const idx = {};
+            (DONNEES.cycles || []).forEach(c => { idx[c.semaine] = c; });
+            const t = {}; let debut = null, fin = null, trouve = 0;
+            sems.slice().sort().forEach(s => {
+                const c = idx[s]; if (!c) return;
+                trouve++;
+                Object.entries(c.t || {}).forEach(([k, v]) => { t[k] = (t[k] || 0) + (Number(v.m) || 0); });
+                if (debut === null && c.debut !== null && c.debut !== undefined) debut = Number(c.debut);
+                if (c.fin !== null && c.fin !== undefined) fin = Number(c.fin);
+            });
+            let rev = 0, chg = 0;
+            REV.forEach(c => { rev += t[c[0]] || 0; });
+            CHG.forEach(c => { chg += t[c[0]] || 0; });
+            const ecart = t.ecart || 0;
+            const net = rev - chg;     // resultat net = produits - charges releves (l'ecart non categorise n'en fait PAS partie)
+            const equip = t.modules || 0;            // equipement : modules et vaisseaux
+            const depCour = chg - equip;             // depenses courantes : tout le reste
+            const avantEquip = rev - depCour;        // ce que rapportent les activites avant d'acheter du materiel
+            // Variation du solde qui n'est pas dans le budget : virements vers la porte-flotte et achat de porte-flotte
+            // (le plugin les suit pour garder le solde juste mais ne les compte ni en revenu ni en charge).
+            const autre = (debut !== null && fin !== null) ? fin - debut - net - ecart : null;
+            return { t, rev, chg, ecart, net, debut, fin, autre, trouve, equip, depCour, avantEquip };
+        }
+        function dernierSolde() {
+            const c = (DONNEES.cycles || []).filter(x => x.fin !== null && x.fin !== undefined).sort((a, b) => (a.semaine < b.semaine ? 1 : -1))[0];
+            return c ? { valeur: Number(c.fin), semaine: c.semaine } : null;
+        }
+
+        // ---------------------------------------------------------------
+        //  ANNEAUX (camemberts) : segments en pointillés lumineux
+        // ---------------------------------------------------------------
+        function anneau(idSvg, idLeg, cats, valeurs, label) {
+            const lignes = cats.map(c => ({ k: c[0], n: c[1], c: c[2], v: valeurs[c[0]] || 0 })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+            const total = lignes.reduce((t, x) => t + x.v, 0);
+            const svg = document.getElementById(idSvg), leg = document.getElementById(idLeg);
+            if (!total) {
+                svg.innerHTML = `<circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="13" stroke-dasharray="3 5"/><text x="100" y="95" fill="#777" font-size="10" letter-spacing="3">${label}</text><text x="100" y="116" fill="#555" font-size="14">AUCUN</text>`;
+                leg.innerHTML = '<div style="color:#777;padding:10px 6px;">Aucun mouvement relevé sur cette période.</div>';
+                return;
+            }
+            const R0 = 70, C = 2 * Math.PI * R0; let off = 0;
+            let h = '<circle cx="100" cy="100" r="92" fill="none" stroke="rgba(255,113,0,.25)" stroke-width="1" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="50" fill="none" stroke="rgba(0,240,255,.25)" stroke-width="1"/>';
+            lignes.forEach(x => {
+                const len = x.v / total * C, vis = Math.max(len - 1.5, .5);
+                h += `<circle class="bd-seg" data-k="${x.k}" cx="100" cy="100" r="${R0}" fill="none" stroke="${x.c}" stroke-width="13" stroke-dasharray="${vis} ${C - vis}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)" style="filter:drop-shadow(0 0 4px ${x.c})"/>`;
+                off += len;
+            });
+            h += `<text x="100" y="95" fill="#777" font-size="10" letter-spacing="3">${label}</text><text x="100" y="116" fill="#fff" font-size="19" style="filter:drop-shadow(0 0 5px #fff)">${fmtM(total)}</text>`;
+            svg.innerHTML = h;
+            leg.innerHTML = lignes.map(x => `<div class="bd-lg" data-k="${x.k}"><i style="background:${x.c};box-shadow:0 0 6px ${x.c}"></i><span>${esc(x.n)}</span><span class="a">${fmtM(x.v)}</span><span class="p">${Math.round(100 * x.v / total)} %</span></div>`).join('');
+        }
+        function surbrillance(k) {
+            document.querySelectorAll('.bd-anneau').forEach(s => { s.classList.toggle('bd-dim', !!k); s.querySelectorAll('.bd-seg').forEach(e => e.classList.toggle('hl', e.dataset.k === k)); });
+            document.querySelectorAll('.bd-lg').forEach(e => e.classList.toggle('hl', e.dataset.k === k));
+        }
+
+        // ---------------------------------------------------------------
+        //  PAGE
+        // ---------------------------------------------------------------
+        function vide(txt) { return `<div style="background:rgba(0,0,0,.45);border:1px dashed #555;border-radius:4px;padding:40px 20px;text-align:center;color:#ccc;line-height:1.8;">${txt}</div>`; }
+        function variation(v, bonSiHausse) {
+            if (v === null) return '<span class="bd-mut">—</span>';
+            const bon = bonSiHausse ? v >= 0 : v <= 0;
+            return `<span class="${v === 0 ? 'bd-mut' : bon ? 'bd-up' : 'bd-down'}">${v > 0 ? '+' : ''}${v} %</span>`;
+        }
+
+        function construirePage() {
+            const zone = document.getElementById('display-area');
+            const entete = `
+                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--ed-orange-dim);padding-bottom:12px;margin-bottom:14px;gap:14px;flex-wrap:wrap;">
+                    <h3 style="margin:0;color:${O};letter-spacing:2px;font-size:1.2em;">&gt; BUDGET <span style="color:#777;font-size:.75em;letter-spacing:1px;margin-left:10px;">PERSONNEL · VISIBLE PAR VOUS SEUL</span>
+                        <span onclick="actualiserPage()" style="color:${B};font-size:.65em;letter-spacing:1px;margin-left:10px;cursor:pointer;border-bottom:1px dashed ${B};">ACTUALISER</span></h3>
+                    ${DONNEES && (DONNEES.cycles || []).length ? "<button class=\"bd-btn-livre\" onclick=\"ouvrirLivre()\">&#9776; LIVRE DE COMPTE</button>" : ""}
+                </div>
+                <div style="color:#8a8a8a;font-size:.9em;line-height:1.5;margin:-4px 0 12px;">ⓘ Tableau établi d'après ce que le plugin a relevé dans vos journaux de jeu. Les mouvements qu'il ne connaît pas (virements, dépôts à la banque d'escadron, etc.) apparaissent en « écart non catégorisé » : ils ne sont jamais cachés dans une catégorie.</div>`;
+
+            if (!DONNEES || !(DONNEES.cycles || []).length) {
+                zone.innerHTML = entete + vide(`<div style="color:${O};font-size:1.2em;letter-spacing:2px;margin-bottom:10px;">AUCUN BUDGET RELEVÉ POUR L'INSTANT</div>Votre budget se remplit automatiquement dès que le plugin SYS.EDTEAM (version 2.5 ou plus) a lu vos journaux de jeu.<br>Mettez le plugin à jour, redémarrez EDMC, puis revenez ici.`);
+                return;
+            }
+
+            const sel = selection(MODE), cur = agreger(sel.sems), prev = sel.prev.length ? agreger(sel.prev) : null;
+            const solde = dernierSolde();
+            const ratio = cur.rev > 0 ? Math.min(100, Math.round(100 * cur.chg / cur.rev)) : 0;
+            const nomPrev = MODE === 'quatre' ? 'les 4 cycles d\'avant' : 'le cycle d\'avant';
+            const onglet = (m, txt) => `<button class="bd-tab ${MODE === m ? 'on' : ''}" onclick="choisirMode('${m}')">${txt}</button>`;
+            const lien = (v, bon) => prev ? `<div class="bd-sm">${v === null ? '<span class="bd-mut">pas de comparaison</span>' : variation(v, bon) + ' <span class="bd-mut">vs ' + nomPrev + '</span>'}</div>` : '';
+
+            const cartes = `
+                <div class="bd-row4">
+                    <div class="bloc"><h2>REVENUS <em>PÉRIODE</em></h2><div class="bd-big bd-up">${fmtM(cur.rev, true)}</div>${lien(prev ? pct(cur.rev, prev.rev) : null, true)}</div>
+                    <div class="bloc"><h2>CHARGES <em>PÉRIODE</em></h2><div class="bd-big bd-down">${cur.chg ? '- ' + fmtM(cur.chg) : fmtM(0)}</div>${lien(prev ? pct(cur.chg, prev.chg) : null, false)}</div>
+                    <div class="bloc cy"><h2>RÉSULTAT NET <em>PÉRIODE</em></h2><div class="bd-big ${cur.net >= 0 ? '' : 'bd-down'}">${fmtM(cur.net, true)}</div>
+                        <div class="bd-jauge"><i style="width:${ratio}%"></i><b style="left:${ratio}%"></b></div><div class="bd-sm bd-mut">CHARGES = ${ratio} % DES REVENUS</div></div>
+                    <div class="bloc cy"><h2>SOLDE <em>DERNIER RELEVÉ</em></h2><div class="bd-big bd-cy">${solde ? fmtM(solde.valeur) : '—'}</div><div class="bd-sm bd-mut">${solde ? 'relevé dans le cycle du ' + jj(addDays(solde.semaine, -7)) : 'solde non encore relevé'}</div></div>
+                </div>`;
+
+            const anneaux = `
+                <div class="bd-row2">
+                    <div class="bloc holo"><div class="holo-balayage"></div><h2>RÉPARTITION DES REVENUS <em>CLIC = LIVRE DE COMPTE</em></h2><div class="bd-anneau-zone"><svg class="bd-anneau" id="bd-svg-r" viewBox="0 0 200 200"></svg><div class="bd-legende" id="bd-leg-r"></div></div></div>
+                    <div class="bloc holo"><div class="holo-balayage"></div><h2>RÉPARTITION DES CHARGES <em>CLIC = LIVRE DE COMPTE</em></h2><div class="bd-anneau-zone"><svg class="bd-anneau" id="bd-svg-c" viewBox="0 0 200 200"></svg><div class="bd-legende" id="bd-leg-c"></div></div></div>
+                </div>`;
+
+            const ligne = (c, sens) => {
+                const a = cur.t[c[0]] || 0, b = prev ? (prev.t[c[0]] || 0) : 0;
+                if (!a && !b) return '';
+                return `<tr class="l"><td>${esc(c[1])}</td><td class="v">${fmtM(a)}</td>${prev ? `<td>${fmtM(b)}</td><td>${variation(pct(a, b), sens === 'in')}</td>` : ''}</tr>`;
+            };
+            const lignesRev = REV.map(c => ligne(c, 'in')).join(''), lignesCour = CHG.filter(c => c[0] !== 'modules').map(c => ligne(c, 'out')).join(''), lignesEquip = ligne(CHG.find(c => c[0] === 'modules'), 'out');
+            const col = prev ? 4 : 2;
+            const connu = o => !!o && o.debut !== null && o.fin !== null;
+            const cel = (o, g) => connu(o) ? g(o) : '<span class="bd-mut">—</span>';
+            const compte = `
+                <div class="bloc" style="margin-bottom:12px;"><h2>COMPTE DE RÉSULTAT <em>${esc(sel.libelle)}</em></h2>
+                    <div style="overflow-x:auto;"><table class="bd-table">
+                        <tr><th></th><th>PÉRIODE</th>${prev ? '<th>PÉRIODE D\'AVANT</th><th>VARIATION</th>' : ''}</tr>
+                        <tr class="sec"><td colspan="${col}">PRODUITS</td></tr>${lignesRev || `<tr class="l"><td colspan="${col}" class="bd-mut">aucun revenu relevé</td></tr>`}
+                        <tr class="tot"><td>TOTAL DES PRODUITS</td><td>${fmtM(cur.rev)}</td>${prev ? `<td>${fmtM(prev.rev)}</td><td>${variation(pct(cur.rev, prev.rev), true)}</td>` : ''}</tr>
+                        <tr class="sec"><td colspan="${col}">DÉPENSES COURANTES</td></tr>${lignesCour || `<tr class="l"><td colspan="${col}" class="bd-mut">aucune dépense relevée</td></tr>`}
+                        <tr class="tot"><td>TOTAL DES DÉPENSES COURANTES</td><td>${fmtM(cur.depCour)}</td>${prev ? `<td>${fmtM(prev.depCour)}</td><td>${variation(pct(cur.depCour, prev.depCour), false)}</td>` : ''}</tr>
+                        <tr class="tot"><td>RÉSULTAT AVANT ÉQUIPEMENT</td><td class="${cur.avantEquip >= 0 ? 'bd-up' : 'bd-down'}">${fmtM(cur.avantEquip, true)}</td>${prev ? `<td>${fmtM(prev.avantEquip, true)}</td><td>${variation(pct(cur.avantEquip, prev.avantEquip), true)}</td>` : ''}</tr>
+                        <tr class="sec"><td colspan="${col}">ÉQUIPEMENT (MODULES ET VAISSEAUX)</td></tr>${lignesEquip || `<tr class="l"><td colspan="${col}" class="bd-mut">aucun achat d'équipement</td></tr>`}
+                        <tr class="res"><td>RÉSULTAT NET</td><td class="${cur.net >= 0 ? 'bd-up' : 'bd-down'}">${fmtM(cur.net, true)}</td>${prev ? `<td>${fmtM(prev.net, true)}</td><td>${variation(pct(cur.net, prev.net), true)}</td>` : ''}</tr>
+                    </table></div>
+                    <div class="bloc-note">Le compte de résultat ne montre que des mouvements sur la période (ce que vous avez gagné et dépensé), jamais votre solde. Le résultat avant équipement montre ce que rapportent vos activités ; l'équipement (modules et vaisseaux) est ce que vous avez investi dans votre matériel ; le résultat net est ce qu'il vous reste une fois l'équipement payé (produits moins toutes les charges). Le lien avec votre solde du jeu est dans le bloc de rapprochement ci-dessous.</div>
+                </div>`;
+            const lignePont = (lib, g, cls) => `<tr class="${cls || 'l'}"><td>${lib}</td><td class="${cls === 'res' ? 'bd-cy' : 'v'}">${g(cur)}</td>${prev ? `<td>${cel(prev, g)}</td><td></td>` : ''}</tr>`;
+            const rapprochement = connu(cur) ? `
+                <div class="bloc cy" style="margin-bottom:12px;"><h2>RAPPROCHEMENT AVEC LE SOLDE DU JEU <em>${esc(sel.libelle)}</em></h2>
+                    <div style="overflow-x:auto;"><table class="bd-table">
+                        <tr><th></th><th>PÉRIODE</th>${prev ? '<th>PÉRIODE D\'AVANT</th><th></th>' : ''}</tr>
+                        ${lignePont('Solde au début de la période', o => fmtM(o.debut))}
+                        ${lignePont('+ Résultat net (produits − charges)', o => fmtM(o.net, true))}
+                        ${lignePont('+ Écart non catégorisé (mouvements que le plugin n\'a pas su classer)', o => fmtM(o.ecart, true))}
+                        ${lignePont('+ Porte-flotte : virements et achat (hors budget)', o => fmtM(o.autre, true))}
+                        ${lignePont('SOLDE EN FIN DE PÉRIODE', o => fmtM(o.fin), 'res')}
+                    </table></div>
+                    <div class="bloc-note">Le solde en fin de période est celui du dernier relevé quand la période va jusqu'à aujourd'hui. L'écart non catégorisé est la différence entre le solde réel du jeu et les mouvements relevés (jeu lancé sans EDMC, dépôt à la banque d'escadron, mouvement pas encore géré) : il est affiché tel quel, jamais caché dans une catégorie.</div>
+                </div>` : '';
+
+            zone.innerHTML = entete + `
+                <div class="bd-tabs">
+                    ${onglet('courant', 'CYCLE EN COURS')}${onglet('precedent', 'CYCLE PRÉCÉDENT')}${onglet('quatre', '4 DERNIERS CYCLES')}${onglet('tout', 'TOUT')}
+                    <span style="margin-left:auto;color:#888;font-size:.95em;letter-spacing:1px;">${esc(sel.libelle)}</span>
+                </div>` + cartes + anneaux + compte + rapprochement + '<div style="height:30px"></div>';
+
+            anneau('bd-svg-r', 'bd-leg-r', REV, cur.t, 'REVENUS');
+            anneau('bd-svg-c', 'bd-leg-c', CHG, cur.t, 'CHARGES');
+        }
+
+        window.choisirMode = function (m) { if (typeof sonClic === 'function') sonClic(); MODE = m; construirePage(); };
+        window.actualiserPage = async function () {
+            try { DONNEES = await chargerDonnees(true); construirePage(); }
+            catch (e) { console.error('Erreur budget :', e); }
+        };
+
+        // survol / clic sur un anneau ou sur une ligne de légende
+        document.addEventListener('mouseover', e => { const t = e.target.closest && e.target.closest('.bd-seg,.bd-lg'); surbrillance(t ? t.dataset.k : ST.cat || null); });
+        document.addEventListener('mouseout', e => { if (e.target.closest && e.target.closest('.bd-seg,.bd-lg')) surbrillance(ST.cat || null); });
+        document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('.bd-seg,.bd-lg'); if (t) ouvrirLivre({ cat: t.dataset.k }); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerLivre(); });
+
+        // ---------------------------------------------------------------
+        //  LIVRE DE COMPTE (fenêtre, pagination côté serveur : 50 lignes à la fois)
+        // ---------------------------------------------------------------
+        window.ouvrirLivre = function (opts) {
+            if (typeof sonClic === 'function') sonClic();
+            ST.type = 'all'; ST.q = ''; ST.p = 0; ST.cat = (opts && opts.cat) || '';
+            const sel = selection(MODE);
+            const options = '<option value="">TOUTES CATÉGORIES</option>' + REV.concat(CHG).map(c => `<option value="${c[0]}">${esc(c[1])}</option>`).join('') + `<option value="ecart">${esc(CAT.ecart.n)}</option>`;
+            const m = document.getElementById('modal-bud');
+            m.innerHTML = `<div class="modal-content bd-livre-modal" onclick="event.stopPropagation()">
+                <div onclick="fermerLivre()" style="position:absolute;top:14px;right:18px;border:1px solid rgba(255,113,0,.3);color:${O};font-size:.85em;letter-spacing:2px;padding:4px 12px;cursor:pointer;">FERMER [ÉCHAP]</div>
+                <div style="color:#888;letter-spacing:4px;font-size:.95em;">LIVRE DE COMPTE <span id="bd-cnt" style="color:#666;letter-spacing:1px;margin-left:8px;"></span></div>
+                <div style="color:#777;font-size:.9em;margin-top:2px;">${esc(sel.libelle)}</div>
+                <div class="bd-console">
+                    <span class="bd-etiquette">&#9656; FILTRES</span>
+                    <div class="bd-groupe"><label>TYPE</label><div class="bd-seg3"><button class="bd-fb on" data-t="all">TOUT</button><button class="bd-fb" data-t="in">REVENUS</button><button class="bd-fb" data-t="out">CHARGES</button></div></div>
+                    <div class="bd-groupe"><label>CATÉGORIE</label><select id="bd-cat">${options}</select></div>
+                    <div class="bd-groupe bd-grow"><label>RECHERCHE</label><div class="bd-recherche"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"></circle><line x1="15" y1="15" x2="21" y2="21"></line></svg><input type="text" id="bd-q" maxlength="60" placeholder="STATION, SYSTÈME, MARCHANDISE..."></div></div>
+                    <div class="bd-groupe"><label>&nbsp;</label><div style="display:flex;gap:6px;"><button class="bd-fb" id="bd-reset">RÉINITIALISER</button><button class="bd-fb" id="bd-export" style="color:${B};border-color:rgba(0,240,255,.3);">EXPORT CSV</button></div></div>
+                </div>
+                <div class="bd-actifs" id="bd-actifs"></div>
+                <div class="bd-livre-corps" id="bd-livre-corps"></div>
+                <div class="bd-pager"><span id="bd-info"></span><span><button class="bd-fb" id="bd-prec">&lt; PRÉCÉDENT</button> <button class="bd-fb" id="bd-suiv">SUIVANT &gt;</button></span></div>
+            </div>`;
+            m.style.display = 'flex';
+            document.getElementById('bd-cat').value = ST.cat;
+            m.querySelectorAll('.bd-fb[data-t]').forEach(b => { b.onclick = () => { ST.type = b.dataset.t; ST.p = 0; chargerLivre(); }; });
+            document.getElementById('bd-cat').onchange = e => { ST.cat = e.target.value; ST.p = 0; surbrillance(ST.cat || null); chargerLivre(); };
+            document.getElementById('bd-q').oninput = e => { clearTimeout(minuteurRecherche); minuteurRecherche = setTimeout(() => { ST.q = e.target.value; ST.p = 0; chargerLivre(); }, 350); };
+            document.getElementById('bd-reset').onclick = () => { ST.type = 'all'; ST.cat = ''; ST.q = ''; ST.p = 0; document.getElementById('bd-q').value = ''; surbrillance(null); chargerLivre(); };
+            document.getElementById('bd-prec').onclick = () => { if (ST.p > 0) { ST.p--; chargerLivre(); } };
+            document.getElementById('bd-suiv').onclick = () => { ST.p++; chargerLivre(); };
+            document.getElementById('bd-export').onclick = exporterCsv;
+            document.getElementById('bd-actifs').onclick = e => {
+                const t = e.target.closest('.tag'); if (!t) return;
+                if (t.dataset.f === 'type') ST.type = 'all'; else if (t.dataset.f === 'cat') ST.cat = ''; else { ST.q = ''; document.getElementById('bd-q').value = ''; }
+                ST.p = 0; surbrillance(ST.cat || null); chargerLivre();
+            };
+            chargerLivre();
+        };
+        window.fermerLivre = function () { const m = document.getElementById('modal-bud'); if (m) m.style.display = 'none'; surbrillance(null); };
+
+        function parametresLivre(limite, decalage) {
+            const sel = selection(MODE);
+            return { p_debut: sel.debut, p_fin: sel.fin, p_type: ST.type, p_categorie: ST.cat || null, p_recherche: ST.q || null, p_limite: limite, p_decalage: decalage };
+        }
+
+        async function chargerLivre() {
+            const moi = ++seqLivre, corps = document.getElementById('bd-livre-corps');
+            if (!corps) return;
+            corps.style.opacity = '.5';
+            let r;
+            try {
+                const { data, error } = await supabaseApp.rpc('budget_livre', parametresLivre(ST.n, ST.p * ST.n));
+                if (error) throw error;
+                r = data || { total: 0, somme: 0, lignes: [] };
+            } catch (e) {
+                console.error('Erreur livre de compte :', e);
+                if (moi === seqLivre) corps.innerHTML = '<div style="color:#FF3333;text-align:center;padding:30px;">Impossible de lire le livre de compte pour le moment.</div>';
+                return;
+            }
+            if (moi !== seqLivre) return;   // une réponse plus récente est déjà arrivée
+            const pages = Math.max(1, Math.ceil(r.total / ST.n));
+            if (ST.p >= pages) { ST.p = pages - 1; return chargerLivre(); }
+            const sel = selection(MODE), limiteLivre = addDays(DONNEES.courant, -56) + 'T07:00:00Z';
+            const lignes = (r.lignes || []).map(l => {
+                const c = CAT[l.k] || { n: l.k, c: '#999', t: 'gap' };
+                const m = Number(l.m) || 0, cls = c.t === 'gap' ? 'bd-cy' : m > 0 ? 'bd-up' : 'bd-down';
+                return `<tr class="${l.k === 'ecart' ? 'ecart' : ''}"><td class="dt">${esc(jm(l.ts))}</td><td><span class="bd-chip"><i style="background:${c.c};box-shadow:0 0 5px ${c.c}"></i>${esc(c.n)}</span></td><td class="lib">${esc(l.l || '')}${l.lieu ? '<small>' + esc(l.lieu) + '</small>' : ''}</td><td class="m ${cls}">${m > 0 ? '+ ' : '- '}${fmtN(m)} cr</td></tr>`;
+            }).join('');
+            corps.innerHTML = `<table><thead><tr><th>DATE (UTC)</th><th>CATÉGORIE</th><th>LIBELLÉ</th><th>MONTANT</th></tr></thead><tbody>${lignes || '<tr><td colspan="4" style="text-align:center;color:#777;padding:24px;">AUCUNE LIGNE</td></tr>'}</tbody></table>`
+                + (sel.debut < limiteLivre ? '<div class="bloc-note">Le livre de compte ne détaille que les 8 derniers cycles : les lignes plus anciennes ne sont plus conservées (les totaux par cycle, eux, restent).</div>' : '');
+            corps.style.opacity = '1';
+            document.getElementById('bd-cnt').textContent = r.total + ' LIGNE' + (r.total > 1 ? 'S' : '');
+            document.getElementById('bd-info').textContent = 'Lignes ' + (r.total ? ST.p * ST.n + 1 : 0) + ' à ' + Math.min((ST.p + 1) * ST.n, r.total) + ' sur ' + r.total + '  |  Somme de la sélection : ' + fmtM(r.somme, true);
+            document.getElementById('bd-prec').disabled = ST.p === 0;
+            document.getElementById('bd-suiv').disabled = ST.p >= pages - 1;
+            document.querySelectorAll('#modal-bud .bd-fb[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === ST.type));
+            document.getElementById('bd-cat').value = ST.cat;
+            const tags = [];
+            if (ST.type !== 'all') tags.push(['type', ST.type === 'in' ? 'REVENUS' : 'CHARGES']);
+            if (ST.cat) tags.push(['cat', (CAT[ST.cat] ? CAT[ST.cat].n : ST.cat).toUpperCase()]);
+            if (ST.q) tags.push(['q', '"' + ST.q.toUpperCase() + '"']);
+            document.getElementById('bd-actifs').innerHTML = tags.length ? 'FILTRES ACTIFS : ' + tags.map(t => `<span class="tag" data-f="${t[0]}">${esc(t[1])} &#10005;</span>`).join('') : '<span style="color:#666;">AUCUN FILTRE : TOUTES LES TRANSACTIONS DE LA PÉRIODE SONT AFFICHÉES</span>';
+        }
+
+        async function exporterCsv() {
+            try {
+                const { data, error } = await supabaseApp.rpc('budget_livre', parametresLivre(2000, 0));
+                if (error) throw error;
+                const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+                const lignes = (data.lignes || []).map(l => [q(l.ts), q((CAT[l.k] || { n: l.k }).n), q(l.l), q(l.lieu), Number(l.m) || 0].join(';'));
+                const csv = '﻿' + ['date_utc;categorie;libelle;lieu;montant'].concat(lignes).join('\r\n');
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+                a.download = 'budget_' + MODE + '.csv';
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+            } catch (e) { console.error('Erreur export :', e); }
+        }
+
+        // ---------------------------------------------------------------
+        //  DÉMARRAGE (tout pilote approuvé : le budget est strictement personnel)
+        // ---------------------------------------------------------------
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            if (data && data.est_approuve) {
+                profilCommandant = data;
+                window.profilCommandant = data;
+                if (data.est_amiral || data.est_directeur) {
+                    const navAmiraute = document.getElementById('nav-bureau-amiraute');
+                    if (navAmiraute) navAmiraute.style.display = 'flex';
+                    if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
+                }
+                const navBgs = document.getElementById('nav-bgs-factions');
+                if (navBgs && localStorage.getItem('edteam_acces_bgs') === 'true') navBgs.style.display = 'flex';
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+                const apiKeyDisplay = document.getElementById('api-key-display');
+                if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;
+
+                const mainUi = document.getElementById('main-ui');
+                if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
+                if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+
+                try {
+                    DONNEES = await chargerDonnees(false);
+                    // onglet de départ : le cycle en cours s'il contient déjà des mouvements, sinon le cycle précédent
+                    const c = (DONNEES.cycles || []).find(x => x.semaine === DONNEES.courant);
+                    MODE = c && Object.keys(c.t || {}).length ? 'courant' : 'precedent';
+                    construirePage();
+                } catch (e) {
+                    console.error('Erreur budget :', e);
+                    document.getElementById('display-area').innerHTML = vide('Impossible de lire votre budget pour le moment.<br>Réessayez dans quelques instants.');
+                }
+            } else {
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+
+    <script src="footer.js?v=7"></script>
+</body>
+</html>
