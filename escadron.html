@@ -491,10 +491,18 @@
             try {
                 // 1. On télécharge les profils (PROJECTION STRICTE ANTI-EGRESS)
                 let repEff = await supabaseApp.from('profils_publics')
-                    .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, rang_bgs, points_bgs')
+                    .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, rang_bgs, points_bgs, rang_escadron_jeu')
                     .eq('escadron_id', profilCommandant.escadron_id)
                     .eq('est_approuve', true)
                     .order('est_amiral', { ascending: false });
+                if (repEff.error) {
+                    // Repli : rang en jeu pas encore expose (script SQL 30)
+                    repEff = await supabaseApp.from('profils_publics')
+                        .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, rang_bgs, points_bgs')
+                        .eq('escadron_id', profilCommandant.escadron_id)
+                        .eq('est_approuve', true)
+                        .order('est_amiral', { ascending: false });
+                }
                 if (repEff.error) {
                     // Repli : colonnes du rang BGS pas encore exposées par la vue (script SQL 19)
                     repEff = await supabaseApp.from('profils_publics')
@@ -539,6 +547,8 @@
                     
                     let badges = '';
                     if (!p.est_amiral) {
+                        // Rang en jeu 4 = Recrue : pas d'acces aux pages d'escadron tant qu'un officier ne l'a pas passé Pilote en jeu
+                        if (Number(p.rang_escadron_jeu) === 4 && !p.est_officier) badges += '<span title="Recrue en jeu : pas d\'accès aux pages d\'escadron. Un officier doit la passer PILOTE dans le jeu." style="background: rgba(255,200,0,0.12); color: #FFC800; border: 1px solid #FFC800; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px; margin-left: 10px; letter-spacing: 1px;">RECRUE</span>';
                         if (p.est_officier) badges += '<span style="background: rgba(0,255,102,0.1); color: #00FF66; border: 1px solid #00FF66; font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">OFFICIER BGS</span>';
                         if (p.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; padding: 2px 6px; border-radius: 3px; margin-left: 10px;">DIPLOMATE</span>';
                     }
