@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-recrue', date: '2026-10-01T22:24:00Z', type: 'AMELIORE',
+        titre: 'Escadron : les recrues sont signalées dans la liste des membres',
+        texte: 'Dans la liste des membres de l\'escadron (PC et mobile), un badge RECRUE apparaît à côté des pilotes dont le rang en jeu est encore « Recrue ». Ils n\'ont pas accès aux pages d\'escadron tant qu\'un officier ne les a pas passés PILOTE dans le jeu : l\'Amiral sait ainsi qui il doit faire basculer. Le badge se met à jour tout seul au prochain lancement du jeu du pilote concerné.',
+        important: false
+    },
+    {
         id: '2026-10-architecte', date: '2026-10-01T21:02:00Z', type: 'AMELIORE',
         titre: 'Colonisation : les systèmes et constructions de chaque architecte',
         texte: 'Sur la page Colonisation, un clic sur un architecte (dans le bloc « Architectes de l\'escadron », ou sur son nom dans la fenêtre d\'un système) ouvre la liste de tous ses systèmes, avec pour chacun ses installations terminées et ses chantiers en cours (avancement et reste à livrer). Chaque système a un bouton COPIER pour son nom, un bouton pour le voir sur la carte et un bouton pour ouvrir son détail. Au survol d\'un architecte, ses systèmes s\'entourent d\'or sur la carte.',

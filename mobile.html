@@ -1340,10 +1340,18 @@
                 const nomEsc = document.getElementById('m-esc-nom');
                 if (nomEsc && profilCommandant.escadron_id) nomEsc.innerText = '> ' + profilCommandant.escadron_id.toUpperCase();
                 if (profilCommandant.escadron_id) {
-                    const { data: membresBruts } = await supabaseApp.from('profils_publics')
-                        .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id, rang_bgs')
+                    let repMembres = await supabaseApp.from('profils_publics')
+                        .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id, rang_bgs, rang_escadron_jeu')
                         .eq('escadron_id', profilCommandant.escadron_id)
                         .eq('est_approuve', true);
+                    if (repMembres.error) {
+                        // Repli : rang en jeu pas encore expose (script SQL 30)
+                        repMembres = await supabaseApp.from('profils_publics')
+                            .select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id, rang_bgs')
+                            .eq('escadron_id', profilCommandant.escadron_id)
+                            .eq('est_approuve', true);
+                    }
+                    const membresBruts = repMembres.data;
                     // Amiral d'abord, puis rang BGS décroissant, puis nom
                     const membres = membresBruts ? [...membresBruts].sort((a, b) =>
                         (b.est_amiral ? 1 : 0) - (a.est_amiral ? 1 : 0) ||
@@ -1363,6 +1371,9 @@
                             } else {
                                 if (m.est_officier) {
                                     badges.push('<span style="color:var(--ed-green); border:1px solid var(--ed-green); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">OFFICIER</span>');
+                                } else if (Number(m.rang_escadron_jeu) === 4) {
+                                    // Recrue en jeu : pas d'accès aux pages d'escadron tant qu'un officier ne l'a pas passée Pilote en jeu
+                                    badges.push('<span style="color:#FFC800; border:1px solid #FFC800; background:rgba(255,200,0,0.12); padding:1px 5px; border-radius:3px; font-size:0.7em; font-weight:bold;">RECRUE</span>');
                                 } else {
                                     badges.push('<span style="color:#888; border:1px solid #444; padding:1px 5px; border-radius:3px; font-size:0.7em;">PILOTE</span>');
                                 }
