@@ -350,7 +350,7 @@
         .lien-archi:hover { color:#fff !important; }
         .prio-ligne { transition:background .15s; border-radius:3px; }
         .prio-ligne:hover { background:rgba(255,215,0,.07); }
-        .journal-feed { height:340px; overflow-y:auto; position:relative; background:rgba(0,0,0,.6); border:1px dashed #333; padding:10px; font-size:.85em; }
+        .journal-feed { height:350px; overflow-y:auto; position:relative; background:rgba(0,0,0,.6); border:1px dashed #333; padding:10px; font-size:.85em; }
         .journal-feed::-webkit-scrollbar { width:6px; }
         .journal-feed::-webkit-scrollbar-thumb { background:rgba(0,240,255,.5); border-radius:3px; }
         .journal-feed::-webkit-scrollbar-thumb:hover { background:var(--ed-blue); }
@@ -881,7 +881,7 @@
             const prio = (data.priorites || []).map((p, k) => `<div class="prio-ligne" onclick="ouvrirMateriau(${k})" onmouseenter="apercuMateriau(${k})" onmouseleave="finApercu()" title="Survol : repère les systèmes sur la carte · Clic : liste des chantiers et noms à copier" style="display:grid;grid-template-columns:1fr 70px 82px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px dashed #222;cursor:pointer;"><span style="color:#fff;">${esc(p.nom)} <small style="color:#777;font-size:.75em;">${p.chantiers} chantier${p.chantiers > 1 ? 's' : ''}</small></span><div style="height:7px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;"><div style="width:${Math.max(3, Math.round(100 * p.reste / maxReste))}%;height:100%;background:${B};"></div></div><span style="color:${GOLD};text-align:right;font-weight:bold;">${fmt(p.reste)} t</span></div>`).join('')
                 || vide('Rien à apporter : aucun chantier en cours.');
 
-            const journalListe = data.journal || [];
+            const journalListe = (data.journal || []).slice(0, 100); // comme BGS : les 100 dernières
             const journal = journalListe.length ? journalGrille(journalListe) : vide('Aucune livraison relevée pour l\'instant.');
             // même style que le journal de la page BGS : titre + [ AGRANDIR ], liste défilante, une ligne par entrée
             const journalBloc = `<div class="bloc cy" style="padding:18px 20px;margin-top:12px;">
