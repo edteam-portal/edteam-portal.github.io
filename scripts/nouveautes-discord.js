@@ -19,15 +19,25 @@ const dry = process.argv.includes('--dry');
 const court = !(process.argv.includes('--complet') || process.env.NOUVEAUTES_FORMAT === 'complet');
 const forcer = process.argv.includes('--forcer') || process.env.NOUVEAUTES_FORCER === '1' || process.env.NOUVEAUTES_FORCER === 'true';
 const maintenant = process.env.NOUVEAUTES_NOW ? new Date(process.env.NOUVEAUTES_NOW) : new Date();
+// Mode EXCEPTIONNEL : annonce ponctuelle des nouveautes du jour (ou depuis NOUVEAUTES_DEPUIS), hors du rythme hebdomadaire.
+//   node scripts/nouveautes-discord.js --exceptionnel [--dry]     ; options : NOUVEAUTES_DEPUIS=2026-10-01T00:00:00Z  NOUVEAUTES_TITRE="mon titre"
+const exceptionnel = process.argv.includes('--exceptionnel') || process.env.NOUVEAUTES_EXCEPTIONNEL === '1' || process.env.NOUVEAUTES_EXCEPTIONNEL === 'true';
 
 const jj = d => ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2);
 
-// Dernier jeudi 07:00 UTC deja passe = fin du cycle ecoule ; debut = 7 jours avant
-const fin = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 7, 0, 0));
-while (fin.getUTCDay() !== 4 || fin > maintenant) fin.setUTCDate(fin.getUTCDate() - 1);
-const debut = new Date(fin.getTime() - 7 * 86400000);
+let fin, debut;
+if (exceptionnel) {
+    // depuis minuit UTC du jour (ou la date donnee) jusqu'a maintenant
+    fin = maintenant;
+    debut = process.env.NOUVEAUTES_DEPUIS ? new Date(process.env.NOUVEAUTES_DEPUIS) : new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 0, 0, 0));
+} else {
+    // Dernier jeudi 07:00 UTC deja passe = fin du cycle ecoule ; debut = 7 jours avant
+    fin = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate(), 7, 0, 0));
+    while (fin.getUTCDay() !== 4 || fin > maintenant) fin.setUTCDate(fin.getUTCDate() - 1);
+    debut = new Date(fin.getTime() - 7 * 86400000);
+}
 
-if (!forcer && fin < PREMIER_ENVOI) {
+if (!exceptionnel && !forcer && fin < PREMIER_ENVOI) {
     console.log(`Premier résumé prévu pour le cycle qui se termine le 08/10 : le cycle du ${jj(debut)} au ${jj(fin)} n'est pas envoyé.`);
     process.exit(0);
 }
@@ -37,7 +47,7 @@ vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'nouveautes-data.j
 const toutes = Array.isArray(ctx.window.EDTEAM_NOUVEAUTES) ? ctx.window.EDTEAM_NOUVEAUTES : [];
 
 const semaine = toutes
-    .filter(e => new Date(e.date) >= debut && new Date(e.date) < fin)
+    .filter(e => new Date(e.date) >= debut && (exceptionnel ? new Date(e.date) <= fin : new Date(e.date) < fin))
     .sort((a, b) => (a.date < b.date ? -1 : 1));
 
 const ICONES = { NOUVEAU: '🟢 **NOUVEAU**', AMELIORE: '🔵 **AMÉLIORÉ**', CORRIGE: '🟠 **CORRIGÉ**' };
@@ -65,7 +75,7 @@ description += '\n\n📖 **Le détail de chaque nouveauté est sur le site :** [
 const message = {
     username: 'SYS.EDTEAM',
     embeds: [{
-        title: `📰 NOUVEAUTÉS DE LA SEMAINE · du ${jj(debut)} au ${jj(fin)}`,
+        title: process.env.NOUVEAUTES_TITRE || (exceptionnel ? `📰 MISES À JOUR EXCEPTIONNELLES · ${jj(debut)}` : `📰 NOUVEAUTÉS DE LA SEMAINE · du ${jj(debut)} au ${jj(fin)}`),
         url: LIEN_DETAIL,
         description,
         color: 0xFF7100,
@@ -73,7 +83,7 @@ const message = {
     }]
 };
 
-console.log(`--- Message (${semaine.length} nouveauté(s), cycle du ${jj(debut)} au ${jj(fin)}${court ? ', version courte' : ', version complète'}) ---`);
+console.log(`--- Message (${semaine.length} nouveauté(s), ${exceptionnel ? 'envoi EXCEPTIONNEL du ' + jj(debut) : 'cycle du ' + jj(debut) + ' au ' + jj(fin)}${court ? ', version courte' : ', version complète'}) ---`);
 console.log(message.embeds[0].title + '\n\n' + description + '\n\n' + message.embeds[0].footer.text);
 console.log('--- fin ---');
 

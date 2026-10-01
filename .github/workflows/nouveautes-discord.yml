@@ -13,6 +13,18 @@ on:
         description: 'Ignorer la date du premier envoi (08/10/2026), pour un test'
         type: boolean
         default: false
+      exceptionnel:
+        description: 'ENVOI EXCEPTIONNEL : annonce les nouveautés du jour (depuis minuit UTC) au lieu du cycle écoulé'
+        type: boolean
+        default: false
+      depuis:
+        description: 'Exceptionnel : date de début facultative (ex. 2026-10-01T00:00:00Z). Vide = aujourd''hui 00:00 UTC'
+        type: string
+        default: ''
+      titre:
+        description: 'Titre du message facultatif. Vide = titre par défaut'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -30,3 +42,6 @@ jobs:
         env:
           DISCORD_WEBHOOK_NOUVEAUTES: ${{ secrets.DISCORD_WEBHOOK_NOUVEAUTES }}
           NOUVEAUTES_FORCER: ${{ inputs.forcer }}
+          NOUVEAUTES_EXCEPTIONNEL: ${{ inputs.exceptionnel }}
+          NOUVEAUTES_DEPUIS: ${{ inputs.depuis }}
+          NOUVEAUTES_TITRE: ${{ inputs.titre }}
