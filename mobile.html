@@ -17,8 +17,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=2"></script>
     <script src="son.js?v=1"></script>
+    <script src="colonisation-types.js?v=1"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <link rel="stylesheet" href="bloc.css?v=1">
     <style>
         :root {
             --ed-orange: #FF7100;
@@ -78,6 +80,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
         }
 
+        .bloc { --coupe: 10px; }   /* cadre de reference (bloc.css), angles plus petits sur mobile */
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -300,6 +303,7 @@
             animation: navBlinkRouge 1.5s infinite !important;
         }
 
+            details > summary::-webkit-details-marker { display: none; }
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -321,7 +325,7 @@
         <h1 style="color: var(--ed-orange); letter-spacing: 4px; margin: 0 0 5px 0; font-size: 1.6em;">SYS.EDTEAM</h1>
         <p style="color: #666; font-size: 0.85em; letter-spacing: 2px; margin-bottom: 30px;">PADD MOBILE TACTIQUE</p>
 
-        <div class="card" style="width: 100%; max-width: 360px;">
+        <div class="bloc" style="width: 100%; max-width: 360px;">
             <div style="display: flex; flex-direction: column; gap: 14px;">
                 <input type="email" id="login-email" class="m-input" placeholder="EMAIL COMMANDANT">
                 <input type="password" id="login-pwd" class="m-input" placeholder="MOT DE PASSE">
@@ -343,7 +347,7 @@
                     <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
                 </svg>
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-size: 1.1em; font-weight: bold; letter-spacing: 2px; color: #fff;">EDTEAM</span>
+                    <span style="font-size: 1.1em; font-weight: bold; letter-spacing: 2px; color: #fff;">EDTEAM <a href="https://discord.gg/max5W9FreN" target="_blank" rel="noopener" title="Version bêta : des bugs peuvent subsister. Un souci ? Signalez-le sur le Discord." style="font-size: 0.5em; vertical-align: middle; letter-spacing: 1px; color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); padding: 1px 5px; border-radius: 3px; text-decoration: none;">BÊTA</a></span>
                     <span id="m-cmdr-name" style="font-size: 0.7em; color: var(--ed-blue); letter-spacing: 1px;">CMDR ...</span>
                 </div>
             </div>
@@ -359,7 +363,7 @@
             <div id="tab-qg" style="display: flex; flex-direction: column; gap: 12px;">
 
                 <!-- 1. IDENTITÉ : escadron, grade, rangs Fédération / Empire -->
-                <div class="card" style="padding: 12px 14px;">
+                <div class="bloc" style="padding: 12px 14px;">
                     <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed var(--ed-orange-dim);">
                         <span id="m-qg-squad" style="color: var(--ed-orange); font-size: 1.05em; font-weight: bold; letter-spacing: 2px;">[ INDÉPENDANT ]</span>
                         <span id="m-qg-grade" style="font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; text-align: center; padding: 2px 8px; border-radius: 3px;">GRADE : ---</span>
@@ -397,6 +401,30 @@
                         <span id="m-pp-nom" style="color: #fff; font-size: 0.7em; letter-spacing: 1px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NON ALIGNÉ</span>
                         <div id="m-pp-badge" style="position: absolute; top: -6px; right: -6px; background: var(--ed-blue); color: #000; min-width: 30px; border-radius: 8px; font-weight: bold; font-size: 0.85em; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3px 6px; box-shadow: 0 0 10px var(--ed-blue); display: none;"></div>
                     </div>
+                </div>
+
+                <!-- COLONISATION : chantiers et stations de l'escadron (membres d'un escadron ; données chargées à l'ouverture) -->
+                <div id="m-carte-colonisation" class="card" onclick="ouvrirColonisationMobile()" style="display: none; border-color: var(--ed-orange); padding: 10px 12px; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; background: rgba(255,113,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; flex-shrink: 0; stroke: var(--ed-orange); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px var(--ed-orange));"><circle cx="11" cy="16" r="5.5"></circle><ellipse cx="11" cy="16" rx="9.5" ry="2.6" transform="rotate(-18 11 16)"></ellipse><line x1="11" y1="10.5" x2="11" y2="3"></line><path d="M11 3l8 2.5-8 2.5"></path></svg>
+                        <div style="min-width: 0;">
+                            <span style="color: var(--ed-orange); font-size: 0.9em; font-weight: bold; letter-spacing: 1px;">COLONISATION</span>
+                            <span style="display: block; color: #aaa; font-size: 0.75em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Chantiers et stations de l'escadron</span>
+                        </div>
+                    </div>
+                    <span style="color: var(--ed-orange); font-size: 1.2em; font-weight: bold;">></span>
+                </div>
+
+                <!-- BUDGET : revenus, charges et livre de compte (tout pilote approuvé ; données chargées à l'ouverture) -->
+                <div id="m-carte-budget" class="card" onclick="ouvrirBudgetMobile()" style="display: none; border-color: var(--ed-blue); padding: 10px 12px; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; background: rgba(0,240,255,0.05);">
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; flex-shrink: 0; stroke: var(--ed-blue); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px var(--ed-blue));"><ellipse cx="12" cy="7" rx="7" ry="3"></ellipse><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"></path><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"></path></svg>
+                        <div style="min-width: 0;">
+                            <span style="color: var(--ed-blue); font-size: 0.9em; font-weight: bold; letter-spacing: 1px;">BUDGET</span>
+                            <span style="display: block; color: #aaa; font-size: 0.75em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Revenus, charges et livre de compte</span>
+                        </div>
+                    </div>
+                    <span style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">></span>
                 </div>
 
                 <!-- 3. NOUVEAUTÉS (remplie par majCarteNouveautesMobile) -->
@@ -552,7 +580,7 @@
                 </div>
 
                 <!-- DIRECTIVES DE L'AMIRAUTÉ (MISSIONS) -->
-                <div class="card">
+                <div class="bloc">
                     <div class="card-header">
                         <span>> MISSIONS BGS (EN COURS)</span>
                     </div>
@@ -568,7 +596,7 @@
             <!-- ONGLET : ESCADRON                          -->
             <!-- ========================================== -->
             <div id="tab-escadron" style="display: none; flex-direction: column; gap: 14px;">
-                <div class="card">
+                <div class="bloc">
                     <div class="card-header">
                         <span id="m-esc-nom">> ESCADRON</span>
                         <span id="m-squad-count" style="color: var(--ed-green); font-size: 0.85em;">-- PILOTES</span>
@@ -617,7 +645,7 @@
         <!-- BARRE BASSE -->
         <nav class="bottom-nav">
             <button id="nav-btn-qg" class="nav-tab-btn active" onclick="switchMobileTab('qg')">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"></path><polygon points="12 7.5 13.4 10.4 16.5 10.8 14.2 13 14.8 16.1 12 14.6 9.2 16.1 9.8 13 7.5 10.8 10.6 10.4"></polygon></svg>
                 <span>QG</span>
             </button>
             <button id="nav-btn-radar" class="nav-tab-btn" onclick="switchMobileTab('radar')">
@@ -625,7 +653,7 @@
                 <span>INFLUENCES</span>
             </button>
             <button id="nav-btn-bgs" class="nav-tab-btn" onclick="switchMobileTab('bgs')">
-                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7" stroke-dasharray="1.6 1.6"></polyline></svg>
                 <span>BGS</span>
             </button>
             <button id="nav-btn-escadron" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('escadron')">
@@ -633,7 +661,7 @@
                 <span>ESCADRON</span>
             </button>
             <button id="nav-btn-comms" class="nav-tab-btn" onclick="switchMobileTab('comms')">
-                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="8" y1="10" x2="8.01" y2="10"></line><line x1="12" y1="10" x2="12.01" y2="10"></line><line x1="16" y1="10" x2="16.01" y2="10"></line></svg>
                 <span>COMMS</span>
             </button>
         </nav>
@@ -666,6 +694,46 @@
             </div>
             <div style="padding: 8px 15px; color: #888; font-size: 0.75em; border-bottom: 1px dashed #333; flex-shrink: 0;">PROCHAIN CYCLE : <span id="pp-m-countdown" style="color: #FFD700; font-weight: bold;"></span></div>
             <div id="pp-m-corps" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;"></div>
+        </div>
+    </div>
+
+    <!-- MODALE COLONISATION MOBILE (remplie par ouvrirColonisationMobile) -->
+    <div class="modal-overlay" id="modal-colonisation" onclick="fermerModalCarriere('colonisation')" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-orange); box-shadow: 0 0 30px rgba(255,113,0,0.25);" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); display: flex; justify-content: space-between; align-items: center; background: rgba(255,113,0,0.1); flex-shrink: 0;">
+                <div style="min-width: 0;">
+                    <span style="color: #888; font-size: 0.7em; letter-spacing: 2px; display: block;">COLONISATION DE L'ESCADRON</span>
+                    <span id="colo-m-titre" style="color: var(--ed-orange); font-weight: bold; font-size: 1.05em; letter-spacing: 1px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">COLONISATION</span>
+                </div>
+                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em; padding-left: 12px;" onclick="fermerModalCarriere('colonisation')">✕</span>
+            </div>
+            <div id="colo-m-corps" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;"></div>
+        </div>
+    </div>
+
+    <!-- MODALES BUDGET MOBILE (remplies par ouvrirBudgetMobile / bmOuvrirLivre) -->
+    <div class="modal-overlay" id="modal-budget" onclick="fermerModalCarriere('budget')" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-blue); box-shadow: 0 0 30px rgba(0,240,255,0.25);" onclick="event.stopPropagation()">
+            <div style="padding: 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.08); flex-shrink: 0;">
+                <div style="min-width: 0;">
+                    <span style="color: #888; font-size: 0.7em; letter-spacing: 2px; display: block;">PERSONNEL · VISIBLE PAR VOUS SEUL</span>
+                    <span style="color: var(--ed-blue); font-weight: bold; font-size: 1.05em; letter-spacing: 1px; display: block;">BUDGET</span>
+                </div>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em; padding-left: 12px;" onclick="fermerModalCarriere('budget')">✕</span>
+            </div>
+            <div id="bm-corps" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;"></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modal-budget-livre" onclick="fermerModalCarriere('budget-livre')" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6100; padding: 14px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-blue); box-shadow: 0 0 40px rgba(0,240,255,0.35);" onclick="event.stopPropagation()">
+            <div style="padding: 12px 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.08); flex-shrink: 0;">
+                <div style="min-width: 0;">
+                    <span id="bm-livre-sous" style="color: #888; font-size: 0.65em; letter-spacing: 1px; display: block;"></span>
+                    <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">LIVRE DE COMPTE <span id="bm-livre-cnt" style="color: #888; font-size: 0.75em; font-weight: normal;"></span></span>
+                </div>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em; padding-left: 12px;" onclick="fermerModalCarriere('budget-livre')">✕</span>
+            </div>
+            <div id="bm-livre-corps" style="display: flex; flex-direction: column; min-height: 0; flex: 1;"></div>
         </div>
     </div>
 
@@ -863,6 +931,8 @@
                 
                 <!-- Carrière BGS & Powerplay (remplie par remplirCartesCarriereFicheMobile) -->
                 <div id="m-modal-carrieres" style="display: none; flex-direction: column; gap: 10px;"></div>
+                <!-- Architecte de colonisation (remplie par remplirCarteArchitecteMobile) -->
+                <div id="m-modal-archi" style="display: none; border: 1px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.05); padding: 10px 12px; border-radius: 4px;"></div>
 
                 <!-- Casier Légal & Impact BGS (Côte à côte) -->
                 <div style="display: flex; gap: 10px;">
@@ -1389,7 +1459,7 @@
                         const iconId = 'sys-icon-' + sysIndex;
                         
                         htmlInf += `
-                            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
+                            <div class="bloc" style="padding: 0; overflow: hidden; margin-bottom: 0;">
                                 <div onclick="const c = document.getElementById('${contentId}'); const i = document.getElementById('${iconId}'); if(c.style.display === 'none'){ c.style.display = 'block'; i.innerText = '[-]'; } else { c.style.display = 'none'; i.innerText = '[+]'; } if(typeof sonClic === 'function') sonClic();" style="cursor: pointer; padding: 12px 15px; background: rgba(255, 113, 0, 0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange-dim);">
                                     <span style="color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 2px;">> <span style="color: var(--ed-orange);">${nomSysteme}</span></span>
                                     <span id="${iconId}" style="color: var(--ed-orange); font-weight: bold; font-size: 1.2em;">[+]</span>
@@ -1856,7 +1926,6 @@
             } else if (canalActif === 'PRIVE') {
                 const select = document.getElementById('m-select-destinataire');
                 const targetId = select.value;
-                const targetNom = select.options[select.selectedIndex]?.text?.replace('CMDR ', '') || 'PILOTE';
 
                 if (!targetId) {
                     alert("Veuillez choisir un destinataire avant de transmettre.");
@@ -1867,11 +1936,16 @@
                     return;
                 }
                 payload.destinataire_id = targetId;
-                payload.destinataire_nom = targetNom;
             }
 
             input.value = '';
-            await supabaseApp.from('transmissions').insert([payload]);
+            // La table n'a pas de colonne destinataire_nom (l'ancien envoi echouait en silence pour les messages prives).
+            const { error } = await supabaseApp.from('transmissions').insert([payload]);
+            if (error) {
+                console.error('Échec de la transmission :', error);
+                input.value = txt;   // on rend le texte au pilote pour qu'il puisse renvoyer
+                alert("Échec de la transmission. Réessayez.");
+            }
         }
 
 
@@ -2043,10 +2117,25 @@
         // GAZETTES & ARCHIVES
         // ==========================================
         let cacheGazettesMobile = [];
-        window.afficherGazetteSelectionnee = function(id) {
+        window.afficherGazetteSelectionnee = async function(id) {
             const article = cacheGazettesMobile.find(g => String(g.id) === String(id));
             if (!article) return;
             document.getElementById('m-gazette-title-modal').innerText = article.titre;
+            // La liste ne contient pas le texte (95 % du poids) : il est lu une seule fois, à la première ouverture de l'édition
+            if (article.contenu === undefined) {
+                document.getElementById('m-gazette-body-modal').innerHTML = '<div style="color: #888; font-style: italic;">Déchiffrement de l\'édition...</div>';
+                try {
+                    const { data: texte, error: erreurTexte } = await supabaseApp.from('gazette_hebdo').select('contenu').eq('id', id).maybeSingle();
+                    if (erreurTexte) throw erreurTexte;
+                    article.contenu = (texte && texte.contenu) || '';
+                } catch (e) {
+                    document.getElementById('m-gazette-body-modal').innerHTML = '<div style="color: #FF3333;">Erreur de liaison réseau. Réessayez.</div>';
+                    return;
+                }
+            }
+            // l'utilisateur a pu choisir une autre édition entre-temps
+            const sel = document.getElementById('m-gazette-selector');
+            if (sel && sel.value && String(sel.value) !== String(id)) return;
             document.getElementById('m-gazette-body-modal').innerHTML = article.contenu;
         };
 
@@ -2228,6 +2317,7 @@
                     if (profil.est_diplomate) badges += '<span style="background: rgba(0,240,255,0.1); color: var(--ed-blue); border: 1px solid var(--ed-blue); font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
                 }
                 document.getElementById('m-modal-cmdr-roles').innerHTML = badges + remplirCartesCarriereFicheMobile(profil);
+                remplirCarteArchitecteMobile(profil);   // asynchrone : la fiche s'affiche sans attendre
 
                 // --- INJECTION DES DISTINCTIONS (PINS) ---
                 const cacheName = 'edteam_specialists_' + escadronCible;
@@ -2607,7 +2697,7 @@
         async function chargerGazetteListMobile() {
             if (!profilCommandant) return;
             try {
-                const { data } = await supabaseApp.from('gazette_hebdo').select('*').eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT').order('created_at', { ascending: false });
+                const { data } = await supabaseApp.from('gazette_hebdo').select('id, semaine_id, titre, created_at').eq('escadron_id', profilCommandant.escadron_id || 'INDEPENDANT').order('created_at', { ascending: false }).limit(60);
 
                 if (data && data.length > 0) {
                     cacheGazettesMobile = data;
@@ -2718,6 +2808,11 @@
                 }
             }
 
+            const carteColo = document.getElementById('m-carte-colonisation');
+            if (carteColo) carteColo.style.display = 'flex';
+            const carteBud = document.getElementById('m-carte-budget');
+            if (carteBud) carteBud.style.display = 'flex';
+
             const nomPP = document.getElementById('m-pp-nom');
             const badgePP = document.getElementById('m-pp-badge');
             if (nomPP) nomPP.innerText = p.puissance_nom ? p.puissance_nom.toUpperCase() : 'NON ALIGNÉ';
@@ -2725,6 +2820,37 @@
                 if (p.puissance_nom && p.puissance_rang) { badgePP.innerHTML = htmlPastilleRang(p.puissance_rang); badgePP.style.display = 'flex'; }
                 else badgePP.style.display = 'none';
             }
+        }
+
+        // Fiche d'un pilote : carte « ARCHITECTE » (systèmes revendiqués, stations terminées, chantiers en cours). Même source que la modale Colonisation.
+        async function remplirCarteArchitecteMobile(profil) {
+            const zone = document.getElementById('m-modal-archi');
+            if (!zone) return;
+            zone.style.display = 'none';
+            zone.innerHTML = '';
+            if (!profil || !profil.cmdr_nom) return;
+            try {
+                const synth = await chargerSyntheseColoMobile();
+                // la fiche a pu être fermée ou remplacée par une autre pendant le chargement
+                // comparaison EXACTE du nom affiché ("CMDR NOM") : un nom contenu dans un autre ne doit pas valider la mauvaise fiche
+                if (document.getElementById('m-modal-cmdr-nom').innerText.trim().toUpperCase() !== ('CMDR ' + String(profil.cmdr_nom).trim()).toUpperCase()) return;
+                if (!synth || synth.perso) return;
+                const nom = String(profil.cmdr_nom).trim().toUpperCase();
+                const siens = (synth.systemes || []).filter(s => s.architecte && String(s.architecte).trim().toUpperCase() === nom);
+                if (!siens.length) return;
+                const stations = siens.reduce((t, s) => t + (s.finies || []).length, 0);
+                const chantiers = siens.reduce((t, s) => t + (s.chantiers || []).length, 0);
+                const pl = (n, un, plus) => n + ' ' + (n > 1 ? plus : un);
+                zone.innerHTML = `
+                    <div style="color: #FFD700; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; margin-bottom: 6px;">> ARCHITECTE DE COLONISATION</div>
+                    <div style="display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 0.82em; font-weight: bold;">
+                        <span style="color: #fff;">${pl(siens.length, 'SYSTÈME', 'SYSTÈMES')}</span>
+                        <span style="color: var(--ed-green);">${pl(stations, 'STATION TERMINÉE', 'STATIONS TERMINÉES')}</span>
+                        <span style="color: var(--ed-orange);">${pl(chantiers, 'CHANTIER EN COURS', 'CHANTIERS EN COURS')}</span>
+                    </div>
+                    <div style="color: #888; font-size: 0.72em; margin-top: 6px; overflow-wrap: anywhere;">${siens.map(s => escapeHtml(coloCourtSysteme(s.nom))).join(' · ')}</div>`;
+                zone.style.display = 'block';
+            } catch (e) { /* la carte n'est simplement pas affichée */ }
         }
 
         // Fiche d'un pilote : cartes Carrière BGS et Powerplay ; renvoie les pastilles de rang pour l'en-tête
@@ -3112,6 +3238,383 @@
         }
 
         // ==========================================
+        // COLONISATION (mêmes données que la page PC : UNE requête colonisation_synthese, mémoire de 2 minutes)
+        // Tableau établi d'après ce que les plugins de l'escadron ont relevé : il peut être en retard ou incomplet.
+        // ==========================================
+        const coloNomStation = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
+        // Type d'installation, seulement quand le jeu l'a donne (une station terminee qui porte encore le type d'un chantier : inconnu, rien d'affiche)
+        const COLO_LIBELLES_TYPE = { Outpost: 'Avant-poste', CraterOutpost: 'Avant-poste planétaire', SurfaceStation: 'Installation de surface', CraterPort: 'Port planétaire',
+          Coriolis: 'Coriolis', Orbis: 'Orbis', Ocellus: 'Ocellus', AsteroidBase: 'Base astéroïde', MegaShip: 'Mégavaisseau',
+          SpaceConstructionDepot: 'Chantier orbital', PlanetaryConstructionDepot: 'Chantier planétaire', SurfaceConstructionDepot: 'Chantier planétaire' };
+        const coloTypeInstallation = (t, terminee) => (terminee && /ConstructionDepot/i.test(t || '')) ? '' : (COLO_LIBELLES_TYPE[t] || '');
+        const coloCourtSysteme = n => String(n || '').replace(/^Col \d+ Sector /, '');
+
+        function coloIlYa(iso) {
+            const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+            if (isNaN(m)) return '';
+            return m < 60 ? 'il y a ' + m + ' min' : m < 1440 ? 'il y a ' + Math.floor(m / 60) + ' h' : 'il y a ' + Math.floor(m / 1440) + ' j';
+        }
+
+        function coloCalculerChantier(c) {
+            const lignes = (c.marchandises || []).map(m => ({ nom: m.nom_fr || m.nom, req: +m.requis || 0, liv: +m.livre || 0 }))
+                .map(l => Object.assign(l, { reste: Math.max(0, l.req - l.liv) }))
+                .sort((a, b) => (a.reste === 0) - (b.reste === 0) || b.reste - a.reste);
+            const req = lignes.reduce((t, l) => t + l.req, 0), liv = lignes.reduce((t, l) => t + Math.min(l.liv, l.req), 0);
+            const pct = c.complet ? 100 : (req > 0 ? Math.max(1, Math.min(99, Math.round(100 * liv / req))) : Math.round((+c.progression || 0) * 100));
+            const reste = Math.max(0, req - liv);
+            let eta = "pas d'estimation";
+            if ((+c.livre_7j || 0) > 0 && reste > 0) {
+                const jours = reste / ((+c.livre_7j) / 7);
+                eta = jours < 1 ? '< 1 jour' : '~' + Math.ceil(jours) + ' jour' + (Math.ceil(jours) > 1 ? 's' : '');
+            }
+            const sansReleve = !c.complet && (Date.now() - Date.parse(c.maj_le)) > 3 * 86400000;
+            return { lignes, pct, reste, eta, sansReleve };
+        }
+
+        async function chargerSyntheseColoMobile() {
+            const cle = 'edteam_colo_' + profilCommandant.user_id;
+            try {
+                const c = JSON.parse(sessionStorage.getItem(cle) || 'null');
+                if (c && Date.now() - c.ts < 120000) return c.data;
+            } catch (e) {}
+            const { data, error } = await supabaseApp.rpc('colonisation_synthese');
+            if (error) throw error;
+            try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), data })); } catch (e) {}
+            return data;
+        }
+
+        function rendreColonisationMobile(d) {
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(Math.round(Number(n) || 0));
+            const esc = escapeHtml;
+            const OR = 'var(--ed-orange)', BL = 'var(--ed-blue)', VE = 'var(--ed-green)', GOLD = '#FFD700';
+            const couleur = p => p >= 100 ? VE : p >= 66 ? BL : p >= 33 ? OR : '#FF4D2E';
+            const barre = pct => `<div style="height: 6px; background: rgba(255,255,255,0.09); border-radius: 3px; overflow: hidden; margin-top: 5px;"><div style="width: ${Math.min(100, pct)}%; height: 100%; background: ${couleur(pct)}; box-shadow: 0 0 6px ${couleur(pct)};"></div></div>`;
+            const kpi = d.kpi || {};
+            const systemes = d.systemes || [];
+            // Type deduit de la RECETTE (marchandises demandees) ; rien d'affiche quand elle ne tranche pas
+            const typeRecette = (c, col) => {
+                const t = typeof window.typeDepuisRecette === 'function' ? window.typeDepuisRecette(c.marchandises) : null;
+                const sep = col === '#9fd' ? '· ' : '';
+                if (t) return ' <span style="color: ' + col + ';">' + sep + esc((t.precis ? t.libelle : t.famille).toUpperCase()) + '</span>';
+                return /ColonisationShip/.test(c.station || '') ? ' <span style="color: ' + col + ';">' + sep + 'NAVIRE DE COLONISATION</span>' : '';
+            };
+
+            if (!systemes.length) {
+                return `<div style="border: 1px dashed #555; padding: 25px; text-align: center; border-radius: 4px; color: #ccc; line-height: 1.6;">Aucun système colonisé relevé pour l'instant.<br><span style="color: #888; font-size: 0.85em;">Un système apparaît quand le plugin (version 2.5 ou plus) de l'escadron, ou le vôtre si vous n'avez pas d'escadron, a relevé une revendication ou un chantier.</span></div>`;
+            }
+
+            const tuile = (val, lib, col) => `<div style="flex: 1; min-width: 0; border: 1px solid #333; background: rgba(0,0,0,0.4); padding: 8px 4px; border-radius: 4px; text-align: center;"><div style="color: ${col}; font-size: 1.1em; font-weight: bold; white-space: nowrap;">${val}</div><div style="color: #888; font-size: 0.6em; letter-spacing: 1px;">${lib}</div></div>`;
+            let html = `<div style="color: #888; font-size: 0.72em; line-height: 1.5; border-left: 2px solid var(--ed-blue); padding-left: 10px;">Tableau établi d'après ce que les plugins de l'escadron ont relevé (chantiers consultés, livraisons, revendications). Il peut être en retard ou incomplet par rapport au jeu.</div>`;
+            html += `<div style="display: flex; gap: 6px;">${tuile(kpi.systemes || 0, 'SYSTÈMES', OR)}${tuile(kpi.construites || 0, 'TERMINÉES', VE)}${tuile(kpi.chantiers || 0, 'CHANTIERS', BL)}${tuile(fmt(kpi.tonnes_cycle || 0) + ' t', 'CYCLE', GOLD)}</div>`;
+
+            // 1) A apporter en priorite (le plus utile en jeu) : avant la liste des systemes
+            const prio = (d.priorites || []).slice(0, 5);
+            if (prio.length) {
+                html += `<div style="border: 1px solid #333; border-radius: 4px; padding: 12px;"><div style="color: ${GOLD}; font-size: 0.72em; letter-spacing: 2px; margin-bottom: 8px;">&gt; À APPORTER EN PRIORITÉ</div>${prio.map(p => `<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 0.82em; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05);"><span style="color: #ccc; overflow-wrap: anywhere;">${esc(p.nom)}</span><span style="color: ${GOLD}; flex-shrink: 0;">${fmt(p.reste)} t</span></div>`).join('')}</div>`;
+            }
+
+            // 2) Une ligne par systeme, repliee (deployee d'office s'il y en a 2 ou moins) : le detail s'ouvre d'un clic
+            const ouvertParDefaut = systemes.length <= 2;
+            html += `<div style="color: ${OR}; font-size: 0.72em; letter-spacing: 2px;">&gt; SYSTÈMES (${systemes.length})${ouvertParDefaut ? '' : ' <span style="color: #777; letter-spacing: 0;">· touchez pour le détail</span>'}</div>`;
+            systemes.forEach(s => {
+                const chantiers = (s.chantiers || []).map(c => {
+                    const k = coloCalculerChantier(c);
+                    const manque = k.lignes.filter(l => l.reste > 0).slice(0, 3).map(l => `<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 0.78em; color: #ccc;"><span style="overflow-wrap: anywhere;">${esc(l.nom)}</span><span style="color: ${GOLD}; flex-shrink: 0;">${fmt(l.reste)} t</span></div>`).join('');
+                    return `<div style="border: 1px solid rgba(255,113,0,0.3); background: rgba(0,0,0,0.35); padding: 9px 10px; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                            <span style="color: #fff; font-weight: bold; font-size: 0.88em; overflow-wrap: anywhere;">${esc(coloNomStation(c.station))}<span style="display: block; font-size: 0.78em; font-weight: normal; margin-top: 2px;"><span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); padding: 0 5px; border-radius: 3px; letter-spacing: 1px;">EN CONSTRUCTION</span>${coloTypeInstallation(c.type, false) ? ' <span style="color: #8fb7bf;">' + esc(coloTypeInstallation(c.type, false)) + '</span>' : ''}${typeRecette(c, '#8fb7bf')}</span></span>
+                            <span style="color: ${couleur(k.pct)}; font-weight: bold; flex-shrink: 0;">${k.pct}%</span>
+                        </div>
+                        ${barre(k.pct)}
+                        <div style="color: #888; font-size: 0.7em; margin: 5px 0;">${k.reste > 0 ? 'RESTE ' + fmt(k.reste) + ' t · ' + k.eta : 'Liste des marchandises non relevée'}${k.sansReleve ? ' · <span style="color: #FF7100;">sans relevé récent (' + coloIlYa(c.maj_le) + ')</span>' : ''}</div>
+                        ${manque}
+                    </div>`;
+                }).join('');
+                const finies = (s.finies || []).map(c => `<span style="border: 1px solid rgba(0,255,102,0.4); background: rgba(0,255,102,0.05); color: var(--ed-green); font-size: 0.78em; padding: 3px 8px; border-radius: 3px;">✔ ${esc(coloNomStation(c.station))}${coloTypeInstallation(c.type, true) ? ' <span style="color: #9fd;">· ' + esc(coloTypeInstallation(c.type, true)) + '</span>' : ''}${typeRecette(c, '#9fd')}</span>`).join('');
+                // resume de la ligne repliee : avancement du chantier le plus avance
+                const pcts = (s.chantiers || []).map(c => coloCalculerChantier(c).pct);
+                const meilleur = pcts.length ? Math.max.apply(null, pcts) : null;
+                const resume = `<span style="color: ${VE};">${(s.finies || []).length} terminée${(s.finies || []).length > 1 ? 's' : ''}</span> · <span style="color: ${OR};">${(s.chantiers || []).length} chantier${(s.chantiers || []).length > 1 ? 's' : ''}</span>${meilleur !== null ? ' · <span style="color: ' + couleur(meilleur) + ';">' + meilleur + '% max</span>' : ''}`;
+                html += `<details ${ouvertParDefaut ? 'open' : ''} style="border: 1px solid rgba(255,113,0,0.4); background: rgba(255,113,0,0.04); border-radius: 4px;">
+                    <summary style="cursor: pointer; padding: 11px 12px; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div style="min-width: 0;">
+                            <div style="color: ${OR}; font-weight: bold; letter-spacing: 1px; overflow-wrap: anywhere;">${esc(coloCourtSysteme(s.nom).toUpperCase())}</div>
+                            <div style="font-size: 0.75em; margin-top: 3px;">${resume}</div>
+                        </div>
+                        <span style="color: ${OR}; font-weight: bold; flex-shrink: 0;">▾</span>
+                    </summary>
+                    <div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <div style="color: #ccc; font-size: 0.8em;">architecte : ${s.architecte ? `<span style="color: ${GOLD}; font-weight: bold;">CMDR ${esc(String(s.architecte).toUpperCase())}</span>` : '<span style="color: #888;">inconnu</span> <span style="color: #666; font-size: 0.85em;">(seule la revendication l\'enregistre)</span>'}</div>
+                            <div style="color: #ccc; font-size: 0.8em;">contrôlé par : ${s.faction ? `<span style="color: ${BL}; font-weight: bold;">${esc(s.faction)}</span>` : '<span style="color: #888;">faction inconnue</span> <span style="color: #666; font-size: 0.85em;">(relevée à l\'arrivée d\'un pilote dans le système)</span>'}</div>
+                        </div>
+                        ${chantiers ? `<div style="display: flex; flex-direction: column; gap: 8px;"><div style="color: ${BL}; font-size: 0.72em; letter-spacing: 2px;">&gt; CHANTIERS (${(s.chantiers || []).length})</div>${chantiers}</div>` : ''}
+                        <div><div style="color: ${VE}; font-size: 0.72em; letter-spacing: 2px; margin-bottom: 6px;">&gt; TERMINÉS (${(s.finies || []).length})</div><div style="display: flex; gap: 6px; flex-wrap: wrap;">${finies || '<span style="color: #777; font-size: 0.8em;">rien de terminé pour l\'instant</span>'}</div></div>
+                    </div>
+                </details>`;
+            });
+
+            const archi = d.architectes || [];
+            if (archi.length) {
+                html += `<div style="border: 1px solid #333; border-radius: 4px; padding: 12px;"><div style="color: ${OR}; font-size: 0.72em; letter-spacing: 2px; margin-bottom: 8px;">&gt; ARCHITECTES DE L'ESCADRON</div>${archi.map((a, i) => `<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 0.82em; padding: 4px 0;"><span style="color: ${i === 0 ? GOLD : '#ccc'}; font-weight: bold;">#${i + 1} CMDR ${esc(String(a.cmdr).toUpperCase())}</span><span style="color: #888; flex-shrink: 0;">${a.systemes} sys. · ${a.stations} stat.</span></div>`).join('')}</div>`;
+            }
+
+            if (kpi.maj) html += `<div style="color: #666; font-size: 0.7em; text-align: center;">dernier relevé de chantier : ${coloIlYa(kpi.maj)}</div>`;
+            html += `<div style="color: #555; font-size: 0.65em; text-align: center; line-height: 1.5;">Types d'installations reconnus grâce à la feuille communautaire de <a href="https://forums.frontier.co.uk/threads/v3-of-the-colonization-construction-spreadsheet-is-now-available.635762/post-10831804" target="_blank" rel="noopener noreferrer" style="color: #6f8c95; text-decoration: underline dotted;">CMDR DaftMav</a> : merci à lui.</div>`;
+            return html;
+        }
+
+        async function ouvrirColonisationMobile() {
+            sonClic();
+            suivreEvenementMobile('ouvrir_colonisation');
+            const modal = document.getElementById('modal-colonisation');
+            const titre = document.getElementById('colo-m-titre');
+            const corps = document.getElementById('colo-m-corps');
+            titre.innerText = profilCommandant && profilCommandant.escadron_id ? profilCommandant.escadron_id.toUpperCase() : 'ESPACE PERSONNEL';
+            corps.innerHTML = '<div style="color: #888; text-align: center; padding: 30px; font-style: italic;">Consultation du registre de colonisation...</div>';
+            modal.style.display = 'flex';
+            try {
+                corps.innerHTML = rendreColonisationMobile(await chargerSyntheseColoMobile());
+            } catch (err) {
+                console.error('Erreur colonisation (mobile) :', err);
+                corps.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Échec de la lecture du registre de colonisation.</div>';
+            }
+        }
+
+        // ==========================================
+        // BUDGET (mêmes données que la page PC : budget_synthese + budget_livre, strictement personnel)
+        // Compte de caisse : ce que le plugin a relevé dans les journaux de jeu. Le livre de compte garde 8 cycles.
+        // ==========================================
+        const BM_REV = [['commerce', 'Commerce', '#00FF66'], ['missions', 'Missions', '#00F0FF'], ['primes', 'Primes et bons de combat', '#FFD700'], ['exploration', 'Exploration et bio', '#FF7100'], ['minage', 'Minage et butin', '#B388FF'], ['autres_revenus', 'Autres revenus', '#9a9a9a']];
+        const BM_CHG = [['achats', 'Marchandises achetées', '#FF3333'], ['modules', 'Modules et vaisseaux', '#FF7100'], ['assurance', 'Assurance (rachat)', '#FFD700'], ['carburant', 'Carburant', '#00F0FF'], ['reparations', 'Réparations', '#B388FF'], ['munitions', 'Munitions et drones', '#00FF66'], ['amendes', 'Amendes et primes', '#ff77aa'], ['transferts', 'Transferts et taxis', '#4F8CFF'], ['autres_charges', 'Autres frais', '#9a9a9a']];
+        const BM_CAT = {};
+        BM_REV.forEach(c => { BM_CAT[c[0]] = { n: c[1], c: c[2], t: 'in' }; });
+        BM_CHG.forEach(c => { BM_CAT[c[0]] = { n: c[1], c: c[2], t: 'out' }; });
+        BM_CAT.ecart = { n: 'Écart non catégorisé', c: '#77eedd', t: 'gap' };
+        let bmDonnees = null, bmMode = 'precedent', bmSeq = 0, bmMinuteur = null;
+        const bmSt = { type: 'all', cat: '', q: '', p: 0, n: 30 };
+
+        const bmFmtN = n => String(Math.round(Math.abs(Number(n) || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        function bmFmtM(v, signe) {
+            const x = Number(v) || 0, a = Math.abs(x);
+            const s = a >= 1e9 ? (a / 1e9).toFixed(2).replace('.', ',') + ' Md' : a >= 1e6 ? (a / 1e6).toFixed(1).replace('.', ',') + ' M' : bmFmtN(a) + ' cr';
+            return signe ? (x > 0 ? '+ ' : x < 0 ? '- ' : '') + s : s;
+        }
+        const bmJj = iso => { const d = new Date(String(iso).slice(0, 10) + 'T00:00:00Z'); return isNaN(d) ? '' : ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + '/' + d.getUTCFullYear(); };
+        const bmJm = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getUTCDate()).slice(-2) + '/' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + ' ' + ('0' + d.getUTCHours()).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2); };
+        function bmAddDays(iso, n) { const d = new Date(String(iso).slice(0, 10) + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+        const bmPct = (a, b) => (b && b > 0) ? Math.round(100 * (a - b) / b) : null;
+
+        function bmSelection(mode) {
+            const c = bmDonnees.courant;
+            let sems, prev = [];
+            if (mode === 'courant') { sems = [c]; prev = [bmAddDays(c, -7)]; }
+            else if (mode === 'precedent') { sems = [bmAddDays(c, -7)]; prev = [bmAddDays(c, -14)]; }
+            else if (mode === 'quatre') { sems = [0, 7, 14, 21].map(n => bmAddDays(c, -n)); prev = [28, 35, 42, 49].map(n => bmAddDays(c, -n)); }
+            else { sems = (bmDonnees.cycles || []).map(x => x.semaine).sort(); if (!sems.length) sems = [c]; }
+            const tri = sems.slice().sort(), mini = tri[0], maxi = tri[tri.length - 1];
+            return { sems, prev, debut: bmAddDays(mini, -7) + 'T07:00:00Z', fin: maxi + 'T07:00:00Z', libelle: bmJj(bmAddDays(mini, -7)) + ' → ' + bmJj(maxi) + ' (07:00 UTC)' };
+        }
+        function bmAgreger(sems) {
+            const idx = {};
+            (bmDonnees.cycles || []).forEach(c => { idx[c.semaine] = c; });
+            const t = {}; let debut = null, fin = null;
+            sems.slice().sort().forEach(s => {
+                const c = idx[s]; if (!c) return;
+                Object.entries(c.t || {}).forEach(([k, v]) => { t[k] = (t[k] || 0) + (Number(v.m) || 0); });
+                if (debut === null && c.debut !== null && c.debut !== undefined) debut = Number(c.debut);
+                if (c.fin !== null && c.fin !== undefined) fin = Number(c.fin);
+            });
+            let rev = 0, chg = 0;
+            BM_REV.forEach(c => { rev += t[c[0]] || 0; });
+            BM_CHG.forEach(c => { chg += t[c[0]] || 0; });
+            const ecart = t.ecart || 0, net = rev - chg, equip = t.modules || 0, depCour = chg - equip;
+            const autre = (debut !== null && fin !== null) ? fin - debut - net - ecart : null;
+            return { t, rev, chg, ecart, net, debut, fin, autre, equip, depCour, avantEquip: rev - depCour };
+        }
+        async function bmCharger(force) {
+            const cle = 'edteam_budget_' + profilCommandant.user_id;
+            try {
+                const c = JSON.parse(sessionStorage.getItem(cle) || 'null');
+                if (!force && c && Date.now() - c.ts < 120000) return c.data;
+            } catch (e) {}
+            const { data, error } = await supabaseApp.rpc('budget_synthese', { p_nb: 80 });
+            if (error) throw error;
+            try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), data })); } catch (e) {}
+            return data;
+        }
+        function bmDernierSolde() {
+            const c = (bmDonnees.cycles || []).filter(x => x.fin !== null && x.fin !== undefined).sort((a, b) => (a.semaine < b.semaine ? 1 : -1))[0];
+            return c ? Number(c.fin) : null;
+        }
+
+        function bmBarres(cats, t, titre, couleurTitre) {
+            const esc = escapeHtml;
+            const lignes = cats.map(c => ({ k: c[0], n: c[1], c: c[2], v: t[c[0]] || 0 })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+            const total = lignes.reduce((s, x) => s + x.v, 0);
+            const tete = `<div style="color: ${couleurTitre}; font-size: 0.72em; letter-spacing: 2px; margin-bottom: 8px;">&gt; ${titre}${total ? ' · ' + bmFmtM(total) : ''}</div>`;
+            if (!total) return `<div style="border: 1px solid #333; border-radius: 4px; padding: 12px;">${tete}<div style="color: #777; font-size: 0.8em;">Aucun mouvement relevé sur cette période.</div></div>`;
+            return `<div style="border: 1px solid #333; border-radius: 4px; padding: 12px;">${tete}${lignes.map(x => `
+                <div onclick="bmOuvrirLivre('${x.k}')" style="cursor: pointer; margin-bottom: 9px;">
+                    <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 0.8em;">
+                        <span style="color: #ddd; min-width: 0; overflow-wrap: anywhere;"><i style="display: inline-block; width: 8px; height: 8px; background: ${x.c}; margin-right: 6px;"></i>${esc(x.n)}</span>
+                        <span style="color: #fff; white-space: nowrap;">${bmFmtM(x.v)} <span style="color: #777;">${Math.round(100 * x.v / total)} %</span></span>
+                    </div>
+                    <div style="height: 5px; background: rgba(255,255,255,0.07); margin-top: 3px;"><div style="width: ${(100 * x.v / total).toFixed(1)}%; height: 100%; background: ${x.c}; box-shadow: 0 0 6px ${x.c};"></div></div>
+                </div>`).join('')}</div>`;
+        }
+
+        function bmRendre() {
+            const corps = document.getElementById('bm-corps');
+            const d = bmDonnees;
+            if (!d || !(d.cycles || []).length) {
+                corps.innerHTML = `<div style="border: 1px dashed #555; padding: 25px; text-align: center; border-radius: 4px; color: #ccc; line-height: 1.6;">Aucun budget relevé pour l'instant.<br><span style="color: #888; font-size: 0.85em;">Votre budget se remplit automatiquement dès que le plugin SYS.EDTEAM (version 2.5 ou plus) a lu vos journaux de jeu. Mettez-le à jour et redémarrez EDMC.</span></div>`;
+                return;
+            }
+            const BL = 'var(--ed-blue)', OR = 'var(--ed-orange)', VE = 'var(--ed-green)', RO = '#FF3333';
+            const sel = bmSelection(bmMode), cur = bmAgreger(sel.sems), prev = sel.prev.length ? bmAgreger(sel.prev) : null;
+            const solde = bmDernierSolde();
+            const onglet = (m, t) => `<button onclick="bmChoisir('${m}')" style="flex: 1; min-width: 0; background: ${bmMode === m ? OR : 'transparent'}; color: ${bmMode === m ? '#000' : OR}; border: 1px solid rgba(255,113,0,0.4); padding: 8px 2px; font-family: inherit; font-size: 0.68em; letter-spacing: 1px; font-weight: ${bmMode === m ? 'bold' : 'normal'};">${t}</button>`;
+            const variation = (v, bon) => v === null ? '' : `<div style="font-size: 0.7em; margin-top: 2px; color: ${v === 0 ? '#777' : ((bon ? v >= 0 : v <= 0) ? VE : RO)};">${v > 0 ? '+' : ''}${v} % vs avant</div>`;
+            const tuile = (lib, val, col, sous) => `<div style="border: 1px solid #333; background: rgba(0,0,0,0.4); padding: 10px 8px; border-radius: 4px; min-width: 0;"><div style="color: #888; font-size: 0.62em; letter-spacing: 2px;">${lib}</div><div style="color: ${col}; font-size: 1.15em; font-weight: bold; white-space: nowrap; text-shadow: 0 0 8px ${col};">${val}</div>${sous || ''}</div>`;
+            const ligne = (lib, f, cls) => `<tr><td style="padding: 5px 4px; color: ${cls ? '#fff' : '#bbb'}; font-weight: ${cls ? 'bold' : 'normal'}; ${cls === 'res' ? 'border-top: 1px solid var(--ed-orange);' : ''}">${lib}</td><td style="padding: 5px 4px; text-align: right; color: #fff; white-space: nowrap; font-weight: ${cls ? 'bold' : 'normal'}; ${cls === 'res' ? 'border-top: 1px solid var(--ed-orange);' : ''}">${f(cur)}</td>${prev ? `<td style="padding: 5px 4px; text-align: right; color: #888; white-space: nowrap; ${cls === 'res' ? 'border-top: 1px solid var(--ed-orange);' : ''}">${f(prev)}</td>` : ''}</tr>`;
+            const connu = cur.debut !== null && cur.fin !== null;
+            const pontLigne = (lib, val, cls) => `<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 0.8em; padding: 4px 0; ${cls ? 'border-top: 1px solid ' + BL + '; font-weight: bold; color: #fff;' : 'color: #bbb;'}"><span>${lib}</span><span style="white-space: nowrap; color: ${cls ? BL : '#fff'};">${val}</span></div>`;
+
+            corps.innerHTML = `
+                <div style="display: flex; gap: 4px;">${onglet('courant', 'EN COURS')}${onglet('precedent', 'PRÉCÉDENT')}${onglet('quatre', '4 CYCLES')}${onglet('tout', 'TOUT')}</div>
+                <div style="color: #777; font-size: 0.7em; text-align: center; margin-top: -6px;">${sel.libelle}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    ${tuile('REVENUS', bmFmtM(cur.rev, true), VE, prev ? variation(bmPct(cur.rev, prev.rev), true) : '')}
+                    ${tuile('CHARGES', cur.chg ? '- ' + bmFmtM(cur.chg) : bmFmtM(0), RO, prev ? variation(bmPct(cur.chg, prev.chg), false) : '')}
+                    ${tuile('RÉSULTAT NET', bmFmtM(cur.net, true), cur.net >= 0 ? '#fff' : RO, prev ? variation(bmPct(cur.net, prev.net), true) : '')}
+                    ${tuile('SOLDE', solde !== null ? bmFmtM(solde) : '—', BL, '<div style="font-size: 0.7em; margin-top: 2px; color: #777;">dernier relevé</div>')}
+                </div>
+                <button onclick="bmOuvrirLivre()" style="width: 100%; background: rgba(0,240,255,0.1); border: 1px solid ${BL}; color: ${BL}; padding: 12px; font-family: inherit; font-weight: bold; letter-spacing: 3px; box-shadow: 0 0 14px rgba(0,240,255,0.25);">&#9776; LIVRE DE COMPTE</button>
+                ${bmBarres(BM_REV, cur.t, 'RÉPARTITION DES REVENUS', VE)}
+                ${bmBarres(BM_CHG, cur.t, 'RÉPARTITION DES CHARGES', RO)}
+                <div style="border: 1px solid #333; border-radius: 4px; padding: 12px;">
+                    <div style="color: ${OR}; font-size: 0.72em; letter-spacing: 2px; margin-bottom: 6px;">&gt; COMPTE DE RÉSULTAT</div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8em;">
+                        <tr><td></td><td style="text-align: right; color: #777; font-size: 0.8em; padding: 2px 4px;">PÉRIODE</td>${prev ? '<td style="text-align: right; color: #777; font-size: 0.8em; padding: 2px 4px;">AVANT</td>' : ''}</tr>
+                        ${ligne('Produits', o => bmFmtM(o.rev))}
+                        ${ligne('Dépenses courantes', o => bmFmtM(o.depCour))}
+                        ${ligne('Résultat avant équipement', o => bmFmtM(o.avantEquip, true), 'tot')}
+                        ${ligne('Équipement (modules et vaisseaux)', o => bmFmtM(o.equip))}
+                        ${ligne('RÉSULTAT NET', o => bmFmtM(o.net, true), 'res')}
+                    </table>
+                    <div style="color: #777; font-size: 0.7em; line-height: 1.5; margin-top: 8px;">Ce tableau ne montre que ce que vous avez gagné et dépensé, jamais votre solde.</div>
+                </div>
+                ${connu ? `<div style="border: 1px solid rgba(0,240,255,0.3); border-radius: 4px; padding: 12px;">
+                    <div style="color: ${BL}; font-size: 0.72em; letter-spacing: 2px; margin-bottom: 6px;">&gt; RAPPROCHEMENT AVEC LE SOLDE DU JEU</div>
+                    ${pontLigne('Solde au début de la période', bmFmtM(cur.debut))}
+                    ${pontLigne('+ Résultat net', bmFmtM(cur.net, true))}
+                    ${pontLigne('+ Écart non catégorisé', bmFmtM(cur.ecart, true))}
+                    ${pontLigne('+ Porte-flotte : virements et achat (hors budget)', bmFmtM(cur.autre, true))}
+                    ${pontLigne('SOLDE EN FIN DE PÉRIODE', bmFmtM(cur.fin), true)}
+                    <div style="color: #777; font-size: 0.68em; line-height: 1.5; margin-top: 8px;">L'écart non catégorisé est la différence entre le solde réel et ce que le plugin a pu compter (par exemple un dépôt à la banque d'escadron). Il est affiché tel quel.</div>
+                </div>` : ''}`;
+        }
+        function bmChoisir(m) { sonClic(); bmMode = m; bmRendre(); }
+
+        async function ouvrirBudgetMobile() {
+            sonClic();
+            suivreEvenementMobile('ouvrir_budget');
+            const modal = document.getElementById('modal-budget');
+            const corps = document.getElementById('bm-corps');
+            corps.innerHTML = '<div style="color: #888; text-align: center; padding: 30px; font-style: italic;">Consultation de votre budget...</div>';
+            modal.style.display = 'flex';
+            try {
+                bmDonnees = await bmCharger(false);
+                const c = (bmDonnees.cycles || []).find(x => x.semaine === bmDonnees.courant);
+                bmMode = c && Object.keys(c.t || {}).length ? 'courant' : 'precedent';
+                bmRendre();
+            } catch (err) {
+                console.error('Erreur budget (mobile) :', err);
+                corps.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Impossible de lire votre budget pour le moment.</div>';
+            }
+        }
+
+        // ---- livre de compte (pagination côté serveur : 30 lignes à la fois) ----
+        function bmOuvrirLivre(cat) {
+            sonClic();
+            bmSt.type = 'all'; bmSt.cat = cat || ''; bmSt.q = ''; bmSt.p = 0;
+            const esc = escapeHtml, BL = 'var(--ed-blue)';
+            document.getElementById('bm-livre-sous').textContent = bmSelection(bmMode).libelle;
+            const options = '<option value="">TOUTES CATÉGORIES</option>' + BM_REV.concat(BM_CHG).map(c => `<option value="${c[0]}">${esc(c[1])}</option>`).join('') + `<option value="ecart">${esc(BM_CAT.ecart.n)}</option>`;
+            const champ = 'background: #080400; border: 1px solid var(--ed-orange); color: #fff; font-family: inherit; font-size: 0.9em; padding: 9px 10px; width: 100%; box-sizing: border-box;';
+            document.getElementById('bm-livre-corps').innerHTML = `
+                <div style="padding: 10px 12px; border-bottom: 1px dashed #333; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
+                    <div style="display: flex;" id="bm-types">${[['all', 'TOUT'], ['in', 'REVENUS'], ['out', 'CHARGES']].map(([t, l]) => `<button data-t="${t}" style="flex: 1; background: #080400; border: 1px solid rgba(255,113,0,0.4); color: #d98a45; padding: 9px 4px; font-family: inherit; font-size: 0.75em; letter-spacing: 1px; margin-left: -1px;">${l}</button>`).join('')}</div>
+                    <select id="bm-cat" style="${champ}">${options}</select>
+                    <input type="text" id="bm-q" maxlength="60" placeholder="RECHERCHE (STATION, SYSTÈME…)" style="${champ} border-color: ${BL};">
+                </div>
+                <div id="bm-actifs" style="padding: 6px 12px; font-size: 0.7em; color: #888; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; flex-shrink: 0;"></div>
+                <div id="bm-liste" style="overflow-y: auto; flex: 1; min-height: 0; padding: 0 12px;"></div>
+                <div style="padding: 8px 12px; border-top: 1px dashed #333; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0; font-size: 0.68em; color: #888;"><span id="bm-info"></span><span style="white-space: nowrap;"><button id="bm-prec" style="background: #080400; border: 1px solid rgba(255,113,0,0.4); color: var(--ed-orange); padding: 7px 12px; font-family: inherit;">&lt;</button> <button id="bm-suiv" style="background: #080400; border: 1px solid rgba(255,113,0,0.4); color: var(--ed-orange); padding: 7px 12px; font-family: inherit;">&gt;</button></span></div>`;
+            document.getElementById('bm-cat').value = bmSt.cat;
+            document.querySelectorAll('#bm-types button').forEach(b => { b.onclick = () => { bmSt.type = b.dataset.t; bmSt.p = 0; bmChargerLivre(); }; });
+            document.getElementById('bm-cat').onchange = e => { bmSt.cat = e.target.value; bmSt.p = 0; bmChargerLivre(); };
+            document.getElementById('bm-q').oninput = e => { clearTimeout(bmMinuteur); bmMinuteur = setTimeout(() => { bmSt.q = e.target.value; bmSt.p = 0; bmChargerLivre(); }, 350); };
+            document.getElementById('bm-prec').onclick = () => { if (bmSt.p > 0) { bmSt.p--; bmChargerLivre(); } };
+            document.getElementById('bm-suiv').onclick = () => { bmSt.p++; bmChargerLivre(); };
+            document.getElementById('bm-actifs').onclick = e => {
+                const t = e.target.closest('[data-f]'); if (!t) return;
+                if (t.dataset.f === 'type') bmSt.type = 'all'; else if (t.dataset.f === 'cat') bmSt.cat = ''; else { bmSt.q = ''; document.getElementById('bm-q').value = ''; }
+                bmSt.p = 0; bmChargerLivre();
+            };
+            document.getElementById('modal-budget-livre').style.display = 'flex';
+            bmChargerLivre();
+        }
+
+        async function bmChargerLivre() {
+            const moi = ++bmSeq, liste = document.getElementById('bm-liste');
+            if (!liste) return;
+            const esc = escapeHtml, sel = bmSelection(bmMode);
+            liste.style.opacity = '0.5';
+            let r;
+            try {
+                const { data, error } = await supabaseApp.rpc('budget_livre', { p_debut: sel.debut, p_fin: sel.fin, p_type: bmSt.type, p_categorie: bmSt.cat || null, p_recherche: bmSt.q || null, p_limite: bmSt.n, p_decalage: bmSt.p * bmSt.n });
+                if (error) throw error;
+                r = data || { total: 0, somme: 0, lignes: [] };
+            } catch (e) {
+                console.error('Erreur livre de compte (mobile) :', e);
+                if (moi === bmSeq) liste.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Impossible de lire le livre de compte pour le moment.</div>';
+                return;
+            }
+            if (moi !== bmSeq) return;
+            const pages = Math.max(1, Math.ceil(r.total / bmSt.n));
+            if (bmSt.p >= pages) { bmSt.p = pages - 1; return bmChargerLivre(); }
+            liste.innerHTML = (r.lignes || []).map(l => {
+                const c = BM_CAT[l.k] || { n: l.k, c: '#999', t: 'gap' };
+                const m = Number(l.m) || 0, col = c.t === 'gap' ? 'var(--ed-blue)' : m > 0 ? 'var(--ed-green)' : '#FF3333';
+                return `<div style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; gap: 10px; ${l.k === 'ecart' ? 'background: rgba(0,240,255,0.05);' : ''}">
+                    <div style="min-width: 0;">
+                        <div style="color: #777; font-size: 0.66em;">${esc(bmJm(l.ts))} · <i style="display: inline-block; width: 7px; height: 7px; background: ${c.c}; margin: 0 4px 0 2px;"></i>${esc(c.n)}</div>
+                        <div style="color: #ddd; font-size: 0.82em; overflow-wrap: anywhere;">${esc(l.l || '')}</div>
+                        ${l.lieu ? `<div style="color: #666; font-size: 0.68em; overflow-wrap: anywhere;">${esc(l.lieu)}</div>` : ''}
+                    </div>
+                    <div style="font-weight: bold; white-space: nowrap; color: ${col}; font-size: 0.85em;">${m > 0 ? '+ ' : '- '}${bmFmtN(m)} cr</div>
+                </div>`;
+            }).join('') || '<div style="color: #777; text-align: center; padding: 24px; font-size: 0.85em;">AUCUNE LIGNE</div>';
+            liste.style.opacity = '1';
+            document.getElementById('bm-livre-cnt').textContent = r.total + ' ligne' + (r.total > 1 ? 's' : '');
+            document.getElementById('bm-info').textContent = (r.total ? bmSt.p * bmSt.n + 1 : 0) + '–' + Math.min((bmSt.p + 1) * bmSt.n, r.total) + ' sur ' + r.total + ' · somme ' + bmFmtM(r.somme, true);
+            document.getElementById('bm-prec').disabled = bmSt.p === 0;
+            document.getElementById('bm-suiv').disabled = bmSt.p >= pages - 1;
+            document.querySelectorAll('#bm-types button').forEach(b => {
+                const on = b.dataset.t === bmSt.type;
+                b.style.background = on ? 'var(--ed-orange)' : '#080400'; b.style.color = on ? '#000' : '#d98a45'; b.style.fontWeight = on ? 'bold' : 'normal';
+            });
+            document.getElementById('bm-cat').value = bmSt.cat;
+            const tags = [];
+            if (bmSt.type !== 'all') tags.push(['type', bmSt.type === 'in' ? 'REVENUS' : 'CHARGES']);
+            if (bmSt.cat) tags.push(['cat', (BM_CAT[bmSt.cat] ? BM_CAT[bmSt.cat].n : bmSt.cat).toUpperCase()]);
+            if (bmSt.q) tags.push(['q', '"' + bmSt.q.toUpperCase() + '"']);
+            document.getElementById('bm-actifs').innerHTML = tags.length ? 'FILTRES :' + tags.map(t => ` <span data-f="${t[0]}" style="border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 2px 8px; background: rgba(0,240,255,0.08); cursor: pointer;">${esc(t[1])} ✕</span>`).join('') : '<span style="color: #666;">Aucun filtre : toutes les transactions de la période</span>';
+        }
+
+        // ==========================================
         // NOUVEAUTÉS (mêmes données et même panneau que le PC : nouveautes-data.js + nouveautes.js)
         // ==========================================
         const CLE_NOUV_VU = 'edteam_nouv_vu';
@@ -3154,7 +3657,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=2', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=4', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

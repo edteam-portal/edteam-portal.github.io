@@ -5,6 +5,43 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-beta', date: '2026-10-01T18:49:00Z', type: 'AMELIORE',
+        titre: 'Une pastille « BÊTA » dans l\'en-tête',
+        texte: 'SYS.EDTEAM est encore en version bêta : de nouvelles pages arrivent régulièrement et des bugs peuvent subsister. Une pastille « BÊTA » est maintenant visible à côté du nom, sur PC comme sur mobile. Si vous rencontrez un souci, cliquez dessus pour rejoindre le Discord et nous le signaler : cela nous aide à corriger plus vite.',
+        important: false
+    },
+    {
+        id: '2026-10-colonisation-types', date: '2026-10-01T18:48:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : le type de chaque installation',
+        texte: 'La page Colonisation (PC et mobile) indique maintenant le type de chaque construction, reconnu d\'après la liste des marchandises qu\'elle demande : par exemple Mining Outpost, Relay Station ou Security Station. Quand plusieurs types demandent exactement les mêmes marchandises (c\'est le cas des avant-postes), seule la famille est affichée, par exemple « Avant-poste orbital ». Quand la liste ne permet pas de savoir, rien n\'est affiché. Rien à faire de votre côté. Un grand merci à CMDR DaftMav, dont la feuille communautaire « Colonization Construction » a fourni les recettes de chaque type d\'installation.',
+        important: false
+    },
+    {
+        id: '2026-10-colonisation-points', date: '2026-10-01T18:47:00Z', type: 'AMELIORE',
+        titre: 'La colonisation compte pour votre rang BGS',
+        texte: 'Vos livraisons de colonisation rapportent désormais des points de carrière : 1 point pour 400 tonnes livrées, comme les autres efforts BGS (elles comptent aussi pour le Pilier de la semaine). Seules les livraisons faites à partir du 1er octobre comptent. Quand une construction de l\'escadron se termine, une ligne verte « STATION TERMINÉE » apparaît dans le journal tactique. Il faut le plugin SYS_EDTEAM 2.5 : la mise à jour se fait toute seule au prochain lancement d\'EDMC.',
+        important: false
+    },
+    {
+        id: '2026-10-menu', date: '2026-10-01T18:46:00Z', type: 'AMELIORE',
+        titre: 'Menu réorganisé, Communications en haut à droite',
+        texte: 'Le menu latéral suit maintenant l\'ordre : Quartier général, Budget, Escadron, Diplomatie, BGS, Colonisation. Communications passe en haut à droite, à côté de l\'interrupteur de son, avec une icône de discussion qui clignote bien visiblement quand un message arrive.',
+        important: false
+    },
+    {
+        id: '2026-10-budget', date: '2026-10-01T18:45:00Z', type: 'NOUVEAU',
+        titre: 'Nouvelle page Budget',
+        texte: 'Une page Budget, dans le menu latéral, montre ce que vous avez gagné et dépensé : revenus, charges et résultat net par cycle (du jeudi au jeudi), la répartition sous forme d\'anneaux, la comparaison avec le cycle d\'avant, et le lien avec votre solde du jeu. Le livre de compte détaille chaque mouvement des 8 derniers cycles, avec filtres, recherche et export CSV. Votre budget est strictement personnel : vous seul le voyez. Il est aussi disponible sur le compagnon mobile. Tout est relevé automatiquement par le plugin SYS_EDTEAM 2.5, rien à saisir.',
+        important: false
+    },
+    {
+        id: '2026-10-colonisation', date: '2026-10-01T18:44:00Z', type: 'NOUVEAU',
+        titre: 'Nouvelle page Colonisation',
+        texte: 'Une page Colonisation, dans le menu latéral, montre les systèmes colonisés par les pilotes de l\'escadron sur une carte (commune à tous ses membres ; un pilote sans escadron a son propre espace personnel, que lui seul voit, et qu\'il peut verser à l\'escadron s\'il en rejoint un), leurs constructions terminées et leurs chantiers en cours (progression de chaque marchandise, qui a livré quoi), le classement des architectes, ce qu\'il faut apporter en priorité et le journal des livraisons. Chaque système indique son architecte et la faction qui le contrôle ; la fiche d\'un pilote architecte affiche aussi ses systèmes, ses stations terminées et ses chantiers en cours. La page est aussi disponible sur le compagnon mobile. Tout est relevé automatiquement par le plugin SYS_EDTEAM 2.5 : rien à saisir. La mise à jour se fait toute seule au prochain lancement d\'EDMC.',
+        important: true,
+        action: 'Redémarrez EDMC une fois la mise à jour terminée'
+    },
+    {
         id: '2026-09-30-plugin-2-4', date: '2026-09-30T21:40:00Z', type: 'NOUVEAU',
         titre: 'Plugin SYS_EDTEAM 2.4 : mérites Powerplay à jour',
         texte: 'Le plugin relève vos mérites Powerplay au plus toutes les cinq minutes et retrouve, au démarrage, l\'historique de vos cycles passés à partir de vos journaux de jeu : votre progression par cycle se remplit donc même pour les semaines jouées sans EDMC. Coller une nouvelle clé dans les paramètres du plugin est désormais pris en compte sans relancer EDMC. La mise à jour se fait toute seule au prochain lancement d\'EDMC.',

@@ -12,12 +12,12 @@
     <meta name="robots" content="noindex, nofollow">
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=2"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=6"></script>
+    <script src="navigation.js?v=8"></script>
 
     <style>
         :root { 
@@ -76,7 +76,7 @@
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
 
         /* MODULE DIPLOMATIQUE */
-        .diplo-category { background: rgba(10, 5, 0, 0.6); border: 1px solid; border-radius: 4px; padding: 20px; display: flex; flex-direction: column; }
+        .diplo-category { padding: 20px; display: flex; flex-direction: column; }   /* cadre : classe .bloc (style.css) */
         .diplo-pill { background: rgba(0,0,0,0.6); border: 1px solid; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; cursor: pointer; transition: 0.2s; letter-spacing: 1px; user-select: none; }
         .diplo-pill:hover { background: rgba(255,255,255,0.1); box-shadow: 0 0 10px currentColor; transform: translateY(-2px); }
         .diplo-details-panel { display: none; margin-top: 20px; border-top: 1px dashed; padding-top: 20px; animation: fadeIn 0.3s ease-out; }
@@ -122,7 +122,7 @@
             <div style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
                 
                 <!-- BLOC ALLIÉS -->
-                <div id="zone-drop-allie" class="diplo-category" style="border-color: #00FF66; box-shadow: inset 4px 0 0 #00FF66; transition: 0.3s;"
+                <div id="zone-drop-allie" class="diplo-category bloc vert" style="transition: 0.3s;"
                      ondragover="allowDropTraite(event)" ondragenter="dragEnterZone(event, '#00FF66')" ondragleave="dragLeaveZone(event)" ondrop="dropTraite(event, 'ALLIE')">
                     <h4 style="color: #00FF66; margin: 0 0 15px 0; letter-spacing: 2px;">🟢 COALITION (ALLIÉS)</h4>
                     <div id="liste-diplo-allies" style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -132,7 +132,7 @@
                 </div>
 
                 <!-- BLOC PNA -->
-                <div id="zone-drop-pna" class="diplo-category" style="border-color: var(--ed-blue); box-shadow: inset 4px 0 0 var(--ed-blue); transition: 0.3s;"
+                <div id="zone-drop-pna" class="diplo-category bloc cy" style="transition: 0.3s;"
                      ondragover="allowDropTraite(event)" ondragenter="dragEnterZone(event, 'var(--ed-blue)')" ondragleave="dragLeaveZone(event)" ondrop="dropTraite(event, 'PNA')">
                     <h4 style="color: var(--ed-blue); margin: 0 0 15px 0; letter-spacing: 2px;">🔵 P.N.A (PACTES DE NON-AGRESSION)</h4>
                     <div id="liste-diplo-pna" style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- BLOC HOSTILES -->
-                <div id="zone-drop-hostiles" class="diplo-category" style="border-color: #FF3333; box-shadow: inset 4px 0 0 #FF3333; transition: 0.3s;"
+                <div id="zone-drop-hostiles" class="diplo-category bloc rouge" style="transition: 0.3s;"
                      ondragover="allowDropTraite(event)" ondragenter="dragEnterZone(event, '#FF3333')" ondragleave="dragLeaveZone(event)" ondrop="dropTraite(event, 'HOSTILE')">
                     <h4 style="color: #FF3333; margin: 0 0 15px 0; letter-spacing: 2px;">🔴 CIBLES HOSTILES</h4>
                     <div id="liste-diplo-hostiles" style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -505,16 +505,14 @@
         window.dragEnterZone = function(event, color) {
             event.preventDefault();
             const zone = event.currentTarget;
-            zone.style.boxShadow = `inset 0 0 30px ${color}`;
-            zone.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            zone.style.setProperty('--lueur', color);                       // halo interieur de la couleur de la zone
+            zone.style.setProperty('--teinte', 'rgba(255, 255, 255, 0.12)');
         };
 
         window.dragLeaveZone = function(event) {
             const zone = event.currentTarget;
-            zone.style.backgroundColor = 'rgba(10, 5, 0, 0.6)';
-            if (zone.id === 'zone-drop-allie') zone.style.boxShadow = 'inset 4px 0 0 #00FF66';
-            if (zone.id === 'zone-drop-pna') zone.style.boxShadow = 'inset 4px 0 0 var(--ed-blue)';
-            if (zone.id === 'zone-drop-hostiles') zone.style.boxShadow = 'inset 4px 0 0 #FF3333';
+            zone.style.removeProperty('--lueur');                           // retour aux valeurs du bloc
+            zone.style.removeProperty('--teinte');
         };
 
         window.dropTraite = async function(event, nouveauStatut) {
@@ -542,6 +540,6 @@
             }
         };
     </script>
-    <script src="footer.js?v=6"></script>
+    <script src="footer.js?v=7"></script>
 </body>
 </html>

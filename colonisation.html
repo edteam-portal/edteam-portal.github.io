@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <title>EDTEAM // COLONISATION</title>
+    <meta name="robots" content="noindex, nofollow">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=2"></script>
+    <script src="son.js?v=1"></script>
+    <script src="navigation.js?v=8"></script>
+    <script src="colonisation-types.js?v=1"></script>
+
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(255, 113, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-orange); }
+
+        /* =========================================
+           BALAYAGE HOLOGRAPHIQUE (SCANLINE)
+           ========================================= */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--ed-orange);
+            box-shadow: 0 0 15px var(--ed-orange-glow), 0 0 5px var(--ed-orange);
+            opacity: 0.15;
+            z-index: 9999;
+            pointer-events: none;
+            animation: scanline-anim 8s linear infinite;
+        }
+
+        @keyframes scanline-anim {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes enveloppeBlink {
+            0%, 100% { color: var(--ed-blue); filter: none; }
+            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
+        }
+        .alerte-enveloppe .nav-icon {
+            animation: enveloppeBlink 1s infinite !important;
+        }
+        .alerte-enveloppe .nav-text {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
+        /* =========================================
+           MENU LATÉRAL TACTIQUE
+           ========================================= */
+        #side-menu {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 60px;
+            background: rgba(10, 10, 10, 0.95); border-right: 1px solid var(--ed-orange-dim);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px;
+        }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-orange); }
+        
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); border-left: 3px solid var(--ed-orange); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }
+
+        /* =========================================
+           CONTENEUR CENTRAL DYNAMIQUE
+           ========================================= */
+        .hud-container { 
+            width: calc(100% - 60px); max-width: 1920px; height: 95vh; display: flex; flex-direction: column; 
+            margin-left: 60px; padding: 20px 30px; box-sizing: border-box;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        .hud-header { display: flex; flex-direction: column; margin-bottom: 15px; flex-shrink: 0; }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
+        
+        /* STYLE DU HEADER UNIFIÉ */
+        #fc-inventory-percent { font-size: 0.9em; color: #fff; letter-spacing: 2px; font-weight: bold; background: rgba(0, 240, 255, 0.08); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
+        .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+        
+        .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px; }
+        .tab-bar { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
+        .tab-btn:hover { background: rgba(255, 113, 0, 0.1); opacity: 0.8; }
+        .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
+
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .data-row { border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 4px; background: rgba(10, 5, 0, 0.6); padding: 20px; margin-bottom: 15px; }
+        
+        /* CARD PILOTE (Membres de l'escadron) */
+        .pilot-card { background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .pilot-card:hover { background: rgba(255, 113, 0, 0.1); border-color: var(--ed-orange); box-shadow: 0 0 10px rgba(255, 113, 0, 0.2); }
+
+        .rank-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,113,0,0.1); transition: 0.2s; }
+        .rank-row:hover { background: rgba(255,113,0,0.05); }
+        .rank-1 { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 1.2em; font-weight: bold; }
+        .rank-2 { color: #C0C0C0; font-size: 1.1em; font-weight: bold; }
+        .rank-3 { color: #CD7F32; font-size: 1.1em; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes alertPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
+
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;
+            padding: 40px; /* Force une belle marge noire tout autour de la modale */
+            box-sizing: border-box;
+        }
+        
+        .modal-content { 
+            background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; 
+            max-width: 600px; width: 100%; color: #ccc; position: relative; 
+            max-height: 100%; /* S'arrête exactement avant la marge de l'overlay */
+            overflow-y: auto; box-sizing: border-box;
+        }
+
+        /* Optimisation automatique pour les écrans 14" (Petite hauteur) */
+        @media (max-width: 1400px), (max-height: 800px) {
+            .modal-overlay { padding: 15px; } /* Marge réduite pour gagner de l'espace */
+            .modal-content { padding: 20px; } /* On réduit un peu l'espace vide à l'intérieur */
+        }
+
+        /* Fiche pilote : les colonnes se replient sur un écran étroit */
+        @media (max-width: 800px) {
+            #grille-fiche-pilote, #bandeau-fiche-pilote { grid-template-columns: 1fr !important; }
+        }
+
+        /* Correction spécifique pour la barre de scroll des modales PC */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.4); border-left: 1px solid rgba(255, 113, 0, 0.1); }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 4px; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold; }
+
+        .copy-click { cursor: pointer; transition: all 0.2s; padding: 2px 5px; border-radius: 3px; }
+        .copy-click:hover { background: rgba(255, 113, 0, 0.2); color: #fff !important; text-shadow: 0 0 5px var(--ed-orange); }
+
+        /* =========================================
+           MÉDAILLES DE CAMPAGNE (STYLE INARA)
+           ========================================= */
+        .medal-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 5px 2px; /* Marges réduites pour en aligner davantage */
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 90px;
+        }
+        
+        .medal-wrapper:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        .medal-wrapper:hover .medal-text {
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+
+        /* Le ruban supérieur */
+        .medal-ribbon {
+            width: 25px;
+            height: 15px;
+            background: linear-gradient(to right, #002244 20%, #B22222 20%, #B22222 40%, #FFD700 40%, #FFD700 60%, #B22222 60%, #B22222 80%, #002244 80%);
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            margin-bottom: -5px; /* Pour passer sous la médaille */
+            border-radius: 1px;
+        }
+
+        /* La pièce métallique */
+        .medal-coin {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            /* Dégradé radial pour l'effet bombé et métallique */
+            background: radial-gradient(ellipse at top left, #FFE55C 0%, #FFD700 30%, #B8860B 70%, #5C4305 100%);
+            border: 2px solid #DAA520;
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.6), /* Ombre interne */
+                inset 2px 2px 5px rgba(255,255,255,0.5), /* Reflet lumière */
+                0 4px 8px rgba(0,0,0,0.6); /* Ombre portée externe */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: #4A3500; /* Couleur sombre pour donner l'impression d'être gravé en creux */
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Étoile centrale de la médaille */
+        .medal-coin::after {
+            content: '★';
+            position: absolute;
+            font-size: 1.8em;
+            color: rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.4);
+        }
+
+        /* Le texte gravé sous la médaille */
+        .medal-text {
+            margin-top: 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            transition: color 0.2s, text-shadow 0.2s;
+            /* Coupure propre si le nom du système est trop long */
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* =========================================
+           MÉDAILLES ÉPIQUES (TOP SPÉCIALISTES)
+           ========================================= */
+        .epic-medal-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            width: 105px; /* Petite taille pour tenir sur 2 lignes */
+        }
+        
+        .epic-medal-container:hover {
+            transform: scale(1.1) translateY(-5px);
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4));
+        }
+
+        .epic-medal-svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        }
+
+        .epic-medal-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        }
+
+        .epic-medal-title {
+            font-size: 0.6em;
+            color: #888;
+            text-align: center;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            height: 18px; /* Hauteur fixe pour l'alignement */
+        }
+
+        .epic-medal-cmdr {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(180deg, rgba(30,30,30,0.9), rgba(0,0,0,0.9));
+            border: 1px solid #555;
+            padding: 3px 6px;
+            border-radius: 3px;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        }
+
+        .exploit-feed { height: 350px; overflow-y: auto; position: relative; background: rgba(0,0,0,0.6); border: 1px dashed #333; padding: 10px; font-size: 0.85em; }
+        .exploit-feed::-webkit-scrollbar { width: 6px; }
+        .exploit-feed::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.5); border-radius: 3px; }
+        .exploit-feed::-webkit-scrollbar-thumb:hover { background: var(--ed-blue); }
+        .exploit-line { margin-bottom: 8px; color: #ccc; font-family: 'Share Tech Mono', monospace; animation: slideInFeed 0.3s ease-out; }
+        .exploit-time { color: var(--ed-blue); margin-right: 10px; }
+        .exploit-cmdr { color: #fff; font-weight: bold; margin-right: 5px; }
+        @keyframes slideInFeed { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .exploit-line { margin-bottom: 8px; color: #ccc; font-family: 'Share Tech Mono', monospace; animation: slideInFeed 0.3s ease-out; }
+        .exploit-time { color: var(--ed-blue); margin-right: 10px; }
+        .exploit-cmdr { color: #fff; font-weight: bold; margin-right: 5px; }
+        @keyframes slideInFeed { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Animation fluide de la barre */
+        .progress-fill {
+            transition: width 0.5s ease-in-out, background-color 0.3s ease-in-out;
+            background-color: #F44336; /* Rouge par défaut */
+        }
+
+        /* Classe ajoutée par le JS quand le joueur a fait sa part */
+        .cap-atteint {
+            background-color: #4CAF50 !important; /* Vert succès */
+            box-shadow: 0 0 8px #4CAF50; /* Petit effet de halo (Optionnel) */
+        }
+
+        /* =========================================
+           MÉDAILLES DE CAMPAGNE ET PINS (MOBILE)
+           ========================================= */
+        .medal-wrapper { display: inline-flex; flex-direction: column; align-items: center; margin: 4px; width: 65px; }
+        .medal-ribbon { width: 18px; height: 10px; background: linear-gradient(to right, #002244 20%, #B22222 20%, #B22222 40%, #FFD700 40%, #FFD700 60%, #B22222 60%, #B22222 80%, #002244 80%); box-shadow: inset 0 -1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.5); border-radius: 1px; margin-bottom: -3px; z-index: 1; }
+        .medal-coin { width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(ellipse at top left, #FFE55C 0%, #FFD700 30%, #B8860B 70%, #5C4305 100%); border: 1px solid #DAA520; box-shadow: inset 0 0 8px rgba(0,0,0,0.6), inset 1px 1px 3px rgba(255,255,255,0.5), 0 2px 5px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: #4A3500; text-shadow: 1px 1px 0px rgba(255,255,255,0.3); z-index: 2; position: relative; }
+        .medal-coin::after { content: '★'; position: absolute; font-size: 1.1em; color: rgba(0,0,0,0.2); text-shadow: 1px 1px 0px rgba(255,255,255,0.4); }
+        .medal-text { margin-top: 5px; font-size: 0.6em; font-weight: bold; color: #FFD700; text-align: center; text-transform: uppercase; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+        /* ===== COLONISATION : pastilles d'état (style "EN LIGNE"), carte holographique. Animations par opacité / transform seulement (pas de coût processeur au repos) ===== */
+        @keyframes coloPouls { 0%,100% { opacity:.35; } 50% { opacity:1; } }
+        .c-pastille { display:inline-flex; align-items:center; gap:6px; font-size:.75em; font-weight:bold; letter-spacing:1px; padding:2px 9px; border-radius:3px; border:1px solid; white-space:nowrap; font-family:inherit; }
+        .c-pastille i { display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 6px currentColor; }
+        .c-pastille i.vif { animation:coloPouls 1.6s ease-in-out infinite; }
+        .c-filtre { cursor:pointer; background:transparent; }
+        .c-filtre.on { background:rgba(0,240,255,.18); box-shadow:0 0 8px rgba(0,240,255,.35); }
+        .noeud-carte { transition:opacity .2s; }
+        .colo-cols { column-count:2; column-gap:30px; }
+        @media (max-width:850px) { .colo-cols { column-count:1; } }
+    </style>
+
+    <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjMDIwMTAwIi8+PHBvbHlnb24gcG9pbnRzPSI0OCwxNSAxNSwzNSAzMCw1MCAxMCw3MCA0OCw4NSA0OCw2NSAzMCw1NSA0OCw0MCIgZmlsbD0iIzAwRjBGRiIvPjxwb2x5Z29uIHBvaW50cz0iNTIsMTUgODUsMzUgNzAsNTAgOTAsNzAgNTIsODUgNTIsNjUgNzAsNTUgNTIsNDAiIGZpbGw9IiNGRjcxMDAiLz48cG9seWdvbiBwb2ludHM9IjUwLDQ1IDQyLDU1IDUwLDY1IDU4LDU1IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjkiLz48L3N2Zz4=">
+
+    <!-- Icône lors de l'installation sur iPhone / iPad (iOS) -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+</head>
+<body>
+
+    <div class="scanline"></div>
+
+    <div id="holo-tooltip"></div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu"></nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+
+        <main class="data-window" id="display-area" style="padding-top: 5px;">
+            <div style="color: #666; font-style: italic; text-align: center; margin-top: 40px;">&gt; CHARGEMENT DES CHANTIERS...</div>
+        </main>
+
+    </div>
+
+    <script>
+        const supabaseApp = window.supabaseApp;
+        let profilCommandant = null;
+
+        // ---------------------------------------------------------------
+        //  COULEURS, FORMATS
+        // ---------------------------------------------------------------
+        const O = '#FF7100', B = '#00F0FF', G = '#00FF66', GOLD = '#FFD700', R = '#FF3333';
+        const esc = escapeHtml;
+        const fmt = n => String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const courtSysteme = n => String(n || '').replace(/^Col \d+ Sector /, '');
+        const nomStation = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
+        const jj = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); };
+        const jjhm = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); };
+        function ilYa(iso) {
+            const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+            if (isNaN(m)) return '';
+            return m < 60 ? 'il y a ' + m + ' min' : m < 1440 ? 'il y a ' + Math.floor(m / 60) + ' h' : 'il y a ' + Math.floor(m / 1440) + ' j';
+        }
+        // barre segmentée façon voyant de cockpit : la couleur dit où on en est
+        const couleurAvancement = p => p >= 100 ? G : p >= 66 ? B : p >= 33 ? O : '#FF4D2E';
+        function barreSeg(pct, h) {
+            const c = couleurAvancement(pct);
+            const seg = col => 'repeating-linear-gradient(90deg,' + col + ' 0 7px, transparent 7px 9px)';
+            return `<div style="position:relative;height:${h || 10}px;background:${seg('rgba(255,255,255,.09)')};border-radius:2px;"><div style="position:absolute;left:0;top:0;bottom:0;width:${Math.min(100, pct)}%;background:${seg(c)};filter:drop-shadow(0 0 4px ${c});"></div></div>`;
+        }
+        // Type d'installation, seulement quand le jeu l'a donne. Une station TERMINEE qui porte encore le type d'un chantier (ConstructionDepot) : type inconnu, rien d'affiche.
+        const LIBELLES_TYPE = { Outpost: 'Avant-poste', CraterOutpost: 'Avant-poste planétaire', SurfaceStation: 'Installation de surface', CraterPort: 'Port planétaire',
+          Coriolis: 'Coriolis', Orbis: 'Orbis', Ocellus: 'Ocellus', AsteroidBase: 'Base astéroïde', MegaShip: 'Mégavaisseau',
+          SpaceConstructionDepot: 'Chantier orbital', PlanetaryConstructionDepot: 'Chantier planétaire', SurfaceConstructionDepot: 'Chantier planétaire' };
+        const typeInstallation = (t, terminee) => (terminee && /ConstructionDepot/i.test(t || '')) ? '' : (LIBELLES_TYPE[t] || '');
+        // Type deduit de la RECETTE (marchandises demandees), jamais d'un nom ni d'une supposition. Rien d'affiche quand la recette ne tranche pas.
+        function typeRecette(c, taille) {
+            const t = typeof window.typeDepuisRecette === 'function' ? window.typeDepuisRecette(c.marchandises) : null;
+            const style = 'color:#8fb7bf;font-size:' + (taille || '.6em') + ';letter-spacing:1px;border-bottom:1px dotted #8fb7bf88;cursor:help;';
+            if (t) {
+                const aide = t.precis ? "Type reconnu d'après la liste des marchandises demandées (recette)." : 'Cette recette est la même pour : ' + t.libelle + '. Le type exact ne peut pas être distingué d\'après les marchandises.';
+                return ' <span title="' + esc(aide) + '" style="' + style + '">' + esc((t.precis ? t.libelle : t.famille).toUpperCase()) + '</span>';
+            }
+            return /ColonisationShip/.test(c.station || '') ? ' <span title="Premier site d\'un système : construit depuis le navire de colonisation." style="' + style + '">NAVIRE DE COLONISATION</span>' : '';
+        }
+        const pastille = (txt, col, vif) => `<span class="c-pastille" style="color:${col};border-color:${col};background:${col}1f;text-shadow:0 0 6px ${col}66;"><i class="${vif ? 'vif' : ''}"></i>${txt}</span>`;
+
+        // ---------------------------------------------------------------
+        //  CALCULS SUR UN CHANTIER (à partir des marchandises relevées)
+        // ---------------------------------------------------------------
+        function calculerChantier(c) {
+            const lignes = (c.marchandises || []).map(m => ({ nom: m.nom_fr || m.nom, req: +m.requis || 0, liv: +m.livre || 0 }))
+                .map(l => Object.assign(l, { reste: Math.max(0, l.req - l.liv), pct: l.req > 0 ? Math.round(100 * l.liv / l.req) : 100 }))
+                .sort((a, b) => (a.reste === 0) - (b.reste === 0) || b.reste - a.reste);
+            const req = lignes.reduce((t, l) => t + l.req, 0), liv = lignes.reduce((t, l) => t + Math.min(l.liv, l.req), 0);
+            const pct = c.complet ? 100 : (req > 0 ? Math.max(1, Math.min(99, Math.round(100 * liv / req))) : Math.round((+c.progression || 0) * 100));
+            const reste = Math.max(0, req - liv);
+            let eta = "pas d'estimation";
+            if (c.complet) eta = 'terminé';
+            else if ((+c.livre_7j || 0) > 0 && reste > 0) {
+                const jours = reste / ((+c.livre_7j) / 7);
+                eta = jours < 1 ? '< 1 jour' : '~' + Math.ceil(jours) + ' jour' + (Math.ceil(jours) > 1 ? 's' : '');
+            }
+            const sansReleve = !c.complet && (Date.now() - Date.parse(c.maj_le)) > 3 * 86400000;
+            return { lignes, req, liv, pct, reste, eta, sansReleve };
+        }
+
+        // ---------------------------------------------------------------
+        //  LECTURE (une seule requête, mémoire de 2 minutes)
+        // ---------------------------------------------------------------
+        async function chargerSynthese(force) {
+            const cle = 'edteam_colo_' + profilCommandant.user_id;
+            try {
+                const c = JSON.parse(sessionStorage.getItem(cle) || 'null');
+                if (!force && c && Date.now() - c.ts < 120000) return c.data;
+            } catch (e) {}
+            const { data, error } = await supabaseApp.rpc('colonisation_synthese');
+            if (error) throw error;
+            try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), data })); } catch (e) {}
+            return data;
+        }
+
+        // ---------------------------------------------------------------
+        //  CARTE : projection à plat (vue de dessus, le haut = vers le centre galactique)
+        // ---------------------------------------------------------------
+        function placerSystemes(systemes) {
+            const W = 800, H = 500, padX = 110, padY = 70;
+            const plot = systemes.filter(s => typeof s.x === 'number' && typeof s.z === 'number');
+            if (!plot.length) return { plot: [], echelle: null, W, H };
+            const xs = plot.map(s => s.x), zs = plot.map(s => s.z);
+            const minX = Math.min(...xs), maxX = Math.max(...xs), minZ = Math.min(...zs), maxZ = Math.max(...zs);
+            const dx = Math.max(maxX - minX, 0.001), dz = Math.max(maxZ - minZ, 0.001);
+            let echelle = Math.min((W - 2 * padX - 130) / dx, (H - 2 * padY) / dz);
+            if (!isFinite(echelle) || plot.length === 1) echelle = 12;
+            echelle = Math.min(echelle, 40);
+            const largeur = dx * echelle, hauteur = dz * echelle;
+            const ox = (W - 130 - largeur) / 2, oy = (H - hauteur) / 2;
+            plot.forEach(s => { s.sx = ox + (s.x - minX) * echelle; s.sy = H - (oy + (s.z - minZ) * echelle); });
+            return { plot, echelle, W, H };
+        }
+        // liaisons décoratives : chaque système relié à son voisin le plus proche (arbre de liaison minimal)
+        function liaisons(plot) {
+            const liens = [], dans = new Set(plot.length ? [0] : []);
+            while (dans.size < plot.length) {
+                let meilleur = null;
+                dans.forEach(i => plot.forEach((p, j) => { if (!dans.has(j)) { const d = Math.hypot(plot[i].sx - p.sx, plot[i].sy - p.sy); if (!meilleur || d < meilleur.d) meilleur = { i, j, d }; } }));
+                if (!meilleur) break;
+                dans.add(meilleur.j); liens.push([meilleur.i, meilleur.j]);
+            }
+            return liens;
+        }
+        function svgCarte(systemes, ordreIdx) {
+            const { plot, echelle, W, H } = placerSystemes(systemes);
+            const defs = `<defs><pattern id="q" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="rgba(0,240,255,.07)"/></pattern>
+                <radialGradient id="h"><stop offset="0" stop-color="${O}" stop-opacity=".55"/><stop offset="1" stop-color="${O}" stop-opacity="0"/></radialGradient>
+                <radialGradient id="hv"><stop offset="0" stop-color="${G}" stop-opacity=".45"/><stop offset="1" stop-color="${G}" stop-opacity="0"/></radialGradient></defs>
+                <rect width="${W}" height="${H}" fill="url(#q)"/>
+                <text x="${W - 16}" y="22" fill="#6f9aa3" font-size="12" text-anchor="end">&uarr; VERS LE CENTRE GALACTIQUE</text>`;
+            if (!plot.length) return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%;display:block;">${defs}<text x="${W / 2}" y="${H / 2}" fill="#6f9aa3" font-size="15" text-anchor="middle">Aucune position connue pour le moment.</text></svg>`;
+            const liens = liaisons(plot).map(l => `<path d="M${plot[l[0]].sx} ${plot[l[0]].sy} L${plot[l[1]].sx} ${plot[l[1]].sy}"/>`).join('');
+            const noeuds = plot.map(s => {
+                const i = ordreIdx.get(s), vert = s.chantiers.length === 0, col = vert ? G : O;
+                const gauche = s.sx > W * 0.62, tx = gauche ? s.sx - 22 : s.sx + 22, ancre = gauche ? 'end' : 'start';
+                const barres = s.chantiers.slice(0, 2).map((c, k) => { const p = calculerChantier(c).pct, bx = gauche ? tx - 78 : tx, y = s.sy + 36 + k * 11;
+                    return `<rect x="${bx}" y="${y}" width="78" height="6" rx="3" fill="#1b2a30"/><rect x="${bx}" y="${y}" width="${Math.max(3, 78 * p / 100)}" height="6" rx="3" fill="${O}"/><text x="${gauche ? bx - 6 : bx + 84}" y="${y + 6}" fill="${O}" font-size="11" text-anchor="${gauche ? 'end' : 'start'}">${p}%</text>`; }).join('');
+                return `<g class="noeud-carte" data-etat="${vert ? 'fini' : 'chantier'}" onclick="ouvrirSysteme(${i})" onmouseenter="coloTip(event,${i})" onmouseleave="if(typeof hideHoloTooltip==='function')hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function')moveHoloTooltip(event)" style="cursor:pointer">
+                    <circle cx="${s.sx}" cy="${s.sy}" r="40" fill="url(#${vert ? 'hv' : 'h'})"/><circle cx="${s.sx}" cy="${s.sy}" r="${vert ? 7 : 9}" fill="${col}"/>${vert ? '' : `<circle cx="${s.sx}" cy="${s.sy}" r="16" fill="none" stroke="${col}" stroke-opacity=".8"/>`}
+                    <text x="${tx}" y="${s.sy - 6}" fill="#fff" font-size="16" font-weight="bold" text-anchor="${ancre}">${esc(courtSysteme(s.nom))}</text>
+                    <text x="${tx}" y="${s.sy + 11}" fill="${G}" font-size="13" text-anchor="${ancre}">${s.finies.length} terminée${s.finies.length > 1 ? 's' : ''}</text>
+                    ${s.chantiers.length ? `<text x="${tx}" y="${s.sy + 27}" fill="${O}" font-size="13" text-anchor="${ancre}">${s.chantiers.length} chantier${s.chantiers.length > 1 ? 's' : ''}</text>` : ''}${barres}</g>`;
+            }).join('');
+            const barreEchelle = (() => { const ly = [1, 2, 5, 10, 20, 50, 100].find(v => v * echelle >= 60) || 100; return `<g stroke="rgba(0,240,255,.5)"><path d="M30 ${H - 20} H${30 + ly * echelle}"/><path d="M30 ${H - 25} V${H - 15}"/><path d="M${30 + ly * echelle} ${H - 25} V${H - 15}"/></g><text x="${40 + ly * echelle}" y="${H - 16}" fill="#6f9aa3" font-size="11">${ly} al</text>`; })();
+            return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;position:relative;">${defs}<g stroke="rgba(0,240,255,.35)" stroke-dasharray="4 6" fill="none">${liens}</g>${noeuds}${barreEchelle}</svg>`;
+        }
+        function coloTip(ev, i) {
+            const s = window.__colo.systemes[i]; if (!s || typeof showHoloTooltip !== 'function') return;
+            const col = s.chantiers.length ? O : G;
+            showHoloTooltip(ev, `<strong style="color:${col}">${esc(s.nom.toUpperCase())}</strong><br><span style="color:#ccc">architecte : ${s.architecte ? 'CMDR ' + esc(s.architecte) : 'inconnu'}<br>contrôlé par : ${s.faction ? esc(s.faction) : 'inconnu'}<br>${s.finies.length} terminée(s) · ${s.chantiers.length} chantier(s)</span>`, col);
+        }
+
+        // ---------------------------------------------------------------
+        //  PAGE
+        // ---------------------------------------------------------------
+        const pilule = (txt, val, col) => `<div style="border:1px solid ${col}55;background:rgba(0,0,0,.55);border-radius:3px;padding:6px 16px;text-align:center;min-width:104px;"><div style="color:#fff;font-size:1.45em;font-weight:bold;line-height:1.1;">${val}</div><div style="color:#888;font-size:.7em;letter-spacing:1.5px;margin-top:2px;">${txt}</div></div>`;
+        const bloc = (titre, contenu, hauteur, opts) => { opts = opts || {}; return `<div class="bloc ${opts.bord ? 'cy' : ''}" style="min-width:0;height:${hauteur}px;display:flex;flex-direction:column;"><div style="flex:none;color:${opts.titre || O};letter-spacing:2px;font-size:1.05em;border-bottom:1px dashed ${opts.trait || 'rgba(255,113,0,.25)'};padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;">${titre}</div><div style="flex:1;min-height:0;overflow-y:auto;padding-right:6px;${opts.interne || ''}">${contenu}</div></div>`; };
+        const sm = t => `<span style="color:#777;font-size:.8em;letter-spacing:1px;">${t}</span>`;
+        const vide = msg => `<div style="color:#777;font-style:italic;text-align:center;padding:30px 10px;line-height:1.6;">${msg}</div>`;
+
+        function ligneJournal(j) {
+            const h = `<span style="color:#555;">[${esc(jjhm(j.t))}]</span>`;
+            const sysCourt = j.systeme ? ' <span style="color:#777;">· ' + esc(courtSysteme(j.systeme)) + '</span>' : '';
+            if (j.type === 'LIVRAISON') return `<div style="font-size:.95em;line-height:1.75;margin-bottom:4px;">${h} <span style="color:#fff;font-weight:bold;">CMDR ${esc((j.cmdr || '?').toUpperCase())}</span> <span style="color:${B};">[ LIVRAISON ]</span><div style="color:#bbb;padding-left:2px;">${fmt(j.tonnes)} t de ${esc(j.marchandise)}${j.station ? ' à ' + esc(nomStation(j.station)) : ''}${sysCourt}</div></div>`;
+            if (j.type === 'STATION TERMINEE') return `<div style="font-size:.95em;line-height:1.75;margin-bottom:4px;">${h} <span style="color:${GOLD};font-weight:bold;">[ STATION TERMINÉE ]</span><div style="color:#ddd;padding-left:2px;">${esc(nomStation(j.station))} est opérationnelle${sysCourt}</div></div>`;
+            return `<div style="font-size:.95em;line-height:1.75;margin-bottom:4px;">${h} <span style="color:#fff;font-weight:bold;">CMDR ${esc((j.cmdr || '?').toUpperCase())}</span> <span style="color:${O};">[ SYSTÈME REVENDIQUÉ ]</span><div style="color:#bbb;padding-left:2px;">${esc(j.systeme || '')}</div></div>`;
+        }
+
+        function construirePage(data) {
+            const zone = document.getElementById('display-area');
+            if (!data || !data.escadron) { zone.innerHTML = vide('Cette page est réservée aux pilotes approuvés.'); return; }
+            const systemes = data.systemes || [];
+            window.__colo = data;
+            const kpi = data.kpi || {};
+            const ordreIdx = new Map(systemes.map((s, i) => [s, i]));
+            const sansPosition = systemes.filter(s => !(typeof s.x === 'number' && typeof s.z === 'number'));
+            const aucun = !systemes.length && !(kpi.chantiers || 0) && !(kpi.construites || 0);
+
+            const architectes = (data.architectes || []).map((a, i) => `<div style="display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.5);border:1px solid ${i === 0 ? GOLD + '88' : '#333'};border-left:3px solid ${i === 0 ? GOLD : '#555'};border-radius:4px;padding:8px 14px;margin-bottom:8px;">
+                <span style="color:${i === 0 ? GOLD : '#888'};font-weight:bold;font-size:1.2em;width:30px;">#${i + 1}</span>
+                <div style="flex:1;min-width:0;"><div style="color:#fff;font-size:1.2em;font-weight:bold;letter-spacing:1px;">CMDR ${esc((a.cmdr || '?').toUpperCase())}</div><div style="color:#888;font-size:.85em;margin-top:2px;">${a.systemes} système${a.systemes > 1 ? 's' : ''} · ${a.stations} station${a.stations > 1 ? 's' : ''} terminée${a.stations > 1 ? 's' : ''}</div></div>
+                <div style="text-align:right;"><div style="color:${GOLD};font-weight:bold;font-size:1.1em;">${fmt(a.tonnes)} t</div><div style="color:#777;font-size:.75em;">livrées au total</div></div></div>`).join('')
+                || vide('Aucun architecte identifié pour l\'instant.<br>Le système doit avoir été revendiqué par un pilote dont le plugin est à jour.');
+
+            const maxReste = Math.max(1, ...(data.priorites || []).map(p => +p.reste || 0));
+            const prio = (data.priorites || []).map(p => `<div style="display:grid;grid-template-columns:1fr 70px 82px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed #222;"><span style="color:#fff;">${esc(p.nom)} <small style="color:#777;font-size:.75em;">${p.chantiers} chantier${p.chantiers > 1 ? 's' : ''}</small></span><div style="height:7px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;"><div style="width:${Math.max(3, Math.round(100 * p.reste / maxReste))}%;height:100%;background:${B};"></div></div><span style="color:${GOLD};text-align:right;font-weight:bold;">${fmt(p.reste)} t</span></div>`).join('')
+                || vide('Rien à apporter : aucun chantier en cours.');
+
+            const journal = (data.journal || []).map(ligneJournal).join('') || vide('Aucune livraison relevée pour l\'instant.');
+
+            const carteHolo = `<div id="carte-holo" class="bloc holo" style="height:560px;padding:12px 16px;display:flex;flex-direction:column;">
+                <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg, rgba(0,240,255,.05) 0px, rgba(0,240,255,.05) 1px, transparent 1px, transparent 4px);pointer-events:none;"></div>
+                <div class="holo-balayage"></div>
+                <div style="position:relative;flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid rgba(0,240,255,.3);padding-bottom:8px;margin-bottom:8px;">
+                    <span style="color:${B};letter-spacing:2px;font-size:1.05em;text-shadow:0 0 8px rgba(0,240,255,.5);">&gt; CARTE DE L'ESCADRON <span style="color:#6f9aa3;font-size:.8em;letter-spacing:1px;margin-left:8px;">${systemes.length} SYSTÈME${systemes.length > 1 ? 'S' : ''}</span></span>
+                    <span style="display:flex;gap:6px;">
+                        <button class="c-pastille c-filtre on" data-f="tous" style="color:${B};border-color:${B};">TOUS</button>
+                        <button class="c-pastille c-filtre" data-f="chantier" style="color:${O};border-color:${O};">EN CHANTIER</button>
+                        <button class="c-pastille c-filtre" data-f="fini" style="color:${G};border-color:${G};">TERMINÉS</button>
+                    </span>
+                </div>
+                <div style="position:relative;flex:1;min-height:0;">${svgCarte(systemes, ordreIdx)}</div>
+                <div style="position:relative;flex:none;color:#6f8f96;font-size:.78em;margin-top:6px;">ⓘ Seuls les systèmes où le plugin a relevé une revendication ou un chantier sont listés.</div>
+                ${sansPosition.length ? `<div style="position:relative;flex:none;color:#7fa3ab;font-size:.85em;margin-top:4px;padding-top:2px;">⚠ ${sansPosition.length} système${sansPosition.length > 1 ? 's' : ''} sans position connue (aucun pilote n'y est passé avec le plugin) : ${sansPosition.map(s => `<span style="color:${B};cursor:pointer;" onclick="ouvrirSysteme(${ordreIdx.get(s)})">${esc(s.nom)}</span>`).join(' · ')}</div>` : ''}
+            </div>`;
+
+            zone.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--ed-orange-dim);padding-bottom:12px;margin-bottom:14px;gap:14px;flex-wrap:wrap;">
+                    <h3 style="margin:0;color:${O};letter-spacing:2px;font-size:1.2em;">&gt; COLONISATION <span style="color:#777;font-size:.75em;letter-spacing:1px;margin-left:10px;">${esc(data.escadron)}</span>
+                        <span style="color:#666;font-size:.65em;letter-spacing:1px;margin-left:10px;">${kpi.maj ? 'dernier relevé ' + esc(ilYa(kpi.maj)) : ''}</span>
+                        <span onclick="actualiserPage()" style="color:${B};font-size:.65em;letter-spacing:1px;margin-left:10px;cursor:pointer;border-bottom:1px dashed ${B};">ACTUALISER</span></h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">${pilule('SYSTÈMES', fmt(kpi.systemes), B)}${pilule('TERMINÉES', fmt(kpi.construites), G)}${pilule('CHANTIERS', fmt(kpi.chantiers), O)}${pilule('LIVRÉES CE CYCLE', fmt(kpi.tonnes_cycle) + ' t', GOLD)}</div>
+                </div>
+                <div style="color:#8a8a8a;font-size:.8em;line-height:1.5;margin:-4px 0 12px;">ⓘ Tableau établi d'après ce que ${data.perso ? 'votre plugin a relevé' : "les plugins de l'escadron ont relevé"} (chantiers consultés, livraisons, revendications). Il peut être en retard ou incomplet par rapport à l'état réel du jeu : un chantier n'apparaît qu'après avoir été consulté ou alimenté par un pilote dont le plugin est à jour.</div>
+                ${data.perso_a_verser ? `<div style="background:rgba(255,215,0,.07);border:1px solid ${GOLD};border-radius:4px;padding:12px 16px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+                    <div style="color:#ddd;font-size:.9em;line-height:1.6;"><span style="color:${GOLD};letter-spacing:2px;font-weight:bold;">ESPACE PERSONNEL</span><br>Avant de rejoindre l'escadron, vous aviez relevé ${fmt(data.perso_a_verser.systemes)} système${data.perso_a_verser.systemes > 1 ? 's' : ''}, ${fmt(data.perso_a_verser.chantiers)} chantier${data.perso_a_verser.chantiers > 1 ? 's' : ''} et ${fmt(data.perso_a_verser.livraisons)} livraison${data.perso_a_verser.livraisons > 1 ? 's' : ''}. Seul vous les voyez pour l'instant ; ils ne sont pas affichés ici.</div>
+                    <button onclick="verserEspacePerso()" style="background:transparent;border:1px solid ${GOLD};color:${GOLD};padding:8px 16px;cursor:pointer;letter-spacing:1.5px;font-family:inherit;">VERSER À L'ESCADRON</button>
+                </div>` : ''}
+                ${aucun ? `<div style="background:rgba(0,0,0,.45);border:1px dashed #555;border-radius:4px;padding:40px 20px;text-align:center;color:#ccc;line-height:1.8;">
+                    <div style="color:${O};font-size:1.2em;letter-spacing:2px;margin-bottom:10px;">AUCUN CHANTIER RELEVÉ POUR L'INSTANT</div>
+                    Les systèmes, les chantiers et les livraisons ${data.perso ? 'que vous avez consultés ou alimentés' : "de l'escadron"} apparaissent ici automatiquement,<br>dès que ${data.perso ? 'votre plugin (version 2.5 ou plus)' : "le plugin d'un pilote"} relève la consultation d'un chantier de colonisation ou une livraison de marchandises.</div>` : `
+                <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:12px;">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        ${carteHolo}
+                        ${bloc('&gt; ARCHITECTES DE L\'ESCADRON ' + sm((data.architectes || []).length + ' PILOTE' + ((data.architectes || []).length > 1 ? 'S' : '')), architectes, 300)}
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        ${bloc('&gt; À APPORTER EN PRIORITÉ ' + sm('TOUS CHANTIERS'), prio, 300)}
+                        ${bloc('<span style="text-shadow:0 0 8px rgba(0,240,255,.4);">&gt; JOURNAL DES LIVRAISONS</span>' + pastille('EN DIRECT', G, true), journal, 572, { bord: 'rgba(0,240,255,.45)', titre: B, trait: 'rgba(0,240,255,.3)', interne: 'background:rgba(0,0,0,.35);padding:8px 10px;' })}
+                    </div>
+                </div>`}
+                <div style="text-align:center;color:#5d6a6e;font-size:.72em;letter-spacing:.5px;padding:18px 10px 0;">Types d'installations reconnus grâce à la feuille communautaire de <a href="https://forums.frontier.co.uk/threads/v3-of-the-colonization-construction-spreadsheet-is-now-available.635762/post-10831804" target="_blank" rel="noopener noreferrer" style="color:#7d9aa3;text-decoration:underline dotted;">CMDR DaftMav</a> : merci à lui pour ce travail.</div>
+                <div style="height:30px"></div>
+                <div class="modal-overlay" id="modal-colo" onclick="if(event.target===this)this.style.display='none'"></div>`;
+
+            document.querySelectorAll('.c-filtre').forEach(b => b.addEventListener('click', () => {
+                document.querySelectorAll('.c-filtre').forEach(x => x.classList.remove('on')); b.classList.add('on');
+                const f = b.dataset.f;
+                document.querySelectorAll('.noeud-carte').forEach(n => { n.style.opacity = (f === 'tous' || n.dataset.etat === f) ? 1 : .15; });
+            }));
+        }
+
+        // ---------------------------------------------------------------
+        //  FENÊTRE DE DÉTAIL D'UN SYSTÈME
+        // ---------------------------------------------------------------
+        window.ouvrirSysteme = function (i) {
+            const s = (window.__colo && window.__colo.systemes || [])[i];
+            if (!s) return;
+            if (typeof sonClic === 'function') sonClic();
+            const chantiers = s.chantiers.map(c => {
+                const k = calculerChantier(c), col = couleurAvancement(k.pct), total = (c.contributions || []).reduce((t, p) => t + p.tonnes, 0), finies = k.lignes.filter(l => l.reste === 0).length;
+                const marchandises = k.lignes.map(l => {
+                    const fin = l.reste === 0;
+                    return `<div style="break-inside:avoid;padding:5px 0;border-bottom:1px dashed #221a10;${fin ? 'opacity:.6;' : ''}">
+                        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><span style="color:${fin ? G : '#fff'};">${fin ? '✔ ' : ''}${esc(l.nom)}</span><span style="color:${fin ? G : '#fff'};font-weight:bold;">${fin ? 'complète' : fmt(l.reste) + ' t'}</span></div>
+                        <div style="display:flex;align-items:center;gap:10px;margin-top:3px;"><div style="flex:1;">${barreSeg(l.pct, 8)}</div><span style="color:${couleurAvancement(l.pct)};font-size:.8em;width:38px;text-align:right;">${l.pct}%</span></div>
+                        <div style="color:#7d7d7d;font-size:.75em;margin-top:1px;">${fmt(l.liv)} livrées sur ${fmt(l.req)} t</div></div>`;
+                }).join('');
+                // bandeau des contributions : simple, qui / combien de tonnes / quelle part
+                const contrib = (c.contributions || []).map((p, n) => `<div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);border:1px solid ${n === 0 ? GOLD + '77' : '#2c2c2c'};border-left:3px solid ${n === 0 ? GOLD : '#555'};border-radius:4px;padding:6px 12px;">
+                        <span style="color:${n === 0 ? GOLD : '#888'};font-weight:bold;width:26px;">#${n + 1}</span>
+                        <span title="CMDR ${esc((p.cmdr || '?').toUpperCase())}" style="flex:1;min-width:0;color:#fff;font-weight:bold;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">CMDR ${esc((p.cmdr || '?').toUpperCase())}</span>
+                        <span style="color:${GOLD};font-weight:bold;white-space:nowrap;">${fmt(p.tonnes)} t</span>
+                        <span style="color:${B};width:48px;text-align:right;">${total > 0 ? Math.round(100 * p.tonnes / total) : 0} %</span></div>`).join('') || `<div style="color:#777;font-style:italic;">Aucune livraison attribuée.</div>`;
+                const nonAttribue = k.liv - total;
+                return `<div class="bloc" style="padding:14px 16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="color:#fff;font-size:1.3em;font-weight:bold;letter-spacing:2px;">${esc(nomStation(c.station).toUpperCase())} ${pastille('EN CONSTRUCTION', O)}${typeInstallation(c.type, false) ? ' <span style="color:#8fb7bf;font-size:.6em;letter-spacing:1px;">' + esc(typeInstallation(c.type, false).toUpperCase()) + '</span>' : ''}${typeRecette(c)}</span><span style="color:${col};font-size:2.2em;font-weight:bold;text-shadow:0 0 10px ${col}66;">${k.pct}%</span></div>
+                    <div style="margin:6px 0 8px;">${barreSeg(k.pct, 14)}</div>
+                    <div style="display:flex;justify-content:space-between;font-size:.92em;color:#999;flex-wrap:wrap;gap:6px;"><span>reste <b style="color:#fff;font-weight:normal;">${fmt(k.reste)} t</b> sur ${fmt(k.req)} t · fin estimée <b style="color:#fff;font-weight:normal;">${esc(k.eta)}</b></span><span>relevé ${esc(ilYa(c.maj_le))}${k.sansReleve ? ' <span style="color:' + R + ';">· sans relevé récent</span>' : ''}</span></div>
+                    <div style="margin-top:14px;">
+                        <div style="color:${B};letter-spacing:2px;font-size:.9em;margin-bottom:8px;display:flex;justify-content:space-between;"><span>&gt; CONTRIBUTIONS</span><span style="color:#888;font-size:.85em;">${fmt(total)} t au total</span></div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:8px;">${contrib}</div>
+                        ${nonAttribue > 0 ? `<div style="color:#8a8a8a;font-size:.78em;line-height:1.5;margin-top:6px;">ⓘ ${fmt(nonAttribue)} t livrées ne sont pas attribuées : le plugin ne voit que les livraisons des pilotes qui l'ont installé.</div>` : ''}
+                    </div>
+                    <div style="margin-top:16px;">
+                        <div style="color:${GOLD};letter-spacing:2px;font-size:.9em;margin-bottom:6px;display:flex;justify-content:space-between;"><span>&gt; MARCHANDISES (${k.lignes.length})</span><span style="color:#888;font-size:.85em;">${finies} complète${finies > 1 ? 's' : ''} · ${k.lignes.length - finies} à livrer</span></div>
+                        <div class="colo-cols">${marchandises || '<div style="color:#777;font-style:italic;">Liste des marchandises non relevée.</div>'}</div>
+                    </div></div>`;
+            }).join('<div style="height:14px"></div>');
+            const finies = s.finies.map(c => `<span style="border:1px solid ${G}66;background:rgba(0,255,102,.05);color:${G};font-size:.95em;padding:5px 12px;border-radius:3px;" title="${c.termine_le ? 'terminée le ' + esc(jj(c.termine_le)) : 'installation relevée à l\'amarrage (date de fin inconnue)'}">${pastille('TERMINÉE', G)} ${esc(nomStation(c.station))}${typeInstallation(c.type, true) ? ' <span style="color:#9fd;font-size:.8em;">· ' + esc(typeInstallation(c.type, true)) + '</span>' : ''}${typeRecette(c, '.8em')}${c.termine_le ? ' <span style="color:#6a9;font-size:.8em;">· ' + esc(jj(c.termine_le)) + '</span>' : ''}</span>`).join('');
+            const m = document.getElementById('modal-colo');
+            m.innerHTML = `<div class="modal-content" style="max-width:1120px;width:95%;max-height:94vh;overflow-y:auto;background:rgba(10,5,0,.97);border:1px solid ${O};box-shadow:0 0 30px rgba(255,113,0,.2);padding:0;">
+                <div style="padding:16px 24px;border-bottom:1px solid rgba(255,113,0,.3);background:rgba(255,113,0,.05);display:flex;justify-content:space-between;align-items:center;">
+                    <div><div style="color:#888;font-size:.8em;letter-spacing:2px;">SYSTÈME COLONISÉ</div><div style="color:${O};font-size:1.6em;font-weight:bold;letter-spacing:2px;">${esc(s.nom.toUpperCase())}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">architecte : ${s.architecte ? `<span style="color:${GOLD};font-weight:bold;">CMDR ${esc(s.architecte.toUpperCase())}</span>` : '<span title="Architecte non relevé : seule la revendication du système l\'enregistre (s\'amarrer ne le change pas). Il n\'est jamais déduit. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">inconnu</span>'}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">contrôlé par : ${s.faction ? `<span style="color:${B};font-weight:bold;">${esc(s.faction)}</span>` : '<span title="Faction non relevée : elle est lue quand un pilote de l\'escadron arrive dans le système avec le plugin à jour, puis consulte ou alimente une construction. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">faction inconnue</span>'}</div></div>
+                    <div style="text-align:right;margin-right:26px;display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><span style="color:#888;font-size:.9em;">${s.revendique_le ? 'revendiqué le <b style="color:#fff;font-weight:normal;">' + esc(jj(s.revendique_le)) + '</b>' : 'revendication non relevée'}</span><span style="display:flex;gap:6px;">${pastille(s.finies.length + ' TERMINÉE' + (s.finies.length > 1 ? 'S' : ''), G)}${pastille(s.chantiers.length + ' CHANTIER' + (s.chantiers.length > 1 ? 'S' : ''), s.chantiers.length ? O : '#777', s.chantiers.length > 0)}</span></div>
+                    <div onclick="document.getElementById('modal-colo').style.display='none'" style="position:absolute;top:14px;right:20px;color:${O};cursor:pointer;font-weight:bold;">X</div>
+                </div>
+                <div style="padding:16px 24px;display:flex;flex-direction:column;gap:14px;">
+                    <div><div style="color:${G};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; TERMINÉS (${s.finies.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;">rien de terminé pour l\'instant</span>'}</div></div>
+                    ${s.chantiers.length ? `<div><div style="color:${O};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; EN CHANTIER (${s.chantiers.length})</div>${chantiers}</div>` : ''}
+                    <div style="color:#888;font-size:.82em;border-top:1px dashed #2a2a2a;padding-top:10px;">ⓘ Seules les constructions que le plugin a vues sont listées : le jeu peut en indiquer d'autres (chantiers que personne n'a encore consultés, installations déjà existantes). Il ne fournit pas non plus le nombre d'emplacements encore libres.</div>
+                </div></div>`;
+            m.style.display = 'flex';
+        };
+
+        // Le pilote verse LUI-MEME son espace personnel a l'escadron (jamais automatique, operation unique).
+        async function verserEspacePerso() {
+            if (!confirm("Verser vos systèmes, chantiers et livraisons personnels à l'escadron ?\n\nTous les membres de l'escadron les verront (avec votre nom pour les livraisons et la revendication). Cette action est définitive.")) return;
+            try {
+                const { data, error } = await supabaseApp.rpc('col_verser_espace_perso');
+                if (error || !data || data.erreur) { alert("Le versement n'a pas pu être effectué. Réessayez plus tard."); return; }
+                await actualiserPage();
+            } catch (e) { console.error('Erreur versement colonisation :', e); }
+        }
+
+        async function actualiserPage() {
+            try { construirePage(await chargerSynthese(true)); }
+            catch (e) { console.error('Erreur colonisation :', e); }
+        }
+
+        // ---------------------------------------------------------------
+        //  DÉMARRAGE (mêmes contrôles d'accès que la page Escadron)
+        // ---------------------------------------------------------------
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            if (!data) { window.location.href = 'index.html'; return; }
+            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
+            if (rangJeu === 4 && (!data || (!data.est_amiral && !data.est_officier))) { window.location.href = 'index.html'; return; }
+
+            if (data && data.est_approuve) {
+                profilCommandant = data;
+                window.profilCommandant = data;
+                if (data.est_amiral || data.est_directeur) {
+                    const navAmiraute = document.getElementById('nav-bureau-amiraute');
+                    if (navAmiraute) navAmiraute.style.display = 'flex';
+                    if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
+                }
+                const navBgs = document.getElementById('nav-bgs-factions');
+                if (navBgs) navBgs.style.display = 'flex';
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+                const apiKeyDisplay = document.getElementById('api-key-display');
+                if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;
+
+                const mainUi = document.getElementById('main-ui');
+                if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
+                if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+
+                try { construirePage(await chargerSynthese(false)); }
+                catch (e) {
+                    console.error('Erreur colonisation :', e);
+                    document.getElementById('display-area').innerHTML = vide('Impossible de lire les données de colonisation pour le moment.<br>Réessayez dans quelques instants.');
+                }
+            } else {
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+
+    <script src="footer.js?v=7"></script>
+</body>
+</html>
