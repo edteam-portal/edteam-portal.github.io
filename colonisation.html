@@ -345,6 +345,9 @@
         .c-filtre { cursor:pointer; background:transparent; }
         .c-filtre.on { background:rgba(0,240,255,.18); box-shadow:0 0 8px rgba(0,240,255,.35); }
         .noeud-carte { transition:opacity .2s; }
+        .archi-ligne { transition:box-shadow .15s, background .15s; }
+        .archi-ligne:hover { box-shadow:0 0 12px rgba(255,215,0,.28); background:rgba(255,215,0,.06) !important; }
+        .lien-archi:hover { color:#fff !important; }
         .prio-ligne { transition:background .15s; border-radius:3px; }
         .prio-ligne:hover { background:rgba(255,215,0,.07); }
         .journal-feed { height:340px; overflow-y:auto; position:relative; background:rgba(0,0,0,.6); border:1px dashed #333; padding:10px; font-size:.85em; }
@@ -554,7 +557,8 @@
             const chip = document.getElementById('carte-chip');
             if (chip) {
                 chip.style.display = mat ? 'flex' : 'none';
-                if (mat) chip.querySelector('.chip-nom').textContent = mat.nom + ' · ' + mat.idx.length + ' système' + (mat.idx.length > 1 ? 's' : '');
+                if (mat) chip.querySelector('.chip-lib').textContent = (mat.lib || 'MATÉRIAU') + ' :';
+                if (mat) chip.querySelector('.chip-nom').textContent = mat.nom +' · ' + mat.idx.length + ' système' + (mat.idx.length > 1 ? 's' : '');
             }
         }
         function rendreCarte() {
@@ -740,6 +744,73 @@
         }
         function fermerMateriau() { const m = document.getElementById('modal-materiau'); if (m) m.style.display = 'none'; }
         function carteEffacerMateriau() { window.__carte.materiau = null; window.__carte.apercu = null; rendreCarte(); }
+        // ---------------------------------------------------------------
+        //  ARCHITECTE : clic sur un architecte (bloc « ARCHITECTES » ou fenêtre d'un système) -> la liste de ses systèmes,
+        //  avec ses installations terminées et ses chantiers en cours ; survol = ses systèmes sont repérés sur la carte
+        // ---------------------------------------------------------------
+        const memeNom = (a, b) => String(a || '').trim().toUpperCase() === String(b || '').trim().toUpperCase();
+        function systemesDe(nomCmdr) {
+            return ((window.__colo && window.__colo.systemes) || []).map((s, i) => ({ s, i })).filter(x => x.s.architecte && memeNom(x.s.architecte, nomCmdr));
+        }
+        function apercuArchitecte(k) {
+            const a = ((window.__colo && window.__colo.architectes) || [])[k];
+            if (!a || !window.__carte) return;
+            window.__carte.apercu = { lib: 'ARCHITECTE', nom: 'CMDR ' + String(a.cmdr || '?').toUpperCase(), idx: systemesDe(a.cmdr).map(x => x.i) };
+            rendreCarte();
+        }
+        function ouvrirArchitecteParNom(nom) {
+            const k = ((window.__colo && window.__colo.architectes) || []).findIndex(a => memeNom(a.cmdr, nom));
+            ouvrirArchitecte(k, nom);
+        }
+        function ouvrirArchitecte(k, nomSecours) {
+            const data = window.__colo; if (!data) return;
+            const a = (data.architectes || [])[k];
+            const nom = a ? a.cmdr : nomSecours;
+            if (!nom) return;
+            if (typeof sonClic === 'function') sonClic();
+            const liste = systemesDe(nom).sort((x, y) => courtSysteme(x.s.nom).localeCompare(courtSysteme(y.s.nom), 'fr'));
+            const nbFinies = liste.reduce((t, x) => t + (x.s.finies || []).length, 0), nbChantiers = liste.reduce((t, x) => t + (x.s.chantiers || []).length, 0);
+            window.__carte.apercu = null;
+            window.__carte.materiau = { lib: 'ARCHITECTE', nom: 'CMDR ' + String(nom).toUpperCase(), idx: liste.map(x => x.i) };
+            rendreCarte();
+            const tuile = (val, lib, col) => `<div style="border:1px solid ${col}55;background:rgba(0,0,0,.55);border-radius:3px;padding:5px 14px;text-align:center;min-width:92px;"><div style="color:#fff;font-size:1.3em;font-weight:bold;line-height:1.1;">${val}</div><div style="color:#888;font-size:.68em;letter-spacing:1.5px;margin-top:2px;">${lib}</div></div>`;
+            const blocs = liste.map(({ s, i }) => {
+                const finies = (s.finies || []).map(c => `<span style="border:1px solid ${G}66;background:rgba(0,255,102,.05);color:${G};font-size:.9em;padding:3px 10px;border-radius:3px;" title="${c.termine_le ? 'terminée le ' + esc(jj(c.termine_le)) : 'installation relevée à l\'amarrage (date de fin inconnue)'}">✔ ${esc(nomStation(c.station))}${typeInstallation(c.type, true) ? ' <span style="color:#9fd;font-size:.85em;">· ' + esc(typeInstallation(c.type, true)) + '</span>' : ''}${typeRecette(c, '.85em')}${c.termine_le ? ' <span style="color:#6a9;font-size:.85em;">· ' + esc(jj(c.termine_le)) + '</span>' : ''}</span>`).join('');
+                const chantiers = (s.chantiers || []).map(c => {
+                    const k2 = calculerChantier(c), col = couleurAvancement(k2.pct);
+                    return `<div style="display:grid;grid-template-columns:minmax(0,1.4fr) 190px 120px;gap:12px;align-items:center;padding:5px 0;border-bottom:1px dashed #222;">
+                        <span style="color:#fff;overflow-wrap:anywhere;">${esc(nomStation(c.station))}${typeRecette(c, '.8em')}</span>
+                        <span style="display:flex;align-items:center;gap:8px;"><span style="flex:1;">${barreSeg(k2.pct, 8)}</span><span style="color:${col};font-weight:bold;width:40px;text-align:right;">${k2.pct}%</span></span>
+                        <span style="color:${GOLD};text-align:right;font-weight:bold;">${k2.reste > 0 ? 'reste ' + fmt(k2.reste) + ' t' : '—'}</span></div>`;
+                }).join('');
+                return `<div style="background:rgba(0,0,0,.4);border:1px solid #2a2a2a;border-left:3px solid ${O};border-radius:4px;padding:12px 16px;margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+                        <div style="display:flex;align-items:center;gap:8px;min-width:0;"><span style="color:${B};font-weight:bold;font-size:1.15em;overflow-wrap:anywhere;">${esc(s.nom)}</span>
+                            <button class="c-zoom" style="width:auto;padding:0 8px;flex:none;" onclick="copierTexteCarte(${esc(JSON.stringify(s.nom)).replace(/&quot;/g, '&#34;')}, this, event)" title="Copier le nom du système pour le coller dans la recherche de la carte galactique du jeu">COPIER</button>
+                            ${s.faction ? `<span style="color:#7d9aa3;font-size:.8em;">contrôlé par ${esc(s.faction)}</span>` : ''}</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">${pastille((s.finies || []).length + ' TERMINÉE' + ((s.finies || []).length > 1 ? 'S' : ''), G)}${pastille((s.chantiers || []).length + ' CHANTIER' + ((s.chantiers || []).length > 1 ? 'S' : ''), (s.chantiers || []).length ? O : '#777', (s.chantiers || []).length > 0)}
+                            <button class="c-zoom" style="width:auto;padding:2px 10px;" onclick="fermerArchitecte(); carteCentrer(${i});" title="Fermer cette liste et centrer la carte sur ce système">VOIR SUR LA CARTE</button>
+                            <button class="c-zoom" style="width:auto;padding:2px 10px;" onclick="fermerArchitecte(); ouvrirSysteme(${i});" title="Ouvrir la fenêtre de détail du système">DÉTAIL</button></div>
+                    </div>
+                    <div style="color:${G};font-size:.75em;letter-spacing:2px;margin:6px 0 5px;">&gt; INSTALLATIONS TERMINÉES (${(s.finies || []).length})</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;font-size:.9em;">aucune pour l\'instant</span>'}</div>
+                    <div style="color:${O};font-size:.75em;letter-spacing:2px;margin:12px 0 4px;">&gt; CHANTIERS EN COURS (${(s.chantiers || []).length})</div>
+                    ${chantiers || '<span style="color:#777;font-size:.9em;">aucun chantier en cours</span>'}
+                </div>`;
+            }).join('') || vide('Aucun système relevé pour cet architecte.');
+            const m = document.getElementById('modal-architecte');
+            m.innerHTML = `<div class="modal-content" style="max-width:1100px;width:95%;max-height:92vh;display:flex;flex-direction:column;background:rgba(10,5,0,.97);border:1px solid ${GOLD};box-shadow:0 0 30px rgba(255,215,0,.15);padding:0;" onclick="event.stopPropagation()">
+                <div style="padding:16px 24px;border-bottom:1px solid rgba(255,215,0,.3);background:rgba(255,215,0,.05);flex:none;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;">
+                    <div><div style="color:#888;font-size:.8em;letter-spacing:2px;">ARCHITECTE DE COLONISATION</div>
+                        <div style="color:${GOLD};font-size:1.6em;font-weight:bold;letter-spacing:2px;">CMDR ${esc(String(nom).toUpperCase())}</div></div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-right:26px;">${tuile(liste.length, 'SYSTÈME' + (liste.length > 1 ? 'S' : ''), B)}${tuile(nbFinies, 'TERMINÉE' + (nbFinies > 1 ? 'S' : ''), G)}${tuile(nbChantiers, 'CHANTIER' + (nbChantiers > 1 ? 'S' : ''), O)}${a ? tuile(fmt(a.tonnes) + ' t', 'LIVRÉES AU TOTAL', GOLD) : ''}</div>
+                    <div onclick="fermerArchitecte()" style="position:absolute;top:14px;right:20px;color:${GOLD};cursor:pointer;font-weight:bold;">X</div>
+                </div>
+                <div style="padding:14px 24px 6px;overflow-y:auto;flex:1;min-height:0;">${blocs}</div>
+                <div style="color:#888;font-size:.8em;padding:8px 24px 14px;flex:none;border-top:1px dashed #2a2a2a;">ⓘ Ses systèmes sont repérés sur la carte tant que le filtre « CMDR ${esc(String(nom).toUpperCase())} » est actif (croix de la pastille pour l'effacer). L'architecte d'un système est celui qui l'a revendiqué : jamais déduit.</div></div>`;
+            m.style.display = 'flex';
+        }
+        function fermerArchitecte() { const m = document.getElementById('modal-architecte'); if (m) m.style.display = 'none'; }
         function coloTip(ev, i) {
             const s = window.__colo.systemes[i]; if (!s || typeof showHoloTooltip !== 'function') return;
             const col = s.chantiers.length ? O : G;
@@ -800,7 +871,7 @@
             const sansPosition = systemes.filter(s => !(typeof s.x === 'number' && typeof s.z === 'number'));
             const aucun = !systemes.length && !(kpi.chantiers || 0) && !(kpi.construites || 0);
 
-            const architectes = (data.architectes || []).map((a, i) => `<div style="display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.5);border:1px solid ${i === 0 ? GOLD + '88' : '#333'};border-left:3px solid ${i === 0 ? GOLD : '#555'};border-radius:4px;padding:8px 14px;margin-bottom:8px;">
+            const architectes = (data.architectes || []).map((a, i) => `<div class="archi-ligne" onclick="ouvrirArchitecte(${i})" onmouseenter="apercuArchitecte(${i})" onmouseleave="finApercu()" title="Survol : repère ses systèmes sur la carte · Clic : ses systèmes, installations et chantiers" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.5);border:1px solid ${i === 0 ? GOLD + '88' : '#333'};border-left:3px solid ${i === 0 ? GOLD : '#555'};border-radius:4px;padding:8px 14px;margin-bottom:8px;">
                 <span style="color:${i === 0 ? GOLD : '#888'};font-weight:bold;font-size:1.2em;width:30px;">#${i + 1}</span>
                 <div style="flex:1;min-width:0;"><div style="color:#fff;font-size:1.2em;font-weight:bold;letter-spacing:1px;">CMDR ${esc((a.cmdr || '?').toUpperCase())}</div><div style="color:#888;font-size:.85em;margin-top:2px;">${a.systemes} système${a.systemes > 1 ? 's' : ''} · ${a.stations} station${a.stations > 1 ? 's' : ''} terminée${a.stations > 1 ? 's' : ''}</div></div>
                 <div style="text-align:right;"><div style="color:${GOLD};font-weight:bold;font-size:1.1em;">${fmt(a.tonnes)} t</div><div style="color:#777;font-size:.75em;">livrées au total</div></div></div>`).join('')
@@ -844,7 +915,7 @@
                     </span>
                 </div>
                 <div style="position:relative;flex:1;min-height:0;">
-                    <div id="carte-chip" style="display:none;position:absolute;left:8px;top:6px;z-index:3;align-items:center;gap:10px;background:rgba(0,0,0,.78);border:1px solid ${GOLD};color:${GOLD};padding:3px 10px;border-radius:3px;font-size:.8em;letter-spacing:1px;"><span>MATÉRIAU :</span><span class="chip-nom" style="color:#fff;font-weight:bold;"></span><span onclick="carteEffacerMateriau()" style="cursor:pointer;font-weight:bold;padding:0 2px;" title="Effacer le repérage sur la carte">✕</span></div>
+                    <div id="carte-chip" style="display:none;position:absolute;left:8px;top:6px;z-index:3;align-items:center;gap:10px;background:rgba(0,0,0,.78);border:1px solid ${GOLD};color:${GOLD};padding:3px 10px;border-radius:3px;font-size:.8em;letter-spacing:1px;"><span class="chip-lib">MATÉRIAU :</span><span class="chip-nom" style="color:#fff;font-weight:bold;"></span><span onclick="carteEffacerMateriau()" style="cursor:pointer;font-weight:bold;padding:0 2px;" title="Effacer le repérage sur la carte">✕</span></div>
                     <div id="carte-svg-zone" style="position:absolute;inset:0;">${svgCarte(systemes, ordreIdx, carteVue(), window.__carte.actif)}</div></div>
                 <div style="position:relative;flex:none;color:#6f8f96;font-size:.78em;margin-top:6px;">ⓘ Seuls les systèmes où le plugin a relevé une revendication ou un chantier sont listés. Molette : zoom · glisser : déplacer.</div>
                 ${sansPosition.length ? `<div style="position:relative;flex:none;color:#7fa3ab;font-size:.85em;margin-top:4px;padding-top:2px;">⚠ ${sansPosition.length} système${sansPosition.length > 1 ? 's' : ''} sans position connue (aucun pilote n'y est passé avec le plugin) : ${sansPosition.map(s => `<span style="color:${B};cursor:pointer;" onclick="ouvrirSysteme(${ordreIdx.get(s)})">${esc(s.nom)}</span>`).join(' · ')}</div>` : ''}
@@ -880,6 +951,7 @@
                 <div style="height:30px"></div>
                 <div class="modal-overlay" id="modal-colo" onclick="if(event.target===this)this.style.display='none'"></div>
                 <div class="modal-overlay" id="modal-materiau" onclick="if(event.target===this)this.style.display='none'"></div>
+                <div class="modal-overlay" id="modal-architecte" onclick="if(event.target===this)this.style.display='none'"></div>
                 <!-- Fenêtre « AGRANDIR » du journal : même liste que le bloc, en plein écran (comme sur la page BGS) -->
                 <div class="modal-overlay" id="modal-journal-colo" onclick="fermerModal('modal-journal-colo', event)" style="z-index:6000;">
                     <div class="modal-content" style="max-width:1400px;width:95%;max-height:90vh;display:flex;flex-direction:column;background:rgba(10,5,0,.95);border:1px solid ${B};box-shadow:0 0 40px rgba(0,240,255,.15);" onclick="event.stopPropagation()">
@@ -941,7 +1013,7 @@
             const m = document.getElementById('modal-colo');
             m.innerHTML = `<div class="modal-content" style="max-width:1120px;width:95%;max-height:94vh;overflow-y:auto;background:rgba(10,5,0,.97);border:1px solid ${O};box-shadow:0 0 30px rgba(255,113,0,.2);padding:0;">
                 <div style="padding:16px 24px;border-bottom:1px solid rgba(255,113,0,.3);background:rgba(255,113,0,.05);display:flex;justify-content:space-between;align-items:center;">
-                    <div><div style="color:#888;font-size:.8em;letter-spacing:2px;">SYSTÈME COLONISÉ</div><div style="color:${O};font-size:1.6em;font-weight:bold;letter-spacing:2px;">${esc(s.nom.toUpperCase())}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">architecte : ${s.architecte ? `<span style="color:${GOLD};font-weight:bold;">CMDR ${esc(s.architecte.toUpperCase())}</span>` : '<span title="Architecte non relevé : seule la revendication du système l\'enregistre (s\'amarrer ne le change pas). Il n\'est jamais déduit. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">inconnu</span>'}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">contrôlé par : ${s.faction ? `<span style="color:${B};font-weight:bold;">${esc(s.faction)}</span>` : '<span title="Faction non relevée : elle est lue quand un pilote de l\'escadron arrive dans le système avec le plugin à jour, puis consulte ou alimente une construction. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">faction inconnue</span>'}</div></div>
+                    <div><div style="color:#888;font-size:.8em;letter-spacing:2px;">SYSTÈME COLONISÉ</div><div style="color:${O};font-size:1.6em;font-weight:bold;letter-spacing:2px;">${esc(s.nom.toUpperCase())}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">architecte : ${s.architecte ? `<span class="lien-archi" data-archi="${esc(s.architecte)}" onclick="document.getElementById('modal-colo').style.display='none'; ouvrirArchitecteParNom(this.dataset.archi)" title="Voir tous ses systèmes, ses installations et ses chantiers" style="color:${GOLD};font-weight:bold;border-bottom:1px dotted ${GOLD};cursor:pointer;">CMDR ${esc(s.architecte.toUpperCase())}</span>` :'<span title="Architecte non relevé : seule la revendication du système l\'enregistre (s\'amarrer ne le change pas). Il n\'est jamais déduit. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">inconnu</span>'}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">contrôlé par : ${s.faction ? `<span style="color:${B};font-weight:bold;">${esc(s.faction)}</span>` : '<span title="Faction non relevée : elle est lue quand un pilote de l\'escadron arrive dans le système avec le plugin à jour, puis consulte ou alimente une construction. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">faction inconnue</span>'}</div></div>
                     <div style="text-align:right;margin-right:26px;display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><span style="color:#888;font-size:.9em;">${s.revendique_le ? 'revendiqué le <b style="color:#fff;font-weight:normal;">' + esc(jj(s.revendique_le)) + '</b>' : 'revendication non relevée'}</span><span style="display:flex;gap:6px;">${pastille(s.finies.length + ' TERMINÉE' + (s.finies.length > 1 ? 'S' : ''), G)}${pastille(s.chantiers.length + ' CHANTIER' + (s.chantiers.length > 1 ? 'S' : ''), s.chantiers.length ? O : '#777', s.chantiers.length > 0)}</span></div>
                     <div onclick="document.getElementById('modal-colo').style.display='none'" style="position:absolute;top:14px;right:20px;color:${O};cursor:pointer;font-weight:bold;">X</div>
                 </div>
