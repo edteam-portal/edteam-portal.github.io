@@ -657,11 +657,13 @@
         //  -> liste des chantiers qui en ont besoin (nom du système copiable pour la carte galactique du jeu) + repérage sur la carte
         // ---------------------------------------------------------------
         const nomMateriau = m => (m && (m.nom_fr || m.nom)) || '';
-        function sitesPourMateriau(nom) {
+        // un produit se reconnait par son CODE INTERNE (p.cle, ex. $steel_name;) : "Acier" et "Steel" sont le meme produit ; repli sur le nom pour d'anciennes donnees
+        const memeMateriau = (m, p) => p.cle ? (m.nom === p.cle || (!m.nom && m.nom_fr === p.cle)) : nomMateriau(m) === p.nom;
+        function sitesPourMateriau(p) {
             const sites = [];
             ((window.__colo && window.__colo.systemes) || []).forEach((s, i) => (s.chantiers || []).forEach(c => {
                 (c.marchandises || []).forEach(m => {
-                    if (nomMateriau(m) !== nom) return;
+                    if (!memeMateriau(m, p)) return;
                     const req = +m.requis || 0, liv = +m.livre || 0;
                     if (req > liv) sites.push({ i, s, c, req, liv, reste: req - liv, pct: calculerChantier(c).pct });
                 });
@@ -672,7 +674,7 @@
         function apercuMateriau(k) {
             const data = window.__colo, p = data && (data.priorites || [])[k];
             if (!p || !window.__carte) return;
-            const sites = sitesPourMateriau(p.nom);
+            const sites = sitesPourMateriau(p);
             window.__carte.apercu = { nom: p.nom, idx: Array.from(new Set(sites.map(x => x.i))) };
             rendreCarte();
         }
@@ -685,7 +687,7 @@
             const data = window.__colo, p = data && (data.priorites || [])[k];
             if (!p) return;
             if (typeof sonClic === 'function') sonClic();
-            const sites = sitesPourMateriau(p.nom);
+            const sites = sitesPourMateriau(p);
             window.__carte.apercu = null;
             window.__carte.materiau = { nom: p.nom, idx: Array.from(new Set(sites.map(x => x.i))) };
             rendreCarte();
