@@ -1601,7 +1601,7 @@
             let moi = null, sem = null, pilier = null;
             try {
                 const [rProfil, rSem, rPilier] = await Promise.all([
-                    supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
+                    supabaseApp.from('profils').select('rang_bgs, points_bgs, palmares_bgs').eq('user_id', profilCommandant.user_id).single(),
                     supabaseApp.rpc('bgs_semaine_escadron'),
                     supabaseApp.from('distinctions_hebdo').select('user_id, cmdr_nom, attribut, part_pct, semaine').eq('escadron_id', profilCommandant.escadron_id || '').order('semaine', { ascending: false }).limit(1)
                 ]);
@@ -1615,6 +1615,13 @@
             const min = seuilRangBgs(rang), max = rang >= 100 ? null : seuilRangBgs(rang + 1);
             const pct = max === null ? 100 : Math.max(0, Math.min(100, (pts - min) / (max - min) * 100));
             const nomEsc = escapeHtml(String(profilCommandant.escadron_id || 'TON ESCADRON'));
+            const palm = (moi && Array.isArray(moi.palmares_bgs)) ? moi.palmares_bgs.slice().sort((a, b) => String(b.date_cloture || '').localeCompare(String(a.date_cloture || ''))) : [];
+            const derniere = palm[0];
+            const teaserDist = palm.length
+                ? `<b style="color: #FFD700;">&#127941; ${palm.length} médaille${palm.length > 1 ? 's' : ''} de campagne</b> · dernière : ${escapeHtml(String(derniere.type_ordre || '').toUpperCase())} · ${escapeHtml(String(derniere.systeme || '').toUpperCase())} (rang ${escapeHtml(String(derniere.rang || '?'))}, score ${f0(derniere.score)})`
+                : '<span style="color: #9aa;">Aucune médaille de campagne pour l\'instant : elles se gagnent en participant aux focus de l\'Amiral.</span>';
+            const detPrec = document.getElementById('bgs-prog-details');
+            const progEtaitOuverte = !!(detPrec && detPrec.open);
             const blocEngagement = `
                 <div class="bloc cy" style="padding: 18px 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
@@ -1634,10 +1641,13 @@
                     <div style="margin-top: 14px; line-height: 1.6; color: #ccc; font-size: 0.92em; border-top: 1px dashed #333; padding-top: 12px;">
                         <b style="color: var(--ed-orange);">Ta priorité :</b> agir pour ta faction d'escadron. <b style="color: #fff;">Chaque action compte</b> (missions, combat, commerce, exploration, colonisation), <b style="color: #fff;">avec ou sans mission de l'Amiral</b>, et fait monter ton rang.
                     </div>
-                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="index.html?bgs=1" style="border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 2px 10px; border-radius: 3px; font-size: 0.78em; letter-spacing: 1px; text-decoration: none; font-weight: bold;">VOIR MA PROGRESSION &rarr;</a>
-                        <a href="escadron.html?fiche=moi" style="border: 1px solid #FFD700; color: #FFD700; padding: 2px 10px; border-radius: 3px; font-size: 0.78em; letter-spacing: 1px; text-decoration: none; font-weight: bold;" title="Tes plaques et médailles d'états de service sont sur ta fiche pilote">MES DISTINCTIONS (FICHE PILOTE) &rarr;</a>
+                    <div style="margin-top: 12px; border-top: 1px dashed #333; padding-top: 10px; font-size: 0.88em; line-height: 1.8;">
+                        ${teaserDist} <a href="escadron.html?fiche=moi" style="border: 1px solid #FFD700; color: #FFD700; padding: 1px 10px; border-radius: 3px; font-size: 0.85em; letter-spacing: 1px; text-decoration: none; font-weight: bold; white-space: nowrap;" title="Ouvre ta fiche pilote, où brillent tes plaques d'états de service">VOIR TOUTE MA FICHE &rarr;</a>
                     </div>
+                    <details id="bgs-prog-details" style="margin-top: 10px;">
+                        <summary style="cursor: pointer; color: var(--ed-blue); font-size: 0.85em; letter-spacing: 1px;">MA PROGRESSION (8 SEMAINES)</summary>
+                        <div id="bgs-progression-acc" style="margin-top: 10px;"></div>
+                    </details>
                 </div>`;
 
             // 2. PILIER DE LA SEMAINE (colonne de droite, à la hauteur de l'engagement)
@@ -1702,6 +1712,67 @@
                 </div>`;
             }
             haut.innerHTML = blocEngagement + blocPilier + blocEscadron;
+            const det = document.getElementById('bgs-prog-details');
+            if (det) {
+                det.addEventListener('toggle', () => { if (det.open) chargerProgressionAccueil(); });
+                if (progEtaitOuverte) det.open = true;   // déclenche le chargement
+            }
+        }
+
+        // "Ma progression" : mes points BGS par cycle (8 derniers), lus à l'ouverture du volet de l'accueil (fonction serveur progression_bgs_hebdo)
+        async function chargerProgressionAccueil() {
+            const zone = document.getElementById('bgs-progression-acc');
+            if (!zone) return;
+            zone.innerHTML = '<div style="color: #666; font-style: italic; font-size: 0.85em;">Chargement...</div>';
+            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
+            const jourMs = 86400000;
+            try {
+                const { data, error } = await supabaseApp.rpc('progression_bgs_hebdo', { p_cycles: 8 });
+                if (error) throw error;
+                const parSemaine = {};
+                (data || []).forEach(l => { parSemaine[l.semaine] = Number(l.points) || 0; });
+
+                // Jeudi (UTC) qui clôture le cycle en cours (le cycle change le jeudi 07:00 UTC)
+                const decale = new Date(Date.now() - 7 * 3600000);
+                let ajout = (4 - decale.getUTCDay() + 7) % 7;
+                if (ajout === 0) ajout = 7;
+                const clotureT = Date.UTC(decale.getUTCFullYear(), decale.getUTCMonth(), decale.getUTCDate()) + ajout * jourMs;
+                const clotureCourante = new Date(clotureT).toISOString().slice(0, 10);
+
+                const cycles = [];
+                for (let i = 7; i >= 0; i--) {
+                    const cle = new Date(clotureT - i * 7 * jourMs).toISOString().slice(0, 10);
+                    cycles.push({ semaine: cle, gain: parSemaine[cle] || 0 });
+                }
+                const gains = cycles.map(c => c.gain);
+                const somme = gains.reduce((a, b) => a + b, 0);
+                if (somme <= 0) {
+                    zone.innerHTML = '<div style="color: #888; font-size: 0.85em; line-height: 1.5;">Aucun effort enregistré sur les 8 derniers cycles. Vos points gagnés chaque semaine s\'afficheront ici.</div>';
+                    return;
+                }
+                const maxGain = Math.max(1, ...gains), meilleur = Math.max(...gains), moyenne = Math.round(somme / cycles.length);
+                const barres = cycles.map(c => {
+                    const enCours = c.semaine === clotureCourante;
+                    const hauteur = c.gain > 0 ? Math.max(3, Math.round(70 * c.gain / maxGain)) : 2;
+                    const couleur = enCours ? 'var(--ed-orange)' : (c.gain > 0 && c.gain === meilleur ? '#FFD700' : 'rgba(255,113,0,0.45)');
+                    return `
+                    <div style="flex: 1; min-width: 44px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;">
+                        <span style="color: #ccc; font-size: 0.7em;">${c.gain > 0 ? '+' + fmt(Math.round(c.gain)) : '0'}</span>
+                        <div style="width: 100%; max-width: 40px; height: ${hauteur}px; background: ${couleur}; border-radius: 2px 2px 0 0;${enCours ? ' box-shadow: 0 0 8px rgba(255,113,0,0.5);' : ''}"></div>
+                        <span style="color: ${enCours ? 'var(--ed-orange)' : '#888'}; font-size: 0.7em; white-space: nowrap;">${enCours ? 'EN COURS' : c.semaine.slice(8, 10) + '/' + c.semaine.slice(5, 7)}</span>
+                    </div>`;
+                }).join('');
+                zone.innerHTML = `
+                    <div style="display: flex; gap: 6px; align-items: flex-end; min-height: 110px; overflow-x: auto;">${barres}</div>
+                    <div style="display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; font-size: 0.82em;">
+                        <div><span style="color: #888;">MEILLEUR CYCLE :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(Math.round(meilleur))}</span></div>
+                        <div><span style="color: #888;">MOYENNE PAR CYCLE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
+                        <div><span style="color: #888;">TOTAL (8 CYCLES) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(Math.round(somme))}</span></div>
+                    </div>`;
+            } catch (err) {
+                console.error('Erreur progression BGS :', err);
+                zone.innerHTML = '<div style="color: #888; font-size: 0.85em;">Progression indisponible pour le moment.</div>';
+            }
         }
 
         async function afficherOrdresBGS() {
