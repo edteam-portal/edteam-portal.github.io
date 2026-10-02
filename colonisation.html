@@ -369,6 +369,8 @@
         .c-select option { background:#06141a; color:#dff; }
         .c-zoom { width:24px; height:22px; background:rgba(0,0,0,.6); color:#00F0FF; border:1px solid rgba(0,240,255,.6); border-radius:3px; font-family:inherit; font-size:.85em; cursor:pointer; line-height:1; padding:0; }
         .c-zoom:hover { background:rgba(0,240,255,.2); box-shadow:0 0 8px rgba(0,240,255,.4); }
+        .colo-haut { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:12px; }
+        @media (max-width:1000px) { .colo-haut { grid-template-columns:minmax(0,1fr); } }
         .colo-cols { column-count:2; column-gap:30px; }
         @media (max-width:850px) { .colo-cols { column-count:1; } }
     </style>
@@ -520,6 +522,9 @@
         // ---------------------------------------------------------------
         const GRAPPE_PX = 34;   // deux systèmes plus proches que cela (en pixels du dessin) se chevauchent : on les regroupe en une bulle
         const rayonGrappe = n => n > 1 ? Math.min(44, 18 + 5 * Math.sqrt(n)) : GRAPPE_PX / 2;
+        // zone occupée par un élément : une bulle = disque + texte dessous (« 47 systèmes » / « 221 terminées · 22 chantiers ») ; un point seul = son disque
+        const zoneElement = it => { const n = it.membres.length, r = rayonGrappe(n); return n > 1 ? { x0: it.sx - 95, x1: it.sx + 95, y0: it.sy - r, y1: it.sy + r + 46 } : { x0: it.sx - 17, x1: it.sx + 17, y0: it.sy - 17, y1: it.sy + 17 }; };
+        const zonesSeChevauchent = (a, b) => a.x0 < b.x1 + 4 && a.x1 > b.x0 - 4 && a.y0 < b.y1 + 4 && a.y1 > b.y0 - 4;
         function grouperSystemes(plot) {
             // un élément = un système seul ou une bulle ; on fusionne tant que deux éléments se chevauchent (la taille d'une bulle grandit avec son nombre de systèmes)
             // 1re passe rapide (union de points qui se touchent), puis fusion des bulles qui se chevauchent
@@ -536,7 +541,7 @@
                 fusion = false;
                 for (let a = 0; a < items.length && !fusion; a++) for (let b = a + 1; b < items.length; b++) {
                     const A = items[a], B = items[b];
-                    if (Math.hypot(A.sx - B.sx, A.sy - B.sy) < rayonGrappe(A.membres.length) + rayonGrappe(B.membres.length) + (A.membres.length + B.membres.length > 2 ? 12 : 0)) {
+                    if (zonesSeChevauchent(zoneElement(A), zoneElement(B))) {
                         const membres = A.membres.concat(B.membres);
                         items.splice(b, 1);
                         items[a] = { membres, sx: membres.reduce((t, s) => t + s.sx, 0) / membres.length, sy: membres.reduce((t, s) => t + s.sy, 0) / membres.length };
@@ -550,9 +555,7 @@
         // Un système sans place reste un simple point (son détail s'affiche au survol) ; en zoomant, les noms apparaissent.
         function placerEtiquettes(items, W, H) {
             const rect = (cx, cy, rx, ry, bas) => ({ x0: cx - rx, x1: cx + rx, y0: cy - ry, y1: cy + (bas === undefined ? ry : bas) });
-            const occ = items.map(it => it.membres.length > 1
-                ? Object.assign(rect(it.sx, it.sy, 52, 52, 92), { it })
-                : Object.assign(rect(it.sx, it.sy, 18, 18), { it }));
+            const occ = items.map(it => Object.assign(zoneElement(it), { it }));
             const choix = new Map();
             const ordre = items.filter(it => it.membres.length === 1).sort((a, b) => (b.membres[0].chantiers.length - a.membres[0].chantiers.length) || (b.membres[0].finies.length - a.membres[0].finies.length));
             const libre = (r, soi) => r.x0 >= 4 && r.x1 <= W - 4 && r.y0 >= 4 && r.y1 <= H - 4 && !occ.some(o => o.it !== soi && r.x0 < o.x1 && r.x1 > o.x0 && r.y0 < o.y1 && r.y1 > o.y0);
@@ -1112,7 +1115,7 @@
                 ${aucun ? `<div style="background:rgba(0,0,0,.45);border:1px dashed #555;border-radius:4px;padding:40px 20px;text-align:center;color:#ccc;line-height:1.8;">
                     <div style="color:${O};font-size:1.2em;letter-spacing:2px;margin-bottom:10px;">AUCUN CHANTIER RELEVÉ POUR L'INSTANT</div>
                     Les systèmes, les chantiers et les livraisons ${data.perso ? 'que vous avez consultés ou alimentés' : "de l'escadron"} apparaissent ici automatiquement,<br>dès que ${data.perso ? 'votre plugin (version 2.5 ou plus)' : "le plugin d'un pilote"} relève la consultation d'un chantier de colonisation ou une livraison de marchandises.</div>` : `
-                <div style="display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:12px;">
+                <div class="colo-haut">
                     <div style="display:flex;flex-direction:column;">
                         ${carteHolo}
                     </div>

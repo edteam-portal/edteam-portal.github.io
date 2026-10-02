@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-largeur', date: '2026-10-02T23:00:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : blocs plus larges à droite de la carte',
+        texte: 'Sur la page Colonisation, la carte est un peu moins large pour laisser plus de place aux blocs « À apporter en priorité » et « Architectes de l\'escadron » : leurs lignes tiennent maintenant sur une seule ligne. Les bulles de la carte tiennent aussi compte de la place de leur texte, ce qui évite qu\'elles se recouvrent.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-noms', date: '2026-10-02T22:30:00Z', type: 'CORRIGE',
         titre: 'Colonisation : un seul nom par produit partout',
         texte: 'Dans la fenêtre de détail d\'un système, dans le détail des livraisons par pilote et dans le journal, un même produit pouvait s\'afficher sous deux noms (par exemple « Acier » et « Steel ») selon la langue du jeu du pilote qui avait relevé le chantier ou la livraison. Chaque produit porte maintenant le même nom partout, et la recherche du journal trouve les livraisons quelle que soit la langue du jeu.',
