@@ -111,6 +111,30 @@
         .data-row { padding: 20px; margin-bottom: 12px; }
         /* l'espace entre cadres vient du conteneur (gap 12 px) : pas de marge en plus, sinon elles s'additionnent */
         #bgs-tab-ordres .data-row, #bgs-tab-suivi .data-row, #bgs-tab-classement .data-row { margin-bottom: 0; }
+        #bgs-plaques-overlay { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 20px; --plq: #FFD700; }
+        .plq-fond { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(20,14,0,0.9), rgba(0,0,0,0.97) 65%); animation: plqFond 0.5s ease-out; }
+        .plq-fond::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, var(--plq) 0%, transparent 55%); opacity: 0.2; }
+        .plq-contenu { position: relative; text-align: center; width: min(94vw, 780px); display: flex; flex-direction: column; align-items: center; gap: 10px; animation: plqEntree 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .plq-legende { letter-spacing: 6px; color: #FFD700; font-size: 0.95em; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .plq-titre { font-size: 2em; color: #fff; letter-spacing: 3px; text-shadow: 0 0 18px var(--plq); }
+        .plq-faction { color: #9aa; letter-spacing: 1px; }
+        .plq-ruban { position: relative; width: min(88vw, 660px); margin: 16px 0; pointer-events: none; overflow: hidden; filter: drop-shadow(0 0 26px var(--plq)); }
+        .plq-ruban svg { width: 100% !important; height: auto !important; }
+        .plq-reflet { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%); transform: translateX(-120%); animation: plqReflet 2.6s ease-in-out 0.7s infinite; pointer-events: none; }
+        .plq-distinction { font-size: 1.7em; color: var(--plq); letter-spacing: 3px; font-weight: bold; text-shadow: 0 0 16px var(--plq); }
+        .plq-place { color: #fff; letter-spacing: 2px; }
+        .plq-stats { color: #aaa; font-size: 0.9em; }
+        .plq-stats b { color: #fff; }
+        .plq-actions { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
+        .plq-btn { background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 22px; font-family: inherit; font-size: 1em; letter-spacing: 2px; cursor: pointer; border-radius: 3px; }
+        .plq-btn:hover { color: #fff; border-color: #aaa; }
+        .plq-principal { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); font-weight: bold; }
+        .plq-principal:hover { background: #FFD700; color: #000; border-color: #FFD700; }
+        .plq-fiche { color: var(--ed-blue); font-size: 0.8em; text-decoration: none; margin-top: 6px; letter-spacing: 1px; }
+        @keyframes plqEntree { from { opacity: 0; transform: translateY(16px) scale(0.92); } to { opacity: 1; transform: none; } }
+        @keyframes plqFond { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes plqReflet { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(120%); } }
+        @media (prefers-reduced-motion: reduce) { .plq-contenu, .plq-fond, .plq-reflet { animation: none; } }
         .pilier-halo { position: absolute; inset: -14px; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.38) 0%, rgba(255,215,0,0) 68%); animation: pilierHalo 3.2s ease-in-out infinite; pointer-events: none; }
         @keyframes pilierHalo { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
         .pilier-bloc { background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.10), rgba(0,0,0,0.55) 70%) !important; }
@@ -1606,6 +1630,7 @@
                     supabaseApp.from('distinctions_hebdo').select('user_id, cmdr_nom, attribut, part_pct, semaine').eq('escadron_id', profilCommandant.escadron_id || '').order('semaine', { ascending: false }).limit(1)
                 ]);
                 moi = rProfil.data || null;
+                if (moi && !window.__plaquesProposees) { window.__plaquesProposees = true; proposerPlaquesBGS(moi.palmares_bgs); }   // plein écran, une fois par chargement
                 sem = (!rSem.error && rSem.data && rSem.data.escadron) ? rSem.data : null;   // absent tant que le script SQL 34 n'est pas lancé : le bloc est simplement masqué
                 pilier = (rPilier.data && rPilier.data[0]) || null;
             } catch (e) { console.error('Erreur accueil BGS :', e); }
@@ -1615,11 +1640,6 @@
             const min = seuilRangBgs(rang), max = rang >= 100 ? null : seuilRangBgs(rang + 1);
             const pct = max === null ? 100 : Math.max(0, Math.min(100, (pts - min) / (max - min) * 100));
             const nomEsc = escapeHtml(String(profilCommandant.escadron_id || 'TON ESCADRON'));
-            const palm = (moi && Array.isArray(moi.palmares_bgs)) ? moi.palmares_bgs.slice().sort((a, b) => String(b.date_cloture || '').localeCompare(String(a.date_cloture || ''))) : [];
-            const derniere = palm[0];
-            const teaserDist = palm.length
-                ? `<b style="color: #FFD700;">&#127941; ${palm.length} médaille${palm.length > 1 ? 's' : ''} de campagne</b> · dernière : ${escapeHtml(String(derniere.type_ordre || '').toUpperCase())} · ${escapeHtml(String(derniere.systeme || '').toUpperCase())} (rang ${escapeHtml(String(derniere.rang || '?'))}, score ${f0(derniere.score)})`
-                : '<span style="color: #9aa;">Aucune médaille de campagne pour l\'instant : elles se gagnent en participant aux focus de l\'Amiral.</span>';
             const detPrec = document.getElementById('bgs-prog-details');
             const progEtaitOuverte = !!(detPrec && detPrec.open);
             const blocEngagement = `
@@ -1640,9 +1660,6 @@
                     </div>
                     <div style="margin-top: 14px; line-height: 1.6; color: #ccc; font-size: 0.92em; border-top: 1px dashed #333; padding-top: 12px;">
                         <b style="color: var(--ed-orange);">Ta priorité :</b> agir pour ta faction d'escadron. <b style="color: #fff;">Chaque action compte</b> (missions, combat, commerce, exploration, colonisation), <b style="color: #fff;">avec ou sans mission de l'Amiral</b>, et fait monter ton rang.
-                    </div>
-                    <div style="margin-top: 12px; border-top: 1px dashed #333; padding-top: 10px; font-size: 0.88em; line-height: 1.8;">
-                        ${teaserDist} <a href="escadron.html?fiche=moi" style="border: 1px solid #FFD700; color: #FFD700; padding: 1px 10px; border-radius: 3px; font-size: 0.85em; letter-spacing: 1px; text-decoration: none; font-weight: bold; white-space: nowrap;" title="Ouvre ta fiche pilote, où brillent tes plaques d'états de service">VOIR TOUTE MA FICHE &rarr;</a>
                     </div>
                     <details id="bgs-prog-details" style="margin-top: 10px;">
                         <summary style="cursor: pointer; color: var(--ed-blue); font-size: 0.85em; letter-spacing: 1px;">MA PROGRESSION (8 SEMAINES)</summary>
@@ -1773,6 +1790,84 @@
                 console.error('Erreur progression BGS :', err);
                 zone.innerHTML = '<div style="color: #888; font-size: 0.85em;">Progression indisponible pour le moment.</div>';
             }
+        }
+
+        // ==========================================
+        // RÉVÉLATION DES PLAQUES : à l'ouverture de la page, plein écran, pour chaque plaque gagnée depuis la dernière visite (clôture d'un ordre par l'Amiral)
+        // ==========================================
+        function libellePlaque(m) {
+            const sc = Number(m.score) || 0;
+            let distinction = 'RUBAN DE CAMPAGNE';
+            if (sc >= 200) distinction = '3 ÉTOILES DE DIAMANT'; else if (sc >= 150) distinction = '2 ÉTOILES DE DIAMANT'; else if (sc >= 100) distinction = '1 ÉTOILE DE DIAMANT';
+            else if (sc >= 90) distinction = "3 ÉTOILES D'OR"; else if (sc >= 80) distinction = "2 ÉTOILES D'OR"; else if (sc >= 70) distinction = "1 ÉTOILE D'OR";
+            else if (sc >= 60) distinction = "3 ÉTOILES D'ARGENT"; else if (sc >= 50) distinction = "2 ÉTOILES D'ARGENT"; else if (sc >= 40) distinction = "1 ÉTOILE D'ARGENT";
+            else if (sc >= 30) distinction = '3 ÉTOILES DE BRONZE'; else if (sc >= 20) distinction = '2 ÉTOILES DE BRONZE'; else if (sc >= 10) distinction = '1 ÉTOILE DE BRONZE';
+            const rang = Number(m.rang) || 0;
+            const place = rang === 1 ? { txt: '1ÈRE PLACE DE LA CAMPAGNE', col: '#00FFFF' } : rang === 2 ? { txt: '2E PLACE DE LA CAMPAGNE', col: '#FFD700' } : rang === 3 ? { txt: '3E PLACE DE LA CAMPAGNE', col: '#C0C0C0' } : { txt: 'PARTICIPATION À LA CAMPAGNE', col: '#FF7100' };
+            return { distinction, place };
+        }
+
+        let plaquesFile = [], plaquesIdx = 0;
+        function fermerPlaquesBGS(toutMarquer) {
+            const ov = document.getElementById('bgs-plaques-overlay');
+            if (ov) ov.remove();
+            document.removeEventListener('keydown', clavierPlaquesBGS);
+            if (toutMarquer && window.edteamPlaques) window.edteamPlaques.marquerVues(profilCommandant.user_id, plaquesFile);
+            plaquesFile = [];
+        }
+        function clavierPlaquesBGS(e) {
+            if (e.key === 'Escape') fermerPlaquesBGS(true);
+            else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); suivantePlaqueBGS(); }
+        }
+        function suivantePlaqueBGS() {
+            if (plaquesIdx + 1 >= plaquesFile.length) { fermerPlaquesBGS(true); return; }
+            plaquesIdx++;
+            afficherPlaqueBGS();
+        }
+        function afficherPlaqueBGS() {
+            const m = plaquesFile[plaquesIdx];
+            if (!m) return;
+            if (window.edteamPlaques) window.edteamPlaques.marquerVues(profilCommandant.user_id, [m]);   // vue dès qu'elle est montrée
+            const info = libellePlaque(m);
+            const jjmmaaaa = s => { const r = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return r ? `${r[3]}/${r[2]}/${r[1]}` : ''; };
+            const dernier = plaquesIdx + 1 >= plaquesFile.length;
+            let ov = document.getElementById('bgs-plaques-overlay');
+            if (!ov) {
+                ov = document.createElement('div');
+                ov.id = 'bgs-plaques-overlay';
+                ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Nouvelle distinction');
+                document.body.appendChild(ov);
+                document.addEventListener('keydown', clavierPlaquesBGS);
+            }
+            const ruban = (typeof window.forgerRubanSVG === 'function') ? window.forgerRubanSVG(m.type_ordre, Number(m.jours) || 0, Number(m.score) || 0, Number(m.rang) || 0, '') : '';
+            ov.style.setProperty('--plq', info.place.col);
+            ov.innerHTML = `
+                <div class="plq-fond"></div>
+                <div class="plq-contenu" key="${plaquesIdx}">
+                    <div class="plq-legende">NOUVELLE DISTINCTION${plaquesFile.length > 1 ? ` <span style="color: #888;">· ${plaquesIdx + 1} / ${plaquesFile.length}</span>` : ''}</div>
+                    <div class="plq-titre">${escapeHtml(String(m.type_ordre || '').toUpperCase())} · ${escapeHtml(String(m.systeme || '').toUpperCase())}</div>
+                    <div class="plq-faction">${escapeHtml(String(m.faction || ''))}</div>
+                    <div class="plq-ruban">${ruban}<div class="plq-reflet"></div></div>
+                    <div class="plq-distinction">${escapeHtml(info.distinction)}</div>
+                    <div class="plq-place">${escapeHtml(info.place.txt)}</div>
+                    <div class="plq-stats">Score <b>${Math.floor(Number(m.score) || 0).toLocaleString('fr-FR')}</b> · <b>${escapeHtml(String(m.jours || '?'))}</b> jour(s) d'engagement · clôturée le ${jjmmaaaa(m.date_cloture)}</div>
+                    <div class="plq-actions">
+                        <button type="button" class="plq-btn plq-principal" onclick="suivantePlaqueBGS()">${dernier ? 'TERMINER' : 'SUIVANTE &rarr;'}</button>
+                        ${dernier ? '' : '<button type="button" class="plq-btn" onclick="fermerPlaquesBGS(true)">PASSER</button>'}
+                    </div>
+                    <a class="plq-fiche" href="escadron.html?fiche=moi">Voir toutes mes plaques sur ma fiche pilote &rarr;</a>
+                </div>`;
+            if (typeof sonSucces === 'function') sonSucces();
+        }
+        // appelée une fois par chargement de page, avec le palmarès du pilote
+        function proposerPlaquesBGS(palmares) {
+            try {
+                if (!window.edteamPlaques || !profilCommandant) return;
+                const nouvelles = window.edteamPlaques.nouvelles(profilCommandant.user_id, palmares);
+                if (!nouvelles.length) return;
+                plaquesFile = nouvelles; plaquesIdx = 0;
+                afficherPlaqueBGS();
+            } catch (e) { console.error('Erreur plaques :', e); }
         }
 
         async function afficherOrdresBGS() {
@@ -4302,6 +4397,7 @@
         };
     </script>
 
+    <script src="plaques-vues.js?v=1"></script>
     <script src="footer.js?v=7"></script>
 </body>
 </html>

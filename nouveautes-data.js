@@ -5,9 +5,15 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-plaques-revelation', date: '2026-10-03T08:00:00Z', type: 'NOUVEAU',
+        titre: 'Vos nouvelles plaques de campagne s\'affichent en plein écran',
+        texte: 'Quand l\'Amiral clôture une directive à laquelle vous avez participé, la prochaine fois que vous ouvrez la page BGS, votre plaque s\'affiche en grand, avec son nombre d\'étoiles, votre place dans la campagne et votre score. Si vous en avez gagné plusieurs depuis votre dernière visite, elles défilent l\'une après l\'autre (touche Échap pour passer). Sur le Quartier général, une petite carte vous prévient qu\'une nouvelle plaque vous attend. Toutes vos plaques restent à retrouver sur votre fiche pilote, dans la page Escadron.',
+        important: false
+    },
+    {
         id: '2026-10-accueil-bgs', date: '2026-10-02T23:30:00Z', type: 'AMELIORE',
         titre: 'BGS : un nouvel accueil centré sur votre engagement',
-        texte: 'La page BGS s\'ouvre maintenant sur un onglet ACCUEIL (l\'ancien onglet MISSIONS). À gauche, votre rang BGS, votre progression et vos points de la semaine, avec le rappel que chaque action pour votre faction d\'escadron compte, avec ou sans mission de l\'Amiral, un volet « Ma progression » (vos points des 8 dernières semaines, sans quitter la page), un aperçu de vos médailles de campagne et un lien vers votre fiche pilote où brillent vos plaques d\'états de service. À droite, le Pilier de la semaine est mis à l\'honneur ; en dessous, les chiffres de la semaine de l\'escadron (points, pilotes actifs, votre part, trois premiers). Les directives de l\'Amiral sont regroupées sous « Focus de l\'Amiral » avec leurs jauges habituelles : elles sont facultatives et donnent droit à une distinction à leur clôture. Un encart « Comment ça marche » repliable complète le tout. Par ailleurs, l\'onglet SUIVI D\'INFLUENCE est masqué pour le moment : si vous l\'utilisiez, dites-le à l\'équipe.',
+        texte: 'La page BGS s\'ouvre maintenant sur un onglet ACCUEIL (l\'ancien onglet MISSIONS). À gauche, votre rang BGS, votre progression et vos points de la semaine, avec le rappel que chaque action pour votre faction d\'escadron compte, avec ou sans mission de l\'Amiral, et un volet « Ma progression » (vos points des 8 dernières semaines, sans quitter la page). À droite, le Pilier de la semaine est mis à l\'honneur ; en dessous, les chiffres de la semaine de l\'escadron (points, pilotes actifs, votre part, trois premiers). Les directives de l\'Amiral sont regroupées sous « Focus de l\'Amiral » avec leurs jauges habituelles : elles sont facultatives et donnent droit à une distinction à leur clôture. Un encart « Comment ça marche » repliable complète le tout. Par ailleurs, l\'onglet SUIVI D\'INFLUENCE est masqué pour le moment : si vous l\'utilisiez, dites-le à l\'équipe.',
         important: false
     },
     {
