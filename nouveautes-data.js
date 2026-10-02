@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-accueil-bgs', date: '2026-10-02T23:30:00Z', type: 'AMELIORE',
+        titre: 'BGS : un nouvel accueil centré sur votre engagement',
+        texte: 'La page BGS s\'ouvre maintenant sur un onglet ACCUEIL (l\'ancien onglet MISSIONS). À gauche, votre rang BGS, votre progression et vos points de la semaine, avec le rappel que chaque action pour votre faction d\'escadron compte, avec ou sans mission de l\'Amiral, et un lien vers votre fiche pilote où brillent vos plaques d\'états de service. À droite, le Pilier de la semaine est mis à l\'honneur ; en dessous, les chiffres de la semaine de l\'escadron (points, pilotes actifs, votre part, trois premiers). Les directives de l\'Amiral sont regroupées sous « Focus de l\'Amiral » avec leurs jauges habituelles : elles sont facultatives et donnent droit à une distinction à leur clôture. Un encart « Comment ça marche » repliable complète le tout. Par ailleurs, l\'onglet SUIVI D\'INFLUENCE est masqué pour le moment : si vous l\'utilisiez, dites-le à l\'équipe.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-largeur', date: '2026-10-02T23:00:00Z', type: 'AMELIORE',
         titre: 'Colonisation : blocs plus larges à droite de la carte',
         texte: 'Sur la page Colonisation, la carte est un peu moins large pour laisser plus de place aux blocs « À apporter en priorité » et « Architectes de l\'escadron » : leurs lignes tiennent maintenant sur une seule ligne. Les bulles de la carte tiennent aussi compte de la place de leur texte, ce qui évite qu\'elles se recouvrent.',

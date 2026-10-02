@@ -1150,6 +1150,12 @@
                 // Démarrage des effectifs
                 chargerEffectifsEscadron();
 
+                // Lien « Mes distinctions » de la page BGS : ouvre directement sa propre fiche pilote
+                if (/[?&]fiche=moi(&|$)/.test(location.search)) {
+                    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+                    ouvrirProfilPilote(data.user_id);
+                }
+
             } else {
                 // SI CONNECTÉ MAIS NON APPROUVÉ -> ÉJECTION
                 await supabaseApp.auth.signOut();
