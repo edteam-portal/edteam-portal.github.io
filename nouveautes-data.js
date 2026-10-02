@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-carte-grappes', date: '2026-10-02T21:00:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : une carte galactique lisible, même avec des dizaines de systèmes',
+        texte: 'Sur la carte de la page Colonisation, les systèmes très proches ne se chevauchent plus : ils sont regroupés en une bulle qui indique leur nombre, le total de stations terminées et de chantiers, et un anneau orange/vert pour la part de systèmes en chantier. Un clic sur une bulle zoome dessus, et elle se défait au fil du zoom. Les noms ne s\'affichent que là où la place le permet (les autres systèmes restent des points, avec leur détail au survol), et le filtre EN CHANTIER / TERMINÉS ainsi que le repérage des matériaux fonctionnent aussi sur les bulles.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-priorites', date: '2026-10-02T19:30:00Z', type: 'CORRIGE',
         titre: 'Colonisation : « À apporter en priorité » ne compte plus un produit deux fois',
         texte: 'Dans la liste « À apporter en priorité », un même produit pouvait apparaître deux fois avec deux totaux partiels (par exemple Acier et Steel), selon que le jeu du pilote qui avait relevé le chantier était en français ou en anglais. Ces lignes sont maintenant regroupées : chaque produit n\'apparaît qu\'une fois, avec le total exact à apporter, ce qui corrige aussi l\'ordre des priorités.',
