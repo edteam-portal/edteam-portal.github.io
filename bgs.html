@@ -3125,6 +3125,42 @@
         // FORCE DE FRAPPE : CAMEMBERT HOLOGRAPHIQUE (ORDRES + ACTIONS LIBRES, SELON LES FILTRES)
         // ==========================================
         let pieInvestChart = null;
+        // Journal : points de carrière (même barème que le script SQL 17, via pointsInvestissement) et progression du rang BGS du pilote
+        const seuilRangBgs = n => n <= 1 ? 0 : Math.round(15 * Math.pow(n - 1, 1.6));
+        function celluleRangBgs(a) {
+            const p = pointsInvestissement(a.type_action, a.valeur);
+            if (!(p > 0)) return '<span style="text-align: right; color: #555; font-size: 0.95em;" title="Cette ligne ne rapporte aucun point de carrière">—</span>';
+            const txt = p < 0.1 ? '< 0,1' : (p < 10 ? Math.round(p * 10) / 10 : Math.round(p)).toLocaleString('fr-FR');
+            return `<span style="text-align: right; white-space: nowrap; color: var(--ed-orange); font-weight: bold; font-size: 0.95em;" title="Cette action rapporte ${txt} point(s) de carrière BGS">${p < 0.1 ? "" : "+"}${txt} PTS</span>`;
+        }
+        let monRangBgsMemo = { ts: 0, d: null };
+        async function bandeauRangBgs() {
+            let d = monRangBgsMemo.d;
+            if (!d || Date.now() - monRangBgsMemo.ts > 60000) {   // une toute petite lecture, au plus une fois par minute
+                try {
+                    const r = await supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single();
+                    if (r.data) { d = r.data; monRangBgsMemo = { ts: Date.now(), d }; }
+                } catch (e) {}
+                if (!d) d = { rang_bgs: profilCommandant.rang_bgs, points_bgs: profilCommandant.points_bgs };
+            }
+            const explication = '<div style="color: #8a8a8a; font-size: 0.8em; line-height: 1.5;">ⓘ La colonne <b style="color: var(--ed-orange);">RANG BGS</b> indique les points de carrière que chaque action rapporte : ce sont ces points, cumulés, qui font monter votre rang BGS (missions, influence, crédits, colonisation…). Les échecs ne rapportent rien.</div>';
+            let progression = '';
+            if (d && d.rang_bgs) {
+                const rang = Math.min(100, Math.max(1, d.rang_bgs)), pts = Number(d.points_bgs) || 0;
+                const min = seuilRangBgs(rang), max = rang >= 100 ? null : seuilRangBgs(rang + 1);
+                const pct = max === null ? 100 : Math.max(0, Math.min(100, (pts - min) / (max - min) * 100));
+                const reste = max === null ? 0 : Math.max(0, Math.ceil(max - pts));
+                const f = n => Math.floor(n).toLocaleString('fr-FR');
+                progression = `<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+                    <span style="color: var(--ed-orange); border: 1px solid rgba(255,113,0,0.5); padding: 1px 8px; border-radius: 2px; font-weight: bold; font-size: 0.85em; letter-spacing: 1px;">VOTRE RANG BGS : ${rang}</span>
+                    <span style="color: #ddd; font-size: 0.85em;">${f(pts)} pts</span>
+                    <div style="flex: 1; min-width: 120px; max-width: 320px; height: 7px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;"><div style="width: ${pct.toFixed(1)}%; height: 100%; background: var(--ed-orange);"></div></div>
+                    <span style="color: #aaa; font-size: 0.8em;">${max === null ? 'rang maximal' : 'prochain rang dans ' + f(reste) + ' pts'}</span>
+                    <a href="index.html?bgs=1" style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; text-decoration: none;">VOIR MA PROGRESSION &rarr;</a>
+                </div>`;
+            }
+            return `<div style="padding: 10px 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">${explication}${progression}</div>`;
+        }
         function pointsInvestissement(type, valeur) {
             const v = Math.abs(Number(valeur) || 0);
             if (type === 'ECHECS') return 0;
@@ -3567,14 +3603,16 @@
                         if (conteneurFeedModal) conteneurFeedModal.innerHTML = txtVide;
                     } else {
                         // Retour à la grille de 6 colonnes propre
-                        let feedHtml = `
-                        <div style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 340px 100px; gap: 10px; padding: 10px 15px; color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
+                        const bandeauRang = await bandeauRangBgs();
+                        let feedHtml = bandeauRang + `
+                        <div style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 300px 100px 100px; gap: 10px; padding: 10px 15px; color: #888; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
                             <span>HORODATAGE</span>
                             <span>COMMANDANT</span>
                             <span>ORDRE</span>
                             <span>THÉÂTRE D'OPÉRATION</span>
                             <span style="text-align: right;">RÉSULTAT</span>
                             <span style="text-align: right;">VECTEUR</span>
+                            <span style="text-align: right; color: var(--ed-orange);" title="Points de carrière que l'action rapporte : ils font monter votre rang BGS">RANG BGS</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">`;
 
@@ -3642,7 +3680,7 @@
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                             
                             feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 340px 100px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 300px 100px 100px; gap: 10px; align-items: center; padding: 10px 15px; background: ${bgLigne}; border-radius: 3px; font-size: 1.05em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
                                 <div style="white-space: nowrap;">
@@ -3655,6 +3693,7 @@
                                 </div>
                                 <span title="${String(formatValeur).replace(/"/g, '&quot;')}" style="text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${colorOrdre}; font-weight: bold; font-size: 1.1em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}</span>
                                 <span style="text-align: right; color: #777; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${vecteurTexte} ]</span>
+                                ${celluleRangBgs(a)}
                             </div>`;
                         });
 

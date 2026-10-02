@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-journal-bgs-points', date: '2026-10-02T18:30:00Z', type: 'AMELIORE',
+        titre: 'BGS : le journal montre les points de rang que chaque action rapporte',
+        texte: 'Dans le journal des exploits de la page BGS, une nouvelle colonne « RANG BGS » indique les points de carrière que chaque action rapporte (missions, influence, crédits, livraisons de colonisation…) : ce sont ces points, cumulés, qui font monter votre rang BGS. Un bandeau en haut du journal rappelle la règle et affiche votre rang, vos points et ce qu\'il reste avant le prochain rang, avec un lien vers votre progression détaillée dans le Quartier général.',
+        important: false
+    },
+    {
         id: '2026-10-journal-colonisation', date: '2026-10-02T17:30:00Z', type: 'AMELIORE',
         titre: 'Colonisation : le journal des livraisons se feuillette et se filtre',
         texte: 'Le journal des livraisons de la page Colonisation ne se limite plus aux dernières lignes : le bouton AGRANDIR ouvre tout l\'historique, par pages de 50, avec des filtres par type, par commandant et une recherche (marchandise, station, système). On retrouve ainsi les livraisons de chaque pilote, même quand un autre en a relevé des milliers d\'un coup. L\'année est maintenant affichée dans les dates (aussi dans le journal du BGS), et les livraisons d\'avant le 01/10/2026 (qui ne rapportent pas de points BGS) sont grisées.',

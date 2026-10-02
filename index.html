@@ -3435,6 +3435,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (!acces) { btn.style.display = 'none'; return; }
             const pr = progressionRangBgs(profil.rang_bgs, Number(profil.points_bgs) || 0);
             btn.style.display = 'flex';
+            if (!window.__bgsAuto && /[?&]bgs=1(&|$)/.test(location.search)) {   // lien depuis le journal de la page BGS
+                window.__bgsAuto = true;
+                try { history.replaceState(null, '', location.pathname); } catch (e) {}
+                setTimeout(ouvrirSalleBgs, 400);
+            }
             const texte = document.getElementById('qg-bgs-progression-texte');
             if (texte) texte.innerText = pr.max === null ? 'RANG MAXIMAL' : Math.floor(pr.points) + ' / ' + pr.max;
             const barre = document.getElementById('qg-bgs-barre');
