@@ -2052,6 +2052,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // Rang BGS de carrière : bouton cockpit (membres d'escadron ayant accès au BGS)
                 majBoutonBgs(profilData);
 
+                // Plaques de campagne gagnées depuis la dernière visite : petite carte d'avertissement
+                verifierPlaquesQG(profilData);
+
                 // Rappel discret du compagnon mobile (une seule fois tous les 45 jours, ordinateur uniquement)
                 if (typeof window.edteamAstuceMobile === 'function') window.edteamAstuceMobile();
                 // Carte discrete pour une nouveauté marquée « importante » (une seule fois par nouveauté)
@@ -3425,6 +3428,34 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             return { rang, points, min, max, pct: Math.max(0, Math.min(100, ((points - min) / (max - min)) * 100)), reste: Math.max(0, Math.ceil(max - points)) };
         }
 
+        // Carte d'avertissement : plaques de campagne pas encore découvertes (la révélation plein écran se fait sur la page BGS).
+        // Au plus une vérification toutes les 10 minutes par session ; la carte se referme seule après 25 s et reviendra à la prochaine session tant que les plaques ne sont pas vues.
+        async function verifierPlaquesQG(profil) {
+            try {
+                if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT' || !window.edteamPlaques) return;
+                const memo = Number(sessionStorage.getItem('edteam_plaques_qg') || 0);
+                if (memo && Date.now() - memo < 600000) return;
+                sessionStorage.setItem('edteam_plaques_qg', String(Date.now()));
+                const { data } = await supabaseApp.from('profils').select('palmares_bgs').eq('user_id', profil.user_id).single();
+                const n = window.edteamPlaques.nouvelles(profil.user_id, data && data.palmares_bgs).length;
+                if (!n) return;
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'ft-astuce';
+                    c.setAttribute('role', 'status');
+                    c.style.borderColor = 'rgba(255,215,0,0.6)'; c.style.borderLeftColor = '#FFD700';
+                    c.innerHTML = '<b style="color: #FFD700;">&#127941; NOUVELLE PLAQUE !</b><br>' + (n > 1 ? 'Tu as gagné ' + n + ' distinctions de campagne.' : 'Tu as gagné une distinction de campagne.') + ' Va ' + (n > 1 ? 'les' : 'la') + ' découvrir dans le BGS.'
+                        + '<div class="ft-acts"><button type="button" class="ft-voir" style="color: #FFD700; border-color: rgba(255,215,0,0.6); background: rgba(255,215,0,0.08);">VOIR</button><button type="button" class="ft-non">PLUS TARD</button></div>';
+                    const retirer = () => { c.classList.remove('ft-vu'); setTimeout(() => { if (c.parentNode) c.parentNode.removeChild(c); }, 500); };
+                    c.querySelector('.ft-voir').addEventListener('click', () => { window.location.href = 'bgs.html'; });
+                    c.querySelector('.ft-non').addEventListener('click', retirer);
+                    document.body.appendChild(c);
+                    setTimeout(() => c.classList.add('ft-vu'), 30);
+                    setTimeout(retirer, 25000);
+                }, 3500);
+            } catch (e) { console.error('Erreur plaques QG :', e); }
+        }
+
         // Bouton cockpit : visible pour les membres d'escadron ayant accès au BGS (même règle que le menu BGS)
         function majBoutonBgs(profil) {
             const btn = document.getElementById('btn-qg-bgs');
@@ -3849,6 +3880,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
+    <script src="plaques-vues.js?v=1"></script>
     <script src="footer.js?v=7"></script>
 </body>
 </html>
