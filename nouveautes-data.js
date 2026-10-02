@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-priorites', date: '2026-10-02T19:30:00Z', type: 'CORRIGE',
+        titre: 'Colonisation : « À apporter en priorité » ne compte plus un produit deux fois',
+        texte: 'Dans la liste « À apporter en priorité », un même produit pouvait apparaître deux fois avec deux totaux partiels (par exemple Acier et Steel), selon que le jeu du pilote qui avait relevé le chantier était en français ou en anglais. Ces lignes sont maintenant regroupées : chaque produit n\'apparaît qu\'une fois, avec le total exact à apporter, ce qui corrige aussi l\'ordre des priorités.',
+        important: false
+    },
+    {
         id: '2026-10-journal-bgs-points', date: '2026-10-02T18:30:00Z', type: 'AMELIORE',
         titre: 'BGS : le journal montre les points de rang que chaque action rapporte',
         texte: 'Dans le journal des exploits de la page BGS, une nouvelle colonne « RANG BGS » indique les points de carrière que chaque action rapporte (missions, influence, crédits, livraisons de colonisation…) : ce sont ces points, cumulés, qui font monter votre rang BGS. Un bandeau en haut du journal rappelle la règle et affiche votre rang, vos points et ce qu\'il reste avant le prochain rang, avec un lien vers votre progression détaillée dans le Quartier général.',
