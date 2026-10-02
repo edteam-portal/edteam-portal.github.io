@@ -411,7 +411,7 @@
         const courtSysteme = n => String(n || '').replace(/^Col \d+ Sector /, '');
         const nomStation = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
         const jj = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); };
-        const jjhm = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); };
+        const jjhm = iso => { const d = new Date(iso); return isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear() + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); };
         function ilYa(iso) {
             const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
             if (isNaN(m)) return '';
@@ -825,8 +825,74 @@
         const sm = t => `<span style="color:#777;font-size:.8em;letter-spacing:1px;">${t}</span>`;
         const vide = msg => `<div style="color:#777;font-style:italic;text-align:center;padding:30px 10px;line-height:1.6;">${msg}</div>`;
 
+        // Journal lu par pages (colonisation_journal) : le bloc montre les 100 dernières lignes, la fenêtre « AGRANDIR » pagine tout l'historique avec des filtres.
+        const DEBUT_POINTS = Date.parse('2026-10-01T13:40:00Z');   // les livraisons postérieures rapportent des points BGS (script 27)
+        const JR = { n: 50, p: 0, type: '', pilote: '', q: '', total: 0, jeton: 0, minuteur: null, pilotesOk: false };
+        async function jrCharger(n, decalage, f) {
+            const { data, error } = await supabaseApp.rpc('colonisation_journal', { p_limite: n, p_decalage: decalage, p_type: f.type || null, p_pilote: f.pilote || null, p_recherche: f.q || null });
+            if (error) throw error;
+            return data || { total: 0, lignes: [], pilotes: [] };
+        }
+        async function chargerJournalBloc(force) {
+            const zone = document.getElementById('journal-feed');
+            if (!zone) return;
+            const cle = 'edteam_colo_j_' + profilCommandant.user_id;
+            let d = null;
+            try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (!force && c && Date.now() - c.ts < 120000) d = c.data; } catch (e) {}
+            if (!d) {
+                try { d = await jrCharger(100, 0, {}); try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), data: d })); } catch (e) {} }
+                catch (e) { console.error('Erreur journal colonisation :', e); zone.innerHTML = vide('Journal indisponible pour le moment.'); return; }
+            }
+            zone.innerHTML = (d.lignes || []).length ? journalGrille(d.lignes) : vide('Aucune livraison relevée pour l\'instant.');
+        }
+        function jrOuvrir() { jrAller(0); }
+        function jrFiltrer() {
+            JR.type = document.getElementById('jr-type').value;
+            JR.pilote = document.getElementById('jr-pilote').value;
+            jrAller(0);
+        }
+        function jrRecherche() {
+            clearTimeout(JR.minuteur);
+            JR.minuteur = setTimeout(() => { JR.q = document.getElementById('jr-q').value.trim(); jrAller(0); }, 350);
+        }
+        function jrReinit() {
+            JR.type = ''; JR.pilote = ''; JR.q = '';
+            ['jr-type', 'jr-pilote', 'jr-q'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+            jrAller(0);
+        }
+        async function jrAller(p) {
+            const liste = document.getElementById('journal-feed-modal'), pager = document.getElementById('jr-pager');
+            if (!liste || !pager) return;
+            JR.p = Math.max(0, p);
+            const jeton = ++JR.jeton;
+            liste.style.opacity = '.5';
+            try {
+                const d = await jrCharger(JR.n, JR.p * JR.n, JR);
+                if (jeton !== JR.jeton) return;   // une requête plus récente a pris le relais
+                JR.total = +d.total || 0;
+                if (!JR.pilotesOk) {   // liste des commandants : une seule fois
+                    JR.pilotesOk = true;
+                    const sel = document.getElementById('jr-pilote');
+                    sel.innerHTML = '<option value="">Tous les commandants</option>' + (d.pilotes || []).map(n => `<option value="${esc(n)}">CMDR ${esc(n.toUpperCase())}</option>`).join('');
+                    sel.value = JR.pilote;
+                }
+                liste.innerHTML = (d.lignes || []).length ? journalGrille(d.lignes) : vide('Aucune ligne ne correspond à ces filtres.');
+                liste.scrollTop = 0;
+            } catch (e) {
+                if (jeton !== JR.jeton) return;
+                console.error('Erreur journal colonisation :', e);
+                liste.innerHTML = vide('Journal indisponible pour le moment.');
+                JR.total = 0;
+            }
+            liste.style.opacity = '1';
+            const pages = Math.max(1, Math.ceil(JR.total / JR.n));
+            const debut = JR.total ? JR.p * JR.n + 1 : 0, fin = Math.min(JR.total, (JR.p + 1) * JR.n);
+            const bt = (txt, cible, actif) => `<button ${actif ? `onclick="jrAller(${cible})"` : 'disabled'} style="background:rgba(0,240,255,.1);border:1px solid ${B};color:${B};padding:5px 14px;font-family:inherit;font-size:.85em;font-weight:bold;letter-spacing:1px;cursor:${actif ? 'pointer' : 'default'};opacity:${actif ? 1 : .35};">${txt}</button>`;
+            pager.innerHTML = `${bt('&laquo; DÉBUT', 0, JR.p > 0)}${bt('&lsaquo; PRÉCÉDENT', JR.p - 1, JR.p > 0)}<span style="color:#bbb;font-size:.9em;min-width:210px;text-align:center;">${fmt(debut)}–${fmt(fin)} sur ${fmt(JR.total)} <span style="color:#777;">· page ${JR.p + 1} / ${fmt(pages)}</span></span>${bt('SUIVANT &rsaquo;', JR.p + 1, JR.p + 1 < pages)}${bt('FIN &raquo;', pages - 1, JR.p + 1 < pages)}`;
+        }
+
         // Journal : UNE LIGNE par entrée, en colonnes (comme le journal de la page BGS). Même rendu dans le bloc et dans la fenêtre « AGRANDIR ».
-        const GRILLE_JOURNAL = '125px 170px 175px minmax(0,1fr) 120px';
+        const GRILLE_JOURNAL = '165px 170px 175px minmax(0,1fr) 120px';
         function ligneJournal(j, idx) {
             const bg = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
             const sysCourt = j.systeme ? esc(courtSysteme(j.systeme)) : '';
@@ -835,6 +901,7 @@
                 col = B; badge = 'LIVRAISON'; pilote = 'CMDR ' + esc((j.cmdr || '?').toUpperCase());
                 detail = `<span style="color:#fff;font-weight:bold;">${esc(j.marchandise || '?')}</span> <span style="color:#555;">&rarr;</span> <span style="color:#bbb;">${j.station ? esc(nomStation(j.station)) : '?'}</span>${sysCourt ? ' <span style="color:#555;margin:0 4px;">//</span> <span style="color:#777;">' + sysCourt + '</span>' : ''}`;
                 resultat = '+' + fmt(j.tonnes) + ' t';
+                if (Date.parse(j.t) < DEBUT_POINTS) resultat = `<span style="opacity:.55;" title="Livraison antérieure au 01/10/2026 : elle figure dans l'historique mais ne rapporte aucun point BGS">${resultat}</span>`;
             } else if (j.type === 'STATION TERMINEE') {
                 col = GOLD; badge = 'STATION TERMINÉE'; pilote = '<span style="color:#888;font-weight:normal;">—</span>';
                 detail = `<span style="color:#fff;font-weight:bold;">${esc(nomStation(j.station))}</span> <span style="color:#bbb;">est opérationnelle</span>${sysCourt ? ' <span style="color:#555;margin:0 4px;">//</span> <span style="color:#777;">' + sysCourt + '</span>' : ''}`;
@@ -881,13 +948,12 @@
             const prio = (data.priorites || []).map((p, k) => `<div class="prio-ligne" onclick="ouvrirMateriau(${k})" onmouseenter="apercuMateriau(${k})" onmouseleave="finApercu()" title="Survol : repère les systèmes sur la carte · Clic : liste des chantiers et noms à copier" style="display:grid;grid-template-columns:1fr 70px 82px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px dashed #222;cursor:pointer;"><span style="color:#fff;">${esc(p.nom)} <small style="color:#777;font-size:.75em;">${p.chantiers} chantier${p.chantiers > 1 ? 's' : ''}</small></span><div style="height:7px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;"><div style="width:${Math.max(3, Math.round(100 * p.reste / maxReste))}%;height:100%;background:${B};"></div></div><span style="color:${GOLD};text-align:right;font-weight:bold;">${fmt(p.reste)} t</span></div>`).join('')
                 || vide('Rien à apporter : aucun chantier en cours.');
 
-            const journalListe = (data.journal || []).slice(0, 100); // comme BGS : les 100 dernières
-            const journal = journalListe.length ? journalGrille(journalListe) : vide('Aucune livraison relevée pour l\'instant.');
+            const journal = vide('Chargement du journal…');   // rempli par chargerJournalBloc (colonisation_journal, 100 dernières lignes)
             // même style que le journal de la page BGS : titre + [ AGRANDIR ], liste défilante, une ligne par entrée
             const journalBloc = `<div class="bloc cy" style="padding:18px 20px;margin-top:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:1px solid rgba(0,240,255,.3);padding-bottom:6px;margin-bottom:12px;">
                     <h4 style="margin:0;color:${B};letter-spacing:2px;text-shadow:0 0 8px rgba(0,240,255,.4);">&gt; JOURNAL DES LIVRAISONS ${pastille('EN DIRECT', G, true)}</h4>
-                    <button style="background:rgba(0,240,255,.1);border:1px solid ${B};color:${B};padding:4px 12px;cursor:pointer;font-family:inherit;font-size:.8em;font-weight:bold;transition:.2s;" onmouseover="this.style.background='${B}';this.style.color='#000';" onmouseout="this.style.background='rgba(0,240,255,.1)';this.style.color='${B}';" onclick="ouvrirModal('modal-journal-colo', event)" onmouseenter="if(typeof sonHover==='function') sonHover()">[ AGRANDIR ]</button>
+                    <button style="background:rgba(0,240,255,.1);border:1px solid ${B};color:${B};padding:4px 12px;cursor:pointer;font-family:inherit;font-size:.8em;font-weight:bold;transition:.2s;" onmouseover="this.style.background='${B}';this.style.color='#000';" onmouseout="this.style.background='rgba(0,240,255,.1)';this.style.color='${B}';" onclick="ouvrirModal('modal-journal-colo', event); jrOuvrir();" onmouseenter="if(typeof sonHover==='function') sonHover()">[ AGRANDIR ]</button>
                 </div>
                 <div id="journal-feed" class="journal-feed">${journal}</div>
             </div>`;
@@ -959,7 +1025,17 @@
                         <div style="border-bottom:1px dashed ${B};padding-bottom:15px;margin-bottom:20px;flex-shrink:0;">
                             <span style="color:${B};font-weight:bold;letter-spacing:3px;font-size:1.3em;">&gt; JOURNAL DES LIVRAISONS : ${esc(data.escadron)}</span>
                         </div>
-                        <div id="journal-feed-modal" style="overflow-y:auto;flex-grow:1;padding-right:10px;">${journal}</div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px;flex-shrink:0;">
+                            <select id="jr-type" onchange="jrFiltrer()" style="background:rgba(0,0,0,.6);border:1px solid #444;color:#ddd;padding:6px 10px;font-family:inherit;font-size:.9em;">
+                                <option value="">Tous les types</option><option value="LIVRAISON">Livraisons</option><option value="STATION TERMINEE">Stations terminées</option><option value="SYSTEME REVENDIQUE">Systèmes revendiqués</option>
+                            </select>
+                            <select id="jr-pilote" onchange="jrFiltrer()" style="background:rgba(0,0,0,.6);border:1px solid #444;color:#ddd;padding:6px 10px;font-family:inherit;font-size:.9em;max-width:240px;"><option value="">Tous les commandants</option></select>
+                            <input id="jr-q" type="search" maxlength="60" oninput="jrRecherche()" placeholder="Rechercher : marchandise, station, système…" style="background:rgba(0,0,0,.6);border:1px solid #444;color:#ddd;padding:6px 10px;font-family:inherit;font-size:.9em;flex:1;min-width:220px;">
+                            <button onclick="jrReinit()" style="background:transparent;border:1px solid #555;color:#aaa;padding:6px 12px;font-family:inherit;font-size:.8em;letter-spacing:1px;cursor:pointer;">RÉINITIALISER</button>
+                        </div>
+                        <div style="flex-shrink:0;color:#777;font-size:.78em;line-height:1.5;margin-bottom:8px;">ⓘ Toutes les livraisons relevées par les plugins, y compris l'historique de jeu relu à l'installation. Les tonnages en grisé datent d'avant le 01/10/2026 : ils ne rapportent pas de points BGS.</div>
+                        <div id="journal-feed-modal" style="overflow-y:auto;flex-grow:1;padding-right:10px;transition:opacity .15s;">${vide('Chargement…')}</div>
+                        <div id="jr-pager" style="flex-shrink:0;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px dashed #333;margin-top:10px;"></div>
                     </div>
                 </div>`;
 
@@ -970,6 +1046,8 @@
             }));
             carteInitEvenements();
             rendreCarte();   // applique le zoom et le centre conservés (et le libellé du zoom)
+            JR.q = ''; JR.type = ''; JR.pilote = ''; JR.pilotesOk = false;
+            chargerJournalBloc(!!window.__jrForce); window.__jrForce = false;
         }
 
         // ---------------------------------------------------------------
@@ -1036,6 +1114,7 @@
         }
 
         async function actualiserPage() {
+            window.__jrForce = true;
             try { construirePage(await chargerSynthese(true)); }
             catch (e) { console.error('Erreur colonisation :', e); }
         }

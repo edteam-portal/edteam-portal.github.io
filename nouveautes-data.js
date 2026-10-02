@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-journal-colonisation', date: '2026-10-02T17:30:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : le journal des livraisons se feuillette et se filtre',
+        texte: 'Le journal des livraisons de la page Colonisation ne se limite plus aux dernières lignes : le bouton AGRANDIR ouvre tout l\'historique, par pages de 50, avec des filtres par type, par commandant et une recherche (marchandise, station, système). On retrouve ainsi les livraisons de chaque pilote, même quand un autre en a relevé des milliers d\'un coup. L\'année est maintenant affichée dans les dates, et les livraisons d\'avant le 01/10/2026 (qui ne rapportent pas de points BGS) sont grisées.',
+        important: false
+    },
+    {
         id: '2026-10-recrue', date: '2026-10-01T22:24:00Z', type: 'AMELIORE',
         titre: 'Escadron : les recrues sont signalées dans la liste des membres',
         texte: 'Dans la liste des membres de l\'escadron (PC et mobile), un badge RECRUE apparaît à côté des pilotes dont le rang en jeu est encore « Recrue ». Ils n\'ont pas accès aux pages d\'escadron tant qu\'un officier ne les a pas passés PILOTE dans le jeu : l\'Amiral sait ainsi qui il doit faire basculer. Le badge se met à jour tout seul au prochain lancement du jeu du pilote concerné.',
