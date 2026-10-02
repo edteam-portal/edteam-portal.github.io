@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-noms', date: '2026-10-02T22:30:00Z', type: 'CORRIGE',
+        titre: 'Colonisation : un seul nom par produit partout',
+        texte: 'Dans la fenêtre de détail d\'un système, dans le détail des livraisons par pilote et dans le journal, un même produit pouvait s\'afficher sous deux noms (par exemple « Acier » et « Steel ») selon la langue du jeu du pilote qui avait relevé le chantier ou la livraison. Chaque produit porte maintenant le même nom partout, et la recherche du journal trouve les livraisons quelle que soit la langue du jeu.',
+        important: false
+    },
+    {
         id: '2026-10-carte-grappes', date: '2026-10-02T21:00:00Z', type: 'AMELIORE',
         titre: 'Colonisation : une carte galactique lisible, même avec des dizaines de systèmes',
         texte: 'Sur la carte de la page Colonisation, les systèmes très proches ne se chevauchent plus : ils sont regroupés en une bulle qui indique leur nombre, le total de stations terminées et de chantiers, et un anneau orange/vert pour la part de systèmes en chantier. Un clic sur une bulle zoome dessus, et elle se défait au fil du zoom. Les noms ne s\'affichent que là où la place le permet (les autres systèmes restent des points, avec leur détail au survol), et le filtre EN CHANTIER / TERMINÉS ainsi que le repérage des matériaux fonctionnent aussi sur les bulles.',
