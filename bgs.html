@@ -110,7 +110,14 @@
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
         .data-row { padding: 20px; margin-bottom: 12px; }
         /* l'espace entre cadres vient du conteneur (gap 12 px) : pas de marge en plus, sinon elles s'additionnent */
-        #bgs-tab-ordres .data-row, #bgs-tab-suivi .data-row, #bgs-tab-classement .data-row { margin-bottom: 0; }   /* cadre : classe .bloc (style.css) */
+        #bgs-tab-ordres .data-row, #bgs-tab-suivi .data-row, #bgs-tab-classement .data-row { margin-bottom: 0; }
+        .pilier-halo { position: absolute; inset: -14px; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.38) 0%, rgba(255,215,0,0) 68%); animation: pilierHalo 3.2s ease-in-out infinite; pointer-events: none; }
+        @keyframes pilierHalo { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+        .pilier-bloc { background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.10), rgba(0,0,0,0.55) 70%) !important; }
+        .acc-grille { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px; }
+        @media (max-width: 1000px) { .acc-grille { grid-template-columns: minmax(0, 1fr) !important; } }
+        #bgs-comment details > summary { cursor: pointer; list-style: none; }
+        #bgs-comment details > summary::-webkit-details-marker { display: none; }   /* cadre : classe .bloc (style.css) */
         
         /* CARD PILOTE (Membres de l'escadron) */
         .pilot-card { background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
@@ -425,8 +432,8 @@
         <!-- ONGLETS DU MODULE BGS -->
         <div class="header-bottom-row" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
             <nav class="tab-bar">
-                <button class="tab-btn active" onclick="switchBgsTab('ordres', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">MISSIONS</button>
-                <button class="tab-btn" onclick="switchBgsTab('suivi', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">SUIVI D'INFLUENCE</button>
+                <button class="tab-btn active" onclick="switchBgsTab('ordres', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">ACCUEIL</button>
+                <button class="tab-btn" style="display: none;" data-masque="2026-10-02" onclick="switchBgsTab('suivi', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">SUIVI D'INFLUENCE</button>
                 <button class="tab-btn" onclick="switchBgsTab('classement', this)" onmouseenter="if(typeof sonHover === 'function') sonHover()">JOURNAL</button>
             </nav>
         </div>
@@ -439,9 +446,12 @@
             <!-- ONGLET 1 : ORDRES (BGS CAP TRACKER) -->
             <div id="bgs-tab-ordres" style="display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-out;">
                 
+                <!-- ACCUEIL : mon engagement (gauche) ; Pilier de la semaine + l'escadron cette semaine (droite) (rempli par chargerAccueilBGS) -->
+                <div id="bgs-accueil-haut" class="acc-grille"><div class="bloc cy" style="padding: 24px; color: #666; font-style: italic;">&gt; CHARGEMENT DE VOTRE ENGAGEMENT...</div></div>
+
                 <!-- EN-TÊTE MISSIONS ET BOUTON COMMANDEMENT -->
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 15px; margin-bottom: 10px;">
-                    <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">> DIRECTIVES OPÉRATIONNELLES</h3>
+                    <div><h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">> FOCUS DE L'AMIRAL</h3><div style="color: #888; font-size: 0.8em; margin-top: 4px;">Facultatif : l'Amiral peut demander de concentrer l'effort sur une cible. Chaque directive donne droit à une distinction (médaille de campagne) à sa clôture.</div></div>
                     <button id="btn-amiral" style="display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 11px 25px; font-family: inherit; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirSalleCommandement(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';">
                         [ COMMANDEMENT ]
                     </button>
@@ -450,6 +460,19 @@
                 <!-- LE SOUS-CONTENEUR POUR LES JAUGES -->
                 <div id="bgs-conteneur-ordres" style="display: flex; flex-direction: column; gap: 12px;">
                     <div style="color: #666; font-style: italic; text-align: center; padding: 20px;">> SYNCHRONISATION DES DIRECTIVES DE L'AMIRAUTÉ EN COURS...</div>
+                </div>
+                <div style="color: #777; font-size: 0.8em;">ⓘ Les actions d'une directive comptent <b>en plus</b> de ton rang BGS : elles servent aussi à la distinction (médaille de campagne, classée par score à la clôture), visible sur ta fiche pilote.</div>
+
+                <!-- COMMENT ÇA MARCHE (replié par défaut) -->
+                <div id="bgs-comment" class="bloc" style="padding: 14px 20px;">
+                    <details>
+                        <summary style="color: var(--ed-blue); letter-spacing: 2px;">&gt; COMMENT ÇA MARCHE <span style="color: #777; font-size: 0.8em;">[ cliquer pour déplier ]</span></summary>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 12px;">
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">1 · AGIS POUR TA FACTION</b>Missions, combat, commerce, exploration, colonisation : tout ce qui sert ta faction d'escadron est relevé par le plugin, sans rien saisir.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">2 · CHAQUE ACTION RAPPORTE</b>Chaque action rapporte des points de carrière (voir la colonne RANG BGS du journal). Les échecs ne rapportent rien.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">3 · TON RANG MONTE</b>Tes points cumulés font monter ton rang, de 1 à 100. L'Amiral peut demander un focus : il rapporte en plus une distinction.</div>
+                        </div>
+                    </details>
                 </div>
 
             </div>
@@ -1564,10 +1587,128 @@
         };
 
         // --- AFFICHAGE DYNAMIQUE DES ORDRES BGS SUR LE TABLEAU DE BORD ---
+        // ==========================================
+        // ACCUEIL : engagement du pilote (gauche) ; Pilier de la semaine et semaine de l'escadron (droite) ; les directives de l'Amiral gardent leur rendu habituel
+        // ==========================================
+        let accueilMemo = { ts: 0 };
+        async function chargerAccueilBGS(force) {
+            const haut = document.getElementById('bgs-accueil-haut');
+            if (!haut || !profilCommandant) return;
+            if (!force && accueilMemo.ts && Date.now() - accueilMemo.ts < 60000) return;   // déjà affiché il y a moins d'une minute
+            accueilMemo.ts = Date.now();
+            const f1 = n => (Math.round((Number(n) || 0) * 10) / 10).toLocaleString('fr-FR');
+            const f0 = n => Math.floor(Number(n) || 0).toLocaleString('fr-FR');
+            let moi = null, sem = null, pilier = null;
+            try {
+                const [rProfil, rSem, rPilier] = await Promise.all([
+                    supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
+                    supabaseApp.rpc('bgs_semaine_escadron'),
+                    supabaseApp.from('distinctions_hebdo').select('user_id, cmdr_nom, attribut, part_pct, semaine').eq('escadron_id', profilCommandant.escadron_id || '').order('semaine', { ascending: false }).limit(1)
+                ]);
+                moi = rProfil.data || null;
+                sem = (!rSem.error && rSem.data && rSem.data.escadron) ? rSem.data : null;   // absent tant que le script SQL 34 n'est pas lancé : le bloc est simplement masqué
+                pilier = (rPilier.data && rPilier.data[0]) || null;
+            } catch (e) { console.error('Erreur accueil BGS :', e); }
+
+            // 1. MON ENGAGEMENT (colonne de gauche)
+            const rang = Math.min(100, Math.max(1, (moi && moi.rang_bgs) || profilCommandant.rang_bgs || 1)), pts = Number((moi && moi.points_bgs) || profilCommandant.points_bgs || 0);
+            const min = seuilRangBgs(rang), max = rang >= 100 ? null : seuilRangBgs(rang + 1);
+            const pct = max === null ? 100 : Math.max(0, Math.min(100, (pts - min) / (max - min) * 100));
+            const nomEsc = escapeHtml(String(profilCommandant.escadron_id || 'TON ESCADRON'));
+            const blocEngagement = `
+                <div class="bloc cy" style="padding: 18px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+                        <h4 style="margin: 0; color: var(--ed-blue); letter-spacing: 2px;">&gt; MON ENGAGEMENT POUR ${nomEsc}</h4>
+                        <span style="color: #777; font-size: 0.8em; letter-spacing: 1px;">carrière BGS</span>
+                    </div>
+                    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: inline-flex; flex-direction: column; align-items: center; border: 2px solid var(--ed-orange); color: var(--ed-orange); padding: 6px 16px; border-radius: 4px; line-height: 1.1; box-shadow: 0 0 12px rgba(255,113,0,0.3);">
+                            <span style="font-size: 0.6em; letter-spacing: 2px;">RANG BGS</span><span style="font-size: 2.3em; font-weight: bold;">${rang}</span>
+                        </div>
+                        <div style="flex: 1; min-width: 220px;">
+                            <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;"><span style="color: #fff;">${f0(pts)} points</span><span style="color: #888;">${max === null ? 'rang maximal' : 'prochain rang dans <b style="color: var(--ed-orange);">' + f0(Math.max(0, Math.ceil(max - pts))) + ' pts</b>'}</span></div>
+                            <div style="height: 9px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;"><div style="width: ${pct.toFixed(1)}%; height: 100%; background: var(--ed-orange);"></div></div>
+                            ${sem ? `<div style="color: #888; margin-top: 8px; font-size: 0.85em;"><b style="color: var(--ed-green);">+${f1(sem.mes_points)} pts</b> cette semaine · <b style="color: var(--ed-green);">+${f1(sem.mes_points_24h)} pts</b> ces dernières 24 h</div>` : ''}
+                        </div>
+                    </div>
+                    <div style="margin-top: 14px; line-height: 1.6; color: #ccc; font-size: 0.92em; border-top: 1px dashed #333; padding-top: 12px;">
+                        <b style="color: var(--ed-orange);">Ta priorité :</b> agir pour ta faction d'escadron. <b style="color: #fff;">Chaque action compte</b> (missions, combat, commerce, exploration, colonisation), <b style="color: #fff;">avec ou sans mission de l'Amiral</b>, et fait monter ton rang.
+                    </div>
+                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="index.html?bgs=1" style="border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 2px 10px; border-radius: 3px; font-size: 0.78em; letter-spacing: 1px; text-decoration: none; font-weight: bold;">VOIR MA PROGRESSION &rarr;</a>
+                        <a href="escadron.html?fiche=moi" style="border: 1px solid #FFD700; color: #FFD700; padding: 2px 10px; border-radius: 3px; font-size: 0.78em; letter-spacing: 1px; text-decoration: none; font-weight: bold;" title="Tes plaques et médailles d'états de service sont sur ta fiche pilote">MES DISTINCTIONS (FICHE PILOTE) &rarr;</a>
+                    </div>
+                </div>`;
+
+            // 2. PILIER DE LA SEMAINE (colonne de droite, à la hauteur de l'engagement)
+            const OR = '#FFD700';
+            let blocPilier;
+            if (pilier) {
+                const pc = Math.max(0, Math.min(100, Number(pilier.part_pct) || 0));
+                const activite = String(pilier.attribut || '').split('·').pop().trim();
+                const dSem = new Date(String(pilier.semaine) + 'T07:50:00Z');
+                const quand = isNaN(dSem) ? '' : dSem.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const cestMoi = pilier.user_id && pilier.user_id === profilCommandant.user_id;
+                blocPilier = `
+                <div class="bloc pilier-bloc" style="padding: 18px 20px; border-color: rgba(255,215,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px;">
+                    <div style="color: ${OR}; letter-spacing: 5px; font-size: 0.85em; text-shadow: 0 0 10px rgba(255,215,0,0.5);">&#9733; PILIER DE LA SEMAINE &#9733;</div>
+                    <div style="position: relative; width: 104px; height: 104px;">
+                        <div class="pilier-halo"></div>
+                        <div style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(${OR} ${pc * 3.6}deg, rgba(255,215,0,0.12) 0deg);"></div>
+                        <div style="position: absolute; inset: 7px; border-radius: 50%; background: #0b0700; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05;">
+                            <span style="color: ${OR}; font-size: 2.2em; text-shadow: 0 0 12px rgba(255,215,0,0.7);">&#9733;</span>
+                            <span style="color: #fff; font-size: 0.95em; font-weight: bold;">${Math.round(pc)} %</span>
+                        </div>
+                    </div>
+                    <div style="color: #fff; font-size: 1.55em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 14px rgba(255,215,0,0.35);">CMDR ${escapeHtml(String(pilier.cmdr_nom).toUpperCase())}</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                        ${activite && !/%/.test(activite) ? `<span style="border: 1px solid ${OR}; color: ${OR}; padding: 2px 12px; border-radius: 3px; font-size: 0.82em; letter-spacing: 1px;">${escapeHtml(activite.toUpperCase())}</span>` : ''}
+                        <span style="border: 1px solid #555; color: #bbb; padding: 2px 12px; border-radius: 3px; font-size: 0.82em;">${Math.round(pc)} % de l'effort de l'escadron</span>
+                    </div>
+                    ${cestMoi ? `<div style="color: #000; background: ${OR}; padding: 4px 16px; border-radius: 3px; font-weight: bold; letter-spacing: 2px; font-size: 0.85em;">C'EST TOI ! BRAVO, PILIER DE LA SEMAINE</div>` : ''}
+                    <div style="color: #777; font-size: 0.78em;">${quand ? 'Désigné le ' + quand + ' · ' : ''}automatiquement chaque jeudi, aucune mission n'est nécessaire</div>
+                </div>`;
+            } else {
+                // prochaine désignation : jeudi 07:50 UTC
+                const n = new Date(); const prochain = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate(), 7, 50));
+                prochain.setUTCDate(prochain.getUTCDate() + ((4 - prochain.getUTCDay() + 7) % 7));
+                if (prochain <= n) prochain.setUTCDate(prochain.getUTCDate() + 7);
+                const quandProchain = prochain.toLocaleString('fr-FR', { weekday: 'long', hour: '2-digit', minute: '2-digit' });
+                blocPilier = `
+                <div class="bloc pilier-bloc" style="padding: 18px 20px; border-color: rgba(255,215,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px;">
+                    <div style="color: ${OR}; letter-spacing: 5px; font-size: 0.85em;">&#9733; PILIER DE LA SEMAINE &#9733;</div>
+                    <div style="width: 84px; height: 84px; border-radius: 50%; border: 2px dashed rgba(255,215,0,0.5); display: flex; align-items: center; justify-content: center; color: rgba(255,215,0,0.6); font-size: 2.4em;">&#9733;</div>
+                    <div style="color: #ccc; line-height: 1.6;">Le prochain Pilier sera désigné<br><b style="color: ${OR};">${escapeHtml(quandProchain)}</b></div>
+                    <div style="color: #777; font-size: 0.78em;">Le pilote qui a porté le plus l'effort de l'escadron, désigné automatiquement chaque jeudi</div>
+                </div>`;
+            }
+
+            // 3. L'ESCADRON CETTE SEMAINE (bandeau pleine largeur sous les deux blocs)
+            let blocEscadron = '';
+            if (sem) {
+                const maPart = sem.points > 0 ? Math.round(100 * sem.mes_points / sem.points) : 0;
+                const tuile = (val, lib) => `<div style="border: 1px solid #333; padding: 8px 14px; text-align: center; min-width: 120px;"><div style="color: #fff; font-size: 1.4em;">${val}</div><div style="color: #888; font-size: 0.7em; letter-spacing: 1px;">${lib}</div></div>`;
+                const top = (sem.top || []).map((t, i) => `<div style="display: flex; justify-content: space-between; gap: 14px;"><span>${i + 1}. CMDR ${escapeHtml(String(t.nom).toUpperCase())}</span><b style="color: var(--ed-orange);">${f1(t.points)} pts</b></div>`).join('') || '<div style="color: #777; font-style: italic;">Pas encore d\'activité cette semaine.</div>';
+                blocEscadron = `
+                <div class="bloc" style="padding: 14px 20px; grid-column: 1 / -1;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px;">&gt; L'ESCADRON CETTE SEMAINE</h4>
+                        <span style="color: #777; font-size: 0.8em;">depuis jeudi 07:00</span>
+                    </div>
+                    <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">${tuile(f0(sem.points), 'POINTS BGS')}${tuile(sem.actifs + ' <span style="color: #888; font-size: 0.5em;">/ ' + sem.membres + '</span>', 'PILOTES ACTIFS')}${tuile(maPart + ' %', 'MA PART')}</div>
+                        <div style="flex: 1; min-width: 240px; font-size: 0.88em; color: #aaa; line-height: 1.7;">${top}</div>
+                    </div>
+                </div>`;
+            }
+            haut.innerHTML = blocEngagement + blocPilier + blocEscadron;
+        }
+
         async function afficherOrdresBGS() {
             if (!profilCommandant) return;
             const container = document.getElementById('bgs-conteneur-ordres');
             if (!container) return;
+            chargerAccueilBGS();   // engagement du pilote, semaine de l'escadron, distinctions (mémoire d'une minute)
 
             const etatsAccordions = {};
             document.querySelectorAll('[id^="details-"]').forEach(el => {
@@ -1652,7 +1793,7 @@
                 window.memoireEffortsGlobaux = totalEffortsActuel;
 
                 if (ordresData.length === 0) {
-                    container.innerHTML = '<div class="data-row bloc" style="text-align: center; color: #888; padding: 40px;">AUCUNE DIRECTIVE ACTIVE DANS CE SECTEUR.<br><span style="font-size: 0.8em; color: #555;">EN ATTENTE DES ORDRES DE L\'AMIRAUTÉ.</span></div>';
+                    container.innerHTML = '<div class="data-row bloc" style="text-align: center; color: #9aa; padding: 28px; line-height: 1.7;">Aucun focus demandé par l\'Amiral pour le moment.<br><b style="color: var(--ed-orange);">Continue d\'agir pour ta faction : tout compte pour ton rang BGS.</b><br><span style="font-size: 0.85em; color: #777;">Quand l\'Amiral demandera un focus, il apparaîtra ici avec la distinction à gagner.</span></div>';
                     return;
                 }
 
