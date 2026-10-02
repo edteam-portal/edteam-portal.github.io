@@ -9,7 +9,7 @@
             { q: 'Comment démarrer avec SYS.EDTEAM ?',
               r: 'Quatre étapes, environ deux minutes :<br>1. Créez votre compte sur le site.<br>2. Installez <strong>EDMC</strong> (Elite Dangerous Market Connector) sur votre PC.<br>3. Téléchargez le plugin <strong>SYS.EDTEAM</strong> depuis le site et placez-le dans le dossier des plugins d\'EDMC.<br>4. Copiez votre <strong>clé</strong> dans les réglages du plugin (voir la question suivante), puis lancez le jeu.' },
             { q: 'Où trouver ma clé, et où la coller ?',
-              r: 'Dans le menu latéral, en bas, cliquez sur l\'icône en forme de <strong>clé</strong> (« Clé EDMC »). Copiez la clé affichée.<br>Dans EDMC, ouvrez les <strong>Paramètres</strong>, onglet <strong>SYS.EDTEAM</strong>, et collez-la dans le champ « Clé d\'Accès ».' },
+              r: 'Dans le menu latéral, en bas, ouvrez <strong>Gestion du compte</strong> : la clé de liaison EDMC est affichée en haut de la fenêtre. Cliquez dessus pour la copier.<br>Dans EDMC, ouvrez les <strong>Paramètres</strong>, onglet <strong>SYS.EDTEAM</strong>, et collez-la dans le champ « Clé d\'Accès ».' },
             { q: 'Je n\'ai pas d\'escadron : que puis-je utiliser ?',
               r: 'Le QG, le Powerplay, les communications, le journal tactique, le Budget et la Colonisation (dans un espace personnel que vous seul voyez). Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d\'un escadron.' },
             { q: 'Comment couper le son du site ?',
@@ -27,7 +27,9 @@
             { q: 'À quoi servent les plaques de mon dossier ?',
               r: 'Quand l\'Amirauté clôture une opération BGS, chaque pilote qui y a participé reçoit une <strong>plaque de campagne</strong>, conservée sur sa fiche. Aucun seuil : une seule soirée d\'effort suffit. La couleur indique le type d\'opération, les barrettes les jours de présence, les étoiles l\'effort fourni, et un cadre distingue le podium de l\'escadron. Survolez le « ? » de la fiche pour la légende.' },
             { q: 'Qu\'est-ce que le Pilier de la semaine ?',
-              r: 'Chaque jeudi, à la fin du cycle, le pilote qui a le plus investi dans l\'effort de l\'escadron (directives et actions libres confondues) reçoit la distinction <strong>Pilier de la semaine</strong>, visible sur sa fiche et dans le journal tactique. Il n\'y a aucun seuil minimum.' }
+              r: 'Chaque jeudi, à la fin du cycle, le pilote qui a le plus investi dans l\'effort de l\'escadron (directives et actions libres confondues) reçoit la distinction <strong>Pilier de la semaine</strong>, visible sur sa fiche et dans le journal tactique. Il n\'y a aucun seuil minimum.' },
+            { q: 'Qu\'est-ce que l\'Élan Powerplay ?',
+              r: 'Chaque jeudi, en plus du Pilier de la semaine (qui récompense l\'effort BGS), la distinction <strong>Élan Powerplay</strong> revient au pilote dont les mérites Powerplay ont le plus <strong>progressé en proportion</strong> de ses mérites de départ. Les mérites s\'affichent en millions pour certains pilotes : en regardant le progrès relatif, chacun a sa chance, quel que soit son niveau. Pour qu\'un débutant ne gagne pas grâce à un tout petit gain, le calcul suppose que chacun avait au moins 100 000 mérites au départ (par exemple, +5 000 mérites partis de presque rien comptent comme +5 %, et non +500 %).' }
         ] },
         { id: 'powerplay', titre: 'POWERPLAY', questions: [
             { q: 'Que montre la salle Powerplay ?',
@@ -73,7 +75,7 @@
             { q: 'Qui voit quoi ?',
               r: 'Vos données de jeu (position, soldes, flotte) ne sont lisibles que par vous. Les membres de votre escadron voient votre fiche (rangs, plaques, distinctions, rang BGS et Powerplay). Dans le tableau Powerplay, les pilotes de la même puissance voient votre nom, votre rang et vos mérites. Sur la page Colonisation, les membres de votre escadron voient les chantiers de l\'escadron, avec le nom et le tonnage des pilotes qui y ont livré ; les autres escadrons n\'en voient rien. Votre budget n\'est visible que par vous. Le Directeur peut consulter les fiches pour administrer l\'application.' },
             { q: 'Comment changer mon e-mail, mon mot de passe ou supprimer mon compte ?',
-              r: 'Dans le menu latéral, en bas, ouvrez « Gestion du compte ». La suppression du compte efface vos données.' },
+              r: 'Dans le menu latéral, en bas, ouvrez « Gestion du compte » (vous y trouvez aussi votre clé EDMC). La suppression du compte efface vos données.' },
             { q: 'Ma question n\'est pas ici.',
               r: 'Demandez sur le <strong>Discord</strong> (bouton violet en bas de page) : les questions posées enrichissent cette aide.' }
         ] }

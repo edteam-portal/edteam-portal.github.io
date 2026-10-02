@@ -5,15 +5,64 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
-        id: '2026-10-plaques-revelation', date: '2026-10-03T08:00:00Z', type: 'NOUVEAU',
+        id: '2026-10-plugin-2-6', date: '2026-10-02T23:03:20Z', type: 'NOUVEAU',
+        titre: 'Plugin 2.6 : les opérations noires contre les factions rivales comptent',
+        texte: 'Le plugin envoie désormais aussi vos meurtres, vols, piratages et opérations de contrebande menés contre une autre faction que celle de votre escadron, même sans directive de l\'Amiral. Ils rapportent des points de rang BGS et alimentent le titre « L\'Exécuteur » du mur des spécialistes.',
+        important: true,
+        action: 'Mettez à jour le plugin : EDMC le propose au démarrage, puis redémarrez EDMC.'
+    },
+    {
+        id: '2026-10-page-escadron', date: '2026-10-02T23:03:00Z', type: 'AMELIORE',
+        titre: 'Page Escadron et fiches pilotes refaites',
+        texte: 'La liste des pilotes devient un tableau de cartes : chaque pilote affiche son rang BGS avec sa progression, son rang Powerplay, ses titres de spécialiste, ses meilleures plaques et son activité de la semaine. On peut rechercher un pilote, trier (rôle, points de la semaine, nom) et filtrer (actifs cette semaine, officiers, avec titre). La fiche d\'un pilote est réorganisée : titres et distinctions en haut (Pilier et Élan comptés), cartes BGS, Powerplay et colonisation, barres de progression pour chaque rang de la Fédération, et un bloc unique pour les plaques et les distinctions hebdomadaires.',
+        important: false
+    },
+    {
+        id: '2026-10-salle-commandement', date: '2026-10-02T23:02:40Z', type: 'AMELIORE',
+        titre: 'Salle de commandement refaite (Amiral et officiers)',
+        texte: 'La fenêtre de commandement est plus claire : un formulaire en trois étapes (système, briefing, directives par faction), où le type de mission et la priorité se choisissent d\'un clic sur des pastilles de couleur, et la liste des directives en cours à côté, avec leurs boutons Éditer, Clôturer et Supprimer. Le bouton « Transmettre la campagne » reste toujours visible en bas.',
+        important: false
+    },
+    {
+        id: '2026-10-menu-allege', date: '2026-10-02T23:02:20Z', type: 'AMELIORE',
+        titre: 'Menu latéral allégé : la clé EDMC est dans « Gestion du compte »',
+        texte: 'Le menu latéral ne garde que les pages et le compte. Les boutons Discord et Aide, déjà présents dans le pied de page de toutes les pages, sont retirés du menu. Votre clé de liaison EDMC se trouve désormais en haut de la fenêtre « Gestion du compte » : cliquez dessus pour la copier.',
+        important: false
+    },
+    {
+        id: '2026-10-bgs-une-page', date: '2026-10-02T23:02:00Z', type: 'AMELIORE',
+        titre: 'BGS : une seule page, et le journal des exploits dans une fenêtre',
+        texte: 'La page BGS n\'a plus d\'onglets et prend un titre comme les autres pages : engagement, progression, escadron, mur des spécialistes et focus de l\'Amiral sont réunis sur l\'accueil, les directives en cartes compactes réparties sur deux colonnes. Le journal des exploits s\'ouvre dans une fenêtre avec le bouton « Journal des exploits » du titre : il garde ses filtres (pilote, période, directive) et ne charge ses données qu\'à l\'ouverture. La Force de frappe et le cadre des états de service quittent la page ; vos plaques restent visibles sur votre fiche pilote.',
+        important: false
+    },
+    {
+        id: '2026-10-titres-specialistes', date: '2026-10-02T23:01:40Z', type: 'AMELIORE',
+        titre: 'Mur des spécialistes : sept titres, au cumul total, visibles sur l\'accueil BGS et sur les fiches',
+        texte: 'Les sept titres (Fer de lance, Maître logisticien, Magnat, Bâtisseur, Expert scientifique, Exécuteur, Seigneur de guerre) sont désormais calculés par le serveur sur l\'ensemble de vos relevés, et non plus sur les filtres du journal : tout le monde voit les mêmes titulaires. Chaque titre se mesure dans son unité (crédits, missions, tonnes livrées, opérations) et le mur affiche le cumul du titulaire et son avance sur le second. Un titre se perd quand un autre pilote dépasse le titulaire de plus de 2 %, et un titre sans activité reste vacant. Le mur est sur l\'accueil BGS ; les titres détenus apparaissent sur la fiche du pilote. Quand vous décrochez un titre, il vous est présenté en plein écran à l\'ouverture de la page BGS, comme les plaques, et une petite carte vous prévient au Quartier général. Les médailles gagnent une couronne crantée et un reflet.',
+        important: false
+    },
+    {
+        id: '2026-10-qg-refonte', date: '2026-10-02T23:01:20Z', type: 'AMELIORE',
+        titre: 'Quartier général : distinctions de la semaine et chiffres clés de l\'escadron',
+        texte: 'Le Quartier général est réorganisé. Le Pilier de la semaine (effort BGS) et l\'Élan Powerplay (progression des mérites) sont mis à l\'honneur toute la semaine, à gauche du journal tactique. Dans la ligne « Carrière militaire », deux nouvelles pastilles carrées résument vos rangs de la Fédération des pilotes et vos rangs auxiliaires ; un clic ouvre la fenêtre avec le détail de chaque rang et sa progression. En bas, de nouveaux « Chiffres clés de l\'escadron » remplacent les rapports financiers avancés : pilotes inscrits, renseignement tactique (KOS, suspects, alliés), points BGS cumulés, CR générés pour la BGS, mérites Powerplay et colonisation (systèmes, stations, chantiers, tonnes livrées), chacun cliquable. Votre patrimoine détaillé (liquidités, Fleet Carrier, flotte, coût de rachat) se retrouve dans la page Budget.',
+        important: false
+    },
+    {
+        id: '2026-10-elan-powerplay', date: '2026-10-02T23:01:00Z', type: 'NOUVEAU',
+        titre: 'Élan Powerplay : une distinction hebdomadaire pour la progression',
+        texte: 'En plus du Pilier de la semaine (qui récompense l\'effort BGS), une nouvelle distinction revient chaque jeudi au pilote dont les mérites Powerplay ont le plus progressé en proportion de ses mérites de départ. Ce critère de progression relative donne sa chance à chacun, quel que soit son niveau. Elle apparaît à côté du Pilier sur le Quartier général, dans le journal tactique et sur la fiche du pilote. Première désignation : jeudi 8 octobre.',
+        important: false
+    },
+    {
+        id: '2026-10-plaques-revelation', date: '2026-10-02T23:00:40Z', type: 'NOUVEAU',
         titre: 'Vos nouvelles plaques de campagne s\'affichent en plein écran',
         texte: 'Quand l\'Amiral clôture une directive à laquelle vous avez participé, la prochaine fois que vous ouvrez la page BGS, votre plaque s\'affiche en grand, avec son nombre d\'étoiles, votre place dans la campagne et votre score. Si vous en avez gagné plusieurs depuis votre dernière visite, elles défilent l\'une après l\'autre (touche Échap pour passer). Sur le Quartier général, une petite carte vous prévient qu\'une nouvelle plaque vous attend. Toutes vos plaques restent à retrouver sur votre fiche pilote, dans la page Escadron.',
         important: false
     },
     {
-        id: '2026-10-accueil-bgs', date: '2026-10-02T23:30:00Z', type: 'AMELIORE',
+        id: '2026-10-accueil-bgs', date: '2026-10-02T23:00:20Z', type: 'AMELIORE',
         titre: 'BGS : un nouvel accueil centré sur votre engagement',
-        texte: 'La page BGS s\'ouvre maintenant sur un onglet ACCUEIL (l\'ancien onglet MISSIONS). À gauche, votre rang BGS, votre progression et vos points de la semaine, avec le rappel que chaque action pour votre faction d\'escadron compte, avec ou sans mission de l\'Amiral, et un volet « Ma progression » (vos points des 8 dernières semaines, sans quitter la page). À droite, le Pilier de la semaine est mis à l\'honneur ; en dessous, les chiffres de la semaine de l\'escadron (points, pilotes actifs, votre part, trois premiers). Les directives de l\'Amiral sont regroupées sous « Focus de l\'Amiral » avec leurs jauges habituelles : elles sont facultatives et donnent droit à une distinction à leur clôture. Un encart « Comment ça marche » repliable complète le tout. Par ailleurs, l\'onglet SUIVI D\'INFLUENCE est masqué pour le moment : si vous l\'utilisiez, dites-le à l\'équipe.',
+        texte: 'La page BGS s\'ouvre maintenant sur un onglet ACCUEIL (l\'ancien onglet MISSIONS). À gauche, votre rang BGS, votre progression et vos points de la semaine (un « ? » rappelle que chaque action pour votre faction d\'escadron compte, avec ou sans mission de l\'Amiral), puis les chiffres de la semaine de l\'escadron (points, pilotes actifs, votre part, trois premiers). À droite, votre progression sur les 8 dernières semaines. Les directives de l\'Amiral sont regroupées sous « Focus de l\'Amiral » avec leurs jauges habituelles : elles sont facultatives et donnent droit à une distinction à leur clôture. Un encart « Comment ça marche » repliable complète le tout. Par ailleurs, l\'onglet SUIVI D\'INFLUENCE est masqué pour le moment : si vous l\'utilisiez, dites-le à l\'équipe.',
         important: false
     },
     {

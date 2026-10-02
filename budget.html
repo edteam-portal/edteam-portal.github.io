@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=2"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=8"></script>
+    <script src="navigation.js?v=9"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -649,11 +649,43 @@
                     <div class="bloc-note">Le solde en fin de période est celui du dernier relevé quand la période va jusqu'à aujourd'hui. L'écart non catégorisé est la différence entre le solde réel du jeu et les mouvements relevés (jeu lancé sans EDMC, dépôt à la banque d'escadron, mouvement pas encore géré) : il est affiché tel quel, jamais caché dans une catégorie.</div>
                 </div>` : '';
 
+            // PATRIMOINE (état actuel) : liquidités, Fleet Carrier, flotte, coût de rachat ; données du profil (dernier relevé du plugin)
+            const patrimoine = (() => {
+                const p = profilCommandant || {};
+                const liq = parseInt(p.solde_vaisseau) || 0, fc = parseInt(p.solde_fc) || 0, nav = parseInt(p.valeur_vaisseaux) || 0, rachat = parseInt(p.cout_rachat) || 0;
+                const total = liq + fc + nav;
+                if (total <= 0) return '';
+                const f = n => new Intl.NumberFormat('fr-FR').format(n);
+                const pct = n => (100 * n / total).toFixed(1);
+                const carte = (lib, val, col) => `<div style="background: rgba(0,0,0,0.5); padding: 12px; border-left: 2px solid ${col}; border-radius: 0 4px 4px 0;"><span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 5px;">${lib}</span><span style="color: ${col === '#FF3333' ? '#FF3333' : '#fff'}; font-weight: bold; font-size: 1.1em;">${f(val)} <span style="color: ${col}; font-size: 0.8em;">CR</span></span></div>`;
+                return `
+                <div class="bloc" style="margin-bottom:12px;"><h2>PATRIMOINE <em>état actuel, d'après le dernier relevé du plugin</em></h2>
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: 0.95em;">
+                        <span style="color: #ccc;">DISTRIBUTION DES ACTIFS</span>
+                        <span style="color: #888;">PATRIMOINE TOTAL : <span style="color: #fff; font-weight: bold;">${f(total)} CR</span></span>
+                    </div>
+                    <div style="width: 100%; height: 12px; display: flex; gap: 3px; background: rgba(255,255,255,0.05);">
+                        <div style="width: ${pct(liq)}%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange);"></div>
+                        <div style="width: ${pct(fc)}%; background: var(--ed-blue); box-shadow: 0 0 8px var(--ed-blue);"></div>
+                        <div style="width: ${pct(nav)}%; background: #00FF66; box-shadow: 0 0 8px #00FF66;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 8px; font-size: 0.8em; color: #888; font-weight: bold;">
+                        <span><span style="color: var(--ed-orange);">■</span> LIQUIDITÉS (${pct(liq)}%)</span>
+                        <span><span style="color: var(--ed-blue);">■</span> FLEET CARRIER (${pct(fc)}%)</span>
+                        <span><span style="color: #00FF66;">■</span> VAISSEAUX &amp; MODULES (${pct(nav)}%)</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px;">
+                        ${carte('SOLDE BANCAIRE (LIQUIDE)', liq, '#FF7100')}${carte('IMMOBILISATIONS (CARRIER)', fc, '#00F0FF')}${carte('VALEUR FLOTTE (NAVIRES)', nav, '#00FF66')}${carte('COÛT DE RACHAT (ASSURANCE)', rachat, '#FF3333')}
+                    </div>
+                    <div class="bloc-note">Le coût de rachat est ce que l'assurance vous coûterait si votre vaisseau actuel était détruit. Ces valeurs sont celles du dernier relevé du plugin : elles ne comptent pas dans le compte de résultat.</div>
+                </div>`;
+            })();
+
             zone.innerHTML = entete + `
                 <div class="bd-tabs">
                     ${onglet('courant', 'CYCLE EN COURS')}${onglet('precedent', 'CYCLE PRÉCÉDENT')}${onglet('quatre', '4 DERNIERS CYCLES')}${onglet('tout', 'TOUT')}
                     <span style="margin-left:auto;color:#888;font-size:.95em;letter-spacing:1px;">${esc(sel.libelle)}</span>
-                </div>` + cartes + anneaux + compte + rapprochement + '<div style="height:30px"></div>';
+                </div>` + cartes + anneaux + compte + rapprochement + patrimoine + '<div style="height:30px"></div>';
 
             anneau('bd-svg-r', 'bd-leg-r', REV, cur.t, 'REVENUS');
             anneau('bd-svg-c', 'bd-leg-c', CHG, cur.t, 'CHARGES');
@@ -815,6 +847,6 @@
         });
     </script>
 
-    <script src="footer.js?v=7"></script>
+    <script src="footer.js?v=8"></script>
 </body>
 </html>
