@@ -20,9 +20,9 @@
     };
 
     // Portraits des Powers (images officielles reduites : images/powers/*.webp ; mention de Frontier dans le pied de page).
-    // Jerome Archer, Nakato Kaine et Yuri Grom n'ont pas de portrait dans la source : ils gardent le monogramme.
-    const PORTRAITS = { 'Aisling Duval': 'aisling-duval', 'Archon Delaine': 'archon-delaine', 'A. Lavigny-Duval': 'a-lavigny-duval', 'Denton Patreus': 'denton-patreus',
-                        'Edmund Mahon': 'edmund-mahon', 'Felicia Winters': 'felicia-winters', 'Li Yong-Rui': 'li-yong-rui', 'Pranav Antal': 'pranav-antal', 'Zemina Torval': 'zemina-torval' };
+        const PORTRAITS = { 'Aisling Duval': 'aisling-duval', 'Archon Delaine': 'archon-delaine', 'A. Lavigny-Duval': 'a-lavigny-duval', 'Denton Patreus': 'denton-patreus',
+                        'Edmund Mahon': 'edmund-mahon', 'Felicia Winters': 'felicia-winters', 'Li Yong-Rui': 'li-yong-rui', 'Pranav Antal': 'pranav-antal', 'Zemina Torval': 'zemina-torval',
+                        'Nakato Kaine': 'nakato-kaine', 'Yuri Grom': 'yuri-grom', 'Jerome Archer': 'jerome-archer' };
 
     // variation : ▲ +n (vert), ▼ -n (rouge), = (gris) ; rien si pas encore d'historique
     const vari = (v, unite) => {

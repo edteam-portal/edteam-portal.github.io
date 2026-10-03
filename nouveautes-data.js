@@ -13,7 +13,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-puissance-faction', date: '2026-10-03T23:00:00Z', type: 'NOUVEAU',
         titre: 'Au QG : votre puissance et votre faction',
-        texte: 'Deux nouvelles cartes en tête du QG. « Ma puissance » montre, avec le portrait de votre puissance, son classement parmi les douze (nombre de systèmes, répartition Stronghold, Fortified et Exploited). « Ma faction » montre la faction de votre escadron : systèmes contrôlés, présence, résidents et stations. Les variations apparaissent après une semaine de relevés. Les données viennent de la base communautaire Spansh, relevée chaque jour (les points par puissance et les systèmes contestés ne sont pas disponibles). EDNews s\'affiche désormais dans la carte de la faction ; les actualités Galnet, déjà visibles en jeu, sont retirées du QG et du compagnon mobile.',
+        texte: 'Deux nouvelles cartes en tête du QG. « Ma puissance » montre, avec le portrait de votre puissance (les 12 puissances en ont un), son classement parmi les douze (nombre de systèmes, répartition Stronghold, Fortified et Exploited). « Ma faction » montre la faction de votre escadron : systèmes contrôlés, présence, résidents et stations. Les variations apparaissent après une semaine de relevés. Les données viennent de la base communautaire Spansh, relevée chaque jour (les points par puissance et les systèmes contestés ne sont pas disponibles). EDNews s\'affiche désormais dans la carte de la faction ; les actualités Galnet, déjà visibles en jeu, sont retirées du QG et du compagnon mobile.',
         important: false
     },
     {
