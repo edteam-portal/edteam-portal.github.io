@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=2"></script>
+    <script src="quoifaire.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=3"></script>
@@ -429,8 +429,8 @@
         .xplq > div { min-width: 64px; flex: 1; border-radius: 14px; padding: 8px 6px; text-align: center; border: 1px solid var(--x-line); background: rgba(255,255,255,0.04); font-size: 0.62em; color: #bbb; line-height: 1.35; }
         .xplq > div i { display: block; font-style: normal; font-size: 2.1em; line-height: 1.2; }
 
-        /* petites tuiles (journal / Galnet / EDNews) et lignes cliquables */
-        .xtiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        /* petites tuiles (journal / EDNews) et lignes cliquables */
+        .xtiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .xtile { background: var(--x-card); border: 1px solid var(--x-line); border-radius: 16px; padding: 13px 4px; text-align: center; cursor: pointer; min-width: 0; }
         .xtile .e { font-size: 1.5em; margin-bottom: 6px; display: block; }
         .xtile .l { font-size: 0.68em; font-weight: bold; letter-spacing: 1px; }
@@ -589,9 +589,6 @@
                 <div class="xtiles">
                     <div id="m-btn-journal-tactique" class="xtile" onclick="ouvrirJournalTactiqueMobile()">
                         <span class="e">📋</span><span class="l" style="color: var(--ed-blue);">JOURNAL</span><span class="d">Escadron</span>
-                    </div>
-                    <div id="m-btn-galnet" class="xtile" onclick="ouvrirGalnetMobile()">
-                        <span class="e">📡</span><span class="l" style="color: var(--ed-orange);">GALNET</span><span class="d" id="m-galnet-date">Connexion...</span>
                     </div>
                     <div id="m-btn-gazette" class="xtile" onclick="ouvrirGazetteMobile()">
                         <span class="e">📰</span><span class="l" style="color: var(--ed-blue);">EDNEWS</span><span class="d" id="m-gazette-date">Archives...</span>
@@ -939,21 +936,6 @@
 
 
 
-    <!-- MODAL GALNET MOBILE -->
-    <div class="modal-overlay" id="modal-galnet" onclick="document.getElementById('modal-galnet').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-orange);" onclick="event.stopPropagation()">
-            <div style="padding: 15px; border-bottom: 1px solid var(--ed-orange); display: flex; justify-content: space-between; align-items: center; background: rgba(255,113,0,0.1);">
-                <span style="color: var(--ed-orange); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">📡 GALNET NEWS</span>
-                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-galnet').style.display='none'">✕</span>
-            </div>
-            <div style="padding: 15px; overflow-y: auto;">
-                <h3 id="m-galnet-title-modal" style="color: var(--ed-orange); margin-top: 0; margin-bottom: 5px; font-size: 1.2em;">Titre</h3>
-                <p id="m-galnet-date-modal" style="color: #888; margin-bottom: 15px; font-size: 0.85em; border-bottom: 1px dashed #333; padding-bottom: 10px;"></p>
-                <div id="m-galnet-body-modal" style="color: #ccc; line-height: 1.5; font-size: 0.95em;">Texte</div>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL GAZETTE MOBILE -->
     <div class="modal-overlay" id="modal-gazette" onclick="document.getElementById('modal-gazette').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
         <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
@@ -1250,7 +1232,6 @@
 
             chargerQGMobile();
             initNouveautesMobile();
-            chargerGalnetMobile();
             chargerGazetteListMobile();
             chargerRegistreTactiqueMobile();
             if (window.QF) QF.monterBande('qf-m-bande');
@@ -1327,7 +1308,7 @@
             setTimeout(xMajCloche, 600);
         }
 
-        // Cloche : liste de ce qui n'a pas encore ete lu (nouveautes, journal, Galnet, EDNews, exploits, titre menace)
+        // Cloche : liste de ce qui n'a pas encore ete lu (nouveautes, journal, EDNews, exploits, titre menace)
         function xListeNotifs() {
             const n = [];
             const nn = typeof nouveautesNonLues === 'function' ? nouveautesNonLues().length : 0;
@@ -1335,7 +1316,6 @@
             const rouge = id => { const e = xEl(id); return !!(e && /alerteBoutonRouge/.test(e.style.animation || '')); };
             if (xAccesBgs()) { const p = xEl('x-exp-pt'); if (p && p.style.display === 'block') n.push({ e: '📜', t: 'Nouveaux exploits', s: 'Journal des exploits BGS', a: "switchMobileTab('bgs'); bgsVue('exp')" }); }
             if (rouge('m-btn-journal-tactique')) n.push({ e: '📋', t: 'Nouvelle note au journal', s: "Journal de l'escadron", a: 'ouvrirJournalTactiqueMobile()' });
-            if (rouge('m-btn-galnet')) n.push({ e: '📡', t: 'Nouvel article Galnet', s: 'Actualités de la galaxie', a: 'ouvrirGalnetMobile()' });
             if (rouge('m-btn-gazette')) n.push({ e: '📰', t: 'Nouvelle édition EDNews', s: "Gazette de l'escadron", a: 'ouvrirGazetteMobile()' });
             { const jp = xEl('x-jr-pt'); if (jp && jp.style.display === 'block') n.push({ e: '📦', t: 'Nouvelles livraisons', s: 'Journal de colonisation', a: "switchMobileTab('batir'); batirVue('jour')" }); }
             const al = xEl('x-alertes');
@@ -2104,10 +2084,6 @@
     };
 
         // ==========================================
-        // GALNET NEWS (API FRONTIER)
-        // ==========================================
-        let cacheGalnetArticle = null;
-        // ==========================================
         // GAZETTES & ARCHIVES
         // ==========================================
         let cacheGazettesMobile = [];
@@ -2447,50 +2423,7 @@
             }
         }
 
-        // Les fonctions existantes de Galnet et Gazette qu'on met à jour avec l'alerte
-        async function chargerGalnetMobile() {
-            try {
-                const response = await fetch('https://cms.zaonce.net/fr-FR/jsonapi/node/galnet_article?sort=-created&page[limit]=1');
-                const payload = await response.json();
-                if (payload && payload.data && payload.data.length > 0) {
-                    const article = payload.data[0].attributes;
-                    cacheGalnetArticle = { title: article.title, date: article.created, body: article.body ? article.body.value : "Contenu indisponible." };
-                    const d = new Date(article.created); d.setFullYear(d.getFullYear() + 1286);
-                    document.getElementById('m-galnet-date').innerText = "DERNIÈRE ÉDITION : " + d.toLocaleDateString('fr-FR');
-
-                    // Alerte Galnet
-                    const articleTs = new Date(article.created).getTime();
-                    const lastRead = parseInt(localStorage.getItem('edteam_last_read_galnet') || '0');
-                    const btn = document.getElementById('m-btn-galnet');
-                    if (btn && articleTs > lastRead) {
-                        btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
-                        btn.style.borderColor = '#FF3333';
-                        
-                        // Allume l'onglet QG en bas si on n'y est pas
-                        if (document.getElementById('tab-qg').style.display !== 'flex') {
-                            document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
-                        }
-                    }
-                }
-            } catch (e) { document.getElementById('m-galnet-date').innerText = "Erreur de liaison."; }
-        }
-
-        function ouvrirGalnetMobile() {
-            if (!cacheGalnetArticle) return;
-            sonClic();
-            
-            // Valider lecture
-            localStorage.setItem('edteam_last_read_galnet', Date.now().toString());
-            const btn = document.getElementById('m-btn-galnet');
-            if (btn) { btn.style.animation = 'none'; btn.style.borderColor = ''; }
-            
-            document.getElementById('m-galnet-title-modal').innerText = cacheGalnetArticle.title;
-            const d = new Date(cacheGalnetArticle.date); d.setFullYear(d.getFullYear() + 1286);
-            document.getElementById('m-galnet-date-modal').innerText = d.toLocaleDateString('fr-FR');
-            document.getElementById('m-galnet-body-modal').innerHTML = cacheGalnetArticle.body;
-            document.getElementById('modal-galnet').style.display = 'flex';
-        }
-
+        // Gazette : alerte de nouvelle edition
         async function chargerGazetteListMobile() {
             if (!profilCommandant) return;
             try {

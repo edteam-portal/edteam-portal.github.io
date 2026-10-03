@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-puissance-faction', date: '2026-10-03T23:00:00Z', type: 'NOUVEAU',
+        titre: 'Au QG : votre puissance et votre faction',
+        texte: 'Deux nouvelles cartes en tête du QG. « Ma puissance » montre le classement de votre puissance Powerplay parmi les douze (nombre de systèmes, répartition Stronghold, Fortified et Exploited). « Ma faction » montre la faction de votre escadron : systèmes contrôlés, présence, résidents et stations. Les variations apparaissent après une semaine de relevés. Les données viennent de la base communautaire Spansh, relevée chaque jour (les points par puissance et les systèmes contestés ne sont pas disponibles). EDNews s\'affiche désormais dans la carte de la faction ; les actualités Galnet, déjà visibles en jeu, sont retirées du QG et du compagnon mobile.',
+        important: false
+    },
+    {
         id: '2026-10-entete-escadron', date: '2026-10-03T21:30:00Z', type: 'AMELIORE',
         titre: 'En-tête : escadron, grades et vos rangs partout',
         texte: 'L\'en-tête affiche maintenant votre escadron et vos grades (Amiral, Officier BGS, Diplomate, Pilote ou Recrue), puis vos quatre rangs : Powerplay, BGS, Fédération et Auxiliaires. Un clic sur un rang ouvre sa fenêtre depuis n\'importe quelle page, plus seulement depuis le QG. Les effectifs de la flotte passent à droite, et le bouton son ne se trouve plus que dans le pied de page. À la place du casier judiciaire et des soldes (qui restent dans votre Budget), le statut « Recherché » n\'apparaît que si vous l\'êtes. Au QG, « Quoi faire » prend la place de la carrière militaire, avec Galnet et EDNews sur la même ligne.',

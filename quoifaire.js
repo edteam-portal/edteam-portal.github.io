@@ -262,6 +262,13 @@
 .qf-bande .qf-k{font-size:.66em;letter-spacing:4px;color:var(--c)}.qf-bande .qf-l{color:#fff;font-size:1em;margin-top:3px;line-height:1.35}.qf-bande .qf-s{color:#8a8a8a;font-size:.76em;margin-top:2px}
 .qf-bande .qf-f{color:var(--c);font-size:1.5em;opacity:.85}
 .qf-slot .qf-bande{width:100%;height:100%;box-sizing:border-box;align-content:center}
+.qf-carte{--c:#FF7100;position:relative;width:100%;height:100%;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--c) 60%,transparent);padding:14px 16px 12px;display:flex;flex-direction:column;gap:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 12%,transparent),rgba(5,3,1,.92) 60%);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.qf-carte:before{content:"";position:absolute;top:0;left:14px;width:50px;height:3px;background:var(--c);box-shadow:0 0 10px var(--c)}
+.qf-carte:hover{filter:brightness(1.15)}
+.qf-carte .qf-t{color:#fff;font-size:1.12em;line-height:1.3}.qf-carte .qf-po{color:#9a9a9a;font-size:.78em;line-height:1.45}
+.qf-carte .qf-jauge{margin-top:0}.qf-carte .qf-jauge i{width:auto;flex:1;max-width:none}
+.qf-pied2{margin-top:auto;color:var(--c);font-size:.7em;letter-spacing:2px;display:flex;justify-content:space-between;gap:8px}
 .qf-slot .qf-bande .qf-l{font-size:1.15em}
 @media (max-width:640px){.qf-cap{grid-template-columns:1fr;gap:8px;padding:14px}.qf-cap .qf-hex{display:none}.qf-cap .qf-dr{text-align:left;display:flex;gap:10px;align-items:baseline;min-width:0}
  .qf-lig{grid-template-columns:auto 1fr 12px;padding:9px 10px}.qf-lig .qf-me{display:none}.qf-hex{width:46px;height:50px}.qf-jauge i{width:140px}
@@ -319,12 +326,24 @@
             <div><div class="qf-k">QUOI FAIRE · RECOMMANDATION</div><div class="qf-l">${esc(i.titre)}</div><div class="qf-s">D'autres idées vous attendent dans « Quoi faire »</div></div><div class="qf-f">›</div></div>`;
     };
 
+    // Carte de recommandation (QG PC) : meme contenu que la bande, en carte haute pour partager la rangee avec « Ma puissance » et « Ma faction »
+    QF.htmlCarte = function (m) {
+        m = m || modele;
+        const i = m && !m.vide ? (m.hero || m.carriere[0]) : null;
+        const c = i ? (COULEUR[i.domaine] || '#FF7100') : '#FF7100';
+        if (!i) return '<div class="qf-carte" style="--c:' + c + ';" onclick="QF.ouvrirTableau()"><div class="qf-etiq">QUOI FAIRE</div><div class="qf-t">Ce qui aiderait le plus votre escadron et votre puissance</div><div class="qf-pied2"><span>VOIR LES IDÉES</span><span>›</span></div></div>';
+        return '<div class="qf-carte" style="--c:' + c + ';" onclick="QF.ouvrirTableau()"><div class="qf-etiq">QUOI FAIRE · RECOMMANDATION</div>'
+            + '<div class="qf-t">' + esc(i.titre) + '</div><div class="qf-po">' + esc(i.pourquoi) + '</div>'
+            + (i.ratio != null ? '<div class="qf-jauge"><i><b style="width:' + Math.round(i.ratio) + '%"></b></i>' + Math.round(i.ratio) + ' %</div>' : '')
+            + '<div class="qf-pied2"><span>D’AUTRES IDÉES DANS « QUOI FAIRE »</span><span>›</span></div></div>';
+    };
+
     QF.monterBande = async function (idConteneur) {
         injecterStyle();
         const el = document.getElementById(idConteneur); if (!el) return;
         try {
             const m = await QF.modele(false);
-            const h = QF.htmlBande(m);
+            const h = el.dataset.style === 'carte' ? QF.htmlCarte(m) : QF.htmlBande(m);
             el.innerHTML = h; el.style.display = h ? (el.dataset.display || 'block') : 'none';
         } catch (e) { console.error('Quoi faire (bande) :', e); }
     };

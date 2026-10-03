@@ -15,7 +15,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=2"></script>
+    <script src="quoifaire.js?v=3"></script>
+    <script src="qgsuivi.js?v=2"></script>
     <script src="son.js?v=1"></script>
     <script src="navigation.js?v=12"></script>
 
@@ -373,33 +374,23 @@
             <!-- ONGLET 1 : DOSSIER COMMANDANT -->
             <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 12px;">
 
-                <!-- RANGEE D'ENTREE : QUOI FAIRE (recommandation) + ACTUALITES GALNET + EDNEWS ESCADRON. Les rangs (Powerplay, BGS, Federation, Auxiliaires) sont dans l'en-tete. -->
-                <div style="display: flex; gap: 12px; align-items: stretch;">
+                <!-- RANGEE D'ENTREE : MA PUISSANCE (Powerplay) | MA FACTION (BGS, avec la bande EDNews) | QUOI FAIRE. Cartes de puissance et de faction : qgsuivi.js. -->
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch;">
 
-                    <div id="qf-bande" class="qf-slot" data-display="flex" style="flex: 1.6; min-width: 0; display: none;"></div>
+                    <div id="qg-carte-puissance" style="flex: 1.15 1 320px; min-width: 0; display: none;"></div>
 
-                    <!-- GALNET -->
-                    <div class="tuile-index" style="flex: 0.7; min-width: 0; border-color: var(--ed-orange); box-shadow: inset 0 0 30px rgba(255, 113, 0, 0.1); padding: 12px 18px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%);" onclick="ouvrirModalGalnet()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-orange)';">
-                        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
-                            <span style="font-size: 1.7em; filter: drop-shadow(0 0 10px rgba(255,113,0,0.5));">📡</span>
-                            <div style="min-width: 0;">
-                                <span style="color: var(--ed-orange); font-size: 1.05em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">GALNET</span>
-                                <span id="galnet-banner-date" style="color: #aaa; font-size: 0.78em; font-weight: bold;">Recherche des transmissions...</span>
-                            </div>
+                    <!-- MA FACTION : cadre statique (il porte la bande EDNews et les ids lus par la gazette) ; corps et source remplis par qgsuivi.js -->
+                    <div id="qg-carte-faction" class="qs-carte" style="--c: #FF7100; flex: 1.15 1 320px; min-width: 0; display: none;">
+                        <div id="qg-faction-corps" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                        <div id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" style="margin-top: auto; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(0,240,255,.5); background: linear-gradient(90deg, rgba(0,240,255,.14), rgba(0,0,0,.4)); padding: 7px 11px; cursor: pointer;">
+                            <span style="font-size: 1.2em;">📰</span>
+                            <div style="min-width: 0;"><div style="color: #00F0FF; font-weight: bold; letter-spacing: 2px; font-size: .78em;">EDNEWS ESCADRON</div><div id="gazette-banner-date" style="color: #aaa; font-size: .72em;">Recherche des archives...</div></div>
+                            <span id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; margin-left: auto; background: #FF3333; color: #fff; font-size: .62em; padding: 2px 7px; border-radius: 3px; letter-spacing: 1px;">NOUVEAU</span>
                         </div>
+                        <div id="qg-faction-src" class="qs-src"></div>
                     </div>
 
-                    <!-- EDNEWS ESCADRON -->
-                    <div class="tuile-index" style="flex: 0.7; min-width: 0; border-color: var(--ed-blue); box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.1); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%);" id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-blue)';">
-                        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
-                            <span style="font-size: 1.7em; filter: drop-shadow(0 0 10px rgba(0,240,255,0.5));">📰</span>
-                            <div style="min-width: 0;">
-                                <span style="color: var(--ed-blue); font-size: 1.05em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">EDNEWS</span>
-                                <span id="gazette-banner-date" style="color: #aaa; font-size: 0.78em; font-weight: bold;">Recherche des archives...</span>
-                            </div>
-                        </div>
-                        <div id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; background: #FF3333; color: #fff; padding: 4px 10px; border-radius: 4px; font-weight: bold; letter-spacing: 1px; font-size: 0.72em; white-space: nowrap;">NOUVEAU</div>
-                    </div>
+                    <div id="qf-bande" class="qf-slot" data-display="flex" data-style="carte" style="flex: 1 1 300px; min-width: 0; display: none;"></div>
 
                 </div>
                 <!-- FIN RANGEE D'ENTREE -->
@@ -456,21 +447,11 @@
         </main>
     </div>
 
-    <!-- MODALE GALNET -->
     <!-- MODAL QUOI FAIRE -->
     <div class="modal-overlay" id="modal-quoifaire" onclick="fermerQuoiFaire()" style="z-index: 4600;">
         <div class="modal-content" style="max-width: 860px; width: 94%; max-height: 90vh; overflow-y: auto; background: #05080a; border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); padding: 22px 26px;" onclick="event.stopPropagation()">
             <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerQuoiFaire()">X</div>
             <div id="qf-corps"></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-galnet" onclick="fermerModalGalnet()" style="z-index: 4600;">
-        <div class="modal-content" style="max-width: 700px; width: 90%; background-color: #0b1016; border: 1px solid var(--ed-blue); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
-            <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModalGalnet()">X</div>
-            <h2 id="modal-galnet-title" style="color: var(--ed-blue); margin-top: 0; margin-bottom: 5px; font-size: 1.4em; letter-spacing: 1px;">Titre</h2>
-            <p id="modal-galnet-date" style="color: gray; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;"></p>
-            <div id="modal-galnet-body" style="color: #e0e0e0; line-height: 1.6; font-size: 1em; white-space: pre-wrap;">Texte</div>
         </div>
     </div>
 
@@ -1394,6 +1375,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (data && data.est_approuve) {
                 profilCommandant = data;
                 if (window.QF) QF.monterBande('qf-bande');
+                if (window.QGSuivi) QGSuivi.monter('qg-carte-puissance', 'qg-carte-faction');
                 enregistrerTelemetrie('page', 'qg');
                 synchroniserTelemetrie();
                 actualiserAffichageRH();
@@ -2555,53 +2537,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     <!-- ========================================== -->
 
 
-    <!-- MOTEUR GALNET NEWS (API OFFICIELLE FRONTIER) -->
+    <!-- MOTEUR DU QG : QUOI FAIRE, CHRONOMETRAGE -->
     <script>
-        let dernierArticleGalnet = null;
-
-        async function chargerGalnet() {
-            try {
-                const response = await fetch('https://cms.zaonce.net/fr-FR/jsonapi/node/galnet_article?sort=-created&page[limit]=1');
-                const payload = await response.json();
-                
-                if (payload && payload.data && payload.data.length > 0) {
-                    const article = payload.data[0].attributes;
-                    dernierArticleGalnet = {
-                        title: article.title,
-                        date: article.created,
-                        body: article.body ? article.body.value : "Contenu crypté ou indisponible."
-                    };
-
-                    const dateReelle = new Date(dernierArticleGalnet.date);
-                    dateReelle.setFullYear(dateReelle.getFullYear() + 1286);
-                    
-                    const bannerDate = document.getElementById('galnet-banner-date');
-                    if(bannerDate) bannerDate.innerText = "> DERNIÈRE ÉDITION : " + dateReelle.toLocaleDateString('fr-FR');
-                }
-            } catch (error) {
-                console.error("Erreur Galnet :", error);
-                const bannerDate = document.getElementById('galnet-banner-date');
-                if(bannerDate) bannerDate.innerText = "Serveurs inaccessibles.";
-            }
-        }
-
-        function ouvrirModalGalnet() {
-            if(typeof sonClic==='function') sonClic();
-            enregistrerTelemetrie('action', 'lecture_galnet');
-            
-            if (!dernierArticleGalnet) return;
-            document.getElementById('modal-galnet-title').innerText = dernierArticleGalnet.title;
-            
-            const dateReelle = new Date(dernierArticleGalnet.date);
-            dateReelle.setFullYear(dateReelle.getFullYear() + 1286);
-            document.getElementById('modal-galnet-date').innerText = dateReelle.toLocaleDateString('fr-FR');
-            
-            // Frontier fournit déjà un code HTML propre, on l'injecte directement
-            document.getElementById('modal-galnet-body').innerHTML = dernierArticleGalnet.body;
-            
-            document.getElementById('modal-galnet').style.display = "flex";
-        }
-
         // ---- QUOI FAIRE (quoifaire.js) : la bande du QG ouvre cette fenetre ; chaque idee renvoie vers le bon ecran
         function fermerQuoiFaire() { if (typeof sonClic === 'function') sonClic(); document.getElementById('modal-quoifaire').style.display = 'none'; }
         if (window.QF) {
@@ -2615,15 +2552,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             QF.destinations.rejoindre = function () { fermerQuoiFaire(); if (typeof window.edteamOuvrirAide === 'function') window.edteamOuvrirAide('demarrer'); };
         }
 
-        function fermerModalGalnet() {
-            if(typeof sonClic==='function') sonClic();
-            document.getElementById('modal-galnet').style.display = "none";
-        }
-
-        // Lancement automatique
-        document.addEventListener('DOMContentLoaded', () => {
-            chargerGalnet();
-        });
 
         // ==========================================
         // MOTEUR DE CHRONOMÉTRAGE TACTIQUE
