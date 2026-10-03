@@ -69,7 +69,7 @@
             { q: 'Comment fonctionnent les communications ?',
               r: 'Trois canaux : le réseau entier, votre escadron, ou un message privé à un pilote. Un message <strong>urgent</strong> s\'affiche en plein écran, un message privé en fenêtre, et l\'icône de discussion, en haut à droite à côté du son, clignote. Pour prévenir toute interception, tout le registre est <strong>purgé chaque semaine, le jeudi</strong>.' },
             { q: 'Puis-je utiliser SYS.EDTEAM sur mon téléphone ?',
-              r: 'Oui, avec le <strong>compagnon mobile</strong> : directives BGS de votre escadron, statut de la flotte et communications. Cliquez sur « Compagnon mobile » en bas de page pour obtenir le QR code, ou ouvrez <em>edteam-portal.github.io/mobile.html</em> sur votre téléphone et connectez-vous avec le même compte. Vous pouvez l\'ajouter à l\'écran d\'accueil.' }
+              r: 'Oui, avec le <strong>compagnon mobile</strong> : accueil (rang BGS, Powerplay, finances, Pilier, Élan, chiffres de l\'escadron), directives et effort BGS, colonisation, escadron et communications. Cliquez sur « Compagnon mobile » en bas de page pour obtenir le QR code, ou ouvrez <em>edteam-portal.github.io/mobile.html</em> sur votre téléphone et connectez-vous avec le même compte. Vous pouvez l\'ajouter à l\'écran d\'accueil.' }
         ] },
         { id: 'donnees', titre: 'MES DONNÉES', questions: [
             { q: 'Qui voit quoi ?',
