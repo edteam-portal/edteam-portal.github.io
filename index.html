@@ -15,10 +15,10 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=4"></script>
-    <script src="qgsuivi.js?v=11"></script>
+    <script src="quoifaire.js?v=5"></script>
+    <script src="qgsuivi.js?v=29"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=12"></script>
+    <script src="navigation.js?v=14"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -173,6 +173,31 @@
         .failsafe-content { border: 2px solid #FF0000; background: rgba(10, 0, 0, 0.95); padding: 40px 60px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); animation: failsafe-pulse 2s infinite; }
         /* Halo pulsant SANS redessin : l'ombre est fixe, seule son opacite varie (animation composee par le GPU).
            Remplace l'animation de box-shadow, qui forcait un redessin a chaque image (16 % d'un coeur au repos mesures). */
+        #gz-popup { position: fixed; inset: 0; z-index: 9500; display: grid; place-items: center; }
+        .gz-fond { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(0,22,28,.92), rgba(0,0,0,.97) 65%); animation: gzFond .5s ease-out; }
+        .gz-fond:after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, #00F0FF 0, transparent 55%); opacity: .14; }
+        .gz-scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,240,255,.035) 0 1px, transparent 1px 3px); pointer-events: none; }
+        .gz-une { position: relative; width: min(94vw, 760px); padding: 26px 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 1px solid rgba(0,240,255,.55); background: linear-gradient(160deg, rgba(0,240,255,.09), rgba(2,10,12,.94) 55%); clip-path: polygon(22px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%, 0 22px); animation: gzEntree .6s cubic-bezier(.2,.8,.2,1); box-shadow: 0 0 40px rgba(0,240,255,.18); }
+        .gz-une:before { content: ''; position: absolute; top: 0; left: 22px; width: 90px; height: 3px; background: #00F0FF; box-shadow: 0 0 12px #00F0FF; }
+        .gz-une:after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(0,240,255,.55) calc(50% - 1px), rgba(0,240,255,.55) calc(50% + 1px), transparent calc(50% + 1px)) left top/22px 22px no-repeat, linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(0,240,255,.55) calc(50% - 1px), rgba(0,240,255,.55) calc(50% + 1px), transparent calc(50% + 1px)) right bottom/22px 22px no-repeat; }
+        .gz-leg { letter-spacing: 6px; color: #00F0FF; font-size: .9em; text-shadow: 0 0 10px rgba(0,240,255,.6); display: flex; align-items: center; gap: 12px; }
+        .gz-nv { background: #FF3333; color: #fff; font-size: .62em; letter-spacing: 2px; padding: 2px 8px; border-radius: 3px; animation: gzPuls 1.5s ease-in-out infinite; }
+        @keyframes gzPuls { 50% { opacity: .55; box-shadow: 0 0 14px rgba(255,0,0,.7); } }
+        @keyframes gzFond { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes gzEntree { from { opacity: 0; transform: translateY(16px) scale(.94); } to { opacity: 1; transform: none; } }
+        .gz-mast { width: 100%; border-top: 1px solid rgba(0,240,255,.35); border-bottom: 1px solid rgba(0,240,255,.35); padding: 8px 0; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 16px; }
+        .gz-mast b { font-size: 2.3em; letter-spacing: 10px; color: #fff; text-shadow: 0 0 18px #00F0FF; font-weight: normal; }
+        .gz-mast i { font-style: normal; color: #00F0FF; font-size: 1.6em; }
+        .gz-meta { width: 100%; display: flex; justify-content: space-between; color: #7a9a9e; font-size: .72em; letter-spacing: 2px; margin-top: -2px; }
+        .gz-esc { color: #FF7100; letter-spacing: 4px; font-size: .8em; margin-top: 8px; }
+        .gz-titre { font-size: 1.75em; color: #fff; line-height: 1.25; letter-spacing: 1px; text-shadow: 0 0 14px rgba(0,240,255,.35); max-width: 640px; margin: 2px 0 14px; overflow-wrap: anywhere; }
+        .gz-act { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+        .gz-b { background: transparent; border: 1px solid #555; color: #aaa; padding: 9px 24px; font: inherit; letter-spacing: 2px; cursor: pointer; border-radius: 3px; }
+        .gz-b:hover { color: #fff; border-color: #aaa; }
+        .gz-b.gz-p { border-color: #00F0FF; color: #00F0FF; background: rgba(0,240,255,.1); font-weight: bold; box-shadow: 0 0 18px rgba(0,240,255,.25); }
+        .gz-b.gz-p:hover { background: #00F0FF; color: #000; }
+        .gz-note { color: #6c8a8e; font-size: .7em; letter-spacing: 1px; margin-top: 2px; }
+        @media (prefers-reduced-motion: reduce) { .gz-une, .gz-fond, .gz-nv { animation: none; } }
         .pulse-halo { position: relative; }
         .pulse-halo::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 50px rgba(255,0,0,0.55); opacity: 0.3; will-change: opacity; animation: halo-opacite 2.5s ease-in-out infinite; }
         .pulse-halo.pulse-vif::after { animation-duration: 1.5s; }
@@ -792,6 +817,7 @@
                     if (String(lastReadId) !== String(latest.id)) {
                         if(badgeNew) badgeNew.style.display = 'block';
                         if(badgeRead) badgeRead.style.display = 'none';
+                        proposerPopupGazette(latest);
                     } else {
                         if(badgeNew) badgeNew.style.display = 'none';
                         if(badgeRead) badgeRead.style.display = 'block';
@@ -803,6 +829,46 @@
             } catch(e) {
                 if (bannerDate) bannerDate.innerText = "Erreur de liaison réseau.";
             }
+        }
+
+        // --- POPUP « NOUVELLE ÉDITION » : à l'ouverture du QG, tant que la dernière édition n'a pas été lue (la liste est déjà chargée : aucune lecture de plus) ---
+        function fermerPopupGazette(lire) {
+            const ov = document.getElementById('gz-popup');
+            if (ov) ov.remove();
+            document.removeEventListener('keydown', clavierPopupGazette);
+            if (lire) ouvrirGazette();
+        }
+        function clavierPopupGazette(e) {
+            if (e.key === 'Escape') fermerPopupGazette(false);
+            else if (e.key === 'Enter') { e.preventDefault(); fermerPopupGazette(true); }
+        }
+        function proposerPopupGazette(ed) {
+            try {
+                if (window.__popupGazetteVue || document.getElementById('gz-popup') || !ed) return;
+                window.__popupGazetteVue = true;   // une seule fois par chargement de page (« Plus tard » : elle revient à la prochaine ouverture du QG)
+                setTimeout(() => {
+                    if (document.getElementById('gz-popup')) return;
+                    const d = new Date(ed.created_at), ov = document.createElement('div');
+                    ov.id = 'gz-popup'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Nouvelle édition EDNews');
+                    const esc = (profilCommandant && profilCommandant.escadron_id && profilCommandant.escadron_id !== 'INDEPENDANT') ? profilCommandant.escadron_id : '';
+                    ov.innerHTML = '<div class="gz-fond"></div><div class="gz-scan"></div><div class="gz-une">'
+                        + '<div class="gz-leg">NOUVELLE ÉDITION <span class="gz-nv">NON LUE</span></div>'
+                        + '<div class="gz-mast"><i>📰</i><b>EDNEWS</b><i>📰</i></div>'
+                        + '<div class="gz-meta"><span>ÉDITION DE LA SEMAINE</span><span class="gz-date"></span></div>'
+                        + '<div class="gz-esc"></div><div class="gz-titre"></div>'
+                        + '<div class="gz-act"><button type="button" class="gz-b gz-p">LIRE L’ÉDITION</button><button type="button" class="gz-b gz-plus">PLUS TARD</button></div>'
+                        + '<div class="gz-note">« Plus tard » : la popup revient à la prochaine ouverture du QG · Échap pour fermer</div></div>';
+                    ov.querySelector('.gz-date').textContent = d.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).toUpperCase();
+                    ov.querySelector('.gz-esc').textContent = String(esc).toUpperCase();
+                    ov.querySelector('.gz-titre').textContent = ed.titre || 'Nouvelle édition';
+                    ov.querySelector('.gz-p').addEventListener('click', () => fermerPopupGazette(true));
+                    ov.querySelector('.gz-plus').addEventListener('click', () => fermerPopupGazette(false));
+                    ov.querySelector('.gz-fond').addEventListener('click', () => fermerPopupGazette(false));
+                    document.body.appendChild(ov);
+                    document.addEventListener('keydown', clavierPopupGazette);
+                    if (typeof sonSucces === 'function') sonSucces();
+                }, 1800);
+            } catch (e) { console.error('Popup gazette :', e); }
         }
 
         // --- AFFICHAGE DE LA GAZETTE SÉLECTIONNÉE ---

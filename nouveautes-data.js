@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-logo-escadron', date: '2026-10-04T08:00:00Z', type: 'NOUVEAU',
+        titre: 'Logo d’escadron et nouvelle édition d’EDNews en popup',
+        texte: 'L’Amiral de chaque escadron peut désormais déposer le logo de son escadron (bouton « + LOGO » au pied de la carte « Ma faction »). L’image est redimensionnée automatiquement et s’affiche pour tous les membres. Chaque semaine, une popup vous présente la nouvelle édition d’EDNews dès l’ouverture du QG (« Lire l’édition » ou « Plus tard »), tant que vous ne l’avez pas lue. Dans l’en-tête, le rang BGS passe aussi en pastille au-dessus du cadre, comme le rang Powerplay, et les cartes du QG retrouvent leurs coins coupés.',
+        important: false
+    },
+    {
         id: '2026-10-puissance-faction', date: '2026-10-03T23:00:00Z', type: 'NOUVEAU',
         titre: 'Au QG : votre puissance et votre faction',
         texte: 'Deux nouvelles cartes en tête du QG. « Ma puissance » montre, avec le portrait de votre puissance, son classement parmi les douze (nombre de systèmes, répartition Stronghold, Fortified et Exploited). « Ma faction » montre la faction de votre escadron : systèmes contrôlés, présence, résidents et stations. Les variations apparaissent après une semaine de relevés. Les données viennent de la base communautaire Spansh, relevée chaque jour (les points par puissance et les systèmes contestés ne sont pas disponibles). EDNews s\'affiche désormais dans la carte de la faction ; les actualités Galnet, déjà visibles en jeu, sont retirées du QG et du compagnon mobile.',

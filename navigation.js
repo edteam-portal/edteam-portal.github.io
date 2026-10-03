@@ -353,8 +353,9 @@ window.actualiserHeader = function(profilData) {
                 const rg = Math.min(100, Math.max(1, parseInt(memo.rang_bgs) || 1)), pts = Number(memo.points_bgs) || 0;
                 const min = seuil(rg), max = rg >= 100 ? null : seuil(rg + 1);
                 const pct = max === null ? 100 : Math.max(0, Math.min(100, 100 * (pts - min) / (max - min)));
-                h += chip('', 'bgs', '#FF7100', 'RANG BGS', rg + '<small>' + (max === null ? 'MAX' : Math.floor(pts) + ' / ' + max) + '</small>', String(rg),
-                    { bar: '<div class="bar"><b style="width:' + pct.toFixed(1) + '%"></b></div>' },
+                // Le rang est en pastille au-dessus du cadre (comme « R42 » du Powerplay) ; le cadre montre la progression en points
+                h += chip('', 'bgs', '#FF7100', 'BGS', max === null ? 'RANG MAXIMAL' : Math.floor(pts) + ' / ' + max, max === null ? 'MAX' : String(Math.floor(pts)),
+                    { pil: '<span class="pil">R' + rg + '</span>', bar: '<div class="bar"><b style="width:' + pct.toFixed(1) + '%"></b></div>' },
                     tip('#FF7100', 'COMMANDEMENT BGS', 'Rang ' + rg + (max === null ? ' (maximal)' : ' · ' + Math.floor(pts) + ' / ' + max + ' points') + '. Progression et tableau de l’escadron.'),
                     '<polyline points="4.8,9.1 12,3.4 19.2,9.1"/><polyline points="4.8,13.9 12,8.2 19.2,13.9"/><polyline points="4.8,18.7 12,13 19.2,18.7"/>');
             }
