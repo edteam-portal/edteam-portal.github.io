@@ -1715,7 +1715,7 @@
 
         // Avancement d'une directive et part du pilote : meme calcul que la page BGS du PC
         function xAvancementOrdre(o, rs) {
-            const nb = Math.max(1, Number(rs.nb_participants) || 0);
+            const nb = Math.max(1, Number(rs.nb_actifs) || Number(rs.nb_participants) || 0);  // pilotes actifs du cycle (serveur) ; repli : participants
             const base = Object.assign({}, xPlafonds(o.population || 0), o.plafonds_custom || {});
             const cap = {};
             Object.keys(base).forEach(k => { cap[k] = base[k] * nb; });
