@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="quoifaire.js?v=5"></script>
+    <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=3"></script>
@@ -521,9 +522,6 @@
             <!-- ========================================== -->
             <div id="tab-qg" style="display: flex; flex-direction: column; gap: 12px;">
 
-                <!-- QUOI FAIRE : bande d'entree (recommandation), remplie par quoifaire.js -->
-                <div id="qf-m-bande" style="display: none;"></div>
-
                 <!-- Alertes (titre menace...) : remplies par chargerAccueilMobile -->
                 <div id="x-alertes" style="display: flex; flex-direction: column; gap: 10px;"></div>
 
@@ -558,6 +556,9 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- MA PUISSANCE (Powerplay) et MA FACTION (BGS) : releve quotidien Spansh, rempli par qgsuivi.js -->
+                <div id="m-suivi" style="display: none; flex-direction: column; gap: 12px;"></div>
 
                 <!-- MES FINANCES : resultat net du cycle (le detail s'ouvre dans une feuille) -->
                 <div class="xc b click" id="x-fin" onclick="ouvrirBudgetMobile()">
@@ -1234,7 +1235,7 @@
             initNouveautesMobile();
             chargerGazetteListMobile();
             chargerRegistreTactiqueMobile();
-            if (window.QF) QF.monterBande('qf-m-bande');
+            if (window.QGSuivi) QGSuivi.monterMobile('m-suivi');
             verifierNouvellesNotesMobile();
             verifierNouvellesLivraisonsMobile();
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI

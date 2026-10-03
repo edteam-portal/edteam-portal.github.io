@@ -1,7 +1,7 @@
 // QG : cartes « MA PUISSANCE » (Powerplay) et « MA FACTION » (BGS). Une seule lecture serveur : rpc('ma_puissance_et_faction') (script SQL 45),
 // mise en memoire 30 minutes (les donnees ne changent qu'une fois par jour : releve quotidien de Spansh, cote serveur).
 // Limites assumees : pas de points par puissance (aucune source publique), pas de systemes « contestes » ; variations seulement apres ~7 jours d'historique.
-// Les emblemes sont des monogrammes crees pour le site : aucune image de Frontier.
+// Les monogrammes (repli sans portrait) sont crees pour le site ; les portraits des Powers sont des images de Frontier (mention au pied de page).
 (function () {
     'use strict';
     const S = window.QGSuivi = {};
@@ -68,6 +68,8 @@
 #banner-gazette:hover{border-color:#00F0FF!important;background:linear-gradient(135deg,rgba(0,240,255,.34),rgba(0,0,0,.4))!important;box-shadow:0 0 14px rgba(0,240,255,.45)}
 #banner-gazette:active{background:linear-gradient(135deg,rgba(0,240,255,.5),rgba(0,0,0,.35))!important}
 .qs-ap{font-size:.6em;color:#8a8a8a;margin-right:4px;vertical-align:.25em}
+#m-suivi .qs-carte{clip-path:none;border-radius:18px;overflow:hidden;border-color:color-mix(in srgb,var(--c) 30%,transparent);box-shadow:inset 0 0 40px color-mix(in srgb,var(--c) 5%,transparent)}#m-suivi .qs-carte:before,#m-suivi .qs-carte:after{display:none}#m-suivi .qs-portrait{border-right-color:color-mix(in srgb,var(--c) 30%,transparent)}
+.qs-fm .qs-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}.qs-fm .qs-src{margin-top:0}.qs-fm .qs-src span{white-space:normal!important}
 .qs-t.cle .v{color:var(--c)}
 .qs-t .qs-v{display:block;margin:3px 0 0}
 .qs-carte.qs-pf{flex-direction:row;gap:0;padding:0;align-items:stretch}
@@ -146,6 +148,16 @@
         return '<span style="white-space:nowrap">SOURCE : SPANSH' + frais + '</span><span style="white-space:nowrap">RELEVÉ DU ' + esc(jj(f.releve_le)) + '</span>';
     }
 
+    // Carte « Ma faction » du compagnon mobile : logo en colonne a gauche (comme le portrait), nom, 4 tuiles, source
+    function carteFactionMobile(f, logo) {
+        const url = logo && logo.chemin ? logoUrl(logo) : '';
+        const hex = url ? '' : '<div class="qs-hx">' + ICONE_FACTION + '</div>';
+        const corps = '<div class="qs-cap">' + hex + '<div style="min-width:0;"><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">' + esc(String(f.nom).toUpperCase()) + '</div></div></div>'
+            + statsFaction(f) + '<div class="qs-src">' + ligneSourceFaction(f) + '</div>';
+        if (!url) return '<div class="qs-carte qs-fm" style="--c:#FF7100;">' + corps + '</div>';
+        return '<div class="qs-carte qs-pf qs-fm" style="--c:#FF7100;"><div class="qs-portrait"><img src="' + esc(url) + '" alt="Logo de l’escadron" loading="lazy" style="object-position:center;"></div><div class="qs-corps">' + corps + '</div></div>';
+    }
+
     async function charger() {
         const now = Date.now();
         try { const s = JSON.parse(sessionStorage.getItem('edteam_suivi_cache') || 'null'); if (s && now - s.ts < DUREE && s.d && ('peut_logo' in s.d)) return s.d; } catch (e) {}
@@ -219,6 +231,21 @@
                 elF.style.display = membre ? 'grid' : 'none';
             }
         } catch (e) { console.error('Suivi puissance / faction :', e); }
+    };
+    // Compagnon mobile : les deux cartes empilees (memes donnees, meme mise en memoire 30 min que le PC)
+    S.monterMobile = async function (idZone) {
+        injecterStyle();
+        const el = document.getElementById(idZone);
+        if (!el) return;
+        try {
+            const d = await charger();
+            const moi = (typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : {};
+            const membre = !!(d && d.acces && (d.faction || (moi.escadron_id && String(moi.escadron_id).toUpperCase() !== 'INDEPENDANT')));
+            let h = '';
+            if (d && d.puissance) h += cartePuissance(d.puissance);
+            if (membre && d && d.faction) h += carteFactionMobile(d.faction, d.logo);
+            el.innerHTML = h; el.style.display = h ? 'flex' : 'none';
+        } catch (e) { console.error('Suivi puissance / faction (mobile) :', e); }
     };
     injecterStyle();
 })();

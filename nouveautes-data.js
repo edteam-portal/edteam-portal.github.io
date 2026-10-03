@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-logo-escadron', date: '2026-10-04T08:00:00Z', type: 'NOUVEAU',
         titre: 'Logo d’escadron et nouvelle édition d’EDNews en popup',
-        texte: 'L’Amiral de chaque escadron peut désormais déposer le logo de son escadron (bouton « + LOGO » au pied de la carte « Ma faction »). L’image est redimensionnée automatiquement et s’affiche pour tous les membres. Chaque semaine, une popup vous présente la nouvelle édition d’EDNews dès l’ouverture du QG (« Lire l’édition » ou « Plus tard »), tant que vous ne l’avez pas lue. Dans l’en-tête, le rang BGS passe aussi en pastille au-dessus du cadre, comme le rang Powerplay, et les cartes du QG retrouvent leurs coins coupés.',
+        texte: 'L’Amiral de chaque escadron peut désormais déposer le logo de son escadron (bouton « + LOGO » au pied de la carte « Ma faction »). L’image est redimensionnée automatiquement et s’affiche pour tous les membres. Le compagnon mobile affiche désormais aussi « Ma puissance » et « Ma faction » sur son accueil. Chaque semaine, une popup vous présente la nouvelle édition d’EDNews dès l’ouverture du QG (« Lire l’édition » ou « Plus tard »), tant que vous ne l’avez pas lue. Dans l’en-tête, le rang BGS passe aussi en pastille au-dessus du cadre, comme le rang Powerplay, et les cartes du QG retrouvent leurs coins coupés.',
         important: false
     },
     {
