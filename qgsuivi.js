@@ -78,12 +78,11 @@
 .qs-logoligne{display:flex;align-items:center;gap:8px;margin-top:4px}.qs-amiral{font-size:.58em;letter-spacing:2px;color:#8a8a8a;white-space:nowrap}
 .qs-btnlogo{display:block;white-space:nowrap;background:none;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);font:inherit;font-size:.95em;letter-spacing:1px;padding:1px 7px;cursor:pointer}.qs-btnlogo:hover{background:color-mix(in srgb,var(--c) 18%,transparent)}.qs-btnlogo[disabled]{opacity:.5;cursor:wait}
 .qs-carte.qs-flogo{padding:0;grid-template-columns:122px minmax(0,1fr);grid-template-areas:"logo haut" "logo stats" "logo src";column-gap:0}
-.qs-flogo #qg-faction-logo{grid-area:logo;position:relative;border-right:1px solid color-mix(in srgb,var(--c) 55%,transparent);background:#05080a;display:grid;place-items:center;padding:12px;overflow:hidden}
-.qs-flogo #qg-faction-logo img{max-width:100%;max-height:100%;object-fit:contain;display:block;position:relative}
-.qs-flogo #qg-faction-logo:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,transparent),transparent 30%)}
+.qs-flogo #qg-faction-logo{grid-area:logo;position:relative;border-right:1px solid color-mix(in srgb,var(--c) 55%,transparent);background:#05080a;overflow:hidden}
+.qs-flogo #qg-faction-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.qs-flogo #qg-faction-logo:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 60%,rgba(5,3,1,.6)),linear-gradient(0deg,rgba(5,3,1,.7),transparent 30%),linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,transparent),transparent 30%)}
 .qs-flogo #qg-faction-haut{padding:11px 14px 0 14px}.qs-flogo #qg-faction-stats{padding:0 14px}.qs-flogo #qg-faction-src{margin:0 14px 8px}
-.qs-flogo #qg-faction-logo{padding:12px 12px 64px}
-.qs-flogo #banner-gazette{position:absolute!important;left:8px;bottom:8px;width:calc(122px - 16px);min-width:0!important;padding:5px 7px!important;gap:6px!important;z-index:5;box-sizing:border-box}.qs-flogo #banner-gazette>span:first-child{font-size:1.05em!important}.qs-flogo #banner-gazette>div{min-width:0}.qs-flogo #banner-gazette>div>div:last-child{white-space:normal;line-height:1.15;font-size:.52em!important;letter-spacing:0}
+.qs-flogo #banner-gazette{background:rgba(3,12,16,.94)!important;box-shadow:0 0 10px rgba(0,0,0,.6);position:absolute!important;left:8px;bottom:8px;width:calc(122px - 16px);min-width:0!important;padding:5px 7px!important;gap:6px!important;z-index:5;box-sizing:border-box}.qs-flogo #banner-gazette>span:first-child{font-size:1.05em!important}.qs-flogo #banner-gazette>div{min-width:0}.qs-flogo #banner-gazette>div>div:last-child{white-space:normal;line-height:1.15;font-size:.52em!important;letter-spacing:0}
 @media (max-width:1500px){.qs-carte.qs-flogo{grid-template-columns:104px minmax(0,1fr)}.qs-flogo #banner-gazette{width:calc(104px - 16px)}}
 @media (max-width:640px){.qs-carte.qs-flogo{grid-template-columns:84px minmax(0,1fr)}}
 .qs-mid{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0}
