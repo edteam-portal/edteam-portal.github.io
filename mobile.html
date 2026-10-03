@@ -720,8 +720,26 @@
             <!-- BATIR : la colonisation de l'escadron      -->
             <!-- ========================================== -->
             <div id="tab-batir" style="display: none; flex-direction: column; gap: 12px;">
-                <div id="x-batir-corps" style="display: flex; flex-direction: column; gap: 12px;">
-                    <div class="xmut" style="text-align: center; padding: 30px;">Consultation du registre de colonisation...</div>
+                <div class="xseg" id="x-batir-seg">
+                    <button class="on" data-v="chant" onclick="batirVue('chant')">CHANTIERS</button>
+                    <button data-v="jour" onclick="batirVue('jour')">JOURNAL<i class="pt" id="x-jr-pt"></i></button>
+                </div>
+
+                <div id="x-batir-chant" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div id="x-batir-corps" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="xmut" style="text-align: center; padding: 30px;">Consultation du registre de colonisation...</div>
+                    </div>
+                </div>
+
+                <div id="x-batir-jour" style="display: none; flex-direction: column; gap: 10px;">
+                    <div class="xsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="cj-q" maxlength="60" placeholder="Produit, station, système…" oninput="coloJournalRecherche()"></div>
+                    <select id="cj-pilote" class="m-input" style="padding: 11px 12px; font-size: 0.8em; border-radius: 12px;" onchange="coloJournalFiltre()"><option value="">TOUS LES PILOTES</option></select>
+                    <div class="xrow"><span class="xk">Livraisons</span><span class="xsp"></span><span id="cj-cnt" class="xmut"></span></div>
+                    <div id="cj-liste" class="xc" style="padding: 4px 14px;"></div>
+                    <div class="xrow" style="justify-content: space-between;">
+                        <span id="cj-info" class="xmut"></span>
+                        <span style="white-space: nowrap;"><button id="cj-prec" class="m-btn" style="padding: 8px 18px;" onclick="coloJournalPage(-1)">&lt;</button> <button id="cj-suiv" class="m-btn" style="padding: 8px 18px;" onclick="coloJournalPage(1)">&gt;</button></span>
+                    </div>
                 </div>
             </div>
 
@@ -1115,28 +1133,6 @@
         </div>
     </div>
 
-    <!-- FEUILLE JOURNAL DES LIVRAISONS DE COLONISATION (remplie par coloOuvrirJournal) -->
-    <div class="modal-overlay" id="modal-colo-journal" onclick="fermerModalCarriere('colo-journal')" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.72); display: none; justify-content: center; align-items: flex-end; z-index: 6100;">
-        <div class="card" style="width: 100%; max-height: 92vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
-            <div style="padding: 10px 16px; border-bottom: 1px solid var(--x-line); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-                <div style="min-width: 0;">
-                    <span class="xk">Colonisation</span>
-                    <span class="xbig" style="display: block; font-size: 1.15em; letter-spacing: 2px; margin-top: 3px;">JOURNAL DES LIVRAISONS <span id="cj-cnt" style="color: var(--x-mut); font-size: 0.6em; font-weight: 400;"></span></span>
-                </div>
-                <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em; padding-left: 12px;" onclick="fermerModalCarriere('colo-journal')">✕</span>
-            </div>
-            <div style="padding: 10px 14px; border-bottom: 1px dashed #333; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
-                <div class="xsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="cj-q" maxlength="60" placeholder="Produit, station, système…" oninput="coloJournalRecherche()"></div>
-                <select id="cj-pilote" class="m-input" style="padding: 9px 10px; font-size: 0.8em; border-radius: 12px;" onchange="coloJournalFiltre()"><option value="">TOUS LES PILOTES</option></select>
-            </div>
-            <div id="cj-liste" style="overflow-y: auto; flex: 1; min-height: 0; padding: 4px 14px;"></div>
-            <div style="padding: 10px 14px; border-top: 1px dashed #333; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0;">
-                <span id="cj-info" class="xmut"></span>
-                <span style="white-space: nowrap;"><button id="cj-prec" class="m-btn" style="padding: 8px 16px; border-radius: 10px;" onclick="coloJournalPage(-1)">&lt;</button> <button id="cj-suiv" class="m-btn" style="padding: 8px 16px; border-radius: 10px;" onclick="coloJournalPage(1)">&gt;</button></span>
-            </div>
-        </div>
-    </div>
-
     <!-- SCRIPT APPLICATION -->
     <script>
 
@@ -1306,6 +1302,7 @@
             chargerRegistreTactiqueMobile();
             initialiserCommsMobile();
             verifierNouvellesNotesMobile();
+            verifierNouvellesLivraisonsMobile();
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
 
         }
@@ -1379,6 +1376,7 @@
             if (rouge('m-btn-journal-tactique')) n.push({ e: '📋', t: 'Nouvelle note au journal', s: "Journal de l'escadron", a: 'ouvrirJournalTactiqueMobile()' });
             if (rouge('m-btn-galnet')) n.push({ e: '📡', t: 'Nouvel article Galnet', s: 'Actualités de la galaxie', a: 'ouvrirGalnetMobile()' });
             if (rouge('m-btn-gazette')) n.push({ e: '📰', t: 'Nouvelle édition EDNews', s: "Gazette de l'escadron", a: 'ouvrirGazetteMobile()' });
+            { const jp = xEl('x-jr-pt'); if (jp && jp.style.display === 'block') n.push({ e: '📦', t: 'Nouvelles livraisons', s: 'Journal de colonisation', a: "switchMobileTab('batir'); batirVue('jour')" }); }
             const al = xEl('x-alertes');
             if (al && al.children.length && profilCommandant) n.push({ e: '⚠', t: 'Titre de spécialiste menacé', s: 'Un pilote vous talonne', a: "ouvrirProfilPiloteMobile('" + profilCommandant.user_id + "')" });
             return n;
@@ -3399,15 +3397,14 @@
             });
 
             const archi = d.architectes || [];
-            if (archi.length) {
-                html += `<div class="xh2">ARCHITECTES</div>
-                <div class="xc" style="padding: 8px 14px;">${archi.map((a, i) => `<div class="xrow" style="padding: 6px 0; font-size: 0.78em;"><span style="color: ${i === 0 ? GOLD : '#ccc'};">#${i + 1} CMDR ${esc(String(a.cmdr).toUpperCase())}</span><span class="xsp"></span><span class="xmut">${a.systemes} sys. · ${a.stations} stat.</span></div>`).join('')}</div>`;
-            }
+            const bandeauArchi = archi.length ? `<details class="xc" style="padding: 0;">
+                <summary style="cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px;"><span class="xk" style="color: var(--ed-orange);">Architectes</span><span class="xpill" style="color: ${GOLD};">${archi.length}</span><span class="xsp"></span><span class="xmut" style="font-size: 1.1em;">▾</span></summary>
+                <div style="padding: 0 14px 8px;">${archi.map((a, i) => `<div class="xrow" style="padding: 7px 0; font-size: 0.78em; border-top: 1px solid var(--x-line);"><span style="color: ${i === 0 ? GOLD : '#ccc'};">#${i + 1} CMDR ${esc(String(a.cmdr).toUpperCase())}</span><span class="xsp"></span><span class="xmut">${a.systemes} sys. · ${a.stations} stat.</span></div>`).join('')}</div>
+            </details>` : '';
 
-            html += `<div class="xc click xlink" onclick="coloOuvrirJournal()"><span class="e">📜</span><span style="font-size: 0.85em;">Journal des livraisons</span><span class="chev" style="color: ${OR};">›</span></div>`;
             if (kpi.maj) html += `<div class="xmut" style="text-align: center; font-size: 0.62em;">dernier relevé de chantier : ${coloIlYa(kpi.maj)}</div>`;
             html += `<div style="color: #555; font-size: 0.6em; text-align: center; line-height: 1.5;">Tableau établi d'après ce que les plugins de l'escadron ont relevé : il peut être en retard ou incomplet par rapport au jeu. Types d'installations reconnus grâce à la feuille communautaire de <a href="https://forums.frontier.co.uk/threads/v3-of-the-colonization-construction-spreadsheet-is-now-available.635762/post-10831804" target="_blank" rel="noopener noreferrer" style="color: #6f8c95; text-decoration: underline dotted;">CMDR DaftMav</a> : merci à lui.</div>`;
-            return html;
+            return bandeauArchi + html;
         }
 
         let xBatirTs = 0;
@@ -3430,18 +3427,44 @@
         const CJ = { n: 50, p: 0, q: '', pilote: '', total: 0, jeton: 0, minuteur: null, pilotesOk: false };
         const CJ_DEBUT_POINTS = Date.parse('2026-10-01T13:40:00Z');   // les livraisons posterieures rapportent des points BGS
 
-        function coloOuvrirJournal() {
+        let xBatirVue = 'chant';
+        function batirVue(v) {
             sonClic();
+            xBatirVue = v;
+            document.querySelectorAll('#x-batir-seg button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+            xEl('x-batir-chant').style.display = v === 'chant' ? 'flex' : 'none';
+            xEl('x-batir-jour').style.display = v === 'jour' ? 'flex' : 'none';
+            if (v === 'chant') chargerBatirMobile(false); else coloOuvrirJournal();
+        }
+        function coloOuvrirJournal() {
             suivreEvenementMobile('ouvrir_journal_colonisation');
-            CJ.q = ''; CJ.pilote = ''; CJ.pilotesOk = false;
+            localStorage.setItem('edteam_last_read_colo', Date.now().toString());   // marque tout comme lu
+            xPoint('x-jr-pt', false);
+            if (CJ.ts && Date.now() - CJ.ts < 120000) return;   // deja affiche il y a moins de 2 minutes
+            CJ.ts = Date.now(); CJ.q = ''; CJ.pilote = ''; CJ.pilotesOk = false;
             xEl('cj-q').value = '';
             xEl('cj-pilote').innerHTML = '<option value="">TOUS LES PILOTES</option>';
-            xEl('modal-colo-journal').style.display = 'flex';
             coloJournalAller(0);
         }
         function coloJournalFiltre() { CJ.pilote = xEl('cj-pilote').value; coloJournalAller(0); }
         function coloJournalRecherche() { clearTimeout(CJ.minuteur); CJ.minuteur = setTimeout(() => { CJ.q = xEl('cj-q').value.trim(); coloJournalAller(0); }, 350); }
         function coloJournalPage(sens) { coloJournalAller(CJ.p + sens); }
+
+        // Pastille rouge : une livraison plus recente que la derniere lecture du journal (une toute petite lecture : la derniere ligne)
+        async function verifierNouvellesLivraisonsMobile() {
+            if (!profilCommandant) return;
+            try {
+                const { data } = await supabaseApp.rpc('colonisation_journal', { p_limite: 1, p_decalage: 0, p_type: 'LIVRAISON', p_pilote: null, p_recherche: null });
+                const l = data && data.lignes && data.lignes[0];
+                if (!l) return;
+                const dernierLu = parseInt(localStorage.getItem('edteam_last_read_colo') || '0');
+                if (Date.parse(l.t) > dernierLu) {
+                    xPoint('x-jr-pt', true);
+                    if (xEl('tab-batir').style.display !== 'flex') xEl('nav-btn-batir').classList.add('alerte-nav-rouge');
+                    xMajCloche();
+                }
+            } catch (e) { /* alerte facultative */ }
+        }
 
         async function coloJournalAller(p) {
             const liste = xEl('cj-liste');
@@ -3474,7 +3497,7 @@
                         <div class="xrow" style="margin-top: 3px;"><span class="xmut" style="font-size: 0.62em; overflow-wrap: anywhere; color: ${col};">${XESC(lieu)}</span><span class="xsp"></span><span class="xmut" style="font-size: 0.6em; white-space: nowrap;">${XESC(date)}</span></div>
                     </div>`;
                 }).join('') || '<div class="xmut" style="text-align: center; padding: 24px;">Aucune ligne ne correspond.</div>';
-                liste.scrollTop = 0;
+                window.scrollTo(0, 0);
                 const pages = Math.max(1, Math.ceil(CJ.total / CJ.n));
                 xTxt('cj-cnt', CJ.total + ' ligne' + (CJ.total > 1 ? 's' : ''));
                 xTxt('cj-info', (CJ.total ? CJ.p * CJ.n + 1 : 0) + '–' + Math.min((CJ.p + 1) * CJ.n, CJ.total) + ' sur ' + CJ.total);
