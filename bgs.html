@@ -1479,10 +1479,11 @@
                         const rs = resume[ordre.id] || { nb_participants: 0, types: {} };
 
                         // Plafond total de l'operation = plafond de reference (calibre pour 1 pilote)
-                        // x nombre de participants distincts a cet ordre. Cumule depuis le debut de
+                        // x nombre de pilotes ACTIFS de l'escadron dans le cycle en cours (tick hebdo, calcule
+                        // par le serveur : nb_actifs) et non plus les seuls participants a cet ordre. Cumule depuis le debut de
                         // l'operation : plus de remise a zero quotidienne, plus de multiplication par
                         // le nombre de jours ecoules (un escadron peu actif n'est plus penalise).
-                        const nbParticipants = Math.max(1, Number(rs.nb_participants) || 0);
+                        const nbParticipants = Math.max(1, Number(rs.nb_actifs) || Number(rs.nb_participants) || 0);
                         const capsBase = { ...calculerPlafonds(ordre.population || 0), ...(ordre.plafonds_custom || {}) };
                         const capsTotal = {};
                         for (const [cle, val] of Object.entries(capsBase)) {

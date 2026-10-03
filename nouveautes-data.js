@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-plafonds-actifs', date: '2026-10-03T16:00:00Z', type: 'AMELIORE',
+        titre: 'Jauges des directives : l\'objectif suit les pilotes actifs de la semaine',
+        texte: 'Jusqu\'ici, l\'objectif de chaque activité d\'une directive dépendait du nombre de pilotes qui l\'avaient déjà commencée : dès que ces quelques pilotes avaient joué, la jauge affichait 100 % et plus personne n\'avait l\'impression de devoir s\'y mettre. Désormais l\'objectif se base sur le nombre de pilotes actifs de l\'escadron dans le cycle en cours (du jeudi 07:00 UTC au suivant) : la jauge ne se remplit vraiment que si l\'escadron fournit l\'effort attendu. En début de cycle, tant que personne n\'a joué, on reprend les actifs du cycle précédent.',
+        important: false
+    },
+    {
         id: '2026-10-mobile-refait', date: '2026-10-03T13:00:00Z', type: 'AMELIORE',
         titre: 'Compagnon mobile entièrement refait',
         texte: 'Le site mobile reprend toutes les nouveautés du PC dans une présentation moderne. L\'accueil montre votre rang BGS, votre Powerplay, vos finances, le Pilier, l\'Élan, la semaine de l\'escadron et les chiffres clés. L\'onglet BGS regroupe les directives, votre effort sur 8 cycles et les exploits. Le nouvel onglet Bâtir affiche la colonisation en direct, avec le journal des livraisons. L\'onglet Escadron devient des cartes avec recherche, tri et filtre « actifs cette semaine ». Les fiches pilotes montrent les titres de spécialiste (désormais identiques à ceux du PC) et les plaques de campagne. Le budget s\'ouvre depuis votre carte « Mes finances », et les réglages (aide, Discord, sons, déconnexion) sont derrière la roue crantée. Le suivi d\'influence disparaît, comme sur le PC.',
