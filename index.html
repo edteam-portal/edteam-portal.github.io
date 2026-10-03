@@ -14,9 +14,10 @@
     <meta name="robots" content="noindex, follow">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=2"></script>
+    <script src="shared-utils.js?v=3"></script>
+    <script src="quoifaire.js?v=2"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=9"></script>
+    <script src="navigation.js?v=12"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -44,17 +45,6 @@
         .boot-btn:hover { background: var(--ed-orange-dim); box-shadow: 0 0 15px var(--ed-orange-glow); }
         .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
 
-        @keyframes enveloppeBlink {
-            0%, 100% { color: var(--ed-blue); filter: none; }
-            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
-        }
-        .alerte-enveloppe .nav-icon {
-            animation: enveloppeBlink 1s infinite !important;
-        }
-        .alerte-enveloppe .nav-text {
-            color: #fff !important;
-            text-shadow: 0 0 10px #fff;
-        }
 
         /* =========================================
            MENU LATÉRAL TACTIQUE (HAMBURGER)
@@ -383,166 +373,36 @@
             <!-- ONGLET 1 : DOSSIER COMMANDANT -->
             <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 12px;">
 
-                <!-- ACTUALITÉS (GALNET & EDNEWS CÔTE À CÔTE) -->
+                <!-- RANGEE D'ENTREE : QUOI FAIRE (recommandation) + ACTUALITES GALNET + EDNEWS ESCADRON. Les rangs (Powerplay, BGS, Federation, Auxiliaires) sont dans l'en-tete. -->
                 <div style="display: flex; gap: 12px; align-items: stretch;">
-                    
+
+                    <div id="qf-bande" class="qf-slot" data-display="flex" style="flex: 1.6; min-width: 0; display: none;"></div>
+
                     <!-- GALNET -->
-                    <div class="tuile-index" style="flex: 1; border-color: var(--ed-orange); box-shadow: inset 0 0 30px rgba(255, 113, 0, 0.1); padding: 15px 25px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%);" onclick="ouvrirModalGalnet()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-orange)';">
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <span style="font-size: 2.2em; filter: drop-shadow(0 0 10px rgba(255,113,0,0.5));">📡</span>
-                            <div>
-                                <span style="color: var(--ed-orange); font-size: 1.3em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">ACTUALITÉS GALNET</span>
-                                <span id="galnet-banner-date" style="color: #aaa; font-size: 0.9em; font-weight: bold;">Recherche des transmissions...</span>
+                    <div class="tuile-index" style="flex: 0.7; min-width: 0; border-color: var(--ed-orange); box-shadow: inset 0 0 30px rgba(255, 113, 0, 0.1); padding: 12px 18px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%);" onclick="ouvrirModalGalnet()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 113, 0, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-orange)';">
+                        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                            <span style="font-size: 1.7em; filter: drop-shadow(0 0 10px rgba(255,113,0,0.5));">📡</span>
+                            <div style="min-width: 0;">
+                                <span style="color: var(--ed-orange); font-size: 1.05em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">GALNET</span>
+                                <span id="galnet-banner-date" style="color: #aaa; font-size: 0.78em; font-weight: bold;">Recherche des transmissions...</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- EDNEWS ESCADRON -->
-                    <div class="tuile-index" style="flex: 1; border-color: var(--ed-blue); box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.1); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%);" id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-blue)';">
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <span style="font-size: 2.2em; filter: drop-shadow(0 0 10px rgba(0,240,255,0.5));">📰</span>
-                            <div>
-                                <span style="color: var(--ed-blue); font-size: 1.3em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">EDNEWS ESCADRON</span>
-                                <span id="gazette-banner-date" style="color: #aaa; font-size: 0.9em; font-weight: bold;">Recherche des archives...</span>
+                    <div class="tuile-index" style="flex: 0.7; min-width: 0; border-color: var(--ed-blue); box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.1); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 0; background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%);" id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" onmouseover="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='#fff';" onmouseout="this.style.background='linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0,0,0,0.8) 100%)'; this.style.borderColor='var(--ed-blue)';">
+                        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                            <span style="font-size: 1.7em; filter: drop-shadow(0 0 10px rgba(0,240,255,0.5));">📰</span>
+                            <div style="min-width: 0;">
+                                <span style="color: var(--ed-blue); font-size: 1.05em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 2px;">EDNEWS</span>
+                                <span id="gazette-banner-date" style="color: #aaa; font-size: 0.78em; font-weight: bold;">Recherche des archives...</span>
                             </div>
                         </div>
-                        <div id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; background: #FF3333; color: #fff; padding: 6px 15px; border-radius: 4px; font-weight: bold; letter-spacing: 2px; font-size: 0.9em;">NOUVELLE TRANSMISSION</div>
+                        <div id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; background: #FF3333; color: #fff; padding: 4px 10px; border-radius: 4px; font-weight: bold; letter-spacing: 1px; font-size: 0.72em; white-space: nowrap;">NOUVEAU</div>
                     </div>
 
                 </div>
-
-                <!-- LIGNE COMBINÉE : CARRIÈRE MILITAIRE + MODULE REGISTRE -->
-                <div style="display: flex; gap: 12px; align-items: stretch;">
-                    
-                    <!-- 1. BLOC CARRIÈRE MILITAIRE (Prend tout l'espace disponible) -->
-                    <div class="data-row bloc" style="flex: 1; cursor: default; margin-bottom: 0; display: flex; flex-direction: row; gap: 20px; align-items: center;">
-
-                        <!-- COLONNE DROITE : LES INFOS -->
-                        <div style="flex-grow: 1; display: flex; flex-direction: column;">
-                            <div class="row-top" style="border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 15px;">
-                                <span style="color: #aaa; font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> CARRIÈRE MILITAIRE</span>
-                            </div>
-
-                            <!-- Si le pilote a un escadron -->
-                            <div id="qg-squad-actif" style="display: none; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    <span id="qg-squad-tag" style="color: var(--ed-orange); font-size: 1.8em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,113,0,0.3);">[ ... ]</span>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div id="qg-squad-roles" style="display: flex; gap: 10px; justify-content: flex-end;"></div>
-                                </div>
-                            </div>
-
-                            <!-- Si le pilote est mercenaire indépendant -->
-                            <div id="qg-squad-mercenaire" style="display: none; flex-direction: column; gap: 12px; text-align: left; padding: 15px 20px; background: rgba(0, 240, 255, 0.03); border: 1px dashed var(--ed-blue); border-radius: 4px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(0, 240, 255, 0.2); padding-bottom: 8px;">
-                                    <span style="color: var(--ed-blue); font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">STATUT : PILOTE INDÉPENDANT</span>
-                                </div>
-                                <div style="color: #ccc; font-size: 0.85em; line-height: 1.5;">
-                                    Les modules BGS, Diplomatie et Escadron sont réservés aux membres d'un escadron.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BOUTON CARRÉ POWERPLAY 2.0 -->
-                    <div id="btn-qg-powerplay" onclick="ouvrirSallePowerplay()" 
-                         onmouseenter="showHoloTooltip(event, 'COMMANDEMENT POWERPLAY 2.0<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Allégeance, mérites du cycle et réseau des partisans</span>', '#00F0FF')"
-                         onmouseleave="hideHoloTooltip()"
-                         style="position: relative; width: 140px; background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 6px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);"
-                         onmouseover="this.style.background='rgba(0, 240, 255, 0.15)'; this.style.boxShadow='0 0 25px rgba(0, 240, 255, 0.4)';"
-                         onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.boxShadow='0 0 15px rgba(0, 240, 255, 0.15)';">
-                        
-                        <!-- Emblème vectoriel -->
-                        <div style="width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;">
-                            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; stroke: var(--ed-blue); fill: none; stroke-width: 4; filter: drop-shadow(0 0 5px var(--ed-blue));">
-                                <polygon points="50,8 90,28 90,72 50,92 10,72 10,28" />
-                                <polygon points="50,22 74,36 74,64 50,78 26,64 26,36" stroke-dasharray="4 4" />
-                                <circle cx="50" cy="50" r="8" fill="var(--ed-blue)" />
-                            </svg>
-                        </div>
-
-                        <!-- Nom de la puissance -->
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; line-height: 1.2;">POWERPLAY</span>
-                            <span id="qg-pp-nom" style="color: #fff; font-size: 0.7em; font-weight: bold; letter-spacing: 1px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NON ALIGNÉ</span>
-                        </div>
-                        
-                        <!-- Pastille de rang -->
-                        <div id="badge-pp-rang" style="display: none; position: absolute; top: -6px; right: -6px; background: var(--ed-blue); color: #000; min-width: 30px; border-radius: 8px; font-weight: bold; font-size: 0.85em; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 0 0 10px var(--ed-blue); padding: 3px 6px; box-sizing: border-box;"><span style="font-size: 0.6em; letter-spacing: 1px; line-height: 1;">RANG</span><span style="line-height: 1.1;">0</span></div>
-                    </div>
-
-                    <!-- BOUTON CARRÉ BGS : RANG DE CARRIÈRE (membres d'escadron, même structure que Powerplay) -->
-                    <div id="btn-qg-bgs" onclick="ouvrirSalleBgs()"
-                         onmouseenter="showHoloTooltip(event, 'COMMANDEMENT BGS<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Rang de carrière, progression et tableau de l\'escadron</span>', '#FF7100')"
-                         onmouseleave="hideHoloTooltip()"
-                         style="display: none; position: relative; width: 140px; background: rgba(255, 113, 0, 0.05); border: 1px solid var(--ed-orange); border-radius: 6px; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 6px; box-shadow: 0 0 15px rgba(255, 113, 0, 0.15); overflow: visible;"
-                         onmouseover="this.style.background='rgba(255, 113, 0, 0.15)'; this.style.boxShadow='0 0 25px rgba(255, 113, 0, 0.4)';"
-                         onmouseout="this.style.background='rgba(255, 113, 0, 0.05)'; this.style.boxShadow='0 0 15px rgba(255, 113, 0, 0.15)';">
-
-                        <!-- Emblème vectoriel : chevrons de grade -->
-                        <div style="width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;">
-                            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; stroke: var(--ed-orange); fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px var(--ed-orange));">
-                                <polyline points="20,38 50,14 80,38" />
-                                <polyline points="20,58 50,34 80,58" />
-                                <polyline points="20,78 50,54 80,78" stroke-dasharray="6 6" />
-                            </svg>
-                        </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; line-height: 1.2;">BGS</span>
-                            <span id="qg-bgs-progression-texte" style="color: #fff; font-size: 0.7em; font-weight: bold; letter-spacing: 1px;">RANG --</span>
-                        </div>
-
-                        <!-- Barre de progression vers le rang suivant -->
-                        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
-                            <div id="qg-bgs-barre" style="width: 0%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 6px var(--ed-orange); transition: width 0.4s;"></div>
-                        </div>
-
-                        <!-- Pastille de rang -->
-                        <div id="badge-bgs-rang" style="display: none; position: absolute; top: -6px; right: -6px; background: var(--ed-orange); color: #000; min-width: 30px; border-radius: 8px; font-weight: bold; font-size: 0.85em; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 0 0 10px var(--ed-orange); padding: 3px 6px; box-sizing: border-box; white-space: nowrap;"><span style="font-size: 0.6em; letter-spacing: 1px; line-height: 1;">RANG</span><span style="line-height: 1.1;">1</span></div>
-                    </div>
-
-
-                    <!-- BOUTON CARRÉ : FÉDÉRATION DES PILOTES (résumé ; le détail des cinq rangs s'ouvre dans la fenêtre « Rangs ») -->
-                    <div id="btn-qg-fedpil" onclick="ouvrirModal('modal-rangs-fed', event)"
-                         onmouseenter="showHoloTooltip(event, 'FÉDÉRATION DES PILOTES<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Vos cinq rangs de carrière et leur progression</span>', '#00FF66')"
-                         onmouseleave="hideHoloTooltip()"
-                         style="position: relative; width: 140px; background: rgba(0, 255, 102, 0.05); border: 1px solid #00FF66; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 6px; box-shadow: 0 0 15px rgba(0, 255, 102, 0.15);"
-                         onmouseover="this.style.background='rgba(0, 255, 102, 0.15)'; this.style.boxShadow='0 0 25px rgba(0, 255, 102, 0.4)';" onmouseout="this.style.background='rgba(0, 255, 102, 0.05)'; this.style.boxShadow='0 0 15px rgba(0, 255, 102, 0.15)';">
-                        <div style="width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;">
-                            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; stroke: #00FF66; fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px #00FF66);">
-                                <path d="M50 10 L84 24 V52 C84 72 68 86 50 92 C32 86 16 72 16 52 V24 Z" />
-                                <path d="M34 50 L46 62 L68 38" />
-                            </svg>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="color: #00FF66; font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; line-height: 1.2;">FÉDÉRATION</span>
-                            <span id="qg-fedpil-txt" style="color: #fff; font-size: 0.7em; font-weight: bold; letter-spacing: 1px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">--</span>
-                            <span id="qg-fedpil-sub" style="color: #888; font-size: 0.6em; letter-spacing: 1px;">5 RANGS</span>
-                        </div>
-                    </div>
-
-                    <!-- BOUTON CARRÉ : RANGS AUXILIAIRES (Fédération / Empire) -->
-                    <div id="btn-qg-aux" onclick="ouvrirModal('modal-rangs-aux', event)"
-                         onmouseenter="showHoloTooltip(event, 'RANGS AUXILIAIRES<br><span style=\'color:#ccc; font-size:0.8em; font-weight:normal;\'>Marine fédérale et Empire : rangs et progression</span>', '#B026FF')"
-                         onmouseleave="hideHoloTooltip()"
-                         style="position: relative; width: 140px; background: rgba(176, 38, 255, 0.05); border: 1px solid #B026FF; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; padding: 10px; box-sizing: border-box; gap: 6px; box-shadow: 0 0 15px rgba(176, 38, 255, 0.15);"
-                         onmouseover="this.style.background='rgba(176, 38, 255, 0.15)'; this.style.boxShadow='0 0 25px rgba(176, 38, 255, 0.4)';" onmouseout="this.style.background='rgba(176, 38, 255, 0.05)'; this.style.boxShadow='0 0 15px rgba(176, 38, 255, 0.15)';">
-                        <div style="width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;">
-                            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; stroke: #B026FF; fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px #B026FF);">
-                                <polygon points="50,12 61,38 90,41 68,60 75,88 50,73 25,88 32,60 10,41 39,38" />
-                            </svg>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="color: #B026FF; font-size: 0.8em; font-weight: bold; letter-spacing: 1.5px; line-height: 1.2;">AUXILIAIRES</span>
-                            <span id="qg-aux-fed" style="color: #fff; font-size: 0.62em; font-weight: bold; letter-spacing: 1px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">--</span>
-                            <span id="qg-aux-emp" style="color: #ccc; font-size: 0.62em; font-weight: bold; letter-spacing: 1px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">--</span>
-                        </div>
-                    </div>
-
-                </div>
-                <!-- FIN LIGNE COMBINÉE -->
+                <!-- FIN RANGEE D'ENTREE -->
 
                 <!-- LIGNE GLOBALE (2 COLONNES) -->
                 <div style="display: flex; gap: 12px; align-items: stretch;">
@@ -555,7 +415,7 @@
 
                     <!-- COLONNE DROITE (FLUX D'ACTIVITÉ HOLOGRAPHIQUE) -->
                     <div class="data-row bloc holo" style="flex: 1.6; min-width: 0; cursor: default; margin-bottom: 0; display: flex; flex-direction: column; padding: 0;">
-                        <!-- lignes de balayage sur tout l'ecran (comme le terminal des Communications) -->
+                        <!-- lignes de balayage sur tout l ecran -->
                         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 51;"></div>
                         <div style="border-bottom: 1px dashed rgba(0, 240, 255, 0.35); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(0,240,255,0.05) 0%, transparent 100%); position: relative; z-index: 52;">
                             <div style="display: flex; align-items: center; gap: 15px;">
@@ -597,6 +457,14 @@
     </div>
 
     <!-- MODALE GALNET -->
+    <!-- MODAL QUOI FAIRE -->
+    <div class="modal-overlay" id="modal-quoifaire" onclick="fermerQuoiFaire()" style="z-index: 4600;">
+        <div class="modal-content" style="max-width: 860px; width: 94%; max-height: 90vh; overflow-y: auto; background: #05080a; border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); padding: 22px 26px;" onclick="event.stopPropagation()">
+            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerQuoiFaire()">X</div>
+            <div id="qf-corps"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-galnet" onclick="fermerModalGalnet()" style="z-index: 4600;">
         <div class="modal-content" style="max-width: 700px; width: 90%; background-color: #0b1016; border: 1px solid var(--ed-blue); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);" onclick="event.stopPropagation()">
             <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModalGalnet()">X</div>
@@ -805,113 +673,6 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE COMMANDEMENT BGS : RANG DE CARRIÈRE (même structure que la salle Powerplay) -->
-    <!-- MODAL : FÉDÉRATION DES PILOTES (les cinq rangs de carrière) -->
-    <div class="modal-overlay" id="modal-rangs-fed" onclick="fermerModal('modal-rangs-fed', event)" style="z-index: 2900;">
-        <div class="modal-content" style="max-width: 580px; width: 95%; padding: 0; background: rgba(8, 5, 0, 0.98); border: 1px solid #00FF66; box-shadow: 0 0 40px rgba(0, 255, 102, 0.15); position: relative;" onclick="event.stopPropagation()">
-            <div class="modal-close" style="position: absolute; top: 14px; right: 20px; color: #00FF66; z-index: 60;" onclick="fermerModal('modal-rangs-fed')">X</div>
-            <div style="padding: 18px 24px; border-bottom: 1px solid rgba(0, 255, 102, 0.35); background: rgba(0, 255, 102, 0.05);">
-                <span style="color: #888; font-size: 0.8em; letter-spacing: 2px; display: block; margin-bottom: 4px;">CARRIÈRE DE PILOTE</span>
-                <span style="color: #00FF66; font-size: 1.4em; font-weight: bold; letter-spacing: 2px;">FÉDÉRATION DES PILOTES</span>
-            </div>
-            <div style="padding: 18px 24px 8px;">
-                <div id="rang-ligne-combat" class="rang-ligne">
-                    <div class="rang-ligne-tete"><span class="rang-dom">COMBAT</span><span id="qg-combat-rank" class="rang-nom">INCONNU</span><span id="qg-combat-prog" class="rang-pct">0%</span></div>
-                    <div class="rang-barre"><div id="qg-combat-bar" style="width: 0%;"></div></div>
-                </div>
-                <div id="rang-ligne-trade" class="rang-ligne">
-                    <div class="rang-ligne-tete"><span class="rang-dom">COMMERCE</span><span id="qg-trade-rank" class="rang-nom">INCONNU</span><span id="qg-trade-prog" class="rang-pct">0%</span></div>
-                    <div class="rang-barre"><div id="qg-trade-bar" style="width: 0%;"></div></div>
-                </div>
-                <div id="rang-ligne-explore" class="rang-ligne">
-                    <div class="rang-ligne-tete"><span class="rang-dom">EXPLORATION</span><span id="qg-explore-rank" class="rang-nom">INCONNU</span><span id="qg-explore-prog" class="rang-pct">0%</span></div>
-                    <div class="rang-barre"><div id="qg-explore-bar" style="width: 0%;"></div></div>
-                </div>
-                <div id="rang-ligne-exobio" class="rang-ligne">
-                    <div class="rang-ligne-tete"><span class="rang-dom">EXOBIOLOGIE</span><span id="qg-exobio-rank" class="rang-nom">INCONNU</span><span id="qg-exobio-prog" class="rang-pct">0%</span></div>
-                    <div class="rang-barre"><div id="qg-exobio-bar" style="width: 0%;"></div></div>
-                </div>
-                <div id="rang-ligne-mercenary" class="rang-ligne">
-                    <div class="rang-ligne-tete"><span class="rang-dom">MERCENAIRE</span><span id="qg-mercenary-rank" class="rang-nom">INCONNU</span><span id="qg-mercenary-prog" class="rang-pct">0%</span></div>
-                    <div class="rang-barre"><div id="qg-mercenary-bar" style="width: 0%;"></div></div>
-                </div>
-            </div>
-            <div style="height: 6px;"></div>
-        </div>
-    </div>
-
-    <!-- MODAL : RANGS AUXILIAIRES (Marine fédérale et Empire) -->
-    <div class="modal-overlay" id="modal-rangs-aux" onclick="fermerModal('modal-rangs-aux', event)" style="z-index: 2900;">
-        <div class="modal-content" style="max-width: 520px; width: 95%; padding: 0; background: rgba(8, 5, 0, 0.98); border: 1px solid #B026FF; box-shadow: 0 0 40px rgba(176, 38, 255, 0.15); position: relative;" onclick="event.stopPropagation()">
-            <div class="modal-close" style="position: absolute; top: 14px; right: 20px; color: #B026FF; z-index: 60;" onclick="fermerModal('modal-rangs-aux')">X</div>
-            <div style="padding: 18px 24px; border-bottom: 1px solid rgba(176, 38, 255, 0.35); background: rgba(176, 38, 255, 0.05);">
-                <span style="color: #888; font-size: 0.8em; letter-spacing: 2px; display: block; margin-bottom: 4px;">ALLÉGEANCES</span>
-                <span style="color: #B026FF; font-size: 1.4em; font-weight: bold; letter-spacing: 2px;">RANGS AUXILIAIRES</span>
-            </div>
-            <div style="padding: 18px 24px 22px; display: flex; flex-direction: column; gap: 14px;">
-                <div class="rang-aux" style="--c: #4da6ff;">
-                    <div style="color: #888; font-size: 0.8em; letter-spacing: 2px;">FÉDÉRATION</div>
-                    <div style="color: #666; font-size: 0.72em; margin-bottom: 8px;">Marine fédérale</div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px;"><span id="qg-fed-rank" class="rang-aux-nom">INCONNU</span><span id="qg-fed-prog" class="rang-pct" style="color: var(--c);">(0%)</span></div>
-                    <div class="rang-barre"><div id="qg-fed-bar" style="width: 0%; background: var(--c); box-shadow: 0 0 6px var(--c);"></div></div>
-                </div>
-                <div class="rang-aux" style="--c: #FF3333;">
-                    <div style="color: #888; font-size: 0.8em; letter-spacing: 2px;">EMPIRE</div>
-                    <div style="color: #666; font-size: 0.72em; margin-bottom: 8px;">Marine impériale</div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px;"><span id="qg-emp-rank" class="rang-aux-nom">INCONNU</span><span id="qg-emp-prog" class="rang-pct" style="color: var(--c);">(0%)</span></div>
-                    <div class="rang-barre"><div id="qg-emp-bar" style="width: 0%; background: var(--c); box-shadow: 0 0 6px var(--c);"></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-bgs" onclick="fermerModal('modal-bgs', event)" style="z-index: 4550;">
-        <div class="modal-content" style="max-width: 900px; width: 95%; background: rgba(8, 5, 0, 0.98); border: 1px solid var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.2); display: flex; flex-direction: column; max-height: 85vh; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
-            <div class="modal-close" style="position: absolute; top: 15px; right: 20px; color: var(--ed-orange); z-index: 60;" onclick="fermerModal('modal-bgs')">X</div>
-
-            <!-- En-tête -->
-            <div style="padding: 20px 25px; border-bottom: 1px solid rgba(255, 113, 0, 0.3); background: rgba(255, 113, 0, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <span style="color: #888; font-size: 0.8em; letter-spacing: 2px; display: block; margin-bottom: 4px;">OPÉRATIONS BGS DE L'ESCADRON</span>
-                    <span id="bgs-modal-escadron" style="color: var(--ed-orange); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;">COMMANDEMENT BGS</span>
-                </div>
-                <div style="text-align: right; margin-right: 30px;">
-                    <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 4px;">PROCHAIN CYCLE :</span>
-                    <span id="bgs-modal-countdown" style="color: #FFD700; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">JEUDI 07:00 UTC</span>
-                </div>
-            </div>
-
-            <!-- Contenu dynamique -->
-            <div id="bgs-modal-body" style="padding: 25px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px;">
-                <!-- Injecté par JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE SALLE STRATÉGIQUE POWERPLAY 2.0 -->
-    <div class="modal-overlay" id="modal-powerplay" onclick="fermerModal('modal-powerplay', event)" style="z-index: 4550;">
-        <div class="modal-content" style="max-width: 900px; width: 95%; background: rgba(5, 8, 12, 0.98); border: 1px solid var(--ed-blue); box-shadow: 0 0 40px rgba(0, 240, 255, 0.2); display: flex; flex-direction: column; max-height: 85vh; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
-            <div class="modal-close" style="position: absolute; top: 15px; right: 20px; color: var(--ed-blue); z-index: 60;" onclick="fermerModal('modal-powerplay')">X</div>
-            
-            <!-- En-tête -->
-            <div style="padding: 20px 25px; border-bottom: 1px solid rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <span style="color: #888; font-size: 0.8em; letter-spacing: 2px; display: block; margin-bottom: 4px;">OPÉRATIONS STRATÉGIQUES GALACTIQUES</span>
-                    <span id="pp-modal-power-name" style="color: var(--ed-blue); font-size: 1.5em; font-weight: bold; letter-spacing: 2px;">ALLÉGEANCE : INCONNUE</span>
-                </div>
-                <div style="text-align: right;">
-                    <span style="color: #888; font-size: 0.8em; display: block; margin-bottom: 4px;">PROCHAIN CYCLE POWERPLAY :</span>
-                    <span id="pp-modal-countdown" style="color: #FFD700; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">JEUDI 07:00 UTC</span>
-                </div>
-            </div>
-
-            <!-- Contenu dynamique -->
-            <div id="pp-modal-body" style="padding: 25px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px;">
-                <!-- Injecté par JavaScript -->
             </div>
         </div>
     </div>
@@ -1632,6 +1393,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             if (data && data.est_approuve) {
                 profilCommandant = data;
+                if (window.QF) QF.monterBande('qf-bande');
                 enregistrerTelemetrie('page', 'qg');
                 synchroniserTelemetrie();
                 actualiserAffichageRH();
@@ -1643,14 +1405,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 }
                 
                 const fmt = new Intl.NumberFormat('fr-FR');
-                if (data.solde_vaisseau !== null && data.solde_vaisseau !== undefined) {
-                    const elVaisseau = document.getElementById('solde-vaisseau');
-                    if (elVaisseau) elVaisseau.innerText = fmt.format(data.solde_vaisseau);
-                }
-                if (data.solde_fc !== null && data.solde_fc !== undefined) {
-                    const elFc = document.getElementById('solde-fc');
-                    if (elFc) elFc.innerText = fmt.format(data.solde_fc);
-                }
+                // Escadron et grades dans l'en-tete (navigation.js)
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
 
                 // AFFICHAGE DE LA PASTILLE D'ALERTE (Amirauté & Directeur)
                 if (data.est_amiral || data.est_directeur) {
@@ -1996,8 +1752,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                 // Header Général
                 const fmt = new Intl.NumberFormat('fr-FR');
-                if (profilData.solde_vaisseau) { const el = document.getElementById('solde-vaisseau'); if (el) el.innerText = fmt.format(profilData.solde_vaisseau); }
-                if (profilData.solde_fc) { const el = document.getElementById('solde-fc'); if (el) el.innerText = fmt.format(profilData.solde_fc); }
                 if (profilData.cmdr_nom) { const el = document.getElementById('cmdr-name-display'); if(el) el.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase(); }
 
                 // POSITION ACTUELLE ET RANGS
@@ -2005,68 +1759,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const elFcPosLog = document.getElementById('qg-fc-pos-logistique');
                 if (elFcPosLog) elFcPosLog.innerText = positionActuelle.toUpperCase();
 
-                const ranksCombat = ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
-                const ranksTrade = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
-                const ranksExplore = ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
-                const ranksExobio = ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
-                const ranksFed = ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"];
-                const ranksEmp = ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"];
-                const ranksMercenary = ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
-
-                const updateRankUI = (idPrefix, rankVal, progVal, rankArray) => {
-                    const r = parseInt(rankVal) || 0; 
-                    const p = parseInt(progVal) || 0;
-                    const elR = document.getElementById(`qg-${idPrefix}-rank`); if(elR) elR.innerText = rankArray[r] || "INCONNU";
-                    const elP = document.getElementById(`qg-${idPrefix}-prog`); if(elP) elP.innerText = (idPrefix==='fed'||idPrefix==='emp') ? `(${p}%)` : `${p}%`;
-                    const elB = document.getElementById(`qg-${idPrefix}-bar`); if(elB) elB.style.width = `${p}%`;
-                    if(idPrefix!=='fed'&&idPrefix!=='emp') { currentRanks[idPrefix=== 'explore' ? 'explore' : idPrefix] = r; currentProgs[idPrefix=== 'explore' ? 'explore' : idPrefix] = p; }
-                };
-
-                updateRankUI('combat', profilData.rang_combat, profilData.prog_combat, ranksCombat);
-                updateRankUI('trade', profilData.rang_commerce, profilData.prog_commerce, ranksTrade);
-                updateRankUI('explore', profilData.rang_explo, profilData.prog_explore, ranksExplore);
-                updateRankUI('exobio', profilData.rang_exobio, profilData.prog_exobio, ranksExobio);
-                updateRankUI('mercenary', profilData.rang_mercenary, profilData.prog_mercenary, ranksMercenary);
-                updateRankUI('fed', profilData.rang_fed, profilData.prog_fed, ranksFed);
-                updateRankUI('emp', profilData.rang_emp, profilData.prog_emp, ranksEmp);
-
-                // Pastilles de la carrière : résumé des rangs (le détail des barres s'ouvre dans la fenêtre « Rangs »)
-                (() => {
-                    const dom = [['COMBAT', profilData.rang_combat, profilData.prog_combat, ranksCombat], ['COMMERCE', profilData.rang_commerce, profilData.prog_commerce, ranksTrade],
-                                 ['EXPLORATION', profilData.rang_explo, profilData.prog_explore, ranksExplore], ['EXOBIOLOGIE', profilData.rang_exobio, profilData.prog_exobio, ranksExobio],
-                                 ['MERCENAIRE', profilData.rang_mercenary, profilData.prog_mercenary, ranksMercenary]];
-                    let meilleur = null;
-                    const cles = ['combat', 'trade', 'explore', 'exobio', 'mercenary'];
-                    dom.forEach((d, i) => { const ligne = document.getElementById('rang-ligne-' + cles[i]); if (ligne) ligne.classList.toggle('elite', (parseInt(d[1]) || 0) >= 8); });
-                    dom.forEach(d => { const r = parseInt(d[1]) || 0, p = parseInt(d[2]) || 0, sc = r + p / 100; if (!meilleur || sc > meilleur.sc) meilleur = { sc, nom: d[0], rang: d[3][r] || 'INCONNU' }; });
-                    const t1 = document.getElementById('qg-fedpil-txt'), t2 = document.getElementById('qg-fedpil-sub');
-                    if (t1 && meilleur) t1.innerText = meilleur.rang;
-                    if (t2 && meilleur) t2.innerText = 'MEILLEUR : ' + meilleur.nom;
-                    const a1 = document.getElementById('qg-aux-fed'), a2 = document.getElementById('qg-aux-emp');
-                    if (a1) a1.innerText = 'FÉD. ' + (ranksFed[parseInt(profilData.rang_fed) || 0] || 'INCONNU');
-                    if (a2) a2.innerText = 'EMP. ' + (ranksEmp[parseInt(profilData.rang_emp) || 0] || 'INCONNU');
-                })();
-
-                // Powerplay 2.0 : Bouton cockpit
-                const elPpNom = document.getElementById('qg-pp-nom');
-                const elPpBadge = document.getElementById('badge-pp-rang');
-                if (elPpNom) {
-                    if (profilData.puissance_nom) {
-                        elPpNom.innerText = profilData.puissance_nom.toUpperCase();
-                        elPpNom.style.color = "var(--ed-blue)";
-                        if (elPpBadge) {
-                            elPpBadge.innerHTML = htmlPastilleRang(profilData.puissance_rang || 0);
-                            elPpBadge.style.display = 'flex';
-                        }
-                    } else {
-                        elPpNom.innerText = "NON ALIGNÉ";
-                        elPpNom.style.color = "#888";
-                        if (elPpBadge) elPpBadge.style.display = 'none';
-                    }
-                }
-
-                // Rang BGS de carrière : bouton cockpit (membres d'escadron ayant accès au BGS)
-                majBoutonBgs(profilData);
+                // Rangs de carriere (Powerplay, BGS, Federation, Auxiliaires) : affiches dans l'en-tete par navigation.js (actualiserHeader), fenetres dans carriere.js
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(profilData);
 
                 // Plaques de campagne gagnées depuis la dernière visite : petite carte d'avertissement
                 verifierPlaquesQG(profilCommandant);
@@ -2084,8 +1778,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // --- MISE À JOUR DU STATUT LÉGAL DANS LE HEADER ---
                 const notoriete = parseInt(profilData.notoriete) || 0;
                 
-                const legalBox = document.getElementById("header-legal-status");
-                const legalText = document.getElementById("legal-text");
 
                 // --- NOUVEAU : DÉTECTION DU CRIME ET ALERTE JOURNAL ---
                 if (typeof window.memoireNotoriete === 'undefined') {
@@ -2106,27 +1798,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     window.memoireNotoriete = notoriete;
                 }
 
-                if (legalBox && legalText) {
-                    if (notoriete > 0) {
-                        legalBox.style.background = "rgba(255, 51, 51, 0.05)";
-                        legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
-                        legalText.style.color = "#FF3333";
-                        legalText.innerText = "RECHERCHÉ";
-                        
-                        // L'explication avec la valeur de la notoriété en évidence
-                        const explicationCrime = "STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#FF3333; font-size:1.2em;\\'>" + notoriete + "</strong><br><br>La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br>Tant qu\\'elle n\\'est pas à 0, vous ne pouvez pas utiliser les terminaux de l\\'autorité<br>pour payer vos amendes.</span>";
-                        legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationCrime}', '#FF3333')`);
-                    } else {
-                        legalBox.style.background = "rgba(0, 255, 102, 0.05)";
-                        legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
-                        legalText.style.color = "#00FF66";
-                        legalText.innerText = "CASIER VIERGE";
-                        
-                        // L'explication avec notoriété = 0
-                        const explicationVierge = "STATUT LÉGAL : SAIN<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Niveau de Notoriété : <strong style=\\'color:#00FF66; font-size:1.2em;\\'>0</strong><br><br>Aucune infraction grave récente n\\'est enregistrée par la Fédération des Pilotes.<br>Vous avez un accès total aux services des spatioports et des Facteurs.</span>";
-                        legalBox.setAttribute('onmouseenter', `if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${explicationVierge}', '#00FF66')`);
-                    }
-                }
+                // Affichage : statut « recherché » dans l'en-tete (navigation.js), seulement si notoriete > 0
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(profilData);
 
                 // Le tour s'est déroulé jusqu'au bout : on retient la ligne la plus récente vue (sinon, en cas d'erreur, elle sera retraitée au tour suivant)
                 window.qgRadarIdVu = Math.max(window.qgRadarIdVu || 0, radarIdMax);
@@ -2150,79 +1823,13 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     <!-- MODULE D'INTERCEPTION DES COMMUNICATIONS   -->
     <!-- ========================================== -->
     
-    <!-- (Alertes de messages : desormais gerees par navigation.js, sur toutes les pages) -->
 
     <!-- 2. MOTEUR D'ÉCOUTE JAVASCRIPT -->
     <script>
+        // L'escadron et les grades s'affichent dans l'en-tete de navigation (navigation.js : actualiserHeader)
         async function actualiserAffichageRH() {
             if (!profilCommandant) return;
-            const divActif = document.getElementById('qg-squad-actif');
-            const divMercenaire = document.getElementById('qg-squad-mercenaire');
-            const spanTag = document.getElementById('qg-squad-tag');
-            
-            if (profilCommandant.escadron_id) {
-                // Le pilote est dans un escadron
-                divActif.style.display = 'flex';
-                divMercenaire.style.display = 'none';
-                spanTag.innerText = '[ ' + profilCommandant.escadron_id + ' ]';
-
-                // VERROUILLAGE DU BOUTON (Seule l'Amirauté peut cliquer sur le logo pour le modifier)
-                const btnLogo = document.getElementById('btn-logo-escadron');
-                if (btnLogo) {
-                    if (profilCommandant.est_amiral || profilCommandant.est_directeur) {
-                        btnLogo.style.cursor = 'pointer';
-                        btnLogo.style.borderColor = 'var(--ed-orange)';
-                    } else {
-                        btnLogo.style.cursor = 'default';
-                        btnLogo.style.borderColor = '#333';
-                    }
-                }
-                
-                // AFFICHAGE DES GRADES ET RÔLES AVEC INFOBULLES
-                const rolesDiv = document.getElementById('qg-squad-roles');
-                if (rolesDiv) {
-                    let rolesHtml = '';
-                    const styleBase = "padding: 6px 15px; border-radius: 4px; font-size: 1.15em; letter-spacing: 1px; font-weight: bold; cursor: help; box-shadow: 0 0 10px currentColor;";
-                    
-                    // Grade Principal
-                    const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-
-                    if (profilCommandant.est_amiral) {
-                        rolesHtml += `<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); ${styleBase}" 
-                            onmouseenter="showHoloTooltip(event, 'COMMANDANT SUPRÊME<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Gère les effectifs, accrédite les officiers<br>et administre l\\'escadron.</span>', '#FF3333')" 
-                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">AMIRAL</span>`;
-                    } else if (rangJeu === 4) {
-                        rolesHtml += `<span style="color: #ccc; border: 1px solid #666; background: rgba(255,255,255,0.05); ${styleBase}" 
-                            onmouseenter="showHoloTooltip(event, 'RECRUE<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Accès limité.<br>Le panneau tactique BGS est verrouillé.</span>', '#ccc')" 
-                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">RECRUE</span>`;
-                    } else {
-                        rolesHtml += `<span style="color: var(--ed-orange); border: 1px solid var(--ed-orange); background: rgba(255,113,0,0.1); ${styleBase}" 
-                            onmouseenter="showHoloTooltip(event, 'MEMBRE ACTIF<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Accès aux opérations de l\\'escadron<br>et au réseau de communication.</span>', 'var(--ed-orange)')" 
-                            onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">PILOTE</span>`;
-                    }
-                    
-                    // Accréditations supplémentaires (Cachées pour l'Amiral)
-                    if (!profilCommandant.est_amiral) {
-                        if (profilCommandant.est_officier) {
-                            rolesHtml += `<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); ${styleBase}" 
-                                onmouseenter="showHoloTooltip(event, 'GESTION TACTIQUE BGS<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Autorisé à publier les Ordres de l\\'Amirauté<br>et à définir les cibles BGS.</span>', '#00FF66')" 
-                                onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">OFFICIER BGS</span>`;
-                        }
-                        if (profilCommandant.est_diplomate) {
-                            rolesHtml += `<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); ${styleBase}" 
-                                onmouseenter="showHoloTooltip(event, 'RELATIONS EXTÉRIEURES<br><span style=&quot;color:#ccc; font-size:0.85em; font-weight:normal;&quot;>Administre la liste noire (KOS)<br>et les traités avec les alliés.</span>', 'var(--ed-blue)')" 
-                                onmouseleave="hideHoloTooltip()" onmousemove="moveHoloTooltip(event)">DIPLOMATE</span>`;
-                        }
-                    }
-                    
-                    rolesDiv.innerHTML = rolesHtml;
-                }
-
-            } else {
-                // Le pilote est un mercenaire indépendant
-                divActif.style.display = 'none';
-                divMercenaire.style.display = 'flex';
-            }
+            if (typeof window.actualiserHeader === 'function') window.actualiserHeader(profilCommandant);
         }
 
         async function chargerDemandesDirecteur() {
@@ -2323,12 +1930,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (!listePersonnel) return;
 
             try {
-                const [resProfils, resParams, resOrdres, resTransmissions] = await Promise.all([
+                const [resProfils, resParams, resOrdres] = await Promise.all([
                     // 'reputations' exclue : ecrite cote serveur mais jamais lue par aucune page (fonctionnalite retiree)
                     supabaseApp.from('profils').select('id, user_id, email, cle_api, est_approuve, created_at, escadron_id, est_amiral, cmdr_nom, solde_vaisseau, solde_fc, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_fed, prog_fed, rang_emp, prog_emp, patrimoine_total, valeur_vaisseaux, cout_rachat, est_directeur, est_officier, est_diplomate, notoriete, rang_mercenary, prog_mercenary, palmares_bgs, faction_choisie, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total').eq('est_approuve', true).order('cmdr_nom'),
                     supabaseApp.from('parametres_app').select('user_id, last_heartbeat, factions_favorites, telemetrie_usage'),
-                    supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true }),
-                    supabaseApp.from('transmissions').select('id', { count: 'exact', head: true })
+                    supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true })
                 ]);
 
                 const profils = resProfils.data || [];
@@ -2343,7 +1949,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 let htmlPilotesJour = '';
                 let comptePilotesJour = 0;
 
-                let pilotesWebActifs = 0; let totalCommsVisites = 0; let totalFactionsFavoris = 0;
+                let pilotesWebActifs = 0; let totalFactionsFavoris = 0;
                 let totalScansBgs = 0; let totalJournalVisites = 0;
                 
                 let globalTotalVisites = 0;
@@ -2386,7 +1992,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         let pagePref = "QG";
                         let maxTemps = temps.qg || 0;
                         if ((temps.bgs || 0) > maxTemps) { maxTemps = temps.bgs; pagePref = "BGS"; }
-                        if ((temps.comms || 0) > maxTemps) { maxTemps = temps.comms; pagePref = "COMMS"; }
 
                         htmlPilotesJour += `
                         <div style="background: rgba(0,0,0,0.4); border-left: 2px solid var(--ed-blue); padding: 8px 12px; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em;">
@@ -2405,10 +2010,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         pilotesWebActifs++;
                     }
 
-                    globalTotalVisites += (pages.qg || 0) + (pages.bgs || 0) + (pages.comms || 0);
-                    globalTotalTemps += (temps.qg || 0) + (temps.bgs || 0) + (temps.comms || 0);
+                    globalTotalVisites += (pages.qg || 0) + (pages.bgs || 0);
+                    globalTotalTemps += (temps.qg || 0) + (temps.bgs || 0);
 
-                    totalCommsVisites += pages.comms || 0;
                     totalJournalVisites += actions.onglets_bgs_journal || 0;
                     totalScansBgs += actions.scans_systeme_bgs || 0;
 
@@ -2427,10 +2031,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 });
 
                 const totalMissionsBgs = resOrdres.count || 0;
-                const totalMessages = resTransmissions.count || 0;
 
                 document.getElementById('stat-pilotes-web').innerText = `${pilotesWebActifs} / ${profils.length}`;
-                document.getElementById('stat-comms-usage').innerText = `${totalCommsVisites} ACCÈS (${totalMessages} MSG)`;
                 document.getElementById('stat-radars-actifs').innerText = `${totalFactionsFavoris} FACTIONS (${totalScansBgs} SCANS)`;
                 document.getElementById('stat-missions-bgs').innerText = `${totalMissionsBgs} ORDRES`;
                 document.getElementById('stat-journal-bgs').innerText = `${totalJournalVisites} LECTURES`;
@@ -3000,6 +2602,19 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             document.getElementById('modal-galnet').style.display = "flex";
         }
 
+        // ---- QUOI FAIRE (quoifaire.js) : la bande du QG ouvre cette fenetre ; chaque idee renvoie vers le bon ecran
+        function fermerQuoiFaire() { if (typeof sonClic === 'function') sonClic(); document.getElementById('modal-quoifaire').style.display = 'none'; }
+        if (window.QF) {
+            QF.onOuvrirTableau = function () {
+                if (typeof sonClic === 'function') sonClic();
+                document.getElementById('modal-quoifaire').style.display = 'flex';
+                QF.monterTableau('qf-corps', false);
+            };
+            QF.destinations.rang = function () { fermerQuoiFaire(); window.ouvrirCarriere('bgs'); };
+            QF.destinations.pp = function () { fermerQuoiFaire(); window.ouvrirCarriere('pp'); };
+            QF.destinations.rejoindre = function () { fermerQuoiFaire(); if (typeof window.edteamOuvrirAide === 'function') window.edteamOuvrirAide('demarrer'); };
+        }
+
         function fermerModalGalnet() {
             if(typeof sonClic==='function') sonClic();
             document.getElementById('modal-galnet').style.display = "none";
@@ -3383,46 +2998,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 .subscribe();
         };
 
-        // ==========================================
-        // SALLE DE COMMANDEMENT POWERPLAY 2.0 (OPSEC)
-        // ==========================================
-        function calculerCompteReboursCycle() {
-            const now = new Date();
-            const prochainJeudi = new Date(Date.UTC(
-                now.getUTCFullYear(),
-                now.getUTCMonth(),
-                now.getUTCDate() + ((4 - now.getUTCDay() + 7) % 7 || 7),
-                7, 0, 0
-            ));
-            if (now.getUTCDay() === 4 && now.getUTCHours() < 7) {
-                prochainJeudi.setUTCDate(now.getUTCDate());
-            }
-            const diff = Math.max(0, prochainJeudi - now);
-            const j = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diff / (1000 * 60)) % 60);
-            return `${j}J ${h}H ${m}M`;
-        }
-
-        // ==========================================
-        // COMMANDEMENT BGS : RANG DE CARRIÈRE (1 à 100), permanent
-        // Seuil du rang n = round(15 * (n-1)^1.6) points cumulés (même formule que le serveur, script SQL 17).
-        // ==========================================
-        // Contenu des pastilles de rang des boutons du QG : mot RANG en petit, chiffre en dessous (lisible même à 4 chiffres)
-        function htmlPastilleRang(n) {
-            return '<span style="font-size: 0.6em; letter-spacing: 1px; line-height: 1;">RANG</span><span style="line-height: 1.1;">' + (Number(n) || 0) + '</span>';
-        }
-
-        function seuilRangBgs(n) { return n <= 1 ? 0 : Math.round(15 * Math.pow(n - 1, 1.6)); }
-
-        function progressionRangBgs(rang, points) {
-            rang = Math.min(100, Math.max(1, rang || 1));
-            points = points || 0;
-            if (rang >= 100) return { rang, points, min: seuilRangBgs(100), max: null, pct: 100, reste: 0 };
-            const min = seuilRangBgs(rang), max = seuilRangBgs(rang + 1);
-            return { rang, points, min, max, pct: Math.max(0, Math.min(100, ((points - min) / (max - min)) * 100)), reste: Math.max(0, Math.ceil(max - points)) };
-        }
-
         // ---------------------------------------------------------------
         //  DISTINCTIONS DE LA SEMAINE (Pilier BGS + Élan Powerplay) : visibles toute la semaine, jusqu'à la désignation suivante (jeudi)
         // ---------------------------------------------------------------
@@ -3571,7 +3146,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     "window.location.href='bgs.html'", 'Points de carrière cumulés de l\'escadron ; CR : vente, sécurité, science et contrebande réunies'),
                 carte('cy', 'POWERPLAY', ico.pp,
                     `<div class="qg-st-ligne">${stat(mp[0], 'MÉRITES CUMULÉS DES PILOTES', mp[1])}</div>`,
-                    'ouvrirSallePowerplay()', 'Ouvrir la salle Powerplay'),
+                    "ouvrirCarriere('pp')", 'Ouvrir la salle Powerplay'),
                 carte('or', 'COLONISATION', ico.col,
                     `<div class="qg-st-grille">${stat(fmt.format(d.systemes), 'SYSTÈMES COLONISÉS')}${stat(fmt.format(d.stations), 'STATIONS CONSTRUITES')}${stat(fmt.format(d.chantiers), 'CHANTIERS EN COURS')}${stat(tn[0], 'LIVRÉES', tn[1] + ' t')}</div>`,
                     "window.location.href='colonisation.html'", 'Ouvrir la colonisation')
@@ -3638,427 +3213,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             } catch (e) { console.error('Erreur titres QG :', e); }
         }
 
-        // Bouton cockpit : visible pour les membres d'escadron ayant accès au BGS (même règle que le menu BGS)
-        function majBoutonBgs(profil) {
-            const btn = document.getElementById('btn-qg-bgs');
-            if (!btn || !profil) return;
-            const roles = (typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : {};
-            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-            const acces = !!roles.escadron_id && !(rangJeu === 4 && !roles.est_amiral && !roles.est_officier);
-            if (!acces) { btn.style.display = 'none'; return; }
-            const pr = progressionRangBgs(profil.rang_bgs, Number(profil.points_bgs) || 0);
-            btn.style.display = 'flex';
-            if (!window.__bgsAuto && /[?&]bgs=1(&|$)/.test(location.search)) {   // lien depuis le journal de la page BGS
-                window.__bgsAuto = true;
-                try { history.replaceState(null, '', location.pathname); } catch (e) {}
-                setTimeout(ouvrirSalleBgs, 400);
-            }
-            const texte = document.getElementById('qg-bgs-progression-texte');
-            if (texte) texte.innerText = pr.max === null ? 'RANG MAXIMAL' : Math.floor(pr.points) + ' / ' + pr.max;
-            const barre = document.getElementById('qg-bgs-barre');
-            if (barre) barre.style.width = pr.pct.toFixed(1) + '%';
-            const badge = document.getElementById('badge-bgs-rang');
-            if (badge) { badge.innerHTML = htmlPastilleRang(pr.rang); badge.style.display = 'flex'; }
-        }
-
-        async function ouvrirSalleBgs() {
-            if (typeof sonClic === 'function') sonClic();
-            const modal = document.getElementById('modal-bgs');
-            const titre = document.getElementById('bgs-modal-escadron');
-            const compteur = document.getElementById('bgs-modal-countdown');
-            const corps = document.getElementById('bgs-modal-body');
-            compteur.innerText = calculerCompteReboursCycle();
-
-            if (!profilCommandant || !profilCommandant.escadron_id) {
-                titre.innerText = 'COMMANDEMENT BGS';
-                corps.innerHTML = `<div style="background: rgba(0,0,0,0.5); border: 1px dashed #555; padding: 30px; text-align: center; border-radius: 4px; color: #ccc; line-height: 1.6;">Le rang BGS est réservé aux membres d'un escadron.</div>`;
-                modal.style.display = 'flex';
-                return;
-            }
-
-            titre.innerText = profilCommandant.escadron_id.toUpperCase();
-            corps.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-style: italic;">Consultation de votre dossier de carrière...</div>';
-            modal.style.display = 'flex';
-            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
-
-            try {
-                const [resMoi, resTab] = await Promise.all([
-                    supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.rpc('tableau_escadron_bgs')
-                ]);
-                if (resMoi.error) throw resMoi.error;
-                const rang = resMoi.data.rang_bgs || 1;
-                const points = Number(resMoi.data.points_bgs) || 0;
-                const pr = progressionRangBgs(rang, points);
-                const tableau = resTab.error ? [] : (resTab.data || []);
-
-                // Bannière de promotion : mémoire du navigateur, aucune écriture en base
-                let banniere = '';
-                try {
-                    const cle = 'edteam_rang_bgs_vu_' + profilCommandant.user_id;
-                    const vu = parseInt(localStorage.getItem(cle) || '0');
-                    if (vu > 0 && rang > vu) {
-                        banniere = `<div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; padding: 12px 18px; border-radius: 4px; color: #FFD700; font-weight: bold; letter-spacing: 2px; text-align: center; box-shadow: 0 0 15px rgba(255,215,0,0.25);">NOUVEAU RANG : VOUS ÊTES PASSÉ AU RANG BGS ${rang}</div>`;
-                    }
-                    localStorage.setItem(cle, String(rang));
-                } catch (e) {}
-
-                const suite = pr.max === null
-                    ? `<span style="color: #FFD700; font-weight: bold;">RANG MAXIMAL ATTEINT</span>`
-                    : `<span style="color: #888;">PROCHAIN : RANG ${rang + 1} À</span> <span style="color: #fff; font-weight: bold;">${fmt(pr.max)}</span> <span style="color: #888;">POINTS · IL VOUS EN MANQUE</span> <span style="color: #FFD700; font-weight: bold;">${fmt(pr.reste)}</span>`;
-
-                let html = `
-                ${banniere}
-                <!-- CARTE PERSONNELLE DU PILOTE -->
-                <div style="background: rgba(255, 113, 0, 0.05); border-left: 3px solid var(--ed-orange); padding: 15px 20px; border-radius: 0 4px 4px 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <div>
-                            <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">VOTRE CARRIÈRE BGS :</span>
-                            <div style="color: #fff; font-size: 1.2em; font-weight: bold; margin-top: 3px;">
-                                CMDR ${(profilCommandant.cmdr_nom || 'INCONNU').toUpperCase()}
-                                <span style="color: var(--ed-orange); font-size: 0.85em; margin-left: 10px;">[ RANG ${rang} ]</span>
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="color: #888; font-size: 0.8em; display: block;">POINTS DE CARRIÈRE :</span>
-                            <span style="color: #FFD700; font-size: 1.3em; font-weight: bold;">${fmt(Math.floor(points))}</span>
-                        </div>
-                    </div>
-                    <div style="margin-top: 14px;">
-                        <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden;">
-                            <div style="width: ${pr.pct.toFixed(1)}%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange);"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 0.8em;">
-                            <span style="color: var(--ed-orange); font-weight: bold;">RANG ${rang}</span>
-                            <span>${suite}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- MA PROGRESSION (chargée après l'affichage) -->
-                <div id="bgs-progression"></div>
-
-                <!-- TABLEAU DE L'ESCADRON -->
-                <div>
-                    <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed rgba(255, 113, 0, 0.3); padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
-                        <span>TABLEAU DE L'ESCADRON</span>
-                        <span>${tableau.length} PILOTE(S)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">`;
-
-                tableau.forEach((p, index) => {
-                    const estMoi = (p.cmdr_nom && profilCommandant.cmdr_nom && p.cmdr_nom.toUpperCase() === profilCommandant.cmdr_nom.toUpperCase());
-                    html += `
-                        <div style="background: ${estMoi ? 'rgba(255, 113, 0, 0.12)' : 'rgba(0,0,0,0.5)'}; border: 1px solid ${estMoi ? 'var(--ed-orange)' : '#333'}; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.95em;">
-                            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                                <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${index + 1}</span>
-                                <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
-                                <span style="color: var(--ed-orange); font-size: 0.8em; border: 1px solid rgba(255,113,0,0.5); padding: 1px 6px; border-radius: 2px;">RANG ${p.rang_bgs || 1}</span>
-                            </div>
-                            <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
-                                ${fmt(Math.floor(Number(p.points_bgs) || 0))} <span style="font-size: 0.8em; color: #888;">POINTS</span>
-                            </div>
-                        </div>`;
-                });
-
-                html += `</div></div>
-
-                <!-- COMMENT ÇA MARCHE -->
-                <details open style="border: 1px solid rgba(255,113,0,0.25); background: rgba(255,113,0,0.03); padding: 14px 18px; border-radius: 4px;">
-                    <summary style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; cursor: pointer;">COMMENT ÇA MARCHE</summary>
-                    <ul style="margin: 12px 0 0 18px; color: #ccc; font-size: 0.9em; line-height: 1.7;">
-                        <li>Chaque effort accompli pour l'escadron, qu'il réponde à une directive ou non, rapporte des <strong style="color:#fff;">points</strong> : 1 point pour 2 millions de crédits (économie, sécurité, science), 1 point pour 400 tonnes de colonisation, et des points selon l'importance de l'action pour les missions et les zones de combat. Les échecs ne rapportent rien.</li>
-                        <li>Vos points s'additionnent pour <strong style="color:#fff;">toute votre carrière</strong> et déterminent votre rang BGS, de 1 à 100. <strong style="color:#fff;">Un rang gagné ne se perd jamais</strong>, même si une directive est supprimée.</li>
-                        <li>Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts. Le rang 100 (23 394 points) est réservé aux plus fidèles.</li>
-                        <li>Une ligne dorée apparaît dans le journal tactique de l'escadron à chaque dizaine atteinte (10, 20… 100).</li>
-                        <li>Ce rang est distinct de votre rôle dans l'escadron (Amiral, Officier…) et de votre rang Powerplay.</li>
-                    </ul>
-                </details>`;
-
-                corps.innerHTML = html;
-                chargerProgressionBgs();
-            } catch (err) {
-                console.error('Erreur Commandement BGS :', err);
-                corps.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Échec de la consultation du dossier de carrière.</div>';
-            }
-        }
-
-        // "Ma progression" BGS : points gagnés par cycle (8 derniers), d'après la fonction serveur progression_bgs_hebdo
-        async function chargerProgressionBgs() {
-            const zone = document.getElementById('bgs-progression');
-            if (!zone) return;
-            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
-            const jourMs = 86400000;
-            try {
-                const { data, error } = await supabaseApp.rpc('progression_bgs_hebdo', { p_cycles: 8 });
-                if (error) throw error;
-                const parSemaine = {};
-                (data || []).forEach(l => { parSemaine[l.semaine] = Number(l.points) || 0; });
-
-                // Jeudi (UTC) qui clôture le cycle en cours (le cycle change le jeudi 07:00 UTC)
-                const decale = new Date(Date.now() - 7 * 3600000);
-                let ajout = (4 - decale.getUTCDay() + 7) % 7;
-                if (ajout === 0) ajout = 7;
-                const clotureT = Date.UTC(decale.getUTCFullYear(), decale.getUTCMonth(), decale.getUTCDate()) + ajout * jourMs;
-                const clotureCourante = new Date(clotureT).toISOString().slice(0, 10);
-
-                const cycles = [];
-                for (let i = 7; i >= 0; i--) {
-                    const cle = new Date(clotureT - i * 7 * jourMs).toISOString().slice(0, 10);
-                    cycles.push({ semaine: cle, gain: parSemaine[cle] || 0 });
-                }
-                const gains = cycles.map(c => c.gain);
-                const somme = gains.reduce((a, b) => a + b, 0);
-                if (somme <= 0) {
-                    zone.innerHTML = `
-                    <div style="border: 1px dashed rgba(255,113,0,0.3); padding: 14px 18px; border-radius: 4px;">
-                        <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;">MA PROGRESSION</div>
-                        <div style="color: #888; font-size: 0.85em; line-height: 1.5; margin-top: 8px;">Aucun effort enregistré sur les 8 derniers cycles. Vos points gagnés chaque semaine s'afficheront ici.</div>
-                    </div>`;
-                    return;
-                }
-                const maxGain = Math.max(1, ...gains);
-                const meilleur = Math.max(...gains);
-                const moyenne = Math.round(somme / cycles.length);
-
-                const barres = cycles.map(c => {
-                    const enCours = c.semaine === clotureCourante;
-                    const hauteur = c.gain > 0 ? Math.max(3, Math.round(70 * c.gain / maxGain)) : 2;
-                    const couleur = enCours ? 'var(--ed-orange)' : (c.gain > 0 && c.gain === meilleur ? '#FFD700' : 'rgba(255,113,0,0.45)');
-                    return `
-                    <div style="flex: 1; min-width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;">
-                        <span style="color: #ccc; font-size: 0.7em;">${c.gain > 0 ? '+' + fmt(Math.round(c.gain)) : '0'}</span>
-                        <div style="width: 100%; max-width: 46px; height: ${hauteur}px; background: ${couleur}; border-radius: 2px 2px 0 0;${enCours ? ' box-shadow: 0 0 8px rgba(255,113,0,0.5);' : ''}"></div>
-                        <span style="color: ${enCours ? 'var(--ed-orange)' : '#888'}; font-size: 0.7em; white-space: nowrap;">${enCours ? 'EN COURS' : c.semaine.slice(8, 10) + '/' + c.semaine.slice(5, 7)}</span>
-                    </div>`;
-                }).join('');
-
-                zone.innerHTML = `
-                <div style="border: 1px solid rgba(255,113,0,0.25); background: rgba(255,113,0,0.03); padding: 14px 18px; border-radius: 4px;">
-                    <div style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed rgba(255,113,0,0.3); padding-bottom: 8px; margin-bottom: 14px;">MA PROGRESSION</div>
-                    <div style="display: flex; gap: 6px; align-items: flex-end; min-height: 110px; overflow-x: auto;">${barres}</div>
-                    <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-top: 14px; font-size: 0.85em;">
-                        <div><span style="color: #888;">MEILLEUR CYCLE :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(Math.round(meilleur))}</span></div>
-                        <div><span style="color: #888;">MOYENNE PAR CYCLE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
-                        <div><span style="color: #888;">TOTAL (8 CYCLES) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(Math.round(somme))}</span></div>
-                    </div>
-                </div>`;
-            } catch (err) {
-                console.error('Erreur progression BGS :', err);
-                zone.innerHTML = '';
-            }
-        }
-
-        // "Ma progression" : mérites gagnés par cycle, d'après merites_cycles (chaque pilote ne lit que ses propres lignes).
-        // Un cycle sans relevé = aucun gain (le total ne bouge que si le plugin a vu des mérites).
-        async function chargerProgressionPowerplay() {
-            const zone = document.getElementById('pp-progression');
-            if (!zone) return;
-            const fmt = n => new Intl.NumberFormat('fr-FR').format(n);
-            const jourMs = 86400000;
-            try {
-                const { data, error } = await supabaseApp.from('merites_cycles')
-                    .select('semaine, puissance, merites_total, releve_le')
-                    .order('semaine', { ascending: false }).limit(10);
-                if (error) throw error;
-                const lignes = (data || []).slice().reverse(); // du plus ancien au plus récent
-                if (!lignes.length) { zone.innerHTML = ''; return; }
-
-                // Jeudi (UTC) qui clôture le cycle en cours (même règle que le serveur : le cycle change le jeudi 07:00 UTC)
-                const decale = new Date(Date.now() - 7 * 3600000);
-                let ajout = (4 - decale.getUTCDay() + 7) % 7;
-                if (ajout === 0) ajout = 7;
-                const clotureCourante = new Date(Date.UTC(decale.getUTCFullYear(), decale.getUTCMonth(), decale.getUTCDate()) + ajout * jourMs).toISOString().slice(0, 10);
-
-                const parSemaine = {};
-                lignes.forEach(l => { parSemaine[l.semaine] = l; });
-                const derniere = lignes[lignes.length - 1];
-                const cycles = [];
-                let prev = lignes[0];
-                const finT = Math.max(Date.parse(derniere.semaine + 'T00:00:00Z'), Date.parse(clotureCourante + 'T00:00:00Z'));
-                for (let t = Date.parse(lignes[0].semaine + 'T00:00:00Z') + 7 * jourMs; t <= finT; t += 7 * jourMs) {
-                    const cle = new Date(t).toISOString().slice(0, 10);
-                    const l = parSemaine[cle];
-                    if (l) {
-                        // autre puissance = mérites repartis à zéro : gain non comparable
-                        cycles.push({ semaine: cle, gain: l.puissance === prev.puissance ? Math.max(0, l.merites_total - prev.merites_total) : null });
-                        prev = l;
-                    } else {
-                        cycles.push({ semaine: cle, gain: 0 });
-                    }
-                }
-
-                const releveMin = Math.max(0, Math.round((Date.now() - Date.parse(derniere.releve_le)) / 60000));
-                const ilYa = releveMin < 60 ? releveMin + ' min' : releveMin < 1440 ? Math.floor(releveMin / 60) + ' h' : Math.floor(releveMin / 1440) + ' j';
-                const enteteReleve = `<span style="color: #888; font-size: 0.8em; font-weight: normal; letter-spacing: 0;">Dernier relevé : il y a ${ilYa}</span>`;
-
-                if (!cycles.length) {
-                    zone.innerHTML = `
-                    <div style="border: 1px dashed rgba(0,240,255,0.3); padding: 14px 18px; border-radius: 4px; margin-bottom: 10px;">
-                        <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"><span>MA PROGRESSION</span>${enteteReleve}</div>
-                        <div style="color: #888; font-size: 0.85em; line-height: 1.5; margin-top: 8px;">L'historique se construit cycle après cycle : chaque jeudi 07:00 UTC, vos mérites gagnés dans la semaine s'ajoutent ici.</div>
-                    </div>`;
-                    return;
-                }
-
-                const affiches = cycles.slice(-8);
-                const gains = affiches.map(c => c.gain).filter(g => g !== null);
-                const maxGain = Math.max(1, ...gains);
-                const meilleur = gains.length ? Math.max(...gains) : 0;
-                const moyenne = gains.length ? Math.round(gains.reduce((a, b) => a + b, 0) / gains.length) : 0;
-                const somme = gains.reduce((a, b) => a + b, 0);
-
-                const barres = affiches.map(c => {
-                    const enCours = c.semaine === clotureCourante;
-                    const hauteur = c.gain ? Math.max(3, Math.round(70 * c.gain / maxGain)) : 2;
-                    const couleur = enCours ? 'var(--ed-blue)' : (c.gain && c.gain === meilleur ? '#FFD700' : 'rgba(0,240,255,0.45)');
-                    const valeur = c.gain === null ? '?' : (c.gain > 0 ? '+' + fmt(c.gain) : '0');
-                    return `
-                    <div style="flex: 1; min-width: 54px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;">
-                        <span style="color: #ccc; font-size: 0.7em;">${valeur}</span>
-                        <div style="width: 100%; max-width: 46px; height: ${hauteur}px; background: ${couleur}; border-radius: 2px 2px 0 0;${enCours ? ' box-shadow: 0 0 8px rgba(0,240,255,0.5);' : ''}"></div>
-                        <span style="color: ${enCours ? 'var(--ed-blue)' : '#888'}; font-size: 0.7em; white-space: nowrap;">${enCours ? 'EN COURS' : c.semaine.slice(8, 10) + '/' + c.semaine.slice(5, 7)}</span>
-                    </div>`;
-                }).join('');
-
-                zone.innerHTML = `
-                <div style="border: 1px solid rgba(0,240,255,0.25); background: rgba(0,240,255,0.03); padding: 14px 18px; border-radius: 4px; margin-bottom: 10px;">
-                    <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; border-bottom: 1px dashed rgba(0,240,255,0.3); padding-bottom: 8px; margin-bottom: 14px;">
-                        <span>MA PROGRESSION</span>${enteteReleve}
-                    </div>
-                    <div style="display: flex; gap: 6px; align-items: flex-end; min-height: 110px; overflow-x: auto;">${barres}</div>
-                    <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-top: 14px; font-size: 0.85em;">
-                        <div><span style="color: #888;">MEILLEUR CYCLE :</span> <span style="color: #FFD700; font-weight: bold;">+${fmt(meilleur)}</span></div>
-                        <div><span style="color: #888;">MOYENNE PAR CYCLE :</span> <span style="color: #fff; font-weight: bold;">+${fmt(moyenne)}</span></div>
-                        <div><span style="color: #888;">TOTAL GAGNÉ (${gains.length} CYCLE${gains.length > 1 ? 'S' : ''}) :</span> <span style="color: #fff; font-weight: bold;">+${fmt(somme)}</span></div>
-                    </div>
-                </div>`;
-            } catch (err) {
-                console.error('Erreur progression Powerplay :', err);
-                zone.innerHTML = '';
-            }
-        }
-
-        async function ouvrirSallePowerplay() {
-            if (typeof sonClic === 'function') sonClic();
-            const modal = document.getElementById('modal-powerplay');
-            const titrePuissance = document.getElementById('pp-modal-power-name');
-            const countdownEl = document.getElementById('pp-modal-countdown');
-            const bodyEl = document.getElementById('pp-modal-body');
-
-            countdownEl.innerText = calculerCompteReboursCycle();
-
-            if (!profilCommandant || !profilCommandant.puissance_nom) {
-                titrePuissance.innerText = "COMMANDEMENT POWERPLAY 2.0";
-                titrePuissance.style.color = "var(--ed-blue)";
-                bodyEl.innerHTML = `
-                    <div style="background: rgba(0,0,0,0.5); border: 1px dashed #555; padding: 30px; text-align: center; border-radius: 4px;">
-                        <span style="color: var(--ed-orange); font-size: 1.2em; letter-spacing: 2px; font-weight: bold; display: block; margin-bottom: 10px;">AUCUNE ALLÉGEANCE DÉTECTÉE</span>
-                        <p style="color: #ccc; font-size: 0.95em; max-width: 600px; margin: 0 auto 20px auto; line-height: 1.6;">
-                            Pour accéder aux classements tactiques et coordonner l'effort du cycle, engagez-vous auprès d'une puissance dans le panneau Powerplay en jeu et relancez votre vol.
-                        </p>
-                    </div>`;
-                modal.style.display = 'flex';
-                return;
-            }
-
-            const maPuissance = profilCommandant.puissance_nom;
-            titrePuissance.innerText = maPuissance.toUpperCase();
-            bodyEl.innerHTML = '<div style="color: #888; text-align: center; padding: 40px; font-style: italic;">Accréditation des partisans et chiffrement du tableau...</div>';
-            modal.style.display = 'flex';
-
-            try {
-                // Cloisonnement OPSEC : lecture stricte sur les partisans de la MÊME puissance
-                // (fonction serveur : ne renvoie que les colonnes du tableau, triees par merites)
-                const { data, error } = await supabaseApp.rpc('tableau_partisans');
-
-                if (error) throw error;
-
-                const partisans = data || [];
-                const monScoreCycle = profilCommandant.puissance_merites_cycle || 0;
-                const monRang = profilCommandant.puissance_rang || 0;
-                const monTotal = profilCommandant.puissance_merites_total || monScoreCycle;
-
-                let html = `
-                <!-- CARTE PERSONNELLE DU PILOTE -->
-                <div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); padding: 15px 20px; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">VOTRE STATUT MILITAIRE :</span>
-                        <div style="color: #fff; font-size: 1.2em; font-weight: bold; margin-top: 3px;">
-                            CMDR ${(profilCommandant.cmdr_nom || 'INCONNU').toUpperCase()} 
-                            <span style="color: var(--ed-blue); font-size: 0.85em; margin-left: 10px;">[ RANG ${monRang} ]</span>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 20px; text-align: right;">
-                        <div>
-                            <span style="color: #888; font-size: 0.8em; display: block;">MÉRITES DU CYCLE :</span>
-                            <span style="color: #FFD700; font-size: 1.3em; font-weight: bold;">${monScoreCycle > 0 ? '+' + new Intl.NumberFormat('fr-FR').format(monScoreCycle) : '—'}</span>
-                        </div>
-                        <div>
-                            <span style="color: #888; font-size: 0.8em; display: block;">CUMUL GLOBAL :</span>
-                            <span style="color: #ccc; font-size: 1.3em; font-weight: bold;">${new Intl.NumberFormat('fr-FR').format(monTotal)}</span>
-                        </div>
-                    </div>
-                </div>
-
-                ${monScoreCycle > 0 ? '' : `
-                <div style="color: #888; font-size: 0.85em; line-height: 1.5; padding: 0 5px;">
-                    Mesure du cycle en cours : vos mérites de la semaine s'affichent dès votre premier relevé après le début du cycle (jeudi 07:00 UTC). Le cumul global et le rang sont déjà à jour.
-                </div>`}
-
-                <!-- MA PROGRESSION (chargee apres l'affichage : historique des cycles) -->
-                <div id="pp-progression"></div>
-
-                <!-- TABLEAU D'HONNEUR DES PARTISANS -->
-                <div style="margin-top: 10px;">
-                    <div style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px; border-bottom: 1px dashed rgba(0, 240, 255, 0.3); padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between;">
-                        <span>TABLEAU DES PARTISANS DU RÉSEAU (OPSEC CLOISONNÉ)</span>
-                        <span>${partisans.length} PILOTE(S) ALIGNÉ(S)</span>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 8px;">`;
-
-                // Tri : mérites du cycle, puis cumul global (tant que le cycle n'est pas mesuré, le cumul départage)
-                [...partisans].sort((a, b) =>
-                    ((b.puissance_merites_cycle || 0) - (a.puissance_merites_cycle || 0)) ||
-                    ((b.puissance_merites_total || 0) - (a.puissance_merites_total || 0))
-                ).forEach((p, index) => {
-                    const rangNumero = index + 1;
-                    const cumulFormat = new Intl.NumberFormat('fr-FR').format(p.puissance_merites_total || 0);
-                    const tagSquad = p.escadron_id ? `[ ${p.escadron_id} ]` : `<span style="color: #888;">[ INDÉPENDANT ]</span>`;
-                    const meritesFormat = new Intl.NumberFormat('fr-FR').format(p.puissance_merites_cycle || 0);
-                    const estMoi = (p.cmdr_nom && profilCommandant.cmdr_nom && p.cmdr_nom.toUpperCase() === profilCommandant.cmdr_nom.toUpperCase());
-                    const fondLigne = estMoi ? 'rgba(0, 240, 255, 0.12)' : 'rgba(0,0,0,0.5)';
-                    const bordureLigne = estMoi ? 'var(--ed-blue)' : '#333';
-
-                    html += `
-                    <div style="background: ${fondLigne}; border: 1px solid ${bordureLigne}; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95em;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span style="color: ${rangNumero <= 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${rangNumero}</span>
-                            <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
-                            <span style="font-size: 0.85em;">${tagSquad}</span>
-                            <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">RANG ${p.puissance_rang || 0}</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: #FFD700; font-weight: bold; letter-spacing: 1px;">
-                                ${(p.puissance_merites_cycle || 0) > 0 ? '+' + meritesFormat : '—'} <span style="font-size: 0.8em; color: #888;">CYCLE</span>
-                            </div>
-                            <div style="color: #ccc; font-size: 0.8em; margin-top: 2px;">
-                                ${cumulFormat} <span style="font-size: 0.85em; color: #888;">CUMUL</span>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-
-                html += `</div></div>`;
-                bodyEl.innerHTML = html;
-                chargerProgressionPowerplay();
-
-            } catch (err) {
-                console.error("Erreur Powerplay :", err);
-                bodyEl.innerHTML = '<div style="color: #FF3333; text-align: center; padding: 20px;">Échec de la liaison avec le réseau de la puissance.</div>';
-            }
-        }
 
     </script>
 

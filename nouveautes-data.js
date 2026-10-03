@@ -5,6 +5,30 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-entete-escadron', date: '2026-10-03T21:30:00Z', type: 'AMELIORE',
+        titre: 'En-tête : escadron, grades et vos rangs partout',
+        texte: 'L\'en-tête affiche maintenant votre escadron et vos grades (Amiral, Officier BGS, Diplomate, Pilote ou Recrue), puis vos quatre rangs : Powerplay, BGS, Fédération et Auxiliaires. Un clic sur un rang ouvre sa fenêtre depuis n\'importe quelle page, plus seulement depuis le QG. Les effectifs de la flotte passent à droite, et le bouton son ne se trouve plus que dans le pied de page. À la place du casier judiciaire et des soldes (qui restent dans votre Budget), le statut « Recherché » n\'apparaît que si vous l\'êtes. Au QG, « Quoi faire » prend la place de la carrière militaire, avec Galnet et EDNews sur la même ligne.',
+        important: false
+    },
+    {
+        id: '2026-10-quoi-faire', date: '2026-10-03T21:00:00Z', type: 'NOUVEAU',
+        titre: 'Quoi faire ? Une idée à chaque connexion',
+        texte: 'Vous vous connectez au jeu et vous ne savez pas par quoi commencer ? Une bande « Quoi faire · Recommandation » en haut du QG (et un onglet sur mobile) vous propose ce qui aiderait le plus : d\'abord la directive que le commandement a classée en priorité, à priorité égale l\'activité la plus en retard, puis ce qui correspond à votre style de jeu. Suivent d\'autres opportunités (colonisation, directives) et votre progression (rang BGS, Powerplay). Sans escadron, vous y trouvez votre chantier de colonisation, votre Powerplay et votre budget. Aucune obligation, aucun rouge, aucune alerte : c\'est vous qui ouvrez.',
+        important: false
+    },
+    {
+        id: '2026-10-colonisation-fraicheur', date: '2026-10-03T20:30:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : pourquoi certains besoins peuvent être dépassés',
+        texte: 'Au lancement du module, les chantiers ont été reconstitués à partir des anciens journaux de jeu : leurs quantités restantes ne sont donc pas encore toutes à jour. Un encadré « IMPORTANT » (PC et mobile, au-dessus de « À apporter en priorité ») indique combien de chantiers n\'ont pas encore été relevés à quai depuis. Dès qu\'un pilote dock sur un chantier, ses chiffres sont à jour et le restent : l\'encadré disparaîtra quand tous les chantiers auront été visités une fois.',
+        important: false
+    },
+    {
+        id: '2026-10-communications-retirees', date: '2026-10-03T19:00:00Z', type: 'AMELIORE',
+        titre: 'Moins de bruit : la page Communications disparaît',
+        texte: 'Personne ne s\'en servait et Discord fait déjà ce travail mieux. La page Communications, l\'enveloppe du menu, les alertes plein écran et l\'onglet Comms du mobile sont retirés. Le Pilier de la semaine ne vous envoie plus de message privé : il reste annoncé dans le journal tactique et sur sa plaque. Le site devient plus léger et moins sollicitant.',
+        important: false
+    },
+    {
         id: '2026-10-plafonds-actifs', date: '2026-10-03T16:00:00Z', type: 'AMELIORE',
         titre: 'Jauges des directives : l\'objectif suit les pilotes actifs de la semaine',
         texte: 'Jusqu\'ici, l\'objectif de chaque activité d\'une directive dépendait du nombre de pilotes qui l\'avaient déjà commencée : dès que ces quelques pilotes avaient joué, la jauge affichait 100 % et plus personne n\'avait l\'impression de devoir s\'y mettre. Désormais l\'objectif se base sur le nombre de pilotes actifs de l\'escadron dans le cycle en cours (du jeudi 07:00 UTC au suivant) : la jauge ne se remplit vraiment que si l\'escadron fournit l\'effort attendu. En début de cycle, tant que personne n\'a joué, on reprend les actifs du cycle précédent.',

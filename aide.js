@@ -11,7 +11,9 @@
             { q: 'Où trouver ma clé, et où la coller ?',
               r: 'Dans le menu latéral, en bas, ouvrez <strong>Gestion du compte</strong> : la clé de liaison EDMC est affichée en haut de la fenêtre. Cliquez dessus pour la copier.<br>Dans EDMC, ouvrez les <strong>Paramètres</strong>, onglet <strong>SYS.EDTEAM</strong>, et collez-la dans le champ « Clé d\'Accès ».' },
             { q: 'Je n\'ai pas d\'escadron : que puis-je utiliser ?',
-              r: 'Le QG, le Powerplay, les communications, le journal tactique, le Budget et la Colonisation (dans un espace personnel que vous seul voyez). Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d\'un escadron.' },
+              r: 'Le QG, le Powerplay, le journal tactique, le Budget et la Colonisation (dans un espace personnel que vous seul voyez). Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d\'un escadron.' },
+            { q: 'Je ne sais pas quoi faire en me connectant : que faire ?',
+              r: 'Ouvrez <strong>Quoi faire</strong> : la bande en haut du QG (PC) ou l\'onglet du même nom (mobile). Il propose, sans rien imposer, ce qui aiderait le plus votre escadron et votre puissance : une <strong>recommandation</strong> d\'abord (la directive prioritaire fixée par le commandement, puis l\'activité la plus en retard, puis votre style de jeu), puis d\'autres opportunités et votre progression. Un pilote sans escadron y trouve son chantier de colonisation, son Powerplay et son budget. Rien n\'est obligatoire.' },
             { q: 'Comment couper le son du site ?',
               r: 'Cliquez sur l\'icône <strong>haut-parleur</strong> en haut à droite de l\'écran, ou celle du pied de page. Elle coupe <strong>tous</strong> les sons (survol, clics, alertes de messages, assistant COVAS, musique d\'ambiance). Elle devient rouge quand le son est coupé, et votre choix est mémorisé sur cet appareil.' },
             { q: 'Rien ne se met à jour sur le site, pourquoi ?',
@@ -39,7 +41,7 @@
             { q: 'Pourquoi mes mérites ne sont-ils pas à jour ?',
               r: 'Le site ne connaît vos mérites que lorsqu\'EDMC est allumé. Si vous avez joué sans EDMC, ils seront mis à jour au prochain lancement du jeu avec EDMC. Le « Dernier relevé » indique l\'ancienneté du chiffre affiché.' },
             { q: 'Quand change le cycle ?',
-              r: 'Chaque <strong>jeudi à 07:00 UTC</strong> (09:00 en heure d\'été en France, 08:00 en hiver). C\'est aussi le moment où les communications sont purgées et où le bilan et le Pilier de la semaine sont publiés.' }
+              r: 'Chaque <strong>jeudi à 07:00 UTC</strong> (09:00 en heure d\'été en France, 08:00 en hiver). C\'est aussi le moment où le bilan et le Pilier de la semaine sont publiés.' }
         ] },
         { id: 'colonisation', titre: 'COLONISATION', questions: [
             { q: 'Où voir mes chantiers de colonisation, ou ceux de l\'escadron ?',
@@ -65,11 +67,9 @@
             { q: 'Jusqu\'où remonte le détail ?',
               r: 'Le livre de compte garde le détail des <strong>8 derniers cycles</strong>. Les totaux de chaque cycle sont conservés plus longtemps, ce qui permet de comparer avec les cycles précédents.' }
         ] },
-        { id: 'communications', titre: 'COMMUNICATIONS ET MOBILE', questions: [
-            { q: 'Comment fonctionnent les communications ?',
-              r: 'Trois canaux : le réseau entier, votre escadron, ou un message privé à un pilote. Un message <strong>urgent</strong> s\'affiche en plein écran, un message privé en fenêtre, et l\'icône de discussion, en haut à droite à côté du son, clignote. Pour prévenir toute interception, tout le registre est <strong>purgé chaque semaine, le jeudi</strong>.' },
+        { id: 'mobile', titre: 'MOBILE', questions: [
             { q: 'Puis-je utiliser SYS.EDTEAM sur mon téléphone ?',
-              r: 'Oui, avec le <strong>compagnon mobile</strong> : accueil (rang BGS, Powerplay, finances, Pilier, Élan, chiffres de l\'escadron), directives et effort BGS, colonisation, escadron et communications. Cliquez sur « Compagnon mobile » en bas de page pour obtenir le QR code, ou ouvrez <em>edteam-portal.github.io/mobile.html</em> sur votre téléphone et connectez-vous avec le même compte. Vous pouvez l\'ajouter à l\'écran d\'accueil.' }
+              r: 'Oui, avec le <strong>compagnon mobile</strong> : accueil (rang BGS, Powerplay, finances, Pilier, Élan, chiffres de l\'escadron), directives et effort BGS, colonisation, et escadron. Cliquez sur « Compagnon mobile » en bas de page pour obtenir le QR code, ou ouvrez <em>edteam-portal.github.io/mobile.html</em> sur votre téléphone et connectez-vous avec le même compte. Vous pouvez l\'ajouter à l\'écran d\'accueil.' }
         ] },
         { id: 'donnees', titre: 'MES DONNÉES', questions: [
             { q: 'Qui voit quoi ?',

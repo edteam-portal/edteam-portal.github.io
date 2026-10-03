@@ -172,7 +172,7 @@
             + '<div class="ft-modal">'
             +   '<div class="ft-x" title="Fermer">X</div>'
             +   '<h3>' + SVG_TEL + ' COMPAGNON MOBILE</h3>'
-            +   '<p>Le commandement dans la poche : consultez les directives BGS de votre escadron, le statut de votre flotte et vos communications depuis votre téléphone.</p>'
+            +   '<p>Le commandement dans la poche : consultez les directives BGS de votre escadron, le statut de votre flotte et vos finances depuis votre téléphone.</p>'
             +   '<div class="ft-qr"><img src="images/qr-mobile.png" alt="QR code pour ouvrir le compagnon mobile" width="190" height="190"></div>'
             +   '<p style="font-size:.8rem;color:#999;">Scannez le code avec votre téléphone, ou ouvrez <strong style="color:#fff;">edteam-portal.github.io/mobile.html</strong>, puis connectez-vous avec le même compte. Vous pouvez l\'ajouter à l\'écran d\'accueil pour l\'ouvrir comme une application.</p>'
             +   '<a class="ft-btn ft-mobile" href="' + MOBILE_URL + '">OUVRIR LA VERSION MOBILE ICI</a>'

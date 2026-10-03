@@ -15,7 +15,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=2"></script>
+    <script src="shared-utils.js?v=3"></script>
+    <script src="quoifaire.js?v=2"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=3"></script>
@@ -154,20 +155,6 @@
             font-weight: bold;
         }
 
-        .nav-tab-btn#nav-btn-comms.active {
-            color: var(--ed-blue) !important;
-            background: rgba(0, 240, 255, 0.08) !important;
-            box-shadow: inset 0 3px 0 var(--ed-blue) !important;
-        }
-
-        @keyframes navMobileBlink {
-            0%, 100% { color: #777; }
-            50% { color: var(--ed-blue); filter: drop-shadow(0 0 8px var(--ed-blue)); }
-        }
-        .alerte-nav-mobile {
-            animation: navMobileBlink 1.5s infinite !important;
-            color: var(--ed-blue) !important;
-        }
 
         .m-input {
             width: 100%;
@@ -255,18 +242,6 @@
             100% { top: 100%; opacity: 0; }
         }
 
-        .chat-bubble {
-            padding: 10px 12px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.03);
-            border-left: 3px solid #555;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 0.85em;
-        }
-        .chat-bubble.squad { border-left-color: var(--ed-orange); background: rgba(255, 113, 0, 0.05); }
-        .chat-bubble.private { border-left-color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); }
     
         /* =========================================
            ANTI-DÉBORDEMENT DES MODALES (SÉCURITÉ)
@@ -344,7 +319,7 @@
         .bottom-nav { height: calc(74px + env(safe-area-inset-bottom)); background: rgba(10,7,5,0.94); border-top: 1px solid var(--x-line); backdrop-filter: blur(16px); padding: 8px 6px env(safe-area-inset-bottom); justify-content: center; }
         .nav-tab-btn { position: relative; height: auto; align-self: stretch; gap: 4px; font-size: 0.6em; letter-spacing: 1.3px; color: #6f675d; border-radius: 0; }
         .nav-tab-btn svg { width: 23px; height: 23px; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-        .nav-tab-btn.active, .nav-tab-btn#nav-btn-comms.active { color: var(--ed-orange) !important; background: transparent !important; box-shadow: none !important; font-weight: normal; }
+        .nav-tab-btn.active { color: var(--ed-orange) !important; background: transparent !important; box-shadow: none !important; font-weight: normal; }
         .nav-tab-btn.active::before { content: ""; position: absolute; top: -9px; left: 50%; width: 30px; height: 3px; margin-left: -15px; border-radius: 0 0 4px 4px; background: var(--ed-orange); box-shadow: 0 0 14px var(--ed-orange); }
         .nav-tab-btn.active svg { filter: drop-shadow(0 0 6px rgba(255,113,0,0.7)); }
 
@@ -471,18 +446,12 @@
         .modal-overlay > .card::before { content: ""; display: block; width: 42px; height: 4px; border-radius: 3px; background: #4a3f34; margin: 9px auto 2px; flex: none; }
         #modal-budget-livre > .card { max-height: 94vh !important; }
 
-        /* ---- messages (onglet Comms) ---- */
-        .xmsg { max-width: 82%; padding: 9px 13px; border-radius: 16px 16px 16px 4px; font-size: 0.82em; line-height: 1.4; background: rgba(255,255,255,0.07); align-self: flex-start; word-break: break-word; color: #eee; }
-        .xmsg small { display: block; font-size: 0.74em; color: var(--x-mut); margin-bottom: 3px; letter-spacing: 0.5px; }
-        .xmsg.me { align-self: flex-end; border-radius: 16px 16px 4px 16px; background: rgba(255,113,0,0.18); border: 1px solid rgba(255,113,0,0.3); }
-        .xmsg.pv { box-shadow: inset 2px 0 0 var(--ed-green); }
         #x-chiffres > summary::-webkit-details-marker { display: none; }
 
         /* ---- adoucissement des anciens elements (messages, champs, boutons) ---- */
         .m-btn { border-radius: 12px; }
         .m-input { border-radius: 12px; }
         .crt-container { border-radius: 18px; }
-        .chat-bubble { border-radius: 4px 14px 14px 4px; }
         .rank-item { border-radius: 12px; }
         .m-repliable { border-radius: 18px; }
         .m-repliable summary { font-family: 'Rajdhani', 'Share Tech Mono', sans-serif; letter-spacing: 3px; font-size: 1em; }
@@ -551,6 +520,9 @@
             <!-- ACCUEIL : moi, mes finances, cette semaine, chiffres cles -->
             <!-- ========================================== -->
             <div id="tab-qg" style="display: flex; flex-direction: column; gap: 12px;">
+
+                <!-- QUOI FAIRE : bande d'entree (recommandation), remplie par quoifaire.js -->
+                <div id="qf-m-bande" style="display: none;"></div>
 
                 <!-- Alertes (titre menace...) : remplies par chargerAccueilMobile -->
                 <div id="x-alertes" style="display: flex; flex-direction: column; gap: 10px;"></div>
@@ -764,27 +736,10 @@
                 <button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="ouvrirSalleBgsMobile()">CLASSEMENT BGS DE L'ESCADRON</button>
             </div>
 
-            <div id="tab-comms" style="display: none; flex-direction: column; gap: 10px; height: calc(100vh - 175px); height: calc(100dvh - 175px); min-height: 300px;">
-                <div class="xseg bl">
-                    <button id="btn-chan-global" class="on" onclick="changerCanalComms('GLOBAL')">RÉSEAU</button>
-                    <button id="btn-chan-squad" onclick="changerCanalComms('ESCADRON')">ESCADRON</button>
-                    <button id="btn-chan-prive" onclick="changerCanalComms('PRIVE')">PRIVÉ</button>
-                </div>
-                <div id="m-prive-selector-row" class="xc b" style="display: none; gap: 10px; align-items: center; padding: 8px 12px;">
-                    <span style="color: var(--ed-blue); font-size: 0.66em; letter-spacing: 1.5px; white-space: nowrap;">CMDR CIBLE</span>
-                    <select id="m-select-destinataire" class="m-input" style="padding: 8px; font-size: 0.85em; background: #000; color: #fff;" onchange="chargerMessagesComms()">
-                        <option value="">Sélectionner un pilote...</option>
-                    </select>
-                </div>
-                <div id="m-crt-wrapper" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
-                    <div id="m-chat-feed" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 2px;">
-                        <div class="xmut" style="text-align: center; margin: auto;">Connexion au relais subspace...</div>
-                    </div>
-                </div>
-                <div class="xc" style="display: flex; gap: 8px; align-items: center; padding: 6px 6px 6px 16px; border-radius: 22px;">
-                    <input type="text" id="m-chat-input" placeholder="Écrire…" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: #fff; font-family: inherit; font-size: 0.9em; padding: 9px 0;" oninput="sonType()" onkeydown="if(event.key === 'Enter') envoyerMessageMobile()">
-                    <button class="xpill" style="color: var(--ed-orange); background: rgba(255,113,0,0.12); font-family: inherit; padding: 10px 14px; cursor: pointer;" onclick="envoyerMessageMobile()">ENVOYER</button>
-                </div>
+
+            <!-- ONGLET QUOI FAIRE (quoifaire.js) -->
+            <div id="tab-quoifaire" style="display: none; flex-direction: column; gap: 10px;">
+                <div id="qf-m-corps"></div>
             </div>
 
         </main>
@@ -807,9 +762,9 @@
                 <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3.5 3.5 0 0 1 0 7M22 20c0-2.6-1.7-4.6-4-5.5"></path></svg>
                 <span>ESCADRON</span>
             </button>
-            <button id="nav-btn-comms" class="nav-tab-btn" onclick="switchMobileTab('comms')">
-                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>COMMS</span>
+            <button id="nav-btn-quoifaire" class="nav-tab-btn" onclick="switchMobileTab('quoifaire')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+                <span>QUOI FAIRE</span>
             </button>
         </nav>
 
@@ -1239,7 +1194,6 @@
             </svg>`;
         };
 
-        function sonType() { playUI('type'); }
 
         // Déverrouillage audio obligatoire au premier toucher de l'écran
         document.body.addEventListener('click', initAudio, { once: true });
@@ -1253,7 +1207,6 @@
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let profilCommandant = null;
-        let canalActif = 'GLOBAL';
 
         window.addEventListener('load', async () => {
             const { data: { session } } = await supabaseApp.auth.getSession();
@@ -1300,7 +1253,7 @@
             chargerGalnetMobile();
             chargerGazetteListMobile();
             chargerRegistreTactiqueMobile();
-            initialiserCommsMobile();
+            if (window.QF) QF.monterBande('qf-m-bande');
             verifierNouvellesNotesMobile();
             verifierNouvellesLivraisonsMobile();
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
@@ -1342,7 +1295,18 @@
             return !(rangJeu === 4 && !p.est_amiral && !p.est_officier);
         }
 
-        const X_ONGLETS = ['qg', 'bgs', 'batir', 'escadron', 'comms'];
+        const X_ONGLETS = ['qg', 'bgs', 'batir', 'escadron', 'quoifaire'];
+        // QUOI FAIRE : crochets propres au mobile (quoifaire.js est partage avec le PC)
+        if (window.QF) {
+            QF.accesBgsHook = function () { return xAccesBgs(); };
+            QF.onOuvrirTableau = function () { switchMobileTab('quoifaire'); };
+            QF.destinations.bgs = function () { switchMobileTab('bgs'); };
+            QF.destinations.colo = function () { switchMobileTab('batir'); };
+            QF.destinations.rang = function () { ouvrirSalleBgsMobile(); };
+            QF.destinations.pp = function () { ouvrirSallePowerplayMobile(); };
+            QF.destinations.budget = function () { ouvrirBudgetMobile(); };
+            QF.destinations.rejoindre = function () { switchMobileTab('qg'); };
+        }
         function switchMobileTab(tabId) {
             sonClic();
             window.scrollTo(0, 0);
@@ -1352,14 +1316,11 @@
             suivreVueMobile(tabId);
             const btnClic = xEl('nav-btn-' + tabId);
             btnClic.classList.add('active');
-            btnClic.classList.remove('alerte-nav-mobile');   // eteint l'alerte du bouton
             btnClic.classList.remove('alerte-nav-rouge');    // eteint l'alerte rouge des onglets Accueil et BGS
 
             xEl('tab-' + tabId).style.display = 'flex';
-            if (tabId === 'comms') {
-                const feed = xEl('m-chat-feed');
-                feed.scrollTop = feed.scrollHeight;
-            } else if (tabId === 'qg') chargerAccueilMobile(false);
+            if (tabId === 'quoifaire') { if (window.QF) QF.monterTableau('qf-m-corps', false); }
+            else if (tabId === 'qg') chargerAccueilMobile(false);
             else if (tabId === 'bgs') chargerBGSMobile(false);
             else if (tabId === 'batir') chargerBatirMobile(false);
             else if (tabId === 'escadron') chargerEscadronMobile(false);
@@ -2094,179 +2055,6 @@
             }).join('');
         }
 
-        // --- COMMS & CHAT (INTACTS) ---
-
-        function securiserTexte(str) {
-        if (!str) return '';
-        return str.replace(/[&<>'"]/g, tag => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-        }[tag] || tag));
-}
-
-        async function initialiserCommsMobile() {
-            await chargerListePilotesPrives();
-            chargerMessagesComms();
-
-            supabaseApp.channel('mobile-transmissions')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
-                    const msg = payload.new;
-                    let estConcerne = false;
-
-                    if (canalActif === 'ESCADRON' && msg.canal === 'ESCADRON' && msg.escadron_id === profilCommandant.escadron_id) {
-                        estConcerne = true;
-                    } else if (canalActif === 'GLOBAL' && msg.canal === 'GLOBAL') {
-                        estConcerne = true;
-                    } else if (canalActif === 'PRIVE' && msg.canal === 'PRIVE') {
-                        const targetId = document.getElementById('m-select-destinataire').value;
-                        if ((msg.expediteur_id === targetId && msg.destinataire_id === profilCommandant.user_id) ||
-                            (msg.expediteur_id === profilCommandant.user_id && msg.destinataire_id === targetId)) {
-                            estConcerne = true;
-                        }
-                    }
-
-                    // Si on est concerné par le message...
-                    if (estConcerne || (msg.canal === 'PRIVE' && msg.destinataire_id === profilCommandant.user_id)) {
-                        
-                        // Si l'onglet COMMS n'est pas ouvert, on fait clignoter le bouton du bas !
-                        const ongletCommsOuvert = document.getElementById('tab-comms').style.display === 'flex';
-                        if (!ongletCommsOuvert) {
-                            document.getElementById('nav-btn-comms').classList.add('alerte-nav-mobile');
-                        } else if (estConcerne) {
-                            ajouterBulleMessage(msg); // On l'affiche direct si on est dessus
-                        }
-                        
-                        // On joue le son de réception radar
-                        if (typeof playUI === 'function') playUI('success');
-                    }
-                })
-                .subscribe();
-        }
-
-        async function chargerListePilotesPrives() {
-            const select = document.getElementById('m-select-destinataire');
-            if (!select) return;
-
-            try {
-                const { data: annuaire } = await supabaseApp.rpc('annuaire_pilotes');
-                const profils = (annuaire || []).filter(p => p.user_id !== profilCommandant.user_id);
-
-                if (profils && profils.length > 0) {
-                    let opts = '<option value="">-- CHOISIR UN DESTINATAIRE --</option>';
-                    opts += '<option value="00000000-0000-4000-8000-0000000000ff">📡 TRANSMISSIONS OFFICIELLES</option>';
-                    profils.forEach(p => {
-                        opts += `<option value="${p.user_id}">CMDR ${escapeHtml((p.cmdr_nom || 'PILOTE').toUpperCase())}</option>`;
-                    });
-                    select.innerHTML = opts;
-                }
-            } catch (e) {}
-        }
-
-        function changerCanalComms(canal) {
-            sonClic();
-            canalActif = canal;
-            [['btn-chan-global', 'GLOBAL'], ['btn-chan-squad', 'ESCADRON'], ['btn-chan-prive', 'PRIVE']].forEach(([id, c]) => document.getElementById(id).classList.toggle('on', c === canal));
-            document.getElementById('m-prive-selector-row').style.display = (canal === 'PRIVE') ? 'flex' : 'none';
-            chargerMessagesComms();
-        }
-
-        async function chargerMessagesComms() {
-            const feed = document.getElementById('m-chat-feed');
-            feed.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; margin: auto;">Balayage de la fréquence...</div>';
-
-            if (canalActif === 'PRIVE') {
-                const targetId = document.getElementById('m-select-destinataire').value;
-                if (!targetId) {
-                    feed.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.85em; text-align: center; margin: auto; padding: 20px;">> SÉLECTIONNEZ UN PILOTE POUR ÉTABLIR LA LIAISON CRYPTÉE.</div>';
-                    return;
-                }
-
-                let query = supabaseApp.from('transmissions')
-                    .select('*')
-                    .eq('canal', 'PRIVE')
-                    .or(`and(expediteur_id.eq.${profilCommandant.user_id},destinataire_id.eq.${targetId}),and(expediteur_id.eq.${targetId},destinataire_id.eq.${profilCommandant.user_id})`)
-                    .order('created_at', { ascending: true })
-                    .limit(40);
-
-                const { data: messages } = await query;
-                afficherFluxComms(messages);
-            } else {
-                let query = supabaseApp.from('transmissions').select('*').order('created_at', { ascending: true }).limit(40);
-
-                if (canalActif === 'ESCADRON') {
-                    query = query.eq('canal', 'ESCADRON').eq('escadron_id', profilCommandant.escadron_id);
-                } else {
-                    query = query.eq('canal', 'GLOBAL');
-                }
-
-                const { data: messages } = await query;
-                afficherFluxComms(messages);
-            }
-        }
-
-        function afficherFluxComms(messages) {
-            const feed = document.getElementById('m-chat-feed');
-            feed.innerHTML = '';
-            if (messages && messages.length > 0) {
-                messages.forEach(m => ajouterBulleMessage(m));
-            } else {
-                feed.innerHTML = '<div class="xmut" style="text-align: center; margin: auto;">Aucune transmission sur ce canal.</div>';
-            }
-            feed.scrollTop = feed.scrollHeight;
-        }
-
-        function ajouterBulleMessage(m) {
-            const feed = document.getElementById('m-chat-feed');
-            const isMe = m.expediteur_id === profilCommandant.user_id;
-            const temps = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            const systeme = m.expediteur_id === '00000000-0000-4000-8000-0000000000ff';
-            const nom = isMe ? 'Vous' : (m.expediteur_nom ? m.expediteur_nom.toUpperCase() : 'PILOTE');
-            const bubble = document.createElement('div');
-            bubble.className = 'xmsg' + (isMe ? ' me' : '') + (m.canal === 'PRIVE' ? ' pv' : '');
-            bubble.innerHTML = `<small>${isMe || systeme ? '' : 'CMDR '}${securiserTexte(nom)} · ${temps}</small>${securiserTexte(m.message)}`;
-            feed.appendChild(bubble);
-            feed.scrollTop = feed.scrollHeight;
-        }
-
-        async function envoyerMessageMobile() {
-            const input = document.getElementById('m-chat-input');
-            const txt = input.value.trim();
-            if (!txt || !profilCommandant) return;
-            
-            sonClic(); // <-- Retour sonore de transmission
-
-            let payload = {
-                expediteur_id: profilCommandant.user_id,
-                expediteur_nom: profilCommandant.cmdr_nom || 'COMMANDANT',
-                canal: canalActif,
-                message: txt
-            };
-
-            if (canalActif === 'ESCADRON') {
-                payload.escadron_id = profilCommandant.escadron_id;
-            } else if (canalActif === 'PRIVE') {
-                const select = document.getElementById('m-select-destinataire');
-                const targetId = select.value;
-
-                if (!targetId) {
-                    alert("Veuillez choisir un destinataire avant de transmettre.");
-                    return;
-                }
-                if (targetId === '00000000-0000-4000-8000-0000000000ff') {
-                    alert("Cette fréquence officielle est en réception seule.");
-                    return;
-                }
-                payload.destinataire_id = targetId;
-            }
-
-            input.value = '';
-            // La table n'a pas de colonne destinataire_nom (l'ancien envoi echouait en silence pour les messages prives).
-            const { error } = await supabaseApp.from('transmissions').insert([payload]);
-            if (error) {
-                console.error('Échec de la transmission :', error);
-                input.value = txt;   // on rend le texte au pilote pour qu'il puisse renvoyer
-                alert("Échec de la transmission. Réessayez.");
-            }
-        }
 
 
     // --- AFFICHAGE DES DÉTAILS DIPLOMATIQUES (MOBILE) ---
@@ -3283,6 +3071,17 @@
         const coloTypeInstallation = (t, terminee) => (terminee && /ConstructionDepot/i.test(t || '')) ? '' : (COLO_LIBELLES_TYPE[t] || '');
         const coloCourtSysteme = n => String(n || '').replace(/^Col \d+ Sector /, '');
 
+        // NOTE sur la fraicheur des besoins (TRANSITOIRE) : au lancement du module, les chantiers ont ete reconstitues a partir d'anciens journaux de jeu.
+        // Elle ne s'affiche que tant qu'il reste des chantiers ouverts jamais releves a quai depuis la mise en service (voir shared-utils.js).
+        function coloNoteMaj(d) {
+            const f = coloChantiersNonReleves(d.systemes);
+            if (!f.anciens) return '';
+            return '<div style="border: 1px solid #FF7100; background: rgba(255,113,0,0.08); border-radius: 12px; padding: 9px 12px; margin: 6px 0 8px; font-size: 0.68em; line-height: 1.5; color: #d9a066;">'
+                + '<b style="color: #FF7100; letter-spacing: 2px; font-weight: normal;">IMPORTANT</b> · Module récent : à son lancement, les chantiers ont été reconstitués à partir des anciens journaux de jeu. '
+                + f.anciens + ' chantier' + (f.anciens > 1 ? 's' : '') + ' sur ' + f.total + ' n\'' + (f.anciens > 1 ? 'ont' : 'a') + ' pas encore été relevé' + (f.anciens > 1 ? 's' : '') + ' à quai depuis : '
+                + 'les quantités peuvent être dépassées. Dès qu\'un pilote dock sur un chantier, ses chiffres sont à jour et le restent. Cette note disparaîtra quand tous les chantiers auront été visités une fois.</div>';
+        }
+
         function coloIlYa(iso) {
             const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
             if (isNaN(m)) return '';
@@ -3349,6 +3148,7 @@
             const prio = (d.priorites || []).slice(0, 5);
             if (prio.length) {
                 html += `<div class="xh2">À APPORTER EN PRIORITÉ</div>
+                ${coloNoteMaj(d)}
                 <div class="xc xlist" style="padding: 4px 14px;">${prio.map(p => `<div><span class="ic">⛏</span><span style="overflow-wrap: anywhere;">${esc(p.nom)}</span><span class="q" style="color: ${GOLD};">${fmt(p.reste)} t</span></div>`).join('')}</div>`;
             }
 

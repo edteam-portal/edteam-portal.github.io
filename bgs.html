@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="style.css?v=2">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=2"></script>
+    <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=9"></script>
+    <script src="navigation.js?v=12"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -49,17 +49,6 @@
             100% { transform: translateY(100vh); }
         }
 
-        @keyframes enveloppeBlink {
-            0%, 100% { color: var(--ed-blue); filter: none; }
-            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
-        }
-        .alerte-enveloppe .nav-icon {
-            animation: enveloppeBlink 1s infinite !important;
-        }
-        .alerte-enveloppe .nav-text {
-            color: #fff !important;
-            text-shadow: 0 0 10px #fff;
-        }
 
         /* =========================================
            MENU LATÉRAL TACTIQUE
@@ -583,14 +572,8 @@
                 }
                 
                 const fmt = new Intl.NumberFormat('fr-FR');
-                if (data.solde_vaisseau !== null && data.solde_vaisseau !== undefined) {
-                    const elVaisseau = document.getElementById('solde-vaisseau');
-                    if (elVaisseau) elVaisseau.innerText = fmt.format(data.solde_vaisseau);
-                }
-                if (data.solde_fc !== null && data.solde_fc !== undefined) {
-                    const elFc = document.getElementById('solde-fc');
-                    if (elFc) elFc.innerText = fmt.format(data.solde_fc);
-                }
+                // Escadron et grades dans l'en-tete (navigation.js)
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
 
                 const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
                 if (failsafeKeyDisplay) failsafeKeyDisplay.innerText = data.cle_api;
@@ -2273,7 +2256,6 @@
     <!-- MODULE D'INTERCEPTION DES COMMUNICATIONS   -->
     <!-- ========================================== -->
     
-    <!-- (Alertes de messages : desormais gerees par navigation.js, sur toutes les pages) -->
 
     <!-- 2. MOTEUR D'ÉCOUTE JAVASCRIPT -->
     <script>

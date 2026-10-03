@@ -90,15 +90,31 @@ function injecterArchitectureGlobale() {
             @media (max-width: 900px) { #beta-badge { margin-left: 5px !important; padding: 1px 4px !important; letter-spacing: 1px !important; } }
             .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
             .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
-            .comms-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 34px; box-sizing: border-box; color: var(--ed-blue, #00F0FF); border: 1px solid rgba(0,240,255,.55); background: rgba(0,240,255,.08); box-shadow: 0 0 10px rgba(0,240,255,.18); border-radius: 4px; text-decoration: none; transition: .2s; cursor: pointer; }
-            .comms-btn .nav-icon { min-width: 0; }
-            .comms-btn .nav-icon svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-            .comms-btn:hover { color: #fff; border-color: #fff; background: rgba(0,240,255,.22); box-shadow: 0 0 14px rgba(0,240,255,.55); }
-            .comms-btn.active { color: #fff; border-color: var(--ed-blue, #00F0FF); background: rgba(0,240,255,.22); }
-            @keyframes commsAlerte { 0%, 100% { box-shadow: 0 0 6px rgba(0,240,255,.3); background: rgba(0,240,255,.12); } 50% { box-shadow: 0 0 22px rgba(0,240,255,1), 0 0 44px rgba(0,240,255,.55); background: rgba(0,240,255,.55); border-color: #fff; } }
-            @keyframes commsPastille { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
-            .comms-btn.alerte-enveloppe { color: #fff; animation: commsAlerte .8s infinite; }
-            .comms-btn.alerte-enveloppe::after { content: ""; position: absolute; top: -5px; right: -5px; width: 11px; height: 11px; border-radius: 50%; background: #FF3333; box-shadow: 0 0 10px #FF3333; animation: commsPastille .8s infinite; }
+            /* pastilles de rang : Powerplay, BGS, Federation, Auxiliaires (fenetres : carriere.js, ouvrables depuis toutes les pages) */
+            .hd-sep { width: 1px; align-self: stretch; margin: 6px 2px; background: linear-gradient(transparent, #333, transparent); flex: none; }
+            .hd-rangs { display: flex; align-items: center; gap: 8px; flex: none; }
+            .hd-rg { --c: #00F0FF; position: relative; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px 0 8px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); border-radius: 5px; cursor: pointer; white-space: nowrap;
+                     background: linear-gradient(135deg, color-mix(in srgb, var(--c) 14%, transparent), rgba(0,0,0,.55)); transition: .15s; box-sizing: border-box; }
+            .hd-rg:hover { border-color: var(--c); box-shadow: 0 0 16px -2px var(--c), inset 0 0 14px color-mix(in srgb, var(--c) 18%, transparent); transform: translateY(-1px); }
+            .hd-rg .hx { width: 30px; height: 33px; flex: none; display: grid; place-items: center; clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); background: linear-gradient(160deg, var(--c), transparent 130%); position: relative; }
+            .hd-rg .hx:before { content: ""; position: absolute; inset: 1.5px; clip-path: inherit; background: rgba(6,4,2,.92); }
+            .hd-rg .hx svg { position: relative; width: 15px; height: 15px; stroke: var(--c); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+            .hd-rg .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+            .hd-rg .l { font-size: .58em; letter-spacing: 2px; color: var(--c); opacity: .9; }
+            .hd-rg .v { font-size: .92em; color: #fff; font-weight: bold; letter-spacing: 1px; line-height: 1.1; }
+            .hd-rg .v small { color: #9a9a9a; font-weight: normal; font-size: .8em; letter-spacing: .5px; margin-left: 4px; }
+            .hd-rg .vc { display: none; }
+            .hd-rg .bar { position: absolute; left: 8px; right: 8px; bottom: 3px; height: 2px; background: rgba(255,255,255,.08); }
+            .hd-rg .bar b { display: block; height: 100%; background: var(--c); box-shadow: 0 0 5px var(--c); }
+            .hd-rg .pil { position: absolute; top: -7px; right: -6px; background: var(--c); color: #000; font-size: .6em; font-weight: bold; padding: 1px 6px; border-radius: 7px; letter-spacing: 1px; }
+            .hd-rg.nonaligne { --c: #6b7a80; }
+            @media (max-width: 1500px) {
+                .hd-rg { height: 44px; padding: 0 10px 0 6px; gap: 6px; } .hd-rg .l { display: none; } .hd-rg .hx { width: 27px; height: 30px; }
+                .hd-rg .vl { display: none; } .hd-rg .vc { display: inline; } .hd-rg .v small { display: none; }
+                .hd-rangs { gap: 6px; }
+                #header-escadron { min-width: 0 !important; padding: 5px 11px !important; }
+                #stats-pilotes-box { padding: 4px 10px !important; } #stats-pilotes-box .stats-lib { display: none; }
+            }
         </style>
         <header class="hud-header" style="display: flex; flex-direction: row; align-items: stretch; justify-content: space-between; flex-wrap: nowrap; gap: 15px; margin-bottom: 15px; width: 100%; border-bottom: 2px solid var(--ed-orange); padding-bottom: 15px; flex-shrink: 0;">
             <div style="display: flex; align-items: stretch; gap: 15px; flex-shrink: 0;">
@@ -114,44 +130,35 @@ function injecterArchitectureGlobale() {
                     </div>
                 </div>
 
-                <div id="header-legal-status" 
-                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 8px 14px; cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
-                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
-                    onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <span id="legal-text" style="color: #00FF66; font-size: 1.2em; font-weight: bold; line-height: 1;">CASIER VIERGE</span>
-                    </div>
+                <div id="header-escadron"
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; font-size: 0.8em; letter-spacing: 1px; gap: 4px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.3); border-radius: 4px; padding: 5px 14px; white-space: nowrap; box-sizing: border-box; min-width: 150px;">
+                    <div id="header-escadron-nom" style="color: var(--ed-orange); font-size: 1.1em; font-weight: bold; letter-spacing: 2px; line-height: 1.1;">---</div>
+                    <div id="header-grades" style="display: flex; gap: 6px; flex-wrap: nowrap;"></div>
+                </div>
+                <div id="header-recherche" style="display: none; align-items: center; background: rgba(255, 51, 51, 0.08); border: 1px solid rgba(255, 51, 51, 0.5); border-radius: 4px; padding: 8px 12px; cursor: help; white-space: nowrap; box-sizing: border-box;"
+                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                    <span id="header-recherche-txt" style="color: #FF3333; font-size: 0.85em; font-weight: bold; letter-spacing: 2px;">RECHERCHÉ</span>
                 </div>
 
-                <div id="stats-pilotes-box"
-                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: help; white-space: nowrap; box-sizing: border-box;"
-                    onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>durant les 30 derniers jours,<br>tous escadrons confondus.</span>', '#00FF66')"
-                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
-                    onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                    <div style="color: #888; font-size: 0.75em; font-weight: bold;">FLOTTE</div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span><span id="stats-inscrits-val" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">INSCRITS</span></span>
-                        <span style="color:#333;">|</span>
-                        <span><span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">ACTIFS (30J)</span></span>
-                    </div>
-                </div>
+                <div class="hd-sep"></div>
+                <div id="header-rangs" class="hd-rangs"></div>
 
-                <div class="finances-box" style="display: flex; flex-direction: column; text-align: right; font-size: 0.85em; letter-spacing: 1px; justify-content: center; gap: 3px; background: rgba(0, 240, 255, 0.05); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); cursor: help; transition: 0.2s; white-space: nowrap; box-sizing: border-box;"
-                     onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'SYNCHRONISATION BANCAIRE<br><span style=\\'color:#00FF66; font-size:0.85em;\\'>> VAISSEAU : AUTOMATIQUE</span><br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Mise à jour en temps réel.</span><br><br><span style=\\'color:#FF7100; font-size:0.85em;\\'>> CARRIER : MANUELLE</span><br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Ouvrez la <strong>Gestion du Fleet Carrier</strong><br>en jeu pour rafraîchir ce solde.</span>', 'var(--ed-blue)')" 
-                     onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
-                     onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
-                     onmouseover="this.style.background='rgba(0, 240, 255, 0.15)'; this.style.borderColor='#fff';"
-                     onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.borderColor='rgba(0, 240, 255, 0.2)';">
-                    <div><span style="color: #888;">VAISSEAU :</span> <span id="solde-vaisseau" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-orange);">CR</span></div>
-                    <div><span style="color: #888;">CARRIER :</span> <span id="solde-fc" style="color: #fff; font-weight: bold;">---</span> <span style="color: var(--ed-blue);">CR</span></div>
-                </div>
+
 
             </div>
-            <div style="display: flex; align-items: flex-start; justify-content: flex-end; flex-grow: 1; padding-right: 5px; gap: 8px;">
-                <a href="communications.html" id="nav-comms-link" class="comms-btn ${page === 'communications.html' ? 'active' : ''}" title="Communications" aria-label="Communications" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="retirerAlerteEnveloppe()">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="8" y1="10" x2="8.01" y2="10"></line><line x1="12" y1="10" x2="12.01" y2="10"></line><line x1="16" y1="10" x2="16.01" y2="10"></line></svg></div>
-                </a>
-                <button type="button" class="son-btn" data-son-toggle></button>
+            <div style="display: flex; align-items: center; justify-content: flex-end; flex-grow: 1; padding-right: 5px; gap: 8px;">
+                    <div id="stats-pilotes-box"
+                        style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: help; white-space: nowrap; box-sizing: border-box;"
+                        onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>durant les 30 derniers jours,<br>tous escadrons confondus.</span>', '#00FF66')"
+                        onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
+                        onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
+                        <div class="stats-lib" style="color: #888; font-size: 0.75em; font-weight: bold;">FLOTTE</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span><span id="stats-inscrits-val" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">INSCRITS</span></span>
+                            <span style="color:#333;">|</span>
+                            <span><span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">ACTIFS (30J)</span></span>
+                        </div>
+                    </div>
             </div>
         </header>
     `;
@@ -279,31 +286,117 @@ window.actualiserHeader = function(profilData) {
         const elCmdr = document.getElementById('cmdr-name-display');
         if (elCmdr) elCmdr.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase();
     }
-    const fmt = new Intl.NumberFormat('fr-FR');
-    if (profilData.solde_vaisseau !== undefined && profilData.solde_vaisseau !== null) {
-        const elV = document.getElementById('solde-vaisseau');
-        if (elV) elV.innerText = fmt.format(profilData.solde_vaisseau);
-    }
-    if (profilData.solde_fc !== undefined && profilData.solde_fc !== null) {
-        const elFc = document.getElementById('solde-fc');
-        if (elFc) elFc.innerText = fmt.format(profilData.solde_fc);
+    // --- ESCADRON ET GRADES (a la place de l'ancien casier et des soldes : tout est deja dans le profil, aucune requete) ---
+    if (profilData.escadron_id !== undefined) {
+        const elNom = document.getElementById('header-escadron-nom');
+        const elGr = document.getElementById('header-grades');
+        const esc = String(profilData.escadron_id || '').trim();
+        const independant = !esc || esc.toUpperCase() === 'INDEPENDANT';
+        if (elNom) elNom.innerText = independant ? 'PILOTE INDÉPENDANT' : esc.toUpperCase();
+        if (elNom) elNom.style.color = independant ? 'var(--ed-blue)' : 'var(--ed-orange)';
+        const boite = document.getElementById('header-escadron');
+        if (boite) {
+            boite.style.borderColor = independant ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 113, 0, 0.3)';
+            boite.style.background = independant ? 'rgba(0, 240, 255, 0.05)' : 'rgba(255, 113, 0, 0.05)';
+            boite.setAttribute('onmouseenter', independant
+                ? "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'PILOTE INDÉPENDANT<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Les modules BGS, Diplomatie et Escadron sont réservés aux membres d\\'un escadron.</span>', '#00F0FF')"
+                : "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'ESCADRON<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Votre escadron et vos accréditations.</span>', '#FF7100')");
+            boite.setAttribute('onmouseleave', "if(typeof hideHoloTooltip === 'function') hideHoloTooltip()");
+        }
+        if (elGr) {
+            const pastille = (txt, col, info) => '<span style="color:' + col + '; border:1px solid ' + col + '; background:rgba(255,255,255,0.04); padding:1px 8px; border-radius:3px; font-size:0.78em; font-weight:bold; letter-spacing:1px; cursor:help;"'
+                + ' onmouseenter="if(typeof showHoloTooltip === \'function\') showHoloTooltip(event, \'' + info + '\', \'' + col + '\')" onmouseleave="if(typeof hideHoloTooltip === \'function\') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === \'function\') moveHoloTooltip(event)">' + txt + '</span>';
+            let g = '';
+            if (!independant) {
+                let rangJeu = 3; try { rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3'); } catch (e) {}
+                if (profilData.est_amiral) g += pastille('AMIRAL', '#FF3333', 'COMMANDANT SUPRÊME<br>Gère les effectifs, accrédite les officiers et publie les ordres BGS.');
+                else if (rangJeu === 4) g += pastille('RECRUE', '#cccccc', 'RECRUE<br>Accès limité : le panneau tactique BGS est verrouillé.');
+                else g += pastille('PILOTE', '#FF7100', 'MEMBRE ACTIF<br>Accès aux opérations de l’escadron.');
+                if (!profilData.est_amiral && profilData.est_officier) g += pastille('OFFICIER BGS', '#00FF66', 'GESTION TACTIQUE BGS<br>Autorisé à publier les ordres de l’Amiral.');
+                if (!profilData.est_amiral && profilData.est_diplomate) g += pastille('DIPLOMATE', '#00F0FF', 'RELATIONS EXTÉRIEURES<br>Administre la liste noire (KOS) et les traités.');
+            }
+            elGr.innerHTML = g;
+            elGr.style.display = g ? 'flex' : 'none';
+        }
     }
 
-    const notoriete = parseInt(profilData.notoriete) || 0;
-    const legalBox = document.getElementById("header-legal-status");
-    const legalText = document.getElementById("legal-text");
+    // --- PASTILLES DE RANG (Powerplay, BGS, Federation, Auxiliaires) : tout est dans le profil, aucune requete ---
+    {
+        const CHAMPS = ['escadron_id', 'est_amiral', 'est_officier', 'rang_combat', 'prog_combat', 'rang_commerce', 'prog_commerce', 'rang_explo', 'prog_explore', 'rang_exobio', 'prog_exobio', 'rang_mercenary', 'prog_mercenary',
+                        'rang_fed', 'prog_fed', 'rang_emp', 'prog_emp', 'puissance_nom', 'puissance_rang', 'puissance_merites_cycle', 'puissance_merites_total', 'rang_bgs', 'points_bgs'];
+        const memo = window.__profilRangs = window.__profilRangs || {};
+        CHAMPS.forEach(k => { if (profilData[k] !== undefined) memo[k] = profilData[k]; });
+        const zone = document.getElementById('header-rangs');
+        if (zone && (memo.rang_fed !== undefined || memo.puissance_nom !== undefined || memo.rang_bgs !== undefined)) {
+            const R = window.EDTEAM_RANGS;
+            const up = s => String(s || '').toUpperCase();
+            const seuil = r => r <= 1 ? 0 : Math.round(15 * Math.pow(r - 1, 1.6));
+            const abr = s => { s = up(s); if (s.length <= 8) return s; const m = s.replace(/\./g, '').split(' '); return m.length > 1 ? m.slice(0, -1).map(w => w[0] + '.').join('') + m[m.length - 1].slice(0, 7) : s.slice(0, 8); };
+            const abrNom = s => { const m = up(s).split(' '); return m.length > 1 ? m[0] + ' ' + m[1][0] + '.' : m[0]; };
+            const att = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+            const tip = (c, t, d) => ' data-c="' + att(c) + '" data-t="' + att(t) + '" data-d="' + att(d) + '"';
+            const chip = (cls, quoi, col, label, vl, vc, extra, info, svg) =>
+                '<div class="hd-rg ' + cls + '" style="--c:' + col + ';" onclick="ouvrirCarriere(\'' + quoi + '\')"' + info + '>' + (extra.pil || '') + '<div class="hx"><svg viewBox="0 0 24 24">' + svg + '</svg></div>'
+                + '<div class="tx"><div class="l">' + label + '</div><div class="v"><span class="vl">' + vl + '</span><span class="vc">' + vc + '</span></div></div>' + (extra.bar || '') + '</div>';
+            let h = '';
+            // Powerplay
+            const pp = up(memo.puissance_nom);
+            h += chip(pp ? '' : 'nonaligne', 'pp', '#00F0FF', 'POWERPLAY', pp || 'NON ALIGNÉ', pp ? abrNom(pp) : 'NON ALIGNÉ',
+                { pil: pp ? '<span class="pil">R' + (parseInt(memo.puissance_rang) || 0) + '</span>' : '' },
+                tip('#00F0FF', 'POWERPLAY 2.0', pp ? 'Rang ' + (parseInt(memo.puissance_rang) || 0) + ' · ' + pp + '. Allégeance, mérites du cycle et réseau des partisans.' : 'Aucune allégeance. Engagez-vous dans le jeu pour suivre vos mérites.'),
+                '<polygon points="12,2.5 20.5,7.2 20.5,16.8 12,21.5 3.5,16.8 3.5,7.2"/><circle cx="12" cy="12" r="2.6"/>');
+            // BGS : membres d'escadron ayant acces au BGS (meme regle que le menu)
+            let rangJeu = 3; try { rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3'); } catch (e) {}
+            const esc = String(memo.escadron_id || '').trim();
+            const accesBgs = !!esc && esc.toUpperCase() !== 'INDEPENDANT' && !(rangJeu === 4 && !memo.est_amiral && !memo.est_officier);
+            if (accesBgs && memo.rang_bgs !== undefined) {
+                const rg = Math.min(100, Math.max(1, parseInt(memo.rang_bgs) || 1)), pts = Number(memo.points_bgs) || 0;
+                const min = seuil(rg), max = rg >= 100 ? null : seuil(rg + 1);
+                const pct = max === null ? 100 : Math.max(0, Math.min(100, 100 * (pts - min) / (max - min)));
+                h += chip('', 'bgs', '#FF7100', 'RANG BGS', rg + '<small>' + (max === null ? 'MAX' : Math.floor(pts) + ' / ' + max) + '</small>', String(rg),
+                    { bar: '<div class="bar"><b style="width:' + pct.toFixed(1) + '%"></b></div>' },
+                    tip('#FF7100', 'COMMANDEMENT BGS', 'Rang ' + rg + (max === null ? ' (maximal)' : ' · ' + Math.floor(pts) + ' / ' + max + ' points') + '. Progression et tableau de l’escadron.'),
+                    '<polyline points="4.8,9.1 12,3.4 19.2,9.1"/><polyline points="4.8,13.9 12,8.2 19.2,13.9"/><polyline points="4.8,18.7 12,13 19.2,18.7"/>');
+            }
+            // Federation : meilleur rang parmi les cinq domaines
+            const dom = [['COMBAT', memo.rang_combat, memo.prog_combat, R.combat], ['COMMERCE', memo.rang_commerce, memo.prog_commerce, R.trade], ['EXPLORATION', memo.rang_explo, memo.prog_explore, R.explore],
+                         ['EXOBIOLOGIE', memo.rang_exobio, memo.prog_exobio, R.exobio], ['MERCENAIRE', memo.rang_mercenary, memo.prog_mercenary, R.mercenary]];
+            let meilleur = null;
+            dom.forEach(d => { const r = parseInt(d[1]) || 0, p = parseInt(d[2]) || 0, sc = r + p / 100; if (!meilleur || sc > meilleur.sc) meilleur = { sc: sc, nom: d[0], rang: d[3][r] || 'INCONNU' }; });
+            h += chip('', 'fed', '#00FF66', 'FÉDÉRATION', meilleur.rang, meilleur.rang, {},
+                tip('#00FF66', 'FÉDÉRATION DES PILOTES', 'Meilleur rang : ' + meilleur.rang + ' (' + meilleur.nom.toLowerCase() + '). Détail des cinq carrières.'),
+                '<path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>');
+            // Auxiliaires : Marine federale et Empire
+            const nf = R.fed[parseInt(memo.rang_fed) || 0] || 'INCONNU', ne = R.emp[parseInt(memo.rang_emp) || 0] || 'INCONNU';
+            h += chip('', 'aux', '#B026FF', 'AUXILIAIRES', nf + '<small>· ' + ne + '</small>', abr(nf) + ' · ' + abr(ne), {},
+                tip('#B026FF', 'RANGS AUXILIAIRES', 'Marine fédérale : ' + nf + ' · Empire : ' + ne + '.'),
+                '<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6L12 16.7 6.7 19.6l1.1-6L3.4 9.4l6-.8z"/>');
+            zone.innerHTML = h;
+            zone.style.display = 'flex';
+            if (!zone.__tips) {
+                zone.__tips = true;
+                const cible = e => e.target.closest ? e.target.closest('.hd-rg') : null;
+                zone.addEventListener('mouseover', e => { const c = cible(e); if (c && c.dataset.t && typeof showHoloTooltip === 'function') showHoloTooltip(e, c.dataset.t + '<br><span style="color:#ccc; font-size:0.85em; font-weight:normal;">' + c.dataset.d + '</span>', c.dataset.c); });
+                zone.addEventListener('mousemove', e => { if (cible(e) && typeof moveHoloTooltip === 'function') moveHoloTooltip(e); });
+                zone.addEventListener('mouseout', e => { const c = cible(e); if (c && !c.contains(e.relatedTarget) && typeof hideHoloTooltip === 'function') hideHoloTooltip(); });
+            }
+            const sep = zone.previousElementSibling; if (sep && sep.classList.contains('hd-sep')) sep.style.display = 'block';
+        }
+        // lien « ?bgs=1 » (journal de la page BGS) : ouvre la fenetre du rang BGS
+        if (!window.__carriereAuto && /[?&]bgs=1(&|$)/.test(location.search)) {
+            window.__carriereAuto = true;
+            try { history.replaceState(null, '', location.pathname); } catch (e) {}
+            setTimeout(function () { window.ouvrirCarriere('bgs'); }, 400);
+        }
+    }
 
-    if (legalBox && legalText) {
-        if (notoriete > 0) {
-            legalBox.style.background = "rgba(255, 51, 51, 0.05)";
-            legalBox.style.borderColor = "rgba(255, 51, 51, 0.3)";
-            legalText.style.color = "#FF3333";
-            legalText.innerText = "RECHERCHÉ";
-        } else {
-            legalBox.style.background = "rgba(0, 255, 102, 0.05)";
-            legalBox.style.borderColor = "rgba(0, 255, 102, 0.3)";
-            legalText.style.color = "#00FF66";
-            legalText.innerText = "CASIER VIERGE";
+    // --- STATUT « RECHERCHÉ » : n'apparaît que si le pilote est recherché (notoriété > 0) ; rien quand son casier est vierge ---
+    if (profilData.notoriete !== undefined) {
+        const recherche = document.getElementById('header-recherche');
+        if (recherche) {
+            const notoriete = parseInt(profilData.notoriete) || 0;
+            recherche.style.display = notoriete > 0 ? 'flex' : 'none';
+            recherche.setAttribute('onmouseenter', "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Niveau de notoriété : " + notoriete + "</span>', '#FF3333')");
         }
     }
 };
@@ -358,6 +451,34 @@ window.toggleMenu = function() {
     if (body) body.classList.toggle('menu-open');
 };
 
+// ---------- CARRIERE : paliers de rang (partages avec carriere.js) et ouverture des fenetres depuis toutes les pages
+window.EDTEAM_RANGS = {
+    combat: ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+    trade: ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+    explore: ["AIMLESS", "MOSTLY AIMLESS", "SCOUT", "SURVEYOR", "TRAILBLAZER", "PATHFINDER", "RANGER", "PIONEER", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+    exobio: ["DIRECTIONLESS", "MONUMENTAL", "COMPILER", "COLLECTOR", "CATALOGUER", "TAXONOMIST", "ECOLOGIST", "GENETICIST", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+    mercenary: ["DEFENSELESS", "MOSTLY DEFENSELESS", "ROOKIE", "SOLDIER", "GUNSLINGER", "WARRIOR", "GLADIATOR", "STRIKE", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"],
+    fed: ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"],
+    emp: ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"]
+};
+// carriere.js (les quatre fenetres : BGS, Powerplay, Federation, Auxiliaires) n'est telecharge qu'au premier clic sur une pastille
+window.ouvrirCarriere = function(quoi) {
+    if (typeof hideHoloTooltip === 'function') hideHoloTooltip();
+    const lancer = () => { if (window.carriere) window.carriere.ouvrir(quoi); };
+    if (window.carriere) { lancer(); return; }
+    if (!window.__carriereChargement) {
+        window.__carriereChargement = new Promise((ok, ko) => {
+            const s = document.createElement('script');
+            s.src = 'carriere.js?v=1';
+            s.onload = ok; s.onerror = () => { window.__carriereChargement = null; ko(); };
+            document.head.appendChild(s);
+        });
+    }
+    window.__carriereChargement.then(lancer).catch(() => {});
+};
+window.ouvrirSalleBgs = function() { window.ouvrirCarriere('bgs'); };
+window.ouvrirSallePowerplay = function() { window.ouvrirCarriere('pp'); };
+
 window.ouvrirModal = function(id, e) { 
     if (e) e.stopPropagation(); 
     if (typeof hideHoloTooltip === 'function') hideHoloTooltip(); 
@@ -382,11 +503,6 @@ window.copierNav = function(texte, element, event) {
         element.style.color = "#00FF00"; 
         setTimeout(() => { element.innerHTML = texteOriginal; element.style.color = ""; }, 1500); 
     }); 
-};
-
-window.retirerAlerteEnveloppe = function() {
-    const envIcon = document.getElementById('nav-comms-link');
-    if (envIcon) envIcon.classList.remove('alerte-enveloppe');
 };
 
 window.deconnexion = async function() { 
@@ -652,7 +768,7 @@ window.playUI = function(type) {
         gain.connect(audioCtx.destination);
         osc.start(t);
         osc.stop(t + 0.015);
-    } else if (type === 'success' || type === 'receive') {
+    } else if (type === 'success') {
         const osc = audioCtx.createOscillator();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(880, t);
@@ -671,7 +787,6 @@ window.playUI = function(type) {
 window.sonClic = function() { window.playUI('click'); };
 window.sonHover = function() { window.playUI('hover'); };
 window.sonSucces = function() { window.playUI('success'); };
-window.sonType = function() { window.playUI('type'); };
 
 // Déverrouillage audio obligatoire au premier clic (écoute globale)
 window.addEventListener('click', window.initAudio, { once: true });
@@ -773,8 +888,9 @@ window.demarrerSystemLoop = async function systemLoop() {
 
         // HEARTBEAT : ancien plugin uniquement (retire en v2.3) - on purge sans reecrire parametres_app
         processLatest('HEARTBEAT', () => {});
-        processLatest('SHIP_BALANCE', item => { profilUpdates.solde_vaisseau = item.prix_unitaire; profilModifie = true; });
-        processLatest('FC_BALANCE', item => { profilUpdates.solde_fc = item.prix_unitaire; profilModifie = true; });
+        // Soldes vaisseau / carrier : le serveur les inscrit deja dans le profil a l'arrivee de la trame (declencheurs SQL). On purge seulement : plus d'ecriture redondante.
+        processLatest('SHIP_BALANCE', () => {});
+        processLatest('FC_BALANCE', () => {});
         processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });
 
         // Interception du ciblage tactique (COVAS / HUD)
@@ -840,136 +956,3 @@ document.addEventListener('visibilitychange', function() {
 // Rétrocompatibilité d'appel
 window.systemLoop = window.demarrerSystemLoop;
 
-// ==========================================
-// RADAR DE COMMUNICATIONS GLOBAL : alertes de messages sur toutes les pages qui chargent navigation.js
-// (urgent = alerte plein ecran ; prive = petite fenetre ; enveloppe du menu si message plus recent que la derniere visite)
-// ==========================================
-(function radarCommunications() {
-    const PAGE = (window.location.pathname.split('/').pop() || 'index.html');
-    // La page Communications gere deja ses propres alertes (onglets clignotants, sons)
-    if (PAGE === 'communications.html') return;
-
-    let radarActif = false;
-    const moi = () => ((typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : window.profilCommandant) || null;
-
-    function injecterAlertes() {
-        if (document.getElementById('comms-alert-massive')) return;
-        const style = document.createElement('style');
-        style.textContent = '@keyframes commsRadarPulse { 0%, 100% { background: rgba(255,0,0,0.9); } 50% { background: rgba(120,0,0,0.92); } } @keyframes commsRadarBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }';
-        document.head.appendChild(style);
-
-        const conteneur = document.createElement('div');
-        conteneur.innerHTML = `
-        <div id="comms-alert-massive" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.9); z-index: 100000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Share Tech Mono', monospace; cursor: pointer; animation: commsRadarPulse 1s infinite;" onclick="this.style.display='none'; if(typeof sonClic==='function') sonClic();">
-            <div style="border: 4px solid #fff; padding: 40px 60px; background: rgba(0,0,0,0.8); box-shadow: 0 0 50px #FF0000; max-width: 90%;">
-                <h1 style="color: #FF0000; font-size: 3.5em; margin: 0; letter-spacing: 5px; text-shadow: 0 0 20px #FF0000;">⚠️ TRANSMISSION URGENTE ⚠️</h1>
-                <p id="comms-massive-sender" style="color: #fff; font-size: 1.5em; letter-spacing: 2px; margin-top: 20px;">> EXPÉDITEUR : CMDR INCONNU</p>
-                <p id="comms-massive-text" style="color: var(--ed-orange); font-size: 1.3em; margin-top: 30px; max-width: 800px; line-height: 1.5; border-left: 5px solid #FF0000; padding-left: 20px; text-align: left;">Message text...</p>
-                <p style="color: #888; font-size: 0.9em; margin-top: 40px; animation: commsRadarBlink 1.5s infinite;">[ CLIQUEZ N'IMPORTE OÙ POUR ACQUITTER ]</p>
-            </div>
-        </div>
-        <div id="comms-alert-toast" style="position: fixed; bottom: 30px; right: -400px; width: 350px; max-width: 90%; background: rgba(10,5,0,0.95); border: 1px solid var(--ed-blue); border-left: 4px solid var(--ed-blue); padding: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.2); z-index: 99999; font-family: 'Share Tech Mono', monospace; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-sizing: border-box;" onclick="this.style.right='-400px'; if(typeof sonClic==='function') sonClic(); window.location.href='communications.html';">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-blue); padding-bottom: 5px; margin-bottom: 10px;">
-                <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 1px;">> MESSAGE PRIVÉ ENTRANT</span>
-                <span style="color: #888; font-size: 0.8em;">MAINTENANT</span>
-            </div>
-            <div style="color: #fff; font-size: 0.95em; margin-bottom: 5px;">
-                De : <span id="comms-toast-sender" style="color: var(--ed-orange); font-weight: bold;">CMDR ...</span>
-            </div>
-            <div style="color: #888; font-size: 0.8em; font-style: italic;">[ Cliquez pour ouvrir le terminal ]</div>
-        </div>`;
-        while (conteneur.firstChild) document.body.appendChild(conteneur.firstChild);
-    }
-
-    function sonAlerteComms(urgent) {
-        try {
-            let ctx = typeof audioCtx !== 'undefined' && audioCtx ? audioCtx : new (window.AudioContext || window.webkitAudioContext)();
-            if (ctx.state === 'suspended') ctx.resume();
-            const t = ctx.currentTime;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            if (urgent) {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(800, t);
-                osc.frequency.setValueAtTime(1200, t + 0.2);
-                osc.frequency.setValueAtTime(800, t + 0.4);
-                gain.gain.setValueAtTime(0.1, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(t); osc.stop(t + 0.6);
-            } else {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1500, t);
-                osc.frequency.exponentialRampToValueAtTime(800, t + 0.1);
-                gain.gain.setValueAtTime(0.05, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(t); osc.stop(t + 0.2);
-            }
-        } catch (e) {}
-    }
-
-    function initialiserEcoute() {
-        const profil = moi();
-        if (!profil || radarActif) return;
-        radarActif = true;
-
-        // Au demarrage : y a-t-il un message plus recent que la derniere visite sur la page Communications ?
-        let filtreCanaux = 'canal.eq.GLOBAL,destinataire_id.eq.' + profil.user_id;
-        if (profil.escadron_id) filtreCanaux += ',escadron_id.eq.' + profil.escadron_id;
-        supabaseApp.from('transmissions')
-            .select('created_at')
-            .or(filtreCanaux)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .then(({ data }) => {
-                if (data && data.length > 0) {
-                    const dateDernierMsgServeur = new Date(data[0].created_at).getTime();
-                    const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_msg_time') || '0');
-                    if (dateDernierMsgServeur > dateDerniereLecture) {
-                        const envIcon = document.getElementById('nav-comms-link');
-                        if (envIcon) envIcon.classList.add('alerte-enveloppe');
-                    }
-                }
-            });
-
-        // En direct
-        supabaseApp.channel('radar:transmissions')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transmissions' }, payload => {
-                const msg = payload.new;
-                const p = moi();
-                if (!p || msg.expediteur_id === p.user_id) return;
-
-                const pourMoi = (msg.destinataire_id === p.user_id);
-                const escadron = (msg.canal === 'ESCADRON' && msg.escadron_id === p.escadron_id);
-                const global = (msg.canal === 'GLOBAL');
-                if (!(pourMoi || escadron || global)) return;
-
-                const envIcon = document.getElementById('nav-comms-link');
-                if (envIcon) envIcon.classList.add('alerte-enveloppe');
-
-                if (msg.est_urgent) {
-                    sonAlerteComms(true);
-                    document.getElementById('comms-massive-sender').innerText = '> EXPÉDITEUR : ' + (msg.expediteur_id === '00000000-0000-4000-8000-0000000000ff' ? '' : 'CMDR ') + msg.expediteur_nom + ' [ Canal: ' + msg.canal + ' ]';
-                    document.getElementById('comms-massive-text').innerText = msg.message;
-                    document.getElementById('comms-alert-massive').style.display = 'flex';
-                } else if (pourMoi) {
-                    sonAlerteComms(false);
-                    document.getElementById('comms-toast-sender').innerText = msg.expediteur_nom;
-                    const toast = document.getElementById('comms-alert-toast');
-                    toast.style.right = '30px';
-                    setTimeout(() => { toast.style.right = '-400px'; }, 8000);
-                }
-            })
-            .subscribe();
-    }
-
-    function demarrer() {
-        injecterAlertes();
-        const attente = setInterval(() => {
-            if (moi()) { clearInterval(attente); initialiserEcoute(); }
-        }, 1000);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
-    else demarrer();
-})();

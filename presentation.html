@@ -47,7 +47,7 @@
                 "name": "Qu'est-ce que sys.edteam ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie, renseignement tactique et communications."
+                    "text": "SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie et renseignement tactique."
                 }
             },
             {
@@ -71,7 +71,7 @@
                 "name": "Faut-il appartenir à un escadron ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit)."
+                    "text": "Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit)."
                 }
             },
             {
@@ -95,7 +95,7 @@
                 "name": "Fonctionne-t-il sur mobile ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives et l'effort BGS, la colonisation, l'escadron et les communications depuis un téléphone."
+                    "text": "Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives et l'effort BGS, la colonisation, et l'escadron depuis un téléphone."
                 }
             }
         ]
@@ -390,7 +390,7 @@
                 <button class="profil" data-profil="solo" style="--c:#00F0FF;--cg:rgba(0,240,255,.10);">
                     <span class="qui">// PILOTE SANS ESCADRON</span>
                     <h3>Pilote solo</h3>
-                    <ul><li>Votre QG : finances, rangs, Powerplay et mérites</li><li>Votre budget personnel, strictement privé</li><li>Votre colonisation, dans un espace que vous seul voyez</li><li>Communications et compagnon mobile</li></ul>
+                    <ul><li>Votre QG : finances, rangs, Powerplay et mérites</li><li>Votre budget personnel, strictement privé</li><li>Votre colonisation, dans un espace que vous seul voyez</li><li>Le compagnon mobile</li></ul>
                     <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
                 </button>
                 <button class="profil" data-profil="squad" style="--c:#FF7100;--cg:rgba(255,113,0,.10);">
@@ -439,7 +439,6 @@
                 <button class="module" data-p="progresser" data-m="force" data-for="squad officier"><span>Force de frappe</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="progresser" data-m="rang" data-for="squad officier"><span>Rang BGS de carrière</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="connecte" data-m="mobile" data-for="solo squad officier"><span>Compagnon mobile</span><span class="pour">POUR VOUS</span></button>
-                <button class="module" data-p="connecte" data-m="comms" data-for="solo squad officier"><span>Communications</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="connecte" data-m="covas" data-for="squad officier"><span>IA embarquée (COVAS)</span><span class="pour">POUR VOUS</span></button>
                 </div>
                 <div class="detail" id="detail">
@@ -497,11 +496,7 @@
                 </article>
                 <article class="panel" id="module-mobile" data-p="connecte" data-m="mobile">
                     <div class="ecran-d"><div class="cadre-d"><img class="contain on" data-i="0" src="images/mobile-poche.png" alt="Compagnon mobile" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 11 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Le <strong>compagnon mobile</strong> reprend l'essentiel dans une interface pensée pour le pouce : accueil (rang BGS, Powerplay, finances, Pilier, Élan, semaine de l'escadron), directives, effort et exploits BGS, colonisation en direct, équipage de l'escadron et messages avec vos ailiers.</p><p>Même compte, mêmes titres et mêmes chiffres que sur le PC. Scannez le QR code en bas de page, puis ajoutez-le à l'écran d'accueil.</p>
-                </article>
-                <article class="panel" id="module-comms" data-p="connecte" data-m="comms">
-                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/comms.png" alt="Communications" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 10 : CRYPTOGRAPHIE</span><h3>SÉCURITÉ MILITAIRE</h3><p>Fréquence ouverte à tout le réseau, canal d'escadron ou transmissions privées. Où que vous soyez sur le site, une alerte vous prévient.</p><p>Le registre de communication est <strong>purgé et détruit automatiquement chaque jeudi</strong>. Ne laissez aucune trace.</p>
+                    <span class="kick">// MODULE 10 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Le <strong>compagnon mobile</strong> reprend l'essentiel dans une interface pensée pour le pouce : accueil (rang BGS, Powerplay, finances, Pilier, Élan, semaine de l'escadron), directives, effort et exploits BGS, colonisation en direct, équipage de l'escadron.</p><p>Même compte, mêmes titres et mêmes chiffres que sur le PC. Scannez le QR code en bas de page, puis ajoutez-le à l'écran d'accueil.</p>
                 </article>
                 <article class="panel" id="module-covas" data-p="connecte" data-m="covas">
                     <div class="ecran-d"><div class="cadre-d"><div class="fiche-faux"><div style="color:#FF3333;font-size:1.1em;font-weight:bold;border-bottom:1px dashed #FF3333;padding-bottom:5px;margin-bottom:14px;letter-spacing:2px;display:flex;justify-content:space-between;"><span>⚠️ ALERTE TACTIQUE</span><span style="opacity:.5;">SYS.EDTEAM</span></div><div style="margin-bottom:16px;color:#ddd;">CIBLE VERROUILLÉE : <strong style="color:#fff;">CMDR GRIMLOCK VANE</strong> <span style="color:#FF7100;font-size:.85em;margin-left:8px;">[ CRVR ]</span></div><div style="padding:14px;background:rgba(0,0,0,.5);border:1px solid #333;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#888;font-size:.85em;">DOSSIER INDIVIDUEL :</span><strong style="color:#000;background:#FF3333;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #FF3333;">K.O.S (HOSTILE)</strong></div><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#888;font-size:.85em;">TRAITÉ ESCADRON <span style="color:#FF7100;">[ CRVR ]</span> :</span><strong style="color:#FF3333;">⚔️ CIBLE HOSTILE</strong></div><div style="display:flex;justify-content:space-between;"><span style="color:#888;font-size:.85em;">RÉSEAU EDTEAM :</span><strong style="color:#000;background:#00F0FF;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #00F0FF;">✓ RÉPERTORIÉ</strong></div></div><div style="color:#555;font-size:.8em;margin-top:16px;font-weight:bold;text-align:center;">[ ANALYSE COMPLÈTE... ] _</div></div></div></div>
@@ -1057,19 +1052,19 @@
             
             <div style="color: #bbb; font-size: 1.2em; line-height: 1.7;">
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QU'EST-CE QUE SYS.EDTEAM ?</h3>
-                <p style="margin: 0 0 26px;">SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie, renseignement tactique et communications.</p>
+                <p style="margin: 0 0 26px;">SYS.EDTEAM est un outil communautaire gratuit pour les escadrons d'Elite Dangerous. Il relie le journal de votre jeu, via le plugin EDMC, à un tableau de bord partagé : suivi BGS et directives de l'Amirauté, QG de commandement, Powerplay 2.0, diplomatie et renseignement tactique.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">EST-CE VRAIMENT GRATUIT ?</h3>
                 <p style="margin: 0 0 26px;">Oui. SYS.EDTEAM est un projet de fan, gratuit et sans lien officiel avec Frontier Developments.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT L'INSTALLER ?</h3>
                 <p style="margin: 0 0 26px;">Créez votre compte sur le site, téléchargez le plugin SYS.EDTEAM.zip et placez-le dans le dossier de votre utilitaire EDMC, puis copiez votre clé dans les réglages d'EDMC. Comptez environ deux minutes.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FAUT-IL APPARTENIR À UN ESCADRON ?</h3>
-                <p style="margin: 0 0 26px;">Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, aux communications, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit).</p>
+                <p style="margin: 0 0 26px;">Le suivi BGS, la diplomatie et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit).</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QUELLES DONNÉES SONT COLLECTÉES ?</h3>
                 <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT SONT RÉCOMPENSÉS LES PILOTES ?</h3>
                 <p style="margin: 0 0 26px;">Par six systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), la Force de frappe (la part de chaque pilote dans l'effort de l'escadron) et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts).</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FONCTIONNE-T-IL SUR MOBILE ?</h3>
-                <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives et l'effort BGS, la colonisation, l'escadron et les communications depuis un téléphone.</p>
+                <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives et l'effort BGS, la colonisation, et l'escadron depuis un téléphone.</p>
             </div>
         </div>
     </div></details>
@@ -1105,7 +1100,7 @@
     /* ---------- Piliers, modules, profils (les textes sont dans le HTML : ce code ne fait qu'afficher / masquer) ---------- */
     (function () {
         const PILIERS = [{"id":"commander","c":"#00F0FF","g":"rgba(0,240,255,.12)"},{"id":"construire","c":"#FF7100","g":"rgba(255,113,0,.12)"},{"id":"progresser","c":"#FFD700","g":"rgba(255,215,0,.10)"},{"id":"connecte","c":"#00FF66","g":"rgba(0,255,102,.10)"}];
-        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"force","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"comms","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
+        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"force","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
         let pilier = 'commander', mod = 'qg', vue = 'tout';
         const $ = id => document.getElementById(id);
         const visible = m => vue === 'tout' || m.pour.indexOf(vue) >= 0;

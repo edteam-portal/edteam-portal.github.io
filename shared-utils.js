@@ -33,3 +33,18 @@ function chargerProfilAvecCache(supabaseApp, userId, ttlMs = 30000) {
         return res;
     });
 }
+
+// COLONISATION : date de mise en service du module (premier releve enregistre le 30/09/2026 a 23:46 UTC).
+// Un chantier dont le dernier releve est AVANT cette date a ete reconstitue a partir d'anciens journaux de jeu et n'a pas encore ete revu a quai
+// depuis : ses besoins peuvent etre depasses. Des qu'un pilote dock dessus, il est a jour et le reste. Quand plus aucun chantier ouvert n'est dans
+// ce cas, la note d'information disparait toute seule (colonisation.html, mobile.html, "Quoi faire").
+window.EDTEAM_COLO_MISE_EN_SERVICE = Date.parse('2026-09-30T23:00:00Z');
+function coloChantiersNonReleves(systemes) {
+    let total = 0, anciens = 0;
+    (systemes || []).forEach(s => (s.chantiers || []).forEach(c => {
+        total++;
+        const t = Date.parse(c && c.maj_le);
+        if (!isNaN(t) && t < window.EDTEAM_COLO_MISE_EN_SERVICE) anciens++;
+    }));
+    return { total: total, anciens: anciens };
+}

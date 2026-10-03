@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="style.css?v=2">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=2"></script>
+    <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=9"></script>
+    <script src="navigation.js?v=12"></script>
     <script src="colonisation-types.js?v=1"></script>
 
     <style>
@@ -50,17 +50,6 @@
             100% { transform: translateY(100vh); }
         }
 
-        @keyframes enveloppeBlink {
-            0%, 100% { color: var(--ed-blue); filter: none; }
-            50% { color: #fff; filter: drop-shadow(0 0 10px #fff); }
-        }
-        .alerte-enveloppe .nav-icon {
-            animation: enveloppeBlink 1s infinite !important;
-        }
-        .alerte-enveloppe .nav-text {
-            color: #fff !important;
-            text-shadow: 0 0 10px #fff;
-        }
 
         /* =========================================
            MENU LATÉRAL TACTIQUE
@@ -418,6 +407,16 @@
             const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
             if (isNaN(m)) return '';
             return m < 60 ? 'il y a ' + m + ' min' : m < 1440 ? 'il y a ' + Math.floor(m / 60) + ' h' : 'il y a ' + Math.floor(m / 1440) + ' j';
+        }
+        // NOTE sur la fraicheur des besoins (TRANSITOIRE) : au lancement du module, les chantiers ont ete reconstitues a partir d'anciens journaux de jeu.
+        // Elle ne s'affiche que tant qu'il reste des chantiers ouverts jamais releves a quai depuis la mise en service (voir shared-utils.js).
+        function noteFraicheur(data) {
+            const f = coloChantiersNonReleves(data.systemes);
+            if (!f.anciens) return '';
+            return '<div style="border:1px solid rgba(255,113,0,.55);background:rgba(255,113,0,.07);padding:7px 10px;margin-bottom:10px;font-size:.78em;line-height:1.5;color:#d9a066;">'
+                + '<b style="color:#FF7100;letter-spacing:2px;font-weight:normal;">IMPORTANT</b> · Module récent : à son lancement, les chantiers ont été reconstitués à partir des anciens journaux de jeu. '
+                + f.anciens + ' chantier' + (f.anciens > 1 ? 's' : '') + ' sur ' + f.total + ' n\'' + (f.anciens > 1 ? 'ont' : 'a') + ' pas encore été relevé' + (f.anciens > 1 ? 's' : '') + ' à quai depuis : '
+                + 'les quantités affichées peuvent être dépassées. Dès qu\'un pilote dock sur un chantier, ses chiffres sont à jour et le restent. Cette note disparaîtra quand tous les chantiers auront été visités une fois.</div>';
         }
         // barre segmentée façon voyant de cockpit : la couleur dit où on en est
         const couleurAvancement = p => p >= 100 ? G : p >= 66 ? B : p >= 33 ? O : '#FF4D2E';
@@ -1120,7 +1119,7 @@
                         ${carteHolo}
                     </div>
                     <div style="display:flex;flex-direction:column;gap:12px;">
-                        ${bloc('&gt; À APPORTER EN PRIORITÉ ' + sm('TOUS CHANTIERS'), prio, 340)}
+                        ${bloc('&gt; À APPORTER EN PRIORITÉ ' + sm('TOUS CHANTIERS'), noteFraicheur(data) + prio, 340)}
                         ${bloc('&gt; ARCHITECTES DE L\'ESCADRON ' + sm((data.architectes || []).length + ' PILOTE' + ((data.architectes || []).length > 1 ? 'S' : '')), architectes, 340)}
                     </div>
                 </div>
