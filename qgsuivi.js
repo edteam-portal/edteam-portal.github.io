@@ -19,6 +19,11 @@
         'Nakato Kaine': ['NK', '#c78bff'], 'Pranav Antal': ['PA', '#7be06a'], 'Yuri Grom': ['YG', '#ff8a5a'], 'Zemina Torval': ['ZT', '#e6e65a']
     };
 
+    // Portraits des Powers (images officielles reduites : images/powers/*.webp ; mention de Frontier dans le pied de page).
+    // Jerome Archer, Nakato Kaine et Yuri Grom n'ont pas de portrait dans la source : ils gardent le monogramme.
+    const PORTRAITS = { 'Aisling Duval': 'aisling-duval', 'Archon Delaine': 'archon-delaine', 'A. Lavigny-Duval': 'a-lavigny-duval', 'Denton Patreus': 'denton-patreus',
+                        'Edmund Mahon': 'edmund-mahon', 'Felicia Winters': 'felicia-winters', 'Li Yong-Rui': 'li-yong-rui', 'Pranav Antal': 'pranav-antal', 'Zemina Torval': 'zemina-torval' };
+
     // variation : ▲ +n (vert), ▼ -n (rouge), = (gris) ; rien si pas encore d'historique
     const vari = (v, unite) => {
         if (v == null || isNaN(Number(v))) return '';
@@ -31,11 +36,11 @@
         if (document.getElementById('qs-style')) return;
         const st = document.createElement('style'); st.id = 'qs-style';
         st.textContent = `
-.qs-carte{--c:#00F0FF;position:relative;height:100%;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--c) 60%,transparent);padding:14px 16px 10px;display:flex;flex-direction:column;gap:10px;font-family:'Share Tech Mono',monospace;color:#ccc;
+.qs-carte{--c:#00F0FF;position:relative;flex:1 1 auto;min-width:0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--c) 60%,transparent);padding:11px 14px 8px;display:flex;flex-direction:column;gap:7px;font-family:'Share Tech Mono',monospace;color:#ccc;
   background:linear-gradient(135deg,color-mix(in srgb,var(--c) 10%,transparent),rgba(5,3,1,.92) 60%);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
 .qs-carte:before{content:"";position:absolute;top:0;left:14px;width:50px;height:3px;background:var(--c);box-shadow:0 0 10px var(--c)}
-.qs-cap{display:flex;align-items:center;gap:14px}
-.qs-hx{width:60px;height:66px;flex:none;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,var(--c),transparent 120%);position:relative}
+.qs-cap{display:flex;align-items:center;gap:12px}
+.qs-hx{width:52px;height:57px;flex:none;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,var(--c),transparent 120%);position:relative}
 .qs-hx:before{content:"";position:absolute;inset:2px;clip-path:inherit;background:rgba(6,4,2,.94)}
 .qs-hx b{position:relative;color:var(--c);font-size:1.2em;letter-spacing:1px;text-shadow:0 0 10px var(--c)}
 .qs-hx svg{position:relative;width:26px;height:26px;stroke:var(--c);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -43,15 +48,28 @@
 .qs-n{color:#fff;font-size:1.1em;letter-spacing:2px;margin-top:2px;overflow-wrap:anywhere}
 .qs-rg{margin-left:auto;text-align:right;flex:none}.qs-rg .g{font-size:1.8em;color:var(--c);line-height:1;text-shadow:0 0 12px color-mix(in srgb,var(--c) 50%,transparent)}.qs-rg .p{font-size:.62em;color:#888;letter-spacing:1px;margin-top:2px}
 .qs-gros{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.qs-gros .v{color:#fff;font-size:1.5em}.qs-gros .l{color:#888;font-size:.7em;letter-spacing:2px}
-.qs-pile{display:flex;height:9px;gap:2px;margin-top:7px}.qs-pile i{display:block;height:100%}
+.qs-pile{display:flex;height:8px;gap:2px;margin-top:5px}.qs-pile i{display:block;height:100%}
 .qs-et{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .qs-et .v{color:#fff;font-size:1.12em;line-height:1.1;white-space:nowrap}.qs-et .l{font-size:.6em;letter-spacing:2px;color:#888;margin-top:2px}
 .qs-v{font-size:.62em;margin-left:5px;white-space:nowrap}.qs-v.h{color:#00FF66}.qs-v.b{color:#FF5555}.qs-v.z{color:#777}
-.qs-src{font-size:.6em;color:#555;letter-spacing:1px;border-top:1px dashed #222;padding-top:7px;margin-top:auto;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.qs-src{font-size:.6em;color:#555;letter-spacing:1px;border-top:1px dashed #222;padding-top:5px;margin-top:auto;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .qs-note{font-size:.7em;color:#8a8a8a;line-height:1.4}
 .qs-vide{color:#8a8a8a;font-size:.82em;line-height:1.6}
-.qs-fresh{border-left:2px solid #d9a066;background:rgba(217,160,102,.07);color:#c9a070;font-size:.68em;line-height:1.45;padding:5px 9px}.qs-fresh b{color:#e0a45f;letter-spacing:1px;font-weight:normal}
-@media (max-width:640px){.qs-hx{width:48px;height:53px}.qs-carte{padding:12px}}
+.qs-carte.qs-fgrid{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;grid-template-areas:"haut" "stats" "src";gap:7px;align-items:stretch}
+.qs-fgrid #qg-faction-haut{grid-area:haut;display:flex;align-items:center;gap:10px;min-width:0}.qs-fgrid #qg-faction-cap{flex:1;min-width:0}
+.qs-fgrid #qg-faction-stats{grid-area:stats;display:flex;flex-direction:column;justify-content:center;min-width:0}.qs-fgrid #qg-faction-src{grid-area:src}
+.qs-tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.qs-t{border:1px solid color-mix(in srgb,var(--c) 38%,transparent);background:rgba(0,0,0,.35);padding:7px 10px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.qs-t .v{color:#fff;font-size:1.45em;line-height:1.1;white-space:nowrap}.qs-t .l{font-size:.58em;letter-spacing:2px;color:#888;margin-top:3px}
+.qs-t.cle .v{color:var(--c)}
+.qs-t .qs-v{display:block;margin:3px 0 0}
+@media (max-width:1500px){.qs-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.qs-carte.qs-pf{flex-direction:row;gap:0;padding:0;align-items:stretch}
+.qs-portrait{position:relative;flex:none;width:122px;border-right:1px solid color-mix(in srgb,var(--c) 55%,transparent);overflow:hidden;background:#05080a}
+.qs-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}
+.qs-portrait:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 55%,rgba(5,3,1,.7)),linear-gradient(0deg,rgba(5,3,1,.55),transparent 32%),linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,transparent),transparent 30%)}
+.qs-corps{flex:1;min-width:0;padding:11px 14px 8px;display:flex;flex-direction:column;gap:7px}
+@media (max-width:640px){.qs-hx{width:48px;height:53px}.qs-carte{padding:12px}.qs-carte.qs-pf{padding:0}.qs-portrait{width:84px}}
 `;
         document.head.appendChild(st);
     }
@@ -62,8 +80,9 @@
         const c = emb[1], tot = Math.max(1, p.total);
         const pc = x => Math.max(1, Math.round(100 * x / tot));
         const v = p.variation;
-        return '<div class="qs-carte" style="--c:' + c + ';">'
-            + '<div class="qs-cap"><div class="qs-hx"><b>' + esc(emb[0]) + '</b></div><div style="min-width:0;"><div class="qs-k">MA PUISSANCE · POWERPLAY</div><div class="qs-n">' + esc(p.nom) + '</div></div>'
+        const slug = PORTRAITS[p.nom_spansh];
+        const hex = slug ? '' : '<div class="qs-hx"><b>' + esc(emb[0]) + '</b></div>';
+        const interne = '<div class="qs-cap">' + hex + '<div style="min-width:0;"><div class="qs-k">MA PUISSANCE · POWERPLAY</div><div class="qs-n">' + esc(p.nom) + '</div></div>'
             + '<div class="qs-rg"><div class="g">#' + p.rang + '</div><div class="p">SUR ' + p.sur + '</div></div></div>'
             + '<div><div class="qs-gros"><span class="v">' + fmt(p.total) + '</span><span class="l">SYSTÈMES</span>' + (v ? vari(v.total) + '<span class="qs-v z">depuis le ' + esc(jj(v.depuis)) + '</span>' : '') + '</div>'
             + '<div class="qs-pile"><i style="width:' + pc(p.stronghold) + '%;background:#FFD700"></i><i style="width:' + pc(p.fortified) + '%;background:#00F0FF"></i><i style="width:' + pc(p.exploited) + '%;background:#2a6f8a"></i></div></div>'
@@ -72,33 +91,36 @@
             + '<div><div class="v" style="color:#6fb6d0">' + fmt(p.exploited) + (v ? vari(v.exploited) : '') + '</div><div class="l">EXPLOITED</div></div></div>'
             + (p.source === 'escadron' ? '<div class="qs-note">Puissance choisie par la majorité de votre escadron (vous n’êtes pas aligné).</div>' : '')
             + (v && v.rang ? '<div class="qs-note">' + (v.rang > 0 ? '▲ gagne ' + v.rang + ' place' + (v.rang > 1 ? 's' : '') : '▼ perd ' + Math.abs(v.rang) + ' place' + (Math.abs(v.rang) > 1 ? 's' : '')) + ' depuis le ' + esc(jj(v.depuis)) + '</div>' : '')
-            + '<div class="qs-src"><span>SOURCE : SPANSH (DONNÉES EDDN)</span><span>RELEVÉ DU ' + esc(jj(p.releve_le)) + '</span></div></div>';
+            + '<div class="qs-src"><span>SOURCE : SPANSH (DONNÉES EDDN)</span><span>RELEVÉ DU ' + esc(jj(p.releve_le)) + '</span></div>';
+        if (!slug) return '<div class="qs-carte" style="--c:' + c + ';">' + interne + '</div>';
+        return '<div class="qs-carte qs-pf" style="--c:' + c + ';"><div class="qs-portrait"><img src="images/powers/' + slug + '.webp" alt="Portrait de ' + esc(p.nom) + '" loading="lazy"></div><div class="qs-corps">' + interne + '</div></div>';
     }
 
     const ICONE_FACTION = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><ellipse cx="12" cy="12" rx="10.5" ry="4.2" transform="rotate(-28 12 12)"/></svg>';
     // Corps de la carte faction (le cadre, la bande EDNews et les ids de la gazette sont statiques dans index.html)
-    function corpsFaction(f) {
+    function capFaction(f) {
         const v = f && f.variation;
-        if (!f) {
-            return '<div class="qs-cap"><div class="qs-hx">' + ICONE_FACTION + '</div><div><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">EN ATTENTE DU PREMIER RELEVÉ</div></div></div>'
-                 + '<div class="qs-vide">Le relevé de la faction de votre escadron s’affichera ici dès demain matin.</div>';
-        }
+        if (!f) return '<div class="qs-cap"><div class="qs-hx">' + ICONE_FACTION + '</div><div><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">EN ATTENTE DU PREMIER RELEVÉ</div></div></div>';
         return '<div class="qs-cap"><div class="qs-hx">' + ICONE_FACTION + '</div><div style="min-width:0;"><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">' + esc(String(f.nom).toUpperCase()) + '</div></div>'
-             + '<div class="qs-rg"><div class="g">' + fmt(f.systemes_controles) + '</div><div class="p">SYSTÈMES CONTRÔLÉS' + (v ? vari(v.systemes_controles) : '') + '</div></div></div>'
-             + '<div class="qs-et"><div><div class="v">' + fmt(f.presence) + (v ? vari(v.presence) : '') + '</div><div class="l">PRÉSENCE</div></div>'
-             + '<div><div class="v">' + pop(f.population) + (v ? vari(v.population, pop) : '') + '</div><div class="l">RÉSIDENTS</div></div>'
-             + '<div><div class="v">' + fmt(f.stations) + (v ? vari(v.stations) : '') + '</div><div class="l">STATIONS</div></div></div>'
-             + '<div class="qs-note">Résidents : population des systèmes contrôlés. Stations : celles de la faction, sans porte-vaisseaux ni chantiers.</div>'
-             + fraicheur(f);
+             + '</div>';
+    }
+    function statsFaction(f) {
+        const v = f && f.variation;
+        if (!f) return '<div class="qs-vide">Le relevé de la faction de votre escadron s’affichera ici dès demain matin.</div>';
+        const t = (cls, val, lib, va, unite) => '<div class="qs-t ' + cls + '"><div class="v">' + val + (v ? vari(va, unite) : '') + '</div><div class="l">' + lib + '</div></div>';
+        return '<div class="qs-tuiles">' + t('cle', fmt(f.systemes_controles), 'CONTRÔLÉS', v && v.systemes_controles) + t('', fmt(f.presence), 'PRÉSENCE', v && v.presence)
+             + t('', pop(f.population), 'RÉSIDENTS', v && v.population, pop) + t('', fmt(f.stations), 'STATIONS', v && v.stations) + '</div>';
     }
 
-    // Fraicheur des donnees : Spansh ne se met a jour que quand un joueur visite un systeme ; le jeu est plus a jour (les nombres reels peuvent etre plus eleves)
-    function fraicheur(f) {
-        const a = Number(f.age_median_jours);
-        if (f.age_median_jours == null || isNaN(a) || a < 0) return '';
-        const t = a < 1 ? 'moins d’un jour' : (a < 1.5 ? '1 jour' : Math.round(a) + ' jours');
-        return '<div class="qs-fresh"><b>DONNÉES COMMUNAUTAIRES (SPANSH)</b> · âge médian : ' + t + (f.age_max_jours != null ? ', jusqu’à ' + fmt(f.age_max_jours) + ' j' : '')
-             + '. Le jeu est plus à jour : les chiffres réels peuvent être plus élevés.</div>';
+    // Ligne de source de la faction + fraicheur : Spansh ne met un systeme a jour que lorsqu’un joueur le visite (EDDN). On compte les systemes a jour depuis 3 jours
+    // (la mediane d’age etait trompeuse : de petites colonies jamais visitees tiraient le chiffre vers le haut alors que le flux est vivant).
+    function ligneSourceFaction(f) {
+        let frais = '';
+        if (f.maj_3j != null && !isNaN(Number(f.maj_3j)) && Number(f.systemes_controles) > 0) {
+            frais = ' · <span style="color:#d9a066;" title="Spansh ne met un système à jour que lorsqu’un joueur le visite (EDDN). Les autres systèmes gardent leur dernier relevé : le jeu est plus à jour, les chiffres réels peuvent être plus élevés.">'
+                  + fmt(f.maj_3j) + ' SYSTÈMES SUR ' + fmt(f.systemes_controles) + ' MIS À JOUR DEPUIS 3 JOURS</span>';
+        }
+        return '<span>SOURCE : SPANSH' + frais + '</span><span>RELEVÉ DU ' + esc(jj(f.releve_le)) + '</span>';
     }
 
     async function charger() {
@@ -119,12 +141,13 @@
             const d = await charger();
             const moi = (typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : {};
             const membre = !!(d && d.acces && (d.faction || (moi.escadron_id && String(moi.escadron_id).toUpperCase() !== 'INDEPENDANT')));
-            if (elP) { const h = d && d.puissance ? cartePuissance(d.puissance) : ''; elP.innerHTML = h; elP.style.display = h ? 'block' : 'none'; }
+            if (elP) { const h = d && d.puissance ? cartePuissance(d.puissance) : ''; elP.innerHTML = h; elP.style.display = h ? 'flex' : 'none'; }
             if (elF) {
-                const corps = elF.querySelector('#qg-faction-corps'), src = elF.querySelector('#qg-faction-src');
-                if (corps) corps.innerHTML = membre ? corpsFaction(d && d.faction) : '';
-                if (src) src.innerHTML = (membre && d && d.faction) ? '<span>SOURCE : SPANSH (DONNÉES EDDN)</span><span>RELEVÉ DU ' + esc(jj(d.faction.releve_le)) + '</span>' : '';
-                elF.style.display = membre ? 'flex' : 'none';
+                const cap = elF.querySelector('#qg-faction-cap'), stats = elF.querySelector('#qg-faction-stats'), src = elF.querySelector('#qg-faction-src');
+                if (cap) cap.innerHTML = membre ? capFaction(d && d.faction) : '';
+                if (stats) stats.innerHTML = membre ? statsFaction(d && d.faction) : '';
+                if (src) src.innerHTML = (membre && d && d.faction) ? ligneSourceFaction(d.faction) : '';
+                elF.style.display = membre ? 'grid' : 'none';
             }
         } catch (e) { console.error('Suivi puissance / faction :', e); }
     };

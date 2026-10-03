@@ -15,8 +15,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=3"></script>
-    <script src="qgsuivi.js?v=2"></script>
+    <script src="quoifaire.js?v=4"></script>
+    <script src="qgsuivi.js?v=11"></script>
     <script src="son.js?v=1"></script>
     <script src="navigation.js?v=12"></script>
 
@@ -379,14 +379,17 @@
 
                     <div id="qg-carte-puissance" style="flex: 1.15 1 320px; min-width: 0; display: none;"></div>
 
-                    <!-- MA FACTION : cadre statique (il porte la bande EDNews et les ids lus par la gazette) ; corps et source remplis par qgsuivi.js -->
-                    <div id="qg-carte-faction" class="qs-carte" style="--c: #FF7100; flex: 1.15 1 320px; min-width: 0; display: none;">
-                        <div id="qg-faction-corps" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                        <div id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" style="margin-top: auto; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(0,240,255,.5); background: linear-gradient(90deg, rgba(0,240,255,.14), rgba(0,0,0,.4)); padding: 7px 11px; cursor: pointer;">
-                            <span style="font-size: 1.2em;">📰</span>
-                            <div style="min-width: 0;"><div style="color: #00F0FF; font-weight: bold; letter-spacing: 2px; font-size: .78em;">EDNEWS ESCADRON</div><div id="gazette-banner-date" style="color: #aaa; font-size: .72em;">Recherche des archives...</div></div>
-                            <span id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; margin-left: auto; background: #FF3333; color: #fff; font-size: .62em; padding: 2px 7px; border-radius: 3px; letter-spacing: 1px;">NOUVEAU</span>
+                    <!-- MA FACTION : cadre statique en grille (haut : nom + bouton EDNews / quatre tuiles / pied « SOURCE » comme « Ma puissance ») ; il porte les ids lus par la gazette. Contenu rempli par qgsuivi.js -->
+                    <div id="qg-carte-faction" class="qs-carte qs-fgrid" style="--c: #FF7100; flex: 1.15 1 320px; min-width: 0; display: none;">
+                        <div id="qg-faction-haut">
+                            <div id="qg-faction-cap"></div>
+                            <div id="banner-gazette" onclick="ouvrirGazette()" onmouseenter="if(typeof sonHover==='function') sonHover()" title="EDNews de l'escadron : dernière édition" style="flex: none; display: flex; align-items: center; gap: 9px; border: 1px solid rgba(0,240,255,.5); background: linear-gradient(135deg, rgba(0,240,255,.16), rgba(0,0,0,.45)); padding: 7px 11px; cursor: pointer; position: relative; min-width: 132px;">
+                                <span style="font-size: 1.25em;">📰</span>
+                                <div style="min-width: 0;"><div style="color: #00F0FF; font-weight: bold; letter-spacing: 2px; font-size: .74em;">EDNEWS</div><div id="gazette-banner-date" style="color: #aaa; font-size: .64em; margin-top: 1px;">Archives…</div></div>
+                                <span id="gazette-badge-new" class="pulse-halo pulse-vif" style="display: none; position: absolute; top: -7px; right: -6px; background: #FF3333; color: #fff; font-size: .58em; padding: 2px 6px; border-radius: 3px; letter-spacing: 1px;">NOUVEAU</span>
+                            </div>
                         </div>
+                        <div id="qg-faction-stats"></div>
                         <div id="qg-faction-src" class="qs-src"></div>
                     </div>
 
@@ -744,7 +747,7 @@
                 if (gazettesCache.length > 0) {
                     const latest = gazettesCache[0];
                     const dateEdition = new Date(latest.created_at).toLocaleDateString('fr-FR');
-                    if (bannerDate) bannerDate.innerText = "> ÉDITION LA PLUS RÉCENTE : " + dateEdition;
+                    if (bannerDate) bannerDate.innerText = "ÉDITION DU " + dateEdition;
 
                     // Remplir le registre latéral
                     if (historyList) {
@@ -3145,6 +3148,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="footer.js?v=9"></script>
+    <script src="footer.js?v=10"></script>
 </body>
 </html>

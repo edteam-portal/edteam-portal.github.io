@@ -159,7 +159,7 @@
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
             +   '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>'
             + '</div>'
-            + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.</div>';
+            + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>';
 
         if (window.edteamSon) window.edteamSon.majUI();
         // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
