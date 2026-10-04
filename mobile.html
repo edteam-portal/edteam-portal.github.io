@@ -382,6 +382,56 @@
         .xchips { display: flex; gap: 6px; margin: 9px 0; flex-wrap: wrap; }
         .xchips span { font-size: 0.66em; color: var(--x-mut); padding: 4px 9px; border-radius: 8px; background: rgba(255,255,255,0.04); }
         .xchips span b { color: #fff; font-weight: normal; }
+        /* résultats du jeu par directive : cartes carrées, 2 par ligne, dans le bloc de chaque système */
+        .mdc-grille { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .mdc { box-sizing: border-box; min-width: 0; min-height: 168px; border: 1px solid var(--x-line); border-top: 3px solid; border-radius: 12px; background: rgba(255,255,255,0.03); padding: 9px 10px; display: flex; flex-direction: column; cursor: pointer; }
+        .mdc:active { background: rgba(0,240,255,0.08); }
+        .mdc.ancien { opacity: 0.65; }
+        .mdc.seule { grid-column: 1 / -1; min-height: 0; }
+        .mdc .haut { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+        .mdc .age { color: #666; font-size: 0.58em; white-space: nowrap; }
+        .mdc .age.vieux { color: #ff9a3c; }
+        .mdc .fac { color: #fff; font-size: 0.74em; letter-spacing: 0.5px; margin-top: 6px; line-height: 1.25; min-height: 2.5em; overflow: hidden; overflow-wrap: anywhere; }
+        .mdc .big { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
+        .mdc .big .n { font-size: 1.55em; font-weight: bold; color: #fff; line-height: 1.1; }
+        .mdc .big .n small { font-size: 0.5em; }
+        .mdc .big .d { font-size: 0.8em; font-weight: bold; }
+        .mdc .sc { font-size: 0.64em; color: var(--ed-orange); text-align: center; border: 1px dashed #555; border-radius: 6px; padding: 2px 4px; margin-top: 3px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .mdc .mini { font-size: 0.6em; color: #888; letter-spacing: 0.5px; margin-top: 4px; }
+        .mdc .eff { margin-top: auto; padding: 7px 8px 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; }
+        .mdc .eff .lab { color: var(--ed-orange); font-size: 0.55em; letter-spacing: 2px; margin-bottom: 3px; }
+        .mdc .eff .nums { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; white-space: nowrap; font-size: 0.5em; color: #999; letter-spacing: 0; }
+        .mdc .eff .nums b { font-size: 1.6em; font-weight: bold; letter-spacing: 0; }
+        .mdc.seule .eff .nums { font-size: 0.6em; }
+        .mdc.seule .eff .nums b { font-size: 1.9em; }
+        .mdc .eff .jg { position: relative; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); margin-top: 5px; overflow: hidden; }
+        .mdc .eff .jg i { position: absolute; left: 0; top: 0; bottom: 0; }
+        .mdc .eff .types { margin-top: 9px; display: flex; flex-direction: column; gap: 6px; }
+        .mdc .eff .types .t { display: grid; grid-template-columns: 38% minmax(0, 1fr); gap: 8px; align-items: center; font-size: 0.6em; color: #aaa; }
+        .mdc .eff .types .t > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .mdc .eff .types .jg2 { position: relative; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+        .mdc .eff .types .jg2 i { position: absolute; left: 0; top: 0; bottom: 0; }
+        .mdet-hero { border: 1px solid; border-radius: 12px; background: rgba(0,0,0,0.4); padding: 10px 12px 12px; }
+        .mdet-hero .r1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+        .mdet-hero .r1 span { color: #999; font-size: 0.68em; letter-spacing: 1.5px; }
+        .mdet-hero .r1 b { font-size: 1.9em; line-height: 1.15; }
+        .mdet-hero .jgh { position: relative; height: 11px; border-radius: 6px; background: rgba(255,255,255,0.08); margin-top: 6px; overflow: hidden; }
+        .mdet-hero .jgh i { position: absolute; left: 0; top: 0; bottom: 0; }
+        /* PRIORITE d'un système : pastille pleine + liseré épais, fixes ; seul le critique a un halo lent à l'intérieur du bloc */
+        .pa { padding: 3px 9px; border-radius: 5px; font-size: 0.6em; font-weight: bold; letter-spacing: 1.2px; color: #000; white-space: nowrap; }
+        .pa.c { background: #ff3b3b; box-shadow: 0 0 10px rgba(255,59,59,0.5); }
+        .pa.h { background: #ffc400; }
+        .pa.n { background: transparent; color: #888; border: 1px solid #444; font-weight: normal; }
+        .xc.prio-c { border-color: rgba(255,59,59,0.7); box-shadow: inset 6px 0 0 #ff3b3b; animation: mHalo 3s ease-in-out infinite; }
+        .xc.prio-h { border-color: rgba(255,196,0,0.6); box-shadow: inset 6px 0 0 #ffc400; }
+        .xc.prio-n { box-shadow: inset 6px 0 0 #444; }
+        @keyframes mHalo { 0%, 100% { box-shadow: inset 6px 0 0 #ff3b3b, inset 0 0 8px rgba(255,59,59,0.08); } 50% { box-shadow: inset 6px 0 0 #ff3b3b, inset 0 0 34px rgba(255,59,59,0.30); } }
+        @media (prefers-reduced-motion: reduce) { .xc.prio-c { animation: none; } }
+        .mdossier-tete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px solid #333; border-radius: 8px; background: rgba(0,0,0,0.4); padding: 10px 12px; margin-bottom: 8px; cursor: pointer; }
+        .mdossier-tete .ti { color: var(--ed-orange); font-weight: bold; letter-spacing: 1.5px; font-size: 0.78em; }
+        .mdossier-tete .re { color: #888; font-size: 0.68em; flex: 1; text-align: right; }
+        .mdossier-tete .fl { color: var(--ed-orange); }
+        .mdet-sec { color: var(--ed-blue); letter-spacing: 2px; font-size: 0.7em; margin: 0 0 6px; }
 
         /* progression 8 cycles */
         .xwk { display: flex; gap: 6px; align-items: flex-end; height: 92px; margin-top: 12px; }
@@ -832,7 +882,7 @@
 
 <!-- MODAL DÉTAILS DE L'ORDRE -->
 <div class="modal-overlay" id="modal-ordre-details" onclick="fermerModalOrdre(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 550; padding: 20px;">
-    <div class="card" style="width: 100%; max-width: 450px;" onclick="event.stopPropagation()">
+    <div class="card" style="width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px;" id="ordre-modal-header">
             <span style="color: var(--ed-orange); font-weight: bold; letter-spacing: 2px;" id="ordre-modal-title">DIRECTIVE</span>
             <span style="color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="fermerModalOrdre()" id="ordre-modal-close">✕</span>
@@ -851,9 +901,13 @@
             </div>
         </div>
 
-        <!-- Analyse d'Effort & Participants -->
-        <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
-            
+        <!-- Résultat du jeu (EDSM) et effort par type d'action : remplis par ouvrirModalOrdre -->
+        <div id="ordre-modal-effort" style="margin-bottom: 15px;"></div>
+
+        <!-- DOSSIER TACTIQUE : efforts individuels, replié par défaut -->
+        <div class="mdossier-tete" onclick="xToggleDossier()"><span class="ti">DOSSIER TACTIQUE</span><span class="re" id="ordre-modal-dossier-resume"></span><span class="fl" id="ordre-modal-dossier-fl">▼</span></div>
+        <div id="ordre-modal-dossier-corps" style="display: none; background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; font-size: 0.85em;">
                 <span style="color: #888;">ESCADRON :</span>
                 <strong id="ordre-modal-total" style="color: #fff; text-align: right; min-width: 100px;">0 PTS</strong>
@@ -876,6 +930,8 @@
                 </div>
             </div>
         </div>
+
+        <div id="ordre-modal-resultat" style="margin-bottom: 15px;"></div>
 
         <div>
             <span style="color: #888; font-size: 0.8em; letter-spacing: 1px;">SIGNÉ PAR : <strong style="color: var(--ed-blue);"><span id="ordre-modal-auteur">...</span></strong></span>
@@ -1618,22 +1674,137 @@
             return { pct: Math.min(100, Math.round(somme / div)), part: pe > 0 ? Math.min(100, Math.round(100 * pm / pe)) : 0 };
         }
 
-        // Directives actives + totaux serveur + conflits : UNE lecture, gardee 2 minutes
+        // Directives actives + totaux serveur : UNE lecture, gardee 2 minutes
         function xLireDirectives(force) {
             return xCache('ordres', 120000, async () => {
                 const { data: ordres, error } = await supabaseApp.from('ordres_bgs').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('statut', 'ACTIF').order('priorite', { ascending: true }).order('date_emission', { ascending: false }).limit(10);
                 if (error) throw error;
-                let resume = [], conflits = [];
+                let resume = [];
                 if (ordres && ordres.length) {
-                    const [rr, rc] = await Promise.all([
-                        supabaseApp.rpc('bgs_directives_resume'),
-                        supabaseApp.from('conflits_systemes').select('systeme, faction1_nom, faction1_score, faction2_nom, faction2_score, mis_a_jour').in('systeme', ordres.map(o => o.systeme_cible))
-                    ]);
+                    const rr = await supabaseApp.rpc('bgs_directives_resume');
                     resume = rr.error ? [] : (rr.data || []);
-                    conflits = rc.data || [];
                 }
-                return { ordres: ordres || [], resume, conflits };
+                return { ordres: ordres || [], resume };
             }, force);
+        }
+
+        // Resultats du jeu par directive (EDSM releve cote serveur, SQL 51) : influence, variation, courbe, etats, score de conflit confirme. Gardes 5 minutes (egress).
+        function xLireResultats(force) {
+            return xCache('resultats', 300000, async () => {
+                const r = await supabaseApp.rpc('bgs_resultats');
+                if (r.error) { console.error('Erreur résultats BGS (mobile) :', r.error.message); return { dir: {}, sys: {} }; }
+                const out = { dir: {}, sys: (r.data && r.data.systemes) || {} };
+                ((r.data && r.data.directives) || []).forEach(x => { out.dir[x.ordre_id] = x; });
+                return out;
+            }, force);
+        }
+
+        const X_SENS = { up: '#2fe07a', dn: '#ff4d4d', fl: '#8a8a8a', att: '#8a8a8a' };
+        const X_COUL_TYPE = { HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' };
+        const xPct = x => (Number(x) * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const xPts = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        function xAge(epoch) {
+            if (!epoch) return '';
+            const h = (Date.now() / 1000 - epoch) / 3600;
+            if (h < 1) return 'il y a ' + Math.max(1, Math.round(h * 60)) + ' min';
+            if (h < 48) return 'il y a ' + Math.round(h) + ' h';
+            return 'il y a ' + Math.round(h / 24) + ' j';
+        }
+        // « progres » / « recul » / « stable » par rapport a ce que demande la directive (le vert = va dans le sens de la directive)
+        function xSensDirective(o, res) {
+            if (!res || !res.donnees) return null;
+            if (res.conflit) {
+                const f = String(o.faction_cible || '').trim().toLowerCase();
+                const estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
+                const moi = estF1 ? res.conflit.s1 : res.conflit.s2, adv = estF1 ? res.conflit.s2 : res.conflit.s1;
+                return moi > adv ? 'up' : moi < adv ? 'dn' : 'fl';
+            }
+            const v = res.variation;
+            if (v === null || v === undefined || Math.abs(v) < 0.05) return 'fl';
+            return (o.type_ordre === 'BAISSE' ? v < 0 : v > 0) ? 'up' : 'dn';
+        }
+        function xSpark(courbe, couleur) {
+            if (!courbe || courbe.length < 2) return '<div style="height: 30px;"></div>';
+            const w = 150, h = 30, v = courbe.map(p => Number(p[1]));
+            const mn = Math.min(...v), mx = Math.max(...v), r = (mx - mn) || 0.001;
+            const pts = v.map((y, i) => [i * (w - 6) / (v.length - 1) + 3, h - 4 - ((y - mn) / r) * (h - 8)]);
+            const dr = pts[pts.length - 1];
+            return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width: 100%; height: 30px; display: block;"><polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${couleur}" stroke-width="2"/><polyline points="${dr[0]},${dr[1]} ${dr[0]},${dr[1]}" fill="none" stroke="${couleur}" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+        }
+        function xCourbeGrande(courbe, emisSec, couleur) {
+            if (!courbe || courbe.length < 2) return '<div class="xmut" style="padding: 22px 8px; text-align: center; border: 1px dashed #333; border-radius: 8px;">Pas encore de courbe : elle apparaît dès deux mesures du jeu sur cette faction.</div>';
+            const W = 340, H = 120, v = courbe.map(p => Number(p[1]) * 100), t = courbe.map(p => Number(p[0]));
+            let mn = Math.min(...v), mx = Math.max(...v); const marge = Math.max(0.5, (mx - mn) * 0.15); mn -= marge; mx += marge;
+            const t0 = t[0], t1 = t[t.length - 1], dt = (t1 - t0) || 1;
+            const X = s => ((s - t0) / dt) * (W - 10) + 5, Y = y => H - 16 - ((y - mn) / (mx - mn)) * (H - 30);
+            const pts = courbe.map((p, i) => X(t[i]).toFixed(1) + ',' + Y(v[i]).toFixed(1)).join(' ');
+            let repere = '';
+            if (emisSec && emisSec > t0 && emisSec < t1) { const x = X(emisSec).toFixed(1); repere = `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#FF7100" stroke-dasharray="3 3"/><text x="${Math.min(Number(x) + 4, W - 70)}" y="11" fill="#FF7100" font-size="9">directive émise</text>`; }
+            const dc = s => new Date(s * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+            return `<svg viewBox="0 0 ${W} ${H}" style="width: 100%; height: 120px; background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; display: block;">${repere}<polyline fill="none" stroke="${couleur}" stroke-width="2.2" points="${pts}"/><circle cx="${X(t1).toFixed(1)}" cy="${Y(v[v.length - 1]).toFixed(1)}" r="3.5" fill="${couleur}"/><text x="4" y="${H - 3}" fill="#666" font-size="8">${dc(t0)}</text><text x="${W - 30}" y="${H - 3}" fill="#666" font-size="8">${dc(t1)}</text></svg>`;
+        }
+
+        // Jauges par type d'action : memes types, memes plafonds et memes couleurs que la page BGS du PC (zone vive = moi, zone attenuee = le reste de l'escadron)
+        function xJaugesDonnees(o, rs) {
+            const nb = Math.max(1, Number(rs.nb_actifs) || Number(rs.nb_participants) || 0);
+            const base = Object.assign({}, xPlafonds(o.population || 0), o.plafonds_custom || {});
+            const cap = {}; Object.keys(base).forEach(k => { cap[k] = base[k] * nb; });
+            const T = rs.types || {};
+            const S = t => Number(T[t] && T[t].s) || 0, M = t => Number(T[t] && T[t].m) || 0;
+            const cr = new Intl.NumberFormat('fr-FR', { notation: 'compact', compactDisplay: 'short' });
+            const fC = v => cr.format(v) + ' CR', fN = v => Number(v).toLocaleString('fr-FR');
+            let L = [];
+            if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Commerce & Minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Carto. & Exobio)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
+            else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['🔋 SABOTAGE AU SOL', '#FF3333', M('VOLS') + M('PIRATAGE'), S('VOLS') + S('PIRATAGE'), cap.VOLS, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
+            else if (o.type_ordre === 'GUERRE') L = [['🏆 VICTOIRES EN CZ', '#FFD700', Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.nm) || 0, Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0, cap.CZ_VICTOIRES || (5 * nb), fN, ''], ['⚔️ OBLIGATIONS DE COMBAT (Bons)', '#FF7100', M('SECURITE'), S('SECURITE'), cap.GUERRE_BONDS || cap.SECURITE, fC, ''], ['🎯 MISSIONS MILITAIRES', '#FF3333', M('MISSIONS'), S('MISSIONS'), cap.GUERRE_MISSIONS || cap.MISSIONS, fN, ' CONTRATS']];
+            else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF']];
+            return L.map(([titre, c, moi, esc, plafond, f, u]) => {
+                const tot = plafond > 0 ? Math.min(100, 100 * esc / plafond) : 0, vous = plafond > 0 ? Math.min(tot, 100 * moi / plafond) : 0;
+                return { titre, c: tot >= 100 ? '#4CAF50' : c, moi, esc, plafond, f, u, tot, vous };
+            });
+        }
+        function xJaugesOrdre(o, rs) {
+            return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
+                    <div style="color: #fff; font-weight: bold;">${titre}</div>
+                    <div style="color: #bbb; margin-top: 3px;">Moi <b style="color: #fff;">${f(moi)}${u}</b> <span style="color: #666;">|</span> Escadron <b style="color: #fff;">${f(esc)} / ${f(plafond)}${u}</b></div>
+                </div>`).join('');
+        }
+
+        // panneau EFFORT (le coeur de l'application) : effort de l'escadron et ma part en gros, jauge a deux tons ; en carte large, une barre par type d'action
+        function xEffortPanel(av, c, mini) {
+            const vous = Math.round(av.pct * av.part / 100);
+            return `<div class="eff"><div class="lab">EFFORT</div>
+                <div class="nums"><span>ESCADRON <b style="color: #fff;">${av.pct} %</b></span><span>MA PART <b style="color: var(--ed-orange);">${av.part} %</b></span></div>
+                <div class="jg"><i style="width: ${av.pct}%; opacity: 0.35; background: ${c};"></i><i style="width: ${vous}%; background: ${c};"></i></div>
+                ${mini && mini.length ? `<div class="types">${mini.map(x => `<div class="t"><span>${XESC(x.titre.replace(/\s*\(.*\)\s*$/, '').replace(/^[^A-Za-zÀ-ÿ]+/, ''))}</span><div class="jg2"><i style="width: ${x.tot}%; background: ${x.c}; opacity: 0.35;"></i><i style="width: ${x.vous}%; background: ${x.c};"></i></div></div>`).join('')}</div>` : ''}
+            </div>`;
+        }
+
+        function xCarteDirective(o, index, res, sens, av, seule, rs) {
+            const type = o.type_ordre || 'DIRECTIVE', c = X_COUL_TYPE[type] || '#FF7100';
+            const donnees = !!(res && res.donnees);
+            const ancien = donnees && res.maj_edsm && (Date.now() / 1000 - res.maj_edsm) > 48 * 3600;
+            const cs = X_SENS[sens || 'att'];
+            let centre;
+            if (!donnees) centre = `<div class="big"><span class="n" style="color: #666;">—</span></div><div class="mini">Résultat du jeu : en attente du prochain relevé</div>`;
+            else if (res.conflit) {
+                const f = String(o.faction_cible || '').trim().toLowerCase();
+                const estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
+                const moi = estF1 ? res.conflit.s1 : res.conflit.s2, adv = estF1 ? res.conflit.s2 : res.conflit.s1;
+                centre = `<div class="big"><span class="n" style="color: ${cs};">${moi} – ${adv}</span></div>
+                    <div class="sc">${type === 'GUERRE' ? '⚔' : '🗳'} vs ${XESC(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</div>
+                    <div class="mini">INFLUENCE <b style="color: #ddd; font-weight: normal;">${xPct(res.influence)} %</b>${res.variation !== null ? ` <b style="color: ${cs}; font-weight: normal;">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : ''} ${xPts(res.variation)}</b>` : ''}</div>`;
+            } else {
+                const fl = res.variation === null ? '' : (res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '=');
+                centre = `<div class="big"><span class="n">${xPct(res.influence)}<small> %</small></span>${res.variation !== null ? `<span class="d" style="color: ${cs};">${fl} ${xPts(res.variation)}</span>` : ''}</div>${xSpark(res.courbe, cs)}`;
+            }
+            const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}">${ancien ? '⚠ ' : ''}${xAge(res.maj_edsm)}</span>` : '';
+            return `<div class="mdc${ancien ? ' ancien' : ''}${seule ? ' seule' : ''}" id="mdc-${o.id}" style="border-top-color: ${c};" onclick="ouvrirModalOrdre(${index}, '${c}')">
+                <div class="haut"><span class="xtag" style="color: ${c};">#${o.id} ${XESC(type)}</span>${age}</div>
+                <div class="fac">${XESC(String(o.faction_cible || 'CIBLE').toUpperCase())}</div>
+                ${centre}
+                ${xEffortPanel(av, c, seule ? xJaugesDonnees(o, rs) : null)}
+            </div>`;
         }
 
         async function chargerDirectivesMobile(force) {
@@ -1650,36 +1821,31 @@
                     cont.innerHTML = `<div class="xc" style="text-align: center; line-height: 1.7; padding: 22px 16px; color: #aab;">Aucun focus demandé par l'Amiral pour le moment.<br><b style="color: var(--ed-orange); font-weight: normal;">Continuez d'agir pour votre faction : tout compte pour votre rang BGS.</b></div>`;
                     return;
                 }
-                const couleurs = { HAUSSE: ['var(--ed-green)', 'g'], BAISSE: ['var(--ed-red)', 'r'], GUERRE: ['var(--ed-orange)', ''], ELECTION: ['var(--ed-blue)', 'b'] };
-                cont.innerHTML = d.ordres.map((o, index) => {
-                    const sys = (o.systeme_cible || 'SECTEUR').toUpperCase(), fac = (o.faction_cible || 'CIBLE').toUpperCase(), type = o.type_ordre || 'DIRECTIVE';
-                    const [col, barCls] = couleurs[type] || ['var(--ed-orange)', ''];
-                    const rs = resume[o.id] || { nb_participants: 0, types: {}, pilotes: [] };
-                    const av = xAvancementOrdre(o, rs);
-                    const pilotes = rs.pilotes || [];
-                    const escPts = pilotes.reduce((t, x) => t + (Number(x.pts) || 0), 0);
-                    const moi = pilotes.find(x => String(x.u) === String(profilCommandant.user_id));
-                    const prio = o.priorite || 3;
-                    const badgePrio = prio === 1 ? '<span class="xtag" style="color: var(--ed-red); background: rgba(255,51,51,0.15);">⚠ CRITIQUE</span>' : prio === 2 ? '<span class="xtag" style="color: var(--ed-orange); background: rgba(255,113,0,0.12);">⚡ HAUTE</span>' : '';
-                    let conflit = '';
-                    if (type === 'GUERRE' || type === 'ELECTION') {
-                        const nf = (o.faction_cible || '').trim().toLowerCase(), ns = (o.systeme_cible || '').trim().toLowerCase();
-                        const c = d.conflits.find(x => x.systeme && x.systeme.trim().toLowerCase() === ns && (x.faction1_nom.trim().toLowerCase() === nf || x.faction2_nom.trim().toLowerCase() === nf));
-                        if (c && (Date.now() - new Date(c.mis_a_jour).getTime()) / 3600000 < 48) {
-                            const f1 = c.faction1_nom.trim().toLowerCase() === nf;
-                            conflit = `<div class="xmut" style="margin-top: 7px;">${type === 'ELECTION' ? '🗳️' : '⚔️'} score <b style="color: ${col}; font-weight: normal; font-size: 1.15em;">${f1 ? c.faction1_score : c.faction2_score} – ${f1 ? c.faction2_score : c.faction1_score}</b> contre ${XESC((f1 ? c.faction2_nom : c.faction1_nom).toUpperCase())}</div>`;
-                        }
-                    }
-                    const top = pilotes.slice(0, 3).map(x => XESC(String(x.nom || '?').split(' ')[0]) + ' ' + XF0(x.pts)).join(' · ');
-                    return `<div class="xc xdir click" style="border-color: color-mix(in srgb, ${col} 28%, transparent);" onclick="ouvrirModalOrdre(${index}, '${col}')">
-                        <div class="xrow" style="flex-wrap: wrap; gap: 6px;"><span class="xtag" style="color: ${col};">${XESC(type)}</span>${badgePrio}<span class="xsp"></span><span class="xmut">${XF0(rs.nb_participants)} pilote${Number(rs.nb_participants) > 1 ? 's' : ''}</span></div>
-                        <div class="t">${XESC(sys)} · ${XESC(fac)}</div>
-                        ${conflit}
-                        <div class="xchips"><span>escadron <b>${XF1(escPts)} pts</b></span><span>moi <b style="${moi ? '' : 'color: #666;'}">${XF1(moi ? moi.pts : 0)} pts</b></span><span>ma part <b>${av.part} %</b></span></div>
-                        <div class="xbar ${barCls}"><i style="width: ${Math.max(2, av.pct)}%;"></i></div>
-                        <div class="xrow" style="margin-top: 7px;"><span class="xmut">${av.pct} % de l'objectif</span><span class="xsp"></span><span class="xmut" style="font-size: 0.6em; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55%;">${top}</span></div>
-                    </div>`;
-                }).join('');
+                const resultats = await xLireResultats(force);
+                window.cacheResultatsBgs = resultats;
+                const groupes = [];   // un bloc par systeme, dans l'ordre de priorite deja trie par la requete
+                d.ordres.forEach((o, index) => {
+                    const sys = (o.systeme_cible || 'SECTEUR').toUpperCase();
+                    let g = groupes.find(x => x.sys === sys);
+                    if (!g) { g = { sys, items: [] }; groupes.push(g); }
+                    g.items.push({ o, index });
+                });
+                const blocs = groupes.map(g => {
+                    const plusAncien = Math.min(...g.items.map(x => new Date(x.o.date_emission || x.o.created_at || Date.now()).getTime()));
+                    const jours = Math.max(1, Math.ceil((Date.now() - plusAncien) / 86400000));
+                    const prio = Math.min(...g.items.map(x => x.o.priorite || 3));
+                    const prioCle = prio === 1 ? 'c' : prio === 2 ? 'h' : 'n';
+                    const badgePrio = `<span class="pa ${prioCle}">${prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE'}</span>`;
+                    const cartes = g.items.map(({ o, index }) => {
+                        const rs = resume[o.id] || { nb_participants: 0, types: {}, pilotes: [] };
+                        const av = xAvancementOrdre(o, rs);
+                        const res = resultats.dir[o.id] || null;
+                        const sens = xSensDirective(o, res);
+                        return xCarteDirective(o, index, res, sens, av, g.items.length === 1, rs);
+                    }).join('');
+                    return `<div class="xc prio-${prioCle}"><div class="xrow" style="flex-wrap: wrap; gap: 6px;"><span class="xk" style="color: var(--ed-orange); overflow-wrap: anywhere;">${XESC(g.sys)}</span><span class="xmut">· depuis ${jours} j</span><span class="xsp"></span>${badgePrio}</div><div class="mdc-grille">${cartes}</div></div>`;
+                });
+                                cont.innerHTML = blocs.join('');
             } catch (e) {
                 console.error('Erreur directives (mobile) :', e);
                 cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">Flux des directives indisponible.</div>';
@@ -1687,6 +1853,13 @@
         }
 
         // Details d'une directive (feuille) : tout vient des totaux du serveur, aucune ligne a telecharger
+        window.xToggleDossier = function () {
+            sonClic();
+            const c = xEl('ordre-modal-dossier-corps'), ouvert = c.style.display !== 'none';
+            c.style.display = ouvert ? 'none' : 'block';
+            xEl('ordre-modal-dossier-fl').innerText = ouvert ? '▼' : '▲';
+        };
+
         window.ouvrirModalOrdre = function (index, couleur) {
             if (typeof sonClic === 'function') sonClic();
             const ordre = (window.cacheOrdresBgs || [])[index];
@@ -1701,8 +1874,7 @@
             xEl('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
 
             const prio = ordre.priorite || 3;
-            xEl('ordre-modal-prio').innerHTML = prio === 1 ? '<div style="margin-top: 6px;"><span class="xtag" style="color: var(--ed-red); background: rgba(255,51,51,0.15);">⚠ PRIORITÉ CRITIQUE</span></div>'
-                : prio === 2 ? '<div style="margin-top: 6px;"><span class="xtag" style="color: var(--ed-orange); background: rgba(255,113,0,0.12);">⚡ PRIORITÉ HAUTE</span></div>' : '';
+            xEl('ordre-modal-prio').innerHTML = `<div style="margin-top: 6px;"><span class="pa ${prio === 1 ? 'c' : prio === 2 ? 'h' : 'n'}">${prio === 1 ? '▲ PRIORITÉ CRITIQUE' : prio === 2 ? '▲ PRIORITÉ HAUTE' : 'PRIORITÉ NORMALE'}</span></div>`;
             // signataire = le commandant qui a cree l'ordre (auteur_id -> nom, lu une fois et garde)
             const zoneAuteur = xEl('ordre-modal-auteur');
             window.cacheNomsAuteurs = window.cacheNomsAuteurs || {};
@@ -1727,6 +1899,8 @@
             xEl('ordre-modal-total').innerText = `${XF1(total)} PTS`;
             xEl('ordre-modal-part').innerText = `${pct.toFixed(1)}% (${XF1(mesPts)} PTS)`;
             xEl('ordre-modal-bar').style.width = `${pct}%`;
+            xEl('ordre-modal-dossier-resume').innerText = `${XF1(total)} PTS · je pèse ${pct.toFixed(1)} %`;
+            xEl('ordre-modal-dossier-corps').style.display = 'none'; xEl('ordre-modal-dossier-fl').innerText = '▼';
 
             xEl('ordre-modal-participants').innerHTML = pilotes.length ? pilotes.map(x => {
                 const estMoi = x.u === String(profilCommandant.user_id);
@@ -1736,6 +1910,57 @@
                     <div style="white-space: nowrap;"><span style="color: #aaa; margin-right: 8px;">${p}%</span><strong style="color: ${couleur};">${XF1(x.pts)} PTS</strong></div>
                 </div>`;
             }).join('') : '<div style="color: #666; text-align: center; font-size: 0.8em; padding: 10px; font-style: italic;">Aucune donnée enregistrée.</div>';
+            // RESULTAT DU JEU (EDSM) + effort par type d'action
+            {
+                const res = ((window.cacheResultatsBgs || {}).dir || {})[ordre.id] || null;
+                const donnees = !!(res && res.donnees);
+                const sens = xSensDirective(ordre, res), cs = X_SENS[sens || 'att'];
+                const f = String(ordre.faction_cible || '').trim().toLowerCase();
+                const toutes = ((window.cacheResultatsBgs || {}).sys || {})[String(ordre.systeme_cible || '').toUpperCase()] || [];
+                // les factions a 0 % (restees dans EDSM mais plus dans le systeme) sont masquees ; la faction ciblee reste toujours
+                const voisines = toutes.filter(x => Number(x.i) >= 0.0005 || String(x.n || '').trim().toLowerCase() === f);
+                const masquees = toutes.length - voisines.length;
+                const jours = Math.max(1, Math.ceil((Date.now() - new Date(ordre.date_emission || ordre.created_at || Date.now()).getTime()) / 86400000));
+                const colVar = v => v === null || Math.abs(v) < 0.05 ? '#aaa' : ((ordre.type_ordre === 'BAISSE' ? v < 0 : v > 0) ? X_SENS.up : X_SENS.dn);
+                let corps = '';
+                if (donnees) {
+                    const cb = res.courbe || [];
+                    const sur30 = cb.length >= 2 ? (cb[cb.length - 1][1] - cb[0][1]) * 100 : null;
+                    corps += xCourbeGrande(cb, ordre.date_emission ? new Date(ordre.date_emission).getTime() / 1000 : null, cs);
+                    corps += `<div style="display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 8px; font-size: 0.78em; color: #aaa;"><span>Maintenant <b style="color: #fff; font-weight: normal;">${xPct(res.influence)} %</b></span>${res.variation !== null ? `<span>Depuis la directive <b style="color: ${colVar(res.variation)}; font-weight: normal;">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : ''} ${xPts(res.variation)} pts</b></span>` : ''}${sur30 !== null ? `<span>Sur la période <b style="color: ${colVar(sur30)}; font-weight: normal;">${sur30 > 0 ? '▲' : sur30 < 0 ? '▼' : ''} ${xPts(sur30)} pts</b></span>` : ''}</div>`;
+                    if (res.conflit) {
+                        const estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
+                        const moi = estF1 ? res.conflit.s1 : res.conflit.s2, adv = estF1 ? res.conflit.s2 : res.conflit.s1;
+                        corps += `<div style="margin-top: 8px; border: 1px dashed ${couleur}; border-radius: 8px; padding: 7px 10px; font-size: 0.8em; color: #ccc;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE <b style="color: ${cs}; font-size: 1.15em;">${moi} – ${adv}</b> <span style="color: #777;">vs</span> <b style="color: #aaa;">${XESC(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</b> <span style="color: #666; font-size: 0.85em;">· ${xAge(res.conflit.maj)}</span></div>`;
+                    }
+                } else {
+                    corps += '<div class="xmut" style="padding: 18px 8px; text-align: center; border: 1px dashed #333; border-radius: 8px;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>';
+                }
+                if (voisines.length) {
+                    corps += `<div class="mdet-sec" style="margin-top: 12px;">FACTIONS DU SYSTÈME</div>` + voisines.map(x => {
+                        const moi = String(x.n || '').trim().toLowerCase() === f;
+                        const etat = (x.a && x.a.length) ? x.a.join(', ') : (x.e || 'Aucun');
+                        return `<div style="display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid #222; font-size: 0.78em; ${moi ? 'color: var(--ed-orange);' : 'color: #ddd;'}"><span style="min-width: 0; overflow-wrap: anywhere;">${XESC(x.n)}${moi ? ' ★' : ''} <span style="color: #777; font-size: 0.85em;">${XESC(etat)}${x.p && x.p.length ? ' · en attente : ' + XESC(x.p.join(', ')) : ''}</span></span><b style="white-space: nowrap;">${xPct(x.i)} %</b></div>`;
+                    }).join('') + (masquees > 0 ? `<div style="color: #666; font-size: 0.68em; margin-top: 6px;">${masquees} faction${masquees > 1 ? 's' : ''} à 0 % masquée${masquees > 1 ? 's' : ''} (encore listée${masquees > 1 ? 's' : ''} par EDSM)</div>` : '');
+                }
+                const rsJ = (window.cacheResumeBgs || {})[ordre.id] || { types: {}, pilotes: [] };
+                const avJ = xAvancementOrdre(ordre, rsJ);
+                const vousJ = Math.round(avJ.pct * avJ.part / 100);
+                // 1. L'EFFORT (le coeur de l'application) : bandeau, puis les jauges par type d'action
+                xEl('ordre-modal-effort').innerHTML = `
+                    <div style="color: #777; font-size: 0.7em; margin-bottom: 8px;">Directive émise il y a ${jours} jour${jours > 1 ? 's' : ''}</div>
+                    <div class="mdet-hero" style="border-color: ${couleur};">
+                        <div class="r1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${avJ.pct} %</b></div>
+                        <div class="r1"><span>MA PART</span><b style="color: ${couleur};">${avJ.part} %</b></div>
+                        <div class="jgh"><i style="width: ${avJ.pct}%; opacity: 0.35; background: ${couleur};"></i><i style="width: ${vousJ}%; background: ${couleur};"></i></div>
+                    </div>
+                    <div class="mdet-sec" style="margin-top: 12px;">EFFORT PAR TYPE D'ACTION</div>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">${xJaugesOrdre(ordre, rsJ)}</div>`;
+                // 2. LE RESULTAT DU JEU (apres les efforts individuels)
+                xEl('ordre-modal-resultat').innerHTML = `
+                    <div class="mdet-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS${donnees ? ' <span style="color: #777; letter-spacing: 0;">· mis à jour ' + xAge(res.maj_edsm) + '</span>' : ''}</div>${corps}
+                    <div style="color: #777; font-size: 0.66em; line-height: 1.5; margin-top: 8px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ».</div>`;
+            }
             xEl('modal-ordre-details').style.display = 'flex';
         };
 
@@ -3415,7 +3640,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=6', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=7', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {
