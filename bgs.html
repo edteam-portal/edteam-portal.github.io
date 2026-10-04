@@ -1130,7 +1130,7 @@
                 return `<tr style="${moi ? 'color: var(--ed-orange);' : ''}"><td style="padding: 5px 4px; border-bottom: 1px solid #222;">${escapeHtml(x.n)}${moi ? ' ★' : ''}${att}</td><td style="padding: 5px 4px; border-bottom: 1px solid #222; color: #888; font-size: 0.9em;">${escapeHtml(etat)}</td><td style="padding: 5px 4px; border-bottom: 1px solid #222; text-align: right; font-weight: bold; white-space: nowrap;">${bgsPct(x.i)} %</td></tr>`;
             }).join('')}</table>${masquees > 0 ? `<div style="color: #666; font-size: 0.75em; margin-top: 6px;">${masquees} faction${masquees > 1 ? 's' : ''} à 0 % masquée${masquees > 1 ? 's' : ''} (encore listée${masquees > 1 ? 's' : ''} par EDSM)</div>` : ''}` : '<div style="color: #777; font-size: 0.85em; font-style: italic;">Aucune donnée du jeu pour ce système pour l\'instant.</div>';
 
-            // DOSSIER TACTIQUE : efforts individuels (classement fourni par le serveur), replié par défaut
+            // PARTICIPANTS : efforts individuels (classement fourni par le serveur), replié par défaut
             const classement = (((window.cacheResumeBgs || {})[ordre.id] || {}).pilotes) || [];
             const totalPoints = classement.reduce((t, p) => t + (Number(p.pts) || 0), 0);
             const maLigne = classement.find(p => String(p.u) === String(profilCommandant.user_id));
@@ -1146,7 +1146,7 @@
                 </div>`;
             }).join('') : '<div style="color: #666; text-align: center; font-size: 0.9em; padding: 16px; font-style: italic;">Aucune télémétrie enregistrée pour cette opération.</div>';
             const dossier = `<div class="bgs-dossier" style="border-color: ${c}55;">
-                <div class="tete" onclick="bgsToggleDossier(this)"><span style="color: ${c}; letter-spacing: 2px; font-weight: bold;">DOSSIER TACTIQUE</span><span style="color: #888; font-size: 0.85em;">efforts individuels · ${fPts(totalPoints)} PTS · tu pèses ${monPct.toFixed(1)} %</span><span class="fl" style="color: ${c};">▼</span></div>
+                <div class="tete" onclick="bgsToggleDossier(this)"><span style="color: ${c}; letter-spacing: 2px; font-weight: bold;">PARTICIPANTS</span><span style="color: #888; font-size: 0.85em;">efforts individuels · ${fPts(totalPoints)} PTS · tu pèses ${monPct.toFixed(1)} %</span><span class="fl" style="color: ${c};">▼</span></div>
                 <div class="corps" style="display: none;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 6px;"><span style="color: #888; letter-spacing: 1px;">VOTRE IMPACT</span><strong style="color: ${c};">${monPct.toFixed(1)}% (${fPts(mesPoints)} PTS)</strong></div>
                     <div style="width: 100%; height: 7px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; margin-bottom: 12px;"><div style="height: 100%; width: ${monPct}%; background: ${c}; box-shadow: 0 0 10px ${c};"></div></div>
