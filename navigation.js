@@ -3,7 +3,7 @@
 // ==========================================
 (function initAnalytics() {
     const s = document.createElement('script');
-    s.src = 'analytics.js?v=1';
+    s.src = 'analytics.js?v=2';
     s.async = true;
     document.head.appendChild(s);
     // relais pour tracer des evenements personnalises de la flotte (sans effet tant que GA n'est pas charge)

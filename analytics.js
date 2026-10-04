@@ -21,7 +21,10 @@
         window.dataLayer = window.dataLayer || [];
         window.gtag = function () { window.dataLayer.push(arguments); };
         window.gtag('js', new Date());
-        var cfg = { anonymize_ip: true, page_title: document.title, page_location: window.location.href };
+        // la racine « / » et « /index.html » sont la même page : on les déclare sous un seul chemin pour qu'Analytics ne les sépare pas
+        var emplacement = window.location.href;
+        if (window.location.pathname === '/') emplacement = window.location.origin + '/index.html' + window.location.search + window.location.hash;
+        var cfg = { anonymize_ip: true, page_title: document.title, page_location: emplacement };
         var opts = window.EDTEAM_GA_OPTIONS || {};
         Object.keys(opts).forEach(function (k) { cfg[k] = opts[k]; });
         // Visiteur aiguillé depuis la racine du site vers la présentation : on garde sa vraie source (Google, Discord...) au lieu de « notre propre site »
