@@ -1482,7 +1482,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     localStorage.setItem('edteam_acces_bgs', 'false');
                 }
 
-                // ACCÈS AUX PAGES ESCADRON ET DIPLOMATIE
+                // ACCÈS À LA PAGE ESCADRON
                 if (data.escadron_id) {
                     localStorage.setItem('edteam_acces_escadron', 'true');
                 } else {
@@ -1983,7 +1983,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 const [resProfils, resParams, resOrdres] = await Promise.all([
                     // 'reputations' exclue : ecrite cote serveur mais jamais lue par aucune page (fonctionnalite retiree)
-                    supabaseApp.from('profils').select('id, user_id, email, cle_api, est_approuve, created_at, escadron_id, est_amiral, cmdr_nom, solde_vaisseau, solde_fc, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_fed, prog_fed, rang_emp, prog_emp, patrimoine_total, valeur_vaisseaux, cout_rachat, est_directeur, est_officier, est_diplomate, notoriete, rang_mercenary, prog_mercenary, palmares_bgs, faction_choisie, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total').eq('est_approuve', true).order('cmdr_nom'),
+                    supabaseApp.from('profils').select('id, user_id, email, cle_api, est_approuve, created_at, escadron_id, est_amiral, cmdr_nom, solde_vaisseau, solde_fc, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_fed, prog_fed, rang_emp, prog_emp, patrimoine_total, valeur_vaisseaux, cout_rachat, est_directeur, est_officier, notoriete, rang_mercenary, prog_mercenary, palmares_bgs, faction_choisie, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total').eq('est_approuve', true).order('cmdr_nom'),
                     supabaseApp.from('parametres_app').select('user_id, last_heartbeat, factions_favorites, telemetrie_usage'),
                     supabaseApp.from('ordres_bgs').select('id', { count: 'exact', head: true })
                 ]);
@@ -2747,7 +2747,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 let col = 'var(--ed-blue)';
 
                 if (typeAction.includes('M.A.J') || typeAction.includes('SYSTÈME')) col = '#B026FF';
-                else if (typeAction.includes('DIPLOMATIE')) col = '#FFD700';
                 else if (typeAction.includes('MISSION BGS')) col = '#FF7100';
                 else if (typeAction.includes('RECRUE') || typeAction.includes('NOUVEAU SUR') || typeAction.includes('COMMANDEMENT')) col = '#00FF66';
                 else if (typeAction.includes('COMMUNIQUÉ')) col = '#FFD700';
@@ -3133,7 +3132,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const cr = compact(d.cr_bgs), mp = compact(d.merites_pp), tn = compact(d.tonnes);
             corps.innerHTML = [
                 carte('vert', 'ESCADRON', ico.esc,
-                    `<div class="qg-st-ligne">${stat(fmt.format(d.pilotes), 'PILOTES INSCRITS')}${Number(d.traites) > 0 ? stat(fmt.format(d.traites), 'TRAITÉS DIPLOMATIQUES') : ''}</div>`,
+                    `<div class="qg-st-ligne">${stat(fmt.format(d.pilotes), 'PILOTES INSCRITS')}</div>`,
                     "window.location.href='escadron.html'", "Voir l'escadron"),
                 carte('rouge', 'RENSEIGNEMENT', ico.ren,
                     `<div class="qg-bulles">${bulle(d.kos, 'KOS', '#FF3333')}${bulle(d.suspects, 'SUSPECTS', '#FF7100')}${bulle(d.allies, 'ALLIÉS VIP', '#00FF66')}</div>`,

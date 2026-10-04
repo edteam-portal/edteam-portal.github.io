@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-retrait-diplomatie', date: '2026-10-04T14:00:00Z', type: 'AMELIORE',
+        titre: 'Retrait de la page Diplomatie',
+        texte: 'La page Diplomatie (traités et alliances) est retirée : personne ne l’utilisait encore, et elle reviendra sous la forme d’un vrai module de coalition, avec des traités signés des deux côtés, quand d’autres escadrons auront rejoint EDTEAM. Le COVAS ne signale donc plus les traités au saut ni sur une cible ; le registre de renseignement (KOS, suspects, alliés VIP) reste en place.',
+        important: false
+    },
+    {
         id: '2026-10-mobile-bgs-chiffres', date: '2026-10-04T12:00:00Z', type: 'AMELIORE',
         titre: 'Compagnon mobile : exploits, chiffres et directives plus clairs',
         texte: 'Le journal des exploits du BGS affiche maintenant aussi les livraisons de colonisation et le soutien libre, avec les points de rang BGS gagnés par chaque action. La fiche d’une directive indique le commandant qui l’a créée. « L’escadron en chiffres » est rangé par thème avec des libellés explicites, « Mes finances » tient sur une ligne, et le statut légal (casier) disparaît de l’accueil et des fiches pilote.',

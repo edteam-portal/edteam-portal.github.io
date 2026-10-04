@@ -562,7 +562,7 @@
         const fmtNb = n => new Intl.NumberFormat('fr-FR').format(n);
         const fmtPts = n => (Math.round(n * 10) / 10).toLocaleString('fr-FR');
 
-        function effRoleOrdre(p) { return p.est_amiral ? 0 : p.est_officier ? 1 : p.est_diplomate ? 2 : 3; }
+        function effRoleOrdre(p) { return p.est_amiral ? 0 : p.est_officier ? 1 : 2; }
 
         window.effFiltrer = function () {
             EFF.recherche = (document.getElementById('eff-recherche') || {}).value || '';
@@ -616,7 +616,6 @@
                     // Rang en jeu 4 = Recrue : pas d'accès aux pages d'escadron tant qu'un officier ne l'a pas passé Pilote en jeu
                     if (Number(p.rang_escadron_jeu) === 4 && !p.est_officier) badges += '<span class="eff-badge" title="Recrue en jeu : pas d\'accès aux pages d\'escadron. Un officier doit la passer PILOTE dans le jeu." style="color: #FFC800;">RECRUE</span>';
                     if (p.est_officier) badges += '<span class="eff-badge" style="color: #00FF66;">OFFICIER BGS</span>';
-                    if (p.est_diplomate) badges += '<span class="eff-badge" style="color: var(--ed-blue);">DIPLOMATE</span>';
                 }
                 const nom = p.cmdr_nom ? escapeHtml(p.cmdr_nom.toUpperCase()) : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
 
@@ -681,20 +680,20 @@
                 // 1. On télécharge les profils (PROJECTION STRICTE ANTI-EGRESS)
                 const COLS_PP = ', puissance_nom, puissance_rang, puissance_merites_total, puissance_merites_cycle';
                 let repEff = await supabaseApp.from('profils_publics')
-                    .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, rang_bgs, points_bgs, rang_escadron_jeu' + COLS_PP)
+                    .select('user_id, cmdr_nom, est_amiral, est_officier, rang_bgs, points_bgs, rang_escadron_jeu' + COLS_PP)
                     .eq('escadron_id', profilCommandant.escadron_id)
                     .eq('est_approuve', true);
                 if (repEff.error) {
                     // Repli : rang en jeu pas encore exposé (script SQL 30)
                     repEff = await supabaseApp.from('profils_publics')
-                        .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, rang_bgs, points_bgs' + COLS_PP)
+                        .select('user_id, cmdr_nom, est_amiral, est_officier, rang_bgs, points_bgs' + COLS_PP)
                         .eq('escadron_id', profilCommandant.escadron_id)
                         .eq('est_approuve', true);
                 }
                 if (repEff.error) {
                     // Repli : colonnes du rang BGS pas encore exposées par la vue (script SQL 19)
                     repEff = await supabaseApp.from('profils_publics')
-                        .select('user_id, cmdr_nom, est_amiral, est_officier, est_diplomate')
+                        .select('user_id, cmdr_nom, est_amiral, est_officier')
                         .eq('escadron_id', profilCommandant.escadron_id)
                         .eq('est_approuve', true);
                 }
@@ -978,7 +977,7 @@
                 const enCache = window.__cacheFichesPilotes[userId];
                 let profil = (enCache && (Date.now() - enCache.t) < 120000) ? enCache.profil : null;
                 if (!profil) {
-                    const COLS_FICHE = 'user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, palmares_bgs, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total';
+                    const COLS_FICHE = 'user_id, cmdr_nom, est_amiral, est_officier, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, palmares_bgs, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total';
                     let rep = await supabaseApp.from('profils_publics').select(COLS_FICHE + ', rang_bgs, points_bgs').eq('user_id', userId).single();
                     if (rep.error) {
                         // Repli : colonnes du rang BGS pas encore exposées par la vue (script SQL 19)
@@ -1003,7 +1002,6 @@
                     badges += '<span style="color: #FF3333; ' + stylePastille + '">AMIRAL</span>';
                 } else {
                     if (profil.est_officier) badges += '<span style="color: #00FF66; ' + stylePastille + '">OFFICIER BGS</span>';
-                    if (profil.est_diplomate) badges += '<span style="color: var(--ed-blue); ' + stylePastille + '">DIPLOMATE</span>';
                 }
                 badges += remplirCartesRangs(profil, pointsSemaine || 0);
                 document.getElementById('modal-cmdr-roles').innerHTML = badges;

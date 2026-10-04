@@ -59,10 +59,6 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <span class="nav-text">ESCADRON</span>
         </a>
-        <a href="diplomatie.html" id="nav-link-diplo" class="nav-link ${page === 'diplomatie.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_escadron') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
-            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line><circle cx="12" cy="17" r="2"></circle></svg></div>
-            <span class="nav-text">DIPLOMATIE</span>
-        </a>
         <a href="bgs.html" id="nav-bgs-factions" class="nav-link ${page === 'bgs.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_bgs') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon" style="position: relative;">
                 <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7" stroke-dasharray="1.6 1.6"></polyline></svg>
@@ -299,7 +295,7 @@ window.actualiserHeader = function(profilData) {
             boite.style.borderColor = independant ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 113, 0, 0.3)';
             boite.style.background = independant ? 'rgba(0, 240, 255, 0.05)' : 'rgba(255, 113, 0, 0.05)';
             boite.setAttribute('onmouseenter', independant
-                ? "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'PILOTE INDÉPENDANT<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Les modules BGS, Diplomatie et Escadron sont réservés aux membres d\\'un escadron.</span>', '#00F0FF')"
+                ? "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'PILOTE INDÉPENDANT<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Les modules BGS et Escadron sont réservés aux membres d\\'un escadron.</span>', '#00F0FF')"
                 : "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'ESCADRON<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Votre escadron et vos accréditations.</span>', '#FF7100')");
             boite.setAttribute('onmouseleave', "if(typeof hideHoloTooltip === 'function') hideHoloTooltip()");
         }
@@ -313,7 +309,6 @@ window.actualiserHeader = function(profilData) {
                 else if (rangJeu === 4) g += pastille('RECRUE', '#cccccc', 'RECRUE<br>Accès limité : le panneau tactique BGS est verrouillé.');
                 else g += pastille('PILOTE', '#FF7100', 'MEMBRE ACTIF<br>Accès aux opérations de l’escadron.');
                 if (!profilData.est_amiral && profilData.est_officier) g += pastille('OFFICIER BGS', '#00FF66', 'GESTION TACTIQUE BGS<br>Autorisé à publier les ordres de l’Amiral.');
-                if (!profilData.est_amiral && profilData.est_diplomate) g += pastille('DIPLOMATE', '#00F0FF', 'RELATIONS EXTÉRIEURES<br>Administre la liste noire (KOS) et les traités.');
             }
             elGr.innerHTML = g;
             elGr.style.display = g ? 'flex' : 'none';

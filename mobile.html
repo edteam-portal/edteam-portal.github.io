@@ -257,7 +257,6 @@
         }
 
         /* Force l'apparition d'un scroll sur les fenêtres qui n'en ont pas par défaut */
-        #modal-diplo-details > .card,
         #modal-ordre-details > .card {
             overflow-y: auto !important;
         }
@@ -831,51 +830,6 @@
     </div>
 </div>
 
-<!-- NOUVELLE MODAL LISTE DIPLOMATIE (MOBILE) -->
-    <div class="modal-overlay" id="modal-diplomatie-liste" onclick="document.getElementById('modal-diplomatie-liste').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 500; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: var(--ed-green);" onclick="event.stopPropagation()">
-            
-            <div style="padding: 15px; border-bottom: 1px solid var(--ed-green); display: flex; justify-content: space-between; align-items: center; background: rgba(0,255,102,0.1); flex-shrink: 0;">
-                <span style="color: var(--ed-green); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">🤝 DIPLOMATIE</span>
-                <span style="color: var(--ed-green); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-diplomatie-liste').style.display='none'; if(typeof sonClic==='function') sonClic();">✕</span>
-            </div>
-            
-            <!-- Le conteneur d'origine que le Javascript va utiliser -->
-            <div id="m-diplomatie-container" style="padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
-                <div style="color: #666; font-size: 0.85em; text-align: center; padding: 10px;">Consultation des registres d'alliances...</div>
-            </div>
-            
-        </div>
-    </div>
-
-<!-- MODAL DÉTAILS DIPLOMATIQUES -->
-<div class="modal-overlay" id="modal-diplo-details" onclick="fermerModalDiplo(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 550; padding: 20px;">
-    <div class="card" style="width: 100%; max-width: 450px;" onclick="event.stopPropagation()">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--ed-blue); padding-bottom: 10px; margin-bottom: 15px;" id="diplo-modal-header">
-            <span id="diplo-modal-title" style="color: var(--ed-blue); font-weight: bold; letter-spacing: 2px;">DÉTAILS DU TRAITÉ</span>
-            <span id="diplo-modal-close" style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="fermerModalDiplo()">✕</span>
-        </div>
-        
-        <div style="margin-bottom: 15px;">
-            <span style="color: #888; font-size: 0.8em;">FACTION CONCERNÉE :</span>
-            <div id="diplo-modal-faction" style="color: #fff; font-weight: bold; font-size: 1.2em; margin-top: 4px;">...</div>
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <span style="color: #888; font-size: 0.8em;">STATUT DE LA RELATION :</span>
-            <div id="diplo-modal-statut" style="font-weight: bold; font-size: 1.1em; margin-top: 4px; letter-spacing: 1px;">...</div>
-        </div>
-
-        <div>
-            <span style="color: #888; font-size: 0.8em;">TERMES & CONDITIONS :</span>
-            <div id="diplo-modal-desc" style="color: #ccc; font-size: 0.9em; background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 12px; border-radius: 4px; margin-top: 4px; min-height: 80px; line-height: 1.5; white-space: pre-wrap;">...</div>
-        </div>
-        <div style="margin-top: 15px; font-size: 0.8em; color: #888; text-align: right; font-style: italic; letter-spacing: 1px;">
-            SIGNÉ PAR : <strong id="diplo-modal-signataire-container" style="color: var(--ed-blue);">CMDR <span id="diplo-modal-signataire">...</span></strong>
-        </div>
-    </div>
-</div>
-
 <!-- MODAL DÉTAILS DE L'ORDRE -->
 <div class="modal-overlay" id="modal-ordre-details" onclick="fermerModalOrdre(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 550; padding: 20px;">
     <div class="card" style="width: 100%; max-width: 450px;" onclick="event.stopPropagation()">
@@ -1344,7 +1298,6 @@
                     if (p.est_amiral) { txtGrade = 'AMIRAL'; colGrade = 'var(--ed-red)'; }
                     else if (p.est_directeur) { txtGrade = 'DIRECTEUR'; colGrade = 'var(--ed-blue)'; }
                     else if (p.est_officier) { txtGrade = 'OFFICIER BGS'; colGrade = 'var(--ed-green)'; }
-                    else if (p.est_diplomate) { txtGrade = 'DIPLOMATE'; colGrade = 'var(--ed-blue)'; }
                     elGrade.innerText = txtGrade;
                     elGrade.style.color = colGrade;
                 }
@@ -1528,8 +1481,7 @@
                 resume.innerHTML = `<div style="min-width: 0; flex: 1;"><div class="xk">L'escadron en chiffres</div><div style="margin-top: 6px; font-size: 0.72em; color: #ccc; line-height: 1.5;"><b style="color: var(--ed-orange); font-weight: normal;">${XF0(d.points_bgs)}</b> pts BGS · <b style="color: var(--ed-blue); font-weight: normal;">${XCOMPACT(d.merites_pp)}</b> mérites Powerplay · <b style="color: var(--x-gold); font-weight: normal;">${XCOMPACT(d.tonnes)} t</b> livrées</div></div><span class="xmut" style="font-size: 1.1em;">▾</span>`;
                 corps.innerHTML = [
                     section('ESCADRON', 'var(--ed-green)', [
-                        st(XF0(d.pilotes), 'PILOTES INSCRITS'),
-                        Number(d.traites) > 0 ? st(XF0(d.traites), 'TRAITÉS DIPLOMATIQUES') : ''
+                        st(XF0(d.pilotes), 'PILOTES INSCRITS')
                     ]),
                     section('RENSEIGNEMENT', 'var(--ed-red)', [
                         st(XF0(d.kos), 'KOS', Number(d.kos) ? 'var(--ed-red)' : ''),
@@ -1960,10 +1912,10 @@
                 const esc = profilCommandant.escadron_id;
                 const [membres, semaine, titres] = await Promise.all([
                     xCache('membres', 180000, async () => {
-                        let rep = await supabaseApp.from('profils_publics').select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id, rang_bgs, rang_escadron_jeu, puissance_rang').eq('escadron_id', esc).eq('est_approuve', true);
+                        let rep = await supabaseApp.from('profils_publics').select('cmdr_nom, est_amiral, est_officier, user_id, rang_bgs, rang_escadron_jeu, puissance_rang').eq('escadron_id', esc).eq('est_approuve', true);
                         if (rep.error) {
                             // Repli : rang en jeu pas encore expose (script SQL 30)
-                            rep = await supabaseApp.from('profils_publics').select('cmdr_nom, est_amiral, est_officier, est_diplomate, user_id, rang_bgs, puissance_rang').eq('escadron_id', esc).eq('est_approuve', true);
+                            rep = await supabaseApp.from('profils_publics').select('cmdr_nom, est_amiral, est_officier, user_id, rang_bgs, puissance_rang').eq('escadron_id', esc).eq('est_approuve', true);
                         }
                         if (rep.error) throw rep.error;
                         return rep.data || [];
@@ -2035,7 +1987,6 @@
                 else {
                     if (m.est_officier) badges.push('<span class="xrk v">OFFICIER</span>');
                     else if (Number(m.rang_escadron_jeu) === 4) badges.push('<span class="xrk y">RECRUE</span>');
-                    if (m.est_diplomate) badges.push('<span class="xrk b">DIPLOMATE</span>');
                 }
                 const titres = [];
                 if (ESC.titres && typeof window.titreMeta === 'function') {
@@ -2053,46 +2004,6 @@
         }
 
 
-
-    // --- AFFICHAGE DES DÉTAILS DIPLOMATIQUES (MOBILE) ---
-    window.ouvrirModalDiplomatie = function(index, couleur, label) {
-        sonClic();
-        
-        // 1. On récupère les données exactes du traité depuis le cache
-        const traite = window.cacheTraitesDiplo[index];
-        if (!traite) return;
-
-        // 2. On colorise la fenêtre dynamiquement selon l'allégeance
-        const header = document.getElementById('diplo-modal-header');
-        header.style.borderBottomColor = couleur;
-        document.getElementById('diplo-modal-title').style.color = couleur;
-        document.getElementById('diplo-modal-close').style.color = couleur;
-
-        // 3. On remplit les données
-        document.getElementById('diplo-modal-faction').innerText = traite.faction_cible.toUpperCase();
-        
-        const statutEl = document.getElementById('diplo-modal-statut');
-        statutEl.innerText = label;
-        statutEl.style.color = couleur;
-
-        // On s'adapte au nom de ta colonne (notes, description, ou termes)
-        const texteDescriptif = traite.directives || "Aucun détail ou directive spécifique n'a été enregistré pour ce traité.";
-        document.getElementById('diplo-modal-desc').innerText = texteDescriptif;
-
-        // 4. Affichage du nom du signataire avec couleur dynamique
-        const nomSignataire = traite.signataire_nom || "INCONNU";
-        document.getElementById('diplo-modal-signataire').innerText = nomSignataire.toUpperCase();
-        document.getElementById('diplo-modal-signataire-container').style.color = couleur;
-
-        // 5. On affiche la fenêtre
-        document.getElementById('modal-diplo-details').style.display = 'flex';
-    };
-
-    window.fermerModalDiplo = function(e) {
-        if (e && e.target.id !== 'modal-diplo-details' && !e.target.innerText.includes('✕')) return;
-        sonClic();
-        document.getElementById('modal-diplo-details').style.display = 'none';
-    };
 
     window.fermerModalOrdre = function(e) {
         if (e && e.target.id !== 'modal-ordre-details' && !e.target.innerText.includes('✕')) return;
@@ -2551,7 +2462,7 @@
             if (typeof sonClic === 'function') sonClic();
             try {
                 const escadronCible = profilCommandant.escadron_id || 'ISS';
-                const COLS_FICHE = 'user_id, cmdr_nom, est_amiral, est_officier, est_diplomate, notoriete, palmares_bgs, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total';
+                const COLS_FICHE = 'user_id, cmdr_nom, est_amiral, est_officier, notoriete, palmares_bgs, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total';
                 const lireFiche = async () => {
                     let rep = await supabaseApp.from('profils_publics').select(COLS_FICHE + ', rang_bgs, points_bgs').eq('user_id', userId).single();
                     if (rep.error) rep = await supabaseApp.from('profils_publics').select(COLS_FICHE).eq('user_id', userId).single();   // repli : colonnes BGS pas exposees
@@ -2577,7 +2488,6 @@
                 if (profil.est_amiral) badges += '<span class="xrk r">AMIRAL</span>';
                 else {
                     badges += profil.est_officier ? '<span class="xrk v">OFFICIER BGS</span>' : '<span class="xrk">PILOTE</span>';
-                    if (profil.est_diplomate) badges += '<span class="xrk b">DIPLOMATE</span>';
                 }
                 document.getElementById('m-modal-cmdr-roles').innerHTML = badges;
                 const nbPil = rPil.error ? 0 : (rPil.data || []).length, nbEla = rEla.error ? 0 : (rEla.data || []).length;

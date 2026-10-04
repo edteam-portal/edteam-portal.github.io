@@ -128,41 +128,6 @@ async function declencherAnalyseTactique(nomSysteme) {
         const escadronId = profilCommandant.escadron_id || 'ISS';
         const userId = profilCommandant.user_id;
 
-        let localFactions = [];
-        try {
-            const edsmRes = await fetch(`https://www.edsm.net/api-system-v1/factions?systemName=${encodeURIComponent(nomSysteme)}`);
-            const edsmData = await edsmRes.json();
-            if (edsmData && edsmData.factions) {
-                localFactions = edsmData.factions.map(f => f.name.toUpperCase());
-            }
-        } catch(e) {}
-
-        if (currentSession !== covasSessionId) return;
-
-        // DIPLOMATIE
-        let diploAlerte = false;
-        if (localFactions.length > 0) {
-            const { data: traites } = await db.from('traites_diplomatiques').select('*').eq('escadron_id', escadronId);
-            if (currentSession !== covasSessionId) return;
-            
-            if (traites && traites.length > 0) {
-                for (let traite of traites) {
-                    if (localFactions.includes(traite.faction_cible.toUpperCase())) {
-                        diploAlerte = true;
-                        if (traite.type_relation === 'HOSTILE') {
-                            await ecrireLigneCovas(`>_ DIPLOMATIE : ⚠️ MENACE. Faction [${traite.faction_cible.toUpperCase()}] présente (HOSTILE).`, contenu, "covas-alerte", currentSession);
-                        } else if (traite.type_relation === 'ALLIE') {
-                            await ecrireLigneCovas(`>_ DIPLOMATIE : Force alliée détectée [${traite.faction_cible.toUpperCase()}].`, contenu, "covas-neutre", currentSession);
-                        } else {
-                            await ecrireLigneCovas(`>_ DIPLOMATIE : Territoire P.N.A. [${traite.faction_cible.toUpperCase()}].`, contenu, "", currentSession);
-                        }
-                    }
-                }
-            }
-        }
-        if (currentSession !== covasSessionId) return;
-        if (!diploAlerte) await ecrireLigneCovas(">_ DIPLOMATIE : RAS (Espace Neutre).", contenu, "covas-neutre", currentSession);
-
         if (currentSession !== covasSessionId) return;
 
         // BGS
@@ -493,7 +458,6 @@ window.initialiserCompteurPresence = function() {
                     let badges = '';
                     if (p.amiral) badges += '<span style="color: #FF3333; border: 1px solid #FF3333; background: rgba(255,51,51,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">AMIRAL</span>';
                     if (p.officier) badges += '<span style="color: #00FF66; border: 1px solid #00FF66; background: rgba(0,255,102,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">OFFICIER</span>';
-                    if (p.diplomate) badges += '<span style="color: var(--ed-blue); border: 1px solid var(--ed-blue); background: rgba(0,240,255,0.1); font-size: 0.75em; font-weight: bold; padding: 2px 6px; border-radius: 3px;">DIPLOMATE</span>';
                     
                     const badgeSquad = nomSquad ? `<span style="color: var(--ed-orange); font-weight: bold;">[ ${nomSquad} ]</span>` : `<span style="color: #888;">[ INDÉPENDANT ]</span>`;
                     
@@ -535,7 +499,6 @@ window.initialiserCompteurPresence = function() {
                     escadron: profilCommandant.escadron_id || '',
                     amiral: profilCommandant.est_amiral === true,
                     officier: profilCommandant.est_officier === true,
-                    diplomate: profilCommandant.est_diplomate === true,
                     connecte_a: new Date().toISOString()
                 });
             }
@@ -554,24 +517,20 @@ async function verifierCibleTactique(nomCmdr, tagEscadron) {
 
         // Fonction serveur : 'profils' est cloisonne par escadron, on ne demande que "inscrit ou non"
         const requeteProfil = db.rpc('pilote_inscrit', { p_nom: nomCmdr });
-        const requeteDiplo = (profilCommandant.escadron_id && tagEscadron) 
-            ? db.from('traites_diplomatiques').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('tag', tagEscadron.toUpperCase()).limit(1) 
-            : Promise.resolve({ data: null });
         const requeteTactique = profilCommandant.escadron_id 
             ? db.from('registre_tactique').select('*').eq('escadron_id', profilCommandant.escadron_id).ilike('cmdr_cible', nomCmdr).eq('est_valide', true).limit(1) 
             : Promise.resolve({ data: null });
 
-        const [resProfil, resDiplo, resTact] = await Promise.all([requeteProfil, requeteDiplo, requeteTactique]);
+        const [resProfil, resTact] = await Promise.all([requeteProfil, requeteTactique]);
 
         const isRegistered = (resProfil.data === true);
-        let diploStatus = (resDiplo.data && resDiplo.data.length > 0) ? resDiplo.data[0] : null;
         const tacticalFiche = (resTact.data && resTact.data.length > 0) ? resTact.data[0] : null;
 
-        afficherAlerteCovas(nomCmdr, tagEscadron, tacticalFiche, diploStatus, isRegistered);
+        afficherAlerteCovas(nomCmdr, tagEscadron, tacticalFiche, isRegistered);
     } catch(e) { console.error("Erreur scan tactique:", e); }
 }
 
-function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered) {
+function afficherAlerteCovas(nom, tag, tacticalFiche, isRegistered) {
     nom = escapeHtml(nom);
     tag = escapeHtml(tag);
     if (typeof playSonCiblageTactique === 'function') playSonCiblageTactique();
@@ -627,45 +586,8 @@ function afficherAlerteCovas(nom, tag, tacticalFiche, diploStatus, isRegistered)
         </div>`;
     }
 
-    if (tag) {
-        if (diploStatus) {
-            let dColor = 'var(--ed-blue)';
-            let dLabel = diploStatus.type_relation ? diploStatus.type_relation.toUpperCase() : 'CONNU DANS LES TRAITÉS';
-            let dIcon = '🤝';
-            
-            if (dLabel.includes('ENNEMI') || dLabel.includes('GUERRE') || dLabel.includes('HOSTILE')) {
-                dColor = '#FF3333'; dIcon = '⚔️';
-                if (!tacticalFiche) { mainColor = '#FF3333'; mainTitle = '⚠️ ALERTE DIPLOMATIQUE'; pulseAnim = true; }
-            } else if (dLabel.includes('ALLI') || dLabel.includes('COALITION')) {
-                dColor = '#00FF66'; dIcon = '🛡️';
-                if (!tacticalFiche) { mainColor = '#00FF66'; mainTitle = '✅ IDENTIFICATION ALLIÉE'; }
-            } else {
-                dColor = 'var(--ed-orange)'; dIcon = '⚠️';
-                if (!tacticalFiche) { mainColor = 'var(--ed-orange)'; mainTitle = '⚠️ AFFILIATION SOUS SURVEILLANCE'; }
-            }
-
-            htmlBlocs += `
-            <div class="covas-ligne" style="${rowStyle}">
-                <span style="color: #888;">TRAITÉ ESCADRON <span style="color:var(--ed-orange)">[ ${tag} ]</span> :</span> 
-                <strong style="color: ${dColor};">${dIcon} ${dLabel}</strong>
-            </div>`;
-        } else {
-            htmlBlocs += `
-            <div class="covas-ligne" style="${rowStyle}">
-                <span style="color: #888;">TRAITÉ ESCADRON <span style="color:var(--ed-orange)">[ ${tag} ]</span> :</span> 
-                <strong style="color: #666; border: 1px solid #444; padding: 2px 8px; border-radius: 2px;">NEUTRE (AUCUN TRAITÉ)</strong>
-            </div>`;
-        }
-    } else {
-        htmlBlocs += `
-        <div class="covas-ligne" style="${rowStyle}">
-            <span style="color: #888;">TRAITE DIPLOMATIQUE :</span>
-            <strong style="color: #666; border: 1px solid #444; padding: 2px 8px; border-radius: 2px;">INCONNUE / INDÉPENDANT</strong>
-        </div>`;
-    }
-
     if (isRegistered) {
-        if (!tacticalFiche && !diploStatus) {
+        if (!tacticalFiche) {
             mainColor = 'var(--ed-blue)'; mainTitle = '🌐 RÉSEAU EDTEAM';
         }
         htmlBlocs += `
