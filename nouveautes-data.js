@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-points-rang', date: '2026-10-04T16:00:00Z', type: 'AMELIORE',
+        titre: 'Colonisation : ses points de rang BGS, et plus de doublon dans les exploits',
+        texte: 'Les livraisons de colonisation n’apparaissent plus dans le journal des exploits du BGS (PC et mobile) : elles ont leur propre journal, dans la page Colonisation et l’onglet Bâtir du mobile. Chaque livraison y indique maintenant les points de rang BGS qu’elle rapporte (400 tonnes = 1 point).',
+        important: false
+    },
+    {
         id: '2026-10-retrait-diplomatie', date: '2026-10-04T14:00:00Z', type: 'AMELIORE',
         titre: 'Retrait de la page Diplomatie',
         texte: 'La page Diplomatie (traités et alliances) est retirée : personne ne l’utilisait encore, et elle reviendra sous la forme d’un vrai module de coalition, avec des traités signés des deux côtés, quand d’autres escadrons auront rejoint EDTEAM. Le COVAS ne signale donc plus les traités au saut ni sur une cible ; le registre de renseignement (KOS, suspects, alliés VIP) reste en place.',

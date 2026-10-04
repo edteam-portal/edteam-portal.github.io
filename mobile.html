@@ -1826,11 +1826,11 @@
             try {
                 const dd = await xLireDirectives(false);
                 const ordres = dd.ordres;
-                // directives en cours + actions libres (colonisation, soutien sans ordre) des 30 derniers jours, comme le journal du PC
+                // directives en cours + actions libres (soutien sans ordre) des 30 derniers jours, comme le journal du PC ; la colonisation a son journal dans l'onglet Bâtir
                 const efforts = await xCache('exploits', 120000, async () => {
                     const ids = ordres.map(o => o.id);
                     const filtre = ids.length ? `ordre_id.in.(${ids.join(',')}),ordre_id.is.null` : 'ordre_id.is.null';
-                    const { data, error } = await supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details').or(filtre).gte('date_action', new Date(Date.now() - 30 * 86400000).toISOString()).order('date_action', { ascending: false }).limit(50);
+                    const { data, error } = await supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details').or(filtre).neq('type_action', 'COLONISATION').gte('date_action', new Date(Date.now() - 30 * 86400000).toISOString()).order('date_action', { ascending: false }).limit(50);
                     if (error) throw error;
                     return data || [];
                 }, force);
@@ -3089,7 +3089,12 @@
                     const date = isNaN(quand) ? '' : quand.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' }) + ' ' + quand.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                     const ancien = !isNaN(quand) && quand.getTime() < CJ_DEBUT_POINTS;
                     let corps, col = 'var(--ed-orange)';
-                    if (l.type === 'LIVRAISON') corps = `<b style="color: #fff; font-weight: normal;">CMDR ${XESC(String(l.cmdr || '?').toUpperCase())}</b> · ${XF0(l.tonnes)} t de ${XESC(l.marchandise || '?')}`;
+                    let pts = '';
+                    if (l.type === 'LIVRAISON') {
+                        const pr = ancien ? 0 : (Number(l.tonnes) || 0) / 400;   // meme bareme que la colonne RANG BGS du PC
+                        if (pr > 0) pts = ` <span style="color: var(--ed-orange); font-weight: bold; white-space: nowrap;">${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS</span>`;
+                    }
+                    if (l.type === 'LIVRAISON') corps = `<b style="color: #fff; font-weight: normal;">CMDR ${XESC(String(l.cmdr || '?').toUpperCase())}</b> · ${XF0(l.tonnes)} t de ${XESC(l.marchandise || '?')}${pts}`;
                     else if (l.type === 'STATION TERMINEE') { col = 'var(--ed-green)'; corps = `Station terminée : <b style="color: #fff; font-weight: normal;">${XESC(nom(l.station))}</b>`; }
                     else { col = 'var(--x-gold)'; corps = `Système revendiqué par <b style="color: #fff; font-weight: normal;">CMDR ${XESC(String(l.cmdr || '?').toUpperCase())}</b>`; }
                     const lieu = [nom(l.station), coloCourtSysteme(l.systeme)].filter(Boolean).join(' · ');

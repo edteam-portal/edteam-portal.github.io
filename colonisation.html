@@ -1004,16 +1004,20 @@
         }
 
         // Journal : UNE LIGNE par entrée, en colonnes (comme le journal de la page BGS). Même rendu dans le bloc et dans la fenêtre « AGRANDIR ».
-        const GRILLE_JOURNAL = '165px 170px 175px minmax(0,1fr) 120px';
+        const GRILLE_JOURNAL = '165px 170px 175px minmax(0,1fr) 120px 90px';
         function ligneJournal(j, idx) {
             const bg = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
             const sysCourt = j.systeme ? esc(courtSysteme(j.systeme)) : '';
-            let col, badge, pilote, detail, resultat;
+            let col, badge, pilote, detail, resultat, points = '<span style="text-align:right;color:#555;" title="Cette ligne ne rapporte aucun point de carrière">—</span>';
             if (j.type === 'LIVRAISON') {
                 col = B; badge = 'LIVRAISON'; pilote = 'CMDR ' + esc((j.cmdr || '?').toUpperCase());
                 detail = `<span style="color:#fff;font-weight:bold;">${esc(j.marchandise || '?')}</span> <span style="color:#555;">&rarr;</span> <span style="color:#bbb;">${j.station ? esc(nomStation(j.station)) : '?'}</span>${sysCourt ? ' <span style="color:#555;margin:0 4px;">//</span> <span style="color:#777;">' + sysCourt + '</span>' : ''}`;
                 resultat = '+' + fmt(j.tonnes) + ' t';
                 if (Date.parse(j.t) < DEBUT_POINTS) resultat = `<span style="opacity:.55;" title="Livraison antérieure au 01/10/2026 : elle figure dans l'historique mais ne rapporte aucun point BGS">${resultat}</span>`;
+                else {   // même barème que la colonne RANG BGS de la page BGS : 400 t = 1 point
+                    const p = (Number(j.tonnes) || 0) / 400;
+                    if (p > 0) { const txt = p < 0.1 ? '< 0,1' : (p < 10 ? Math.round(p * 10) / 10 : Math.round(p)).toLocaleString('fr-FR'); points = `<span style="text-align:right;white-space:nowrap;color:var(--ed-orange);font-weight:bold;font-size:.95em;" title="Cette livraison rapporte ${txt} point(s) de carrière BGS">${p < 0.1 ? '' : '+'}${txt} PTS</span>`; }
+                }
             } else if (j.type === 'STATION TERMINEE') {
                 col = GOLD; badge = 'STATION TERMINÉE'; pilote = '<span style="color:#888;font-weight:normal;">—</span>';
                 detail = `<span style="color:#fff;font-weight:bold;">${esc(nomStation(j.station))}</span> <span style="color:#bbb;">est opérationnelle</span>${sysCourt ? ' <span style="color:#555;margin:0 4px;">//</span> <span style="color:#777;">' + sysCourt + '</span>' : ''}`;
@@ -1030,10 +1034,11 @@
                 <span style="white-space:nowrap;"><span style="border:1px solid ${col};color:${col};padding:2px 8px;border-radius:3px;font-size:.8em;font-weight:bold;letter-spacing:1px;display:inline-block;">${badge}</span></span>
                 <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#bbb;" title="${esc(texte)}">${detail}</span>
                 <span style="text-align:right;color:${col};font-weight:bold;font-size:1.05em;text-shadow:0 0 6px ${col}40;white-space:nowrap;">${resultat}</span>
+                ${points}
             </div>`;
         }
         function journalGrille(liste) {
-            const entetes = ['HORODATAGE', 'COMMANDANT', 'TYPE', 'DÉTAIL', 'RÉSULTAT'].map((t, k) => `<span${k === 4 ? ' style="text-align:right;"' : ''}>${t}</span>`).join('');
+            const entetes = ['HORODATAGE', 'COMMANDANT', 'TYPE', 'DÉTAIL', 'RÉSULTAT', 'RANG BGS'].map((t, k) => `<span${k === 4 ? ' style="text-align:right;"' : k === 5 ? ' style="text-align:right;color:var(--ed-orange);" title="Points de carrière que la livraison rapporte : ils font monter votre rang BGS"' : ''}>${t}</span>`).join('');
             return `<div style="display:grid;grid-template-columns:${GRILLE_JOURNAL};gap:10px;padding:8px 14px;color:#888;font-size:.85em;font-weight:bold;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.1);">${entetes}</div>
                 <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">${liste.map(ligneJournal).join('')}</div>`;
         }

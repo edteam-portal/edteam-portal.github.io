@@ -2021,8 +2021,10 @@
                 const ordres = resOrdres.data || [];
 
                 // Projection stricte intégrant les champs de colonisation et d'action libre
+                // la colonisation a son propre journal (page Colonisation) : elle n'apparait plus ici
                 let queryEfforts = supabaseApp.from('efforts_bgs')
-                    .select('user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details');
+                    .select('user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details')
+                    .neq('type_action', 'COLONISATION');
 
                 if (filtreOrdre === 'ACTIF') {
                     const activeOrdreIds = ordres.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
@@ -2452,7 +2454,7 @@
             <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; flex-shrink: 0;">
                 <select id="filtre-pilote" class="tactical-filter"><option value="ALL" selected>[ TOUT L'ESCADRON ]</option><option value="ME">> MON DOSSIER PERSONNEL</option></select>
                 <select id="filtre-periode" class="tactical-filter"><option value="ALL">TOUT L'HISTORIQUE</option><option value="TICK_HEBDO" selected>DEPUIS LE DERNIER CYCLE (JEUDI)</option><option value="7J">7 DERNIERS JOURS</option><option value="30J">30 DERNIERS JOURS</option></select>
-                <select id="filtre-ordre" class="tactical-filter"><option value="ACTIF">[ DIRECTIVES EN COURS ]</option><option value="LIBRE">[ ACTIONS LIBRES & COLONISATION ]</option><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option></select>
+                <select id="filtre-ordre" class="tactical-filter"><option value="ACTIF">[ DIRECTIVES EN COURS ]</option><option value="LIBRE">[ ACTIONS LIBRES ]</option><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option></select>
             </div>
             <div id="modal-exploit-feed-content" style="overflow-y: auto; flex-grow: 1; padding-right: 10px;">
                 <!-- Les lignes du journal seront injectées ici en miroir par le JS -->
