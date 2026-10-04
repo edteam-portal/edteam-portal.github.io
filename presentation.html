@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYS.EDTEAM — Outil communautaire gratuit pour escadrons Elite Dangerous</title>
-    <meta name="description" content="SYS.EDTEAM est l'outil communautaire gratuit pour les escadrons Elite Dangerous : suivi BGS en temps réel, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Installation en 2 minutes via EDMC.">
+    <meta name="description" content="SYS.EDTEAM est l'outil communautaire gratuit pour les escadrons Elite Dangerous : suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Installation en 2 minutes via EDMC.">
     <link rel="icon" href="icon-192.png" type="image/png">
 
     <!-- Open Graph / Discord & réseaux sociaux -->
@@ -13,12 +13,12 @@
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="SYS.EDTEAM">
     <meta property="og:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
-    <meta property="og:description" content="Suivi BGS en temps réel, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
+    <meta property="og:description" content="Suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
     <meta property="og:image" content="https://edteam-portal.github.io/images/qg.png">
     <meta property="og:url" content="https://edteam-portal.github.io/presentation.html">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
-    <meta name="twitter:description" content="Suivi BGS en temps réel, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
+    <meta name="twitter:description" content="Suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
     <meta name="twitter:image" content="https://edteam-portal.github.io/images/qg.png">
     <link rel="canonical" href="https://edteam-portal.github.io/presentation.html">
 
@@ -29,7 +29,7 @@
         "name": "SYS.EDTEAM",
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Windows (plugin EDMC) + Web",
-        "description": "Outil communautaire gratuit pour escadrons Elite Dangerous : suivi BGS en temps réel, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué.",
+        "description": "Outil communautaire gratuit pour escadrons Elite Dangerous : suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
         "url": "https://edteam-portal.github.io/presentation.html",
         "inLanguage": "fr"
@@ -87,7 +87,7 @@
                 "name": "Comment sont récompensés les pilotes ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Par six systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), la Force de frappe (la part de chaque pilote dans l'effort de l'escadron) et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts)."
+                    "text": "Par cinq systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts)."
                 }
             },
             {
@@ -95,7 +95,7 @@
                 "name": "Fonctionne-t-il sur mobile ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives et l'effort BGS, la colonisation, et l'escadron depuis un téléphone."
+                    "text": "Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives avec leur résultat dans le jeu et votre effort BGS, la colonisation, le budget, l'escadron et la recommandation « Quoi faire », depuis un téléphone."
                 }
             }
         ]
@@ -251,17 +251,6 @@
         details.pli .section { padding: 30px 0; border: 0; background: none !important; box-shadow: none !important; }
         details.pli .section-title { font-size: 1.6em; margin-bottom: 24px; }
 
-        /* classes reprises des sections existantes (distinctions) */
-        .feature-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 50px; align-items: center; margin-bottom: 60px; }
-        .feature-grid.reverse { grid-template-columns: 1.5fr 1fr; }
-        .feature-text { background: rgba(10, 15, 20, 0.8); padding: 34px; border-left: 4px solid var(--ed-blue); }
-        .feature-grid.reverse .feature-text { border-left: none; border-right: 4px solid var(--ed-orange); grid-column: 2; grid-row: 1; }
-        .feature-grid.reverse .holo-container { grid-column: 1; grid-row: 1; }
-        .feature-text h3 { font-size: 1.8em; margin-bottom: 18px; letter-spacing: 3px; }
-        .feature-text p { font-size: 1.1em; line-height: 1.7; color: #bbb; }
-        .holo-card { position: relative; width: 100%; border: 2px solid var(--ed-blue); border-radius: 6px; background: #000; }
-        .holo-card img { width: 100%; display: block; }
-        .holo-container { padding: 14px; }
 
         .final { text-align: center; padding: 100px 0; background: rgba(0,240,255,.03); border-top: 1px solid var(--ed-blue); }
         .final p { color: #fff; font-size: 1.7em; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,.5); margin: 0 0 36px; }
@@ -287,8 +276,6 @@
             .scene { grid-template-columns: 1fr; }
             .liste { flex-direction: row; overflow-x: auto; padding-bottom: 6px; }
             .module { white-space: nowrap; }
-            .feature-grid, .feature-grid.reverse { grid-template-columns: 1fr; }
-            .feature-grid.reverse .feature-text, .feature-grid.reverse .holo-container { grid-column: 1; grid-row: auto; }
             .topbar nav { display: none; }
             .topbar .btn-mini { margin-left: auto; }
         }
@@ -405,7 +392,7 @@
                 <button class="profil" data-profil="officier" style="--c:#FFD700;--cg:rgba(255,215,0,.09);">
                     <span class="qui">// AMIRAL · OFFICIER</span>
                     <h3>Commandement</h3>
-                    <ul><li>Vous définissez les théâtres d'opération</li><li>Renseignement tactique : KOS, suspects et alliés VIP</li><li>Effectifs, rubans de campagne et palmarès</li><li>La part de chaque pilote dans l'effort commun</li></ul>
+                    <ul><li>Vous définissez les théâtres d'opération</li><li>Renseignement tactique : KOS, suspects et alliés VIP</li><li>Effectifs, rubans de campagne et palmarès</li><li>Le dossier tactique : l'effort de chaque pilote sur chaque directive</li></ul>
                     <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
                 </button>
             </div>
@@ -440,7 +427,6 @@
                 <button class="module" data-p="progresser" data-m="spe" data-for="squad officier"><span>Spécialistes</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="progresser" data-m="pilier" data-for="squad officier"><span>Pilier de la semaine</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="progresser" data-m="elan" data-for="squad officier"><span>Élan Powerplay</span><span class="pour">POUR VOUS</span></button>
-                <button class="module" data-p="progresser" data-m="force" data-for="squad officier"><span>Force de frappe</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="progresser" data-m="rang" data-for="squad officier"><span>Rang BGS de carrière</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="connecte" data-m="mobile" data-for="solo squad officier"><span>Compagnon mobile</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="connecte" data-m="covas" data-for="squad officier"><span>IA embarquée (COVAS)</span><span class="pour">POUR VOUS</span></button>
@@ -456,8 +442,8 @@
                 </article>
 
                 <article class="panel" id="module-bgs" data-p="commander" data-m="bgs">
-                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/ordres.png" alt="BGS tactique" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 02 : BGS TACTIQUE</span><h3>FRAPPEZ OÙ ÇA FAIT MAL</h3><p>Ne demandez plus sur le Discord <em>« Où est-ce qu'on se bat aujourd'hui ? »</em>. Tout tient sur <strong>une seule page</strong> : votre engagement (rang, points, prochain rang), votre progression sur les 8 dernières semaines, la semaine de l'escadron avec son podium, et le mur des spécialistes.</p><p>Le <strong>Focus de l'Amiral</strong> liste les directives (Guerre, Élection, Hausse, Baisse) avec leur avancement, votre part d'impact et le score du conflit en direct. Il est facultatif : sans directive, chaque effort compte déjà pour votre rang BGS. Le <strong>journal des exploits</strong> détaille chaque action.</p>
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/ordres.png" alt="BGS tactique : les directives par système, avec le résultat du jeu" loading="lazy"><img class="" data-i="1" src="images/ordres-detail.png" alt="BGS tactique : le détail d'une directive" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/ordres.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/ordres-detail.png')" aria-label="Écran 2"></button></div></div>
+                    <span class="kick">// MODULE 02 : BGS TACTIQUE</span><h3>FRAPPEZ OÙ ÇA FAIT MAL</h3><p>Ne demandez plus sur le Discord <em>« Où est-ce qu'on se bat aujourd'hui ? »</em>. Tout tient sur <strong>une seule page</strong> : votre engagement (rang, points, prochain rang), votre progression sur les 8 dernières semaines, la semaine de l'escadron avec son podium, et le mur des spécialistes.</p><p>Le <strong>Focus de l'Amiral</strong> range les directives (Guerre, Élection, Hausse, Baisse) par système, avec leur <strong>priorité</strong> (critique, haute, normale) bien visible. Chaque carte montre l'<strong>effort de l'escadron</strong> et votre part, et le <strong>résultat constaté dans le jeu</strong> : l'influence de la faction, sa variation depuis la directive et une mini-courbe, ou le score du conflit pour une guerre ou une élection.</p><p>Un clic ouvre le détail : l'effort par type d'action (missions, économie, sécurité, science…), le dossier tactique des efforts individuels, la courbe sur 30 jours, les factions du système et leurs états. Les chiffres du jeu viennent d'EDSM, relevés deux fois par jour : c'est un résultat constaté, pas la preuve que vos actions en sont la cause.</p><p>Les directives sont facultatives : sans directive, chaque effort compte déjà pour votre rang BGS. Le <strong>journal des exploits</strong> détaille chaque action.</p>
                 </article>
                 <article class="panel" id="module-pp" data-p="commander" data-m="pp">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/powerplay.png" alt="Powerplay 2.0" loading="lazy"></div></div>
@@ -473,7 +459,7 @@
                 </article>
                 <article class="panel" id="module-colo" data-p="construire" data-m="colo">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/colonisation.png" alt="Colonisation (écran 1)" loading="lazy"><img class="" data-i="1" src="images/colonisation-detail.png" alt="Colonisation (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/colonisation.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/colonisation-detail.png')" aria-label="Écran 2"></button></div></div>
-                    <span class="kick">// MODULE 08 : COLONISATION</span><h3>BÂTIR ENSEMBLE</h3><p>Une carte des systèmes colonisés, leur architecte, la faction qui les contrôle. Un clic ouvre les stations terminées et les chantiers en cours : avancement, marchandises restantes, temps estimé, et ce que chaque pilote a livré. Un <strong>journal des livraisons</strong> paginé garde la trace de chaque cargaison.</p><p><strong>Rien à saisir</strong> : le plugin relève tout seul. Vos livraisons comptent pour votre rang BGS (1 point pour 400 tonnes). Sans escadron, vous avez un espace personnel que vous seul voyez.</p>
+                    <span class="kick">// MODULE 08 : COLONISATION</span><h3>BÂTIR ENSEMBLE</h3><p>Une carte des systèmes colonisés, leur architecte, la faction qui les contrôle. Un clic ouvre les stations terminées et les chantiers en cours : avancement, marchandises restantes, temps estimé, et ce que chaque pilote a livré. Un <strong>journal des livraisons</strong> paginé garde la trace de chaque cargaison et des points de rang BGS qu'elle rapporte.</p><p><strong>Rien à saisir</strong> : le plugin relève tout seul. Vos livraisons comptent pour votre rang BGS (1 point pour 400 tonnes). Sans escadron, vous avez un espace personnel que vous seul voyez.</p>
                 </article>
                 <article class="panel" id="module-budget" data-p="construire" data-m="budget">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/budget.png" alt="Budget (écran 1)" loading="lazy"><img class="" data-i="1" src="images/budget-livre.png" alt="Budget (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/budget.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/budget-livre.png')" aria-label="Écran 2"></button></div></div>
@@ -495,17 +481,13 @@
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/elan.png" alt="Élan Powerplay" loading="lazy"></div></div>
                     <span class="kick">// RECONNAISSANCE</span><h3>L'ÉLAN POWERPLAY</h3><p>Chaque jeudi, le pilote dont les mérites Powerplay ont le plus <strong>progressé en proportion</strong> de ceux qu'il avait au début du cycle devient l'<strong>Élan de la semaine</strong>.</p><p>Chacun a donc sa chance, quel que soit son niveau : un débutant qui double ses mérites compte autant qu'un vétéran. Le gagnant reçoit une distinction sur sa fiche et une ligne dans le journal tactique.</p>
                 </article>
-                <article class="panel" id="module-force" data-p="progresser" data-m="force">
-                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/investissement.png" alt="Force de frappe" loading="lazy"></div></div>
-                    <span class="kick">// RECONNAISSANCE</span><h3>VOTRE PART DANS L'EFFORT COMMUN</h3><p>Un camembert holographique du journal BGS montre en direct la <strong>part de chaque pilote</strong> dans l'effort de l'escadron. Il suit vos filtres, et sur votre dossier la répartition de votre effort par activité.</p><p>Il mesure l'effort fourni, pas l'influence exacte gagnée.</p>
-                </article>
                 <article class="panel" id="module-rang" data-p="progresser" data-m="rang">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/fiche-pilote.png" alt="Rang BGS de carrière" loading="lazy"></div></div>
                     <span class="kick">// RECONNAISSANCE</span><h3>VOTRE RANG, GAGNÉ POUR TOUJOURS</h3><p>Chaque effort pour l'escadron (directive, action libre, livraison de colonisation) rapporte des points qui s'additionnent pour toute votre carrière et déterminent votre <strong>rang BGS, de 1 à 100</strong>.</p><p>Un rang gagné ne se perd jamais. Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts : le rang 100 est réservé aux plus fidèles.</p>
                 </article>
                 <article class="panel" id="module-mobile" data-p="connecte" data-m="mobile">
                     <div class="ecran-d"><div class="cadre-d"><img class="contain on" data-i="0" src="images/mobile-poche.png" alt="Compagnon mobile" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 10 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Le <strong>compagnon mobile</strong> reprend l'essentiel dans une interface pensée pour le pouce : accueil (rang BGS, Powerplay, finances, Pilier, Élan, semaine de l'escadron), directives, effort et exploits BGS, colonisation en direct, équipage de l'escadron.</p><p>Même compte, mêmes titres et mêmes chiffres que sur le PC. Scannez le QR code en bas de page, puis ajoutez-le à l'écran d'accueil.</p>
+                    <span class="kick">// MODULE 10 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Le <strong>compagnon mobile</strong> reprend l'essentiel dans une interface pensée pour le pouce : cinq onglets : accueil (rang BGS, Powerplay, finances, Pilier, Élan, semaine de l'escadron), BGS (directives avec leur résultat dans le jeu, votre effort, exploits), Bâtir (colonisation en direct et budget), équipage de l'escadron, et la recommandation « Quoi faire ».</p><p>Même compte, mêmes titres et mêmes chiffres que sur le PC. Scannez le QR code en bas de page, puis ajoutez-le à l'écran d'accueil.</p>
                 </article>
                 <article class="panel" id="module-covas" data-p="connecte" data-m="covas">
                     <div class="ecran-d"><div class="cadre-d"><div class="fiche-faux"><div style="color:#FF3333;font-size:1.1em;font-weight:bold;border-bottom:1px dashed #FF3333;padding-bottom:5px;margin-bottom:14px;letter-spacing:2px;display:flex;justify-content:space-between;"><span>⚠️ ALERTE TACTIQUE</span><span style="opacity:.5;">SYS.EDTEAM</span></div><div style="margin-bottom:16px;color:#ddd;">CIBLE VERROUILLÉE : <strong style="color:#fff;">CMDR GRIMLOCK VANE</strong> <span style="color:#FF7100;font-size:.85em;margin-left:8px;">[ CRVR ]</span></div><div style="padding:14px;background:rgba(0,0,0,.5);border:1px solid #333;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#888;font-size:.85em;">DOSSIER INDIVIDUEL :</span><strong style="color:#000;background:#FF3333;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #FF3333;">K.O.S (HOSTILE)</strong></div><div style="display:flex;justify-content:space-between;"><span style="color:#888;font-size:.85em;">RÉSEAU EDTEAM :</span><strong style="color:#000;background:#00F0FF;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #00F0FF;">✓ RÉPERTORIÉ</strong></div></div><div style="color:#555;font-size:.8em;margin-top:16px;font-weight:bold;text-align:center;">[ ANALYSE COMPLÈTE... ] _</div></div></div></div>
@@ -530,10 +512,12 @@
                     <li>À l'inscription : votre <strong>adresse email</strong> et votre mot de passe (chiffré, géré par Supabase).</li>
                     <li>Depuis le plugin, à partir du journal d'Elite Dangerous : nom de CMDR, système actuel, nom et modèle du vaisseau, soldes (vaisseau et Fleet Carrier), patrimoine, rangs et progression, statut Powerplay (puissance, rang, mérites), escadron, réputations dans le système, CMDR ciblés et actions BGS.</li>
                     <li>Toujours depuis le plugin : à son démarrage, il relit en local vos journaux de jeu des dernières semaines pour retrouver les mérites Powerplay que vous avez gagnés sans EDMC, cycle par cycle. Seuls le total de mérites et le rang de chaque cycle sont envoyés, jamais le contenu de vos journaux.</li>
-                    <li>Pour la colonisation (plugin 2.5) : l'état des chantiers que vous consultez (station, système, avancement, marchandises), vos livraisons (marchandise, tonnage, date), les systèmes que vous revendiquez et leur position dans la galaxie, la faction qui les contrôle, et les stations terminées de votre escadron où vous vous amarrez (seulement dans un système déjà colonisé). Rien n'est enregistré pour un pilote sans escadron.</li>
-                    <li>Pour le budget (plugin 2.5) : chaque mouvement d'argent de votre compte (vente, achat, mission, prime, réparation, carburant…) avec sa date, son montant, sa catégorie et le lieu où il a eu lieu, ainsi que les totaux par cycle et votre solde. Ces données ne sont lisibles que par vous.</li>
+                    <li>Pour la colonisation (plugin 2.5 ou plus) : l'état des chantiers que vous consultez (station, système, avancement, marchandises), vos livraisons (marchandise, tonnage, date), les systèmes que vous revendiquez et leur position dans la galaxie, la faction qui les contrôle, et les stations terminées de votre escadron où vous vous amarrez (seulement dans un système déjà colonisé). Rien n'est enregistré pour un pilote sans escadron.</li>
+                    <li>Pour le budget (plugin 2.5 ou plus) : chaque mouvement d'argent de votre compte (vente, achat, mission, prime, réparation, carburant…) avec sa date, son montant, sa catégorie et le lieu où il a eu lieu, ainsi que les totaux par cycle et votre solde. Ces données ne sont lisibles que par vous.</li>
+                    <li>Pour les résultats des directives BGS : aucune donnée de votre compte. Notre serveur relève deux fois par jour l'influence des factions dans les systèmes visés par les directives, à partir d'EDSM, une base communautaire publique.</li>
                 </ul>
                 <p style="margin-bottom: 30px;"><strong style="color:#fff;">Ce que nous ne recevons pas :</strong> vos identifiants Frontier, le contenu de vos discussions en jeu, ni aucun fichier de votre ordinateur.</p>
+                <p style="margin-bottom: 30px;"><strong style="color:#fff;">Mesure d'audience :</strong> le site utilise Google Analytics (cookies, adresse IP anonymisée) pour compter les visites, <strong>uniquement si vous l'acceptez</strong> dans la bannière. Aucune donnée de votre compte n'y est envoyée. Vous pouvez changer d'avis à tout moment avec le bouton « COOKIES » en bas de page (ou dans les réglages sur mobile).</p>
 
                 <p style="color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">QUI VOIT QUOI</p>
                 <ul style="margin: 0 0 30px 20px;">
@@ -547,513 +531,6 @@
 
                 <p style="margin-bottom: 0;">Le plugin ne tourne que lorsque EDMC est lancé, et vous pouvez le retirer à tout moment. Vous pouvez modifier votre email, votre mot de passe ou <strong style="color:#fff;">supprimer votre compte</strong> depuis « Gestion du compte » : vos données sont alors effacées.</p>
             </div>
-        </div>
-    </div></details>
-            <details class="pli" id="distinctions"><summary>GALERIE DES DISTINCTIONS <small>plaques · spécialistes · Pilier · Élan · Force de frappe · rang</small></summary><div class="corps">
-        <div class="container">
-            
-            <p style="text-align: center; color: #aaa; font-size: 1.3em; line-height: 1.6; max-width: 900px; margin: 0 auto 80px auto;">Chaque effort compte, et ici, il se voit. Six systèmes complémentaires reconnaissent votre implication, du pilote occasionnel au pilier de l'escadron.</p>
-
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// DISTINCTION 01 : ÉTATS DE SERVICE</span>
-                    <h3 class="neon-blue">VOTRE CARRIÈRE, PLAQUE PAR PLAQUE</h3>
-                    <p>Quand l'Amirauté clôture une opération BGS, chaque pilote qui y a participé reçoit une <strong>plaque de campagne</strong>, accrochée à sa fiche pour toujours. Il n'y a aucun seuil : une seule soirée d'effort suffit pour gagner la sienne.</p>
-                    <p>Chaque plaque raconte l'opération d'un coup d'œil : le type d'ordre, les jours d'activité, l'ampleur de l'effort et la place obtenue au classement de l'escadron.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/fiche-pilote.png" alt="Fiche de pilote avec ses rangs BGS et Powerplay, ses plaques d'états de service et ses distinctions hebdomadaires" loading="lazy"></div>
-                </div>
-            </div>
-
-            <div style="margin: 0 0 110px 0;">
-                <div style="text-align: center; color: var(--ed-blue); letter-spacing: 3px; font-weight: bold; margin-bottom: 24px;">COMMENT LIRE UNE PLAQUE</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px;">
-                <div style="background: rgba(0,0,0,0.5); border: 1px solid #1c2a30; border-top: 2px solid var(--ed-blue); padding: 20px; border-radius: 3px;">
-                    <div style="color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 0.95em; margin-bottom: 8px;">LA COULEUR : LE TYPE D'ORDRE</div>
-                    <p style="color: #999; font-size: 0.95em; line-height: 1.5; margin: 0 0 16px 0;">Le fond indique la nature de l'opération : guerre, hausse, élection ou baisse d'influence.</p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: flex-end;"><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_y8740i" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#800000" />
-                            <stop offset="100%" stop-color="#330000" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_y8740i" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_y8740i)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_y8740i)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Guerre</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_7v0sw" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#004D00" />
-                            <stop offset="100%" stop-color="#001A00" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_7v0sw" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_7v0sw)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_7v0sw)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Hausse</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_y5y53j" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#002060" />
-                            <stop offset="100%" stop-color="#000A20" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_y5y53j" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_y5y53j)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_y5y53j)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Élection</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_2ebray" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#993D00" />
-                            <stop offset="100%" stop-color="#4D1F00" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_2ebray" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_2ebray)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#FF9933" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#FF9933" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#FF9933" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#FF9933" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#FF9933" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#FF9933" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_2ebray)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Baisse</div></div></div>
-                </div>
-                <div style="background: rgba(0,0,0,0.5); border: 1px solid #1c2a30; border-top: 2px solid var(--ed-blue); padding: 20px; border-radius: 3px;">
-                    <div style="color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 0.95em; margin-bottom: 8px;">LES RAYURES : LES JOURS ACTIFS</div>
-                    <p style="color: #999; font-size: 0.95em; line-height: 1.5; margin: 0 0 16px 0;">Une rayure par jour d'activité sur l'opération, jusqu'à dix.</p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: flex-end;"><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_49dlsa" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#004D00" />
-                            <stop offset="100%" stop-color="#001A00" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_49dlsa" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_49dlsa)"/>
-                    <rect x="31.333333333333336" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="31.333333333333336" y1="0" x2="31.333333333333336" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="35.333333333333336" y1="0" x2="35.333333333333336" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="64.66666666666667" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="64.66666666666667" y1="0" x2="64.66666666666667" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="68.66666666666667" y1="0" x2="68.66666666666667" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_49dlsa)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">2 jours</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_w02zk" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#004D00" />
-                            <stop offset="100%" stop-color="#001A00" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_w02zk" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_w02zk)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_w02zk)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">6 jours</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_mh9fal" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#004D00" />
-                            <stop offset="100%" stop-color="#001A00" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_mh9fal" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_mh9fal)"/>
-                    <rect x="7.090909090909092" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="7.090909090909092" y1="0" x2="7.090909090909092" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="11.090909090909092" y1="0" x2="11.090909090909092" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="16.181818181818183" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="16.181818181818183" y1="0" x2="16.181818181818183" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="20.181818181818183" y1="0" x2="20.181818181818183" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="25.272727272727273" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="25.272727272727273" y1="0" x2="25.272727272727273" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="29.272727272727273" y1="0" x2="29.272727272727273" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="34.36363636363637" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="34.36363636363637" y1="0" x2="34.36363636363637" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="38.36363636363637" y1="0" x2="38.36363636363637" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="43.45454545454546" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="43.45454545454546" y1="0" x2="43.45454545454546" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="47.45454545454546" y1="0" x2="47.45454545454546" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="52.54545454545455" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="52.54545454545455" y1="0" x2="52.54545454545455" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="56.54545454545455" y1="0" x2="56.54545454545455" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="61.63636363636364" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="61.63636363636364" y1="0" x2="61.63636363636364" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="65.63636363636364" y1="0" x2="65.63636363636364" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="70.72727272727273" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="70.72727272727273" y1="0" x2="70.72727272727273" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="74.72727272727273" y1="0" x2="74.72727272727273" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="79.81818181818183" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="79.81818181818183" y1="0" x2="79.81818181818183" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="83.81818181818183" y1="0" x2="83.81818181818183" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="88.90909090909092" y="0" width="4" height="28" fill="#33FF33" opacity="0.85"/><line x1="88.90909090909092" y1="0" x2="88.90909090909092" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="92.90909090909092" y1="0" x2="92.90909090909092" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_mh9fal)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">10 jours et +</div></div></div>
-                </div>
-                <div style="background: rgba(0,0,0,0.5); border: 1px solid #1c2a30; border-top: 2px solid var(--ed-blue); padding: 20px; border-radius: 3px;">
-                    <div style="color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 0.95em; margin-bottom: 8px;">LES ÉTOILES : L'AMPLEUR DE L'EFFORT</div>
-                    <p style="color: #999; font-size: 0.95em; line-height: 1.5; margin: 0 0 16px 0;">De une à trois étoiles par palier (bronze, argent, or, diamant). Barème : 2 M de crédits = 1 point, 1 mission = 1 point.</p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: flex-end;"><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_0w8lt" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#800000" />
-                            <stop offset="100%" stop-color="#330000" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_0w8lt" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradBro_0w8lt" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_0w8lt)"/>
-                    <rect x="14.666666666666668" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="14.666666666666668" y1="0" x2="14.666666666666668" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="18.666666666666668" y1="0" x2="18.666666666666668" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="31.333333333333336" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="31.333333333333336" y1="0" x2="31.333333333333336" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="35.333333333333336" y1="0" x2="35.333333333333336" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="48" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="48" y1="0" x2="48" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="52" y1="0" x2="52" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="64.66666666666667" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="64.66666666666667" y1="0" x2="64.66666666666667" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="68.66666666666667" y1="0" x2="68.66666666666667" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="81.33333333333334" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="81.33333333333334" y1="0" x2="81.33333333333334" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="85.33333333333334" y1="0" x2="85.33333333333334" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_0w8lt)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    <g transform="translate(50, 14) scale(0.65)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_0w8lt)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g>
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Bronze<br>dès 10 pts</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_dz6s1l" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#800000" />
-                            <stop offset="100%" stop-color="#330000" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_dz6s1l" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradSilv_dz6s1l" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_dz6s1l)"/>
-                    <rect x="14.666666666666668" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="14.666666666666668" y1="0" x2="14.666666666666668" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="18.666666666666668" y1="0" x2="18.666666666666668" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="31.333333333333336" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="31.333333333333336" y1="0" x2="31.333333333333336" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="35.333333333333336" y1="0" x2="35.333333333333336" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="48" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="48" y1="0" x2="48" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="52" y1="0" x2="52" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="64.66666666666667" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="64.66666666666667" y1="0" x2="64.66666666666667" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="68.66666666666667" y1="0" x2="68.66666666666667" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="81.33333333333334" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="81.33333333333334" y1="0" x2="81.33333333333334" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="85.33333333333334" y1="0" x2="85.33333333333334" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_dz6s1l)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    <g transform="translate(40, 14) scale(0.6)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradSilv_dz6s1l)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(255,255,255,0.8))"/></g><g transform="translate(68, 14) scale(0.6)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradSilv_dz6s1l)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(255,255,255,0.8))"/></g>
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Argent<br>dès 40 pts</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_gb4s1f" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#800000" />
-                            <stop offset="100%" stop-color="#330000" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_gb4s1f" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradGold_gb4s1f" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="40%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_gb4s1f)"/>
-                    <rect x="14.666666666666668" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="14.666666666666668" y1="0" x2="14.666666666666668" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="18.666666666666668" y1="0" x2="18.666666666666668" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="31.333333333333336" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="31.333333333333336" y1="0" x2="31.333333333333336" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="35.333333333333336" y1="0" x2="35.333333333333336" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="48" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="48" y1="0" x2="48" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="52" y1="0" x2="52" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="64.66666666666667" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="64.66666666666667" y1="0" x2="64.66666666666667" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="68.66666666666667" y1="0" x2="68.66666666666667" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="81.33333333333334" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="81.33333333333334" y1="0" x2="81.33333333333334" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="85.33333333333334" y1="0" x2="85.33333333333334" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_gb4s1f)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    <g transform="translate(33, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradGold_gb4s1f)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(255,215,0,0.9))"/></g><g transform="translate(56, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradGold_gb4s1f)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(255,215,0,0.9))"/></g><g transform="translate(79, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradGold_gb4s1f)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(255,215,0,0.9))"/></g>
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Or<br>dès 70 pts</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_spre7" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#800000" />
-                            <stop offset="100%" stop-color="#330000" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_spre7" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradDia_spre7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_spre7)"/>
-                    <rect x="14.666666666666668" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="14.666666666666668" y1="0" x2="14.666666666666668" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="18.666666666666668" y1="0" x2="18.666666666666668" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="31.333333333333336" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="31.333333333333336" y1="0" x2="31.333333333333336" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="35.333333333333336" y1="0" x2="35.333333333333336" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="48" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="48" y1="0" x2="48" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="52" y1="0" x2="52" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="64.66666666666667" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="64.66666666666667" y1="0" x2="64.66666666666667" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="68.66666666666667" y1="0" x2="68.66666666666667" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="81.33333333333334" y="0" width="4" height="28" fill="#FF3333" opacity="0.85"/><line x1="81.33333333333334" y1="0" x2="81.33333333333334" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="85.33333333333334" y1="0" x2="85.33333333333334" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_spre7)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    <g transform="translate(33, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradDia_spre7)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(0,255,255,1))"/></g><g transform="translate(56, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradDia_spre7)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(0,255,255,1))"/></g><g transform="translate(79, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradDia_spre7)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(0,255,255,1))"/></g>
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">Diamant<br>dès 100 pts</div></div></div>
-                </div>
-                <div style="background: rgba(0,0,0,0.5); border: 1px solid #1c2a30; border-top: 2px solid var(--ed-blue); padding: 20px; border-radius: 3px;">
-                    <div style="color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 0.95em; margin-bottom: 8px;">LE CADRE ET LE DISQUE : LE PODIUM</div>
-                    <p style="color: #999; font-size: 0.95em; line-height: 1.5; margin: 0 0 16px 0;">Les trois premiers de l'opération reçoivent un cadre (diamant, or, argent) et le chiffre de leur rang dans le coin.</p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: flex-end;"><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_pndwx" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#002060" />
-                            <stop offset="100%" stop-color="#000A20" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_pndwx" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradBro_pndwx" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>
-                        <linearGradient id="frameDia_pndwx" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_pndwx)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_pndwx)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameDia_pndwx)" stroke-width="2" filter="drop-shadow(0 0 4px #00FFFF)"/>
-                    <g transform="translate(33, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_pndwx)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(56, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_pndwx)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(79, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_pndwx)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g>
-                    <circle cx="8" cy="8.5" r="6.2" fill="#050505" stroke="#00FFFF" stroke-width="1.3"/><text x="8" y="12" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-size="9.5" font-weight="bold" fill="#00FFFF">1</text>
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">1er</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_zm7zum" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#002060" />
-                            <stop offset="100%" stop-color="#000A20" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_zm7zum" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradBro_zm7zum" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>
-                        <linearGradient id="frameGold_zm7zum" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="50%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_zm7zum)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_zm7zum)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameGold_zm7zum)" stroke-width="2" filter="drop-shadow(0 0 3px #FFD700)"/>
-                    <g transform="translate(33, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_zm7zum)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(56, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_zm7zum)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(79, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_zm7zum)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g>
-                    <circle cx="8" cy="8.5" r="6.2" fill="#050505" stroke="#FFD700" stroke-width="1.3"/><text x="8" y="12" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-size="9.5" font-weight="bold" fill="#FFD700">2</text>
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">2e</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_mqd07" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#002060" />
-                            <stop offset="100%" stop-color="#000A20" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_mqd07" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradBro_mqd07" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>
-                        <linearGradient id="frameSilv_mqd07" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_mqd07)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_mqd07)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameSilv_mqd07)" stroke-width="2" filter="drop-shadow(0 0 2px #FFFFFF)"/>
-                    <g transform="translate(33, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_mqd07)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(56, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_mqd07)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(79, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_mqd07)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g>
-                    <circle cx="8" cy="8.5" r="6.2" fill="#050505" stroke="#C0C0C0" stroke-width="1.3"/><text x="8" y="12" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-size="9.5" font-weight="bold" fill="#C0C0C0">3</text>
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">3e</div></div><div style="text-align: center;"><svg viewBox="0 0 100 28" style="width: 104px; height: 28.6px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_tmnidr" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#002060" />
-                            <stop offset="100%" stop-color="#000A20" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_tmnidr" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        <linearGradient id="gradBro_tmnidr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>
-                        
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_tmnidr)"/>
-                    <rect x="12.285714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="12.285714285714286" y1="0" x2="12.285714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="16.285714285714285" y1="0" x2="16.285714285714285" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="26.571428571428573" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="26.571428571428573" y1="0" x2="26.571428571428573" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="30.571428571428573" y1="0" x2="30.571428571428573" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="40.85714285714286" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="40.85714285714286" y1="0" x2="40.85714285714286" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="44.85714285714286" y1="0" x2="44.85714285714286" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="55.142857142857146" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="55.142857142857146" y1="0" x2="55.142857142857146" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="59.142857142857146" y1="0" x2="59.142857142857146" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="69.42857142857143" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="69.42857142857143" y1="0" x2="69.42857142857143" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="73.42857142857143" y1="0" x2="73.42857142857143" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/><rect x="83.71428571428572" y="0" width="4" height="28" fill="#00FFFF" opacity="0.85"/><line x1="83.71428571428572" y1="0" x2="83.71428571428572" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="87.71428571428572" y1="0" x2="87.71428571428572" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_tmnidr)" pointer-events="none"/>
-                    <rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>
-                    <g transform="translate(33, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_tmnidr)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(56, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_tmnidr)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g><g transform="translate(79, 14) scale(0.5)"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#gradBro_tmnidr)" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px rgba(205,127,50,0.8))"/></g>
-                    
-                </svg><div style="color: #888; font-size: 0.75em; margin-top: 4px;">4e et après</div></div></div>
-                </div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse">
-                <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// DISTINCTION 02 : MUR DES SPÉCIALISTES</span>
-                    <h3 class="neon-orange">LE MEILLEUR DANS CHAQUE SPÉCIALITÉ</h3>
-                    <p>Sept titres honorent le pilote en tête de l'escadron dans chaque domaine, au <strong>cumul total</strong> de ses activités pour la faction de l'escadron, avec ou sans directive. Un titre change de mains quand un autre pilote dépasse le titulaire de plus de 2 % : une annonce est publiée dans le journal tactique et le nouveau titulaire découvre sa médaille en plein écran.</p>
-                    <ul style="color: #bbb; font-size: 1.05em; line-height: 1.6; padding-left: 20px; margin: 0;">
-                        <li><strong style="color: #fff;">Le Fer de lance :</strong> primes et sécurisation, en crédits</li>
-                        <li><strong style="color: #fff;">Le Maître logisticien :</strong> missions accomplies pour la faction</li>
-                        <li><strong style="color: #fff;">Le Magnat :</strong> richesse générée par le commerce et le minage</li>
-                        <li><strong style="color: #fff;">Le Bâtisseur :</strong> tonnes livrées aux chantiers de colonisation</li>
-                        <li><strong style="color: #fff;">L'Expert scientifique :</strong> données cartographiques et exobiologiques</li>
-                        <li><strong style="color: #fff;">L'Exécuteur :</strong> meurtres, vols, piratages et contrebande contre une autre faction que celle de l'escadron</li>
-                        <li><strong style="color: #fff;">Le Seigneur de guerre :</strong> victoires en zones de conflit</li>
-                    </ul>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/specialistes.png" alt="Mur des spécialistes : les sept titres de l'escadron" loading="lazy"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// DISTINCTION 03 : PILIER DE LA SEMAINE</span>
-                    <h3 class="neon-blue">LE PILIER DE L'ESCADRON</h3>
-                    <p>Chaque jeudi, à la fin du cycle (07:00 UTC), le pilote qui a rapporté le plus de <strong>points BGS</strong> à l'escadron, <strong>avec ou sans directive</strong>, devient le <strong>Pilier de la semaine</strong>.</p>
-                    <p>Il reçoit une distinction sur sa fiche (avec sa part de l'effort et son activité dominante) et une ligne dorée dans le journal tactique de l'escadron.</p>
-                    <p style="color: #888; font-size: 0.9em;">Aucun seuil minimum ; en cas d'égalité, le pilote le plus régulier l'emporte.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/pilier-distinction.png" alt="Distinctions hebdomadaires Pilier de la semaine sur la fiche du pilote" loading="lazy"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse">
-                <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// DISTINCTION 04 : ÉLAN POWERPLAY</span>
-                    <h3 class="neon-orange">LE PROGRÈS, RÉCOMPENSÉ</h3>
-                    <p>Chaque jeudi, le pilote dont les mérites Powerplay ont le plus <strong>progressé en proportion</strong> de ses mérites de début de cycle (le gain divisé par ce qu'il avait déjà) devient l'<strong>Élan de la semaine</strong>.</p>
-                    <p>Chacun a donc sa chance, quel que soit son niveau. Pour qu'un débutant ne gagne pas grâce à un tout petit gain, le calcul suppose au moins 100 000 mérites au départ. Le gagnant reçoit une distinction sur sa fiche et une ligne dans le journal tactique.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/elan.png" alt="Élan Powerplay : le pilote dont les mérites ont le plus progressé en proportion" loading="lazy"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid">
-                <div class="feature-text">
-                    <span class="sub-data">// DISTINCTION 05 : INVESTISSEMENT DU CYCLE</span>
-                    <h3 class="neon-blue">VOTRE PART DANS L'EFFORT COMMUN</h3>
-                    <p>La <strong>Force de frappe</strong>, un camembert holographique du journal BGS, montre en direct la part de chaque pilote dans l'effort de l'escadron pour la faction, ordres et actions libres confondus.</p>
-                    <p>Elle suit vos filtres (période, directives ou actions libres) : vous voyez votre part et celle de chaque ailier, et sur votre dossier personnel, la répartition de votre effort par activité. Elle mesure l'effort fourni, pas l'influence exacte gagnée.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card"><img src="images/investissement.png" alt="Force de frappe : camembert holographique de la part de chaque pilote dans l'effort de l'escadron" loading="lazy"></div>
-                </div>
-            </div>
-
-            <div class="feature-grid reverse" style="margin-bottom: 0;">
-                <div class="feature-text">
-                    <span class="sub-data" style="color: var(--ed-orange);">// DISTINCTION 06 : RANG BGS DE CARRIÈRE</span>
-                    <h3 class="neon-orange">VOTRE RANG, GAGNÉ POUR TOUJOURS</h3>
-                    <p>Chaque effort accompli pour l'escadron, <strong>directive ou action libre</strong> (y compris les livraisons de colonisation, 1 point pour 400 tonnes), rapporte des points qui s'additionnent pour toute votre carrière. Ils déterminent votre <strong>rang BGS</strong>, de 1 à 100.</p>
-                    <p>Un rang gagné ne se perd jamais. Les premiers rangs se gagnent vite, les suivants demandent de plus en plus d'efforts : le rang 100 est réservé aux plus fidèles.</p>
-                    <p style="color: #888; font-size: 0.9em;">Une barre de progression indique ce qu'il reste à accomplir avant le rang suivant, dans la fenêtre BGS du QG et sur la fiche du pilote. Une ligne dorée apparaît dans le journal tactique à chaque dizaine atteinte.</p>
-                </div>
-                <div class="holo-container">
-                    <div class="holo-card" style="box-sizing: border-box; padding: 28px 26px; background: rgba(5, 8, 12, 0.96); font-family: 'Share Tech Mono', monospace;" role="img" aria-label="Exemple de progression du rang BGS : rang 12, 751 points sur 799 pour le rang 13, et repères de points pour les rangs 2, 10, 25, 50 et 100">
-                        <div style="color: #888; font-size: 0.8em; letter-spacing: 2px; margin-bottom: 6px;">EXEMPLE : CARRIÈRE BGS</div>
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
-                            <span style="color: #fff; font-size: 1.6em; font-weight: bold; letter-spacing: 2px;">RANG 12</span>
-                            <span style="color: #FFD700; font-weight: bold;">751 <span style="color: #888; font-size: 0.75em; font-weight: normal;">POINTS</span></span>
-                        </div>
-                        <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; margin: 12px 0 6px;">
-                            <div style="width: 54%; height: 100%; background: var(--ed-orange); box-shadow: 0 0 8px var(--ed-orange);"></div>
-                        </div>
-                        <div style="color: #888; font-size: 0.75em; margin-bottom: 20px;">PROCHAIN : RANG 13 À 799 POINTS</div>
-                        <div style="border-top: 1px dashed rgba(255,113,0,0.35); padding-top: 14px; color: #ccc; font-size: 0.9em; line-height: 1.9;">
-                            <div style="display: flex; justify-content: space-between;"><span>RANG 2</span><span style="color: #fff;">15 pts</span></div>
-                            <div style="display: flex; justify-content: space-between;"><span>RANG 10</span><span style="color: #fff;">505 pts</span></div>
-                            <div style="display: flex; justify-content: space-between;"><span>RANG 25</span><span style="color: #fff;">2 423 pts</span></div>
-                            <div style="display: flex; justify-content: space-between;"><span>RANG 50</span><span style="color: #fff;">7 593 pts</span></div>
-                            <div style="display: flex; justify-content: space-between;"><span>RANG 100</span><span style="color: #FFD700;">23 394 pts</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div></details>
             <details class="pli" id="faq"><summary>QUESTIONS FRÉQUENTES</summary><div class="corps">
@@ -1071,9 +548,9 @@
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QUELLES DONNÉES SONT COLLECTÉES ?</h3>
                 <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT SONT RÉCOMPENSÉS LES PILOTES ?</h3>
-                <p style="margin: 0 0 26px;">Par six systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), la Force de frappe (la part de chaque pilote dans l'effort de l'escadron) et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts).</p>
+                <p style="margin: 0 0 26px;">Par cinq systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts).</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FONCTIONNE-T-IL SUR MOBILE ?</h3>
-                <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives et l'effort BGS, la colonisation, et l'escadron depuis un téléphone.</p>
+                <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives avec leur résultat dans le jeu et votre effort BGS, la colonisation, le budget, l'escadron et la recommandation « Quoi faire », depuis un téléphone.</p>
             </div>
         </div>
     </div></details>
@@ -1109,7 +586,7 @@
     /* ---------- Piliers, modules, profils (les textes sont dans le HTML : ce code ne fait qu'afficher / masquer) ---------- */
     (function () {
         const PILIERS = [{"id":"commander","c":"#00F0FF","g":"rgba(0,240,255,.12)"},{"id":"construire","c":"#FF7100","g":"rgba(255,113,0,.12)"},{"id":"progresser","c":"#FFD700","g":"rgba(255,215,0,.10)"},{"id":"connecte","c":"#00FF66","g":"rgba(0,255,102,.10)"}];
-        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"qf","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"force","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
+        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"qf","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
         let pilier = 'commander', mod = 'qg', vue = 'tout';
         const $ = id => document.getElementById(id);
         const visible = m => vue === 'tout' || m.pour.indexOf(vue) >= 0;
@@ -1154,7 +631,7 @@
         document.querySelectorAll('.profil').forEach(b => b.onclick = () => { choisirVue(b.dataset.profil); $('piliers').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
         maj(false);
 
-        /* un lien vers #faq, #vos-donnees ou #distinctions ouvre le bloc depliable correspondant */
+        /* un lien vers #faq ou #vos-donnees ouvre le bloc depliable correspondant */
         function ouvrirAncre() {
             const el = location.hash ? document.getElementById(location.hash.slice(1)) : null;
             if (el && el.tagName === 'DETAILS') { el.open = true; setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
@@ -1530,6 +1007,7 @@
         }, { passive: true });
     })();
     </script>
-    <script src="footer.js?v=12"></script>
+    <script>window.EDTEAM_PIED_VISITEUR = true;   // page publique : le pied de page n'affiche pas l'aide, les nouveautés ni le compagnon mobile (utiles une fois inscrit)</script>
+    <script src="footer.js?v=13"></script>
 </body>
 </html>

@@ -147,6 +147,7 @@
         var st = el('style', null, ''); st.textContent = CSS; document.head.appendChild(st);
 
         var enApp = !!document.getElementById('main-ui');
+        var visiteur = !!window.EDTEAM_PIED_VISITEUR;   // page publique (presentation) : ni aide, ni nouveautes, ni compagnon mobile
         var pied = document.getElementById('footer-edteam');
         if (!pied) { pied = el('footer', { id: 'footer-edteam' }); document.body.appendChild(pied); }
         pied.className = 'ft-edteam ' + (enApp ? 'ft-fixe' : 'ft-flux');
@@ -154,19 +155,20 @@
             + '<div class="ft-ligne">'
             +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
-            +   '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>'
-            +   '<button type="button" class="ft-btn ft-nouv" onclick="edteamOuvrirNouveautes()" title="Nouveautés">NOUVEAUTÉS<span class="ft-point" style="display:none"></span></button>'
+            +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
+            +   (visiteur ? '' : '<button type="button" class="ft-btn ft-nouv" onclick="edteamOuvrirNouveautes()" title="Nouveautés">NOUVEAUTÉS<span class="ft-point" style="display:none"></span></button>')
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
-            +   '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>'
+            +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')
             + '</div>'
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>';
 
         if (window.edteamSon) window.edteamSon.majUI();
         // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
-        if (/[?&]nouveautes(=|&|$)/.test(location.search)) setTimeout(function () { window.edteamOuvrirNouveautes(); }, 800);
+        if (!visiteur && /[?&]nouveautes(=|&|$)/.test(location.search)) setTimeout(function () { window.edteamOuvrirNouveautes(); }, 800);
         if (dansApp()) charger(urlDonnees(), function () { window.edteamMajPointNouveautes(); });
 
+        if (visiteur) return;   // pas de fenetre du compagnon mobile sur la page publique
         // Fenetre du compagnon mobile
         var ov = el('div', { id: 'ft-mobile-overlay', class: 'ft-overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Compagnon mobile' });
         ov.innerHTML = ''
