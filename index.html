@@ -180,7 +180,7 @@
         #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-family: 'Share Tech Mono', monospace; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
         
         /* Modal, Auth et Failsafe (Raccourcis pour lisibilité) */
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--ed-bg); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--ed-bg); z-index: 10000; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
         .auth-box { border: 2px solid var(--ed-orange); padding: 40px; background: rgba(10, 5, 0, 0.9); width: 100%; max-width: 400px; text-align: center; }
         .auth-input { width: 100%; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--ed-orange-dim); color: #fff; padding: 12px; margin-bottom: 15px; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; outline: none;}
         .auth-btn { background: rgba(255, 113, 0, 0.1); border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.1em; cursor: pointer; margin-bottom: 10px;}
@@ -252,8 +252,8 @@
 <body>
 
     <!-- SAS D'AUTHENTIFICATION ÉPURÉ -->
-    <div id="auth-screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background-color: var(--ed-bg); z-index: 10000;">
-        <div class="auth-box" style="border: 2px solid var(--ed-orange); padding: 40px; background: rgba(10, 5, 0, 0.9); width: 100%; max-width: 400px; text-align: center;">
+    <div id="auth-screen" style="display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background-color: var(--ed-bg); z-index: 10000; overflow-y: auto;">
+        <div class="auth-box" style="border: 2px solid var(--ed-orange); padding: 40px; background: rgba(10, 5, 0, 0.9); width: 100%; max-width: 400px; text-align: center; margin-top: auto; box-sizing: border-box;">
             
             <!-- LOGO EDTEAM -->
             <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 80px; width: 80px; filter: drop-shadow(0 0 10px var(--ed-orange-glow)); margin: 0 auto 15px auto; display: block;">
@@ -271,23 +271,13 @@
             
             <div id="auth-msg" style="margin-top: 15px; font-weight: bold;"></div>
         </div>
-        <div style="text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+        <div style="text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 15px; align-items: center; padding: 0 12px;">
             <span style="color: #888; font-size: 0.8em; cursor: pointer; text-decoration: underline; transition: 0.2s;" onmouseover="this.style.color='var(--ed-orange)'" onmouseout="this.style.color='#888'" onclick="recupererMotDePasse()" onmouseenter="if(typeof sonHover==='function') sonHover()">
                 [ MOT DE PASSE OUBLIÉ ? ]
             </span>
             <a href="presentation.html" style="color: #888; font-size: 0.8em; text-decoration: underline; letter-spacing: 1px;">[ DÉCOUVRIR SYS.EDTEAM ]</a>
-            <div style="color: #555; font-size: 0.75em; letter-spacing: 1px;">
-                > ASSISTANCE : 
-                <span style="color: #888; cursor: pointer; transition: 0.2s; font-weight: bold;" 
-                      onmouseover="this.style.color='var(--ed-blue)'" 
-                      onmouseout="this.style.color='#888'" 
-                      onclick="copierNav('edteam.portal@gmail.com', this, event)" 
-                      onmouseenter="if(typeof sonHover==='function') sonHover()"
-                      title="Cliquer pour copier">
-                    edteam.portal@gmail.com
-                </span> <
-            </div>
         </div>
+        <footer id="footer-auth"></footer>
     </div>
 
     <!-- NOUVEAU SAS DE SÉCURITÉ (STYLE MINISITE) -->
@@ -316,6 +306,14 @@
                     <span style="color: #888;">ESCADRON DÉTECTÉ :</span>
                     <span id="sas-squad-name" style="color: #FF3333; font-weight: bold;">RECHERCHE DU SIGNAL...</span>
                 </div>
+
+                <!-- CODE D'INVITATION : visible seulement si le jeu annonce un escadron. Vérifié par le serveur (aucun code = seul l'Amiral peut inscrire un nouvel escadron) -->
+                <div id="sas-code-zone" style="display: none; margin: -10px 0 22px 0; text-align: left;">
+                    <label for="sas-code" style="display: block; color: #888; font-size: 0.95em; margin-bottom: 6px; letter-spacing: 1px;">CODE D'INVITATION DE L'ESCADRON :</label>
+                    <input type="text" id="sas-code" maxlength="12" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange); color: #fff; padding: 11px; font-family: 'Share Tech Mono', monospace; font-size: 1.2em; letter-spacing: 4px; text-transform: uppercase; text-align: center;">
+                    <div style="color: #777; font-size: 0.8em; line-height: 1.5; margin-top: 6px;">Donné par l'Amiral de votre escadron. <b style="color: #aaa;">Si vous êtes l'Amiral</b> et que l'escadron n'est pas encore sur EDTEAM, laissez ce champ vide.</div>
+                </div>
+                <div id="sas-msg" style="display: none; margin: 0 0 18px 0; padding: 12px 14px; border: 1px solid #FF3333; border-left: 4px solid #FF3333; background: rgba(255,51,51,0.08); color: #ddd; line-height: 1.55; text-align: left; font-size: 0.95em;"></div>
 
                 <button id="btn-sas-demande" class="fs-auth-btn" style="border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5;" disabled onclick="soumettreDossier()"> CERTIFIER L'IDENTITÉ NAVALE</button>
 
@@ -416,6 +414,12 @@
             
             <!-- ONGLET 1 : DOSSIER COMMANDANT -->
             <div id="qg-tab-dossier" style="display: flex; flex-direction: column; gap: 12px;">
+
+                <!-- CONFLIT DE COMMANDEMENT : visible seulement pour un pilote dont l'annonce « Amiral » a ete refusee (fonction mon_message_securite). Rempli par verifierConflitCommandement() -->
+                <div id="qg-conflit-chef" style="display: none;"></div>
+
+                <!-- PILOTE INDEPENDANT : rejoindre un escadron avec le code d'invitation de son Amiral (fonction rejoindre_escadron). Rempli par afficherRejoindreEscadron() -->
+                <div id="qg-rejoindre-escadron" style="display: none;"></div>
 
                 <!-- RANGEE D'ENTREE : MA PUISSANCE (Powerplay) | MA FACTION (BGS, avec la bande EDNews) | QUOI FAIRE. Cartes de puissance et de faction : qgsuivi.js. -->
                 <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch;">
@@ -1450,6 +1454,78 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             }
         }
 
+        // Pilote dont le jeu annonce « Amiral » alors qu'un autre compte l'est deja sur EDTEAM : la base refuse (securite) et nous le dit ;
+        // on l'invite a prevenir l'administrateur sur le Discord. Une seule petite lecture, au plus toutes les 15 minutes, et seulement pour un membre d'escadron non Amiral.
+        async function verifierConflitCommandement(profil) {
+            const zone = document.getElementById('qg-conflit-chef');
+            if (!zone || !supabaseApp || !profil || !profil.escadron_id || profil.est_amiral) return;
+            const cle = 'edteam_conflit_chef_' + profil.user_id;
+            let c = null;
+            try { c = JSON.parse(sessionStorage.getItem(cle) || 'null'); } catch (e) { c = null; }
+            if (!c || Date.now() - c.t > 15 * 60 * 1000) {
+                try {
+                    const { data, error } = await supabaseApp.rpc('mon_message_securite');
+                    if (error) return;
+                    c = { t: Date.now(), m: (data && !Array.isArray(data) && data.escadron) ? data : null };
+                    try { sessionStorage.setItem(cle, JSON.stringify(c)); } catch (e) { /* stockage indisponible */ }
+                } catch (e) { return; }
+            }
+            if (!c.m) { zone.style.display = 'none'; return; }
+            const esc = escapeHtml(String(c.m.escadron || ''));
+            const actuel = c.m.amiral_actuel ? 'CMDR ' + escapeHtml(String(c.m.amiral_actuel)) : 'un autre compte';
+            zone.innerHTML = '<div class="bloc rouge"><h2>&#9888; CONFLIT DE COMMANDEMENT <em>' + esc + '</em></h2>'
+                + '<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">'
+                + '<div style="flex: 1 1 420px; min-width: 0; line-height: 1.55;">'
+                + '<span style="color: #ddd;">Votre jeu indique que vous êtes <b>Amiral</b> de <b>' + esc + '</b>, mais ' + actuel + ' est déjà enregistré comme Amiral sur EDTEAM. Vos droits d\'Amiral restent donc bloqués. '
+                + '<b style="color: #fff;">Rejoignez le Discord et prévenez l\'administrateur</b> pour régler la situation.</span></div>'
+                + '<a href="https://discord.gg/max5W9FreN" target="_blank" rel="noopener" style="color: #fff; background: #5865F2; border: 1px solid #5865F2; padding: 8px 16px; letter-spacing: 1.5px; font-weight: bold; text-decoration: none; white-space: nowrap;">REJOINDRE LE DISCORD</a></div></div>';
+            zone.style.display = 'block';
+        }
+
+        // Pilote independant (aucun escadron sur EDTEAM) : champ pour le code d'invitation donne par l'Amiral. Le serveur verifie tout (code, nom, 5 essais par heure).
+        function afficherRejoindreEscadron(profil) {
+            const zone = document.getElementById('qg-rejoindre-escadron');
+            if (!zone || !profil || !profil.est_approuve) return;
+            if (profil.escadron_id && profil.escadron_id !== 'INDEPENDANT') { zone.style.display = 'none'; return; }
+            zone.innerHTML = '<div class="bloc cy"><h2>PILOTE INDÉPENDANT <em>rejoindre un escadron</em></h2>'
+                + '<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">'
+                + '<div style="flex: 1 1 320px; min-width: 0; line-height: 1.55;">'
+                + '<span style="color: #ccc;">Votre Amiral vous a donné un <b>code d\'invitation</b> ? Saisissez-le pour rejoindre votre escadron.</span>'
+                + '<div id="rejoindre-msg" style="margin-top: 6px; font-size: .9em;"></div></div>'
+                + '<div style="display: flex; gap: 8px; align-items: center;">'
+                + '<input type="text" id="rejoindre-code" maxlength="12" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX" onkeydown="if(event.key===\'Enter\') rejoindreEscadronParCode()" style="width: 150px; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid #00F0FF; color: #fff; padding: 9px; font-family: \'Share Tech Mono\', monospace; font-size: 1.05em; letter-spacing: 3px; text-transform: uppercase; text-align: center;">'
+                + '<button type="button" id="rejoindre-btn" onclick="rejoindreEscadronParCode()" style="color: #00F0FF; background: rgba(0,240,255,.08); border: 1px solid #00F0FF; padding: 9px 16px; letter-spacing: 1.5px; font-family: inherit; font-weight: bold; cursor: pointer;">REJOINDRE</button></div></div></div>';
+            zone.style.display = 'block';
+        }
+        async function rejoindreEscadronParCode() {
+            const champ = document.getElementById('rejoindre-code'), msg = document.getElementById('rejoindre-msg'), btn = document.getElementById('rejoindre-btn');
+            if (!champ || !msg || !supabaseApp) return;
+            const code = champ.value.trim();
+            if (!code) { msg.style.color = '#FF7100'; msg.innerText = 'Saisissez le code donné par votre Amiral.'; return; }
+            btn.disabled = true; msg.style.color = '#aaa'; msg.innerText = 'Vérification…';
+            try {
+                const { data, error } = await supabaseApp.rpc('rejoindre_escadron', { p_code: code });
+                if (error) throw error;
+                if (data === 'OK' || data === 'DEJA_MEMBRE') {
+                    try { if (profilCommandant) sessionStorage.removeItem('edteam_profil_cache_' + profilCommandant.user_id); } catch (e) { /* stockage indisponible */ }
+                    msg.style.color = '#00FF66'; msg.innerText = 'Bienvenue dans l\'escadron. Chargement…';
+                    setTimeout(() => window.location.reload(), 700);
+                    return;
+                }
+                const textes = {
+                    CODE_INVALIDE: 'Code invalide : vérifiez-le auprès de votre Amiral (il a pu être renouvelé). Après 5 essais ratés, la saisie est bloquée une heure.',
+                    TROP_DE_TENTATIVES: 'Trop d\'essais : la saisie est bloquée pendant une heure.',
+                    NOM_DEJA_PRIS: 'Un autre pilote de cet escadron porte déjà votre nom de commandant : contactez votre Amiral.',
+                    NON_APPROUVE: 'Votre accréditation n\'est pas terminée : passez par le sas de sécurité.'
+                };
+                msg.style.color = '#FF7100'; msg.innerText = textes[data] || ('Réponse inattendue du serveur (' + data + ').');
+            } catch (e) {
+                console.error('Erreur rejoindre_escadron :', e);
+                msg.style.color = '#FF3333'; msg.innerText = 'Erreur de liaison : réessayez dans un instant.';
+            }
+            btn.disabled = false;
+        }
+
         async function verifierApprobation(user) {
             const msg = document.getElementById('auth-msg');
             const { data, error } = await chargerProfilAvecCache(supabaseApp, user.id);
@@ -1477,6 +1553,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const fmt = new Intl.NumberFormat('fr-FR');
                 // Escadron et grades dans l'en-tete (navigation.js)
                 if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+                verifierConflitCommandement(data);
+                afficherRejoindreEscadron(data);
 
                 // AFFICHAGE DE LA PASTILLE D'ALERTE (Amirauté & Directeur)
                 if (data.est_amiral || data.est_directeur) {
@@ -1746,15 +1824,15 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         const sq = JSON.parse(item.station_name); 
                         localStorage.setItem('edteam_rang_jeu', sq.rank);
 
-                        // Si le joueur est validé, mais que l'escadron en jeu est différent de sa fiche :
-                        if (profilCommandant && profilCommandant.escadron_id && profilCommandant.est_approuve) {
-                            if (sq.nom.toUpperCase() !== profilCommandant.escadron_id.toUpperCase()) {
-                                
-                                // AUTO-DESTRUCTION IMMÉDIATE
-                                await supabaseApp.rpc('purger_utilisateur', { target_user_id: profilCommandant.user_id });
-                                await supabaseApp.auth.signOut();
-                                
-                                alert("⚠️ ALERTE INTRUSION : Vos données navales ne correspondent plus à l'escadron accrédité. Accès révoqué définitivement.");
+                        // Si le joueur est validé, mais que l'escadron en jeu est différent de sa fiche (ou qu'il est devenu indépendant) :
+                        // le SERVEUR le fait quitter son escadron tout seul (plus d'accès, plus de rôle ; le compte n'est jamais supprimé).
+                        // Ici on rafraîchit seulement l'affichage, une fois par session (pas de boucle). Le compte Directeur n'est pas concerné.
+                        if (profilCommandant && profilCommandant.escadron_id && profilCommandant.escadron_id !== 'INDEPENDANT' && profilCommandant.est_approuve && !profilCommandant.est_directeur) {
+                            const normaliser = t => String(t || '').trim().replace(/\s+/g, ' ').toUpperCase();
+                            if (normaliser(sq.nom) !== normaliser(profilCommandant.escadron_id) && !sessionStorage.getItem('edteam_depart_vu')) {
+                                sessionStorage.setItem('edteam_depart_vu', '1');
+                                try { sessionStorage.removeItem('edteam_profil_cache_' + profilCommandant.user_id); } catch (e) { /* stockage indisponible */ }
+                                alert("Votre escadron en jeu ne correspond plus à celui de votre fiche EDTEAM : vous repassez pilote indépendant.\n\nPour rejoindre un autre escadron, saisissez son code d'invitation dans le Quartier Général.");
                                 window.location.reload();
                             }
                         }
@@ -2488,7 +2566,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const btn = document.getElementById('btn-sas-demande');
 
                 if (nomCmdr) { elCmdr.innerText = nomCmdr.toUpperCase(); elCmdr.style.color = "#00FF66"; }
-                const estIndependant = !squadInfo || !squadInfo.nom;
+                const estIndependant = !squadInfo || !squadInfo.nom || !!window.sasForcerIndependant;
+                const zoneCode = document.getElementById('sas-code-zone');
+                if (zoneCode) zoneCode.style.display = estIndependant ? 'none' : 'block';
 
                 if (!estIndependant) {
                     const rankText = ["Amiral", "Officier", "Officier", "Pilote", "Recrue"][squadInfo.rank] || "Pilote";
@@ -2536,64 +2616,110 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             }
         }
 
+        // Messages du sas pour les refus du serveur (la fonction serveur renvoie un code, jamais une erreur technique)
+        function messageSas(html, couleur) {
+            const z = document.getElementById('sas-msg');
+            if (!z) return;
+            z.style.borderColor = couleur || '#FF3333';
+            z.style.background = (couleur === '#FF7100') ? 'rgba(255,113,0,0.08)' : 'rgba(255,51,51,0.08)';
+            z.innerHTML = html;
+            z.style.display = html ? 'block' : 'none';
+        }
+        const LIEN_DISCORD_SAS = '<a href="https://discord.gg/max5W9FreN" target="_blank" rel="noopener" style="color: #fff; background: #5865F2; border: 1px solid #5865F2; padding: 5px 12px; letter-spacing: 1px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 8px;">REJOINDRE LE DISCORD</a>';
+
         async function soumettreDossier() {
             if(typeof sonClic === 'function') sonClic();
             const btn = document.getElementById('btn-sas-demande');
-            
+            const texteBouton = btn.innerText;
+
             btn.innerText = "TRANSMISSION EN COURS...";
             btn.disabled = true;
+            messageSas('');
 
             try {
-                if (event) event.preventDefault(); 
-                
+                if (event) event.preventDefault();
+
                 const { data: { user }, error: authErr } = await supabaseApp.auth.getUser();
                 if (authErr || !user) throw new Error("Joueur non authentifié !");
-                
-                const estIndependant = !window.sasCacheSquad;
+
+                const estIndependant = !window.sasCacheSquad || !!window.sasForcerIndependant;
+                const champCode = document.getElementById('sas-code');
+                const code = (!estIndependant && champCode) ? champCode.value.trim() : '';
 
                 // Independants comme membres passent par la fonction serveur (profils n'est pas modifiable
                 // directement depuis le navigateur : aucune regle UPDATE, l'ecriture directe echouait en silence).
-                // Pour les membres d'escadron, procédure d'enrôlement habituelle
+                // Le SERVEUR decide : escadron deja inscrit = code d'invitation obligatoire ; nouvel escadron = seul son Amiral (grade 0 en jeu) peut l'inscrire.
                 const rank = window.sasCacheRank !== undefined ? window.sasCacheRank : 4;
                 const { data: reponse, error } = await supabaseApp.rpc('soumettre_dossier', {
                     p_user_id: user.id,
                     p_cmdr_nom: window.sasCacheCmdr,
-                    p_escadron_id: window.sasCacheSquad || '',
-                    p_rank: rank
+                    p_escadron_id: estIndependant ? '' : window.sasCacheSquad,
+                    p_rank: estIndependant ? 4 : rank,
+                    p_code: code || null
                 });
-                
+
                 if (error) throw error;
 
                 // Plus aucune validation manuelle : toute soumission valide est approuvee
                 // immediatement (troupe, Amiral, ou repli indépendant depuis ce chemin).
                 // (la ligne "NOUVEAU SUR EDTEAM" du journal GLOBAL est ecrite par la fonction serveur)
-                if (reponse === 'PILOTE_ACCEPTE_ET_VERIFIE_TRUE') {
+                if (reponse === 'PILOTE_ACCEPTE_ET_VERIFIE_TRUE' || reponse === 'DEJA_ACCEPTE') {
+                    try { sessionStorage.removeItem('edteam_profil_cache_' + user.id); } catch (e) {}
                     window.location.reload();
                     return;
                 }
 
                 if (reponse === 'AMIRAL_ACCEPTE') {
                     await supabaseApp.from('journal_activite').insert([{
-                        escadron_id: window.sasCacheSquad,
+                        escadron_id: String(window.sasCacheSquad).trim().replace(/\s+/g, ' ').toUpperCase(),
                         user_id: user.id,
                         cmdr_nom: window.sasCacheCmdr,
                         type_action: 'COMMANDEMENT',
                         details: `Le CMDR ${window.sasCacheCmdr.toUpperCase()} a pris le commandement de l'escadron ${window.sasCacheSquad}.`,
                         couleur: '#00FF66'
                     }]);
+                    try { sessionStorage.removeItem('edteam_profil_cache_' + user.id); } catch (e) {}
                     window.location.reload();
                     return;
                 }
 
                 if (reponse === 'PILOTE_ACCEPTE_INDEPENDANT') {
+                    try { sessionStorage.removeItem('edteam_profil_cache_' + user.id); } catch (e) {}
                     window.location.reload();
                     return;
+                }
+
+                // Refus : on explique, et on rend la main au pilote
+                btn.innerText = texteBouton;
+                btn.disabled = false;
+                const nomEsc = escapeHtml(String(window.sasCacheSquad || '').toUpperCase());
+                if (reponse === 'CODE_REQUIS') {
+                    messageSas('<b style="color: #FF7100;">CODE D\'INVITATION REQUIS.</b> L\'escadron <b>' + nomEsc + '</b> est déjà sur EDTEAM : saisissez le code donné par votre Amiral, puis certifiez à nouveau.'
+                        + (rank === 0 ? '<br><br><b style="color: #fff;">Vous êtes l\'Amiral de cet escadron sans l\'avoir inscrit ?</b> Rejoignez le Discord et prévenez l\'administrateur.<br>' + LIEN_DISCORD_SAS : ''), '#FF7100');
+                } else if (reponse === 'CODE_INVALIDE') {
+                    messageSas('<b>CODE INVALIDE.</b> Vérifiez-le auprès de votre Amiral (il a pu être renouvelé). Après 5 essais ratés, la saisie est bloquée une heure.');
+                } else if (reponse === 'TROP_DE_TENTATIVES') {
+                    messageSas('<b>TROP D\'ESSAIS.</b> Pour votre sécurité, la saisie du code est bloquée pendant une heure. Réessayez plus tard.');
+                } else if (reponse === 'ESCADRON_INCONNU') {
+                    messageSas('<b style="color: #FF7100;">ESCADRON PAS ENCORE SUR EDTEAM.</b> Seul son Amiral peut l\'inscrire (en jeu, grade Amiral). En attendant, vous pouvez entrer en <b>pilote indépendant</b> : vous rejoindrez l\'escadron plus tard avec son code, depuis le Quartier Général.'
+                        + '<br><button type="button" class="fs-auth-btn" style="margin: 10px 0 0 0; padding: 8px;" onclick="window.sasForcerIndependant = true; document.getElementById(\'sas-code-zone\').style.display = \'none\'; messageSas(\'\'); soumettreDossier();">CONTINUER EN INDÉPENDANT</button>', '#FF7100');
+                } else if (reponse === 'ESCADRON_SIMILAIRE') {
+                    messageSas('<b style="color: #FF7100;">NOM D\'ESCADRON TROP PROCHE.</b> Un escadron au nom presque identique est déjà inscrit sur EDTEAM. Si c\'est bien le vôtre, rejoignez le Discord et prévenez l\'administrateur.<br>' + LIEN_DISCORD_SAS, '#FF7100');
+                } else if (reponse === 'ESCADRON_INVALIDE') {
+                    messageSas('<b>NOM D\'ESCADRON ILLISIBLE.</b> Relancez le jeu avec le plugin actif, puis réessayez.');
+                } else if (reponse === 'NOM_DEJA_PRIS') {
+                    messageSas('<b>NOM DÉJÀ PRIS.</b> Un autre pilote de cet escadron porte déjà ce nom de commandant. Contactez votre Amiral.');
+                } else if (reponse === 'NOM_INVALIDE') {
+                    messageSas('<b>NOM DE COMMANDANT ILLISIBLE.</b> Relancez le jeu avec le plugin actif, puis réessayez.');
+                } else {
+                    messageSas('<b>RÉPONSE INATTENDUE DU SERVEUR</b> (' + escapeHtml(String(reponse)) + '). Réessayez, ou prévenez l\'administrateur sur le Discord.<br>' + LIEN_DISCORD_SAS);
                 }
 
             } catch (e) {
                 console.error("Erreur de soumission :", e);
                 btn.innerText = "ERREUR DE TRANSMISSION";
                 btn.style.color = "#FF3333";
+                btn.disabled = false;
             }
         }
 
@@ -3232,6 +3358,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="footer.js?v=14"></script>
+    <script src="footer.js?v=15"></script>
 </body>
 </html>

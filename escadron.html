@@ -412,6 +412,17 @@
         <!-- ZONE D'AFFICHAGE DU CONTENU DIRECT -->
         <main class="data-window" id="display-area" style="padding-top: 5px;">
             
+            <!-- CODE D'INVITATION : visible par l'Amiral et les officiers (fonction mon_code_invitation) ; seul l'Amiral peut le renouveler -->
+            <div id="carte-code" class="bloc or" style="display: none; margin-bottom: 14px;">
+                <h2>CODE D'INVITATION <em>à donner aux pilotes qui rejoignent l'escadron</em></h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center;">
+                    <span id="code-valeur" style="font-size: 1.9em; letter-spacing: 6px; color: #fff; font-weight: bold;">----</span>
+                    <button type="button" id="code-copier" onclick="copierCodeInvitation()" style="color: #FFD700; background: rgba(255,215,0,.07); border: 1px solid rgba(255,215,0,.6); padding: 8px 16px; letter-spacing: 1.5px; font-family: inherit; font-weight: bold; cursor: pointer;">COPIER</button>
+                    <button type="button" id="code-renouveler" onclick="renouvelerCodeInvitation()" style="display: none; color: #aaa; background: transparent; border: 1px solid #555; padding: 8px 16px; letter-spacing: 1.5px; font-family: inherit; cursor: pointer;">RENOUVELER</button>
+                </div>
+                <div class="bloc-note" id="code-note">Sans ce code, personne ne peut rejoindre l'escadron. Donnez-le à vos pilotes ; ils le saisissent à leur première connexion (ou depuis le Quartier Général s'ils sont déjà inscrits). Le grade de chacun (Officier, Amiral) est repris automatiquement du jeu.</div>
+            </div>
+
             <div class="eff-tete">
                 <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">&gt; EFFECTIFS DE L'ESCADRON</h3>
                 <span id="badge-onglet-escadron" style="display: none; background: #FF3333; color: #fff; border-radius: 10px; padding: 4px 10px; font-size: 0.9em; font-weight: bold; box-shadow: 0 0 8px #FF3333;">0</span>
@@ -429,6 +440,8 @@
             <div id="liste-effectifs" class="eff-grille">
                 <div style="grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; margin-top: 20px;">> CHARGEMENT DES EFFECTIFS...</div>
             </div>
+
+            <div style="text-align: right; margin-top: 18px;"><span onclick="quitterEscadron()" style="color: #555; font-size: .8em; letter-spacing: 1px; cursor: pointer; text-decoration: underline;" title="Repasser pilote indépendant">[ QUITTER L'ESCADRON ]</span></div>
 
             <!-- MODALE : DOSSIER DU PILOTE -->
             <div class="modal-overlay" id="modal-profil-pilote" onclick="fermerModal('modal-profil-pilote', event)">
@@ -1148,6 +1161,7 @@
                 
                 // Démarrage des effectifs
                 chargerEffectifsEscadron();
+                chargerCodeInvitation(data);
 
                 // Lien « Mes distinctions » de la page BGS : ouvre directement sa propre fiche pilote
                 if (/[?&]fiche=moi(&|$)/.test(location.search)) {
@@ -1165,7 +1179,53 @@
     </script>
 
 
+    <script>
+        // ----- Code d'invitation de l'escadron (Amiral et officiers) + depart de l'escadron -----
+        async function chargerCodeInvitation(profil) {
+            if (!profil || !(profil.est_amiral || profil.est_officier) || !window.supabaseApp) return;
+            try {
+                const { data, error } = await window.supabaseApp.rpc('mon_code_invitation');
+                if (error || !data || Array.isArray(data) || !data.code) return;
+                document.getElementById('code-valeur').innerText = data.code;
+                document.getElementById('code-renouveler').style.display = data.peut_renouveler ? 'inline-block' : 'none';
+                document.getElementById('carte-code').style.display = 'block';
+            } catch (e) { /* le code reste masque : rien d'autre ne depend de lui */ }
+        }
+        function copierCodeInvitation() {
+            const code = document.getElementById('code-valeur').innerText;
+            const btn = document.getElementById('code-copier');
+            const fait = () => { btn.innerText = 'COPIÉ ✓'; setTimeout(() => { btn.innerText = 'COPIER'; }, 1500); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(fait, () => {});
+            else { const t = document.createElement('textarea'); t.value = code; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); fait(); } catch (e) {} document.body.removeChild(t); }
+        }
+        async function renouvelerCodeInvitation() {
+            if (!confirm("Renouveler le code d'invitation ?\n\nL'ancien code cessera de fonctionner immédiatement. Les pilotes déjà dans l'escadron ne sont pas concernés.")) return;
+            const btn = document.getElementById('code-renouveler');
+            btn.disabled = true;
+            try {
+                const { data, error } = await window.supabaseApp.rpc('renouveler_code_invitation');
+                if (error) throw error;
+                document.getElementById('code-valeur').innerText = data;
+            } catch (e) {
+                alert('Impossible de renouveler le code pour le moment.');
+            }
+            btn.disabled = false;
+        }
+        async function quitterEscadron() {
+            if (!confirm("Quitter l'escadron ?\n\nVous repasserez pilote indépendant, sans rôle. Pour revenir, il faudra le code d'invitation de l'escadron.")) return;
+            try {
+                const { data, error } = await window.supabaseApp.rpc('quitter_escadron');
+                if (error) throw error;
+                try { if (window.profilCommandant) sessionStorage.removeItem('edteam_profil_cache_' + window.profilCommandant.user_id); } catch (e) {}
+                ['edteam_acces_escadron', 'edteam_acces_bgs'].forEach(k => { try { localStorage.setItem(k, 'false'); } catch (e) {} });
+                window.location.href = 'index.html';
+            } catch (e) {
+                alert("Impossible de quitter l'escadron pour le moment.");
+            }
+        }
+    </script>
+
     <script src="medailles.js?v=3"></script>
-    <script src="footer.js?v=14"></script>
+    <script src="footer.js?v=15"></script>
 </body>
 </html>

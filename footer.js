@@ -38,6 +38,9 @@
         + '.ft-flux{background:#000;padding:50px 20px}'
         + '.ft-flux .ft-ligne{font-size:.9rem;letter-spacing:3px;gap:16px}'
         + '.ft-flux .ft-legal{font-size:.75rem;margin-top:12px}'
+        + '.ft-flux.ft-auth{background:transparent;padding:22px 16px 14px;width:100%;margin-top:auto}'
+        + '.ft-auth .ft-ligne{font-size:.75rem;letter-spacing:2px;gap:10px}'
+        + '.ft-auth .ft-legal{font-size:.62rem;margin-top:8px}'
         + '@media (max-width:1100px){.ft-fixe .ft-titre{display:none}}'
         /* fenetre du compagnon mobile */
         + '.ft-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center;z-index:6000;padding:15px;box-sizing:border-box}'
@@ -73,7 +76,7 @@
     window.edteamOuvrirAide = function (section) {
         if (window.edteamAide) { window.edteamAide.ouvrir(section); return; }
         var s = document.createElement('script');
-        s.src = 'aide.js?v=8';
+        s.src = 'aide.js?v=9';
         s.onload = function () { if (window.edteamAide) window.edteamAide.ouvrir(section); };
         document.head.appendChild(s);
     };
@@ -151,7 +154,7 @@
         var pied = document.getElementById('footer-edteam');
         if (!pied) { pied = el('footer', { id: 'footer-edteam' }); document.body.appendChild(pied); }
         pied.className = 'ft-edteam ' + (enApp ? 'ft-fixe' : 'ft-flux');
-        pied.innerHTML = ''
+        function contenuPied(visiteur) { return ''
             + '<div class="ft-ligne">'
             +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
@@ -161,7 +164,11 @@
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')
             + '</div>'
-            + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>';
+            + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>'; }
+        pied.innerHTML = contenuPied(visiteur);
+        // Page de connexion (index.html) : meme pied de page que la presentation (version visiteur), dans le sas d'identification
+        var pa = document.getElementById('footer-auth');
+        if (pa) { pa.className = 'ft-edteam ft-flux ft-auth'; pa.innerHTML = contenuPied(true); }
 
         if (window.edteamSon) window.edteamSon.majUI();
         // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
