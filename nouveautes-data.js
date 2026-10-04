@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-mobile-bgs-chiffres', date: '2026-10-04T12:00:00Z', type: 'AMELIORE',
+        titre: 'Compagnon mobile : exploits, chiffres et directives plus clairs',
+        texte: 'Le journal des exploits du BGS affiche maintenant aussi les livraisons de colonisation et le soutien libre, avec les points de rang BGS gagnés par chaque action. La fiche d’une directive indique le commandant qui l’a créée. « L’escadron en chiffres » est rangé par thème avec des libellés explicites, « Mes finances » tient sur une ligne, et le statut légal (casier) disparaît de l’accueil et des fiches pilote.',
+        important: false
+    },
+    {
         id: '2026-10-logo-escadron', date: '2026-10-04T08:00:00Z', type: 'NOUVEAU',
         titre: 'Logo d’escadron et nouvelle édition d’EDNews en popup',
         texte: 'L’Amiral de chaque escadron peut désormais déposer le logo de son escadron (bouton « + LOGO » au pied de la carte « Ma faction »). L’image est redimensionnée automatiquement et s’affiche pour tous les membres. Le compagnon mobile affiche désormais aussi « Ma puissance » et « Ma faction » sur son accueil. Chaque semaine, une popup vous présente la nouvelle édition d’EDNews dès l’ouverture du QG (« Lire l’édition » ou « Plus tard »), tant que vous ne l’avez pas lue. Dans l’en-tête, le rang BGS passe aussi en pastille au-dessus du cadre, comme le rang Powerplay, et les cartes du QG retrouvent leurs coins coupés.',
