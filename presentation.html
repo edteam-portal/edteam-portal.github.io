@@ -134,6 +134,8 @@
         .topbar nav a { color: #9ab; text-decoration: none; padding: 6px 0; border-bottom: 1px solid transparent; transition: .25s; }
         .topbar nav a:hover, .topbar nav a.on { color: #fff; border-color: var(--ed-blue); text-shadow: 0 0 10px var(--ed-blue); }
         .btn-mini { background: rgba(0,240,255,.08); border: 1px solid var(--ed-blue); color: #fff; padding: 9px 18px; letter-spacing: 2px; font-size: .85em; text-decoration: none; font-weight: bold; box-shadow: 0 0 18px rgba(0,240,255,.25); transition: .25s; white-space: nowrap; }
+        .btn-mini.sec { background: transparent; border-color: #666; color: #ccc; box-shadow: none; margin-left: auto; margin-right: 12px; }
+        .btn-mini.sec + .btn-mini { margin-left: 0; }
         .btn-mini:hover { background: var(--ed-blue); color: #000; box-shadow: 0 0 34px var(--ed-blue); }
 
         /* ---------- Boutons (identiques) ---------- */
@@ -333,7 +335,8 @@
             <a href="#vos-donnees">VOS DONNÉES</a>
             <a href="#faq">FAQ</a>
         </nav>
-        <a class="btn-mini" href="index.html">[ S'INSTALLER · 2 MIN ]</a>
+        <a class="btn-mini sec" href="index.html?connexion" data-ga="clic_connexion" data-emp="barre">[ SE CONNECTER ]</a>
+        <a class="btn-mini" href="index.html?connexion" data-ga="clic_inscription" data-emp="barre">[ S'INSTALLER · 2 MIN ]</a>
     </div>
 
     <!-- 1. HERO : le titre ET l'outil en action, des la premiere seconde -->
@@ -349,7 +352,7 @@
                 <h1 class="main-title neon-blue">UNIFIEZ LA FLOTTE.<br><span class="neon-orange">GAGNEZ LA GUERRE.</span></h1>
                 <p class="sub-title">Le réseau tactique qui relie le journal de votre vaisseau <strong>Elite Dangerous</strong> au commandement de l'escadron. <strong style="color:#fff;">Vous volez. Le système s'occupe du reste.</strong></p>
                 <div class="hero-cta">
-                    <a href="index.html" class="btn-massive">[ INITIALISER LA LIAISON ]</a>
+                    <a href="index.html?connexion" class="btn-massive" data-ga="clic_inscription" data-emp="hero">[ INITIALISER LA LIAISON ]</a>
                     <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan" >[ DISCORD ]</a>
                 </div>
                 <div class="hero-note">✓ 2 minutes · ✓ 100 % gratuit · ✓ rien à saisir : tout est relevé par le plugin</div>
@@ -376,7 +379,7 @@
                 <div class="etape"><span class="n">01</span><b>ACCRÉDITATION WEB</b><span>Créez votre profil sécurisé sur le Terminal. Immédiat.</span></div>
                 <div class="etape"><span class="n">02</span><b>LIAISON NAVALE</b><span>Téléchargez <code>SYS.EDTEAM.zip</code> et placez-le dans le dossier de votre utilitaire <strong>EDMC</strong>.</span></div>
                 <div class="etape"><span class="n">03</span><b>SYNCHRONISATION</b><span>Copiez votre clé unique dans les réglages d'EDMC. Décollez.</span></div>
-                <div class="go"><a href="index.html" class="btn-massive" style="padding:18px 26px;font-size:1.05em;letter-spacing:3px;background:var(--ed-orange);color:#000;box-shadow:0 0 40px rgba(255,113,0,.7);">[ ACTIVER ]</a></div>
+                <div class="go"><a href="index.html?connexion" data-ga="clic_inscription" data-emp="installer" class="btn-massive" style="padding:18px 26px;font-size:1.05em;letter-spacing:3px;background:var(--ed-orange);color:#000;box-shadow:0 0 40px rgba(255,113,0,.7);">[ ACTIVER ]</a></div>
             </div>
         </div>
     </section>
@@ -1080,7 +1083,7 @@
     <section class="final">
         <p>L'AMIRAUTÉ N'ATTEND PLUS QUE VOUS.</p>
         <div style="display:flex;gap:26px;flex-wrap:wrap;justify-content:center;padding:0 20px;">
-            <a href="index.html" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
+            <a href="index.html?connexion" data-ga="clic_inscription" data-emp="final" class="btn-massive" style="background: var(--ed-orange); color: #000; box-shadow: 0 0 50px rgba(255,113,0,0.8);">[ ACTIVER LA LIAISON ]</a>
             <a href="https://discord.com/invite/max5W9FreN" target="_blank" rel="noopener" class="btn-massive btn-cyan">[ REJOINDRE LE DISCORD ]</a>
         </div>
     </section>
@@ -1506,6 +1509,27 @@
         }
     </script>
 
-    <script src="footer.js?v=11"></script>
+    <script src="analytics.js?v=1"></script>
+    <script>
+    // Suivi des actions utiles de la page publique (sans effet tant que le visiteur n'a pas accepté la mesure d'audience)
+    (function () {
+        document.addEventListener('click', function (e) {
+            if (!window.tracerAction || !e.target.closest) return;
+            var a = e.target.closest('[data-ga]');
+            if (a) window.tracerAction(a.getAttribute('data-ga'), { emplacement: a.getAttribute('data-emp') || '' });
+            var d = e.target.closest('a[href*="discord"]');
+            if (d) window.tracerAction('clic_discord', {});
+            var m = e.target.closest('.module');
+            if (m) window.tracerAction('module_ouvert', { module: m.getAttribute('data-m') || '' });
+        });
+        var seuils = [25, 50, 75, 90], vus = {};
+        window.addEventListener('scroll', function () {
+            var h = document.documentElement.scrollHeight - window.innerHeight; if (h <= 0 || !window.tracerAction) return;
+            var p = 100 * window.scrollY / h;
+            seuils.forEach(function (s) { if (p >= s && !vus[s]) { vus[s] = 1; window.tracerAction('scroll_profondeur', { pourcent: s }); } });
+        }, { passive: true });
+    })();
+    </script>
+    <script src="footer.js?v=12"></script>
 </body>
 </html>

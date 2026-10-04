@@ -2,6 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <script>
+    // AIGUILLEUR D'ACCUEIL : un visiteur sans session est envoye sur la presentation (page publique) ; « ?connexion » ouvre directement le formulaire.
+    // Un pilote deja connecte continue vers le QG. Les parametres (utm_...) et la vraie source du visiteur sont conservés pour Analytics.
+    (function () {
+        try {
+            if (new URLSearchParams(location.search).has('connexion')) return;
+            var cle = null;
+            for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (/^sb-.+-auth-token$/.test(k)) { cle = k; break; } }
+            if (!cle) {
+                try { sessionStorage.setItem('edteam_ref', document.referrer || ''); } catch (e) {}
+                location.replace('presentation.html' + location.search + location.hash);
+            } else {
+                document.documentElement.className += ' session-probable';   // masque le formulaire le temps de verifier la session
+            }
+        } catch (e) {}
+    })();
+    </script>
+    <style>html.session-probable #auth-screen { display: none !important; }</style>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,7 +36,7 @@
     <script src="quoifaire.js?v=5"></script>
     <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=14"></script>
+    <script src="navigation.js?v=15"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -1377,6 +1395,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         window.onload = async () => {
             const { data: { session } } = await supabaseApp.auth.getSession();
             if (session) { verifierApprobation(session.user); }
+            else { document.documentElement.classList.remove('session-probable'); }   // jeton périmé : on montre le formulaire
         };
 
         async function tenterConnexion() {
@@ -3213,6 +3232,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="footer.js?v=11"></script>
+    <script src="footer.js?v=12"></script>
 </body>
 </html>

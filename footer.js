@@ -156,6 +156,7 @@
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
             +   '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>'
             +   '<button type="button" class="ft-btn ft-nouv" onclick="edteamOuvrirNouveautes()" title="Nouveautés">NOUVEAUTÉS<span class="ft-point" style="display:none"></span></button>'
+            +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
             +   '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>'
             + '</div>'

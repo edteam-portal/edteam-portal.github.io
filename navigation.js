@@ -1,29 +1,14 @@
 // ==========================================
-// 0. SONDE TÉLÉMÉTRIQUE (GOOGLE ANALYTICS 4)
+// 0. MESURE D'AUDIENCE : chargee par analytics.js, SEULEMENT apres le consentement du visiteur (banniere « Accepter / Refuser »)
 // ==========================================
 (function initAnalytics() {
-    const GA_ID = 'G-26FQZ7SDX4'; 
-
-    // 1. Initialisation de la file d'attente télémétrique
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function() { dataLayer.push(arguments); };
-    gtag('js', new Date());
-    gtag('config', GA_ID, {
-        page_title: document.title,
-        page_location: window.location.href
-    });
-
-    // 2. Injection asynchrone du script externe (zéro blocage DOM)
-    const scriptGA = document.createElement('script');
-    scriptGA.async = true;
-    scriptGA.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-    document.head.appendChild(scriptGA);
-
-    // 3. Relais pour tracer des événements personnalisés de la flotte
-    window.tracerAction = function(nomEvenement, parametres = {}) {
-        if (typeof window.gtag === 'function') {
-            window.gtag('event', nomEvenement, parametres);
-        }
+    const s = document.createElement('script');
+    s.src = 'analytics.js?v=1';
+    s.async = true;
+    document.head.appendChild(s);
+    // relais pour tracer des evenements personnalises de la flotte (sans effet tant que GA n'est pas charge)
+    window.tracerAction = window.tracerAction || function (nomEvenement, parametres = {}) {
+        if (typeof window.gtag === 'function') window.gtag('event', nomEvenement, parametres);
     };
 })();
 

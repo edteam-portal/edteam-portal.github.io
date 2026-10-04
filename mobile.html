@@ -1040,6 +1040,7 @@
             <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; ouvrirAideMobile()"><span class="e">❓</span><span style="font-size: 0.85em;">Aide et questions fréquentes</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')"><span class="e">🎧</span><span style="font-size: 0.85em;">Rejoindre le Discord</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc xlink" style="cursor: default;"><span class="e">🔊</span><span style="font-size: 0.85em;">Sons de l'application</span><span class="chev"><button type="button" data-son-toggle class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; padding: 8px 14px; display: flex; align-items: center; justify-content: center; border-radius: 10px;"></button></span></div>
+            <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; if (window.EdAnalytics) EdAnalytics.reouvrir()"><span class="e">🍪</span><span style="font-size: 0.85em;">Mesure d'audience (cookies)</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <button class="m-btn" style="background: transparent; border-color: #555; color: #999; font-size: 0.8em; padding: 13px; border-radius: 13px; margin-top: 4px;" onclick="deconnexionMobile()">DÉCONNEXION</button>
         </div>
     </div>
@@ -3658,12 +3659,10 @@
 
         function initAnalyticsMobile() {
             if (!GA_ID) return;
-            window.dataLayer = window.dataLayer || [];
-            window.gtag = function () { window.dataLayer.push(arguments); };
-            window.gtag('js', new Date());
-            window.gtag('config', GA_ID, { send_page_view: false, anonymize_ip: true });
-            chargerScriptMobile('https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID));
-            suivreVueMobile('qg');
+            // le chargement de GA depend du consentement du visiteur (analytics.js : banniere « Accepter / Refuser »)
+            window.EDTEAM_GA_OPTIONS = { send_page_view: false };
+            window.addEventListener('edteam-ga-pret', () => suivreVueMobile('qg'));
+            chargerScriptMobile('analytics.js?v=1');
         }
 
         // Un "écran vu" par onglet de la barre basse
