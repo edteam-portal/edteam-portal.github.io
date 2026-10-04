@@ -1755,7 +1755,7 @@
             const cr = new Intl.NumberFormat('fr-FR', { notation: 'compact', compactDisplay: 'short' });
             const fC = v => cr.format(v) + ' CR', fN = v => Number(v).toLocaleString('fr-FR');
             let L = [];
-            if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Commerce & Minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Carto. & Exobio)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
+            if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Commerce & Minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Cartographie)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
             else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['🔋 SABOTAGE AU SOL', '#FF3333', M('VOLS') + M('PIRATAGE'), S('VOLS') + S('PIRATAGE'), cap.VOLS, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
             else if (o.type_ordre === 'GUERRE') L = [['🏆 VICTOIRES EN CZ', '#FFD700', Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.nm) || 0, Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0, cap.CZ_VICTOIRES || (5 * nb), fN, ''], ['⚔️ OBLIGATIONS DE COMBAT (Bons)', '#FF7100', M('SECURITE'), S('SECURITE'), cap.GUERRE_BONDS || cap.SECURITE, fC, ''], ['🎯 MISSIONS MILITAIRES', '#FF3333', M('MISSIONS'), S('MISSIONS'), cap.GUERRE_MISSIONS || cap.MISSIONS, fN, ' CONTRATS']];
             else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF']];
@@ -1960,7 +1960,7 @@
                 // 2. LE RESULTAT DU JEU (apres les efforts individuels)
                 xEl('ordre-modal-resultat').innerHTML = `
                     <div class="mdet-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS${donnees ? ' <span style="color: #777; letter-spacing: 0;">· mis à jour ' + xAge(res.maj_edsm) + '</span>' : ''}</div>${corps}
-                    <div style="color: #777; font-size: 0.66em; line-height: 1.5; margin-top: 8px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ».</div>`;
+                    <div style="color: #777; font-size: 0.66em; line-height: 1.5; margin-top: 8px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
             }
             xEl('modal-ordre-details').style.display = 'flex';
         };
@@ -2086,7 +2086,7 @@
                     let col = 'var(--ed-blue)';
                     if (action === 'COLONISATION') col = 'var(--x-gold)';
                     else if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)'; else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)'; else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
-                    const etiquette = action === 'COLONISATION' ? 'COLONISATION · CHANTIER' : ordre ? `OP.#${e.ordre_id} · ${action}` : `SOUTIEN LIBRE · ${action}`;
+                    const etiquette = action === 'COLONISATION' ? 'COLONISATION · CHANTIER' : ordre ? `OP.#${e.ordre_id} · ${action}` : `SOUTIEN LIBRE · ${action === 'SCIENCE' && e.details === 'Exobiologie' ? 'EXOBIOLOGIE' : action}`;
                     const lieu = XESC(String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase());
                     const pr = pointsRang(action, e.valeur);
                     const ptsTxt = !(pr > 0) ? '' : `${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS`;
@@ -3641,7 +3641,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=7', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=8', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

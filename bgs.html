@@ -1185,7 +1185,7 @@
                         ${donnees ? `<div class="bgs-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div><div style="font-size: 0.85em; color: #ccc;">Actifs : <b>${escapeHtml((res.actifs && res.actifs.length ? res.actifs.join(', ') : 'aucun'))}</b>${res.attente && res.attente.length ? `<br>En attente : <b style="color: var(--ed-green, #2fe07a);">${escapeHtml(res.attente.join(', '))}</b>` : ''}${res.recuperation && res.recuperation.length ? `<br>En récupération : <b>${escapeHtml(res.recuperation.join(', '))}</b>` : ''}</div>` : ''}
                     </div>
                 </div>
-                <div style="color: #777; font-size: 0.75em; line-height: 1.5; margin-top: 14px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ».</div>`;
+                <div style="color: #777; font-size: 0.75em; line-height: 1.5; margin-top: 14px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
             const m = document.getElementById('modal-ordre-resultat');
             m.querySelector('.modal-content').style.borderColor = c;
             m.querySelector('.modal-content').style.boxShadow = `0 0 40px ${c}30`;
@@ -1705,7 +1705,7 @@
                                 genererJaugeHTML('📝 LOGISTIQUE (Missions)', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capsTotal['MISSIONS']), 'INF'), 'var(--ed-orange)', getRatio('MISSIONS'), getRatioVous('MISSIONS'), getRatio('MISSIONS') >= 100) +
                                 genererJaugeHTML('💰 ÉCONOMIE (Commerce & Minage)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100) +
                                 genererJaugeHTML('💥 SÉCURITÉ (Primes & Conflits)', fmtDual(formatCR(totauxMoiG['SECURITE']), formatCR(totauxG['SECURITE']), formatCR(capsTotal['SECURITE'])), 'var(--ed-blue)', getRatio('SECURITE'), getRatioVous('SECURITE'), getRatio('SECURITE') >= 100) +
-                                genererJaugeHTML('🔬 SCIENCE (Carto. & Exobio)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
+                                genererJaugeHTML('🔬 SCIENCE (Cartographie)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
 
                         } else if (ordre.type_ordre === 'BAISSE') {
                             const valMoiSabotage = totauxMoiG['VOLS'] + totauxMoiG['PIRATAGE'];
@@ -2344,6 +2344,8 @@
                                 vecteurTexte = "GUERRE";
                             } else if (a.type_action === 'COLONISATION') {
                                 vecteurTexte = "CHANTIER";
+                            } else if (a.type_action === 'SCIENCE' && a.details === 'Exobiologie') {
+                                vecteurTexte = "EXOBIOLOGIE";
                             }
 
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
@@ -2622,6 +2624,6 @@
 
     <script src="plaques-vues.js?v=2"></script>
     <script src="medailles.js?v=3"></script>
-    <script src="footer.js?v=13"></script>
+    <script src="footer.js?v=14"></script>
 </body>
 </html>

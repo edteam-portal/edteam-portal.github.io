@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-plugin-2-8', date: '2026-10-04T16:12:00Z', type: 'CORRIGE',
+        titre: 'Plugin 2.8 : l’exobiologie ne compte plus dans les directives',
+        texte: 'Dans le jeu, vendre des données d’exobiologie ne change pas l’influence d’une faction (seule la cartographie le fait). Elle ne compte donc plus dans les directives de l’Amiral : la jauge Science devient « Cartographie ». L’exobiologie reste prise en compte pour votre rang BGS, en soutien libre, quand vous la vendez dans une station de la faction de votre escadron, et apparaît dans le journal des exploits.',
+        important: true,
+        action: 'Mettez à jour le plugin : EDMC le propose au démarrage, puis redémarrez EDMC.'
+    },
+    {
         id: '2026-10-plugin-2-7', date: '2026-10-04T15:25:00Z', type: 'CORRIGE',
         titre: 'Plugin 2.7 : une vente de marchandises n’est plus comptée comme de la colonisation',
         texte: 'Jusqu’ici, vendre au marché des matériaux de construction (titane, microcontrôleurs…) ou livrer une mission de fret pouvait ajouter à tort des « tonnes de colonisation » à une directive et gonfler le classement. C’est corrigé : la vente reste comptée en commerce, comme avant, et les vraies livraisons aux chantiers de colonisation ne changent pas. Le classement des directives applique aussi le même barème que le rang BGS (400 tonnes de colonisation = 1 point, les échecs ne rapportent rien).',
