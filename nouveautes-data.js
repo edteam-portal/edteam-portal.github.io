@@ -5,13 +5,20 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
-        id: '2026-10-bgs-resultats-directives', date: '2026-10-04T18:00:00Z', type: 'NOUVEAU',
+        id: '2026-10-plugin-2-7', date: '2026-10-04T15:25:00Z', type: 'CORRIGE',
+        titre: 'Plugin 2.7 : une vente de marchandises n’est plus comptée comme de la colonisation',
+        texte: 'Jusqu’ici, vendre au marché des matériaux de construction (titane, microcontrôleurs…) ou livrer une mission de fret pouvait ajouter à tort des « tonnes de colonisation » à une directive et gonfler le classement. C’est corrigé : la vente reste comptée en commerce, comme avant, et les vraies livraisons aux chantiers de colonisation ne changent pas. Le classement des directives applique aussi le même barème que le rang BGS (400 tonnes de colonisation = 1 point, les échecs ne rapportent rien).',
+        important: true,
+        action: 'Mettez à jour le plugin : EDMC le propose au démarrage, puis redémarrez EDMC.'
+    },
+    {
+        id: '2026-10-bgs-resultats-directives', date: '2026-10-04T15:10:00Z', type: 'NOUVEAU',
         titre: 'BGS : le résultat du jeu sur chaque directive',
         texte: 'Chaque directive de l’Amiral affiche maintenant ce que le jeu en a fait : l’influence de la faction, sa variation depuis l’émission de la directive, une mini-courbe, et le score du conflit pour une guerre ou une élection. Un clic ouvre le détail : courbe sur 30 jours, factions voisines, états, et l’effort par type d’action. Les chiffres viennent d’EDSM, relevés deux fois par jour : c’est le résultat constaté dans le jeu, pas la preuve que nos actions en sont la cause. Disponible sur PC et sur le compagnon mobile.',
         important: false
     },
     {
-        id: '2026-10-colonisation-points-rang', date: '2026-10-04T16:00:00Z', type: 'AMELIORE',
+        id: '2026-10-colonisation-points-rang', date: '2026-10-04T14:30:00Z', type: 'AMELIORE',
         titre: 'Colonisation : ses points de rang BGS, et plus de doublon dans les exploits',
         texte: 'Les livraisons de colonisation n’apparaissent plus dans le journal des exploits du BGS (PC et mobile) : elles ont leur propre journal, dans la page Colonisation et l’onglet Bâtir du mobile. Chaque livraison y indique maintenant les points de rang BGS qu’elle rapporte (400 tonnes = 1 point).',
         important: false
