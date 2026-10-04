@@ -564,7 +564,7 @@
                 <div class="xc b click" id="x-fin" onclick="ouvrirBudgetMobile()">
                     <div class="xrow">
                         <div class="xsp">
-                            <div class="xk" style="color: #4fb8c0;">Mes finances · ce cycle</div>
+                            <div class="xk" style="color: #4fb8c0; white-space: nowrap;">Mes finances</div>
                             <div class="xbig" id="x-fin-val" style="font-size: 1.6em; margin-top: 5px; color: var(--ed-green); text-shadow: 0 0 14px rgba(0,255,102,0.3);">---</div>
                         </div>
                         <div style="text-align: right;"><div class="xmut" id="x-fin-var" style="font-size: 0.7em;"></div><div class="xmut" id="x-fin-sub" style="font-size: 0.62em;">budget personnel</div></div>
@@ -583,7 +583,7 @@
                 <!-- CHIFFRES CLES de l'escadron : une ligne, depliable -->
                 <details id="x-chiffres" class="xc" style="display: none; padding: 0;">
                     <summary id="x-chiffres-resume" style="cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px;"></summary>
-                    <div class="xkg" id="x-chiffres-corps" style="padding: 0 12px 12px;"></div>
+                    <div id="x-chiffres-corps" style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;"></div>
                 </details>
 
                 <div class="xh2">COMMUNICATIONS</div>
@@ -640,16 +640,12 @@
                             </div>
                             <strong id="rank-exo" style="color: #fff;">---</strong>
                         </div>
-                        <div class="rank-item" onclick="ouvrirModalGradesMobile('mercenary')" style="cursor: pointer; border-color: #555; background: rgba(255,255,255,0.02);">
+                        <div class="rank-item" onclick="ouvrirModalGradesMobile('mercenary')" style="cursor: pointer; border-color: #555; grid-column: 1 / -1; background: rgba(255,255,255,0.02);">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #888; font-size: 0.85em;">MERCENAIRE</span>
                                 <span id="rank-mercenary-pct" style="color: var(--ed-blue); font-size: 1.2em; font-weight: bold;">--%</span>
                             </div>
                             <strong id="rank-mercenary" style="color: #fff;">---</strong>
-                        </div>
-                        <div class="rank-item" id="m-legal-status-box" style="cursor: pointer; justify-content: center; align-items: center; background: rgba(0, 255, 102, 0.05); border-color: rgba(0, 255, 102, 0.3);" onclick="ouvrirModalLegalMobile()">
-                            <span style="color: #888; font-size: 0.65em; letter-spacing: 1px; margin-bottom: 2px;">STATUT LÉGAL</span>
-                            <strong id="m-legal-status-text" style="color: #00FF66; font-size: 1em; text-align: center;">CASIER VIERGE</strong>
                         </div>
                     </div>
                     </div>
@@ -969,21 +965,6 @@
         </div>
     </div>
 
-    <!-- MODAL STATUT LÉGAL MOBILE -->
-    <div class="modal-overlay" id="modal-legal-status" onclick="document.getElementById('modal-legal-status').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6000; padding: 20px;">
-        <div class="card" id="modal-legal-card" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-color: #00FF66;" onclick="event.stopPropagation()">
-            <div id="modal-legal-header" style="padding: 15px; border-bottom: 1px solid #00FF66; display: flex; justify-content: space-between; align-items: center; background: rgba(0,255,102,0.1);">
-                <span id="modal-legal-title" style="color: #00FF66; font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">⚖️ STATUT LÉGAL</span>
-                <span id="modal-legal-close" style="color: #00FF66; font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-legal-status').style.display='none'">✕</span>
-            </div>
-            <div style="padding: 25px 20px; overflow-y: auto; text-align: center;">
-                <h3 id="modal-legal-notoriety" style="color: #00FF66; margin-top: 0; margin-bottom: 15px; font-size: 1.4em; letter-spacing: 1px;">Niveau de Notoriété : 0</h3>
-                <div id="modal-legal-desc" style="color: #ccc; line-height: 1.6; font-size: 0.95em;">Aucune infraction grave...</div>
-                <button class="m-btn" id="modal-legal-btn" style="margin-top: 25px; width: 100%; border-color: #00FF66; color: #00FF66; background: transparent;" onclick="document.getElementById('modal-legal-status').style.display='none'">[ COMPRIS ]</button>
-            </div>
-        </div>
-    </div>
-
     <!-- FICHE PILOTE MOBILE (feuille) : remplie par ouvrirProfilPiloteMobile -->
     <div class="modal-overlay" id="modal-profil-pilote" onclick="document.getElementById('modal-profil-pilote').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.72); display: none; justify-content: center; align-items: flex-end; z-index: 6000;">
         <div class="card" style="width: 100%; max-height: 92vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
@@ -1017,12 +998,6 @@
                 <div id="m-modal-plaques-bloc" style="display: none;">
                     <div class="xh2" style="margin-top: 0;">PLAQUES DE CAMPAGNE <span id="m-modal-plaques-n" class="xmut"></span></div>
                     <div id="m-modal-plaques" class="xplq" style="margin-top: 10px;"></div>
-                </div>
-
-                <!-- Casier legal -->
-                <div id="m-modal-casier-container" class="xc" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px;">
-                    <span class="xk">Casier légal</span>
-                    <div id="m-modal-notoriety" style="font-size: 0.85em; letter-spacing: 1px; text-align: right;">-</div>
                 </div>
 
                 <!-- Rangs Federation -->
@@ -1399,18 +1374,6 @@
                     xTxt('rank-' + id + '-pct', r.pct);
                 });
 
-                // 4. Statut legal
-                const notoriete = parseInt(p.notoriete) || 0;
-                const legalBox = xEl('m-legal-status-box'), legalText = xEl('m-legal-status-text');
-                if (legalBox && legalText) {
-                    legalBox.dataset.notoriety = notoriete;
-                    const recherche = notoriete > 0;
-                    legalBox.style.background = recherche ? 'rgba(255, 51, 51, 0.05)' : 'rgba(0, 255, 102, 0.05)';
-                    legalBox.style.borderColor = recherche ? 'rgba(255, 51, 51, 0.3)' : 'rgba(0, 255, 102, 0.3)';
-                    legalText.style.color = recherche ? '#FF3333' : '#00FF66';
-                    legalText.innerText = recherche ? 'RECHERCHÉ' : 'CASIER VIERGE';
-                }
-
                 // 5. Barre du bas : BGS (membres avec acces) et Escadron (membres)
                 const navBgs = xEl('nav-btn-bgs'); if (navBgs) navBgs.style.display = xAccesBgs() ? 'flex' : 'none';
                 const navEsc = xEl('nav-btn-escadron'); if (navEsc) navEsc.style.display = xEstMembre() ? 'flex' : 'none';
@@ -1454,7 +1417,8 @@
                 const prevS = aDuCourant ? [bmAddDays(courant, -7)] : [bmAddDays(courant, -14)];
                 const cur = bmAgreger(sems), prev = bmAgreger(prevS);
                 val.style.fontSize = ''; val.style.textShadow = '';
-                val.innerText = bmFmtM(cur.net, true) + ' CR';
+                const netTxt = bmFmtM(cur.net, true);   // les petits montants portent deja "cr"
+                val.innerText = / cr$/.test(netTxt) ? netTxt.replace(/ cr$/, ' CR') : netTxt + ' CR';
                 val.style.color = cur.net >= 0 ? 'var(--ed-green)' : 'var(--ed-red)';
                 const v = bmPct(cur.net, prev.net);
                 if (v === null) vr.innerText = '';
@@ -1555,18 +1519,36 @@
                 }, force);
                 if (!d || !d.escadron) { zone.style.display = 'none'; return; }
                 const st = (val, lib, col) => `<div><b${col ? ` style="color: ${col};"` : ''}>${val}</b><span>${lib}</span></div>`;
+                // meme decoupage et memes libelles que les chiffres cles du QG sur PC
+                const section = (titre, couleur, cases) => {
+                    const l = cases.filter(Boolean);
+                    return `<div><div class="xk" style="color: ${couleur}; margin: 4px 2px 7px;">${titre}</div><div class="xkg" style="grid-template-columns: repeat(${Math.min(3, l.length)}, 1fr);">${l.join('')}</div></div>`;
+                };
                 zone.style.display = 'block';
-                resume.innerHTML = `<div style="min-width: 0; flex: 1;"><div class="xk">L'escadron en chiffres</div><div style="margin-top: 6px; font-size: 0.72em; color: #ccc; line-height: 1.5;"><b style="color: var(--ed-orange); font-weight: normal;">${XF0(d.points_bgs)}</b> pts BGS · <b style="color: var(--ed-blue); font-weight: normal;">${XCOMPACT(d.merites_pp)}</b> mérites · <b style="color: var(--x-gold); font-weight: normal;">${XCOMPACT(d.tonnes)} t</b></div></div><span class="xmut" style="font-size: 1.1em;">▾</span>`;
+                resume.innerHTML = `<div style="min-width: 0; flex: 1;"><div class="xk">L'escadron en chiffres</div><div style="margin-top: 6px; font-size: 0.72em; color: #ccc; line-height: 1.5;"><b style="color: var(--ed-orange); font-weight: normal;">${XF0(d.points_bgs)}</b> pts BGS · <b style="color: var(--ed-blue); font-weight: normal;">${XCOMPACT(d.merites_pp)}</b> mérites Powerplay · <b style="color: var(--x-gold); font-weight: normal;">${XCOMPACT(d.tonnes)} t</b> livrées</div></div><span class="xmut" style="font-size: 1.1em;">▾</span>`;
                 corps.innerHTML = [
-                    st(XF0(d.kos), 'KOS', Number(d.kos) ? 'var(--ed-red)' : ''),
-                    st(XF0(d.suspects), 'SUSPECTS', Number(d.suspects) ? 'var(--ed-orange)' : ''),
-                    st(XF0(d.allies), 'ALLIÉS VIP', Number(d.allies) ? 'var(--ed-green)' : ''),
-                    Number(d.traites) > 0 ? st(XF0(d.traites), 'TRAITÉS') : '',
-                    st(XCOMPACT(d.cr_bgs) + ' CR', 'CR POUR LA BGS'),
-                    st(XF0(d.systemes), 'SYSTÈMES'),
-                    st(XF0(d.stations), 'STATIONS'),
-                    st(XF0(d.chantiers), 'CHANTIERS'),
-                    st(XF0(d.pilotes), 'PILOTES')
+                    section('ESCADRON', 'var(--ed-green)', [
+                        st(XF0(d.pilotes), 'PILOTES INSCRITS'),
+                        Number(d.traites) > 0 ? st(XF0(d.traites), 'TRAITÉS DIPLOMATIQUES') : ''
+                    ]),
+                    section('RENSEIGNEMENT', 'var(--ed-red)', [
+                        st(XF0(d.kos), 'KOS', Number(d.kos) ? 'var(--ed-red)' : ''),
+                        st(XF0(d.suspects), 'SUSPECTS', Number(d.suspects) ? 'var(--ed-orange)' : ''),
+                        st(XF0(d.allies), 'ALLIÉS VIP', Number(d.allies) ? 'var(--ed-green)' : '')
+                    ]),
+                    section('BGS', 'var(--ed-orange)', [
+                        st(XF0(d.points_bgs), 'POINTS BGS CUMULÉS'),
+                        st(XCOMPACT(d.cr_bgs) + ' CR', 'CR GÉNÉRÉS POUR LA BGS')
+                    ]),
+                    section('POWERPLAY', 'var(--ed-blue)', [
+                        st(XCOMPACT(d.merites_pp), 'MÉRITES CUMULÉS DES PILOTES')
+                    ]),
+                    section('COLONISATION', 'var(--x-gold)', [
+                        st(XF0(d.systemes), 'SYSTÈMES COLONISÉS'),
+                        st(XF0(d.stations), 'STATIONS CONSTRUITES'),
+                        st(XF0(d.chantiers), 'CHANTIERS EN COURS'),
+                        st(XCOMPACT(d.tonnes) + ' t', 'LIVRÉES')
+                    ])
                 ].join('');
             } catch (e) {
                 console.error('Erreur chiffres cles (accueil) :', e);
@@ -1769,8 +1751,19 @@
             const prio = ordre.priorite || 3;
             xEl('ordre-modal-prio').innerHTML = prio === 1 ? '<div style="margin-top: 6px;"><span class="xtag" style="color: var(--ed-red); background: rgba(255,51,51,0.15);">⚠ PRIORITÉ CRITIQUE</span></div>'
                 : prio === 2 ? '<div style="margin-top: 6px;"><span class="xtag" style="color: var(--ed-orange); background: rgba(255,113,0,0.12);">⚡ PRIORITÉ HAUTE</span></div>' : '';
-            const officier = ordre.nom_officier_traduit || ordre.auteur_nom || ordre.emetteur_nom || ordre.auteur || 'AMIRAUTÉ';
-            xEl('ordre-modal-auteur').innerText = String(officier).toUpperCase();
+            // signataire = le commandant qui a cree l'ordre (auteur_id -> nom, lu une fois et garde)
+            const zoneAuteur = xEl('ordre-modal-auteur');
+            window.cacheNomsAuteurs = window.cacheNomsAuteurs || {};
+            const nomAuteur = window.cacheNomsAuteurs[ordre.auteur_id];
+            zoneAuteur.innerText = nomAuteur ? nomAuteur : (ordre.auteur_id ? '...' : 'AMIRAUTÉ');
+            if (ordre.auteur_id && !nomAuteur) {
+                const idOrdre = ordre.id;
+                supabaseApp.from('profils_publics').select('cmdr_nom').eq('user_id', ordre.auteur_id).maybeSingle().then(({ data }) => {
+                    const n = String((data && data.cmdr_nom) || 'AMIRAUTÉ').toUpperCase();
+                    window.cacheNomsAuteurs[ordre.auteur_id] = n;
+                    if (xEl('ordre-modal-title').innerText === `DIRECTIVE #${idOrdre}`) zoneAuteur.innerText = n;
+                }).catch(() => { zoneAuteur.innerText = 'AMIRAUTÉ'; });
+            }
             xEl('ordre-modal-brief').innerText = ordre.briefing_amiral || 'Aucun briefing supplémentaire fourni.';
 
             const rs = (window.cacheResumeBgs || {})[ordre.id] || { pilotes: [] };
@@ -1881,25 +1874,47 @@
             try {
                 const dd = await xLireDirectives(false);
                 const ordres = dd.ordres;
-                if (!ordres.length) { cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">Aucune directive en cours. Le journal est vierge.</div>'; return; }
+                // directives en cours + actions libres (colonisation, soutien sans ordre) des 30 derniers jours, comme le journal du PC
                 const efforts = await xCache('exploits', 120000, async () => {
-                    const { data, error } = await supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action').in('ordre_id', ordres.map(o => o.id)).order('date_action', { ascending: false }).limit(50);
+                    const ids = ordres.map(o => o.id);
+                    const filtre = ids.length ? `ordre_id.in.(${ids.join(',')}),ordre_id.is.null` : 'ordre_id.is.null';
+                    const { data, error } = await supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details').or(filtre).gte('date_action', new Date(Date.now() - 30 * 86400000).toISOString()).order('date_action', { ascending: false }).limit(50);
                     if (error) throw error;
                     return data || [];
                 }, force);
                 if (!efforts.length) { cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">En attente de nouveaux rapports de vol.</div>'; return; }
                 const noms = {};
                 dd.resume.forEach(r => (r.pilotes || []).forEach(x => { noms[String(x.u)] = x.nom; }));
+                // pilotes qui n'ont agi que hors directive : on ne lit que les noms manquants
+                window.cacheNomsExploits = window.cacheNomsExploits || {};
+                const manquants = [...new Set(efforts.map(e => String(e.user_id)))].filter(u => !noms[u] && !window.cacheNomsExploits[u]);
+                if (manquants.length) {
+                    const { data: pp } = await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').in('user_id', manquants);
+                    (pp || []).forEach(p => { window.cacheNomsExploits[String(p.user_id)] = p.cmdr_nom; });
+                }
                 const compact = new Intl.NumberFormat('fr-FR', { notation: 'compact', compactDisplay: 'short' });
+                const pointsRang = (type, valeur) => {   // meme bareme que la colonne RANG BGS du PC
+                    const v = Math.abs(Number(valeur) || 0);
+                    if (type === 'ECHECS') return 0;
+                    if (type === 'COLONISATION') return v / 400;
+                    if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
+                    return v > 10000 ? v / 2000000 : v;
+                };
                 cont.innerHTML = efforts.map(e => {
-                    const cmdr = XESC(String(noms[String(e.user_id)] || 'INCONNU').toUpperCase());
+                    const cmdr = XESC(String(noms[String(e.user_id)] || window.cacheNomsExploits[String(e.user_id)] || 'INCONNU').toUpperCase());
                     const action = (e.type_action || 'ACTION').toUpperCase();
                     const ordre = ordres.find(o => String(o.id) === String(e.ordre_id));
                     const typeOrdre = ordre ? String(ordre.type_ordre).toUpperCase() : 'BGS';
                     let col = 'var(--ed-blue)';
-                    if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)'; else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)'; else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
+                    if (action === 'COLONISATION') col = 'var(--x-gold)';
+                    else if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)'; else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)'; else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
+                    const etiquette = action === 'COLONISATION' ? 'COLONISATION · CHANTIER' : ordre ? `OP.#${e.ordre_id} · ${action}` : `SOUTIEN LIBRE · ${action}`;
+                    const lieu = XESC(String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase());
+                    const pr = pointsRang(action, e.valeur);
+                    const ptsTxt = !(pr > 0) ? '' : `${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS`;
                     let q = e.valeur;
-                    if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) q = '+' + compact.format(e.valeur) + ' CR';
+                    if (action === 'COLONISATION') q = `+${Number(e.valeur).toLocaleString('fr-FR')} T${e.details ? ' (' + String(e.details).replace(/^Livraison de colonisation\s*:\s*/i, '') + ')' : ''}`;
+                    else if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) q = '+' + compact.format(e.valeur) + ' CR';
                     else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(action)) q = `+${e.valeur} INF`;
                     else if (action === 'ECHECS') q = `${e.valeur} ÉCHEC${e.valeur > 1 ? 'S' : ''}`;
                     else if (action === 'MEURTRES') q = `${e.valeur} MEURTRE${e.valeur > 1 ? 'S' : ''}`;
@@ -1910,7 +1925,8 @@
                     const quand = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                     return `<div class="xc exploit-item" style="padding: 10px 12px; border-left: 3px solid ${col}; border-radius: 6px 14px 14px 6px;">
                         <div class="xrow"><span style="color: #fff; font-size: 0.85em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">CMDR ${cmdr}</span><span class="xsp"></span><span class="xmut" style="font-size: 0.62em;">${quand}</span></div>
-                        <div class="xrow" style="margin-top: 5px;"><span class="xmut" style="color: ${col};">OP.#${XESC(e.ordre_id)} · ${XESC(action)}</span><span class="xsp"></span><span style="color: ${col}; font-size: 0.82em; font-weight: bold;">${XESC(q)}</span></div>
+                        <div class="xrow" style="margin-top: 5px;"><span class="xmut" style="color: ${col};">${XESC(etiquette)}</span><span class="xsp"></span><span style="color: ${col}; font-size: 0.82em; font-weight: bold; text-align: right;">${XESC(q)}</span></div>
+                        ${(lieu || ptsTxt) ? `<div class="xrow" style="margin-top: 4px;"><span class="xmut" style="font-size: 0.62em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${lieu}</span><span class="xsp"></span><span style="color: var(--ed-orange); font-size: 0.66em; font-weight: bold; white-space: nowrap;">${ptsTxt}</span></div>` : ''}
                     </div>`;
                 }).join('');
                 window.filtrerJournalExploitsMobile();
@@ -2241,54 +2257,6 @@
             if (typeof sonClic === 'function') sonClic();
             document.getElementById('modal-registre-tactique').style.display = 'flex';
         }
-
-        window.ouvrirModalLegalMobile = function() {
-            if (typeof sonClic === 'function') sonClic();
-            const legalBox = document.getElementById("m-legal-status-box");
-            if (!legalBox) return;
-            
-            const notoriete = parseInt(legalBox.dataset.notoriety) || 0;
-            
-            // Éléments de la modale
-            const modal = document.getElementById('modal-legal-status');
-            const card = document.getElementById('modal-legal-card');
-            const header = document.getElementById('modal-legal-header');
-            const title = document.getElementById('modal-legal-title');
-            const closeBtn = document.getElementById('modal-legal-close');
-            const notorietyText = document.getElementById('modal-legal-notoriety');
-            const descText = document.getElementById('modal-legal-desc');
-            const okBtn = document.getElementById('modal-legal-btn');
-            
-            // Couleurs par défaut (Sain)
-            let color = "#00FF66";
-            let bgHeader = "rgba(0,255,102,0.1)";
-            let status = "SAIN";
-            let desc = "Aucune infraction grave récente n'est enregistrée.<br><br>Vous avez un accès total aux services de la Fédération des Pilotes et des spatioports locaux.";
-            
-            // Couleurs de crime (Recherché)
-            if (notoriete > 0) {
-                color = "#FF3333";
-                bgHeader = "rgba(255,51,51,0.1)";
-                status = "SOUS SURVEILLANCE";
-                desc = "La Notoriété augmente lorsque vous abattez des vaisseaux non recherchés.<br><br>Chaque point nécessite <strong>2 heures de jeu actif</strong> pour se dissiper.<br><br>Tant qu'elle n'est pas à 0, vous ne pouvez pas utiliser les terminaux de l'autorité pour payer vos amendes.";
-            }
-            
-            // Application du style
-            card.style.borderColor = color;
-            header.style.background = bgHeader;
-            header.style.borderBottomColor = color;
-            title.style.color = color;
-            title.innerHTML = `⚖️ STATUT LÉGAL : ${status}`;
-            closeBtn.style.color = color;
-            okBtn.style.color = color;
-            okBtn.style.borderColor = color;
-            
-            notorietyText.style.color = color;
-            notorietyText.innerHTML = `NIVEAU DE NOTORIÉTÉ : <strong>${notoriete}</strong>`;
-            descText.innerHTML = desc;
-            
-            modal.style.display = 'flex';
-        };
 
         // ==========================================
         // GRADES MILITAIRES
@@ -2640,17 +2608,6 @@
                 document.getElementById('m-modal-rank-merc').innerHTML = formatRank(TABLES_ED_RANGS.mercenary, profil.rang_mercenary, profil.prog_mercenary);
                 document.getElementById('m-modal-rank-fed').innerHTML = profil.rang_fed > 0 ? formatRank(TABLES_ED_RANGS.federation, profil.rang_fed, profil.prog_fed) : '<span style="color: #666;">AUCUN</span>';
                 document.getElementById('m-modal-rank-emp').innerHTML = profil.rang_emp > 0 ? formatRank(TABLES_ED_RANGS.empire, profil.rang_emp, profil.prog_emp) : '<span style="color: #666;">AUCUN</span>';
-
-                // --- CASIER LEGAL ---
-                const noto = profil.notoriete || 0;
-                const casierContainer = document.getElementById('m-modal-casier-container'), notorietyText = document.getElementById('m-modal-notoriety');
-                if (noto > 0) {
-                    casierContainer.style.borderColor = 'rgba(255,51,51,0.5)'; casierContainer.style.background = 'rgba(255,51,51,0.08)';
-                    notorietyText.innerHTML = `<span style="color: #FF3333;">RECHERCHÉ (${noto})</span>`;
-                } else {
-                    casierContainer.style.borderColor = 'rgba(0,255,102,0.35)'; casierContainer.style.background = 'rgba(0,255,102,0.05)';
-                    notorietyText.innerHTML = '<span style="color: #00FF66;">CASIER VIERGE</span>';
-                }
 
                 document.getElementById('modal-profil-pilote').style.display = 'flex';
             } catch (err) {
