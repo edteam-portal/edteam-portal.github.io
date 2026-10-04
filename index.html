@@ -36,7 +36,7 @@
     <script src="quoifaire.js?v=5"></script>
     <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=16"></script>
+    <script src="navigation.js?v=17"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -281,8 +281,8 @@
     </div>
 
     <!-- NOUVEAU SAS DE SÉCURITÉ (STYLE MINISITE) -->
-    <div id="sas-screen" class="failsafe-overlay" style="display: none; z-index: 10005; background-color: var(--ed-bg);">
-        <div class="failsafe-content" style="max-width: 750px; border-color: var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.15); animation: none; padding: 40px;">
+    <div id="sas-screen" class="failsafe-overlay" style="display: none; z-index: 10005; background-color: var(--ed-bg); flex-direction: column; justify-content: flex-start; overflow-y: auto;">
+        <div class="failsafe-content" style="width: 100%; box-sizing: border-box; max-width: 750px; margin-top: auto; border-color: var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.15); animation: none; padding: 40px;">
             
             <!-- LOGO EDTEAM -->
             <svg class="app-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 70px; width: 70px; filter: drop-shadow(0 0 10px var(--ed-orange-glow)); margin: 0 auto 15px auto; display: block;">
@@ -311,7 +311,7 @@
                 <div id="sas-code-zone" style="display: none; margin: -10px 0 22px 0; text-align: left;">
                     <label for="sas-code" style="display: block; color: #888; font-size: 0.95em; margin-bottom: 6px; letter-spacing: 1px;">CODE D'INVITATION DE L'ESCADRON :</label>
                     <input type="text" id="sas-code" maxlength="12" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid var(--ed-orange); color: #fff; padding: 11px; font-family: 'Share Tech Mono', monospace; font-size: 1.2em; letter-spacing: 4px; text-transform: uppercase; text-align: center;">
-                    <div style="color: #777; font-size: 0.8em; line-height: 1.5; margin-top: 6px;">Donné par l'Amiral de votre escadron. <b style="color: #aaa;">Si vous êtes l'Amiral</b> et que l'escadron n'est pas encore sur EDTEAM, laissez ce champ vide.</div>
+                    <div style="color: #777; font-size: 0.8em; line-height: 1.5; margin-top: 6px;">Donné par l'Amiral ou un officier de votre escadron. <b style="color: #aaa;">Si vous êtes l'Amiral</b> et que l'escadron n'est pas encore sur EDTEAM, laissez ce champ vide.</div>
                 </div>
                 <div id="sas-msg" style="display: none; margin: 0 0 18px 0; padding: 12px 14px; border: 1px solid #FF3333; border-left: 4px solid #FF3333; background: rgba(255,51,51,0.08); color: #ddd; line-height: 1.55; text-align: left; font-size: 0.95em;"></div>
 
@@ -387,6 +387,7 @@
             </div>
 
         </div>
+        <footer id="footer-sas"></footer>
     </div>
 
     <!-- BOOT SCREEN -->
@@ -1490,7 +1491,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             zone.innerHTML = '<div class="bloc cy"><h2>PILOTE INDÉPENDANT <em>rejoindre un escadron</em></h2>'
                 + '<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">'
                 + '<div style="flex: 1 1 320px; min-width: 0; line-height: 1.55;">'
-                + '<span style="color: #ccc;">Votre Amiral vous a donné un <b>code d\'invitation</b> ? Saisissez-le pour rejoindre votre escadron.</span>'
+                + '<span style="color: #ccc;">Votre Amiral (ou un officier) vous a donné un <b>code d\'invitation</b> ? Saisissez-le pour rejoindre votre escadron.</span>'
                 + '<div id="rejoindre-msg" style="margin-top: 6px; font-size: .9em;"></div></div>'
                 + '<div style="display: flex; gap: 8px; align-items: center;">'
                 + '<input type="text" id="rejoindre-code" maxlength="12" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX" onkeydown="if(event.key===\'Enter\') rejoindreEscadronParCode()" style="width: 150px; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid #00F0FF; color: #fff; padding: 9px; font-family: \'Share Tech Mono\', monospace; font-size: 1.05em; letter-spacing: 3px; text-transform: uppercase; text-align: center;">'
@@ -1501,7 +1502,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const champ = document.getElementById('rejoindre-code'), msg = document.getElementById('rejoindre-msg'), btn = document.getElementById('rejoindre-btn');
             if (!champ || !msg || !supabaseApp) return;
             const code = champ.value.trim();
-            if (!code) { msg.style.color = '#FF7100'; msg.innerText = 'Saisissez le code donné par votre Amiral.'; return; }
+            if (!code) { msg.style.color = '#FF7100'; msg.innerText = 'Saisissez le code donné par votre Amiral ou un officier.'; return; }
             btn.disabled = true; msg.style.color = '#aaa'; msg.innerText = 'Vérification…';
             try {
                 const { data, error } = await supabaseApp.rpc('rejoindre_escadron', { p_code: code });
@@ -1513,9 +1514,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     return;
                 }
                 const textes = {
-                    CODE_INVALIDE: 'Code invalide : vérifiez-le auprès de votre Amiral (il a pu être renouvelé). Après 5 essais ratés, la saisie est bloquée une heure.',
+                    CODE_INVALIDE: 'Code invalide : vérifiez-le auprès de votre Amiral ou d’un officier (il a pu être renouvelé). Après 5 essais ratés, la saisie est bloquée une heure.',
                     TROP_DE_TENTATIVES: 'Trop d\'essais : la saisie est bloquée pendant une heure.',
-                    NOM_DEJA_PRIS: 'Un autre pilote de cet escadron porte déjà votre nom de commandant : contactez votre Amiral.',
+                    NOM_DEJA_PRIS: 'Un autre pilote de cet escadron porte déjà votre nom de commandant : contactez votre Amiral ou un officier.',
                     NON_APPROUVE: 'Votre accréditation n\'est pas terminée : passez par le sas de sécurité.'
                 };
                 msg.style.color = '#FF7100'; msg.innerText = textes[data] || ('Réponse inattendue du serveur (' + data + ').');
@@ -2694,10 +2695,10 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 btn.disabled = false;
                 const nomEsc = escapeHtml(String(window.sasCacheSquad || '').toUpperCase());
                 if (reponse === 'CODE_REQUIS') {
-                    messageSas('<b style="color: #FF7100;">CODE D\'INVITATION REQUIS.</b> L\'escadron <b>' + nomEsc + '</b> est déjà sur EDTEAM : saisissez le code donné par votre Amiral, puis certifiez à nouveau.'
+                    messageSas('<b style="color: #FF7100;">CODE D\'INVITATION REQUIS.</b> L\'escadron <b>' + nomEsc + '</b> est déjà sur EDTEAM : saisissez le code donné par votre Amiral ou un officier, puis certifiez à nouveau.'
                         + (rank === 0 ? '<br><br><b style="color: #fff;">Vous êtes l\'Amiral de cet escadron sans l\'avoir inscrit ?</b> Rejoignez le Discord et prévenez l\'administrateur.<br>' + LIEN_DISCORD_SAS : ''), '#FF7100');
                 } else if (reponse === 'CODE_INVALIDE') {
-                    messageSas('<b>CODE INVALIDE.</b> Vérifiez-le auprès de votre Amiral (il a pu être renouvelé). Après 5 essais ratés, la saisie est bloquée une heure.');
+                    messageSas('<b>CODE INVALIDE.</b> Vérifiez-le auprès de votre Amiral ou d’un officier (il a pu être renouvelé). Après 5 essais ratés, la saisie est bloquée une heure.');
                 } else if (reponse === 'TROP_DE_TENTATIVES') {
                     messageSas('<b>TROP D\'ESSAIS.</b> Pour votre sécurité, la saisie du code est bloquée pendant une heure. Réessayez plus tard.');
                 } else if (reponse === 'ESCADRON_INCONNU') {
@@ -2708,7 +2709,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 } else if (reponse === 'ESCADRON_INVALIDE') {
                     messageSas('<b>NOM D\'ESCADRON ILLISIBLE.</b> Relancez le jeu avec le plugin actif, puis réessayez.');
                 } else if (reponse === 'NOM_DEJA_PRIS') {
-                    messageSas('<b>NOM DÉJÀ PRIS.</b> Un autre pilote de cet escadron porte déjà ce nom de commandant. Contactez votre Amiral.');
+                    messageSas('<b>NOM DÉJÀ PRIS.</b> Un autre pilote de cet escadron porte déjà ce nom de commandant. Contactez votre Amiral ou un officier.');
                 } else if (reponse === 'NOM_INVALIDE') {
                     messageSas('<b>NOM DE COMMANDANT ILLISIBLE.</b> Relancez le jeu avec le plugin actif, puis réessayez.');
                 } else {
@@ -3358,6 +3359,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="footer.js?v=15"></script>
+    <script src="footer.js?v=16"></script>
 </body>
 </html>

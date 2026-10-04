@@ -128,6 +128,16 @@ function injecterArchitectureGlobale() {
 
             </div>
             <div style="display: flex; align-items: center; justify-content: flex-end; flex-grow: 1; padding-right: 5px; gap: 8px;">
+                    <div id="header-inscriptions" onclick="ouvrirInscriptionsEnCours()"
+                        style="display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 4px 14px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
+                        title="Comptes créés mais pas encore finalisés au sas (visible du Directeur seulement)">
+                        <div class="stats-lib" style="color: #888; font-size: 0.75em; font-weight: bold;">INSCRIPTIONS EN COURS</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span><span id="insc-nb" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">COMPTES</span></span>
+                            <span style="color:#333;">|</span>
+                            <span style="color:#666; font-size:0.7em;">PLUS ANCIEN : <span id="insc-ancien" style="color: #FF7100; font-size: 1.15em; font-weight: bold;">--</span></span>
+                        </div>
+                    </div>
                     <div id="stats-pilotes-box"
                         style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: help; white-space: nowrap; box-sizing: border-box;"
                         onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>durant les 30 derniers jours,<br>tous escadrons confondus.</span>', '#00FF66')"
@@ -263,6 +273,7 @@ if (document.readyState === 'loading') {
 // Profil Header
 window.actualiserHeader = function(profilData) {
     if (!profilData) return;
+    if (typeof window.actualiserInscriptionsEnCours === 'function') window.actualiserInscriptionsEnCours();
     if (profilData.cmdr_nom) {
         const elCmdr = document.getElementById('cmdr-name-display');
         if (elCmdr) elCmdr.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase();
@@ -493,44 +504,90 @@ window.deconnexion = async function() {
     window.location.href = 'index.html'; 
 };
 
+// Plus aucun compteur de demandes (l'accreditation est automatique, les conflits se reglent sur le Discord) : on masque les anciennes pastilles.
 window.actualiserBadgeAmiraute = async function() {
-    if (typeof profilCommandant === 'undefined' || !profilCommandant) return;
-    
-    const badgeDirecteur = document.getElementById('badge-amiraute'); 
-    const badgeEscadron = document.getElementById('badge-escadron'); 
-    
-    let totalDirecteur = 0;
-    let totalEscadron = 0;
-
-    try {
-        if (profilCommandant.est_directeur) {
-            const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).neq('est_approuve', true);
-            if (!error && count) totalDirecteur = count;
-        }
-        
-        if (profilCommandant.est_amiral && profilCommandant.escadron_id) {
-            const { count, error } = await supabaseApp.from('profils').select('*', { count: 'exact', head: true }).eq('demande_escadron', profilCommandant.escadron_id);
-            if (!error && count) totalEscadron = count;
-        }
-
-        if (badgeDirecteur) {
-            badgeDirecteur.innerText = totalDirecteur;
-            badgeDirecteur.style.display = totalDirecteur > 0 ? 'inline-block' : 'none';
-        }
-
-        if (badgeEscadron) {
-            badgeEscadron.innerText = totalEscadron;
-            badgeEscadron.style.display = totalEscadron > 0 ? 'inline-block' : 'none';
-        }
-
-        const badgeOngletDir = document.getElementById('badge-onglet-directeur');
-        if (badgeOngletDir) { badgeOngletDir.innerText = totalDirecteur; badgeOngletDir.style.display = totalDirecteur > 0 ? 'inline-block' : 'none'; }
-
-        const badgeOngletEscadron = document.getElementById('badge-onglet-escadron');
-        if (badgeOngletEscadron) { badgeOngletEscadron.innerText = totalEscadron; badgeOngletEscadron.style.display = totalEscadron > 0 ? 'inline-block' : 'none'; }
-
-    } catch (e) { console.error("Erreur calcul des badges", e); }
+    ['badge-amiraute', 'badge-escadron', 'badge-onglet-directeur', 'badge-onglet-escadron'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 };
+
+// ==========================================
+// INSCRIPTIONS EN COURS (Directeur seulement) : comptes crees mais pas finalises au sas
+// Le nettoyage automatique (script SQL 55) supprime chaque nuit ceux de plus de 7 jours sans aucune donnee du plugin.
+// ==========================================
+(function () {
+    const CLE = 'edteam_inscriptions_cache';
+    const echapper = x => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const pad = n => String(n).padStart(2, '0');
+    const dateFr = d => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    const jourFr = d => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+    function duree(ms) {
+        const min = Math.max(0, Math.floor(ms / 60000));
+        if (min < 60) return min + ' min';
+        const h = Math.floor(min / 60);
+        if (h < 48) return h + ' h';
+        return Math.floor(h / 24) + ' j ' + (h % 24) + ' h';
+    }
+    async function lister(force) {
+        try {
+            const brut = sessionStorage.getItem(CLE);
+            if (!force && brut) { const c = JSON.parse(brut); if (Date.now() - c.t < 3 * 60 * 1000) return c.l; }
+        } catch (e) { /* stockage indisponible : on interroge la base */ }
+        if (typeof supabaseApp === 'undefined') return null;
+        const { data, error } = await supabaseApp.from('profils').select('user_id, created_at, cmdr_nom')
+            .or('est_approuve.is.null,est_approuve.eq.false').order('created_at', { ascending: true });
+        if (error) return null;
+        const l = data || [];
+        try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), l: l })); } catch (e) { /* rien */ }
+        return l;
+    }
+    window.actualiserInscriptionsEnCours = async function (force) {
+        const boite = document.getElementById('header-inscriptions');
+        if (!boite) return;
+        if (typeof profilCommandant === 'undefined' || !profilCommandant || !profilCommandant.est_directeur) { boite.style.display = 'none'; return; }
+        const l = await lister(force);
+        if (!l) return;
+        boite.style.display = 'flex';
+        document.getElementById('insc-nb').innerText = l.length;
+        document.getElementById('insc-ancien').innerText = l.length ? duree(Date.now() - new Date(l[0].created_at).getTime()) : '—';
+    };
+    window.ouvrirInscriptionsEnCours = async function () {
+        if (typeof sonClic === 'function') sonClic();
+        let ov = document.getElementById('modal-inscriptions');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'modal-inscriptions';
+            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;z-index:6000;padding:15px;box-sizing:border-box;';
+            ov.addEventListener('click', e => { if (e.target === ov) ov.style.display = 'none'; });
+            document.body.appendChild(ov);
+        }
+        ov.innerHTML = '<div class="bloc" style="width:100%;max-width:680px;max-height:88vh;overflow-y:auto;"><h2>INSCRIPTIONS EN COURS <em>comptes créés, pas encore finalisés au sas</em></h2><div style="color:#888;">Chargement…</div></div>';
+        ov.style.display = 'flex';
+        const l = await lister(true);
+        window.actualiserInscriptionsEnCours();
+        let h = '<div style="position:absolute;top:10px;right:16px;color:var(--ed-orange);cursor:pointer;font-weight:bold;font-size:1.2em;" onclick="document.getElementById(\'modal-inscriptions\').style.display=\'none\'">X</div>';
+        h += '<h2>INSCRIPTIONS EN COURS <em>comptes créés, pas encore finalisés au sas</em></h2>';
+        if (!l) h += '<div style="color:#FF3333;">Impossible de lire la liste pour le moment.</div>';
+        else if (!l.length) h += '<div style="color:#666;font-style:italic;text-align:center;padding:18px;">Aucune inscription en cours.</div>';
+        else {
+            h += '<div style="color:#888;font-size:.85em;margin-bottom:10px;line-height:1.5;">Du plus ancien au plus récent. Un compte jamais finalisé, sans aucune donnée du plugin, est supprimé automatiquement chaque nuit après 7 jours.</div>';
+            h += '<table style="width:100%;border-collapse:collapse;font-size:.9em;"><thead><tr style="color:#888;text-align:left;border-bottom:1px solid #444;"><th style="padding:6px 8px;">INSCRIT LE</th><th style="padding:6px 8px;">DEPUIS</th><th style="padding:6px 8px;">NOM DÉTECTÉ</th><th style="padding:6px 8px;">NETTOYAGE</th></tr></thead><tbody>';
+            const maintenant = Date.now();
+            l.forEach(p => {
+                const d = new Date(p.created_at), age = maintenant - d.getTime(), fin = new Date(d.getTime() + 7 * 86400000);
+                const reste = fin.getTime() - maintenant;
+                h += '<tr style="border-bottom:1px solid rgba(255,255,255,.07);"><td style="padding:7px 8px;color:#ddd;">' + dateFr(d) + '</td>'
+                    + '<td style="padding:7px 8px;color:#FF7100;font-weight:bold;">' + duree(age) + '</td>'
+                    + '<td style="padding:7px 8px;color:' + (p.cmdr_nom ? '#00FF66' : '#666') + ';">' + (p.cmdr_nom ? 'CMDR ' + echapper(String(p.cmdr_nom).toUpperCase()) : 'pas encore') + '</td>'
+                    + '<td style="padding:7px 8px;color:#888;">' + (reste > 0 ? 'le ' + jourFr(fin) + ' (dans ' + duree(reste) + ')' : 'cette nuit (sauf données du plugin)') + '</td></tr>';
+            });
+            h += '</tbody></table>';
+        }
+        ov.innerHTML = '<div class="bloc" style="position:relative;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;">' + h + '</div>';
+        ov.style.display = 'flex';
+    };
+})();
 
 // ==========================================
 // 4. GESTION DU COMPTE (GLOBAL)

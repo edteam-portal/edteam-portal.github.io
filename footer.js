@@ -166,9 +166,11 @@
             + '</div>'
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>'; }
         pied.innerHTML = contenuPied(visiteur);
-        // Page de connexion (index.html) : meme pied de page que la presentation (version visiteur), dans le sas d'identification
-        var pa = document.getElementById('footer-auth');
-        if (pa) { pa.className = 'ft-edteam ft-flux ft-auth'; pa.innerHTML = contenuPied(true); }
+        // Page de connexion et sas de securite (index.html) : meme pied de page que la presentation (version visiteur)
+        ['footer-auth', 'footer-sas'].forEach(function (id) {
+            var pa = document.getElementById(id);
+            if (pa) { pa.className = 'ft-edteam ft-flux ft-auth'; pa.innerHTML = contenuPied(true); }
+        });
 
         if (window.edteamSon) window.edteamSon.majUI();
         // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
