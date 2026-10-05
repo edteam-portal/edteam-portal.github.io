@@ -1450,8 +1450,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             } else { 
                 // Nouveau compte créé avec succès
                 msg.style.color = "#00FF66"; 
-                msg.innerText = "> SUCCÈS. OUVERTURE DU SAS..."; 
-                setTimeout(() => { verifierApprobation(data.user); }, 1500);
+                msg.innerText = (data && data.session) ? "> SUCCÈS. OUVERTURE DU SAS..." : "> ENREGISTREMENT REÇU. VÉRIFIEZ VOTRE BOÎTE MAIL : CLIQUEZ SUR LE LIEN DE CONFIRMATION, PUIS REVENEZ VOUS CONNECTER ICI (PENSEZ À REGARDER LES COURRIERS INDÉSIRABLES). SI VOUS AVEZ DÉJÀ UN COMPTE, UTILISEZ SIMPLEMENT LA CONNEXION.";
+                // Confirmation par email activee : pas de session tant que le lien n'est pas clique, on n'ouvre donc pas le sas
+                if (data && data.session) setTimeout(() => { verifierApprobation(data.user); }, 1500);
             }
         }
 
