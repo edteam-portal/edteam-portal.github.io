@@ -5,6 +5,7 @@
 //   1. priorite de la directive fixee par l'Amiral ou un officier (1 critique, 2 haute, 3 normale) ;
 //   2. a priorite egale : l'activite la plus en retard (jauge la moins remplie, au pourcent pres) ;
 //   3. a retard egal : l'activite qui correspond au style de jeu du pilote.
+//   Exception (05/10) : un style CHOISI A LA MAIN passe avant le retard de la jauge (la priorite du commandement reste devant).
 //   La colonisation vient apres les directives ; le rang et le Powerplay ne sont jamais la recommandation.
 // Les plafonds des directives = ceux de bgs.html (calculerPlafonds + plafonds personnalises x pilotes actifs du cycle) : a garder identiques.
 (function () {
@@ -101,11 +102,13 @@
             (d.ordres || []).forEach(o => {
                 const acts = activitesOrdre(o, resume[o.id] || {}).filter(a => a.ratio < 100 && a.reste > 0);
                 if (!acts.length) return;
-                acts.sort((a, b) => (Math.round(a.ratio) - Math.round(b.ratio)) || ((b.style === styleSouhaite) - (a.style === styleSouhaite)));
+                // style choisi a la main : il passe avant le retard de la jauge (jamais avant la priorite du commandement) ; en automatique il ne depart que les egalites
+                const pref = (a, b) => styleForce ? ((b.style === styleForce) - (a.style === styleForce)) : 0;
+                acts.sort((a, b) => pref(a, b) || (Math.round(a.ratio) - Math.round(b.ratio)) || ((b.style === styleSouhaite) - (a.style === styleSouhaite)));
                 const a = acts[0];
                 cands.push({ o, a, prio: o.priorite || 3 });
             });
-            cands.sort((x, y) => (x.prio - y.prio) || (Math.round(x.a.ratio) - Math.round(y.a.ratio))
+            cands.sort((x, y) => (x.prio - y.prio) || (styleForce ? ((y.a.style === styleForce) - (x.a.style === styleForce)) : 0) || (Math.round(x.a.ratio) - Math.round(y.a.ratio))
                 || ((y.a.style === styleSouhaite) - (x.a.style === styleSouhaite)) || (Date.parse(x.o.date_emission) - Date.parse(y.o.date_emission)));
         }
         const idees = cands.map(c => {

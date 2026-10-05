@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-quoi-faire-style', date: '2026-10-05T16:20:00Z', type: 'CORRIGE',
+        titre: 'Quoi faire : le style de jeu choisi change vraiment les idées',
+        texte: 'Quand vous choisissez votre style (combat, marchand, exploration ou logistique) tout en bas de « Quoi faire », les idées proposées s’adaptent maintenant à vos habitudes. Avant, ce choix ne servait qu’à départager des cas à égalité et on ne voyait rien changer. La priorité fixée par le commandement reste toujours en tête, et le mode « automatique » fonctionne comme avant.',
+        important: false
+    },
+    {
         id: '2026-10-code-invitation', date: '2026-10-04T18:20:00Z', type: 'NOUVEAU',
         titre: 'Escadrons : un code d’invitation pour les rejoindre',
         texte: 'Pour protéger votre escadron, on le rejoint désormais avec un code d’invitation que l’Amiral (et les officiers) retrouvent en haut de la page Escadron, et qu’il peut renouveler. Le code se saisit au sas de sécurité, ou depuis le QG pour un pilote déjà inscrit comme indépendant. Votre rôle (Officier, Amiral) reste repris automatiquement de votre grade en jeu. Un escadron est inscrit par son Amiral, à sa première connexion avec le plugin. La page de connexion affiche aussi le même pied de page que la présentation.',
