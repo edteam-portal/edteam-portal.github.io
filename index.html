@@ -266,8 +266,9 @@
             <input type="email" id="auth-email" class="auth-input" placeholder="EMAIL COMMANDANT">
             <input type="password" id="auth-password" class="auth-input" placeholder="MOT DE PASSE">
             
-            <button class="auth-btn" id="btn-login" onclick="tenterConnexion()">CONNEXION (PILOTES ACCRÉDITÉS)</button>
-            <button class="auth-btn" id="btn-register" style="border-color: #555; color: #aaa;" onclick="tenterInscription()">DEMANDE D'ACCES</button>
+            <button class="auth-btn" id="btn-login" onclick="tenterConnexion()">SE CONNECTER</button>
+            <button class="auth-btn" id="btn-register" style="border-color: #555; color: #aaa;" onclick="tenterInscription()">CRÉER UN COMPTE</button>
+            <div style="margin-top: 12px; color: #888; font-size: 0.75em; line-height: 1.5; letter-spacing: 0.5px;">Première visite ? Créez un compte, confirmez votre email, puis connectez-vous. Vous demanderez ensuite l'accès à votre escadron.</div>
             
             <div id="auth-msg" style="margin-top: 15px; font-weight: bold;"></div>
         </div>
@@ -1450,7 +1451,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             } else { 
                 // Nouveau compte créé avec succès
                 msg.style.color = "#00FF66"; 
-                msg.innerText = (data && data.session) ? "> SUCCÈS. OUVERTURE DU SAS..." : "> ENREGISTREMENT REÇU. VÉRIFIEZ VOTRE BOÎTE MAIL : CLIQUEZ SUR LE LIEN DE CONFIRMATION, PUIS REVENEZ VOUS CONNECTER ICI (PENSEZ À REGARDER LES COURRIERS INDÉSIRABLES). SI VOUS AVEZ DÉJÀ UN COMPTE, UTILISEZ SIMPLEMENT LA CONNEXION.";
+                msg.innerText = (data && data.session) ? "> SUCCÈS. OUVERTURE DU SAS..." : "> EMAIL DE CONFIRMATION ENVOYÉ. CLIQUEZ SUR LE LIEN REÇU (VÉRIFIEZ LES SPAMS), PUIS REVENEZ ICI ET CLIQUEZ SUR « SE CONNECTER ». SI VOUS AVEZ DÉJÀ UN COMPTE, CLIQUEZ SIMPLEMENT SUR « SE CONNECTER ».";
                 // Confirmation par email activee : pas de session tant que le lien n'est pas clique, on n'ouvre donc pas le sas
                 if (data && data.session) setTimeout(() => { verifierApprobation(data.user); }, 1500);
             }
