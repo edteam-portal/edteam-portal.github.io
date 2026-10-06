@@ -2083,7 +2083,7 @@
                     const action = (e.type_action || 'ACTION').toUpperCase();
                     const ordre = ordres.find(o => String(o.id) === String(e.ordre_id));
                     const typeOrdre = ordre ? String(ordre.type_ordre).toUpperCase() : 'BGS';
-                    let col = 'var(--ed-blue)';
+                    let col = ordre ? 'var(--ed-blue)' : '#B388FF';
                     if (action === 'COLONISATION') col = 'var(--x-gold)';
                     else if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)'; else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)'; else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
                     const etiquette = action === 'COLONISATION' ? 'COLONISATION · CHANTIER' : ordre ? `OP.#${e.ordre_id} · ${action}` : `SOUTIEN LIBRE · ${action === 'SCIENCE' && e.details === 'Exobiologie' ? 'EXOBIOLOGIE' : action}`;

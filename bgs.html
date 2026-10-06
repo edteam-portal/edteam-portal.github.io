@@ -2305,7 +2305,7 @@
                             
                             let typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "LIBRE";
                             let badgeOrdreTexte = ordreConcerne ? `#${ordreConcerne.id} | ${typeOrdre}` : "SOUTIEN LIBRE";
-                            let colorOrdre = 'var(--ed-blue)';
+                            let colorOrdre = ordreConcerne ? 'var(--ed-blue)' : '#B388FF';
 
                             if (a.type_action === 'COLONISATION') {
                                 typeOrdre = "COLONISATION";
