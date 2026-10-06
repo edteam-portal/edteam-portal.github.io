@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-soutien-libre', date: '2026-10-06T21:50:00Z', type: 'CORRIGE',
+        titre: 'Soutien libre : vos actions pour la faction de l’escadron comptent enfin',
+        texte: 'Jusqu’ici, les actions faites pour la faction de votre escadron en dehors des directives de l’Amiral (missions, primes, commerce, exploration, exobiologie…) n’étaient pas enregistrées : elles n’apparaissaient pas dans le journal BGS et ne rapportaient aucun point de rang. C’était un défaut, il est corrigé. Elles sont maintenant notées en « soutien libre » dans le journal et font monter votre rang BGS, comme les actions des directives. Elles ne comptent pas dans la progression des directives, qui ne suivent que leur faction et leur système. Rien à faire de votre côté, pas de mise à jour du plugin : seules les actions à partir de maintenant sont comptées.',
+        important: true
+    },
+    {
         id: '2026-10-quoi-faire-style', date: '2026-10-05T16:20:00Z', type: 'CORRIGE',
         titre: 'Quoi faire : le style de jeu choisi change vraiment les idées',
         texte: 'Quand vous choisissez votre style (combat, marchand, exploration ou logistique) tout en bas de « Quoi faire », les idées proposées s’adaptent maintenant à vos habitudes. Avant, ce choix ne servait qu’à départager des cas à égalité et on ne voyait rien changer. La priorité fixée par le commandement reste toujours en tête, et le mode « automatique » fonctionne comme avant.',
