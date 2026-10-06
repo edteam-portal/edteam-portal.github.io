@@ -12,12 +12,12 @@
     <meta name="robots" content="noindex, nofollow">
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=3">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=17"></script>
+    <script src="navigation.js?v=18"></script>
     <script src="colonisation-types.js?v=1"></script>
 
     <style>
@@ -1256,8 +1256,11 @@
                     if (navAmiraute) navAmiraute.style.display = 'flex';
                     if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
                 }
+                // BGS dans le menu : membres d'escadron uniquement (un pilote sans escadron le voit grise, avec un cadenas, via actualiserHeader)
                 const navBgs = document.getElementById('nav-bgs-factions');
-                if (navBgs) navBgs.style.display = 'flex';
+                const escCol = String(data.escadron_id || '').trim();
+                const membre = !!escCol && escCol.toUpperCase() !== 'INDEPENDANT' && !(rangJeu === 4 && !data.est_amiral && !data.est_officier);
+                if (navBgs && membre) navBgs.style.display = 'flex';
                 if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
                 const apiKeyDisplay = document.getElementById('api-key-display');
                 if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;

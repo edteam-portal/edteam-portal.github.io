@@ -266,6 +266,10 @@ body {
 .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
 .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
 .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* BGS / Escadron pour un pilote sans escadron : grises, avec un petit cadenas sur l'icone */
+.nav-link.verrou { color: #5f5f5f; }
+.nav-link.verrou .nav-icon { position: relative; }
+.nav-link.verrou .nav-icon::after { content: ''; position: absolute; right: -3px; bottom: -4px; width: 12px; height: 12px; background: #0b0b0b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF7100' stroke-width='2.4' stroke-linecap='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='1.5' fill='%23FF7100' fill-opacity='.25'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center / 12px no-repeat; border-radius: 2px; }
 .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
 #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
 .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }

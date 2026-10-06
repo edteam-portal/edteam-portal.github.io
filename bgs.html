@@ -12,12 +12,13 @@
     <meta name="robots" content="noindex, nofollow">
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=3">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=17"></script>
+    <script src="navigation.js?v=18"></script>
+    <script src="vitrine-module.js?v=1"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -567,9 +568,12 @@
             const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
             const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
 
-            // PAS D'ESCADRON = PAS D'ACCÈS (pilote indépendant)
-            if (!data || !data.escadron_id || data.escadron_id === 'INDEPENDANT') {
-                window.location.href = 'index.html';
+            if (!data) { window.location.href = 'index.html'; return; }
+
+            // PAS D'ESCADRON : la page presente le module (vitrine-module.js) au lieu de rediriger
+            if (!data.escadron_id || data.escadron_id === 'INDEPENDANT') {
+                if (data.est_approuve) { window.afficherVitrineModule('bgs', data); }
+                else { await supabaseApp.auth.signOut(); window.location.href = 'index.html'; }
                 return;
             }
 

@@ -23,6 +23,9 @@ function injecterArchitectureGlobale() {
     const path = window.location.pathname;
     const page = path.split("/").pop() || "index.html";
 
+    // Pilote sans escadron : BGS et Escadron restent visibles (avec un cadenas) et ouvrent une page de presentation (vitrine-module.js)
+    let indep = false; try { indep = localStorage.getItem('edteam_independant') === 'true'; } catch (e) {}
+
     // --- A. LE MENU LATÉRAL ---
     const menuHTML = `
         <div class="nav-link hamburger-btn" onclick="toggleMenu()" onmouseenter="if(typeof sonHover==='function') sonHover()">
@@ -40,11 +43,11 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="7" ry="3"></ellipse><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"></path><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"></path></svg></div>
             <span class="nav-text">BUDGET</span>
         </a>
-        <a href="escadron.html" id="nav-link-escadron" class="nav-link ${page === 'escadron.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_escadron') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
+        <a href="escadron.html" id="nav-link-escadron" class="nav-link ${page === 'escadron.html' ? 'active' : ''}${indep ? ' verrou' : ''}" ${indep ? 'title="Réservé aux membres d\'un escadron"' : ''} style="display: ${(indep || localStorage.getItem('edteam_acces_escadron') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <span class="nav-text">ESCADRON</span>
         </a>
-        <a href="bgs.html" id="nav-bgs-factions" class="nav-link ${page === 'bgs.html' ? 'active' : ''}" style="display: ${localStorage.getItem('edteam_acces_bgs') === 'true' ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
+        <a href="bgs.html" id="nav-bgs-factions" class="nav-link ${page === 'bgs.html' ? 'active' : ''}${indep ? ' verrou' : ''}" ${indep ? 'title="Réservé aux membres d\'un escadron"' : ''} style="display: ${(indep || localStorage.getItem('edteam_acces_bgs') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon" style="position: relative;">
                 <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7" stroke-dasharray="1.6 1.6"></polyline></svg>
                 <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; text-align: center;">0</span>
@@ -284,6 +287,13 @@ window.actualiserHeader = function(profilData) {
         const elGr = document.getElementById('header-grades');
         const esc = String(profilData.escadron_id || '').trim();
         const independant = !esc || esc.toUpperCase() === 'INDEPENDANT';
+        // BGS et Escadron : visibles avec un cadenas pour un pilote sans escadron (la page affiche alors sa vitrine)
+        try { localStorage.setItem('edteam_independant', independant ? 'true' : 'false'); } catch (e) {}
+        ['nav-link-escadron', 'nav-bgs-factions'].forEach(id => {
+            const lien = document.getElementById(id); if (!lien) return;
+            lien.classList.toggle('verrou', independant);
+            if (independant) { lien.style.display = 'flex'; lien.title = 'Réservé aux membres d\'un escadron'; } else lien.removeAttribute('title');
+        });
         if (elNom) elNom.innerText = independant ? 'PILOTE INDÉPENDANT' : esc.toUpperCase();
         if (elNom) elNom.style.color = independant ? 'var(--ed-blue)' : 'var(--ed-orange)';
         const boite = document.getElementById('header-escadron');
