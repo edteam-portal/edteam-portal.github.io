@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="photos.js?v=1"></script>
+    <script src="anecdotes.js?v=1"></script>
     <script src="quoifaire.js?v=6"></script>
     <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
@@ -627,6 +628,7 @@
                     <div class="xc g" id="x-pilier"></div>
                     <div class="xc b" id="x-elan" style="display: none;"></div>
                     <div class="xc click" id="x-escsem" onclick="switchMobileTab('bgs')"></div>
+                    <div id="x-anecdote" style="display: none;"></div>
                 </div>
 
                 <!-- CHIFFRES CLES de l'escadron : une ligne, depliable -->
@@ -1039,6 +1041,12 @@
                 <span style="color: #888; cursor: pointer; font-size: 1.2em; padding: 4px 8px;" onclick="document.getElementById('modal-reglages').style.display='none'">✕</span>
             </div>
             <div id="m-trombi-lien" class="xc click xlink" style="display: none;" onclick="window.location.href='trombinoscope.html'"><span class="e">🖼️</span><span style="font-size: 0.85em;">Photos des pilotes (Directeur)</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
+            <div id="m-anec-bloc" class="xc" style="padding: 12px 14px;">
+                <div class="xk" style="color: var(--ed-orange); margin-bottom: 8px;">Anecdotes de l'escadron</div>
+                <div class="xmut" style="font-size: 0.7em; line-height: 1.5; margin-bottom: 10px;">Autoriser l'escadron à raconter des anecdotes sur moi : un fait réel de ma semaine, habillé en histoire. Décocher efface celles déjà écrites sur moi.</div>
+                <label style="display: flex; align-items: center; gap: 10px; font-size: 0.85em; color: #ccc; cursor: pointer;"><input type="checkbox" id="m-anec-opt" onchange="changerOptionAnecdotesMobile(this)" style="width: 18px; height: 18px;"> Apparaître dans les anecdotes</label>
+                <div id="m-anec-msg" class="xmut" style="font-size: 0.62em; margin-top: 6px; min-height: 1em;"></div>
+            </div>
             <div id="m-photo-bloc" class="xc" style="padding: 12px 14px;">
                 <div class="xk" style="color: var(--ed-orange); margin-bottom: 10px;">Ma photo de commandant</div>
                 <div style="display: flex; align-items: center; gap: 14px;">
@@ -1188,6 +1196,7 @@
         const supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
         if (window.EDTEAMPhotos) window.EDTEAMPhotos.init(supabaseApp);
+        if (window.EDTEAMAnecdotes) window.EDTEAMAnecdotes.init(supabaseApp);
 
         let profilCommandant = null;
 
@@ -1255,6 +1264,21 @@
             document.getElementById('m-photo-btn').textContent = a ? '✎ CHANGER' : '+ AJOUTER';
             document.getElementById('m-photo-retirer').style.display = a ? 'inline-block' : 'none';
         }
+        async function majOptionAnecdotesMobile() {
+            const c = document.getElementById('m-anec-opt'), bloc = document.getElementById('m-anec-bloc');
+            if (!c || !bloc) return;
+            try { const r = await supabaseApp.rpc('mon_option_anecdotes'); if (r.error) throw r.error; c.checked = r.data !== false; bloc.style.display = ''; }
+            catch (e) { bloc.style.display = 'none'; }   // SQL 60 pas encore lance : le bloc n'apparait pas
+        }
+        window.changerOptionAnecdotesMobile = async function (c) {
+            const msg = document.getElementById('m-anec-msg');
+            try {
+                const r = await supabaseApp.rpc('definir_option_anecdotes', { p_actif: c.checked });
+                if (r.error) throw r.error;
+                if (window.EDTEAMAnecdotes) window.EDTEAMAnecdotes.invalider();
+                msg.textContent = c.checked ? 'Vous pouvez apparaître dans les anecdotes.' : 'Vous n’apparaîtrez plus dans les anecdotes.';
+            } catch (e) { console.error(e); c.checked = !c.checked; msg.textContent = 'Le réglage n’a pas pu être enregistré.'; }
+        };
         window.envoyerPhotoMobile = async function (input) {
             const f = input && input.files && input.files[0];
             if (!f) return;
@@ -1379,6 +1403,7 @@
             suivreEvenementMobile('ouvrir_reglages');
             xEl('modal-reglages').style.display = 'flex';
             if (typeof majPhotoMobile === 'function') majPhotoMobile();
+            if (typeof majOptionAnecdotesMobile === 'function') majOptionAnecdotesMobile();
             { const t = document.getElementById('m-trombi-lien'); if (t) t.style.display = (profilCommandant && profilCommandant.est_directeur) ? '' : 'none'; }
         }
 
@@ -1550,6 +1575,16 @@
                 <div class="xrow" style="margin-top: 11px; padding-top: 10px; border-top: 1px dashed #333;"><span class="xmut">${XF0(s.actifs)} / ${XF0(s.membres)} pilotes actifs</span><span class="xsp"></span><span class="xmut">vous : <b style="color: var(--ed-green); font-weight: normal;">+${XF1(s.mes_points)} pts</b></span></div>`;
         }
 
+        // anecdote de l'escadron : une lecture, carte masquee tant qu'il n'y en a pas
+        async function xChargerAnecdote() {
+            const z = xEl('x-anecdote');
+            if (!z || !window.EDTEAMAnecdotes) return;
+            const a = await window.EDTEAMAnecdotes.charger(false);
+            if (!a) { z.style.display = 'none'; return; }
+            z.innerHTML = window.EDTEAMAnecdotes.htmlCarteMobile(a);
+            z.style.display = 'block';
+        }
+        window.addEventListener('edteam-anecdotes', () => { if (typeof xChargerAnecdote === 'function' && profilCommandant) xChargerAnecdote(); });
         async function xChargerSemaine(force) {
             const box = xEl('x-semaine');
             if (!box) return;
@@ -1577,6 +1612,7 @@
                 if (dist.elan === 'absent') el.style.display = 'none'; else { el.style.display = 'block'; el.innerHTML = xHtmlElan(dist.elan); }
                 const es = xEl('x-escsem');
                 if (sem && sem.escadron) { es.style.display = 'block'; es.innerHTML = xHtmlSemaine(sem); } else es.style.display = 'none';
+                xChargerAnecdote();
             } catch (e) {
                 console.error('Erreur semaine (accueil) :', e);
                 box.style.display = 'none';
@@ -3720,7 +3756,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=10', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=11', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

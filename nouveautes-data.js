@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-anecdotes-escadron', date: '2026-10-07T18:36:00Z', type: 'NOUVEAU',
+        titre: 'Anecdotes de l’escadron : une petite histoire écrite à partir d’un exploit réel',
+        texte: 'Trois à quatre fois par semaine, une IA raconte une courte anecdote de roleplay (drôle, épique, émouvante ou sérieuse) sur un pilote actif de votre escadron, à partir d’un fait réel de ses dernières 48 heures : tonnes livrées, victoires en zone de conflit, missions, primes… Elle apparaît dans une bande du QG et sur l’accueil du mobile ; cliquez dessus pour la lire en entier et retrouver les précédentes. Le fait réel est toujours cité, le reste est de la fiction. Vous ne voulez pas apparaître ? Décochez « Apparaître dans les anecdotes » dans Gestion du compte (PC) ou dans les Réglages (mobile). L’Amiral peut supprimer une anecdote. Rien à faire de votre côté, pas de mise à jour du plugin.',
+        important: false
+    },
+    {
         id: '2026-10-photo-commandant', date: '2026-10-07T17:00:00Z', type: 'NOUVEAU',
         titre: 'Votre photo de commandant, visible par votre escadron',
         texte: 'Ajoutez la photo de votre personnage : depuis « Gestion du compte » (menu latéral, en bas) sur ordinateur, ou depuis les Réglages (la roue crantée) sur mobile. Elle apparaît sur la page Escadron (liste et fiche), dans le mur des spécialistes (en fond du cadre), sur l’onglet Escadron du mobile, dans les classements BGS et Powerplay, et au centre de la médaille du Pilier de la semaine et de l’Élan Powerplay. Elle n’est visible que par les membres de votre escadron et par les pilotes de votre Puissance. Une nouvelle photo remplace l’ancienne ; vous pouvez la retirer quand vous voulez, et l’Amiral peut retirer celle d’un membre de son escadron si besoin. Sans photo, vos initiales s’affichent dans un disque à la couleur de votre rôle. Rien à faire de votre côté, pas de mise à jour du plugin.',

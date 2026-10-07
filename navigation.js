@@ -180,6 +180,11 @@ function injecterArchitectureGlobale() {
                         </div>
                         <div style="border-top: 1px dashed #5a3000; margin-top: 12px; padding-top: 9px; color: #888; font-size: 0.72em; line-height: 1.6;"><b style="color: #bbb;">Qui la voit ?</b> Les membres de votre escadron (page Escadron, fiche, mur des spécialistes, classement BGS) et les pilotes EDTEAM de votre Puissance (classement Powerplay). Personne d'autre.</div>
                     </div>
+                    <div id="bloc-anecdotes-compte" style="display: none; background: rgba(255, 113, 0, 0.04); padding: 15px; border: 1px dashed var(--ed-orange); border-radius: 4px;">
+                        <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">ANECDOTES DE L'ESCADRON :</label>
+                        <label style="display: flex; align-items: center; gap: 10px; color: #ccc; font-size: 0.9em; cursor: pointer;"><input type="checkbox" id="anecdotes-option" onchange="changerOptionAnecdotes(this)" style="width: 16px; height: 16px;"> Apparaître dans les anecdotes</label>
+                        <div id="anecdotes-msg" style="color: #777; font-size: 0.72em; margin-top: 8px; line-height: 1.5;">Une courte histoire écrite par une IA, 3 à 4 fois par semaine, à partir d'un fait réel de la semaine d'un pilote actif. Décocher vous retire du choix et efface celles déjà écrites sur vous.</div>
+                    </div>
                     <div style="background: rgba(0, 240, 255, 0.05); padding: 15px; border: 1px solid var(--ed-blue); border-radius: 4px;">
                         <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">CLÉ DE LIAISON EDMC :</label>
                         <div style="text-align: center; margin: 6px 0 8px;"><strong id="api-key-display" style="color: var(--ed-orange); font-size: 1.15em; cursor: pointer; letter-spacing: 2px; word-break: break-all;" onclick="copierNav(this.innerText, this, event)" title="Cliquer pour copier">[ CHARGEMENT DE LA CLÉ... ]</strong></div>
@@ -507,6 +512,7 @@ window.ouvrirModal = function(id, e) {
     const modal = document.getElementById(id);
     if (modal) modal.style.display = 'flex';
     if (id === 'modal-gestion-compte' && typeof window.majBlocPhotoCompte === 'function') window.majBlocPhotoCompte();
+    if (id === 'modal-gestion-compte' && typeof window.majOptionAnecdotesCompte === 'function') window.majOptionAnecdotesCompte();
 };
 
 // ---- Photo de commandant (fenetre Gestion du compte) : apercu, envoi, retrait. Le travail est dans photos.js ----
@@ -522,6 +528,25 @@ window.majBlocPhotoCompte = async function() {
     const b = document.getElementById('photo-compte-btn'), r = document.getElementById('photo-compte-retirer');
     if (b) b.textContent = a ? '✎ CHANGER' : '+ AJOUTER';
     if (r) r.style.display = a ? '' : 'none';
+};
+// ---- Option « apparaitre dans les anecdotes » (SQL 60) : le bloc n'est affiche que si la fonction existe cote base ----
+window.majOptionAnecdotesCompte = async function() {
+    const bloc = document.getElementById('bloc-anecdotes-compte'), c = document.getElementById('anecdotes-option');
+    if (!bloc || !c || typeof supabaseApp === 'undefined') return;
+    try { const r = await supabaseApp.rpc('mon_option_anecdotes'); if (r.error) throw r.error; c.checked = r.data !== false; bloc.style.display = 'block'; }
+    catch (e) { bloc.style.display = 'none'; }
+};
+window.changerOptionAnecdotes = async function(c) {
+    const msg = document.getElementById('anecdotes-msg');
+    try {
+        const r = await supabaseApp.rpc('definir_option_anecdotes', { p_actif: c.checked });
+        if (r.error) throw r.error;
+        if (window.EDTEAMAnecdotes) window.EDTEAMAnecdotes.invalider();
+        if (msg) { msg.style.color = '#00FF66'; msg.textContent = c.checked ? 'Vous pouvez apparaître dans les anecdotes.' : 'Vous n\'apparaîtrez plus dans les anecdotes.'; }
+    } catch (e) {
+        console.error('Anecdotes :', e); c.checked = !c.checked;
+        if (msg) { msg.style.color = '#FF6a6a'; msg.textContent = 'Le réglage n\'a pas pu être enregistré.'; }
+    }
 };
 window.envoyerPhotoCompte = async function(input) {
     const f = input && input.files && input.files[0];

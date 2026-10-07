@@ -37,7 +37,8 @@
     <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=1"></script>
-    <script src="navigation.js?v=21"></script>
+    <script src="anecdotes.js?v=1"></script>
+    <script src="navigation.js?v=22"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -450,6 +451,9 @@
 
                 </div>
                 <!-- FIN RANGEE D'ENTREE -->
+
+                <!-- ANECDOTE DE L'ESCADRON (bande compacte, remplie par chargerAnecdoteQG ; masquee tant qu'il n'y en a pas) -->
+                <div id="qg-anecdote" style="display: none;"></div>
 
                 <!-- LIGNE GLOBALE (2 COLONNES) -->
                 <div style="display: flex; gap: 12px; align-items: stretch;">
@@ -1924,6 +1928,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
                 // Distinctions de la semaine et chiffres clés de l'escadron (une fois par chargement, mémoire de 5 minutes)
                 chargerDistinctionsQG(profilCommandant);
+                chargerAnecdoteQG(profilCommandant);
                 chargerChiffresQG(profilCommandant);
 
                 // Rappel discret du compagnon mobile (une seule fois tous les 45 jours, ordinateur uniquement)
@@ -3243,7 +3248,19 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 el.addEventListener('mouseleave', () => { if (typeof hideHoloTooltip === 'function') hideHoloTooltip(); });
             });
         }
-        window.addEventListener('edteam-photos', () => { if (typeof profilCommandant !== 'undefined' && profilCommandant) chargerDistinctionsQG(profilCommandant); });
+        // ANECDOTE DE L'ESCADRON : une seule lecture (rpc), memoire de 10 minutes ; la bande n'apparait que s'il y a une anecdote recente
+        async function chargerAnecdoteQG(profil) {
+            const zone = document.getElementById('qg-anecdote');
+            if (!zone || !window.EDTEAMAnecdotes) return;
+            if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') { zone.style.display = 'none'; return; }
+            try { if (window.EDTEAMPhotos) await window.EDTEAMPhotos.charger(false); } catch (e) {}
+            const a = await window.EDTEAMAnecdotes.charger(false);
+            if (!a) { zone.style.display = 'none'; return; }
+            zone.innerHTML = window.EDTEAMAnecdotes.htmlBande(a);
+            zone.style.display = 'block';
+        }
+        window.addEventListener('edteam-anecdotes', () => { if (typeof profilCommandant !== 'undefined' && profilCommandant) chargerAnecdoteQG(profilCommandant); });
+        window.addEventListener('edteam-photos', () => { if (typeof profilCommandant !== 'undefined' && profilCommandant) { chargerDistinctionsQG(profilCommandant); chargerAnecdoteQG(profilCommandant); } });
         async function chargerDistinctionsQG(profil) {
             const boxP = document.getElementById('qg-pilier'), boxE = document.getElementById('qg-elan');
             if (!boxP || !boxE) return;
@@ -3384,6 +3401,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="footer.js?v=17"></script>
+    <script src="footer.js?v=18"></script>
 </body>
 </html>
