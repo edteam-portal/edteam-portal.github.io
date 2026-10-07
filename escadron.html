@@ -17,7 +17,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=18"></script>
+    <script src="photos.js?v=1"></script>
+    <script src="navigation.js?v=21"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -334,7 +335,18 @@
         .eff-puce:hover { border-color: #888; color: #ccc; }
         .eff-puce.on { border-color: var(--ed-orange); color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); }
         .eff-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 12px; align-items: stretch; }
-        .eff-carte { padding: 14px 18px; display: grid; gap: 10px; cursor: pointer; margin-bottom: 0; transition: 0.2s; }
+        .eff-carte { padding: 0; display: flex; align-items: stretch; gap: 0; cursor: pointer; margin-bottom: 0; transition: 0.2s; }
+        .eff-corps { flex: 1; min-width: 0; display: grid; gap: 10px; padding: 14px 18px; }
+        .eff-portrait { --c: #FF7100; position: relative; flex: none; width: 118px; overflow: hidden; border-right: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--c) 28%, #0a0604), #07090b 80%); }
+        .eff-portrait.amiral { --c: #FF3333; } .eff-portrait.officier { --c: #00FF66; } .eff-portrait.pilote { --c: #FF7100; }
+        .eff-portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+        .eff-portrait:after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 55%, rgba(5, 3, 1, 0.7)), linear-gradient(0deg, rgba(5, 3, 1, 0.55), transparent 32%), linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 30%); }
+        .eff-ini { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.1em; font-weight: bold; letter-spacing: 1px; color: color-mix(in srgb, var(--c) 85%, #fff); text-shadow: 0 0 14px color-mix(in srgb, var(--c) 60%, transparent); }
+        .fp-entete { display: flex; align-items: center; gap: 20px; }
+        .fp-photo { text-align: center; flex: none; }
+        .fp-photo .ph { border-width: 2px; box-shadow: 0 0 14px rgba(255, 113, 0, 0.35); }
+        .fp-photo-lien { display: block; margin-top: 8px; font-size: 0.7em; letter-spacing: 1px; cursor: pointer; color: var(--ed-orange); }
+        .fp-photo-lien.rouge { color: #FF6a6a; }
         .eff-carte:hover { --teinte: rgba(255, 113, 0, 0.22); --lueur: rgba(255, 113, 0, 0.22); }
         .eff-carte.cy:hover { --teinte: rgba(0, 240, 255, 0.2); --lueur: rgba(0, 240, 255, 0.2); }
         .eff-l1 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -450,9 +462,14 @@
                     <div class="modal-close" style="position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold;" onclick="fermerModal('modal-profil-pilote')">X</div>
 
                     <!-- EN-TÊTE : nom, rôles et rangs, activité -->
-                    <div id="modal-cmdr-nom" class="fp-nom">CMDR ...</div>
-                    <div id="modal-cmdr-roles" class="fp-puces"></div>
-                    <div id="modal-cmdr-meta" class="fp-meta"></div>
+                    <div class="fp-entete">
+                        <div id="modal-cmdr-photo" class="fp-photo"></div>
+                        <div style="min-width: 0; flex: 1;">
+                            <div id="modal-cmdr-nom" class="fp-nom">CMDR ...</div>
+                            <div id="modal-cmdr-roles" class="fp-puces"></div>
+                            <div id="modal-cmdr-meta" class="fp-meta"></div>
+                        </div>
+                    </div>
 
                     <!-- TITRES DE SPÉCIALISTE + distinctions de la semaine (masqué si le pilote n'en a aucune) -->
                     <div id="modal-bandeau-titres" class="fp-titres" style="display: none;">
@@ -589,6 +606,13 @@
             afficherEffectifs();
         };
 
+        // portrait de la carte : la photo sur toute la hauteur, sinon les initiales sur fond a la couleur du role
+        function portraitCarte(p) {
+            const P = window.EDTEAMPhotos, role = p.est_amiral ? 'amiral' : (p.est_officier ? 'officier' : 'pilote');
+            const u = P ? P.url(p.user_id, p.cmdr_nom) : '';
+            return '<div class="eff-portrait ' + role + '">' + '<span class="eff-ini">' + escapeHtml(P ? P.initiales(p.cmdr_nom) : '?') + '</span>'
+                + (u ? '<img src="' + escapeHtml(u) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</div>';
+        }
         function afficherEffectifs() {
             const conteneur = document.getElementById('liste-effectifs');
             if (!conteneur) return;
@@ -663,6 +687,8 @@
 
                 return `
                 <div class="bloc eff-carte${moi ? ' cy' : ''}" onclick="ouvrirProfilPilote('${p.user_id}')">
+                    ${portraitCarte(p)}
+                    <div class="eff-corps">
                     <div class="eff-l1">
                         <span class="eff-role" style="color: ${couleurRole};">${p.est_amiral ? 'AMIRAL' : 'PILOTE'}</span>
                         <span class="eff-nom" style="color: ${moi ? 'var(--ed-blue)' : '#fff'};">CMDR ${nom}</span>${moi ? '<span style="color: var(--ed-blue); font-size: 0.75em; letter-spacing: 1px;">[ VOUS ]</span>' : ''}${badges}
@@ -677,6 +703,7 @@
                         <div class="eff-plaques">${plaquesHtml}</div>
                         <span class="eff-voir">VOIR LA FICHE →</span>
                     </div>
+                    </div>
                 </div>`;
             }).join('');
             if (window.brancherTitresSpecialistes) window.brancherTitresSpecialistes(conteneur);
@@ -690,6 +717,7 @@
                 // lectures annexes lancées tout de suite (en parallèle) : points de la semaine et titres de spécialiste
                 EFF.promesseSemaine = semainePoints();
                 const promesseTitres = window.chargerTitresSpecialistes ? window.chargerTitresSpecialistes(profilCommandant.escadron_id) : Promise.resolve(null);
+                const promessePhotos = window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : Promise.resolve(null);
 
                 // 1. On télécharge les profils (PROJECTION STRICTE ANTI-EGRESS)
                 const COLS_PP = ', puissance_nom, puissance_rang, puissance_merites_total, puissance_merites_cycle';
@@ -738,12 +766,40 @@
                 EFF.liste = effectifs;
                 EFF.semaine = await EFF.promesseSemaine;
                 EFF.titres = await promesseTitres;
+                await promessePhotos;
                 afficherEffectifs();
 
             } catch (e) {
                 console.error("Erreur effectifs:", e);
                 containerEffectifs.innerHTML = '<div style="grid-column: 1 / -1; color: red; text-align: center;">Erreur de chargement des effectifs.</div>';
             }
+        }
+
+        // une photo vient d'etre ajoutee, changee ou retiree : on redessine la liste (et la fiche ouverte)
+        window.addEventListener('edteam-photos', () => {
+            if (EFF.liste && EFF.liste.length) afficherEffectifs();
+            const m = document.getElementById('modal-profil-pilote');
+            if (m && m.style.display === 'flex' && window.__ficheCourante) majPhotoFiche(window.__ficheCourante);
+        });
+        // portrait de la fiche + lien : « changer ma photo » sur sa propre fiche, « retirer la photo » pour l'Amiral (de cet escadron) ou le Directeur
+        function majPhotoFiche(userId) {
+            const el = document.getElementById('modal-cmdr-photo'), P = window.EDTEAMPhotos;
+            if (!el || !P) return;
+            const p = (window.__cacheFichesPilotes && window.__cacheFichesPilotes[userId] && window.__cacheFichesPilotes[userId].profil) || {};
+            const moi = userId === profilCommandant.user_id, aPhoto = !!P.url(userId, p.cmdr_nom);
+            let lien = '';
+            if (moi) lien = '<span class="fp-photo-lien" onclick="fermerModal(\'modal-profil-pilote\'); ouvrirModal(\'modal-gestion-compte\')">✎ ' + (aPhoto ? 'CHANGER' : 'AJOUTER') + ' MA PHOTO</span>';
+            else if (aPhoto && (profilCommandant.est_amiral || profilCommandant.est_directeur)) lien = '<span class="fp-photo-lien rouge" onclick="retirerPhotoMembre(\'' + userId + '\')">RETIRER LA PHOTO</span>';
+            el.innerHTML = P.avatar({ uid: userId, nom: p.cmdr_nom || 'CMDR', p: p, taille: 90 }) + lien;
+        }
+        async function retirerPhotoMembre(userId) {
+            const p = (window.__cacheFichesPilotes && window.__cacheFichesPilotes[userId] && window.__cacheFichesPilotes[userId].profil) || {};
+            const texte = 'Retirer la photo de CMDR ' + String(p.cmdr_nom || '').toUpperCase() + ' ? Le pilote pourra en remettre une.';
+            let ok = false;
+            if (typeof window.demanderConfirmation === 'function') ok = await window.demanderConfirmation('RETIRER LA PHOTO', texte, '#FF3333'); else ok = confirm(texte);
+            if (!ok) return;
+            try { await window.EDTEAMPhotos.retirer(userId); }
+            catch (e) { console.error(e); if (typeof window.afficherAlerte === 'function') window.afficherAlerte('ÉCHEC', 'La photo n\'a pas pu être retirée : ' + (e && e.message ? e.message : e), '#FF3333'); else alert('La photo n\'a pas pu être retirée.'); }
         }
 
         const ranksCombat = ["HARMLESS", "MOSTLY HARMLESS", "NOVICE", "COMPETENT", "EXPERT", "MASTER", "DANGEROUS", "DEADLY", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
@@ -1019,6 +1075,7 @@
                 }
                 badges += remplirCartesRangs(profil, pointsSemaine || 0);
                 document.getElementById('modal-cmdr-roles').innerHTML = badges;
+                if (window.EDTEAMPhotos) { try { await window.EDTEAMPhotos.charger(false); } catch (e) {} majPhotoFiche(userId); }
                 {
                     const mer = Number(profil.puissance_merites_cycle) || 0;
                     const parts = [];
@@ -1229,7 +1286,7 @@
         }
     </script>
 
-    <script src="medailles.js?v=3"></script>
+    <script src="medailles.js?v=4"></script>
     <script src="footer.js?v=16"></script>
 </body>
 </html>

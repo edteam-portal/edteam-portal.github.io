@@ -151,26 +151,34 @@
 
     // ---------- LE MUR (accueil BGS) : 8 cartes, titulaire + cumul + avance sur le second ----------
     window.htmlMurTitres = function (data, monId) {
+        const P = window.EDTEAMPhotos;
+        // adresse sure dans un url('...') : ni apostrophe ni parenthese
+        const photoDe = r => { const u = (P && r) ? P.url(r.user_id, r.cmdr_nom) : ''; return u ? u.replace(/'/g, '%27').split('(').join('%28').split(')').join('%29') : ''; };
+        const unePhoto = !!P;   // photos.js charge : le mur est toujours en mode photo ; sans photo, les initiales du titulaire montrent qu'il en manque une
+        const ini = n => P ? P.initiales(n) : '?';
         const cartes = TITRES.map(t => {
             const r = data[t.code];
+            const ph = photoDe(r);
             const tip = esc(infoBulle(t, r));
             const moi = r && monId && r.user_id === monId;
             const base = `<div class="titre-carte${r ? '' : ' vacant'}${moi ? ' moi' : ''}" style="--tc: ${t.couleur};" data-titre-tip="${tip}" data-titre-col="${t.couleur}">`;
             if (!r) {
                 return `${base}
+                    ${unePhoto ? '<div class="titre-fantome">' + window.forgerMedailleSVG(t.code, t.couleur, true) + '</div>' : ''}
                     <div class="titre-medaille">${window.forgerMedailleSVG(t.code, t.couleur, true)}</div>
                     <div class="titre-nom">${esc(t.nom)}</div><div class="titre-sous">${esc(t.sous)}</div>
                     <div class="titre-pilote vide">VACANT</div></div>`;
             }
             const avance = r.second_nom ? `+${esc(formater(t.unite, Math.max(0, r.valeur - r.second_valeur)))} <span>sur ${esc(String(r.second_nom).toUpperCase())}</span>` : '<span>seul en lice</span>';
             return `${base}
+                ${ph ? '<div class="titre-fond" style="background-image:url(\'' + esc(ph) + '\')"></div><div class="titre-voile"></div>' : (unePhoto ? '<div class="titre-fond sans"><span class="titre-ini">' + esc(ini(r.cmdr_nom)) + '</span></div><div class="titre-voile"></div>' : '')}
                 <div class="titre-medaille">${window.forgerMedailleSVG(t.code, t.couleur)}</div>
                 <div class="titre-nom">${esc(t.nom)}</div><div class="titre-sous">${esc(t.sous)}</div>
                 <div class="titre-pilote" style="border-bottom-color: ${t.couleur};">${esc(String(r.cmdr_nom).toUpperCase())}</div>
                 <div class="titre-total">${esc(formater(t.unite, r.valeur))}</div>
                 <div class="titre-avance">${avance}</div></div>`;
         }).join('');
-        return `<div class="titres-grille">${cartes}</div>`;
+        return `<div class="titres-grille${unePhoto ? ' avec-photos' : ''}">${cartes}</div>`;
     };
 
     // ---------- PASTILLES DE FICHE PILOTE : les titres que CE pilote detient ----------
@@ -219,6 +227,16 @@
         .titre-total { margin-top: 5px; font-size: 0.8em; color: var(--tc); font-weight: bold; }
         .titre-avance { font-size: 0.62em; color: #9a9a9a; text-align: center; line-height: 1.3; }
         .titre-avance span { color: #666; }
+        .titres-grille.avec-photos .titre-carte { min-height: 292px; overflow: hidden; }
+        .titres-grille.avec-photos .titre-medaille { position: absolute; top: 9px; right: 9px; width: 52px; height: 52px; margin: 0; z-index: 2; }
+        .titres-grille.avec-photos .titre-nom { margin-top: auto; position: relative; z-index: 1; text-shadow: 0 1px 4px #000; }
+        .titres-grille.avec-photos .titre-sous, .titres-grille.avec-photos .titre-pilote, .titres-grille.avec-photos .titre-total, .titres-grille.avec-photos .titre-avance { position: relative; z-index: 1; }
+        .titres-grille.avec-photos .titre-total, .titres-grille.avec-photos .titre-avance { text-shadow: 0 1px 4px #000; }
+        .titre-fond { position: absolute; inset: 0; background-size: cover; background-position: center 12%; z-index: 0; }
+        .titre-voile { position: absolute; inset: 0; z-index: 0; background: linear-gradient(180deg, rgba(5,3,0,0.12) 0%, rgba(5,3,0,0.04) 40%, rgba(5,3,0,0.78) 62%, rgba(5,3,0,0.96) 80%); }
+        .titre-fond.sans { background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--tc) 30%, #0a0604), #07090b 78%); display: flex; align-items: flex-start; justify-content: center; }
+        .titre-ini { margin-top: 74px; font-size: 2.6em; font-weight: bold; letter-spacing: 1px; color: color-mix(in srgb, var(--tc) 85%, #fff); text-shadow: 0 0 16px color-mix(in srgb, var(--tc) 60%, transparent); }
+        .titre-fantome { position: absolute; left: 50%; top: 92px; transform: translateX(-50%); width: 96px; height: 96px; opacity: 0.2; z-index: 0; pointer-events: none; }
         .titre-detail { display: flex; align-items: center; gap: 12px; cursor: help; }
         .titre-detail-med { width: 56px; height: 56px; flex: none; }
         .titre-detail b { display: block; font-size: 0.8em; letter-spacing: 1px; }

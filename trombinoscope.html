@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>EDTEAM // PHOTOS DES PILOTES</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=3"></script>
+    <script src="son.js?v=1"></script>
+    <script src="photos.js?v=1"></script>
+    <script src="navigation.js?v=21"></script>
+
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; min-height: 100vh; }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-orange); box-shadow: 0 0 15px var(--ed-orange-glow), 0 0 5px var(--ed-orange); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 8s linear infinite; }
+        @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+
+        .tb-tete { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 14px; margin-bottom: 14px; }
+        .tb-tete h2 { margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em; }
+        .tb-tete h2 small { color: #777; font-size: 0.6em; letter-spacing: 1px; margin-left: 10px; }
+        .tb-outils { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .tb-outils input, .tb-outils select { background: rgba(0, 0, 0, 0.7); border: 1px solid #5a3000; color: #ddd; padding: 7px 12px; font-family: inherit; font-size: 0.88em; }
+        .tb-puces { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+        .tb-puce { border: 1px solid #444; color: #999; padding: 3px 12px; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; border-radius: 12px; user-select: none; }
+        .tb-puce:hover { border-color: #888; color: #ccc; }
+        .tb-puce.on { border-color: var(--ed-orange); color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); }
+        .tb-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+        .tb-vign { border: 1px solid #5a3000; background: rgba(10, 6, 2, 0.9); cursor: pointer; display: flex; flex-direction: column; transition: 0.15s; }
+        .tb-vign:hover { border-color: var(--ed-orange); box-shadow: 0 0 14px rgba(255, 113, 0, 0.25); }
+        .tb-img { position: relative; aspect-ratio: 1 / 1; background: #0a0604; overflow: hidden; }
+        .tb-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+        .tb-new { position: absolute; top: 8px; left: 8px; z-index: 1; background: var(--ed-orange); color: #000; font-size: 0.62em; font-weight: bold; letter-spacing: 1px; padding: 2px 7px; }
+        .tb-zoom { position: absolute; right: 8px; bottom: 8px; z-index: 1; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.3); color: #ddd; font-size: 0.62em; letter-spacing: 1px; padding: 2px 7px; }
+        .tb-inf { padding: 9px 11px 10px; }
+        .tb-n { color: #fff; font-weight: bold; letter-spacing: 1px; font-size: 0.88em; overflow-wrap: anywhere; }
+        .tb-e { color: #888; font-size: 0.72em; margin-top: 2px; }
+        .tb-d { color: #666; font-size: 0.68em; margin-top: 2px; }
+        .tb-btn { background: transparent; border: 1px solid #FF6a6a; color: #FF6a6a; padding: 5px 12px; font-family: inherit; font-size: 0.75em; letter-spacing: 1px; cursor: pointer; }
+        .tb-btn:hover { background: rgba(255, 106, 106, 0.12); }
+        .tb-btn.gris { border-color: #666; color: #aaa; } .tb-btn.gris:hover { background: rgba(255, 255, 255, 0.06); }
+        .tb-btn:disabled { opacity: 0.5; cursor: wait; }
+        .tb-vign .tb-btn { margin: 0 11px 11px; }
+        .tb-vide { grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; padding: 40px 10px; line-height: 1.8; }
+
+        /* agrandissement : la photo en grand pour controler */
+        .tb-voile { position: fixed; inset: 0; z-index: 4000; background: rgba(0, 0, 0, 0.88); display: none; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+        .tb-fiche { width: 100%; max-width: 1060px; max-height: 94vh; overflow-y: auto; border: 1px solid var(--ed-orange); background: rgba(8, 4, 0, 0.98); box-shadow: 0 0 40px rgba(255, 113, 0, 0.25); padding: 22px 26px; position: relative; box-sizing: border-box; }
+        .tb-x { position: absolute; top: 12px; right: 18px; color: var(--ed-orange); font-weight: bold; cursor: pointer; font-size: 1.2em; }
+        .tb-grand { display: grid; grid-template-columns: minmax(0, 560px) 1fr; gap: 26px; align-items: start; }
+        .tb-photo { width: 100%; aspect-ratio: 1 / 1; border: 1px solid #5a3000; position: relative; background: #0a0604; overflow: hidden; }
+        .tb-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+        .tb-fleche { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; width: 38px; height: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.4em; user-select: none; }
+        .tb-fleche.g { left: 8px; } .tb-fleche.d { right: 8px; }
+        .tb-grand h4 { margin: 0; color: var(--ed-orange); font-size: 1.5em; letter-spacing: 3px; overflow-wrap: anywhere; }
+        .tb-meta { color: #888; font-size: 0.82em; line-height: 1.9; margin-top: 8px; }
+        .tb-meta b { color: #ddd; }
+        .tb-actions { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .tb-pos { color: #777; font-size: 0.72em; letter-spacing: 1px; margin-top: 8px; line-height: 1.6; }
+        .tb-aide { margin-top: 22px; border-top: 1px dashed #5a3000; padding-top: 12px; color: #777; font-size: 0.74em; line-height: 1.7; }
+        .tb-msg { margin-top: 10px; font-size: 0.8em; min-height: 1.2em; }
+        @media (max-width: 760px) {
+            .tb-grille { grid-template-columns: 1fr 1fr; gap: 9px; }
+            .tb-inf { padding: 7px 8px 8px; } .tb-n { font-size: 0.74em; } .tb-vign .tb-btn { display: none; }
+            .tb-grand { grid-template-columns: 1fr; gap: 14px; }
+            .tb-fiche { padding: 16px 14px; }
+            .tb-actions .tb-btn { flex: 1; padding: 11px 0; }
+            .tb-aide, .tb-clavier { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div id="holo-tooltip"></div>
+    <nav id="side-menu"></nav>
+
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+        <main class="data-window" id="display-area" style="padding-top: 5px;">
+            <div style="color: #666; font-style: italic; text-align: center; margin-top: 40px;">&gt; CHARGEMENT DES PHOTOS...</div>
+        </main>
+    </div>
+
+    <!-- PHOTO EN GRAND -->
+    <div class="tb-voile" id="tb-voile" onclick="if (event.target === this) fermerPhoto()">
+        <div class="tb-fiche">
+            <div class="tb-x" onclick="fermerPhoto()">X</div>
+            <div class="tb-grand">
+                <div class="tb-photo" id="tb-photo"><div class="tb-fleche g" onclick="photoSuivante(-1)">‹</div><div class="tb-fleche d" onclick="photoSuivante(1)">›</div><img id="tb-img-grand" alt=""></div>
+                <div>
+                    <h4 id="tb-g-nom">CMDR</h4>
+                    <div class="tb-meta" id="tb-g-meta"></div>
+                    <div class="tb-actions">
+                        <button class="tb-btn" id="tb-g-retirer" onclick="retirerPhotoCourante()">RETIRER CETTE PHOTO</button>
+                        <button class="tb-btn gris" onclick="photoSuivante(1)">PHOTO SUIVANTE ›</button>
+                        <button class="tb-btn gris" onclick="fermerPhoto()">FERMER</button>
+                    </div>
+                    <div class="tb-msg" id="tb-g-msg"></div>
+                    <div class="tb-pos" id="tb-g-pos"></div>
+                    <div class="tb-aide"><b style="color: #bbb;">Contrôle :</b> la photo est affichée au plus grand que permet son enregistrement (carré, 256 px, agrandi à l'écran : suffisant pour juger du contenu, pas pour examiner des détails fins). Retirer la photo ramène le pilote à ses initiales ; il peut en remettre une autre.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const supabaseApp = window.supabaseApp;
+        let profilCommandant = null;
+        const ST = { liste: [], esc: '', q: '', tri: 'recent', nouv: false, courant: -1, vue: [] };
+        const esc = escapeHtml;
+        const CLE = 'edteam_trombi_v1';
+        const ROLES = { amiral: 'Amiral', officier: 'Officier BGS', pilote: 'Pilote' };
+
+        function urlPhoto(chemin) { try { return supabaseApp.storage.from('photos').getPublicUrl(chemin).data.publicUrl; } catch (e) { return ''; } }
+        function dateFr(iso) {
+            const d = new Date(iso); if (isNaN(d)) return '';
+            const p = n => String(n).padStart(2, '0');
+            return p(d.getDate()) + '/' + p(d.getMonth() + 1) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+        }
+        function dateFrLongue(iso) {
+            const d = new Date(iso); if (isNaN(d)) return '';
+            const p = n => String(n).padStart(2, '0');
+            return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' à ' + p(d.getHours()) + ':' + p(d.getMinutes());
+        }
+        const role = p => p.est_amiral ? 'amiral' : (p.est_officier ? 'officier' : 'pilote');
+        const estNouvelle = p => Date.now() - Date.parse(p.maj_le) < 48 * 3600e3;
+        const nomEsc = p => String(p.escadron_id || '').trim() && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' ? String(p.escadron_id).toUpperCase() : 'INDÉPENDANT';
+
+        // ---------------------------------------------------------------
+        //  LECTURE : UNE requete (reservee au Directeur par la base), gardee 2 minutes dans la session
+        // ---------------------------------------------------------------
+        async function charger(force) {
+            if (!force) { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.ts < 120000) return c.d; } catch (e) {} }
+            const r = await supabaseApp.rpc('photos_directeur');
+            if (r.error) throw r.error;
+            try { sessionStorage.setItem(CLE, JSON.stringify({ ts: Date.now(), d: r.data || [] })); } catch (e) {}
+            return r.data || [];
+        }
+
+        // ---------------------------------------------------------------
+        //  PAGE
+        // ---------------------------------------------------------------
+        function vueFiltree() {
+            const q = ST.q.trim().toUpperCase();
+            let l = ST.liste.filter(p => (!ST.esc || nomEsc(p) === ST.esc) && (!ST.nouv || estNouvelle(p)) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
+            const n = p => String(p.cmdr_nom || '');
+            if (ST.tri === 'nom') l.sort((a, b) => n(a).localeCompare(n(b)));
+            else if (ST.tri === 'esc') l.sort((a, b) => nomEsc(a).localeCompare(nomEsc(b)) || n(a).localeCompare(n(b)));
+            else l.sort((a, b) => Date.parse(b.maj_le) - Date.parse(a.maj_le));
+            return l;
+        }
+        function dessiner(garderSaisie) {
+            const zone = document.getElementById('display-area');
+            const escs = {}; ST.liste.forEach(p => { const k = nomEsc(p); escs[k] = (escs[k] || 0) + 1; });
+            const nNouv = ST.liste.filter(estNouvelle).length;
+            const puces = [['', 'TOUS (' + ST.liste.length + ')']].concat(Object.keys(escs).sort().map(k => [k, k + ' (' + escs[k] + ')']));
+            ST.vue = vueFiltree();
+            const html = ST.vue.map((p, i) => `<div class="tb-vign" onclick="ouvrirPhoto(${i})">
+                    <div class="tb-img">${estNouvelle(p) ? '<span class="tb-new">NOUVELLE</span>' : ''}<span class="tb-zoom">AGRANDIR</span><img src="${esc(urlPhoto(p.chemin))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0.15"></div>
+                    <div class="tb-inf"><div class="tb-n">CMDR ${esc(String(p.cmdr_nom || '').toUpperCase())}</div><div class="tb-e">${esc(nomEsc(p))}</div><div class="tb-d">envoyée le ${esc(dateFr(p.maj_le))}</div></div>
+                    <button class="tb-btn" onclick="event.stopPropagation(); retirerDepuisListe(${i})">RETIRER</button>
+                </div>`).join('') || '<div class="tb-vide">' + (ST.liste.length ? 'Aucune photo ne correspond à ces filtres.' : 'Aucun pilote n\'a encore ajouté de photo.') + '</div>';
+            zone.innerHTML = `
+                <div class="tb-tete">
+                    <h2>&gt; PHOTOS DES PILOTES <small>VUE DU DIRECTEUR · TOUS LES ESCADRONS</small></h2>
+                    <div class="tb-outils">
+                        <input type="search" id="tb-q" placeholder="Rechercher un pilote…" style="width: 210px;" value="${esc(ST.q)}" oninput="ST.q = this.value; dessiner(true)">
+                        <select onchange="ST.tri = this.value; dessiner()">
+                            <option value="recent"${ST.tri === 'recent' ? ' selected' : ''}>Trier : plus récentes d'abord</option>
+                            <option value="esc"${ST.tri === 'esc' ? ' selected' : ''}>Trier : escadron, puis nom</option>
+                            <option value="nom"${ST.tri === 'nom' ? ' selected' : ''}>Trier : nom</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tb-puces">${puces.map(([k, t]) => `<span class="tb-puce${!ST.nouv && ST.esc === k ? ' on' : ''}" onclick="ST.esc = ${JSON.stringify(k).replace(/"/g, '&quot;')}; ST.nouv = false; dessiner()">${esc(t)}</span>`).join('')}<span class="tb-puce${ST.nouv ? ' on' : ''}" onclick="ST.nouv = !ST.nouv; if (ST.nouv) ST.esc = ''; dessiner()">NOUVELLES 48 H (${nNouv})</span></div>
+                <div class="tb-grille">${html}</div>`;
+            if (garderSaisie) { const el = document.getElementById('tb-q'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+        }
+
+        // ---------------------------------------------------------------
+        //  PHOTO EN GRAND : navigation, retrait
+        // ---------------------------------------------------------------
+        function ouvrirPhoto(i) {
+            if (i < 0 || i >= ST.vue.length) return;
+            ST.courant = i;
+            const p = ST.vue[i];
+            document.getElementById('tb-img-grand').src = urlPhoto(p.chemin);
+            document.getElementById('tb-g-nom').textContent = 'CMDR ' + String(p.cmdr_nom || '').toUpperCase();
+            document.getElementById('tb-g-meta').innerHTML = 'Escadron : <b>' + esc(nomEsc(p)) + '</b><br>Rôle : <b>' + esc(ROLES[role(p)]) + '</b><br>Photo envoyée le <b>' + esc(dateFrLongue(p.maj_le)) + '</b>';
+            document.getElementById('tb-g-pos').innerHTML = 'PHOTO ' + (i + 1) + ' SUR ' + ST.vue.length + '<span class="tb-clavier"> · flèches du clavier ← → pour naviguer, Échap pour fermer</span>';
+            document.getElementById('tb-g-msg').textContent = '';
+            document.getElementById('tb-g-retirer').disabled = false;
+            document.getElementById('tb-voile').style.display = 'flex';
+            if (typeof sonClic === 'function') sonClic();
+        }
+        function fermerPhoto() { document.getElementById('tb-voile').style.display = 'none'; ST.courant = -1; }
+        function photoSuivante(sens) { if (ST.courant < 0 || !ST.vue.length) return; ouvrirPhoto((ST.courant + sens + ST.vue.length) % ST.vue.length); }
+        document.addEventListener('keydown', e => {
+            if (ST.courant < 0) return;
+            if (e.key === 'Escape') fermerPhoto(); else if (e.key === 'ArrowRight') photoSuivante(1); else if (e.key === 'ArrowLeft') photoSuivante(-1);
+        });
+
+        async function retirer(p) {
+            const texte = 'Retirer la photo de CMDR ' + String(p.cmdr_nom || '').toUpperCase() + ' (' + nomEsc(p) + ') ? Le pilote reviendra à ses initiales et pourra en remettre une.';
+            let ok = false;
+            if (typeof window.demanderConfirmation === 'function') ok = await window.demanderConfirmation('RETIRER LA PHOTO', texte, '#FF3333'); else ok = confirm(texte);
+            if (!ok) return false;
+            // la liste des photos du module partagé doit etre a jour pour connaitre le fichier a supprimer
+            await window.EDTEAMPhotos.charger(true);
+            await window.EDTEAMPhotos.retirer(p.user_id);
+            try { sessionStorage.removeItem(CLE); } catch (e) {}
+            ST.liste = ST.liste.filter(x => x.user_id !== p.user_id);
+            return true;
+        }
+        async function retirerDepuisListe(i) {
+            const p = ST.vue[i]; if (!p) return;
+            try { if (await retirer(p)) dessiner(); }
+            catch (e) { console.error(e); alert('La photo n\'a pas pu être retirée : ' + (e && e.message ? e.message : e)); }
+        }
+        async function retirerPhotoCourante() {
+            const p = ST.vue[ST.courant]; if (!p) return;
+            const b = document.getElementById('tb-g-retirer'), msg = document.getElementById('tb-g-msg');
+            try {
+                b.disabled = true;
+                if (!(await retirer(p))) { b.disabled = false; return; }
+                dessiner();
+                if (ST.vue.length) ouvrirPhoto(Math.min(ST.courant, ST.vue.length - 1)); else fermerPhoto();
+            } catch (e) {
+                console.error(e); b.disabled = false;
+                msg.style.color = '#FF6a6a'; msg.textContent = 'La photo n\'a pas pu être retirée : ' + (e && e.message ? e.message : e);
+            }
+        }
+
+        // ---------------------------------------------------------------
+        //  DEMARRAGE : reserve au Directeur (la base le verifie aussi)
+        // ---------------------------------------------------------------
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            if (!(data && data.est_approuve && data.est_directeur)) { window.location.href = 'index.html'; return; }
+            profilCommandant = data;
+            window.profilCommandant = data;
+            if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+            const apiKeyDisplay = document.getElementById('api-key-display');
+            if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;
+            const mainUi = document.getElementById('main-ui');
+            if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
+            if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+            try { ST.liste = await charger(false); dessiner(); }
+            catch (e) {
+                console.error('Erreur trombinoscope :', e);
+                document.getElementById('display-area').innerHTML = '<div class="tb-vide">Impossible de lire les photos pour le moment.<br>Réessayez dans quelques instants.</div>';
+            }
+        });
+    </script>
+
+    <script src="footer.js?v=16"></script>
+</body>
+</html>

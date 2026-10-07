@@ -58,6 +58,10 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="16" r="5.5"></circle><ellipse cx="11" cy="16" rx="9.5" ry="2.6" transform="rotate(-18 11 16)"></ellipse><line x1="11" y1="10.5" x2="11" y2="3"></line><path d="M11 3l8 2.5-8 2.5"></path></svg></div>
             <span class="nav-text">COLONISATION</span>
         </a>
+        <a href="trombinoscope.html" id="nav-link-trombinoscope" class="nav-link ${page === 'trombinoscope.html' ? 'active' : ''}" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18c.8-2.4 2.9-3.5 5.5-3.5s4.7 1.1 5.5 3.5"></path></svg></div>
+            <span class="nav-text">PHOTOS DES PILOTES</span>
+        </a>
         <a href="#" id="nav-gestion-compte" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);" onclick="event.preventDefault(); ouvrirModal('modal-gestion-compte', event)" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'GESTION DU COMPTE<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Clé EDMC, e-mail, mot de passe, suppression du compte</span>', '#FF7100')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
             <span class="nav-text">GESTION DU COMPTE</span>
@@ -164,6 +168,18 @@ function injecterArchitectureGlobale() {
                 <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-gestion-compte')">X</div>
                 <div style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">⚙️ GESTION DU COMPTE</div>
                 <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div id="bloc-photo-compte" style="background: rgba(255, 113, 0, 0.06); padding: 15px; border: 1px solid var(--ed-orange); border-radius: 4px;">
+                        <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 10px;">MA PHOTO DE COMMANDANT :</label>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div id="photo-compte-apercu"></div>
+                            <div style="min-width: 0;">
+                                <input type="file" id="photo-compte-fichier" accept="image/png,image/jpeg,image/webp" style="display: none;" onchange="envoyerPhotoCompte(this)">
+                                <button id="photo-compte-btn" style="background: transparent; border: 1px solid var(--ed-orange); color: var(--ed-orange); padding: 5px 14px; font-family: inherit; font-size: 0.8em; letter-spacing: 1px; cursor: pointer; margin-right: 8px;" onclick="document.getElementById('photo-compte-fichier').click()">+ AJOUTER</button><button id="photo-compte-retirer" style="background: transparent; border: 1px solid #555; color: #999; padding: 5px 14px; font-family: inherit; font-size: 0.8em; letter-spacing: 1px; cursor: pointer; display: none;" onclick="retirerPhotoCompte()">RETIRER</button>
+                                <div id="photo-compte-msg" style="color: #777; font-size: 0.72em; margin-top: 8px; line-height: 1.5;">PNG, JPEG ou WebP, recadrée en carré au centre et réduite automatiquement. Remplace la précédente.</div>
+                            </div>
+                        </div>
+                        <div style="border-top: 1px dashed #5a3000; margin-top: 12px; padding-top: 9px; color: #888; font-size: 0.72em; line-height: 1.6;"><b style="color: #bbb;">Qui la voit ?</b> Les membres de votre escadron (page Escadron, fiche, mur des spécialistes, classement BGS) et les pilotes EDTEAM de votre Puissance (classement Powerplay). Personne d'autre.</div>
+                    </div>
                     <div style="background: rgba(0, 240, 255, 0.05); padding: 15px; border: 1px solid var(--ed-blue); border-radius: 4px;">
                         <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">CLÉ DE LIAISON EDMC :</label>
                         <div style="text-align: center; margin: 6px 0 8px;"><strong id="api-key-display" style="color: var(--ed-orange); font-size: 1.15em; cursor: pointer; letter-spacing: 2px; word-break: break-all;" onclick="copierNav(this.innerText, this, event)" title="Cliquer pour copier">[ CHARGEMENT DE LA CLÉ... ]</strong></div>
@@ -276,6 +292,9 @@ if (document.readyState === 'loading') {
 // Profil Header
 window.actualiserHeader = function(profilData) {
     if (!profilData) return;
+    // trombinoscope : entree de menu reservee au Directeur
+    const navTrombi = document.getElementById('nav-link-trombinoscope');
+    if (navTrombi && profilData.est_directeur !== undefined) navTrombi.style.display = profilData.est_directeur ? 'flex' : 'none';   // certains appels (QG) passent un profil partiel : on ne touche a rien s'il n'a pas ce champ
     if (typeof window.actualiserInscriptionsEnCours === 'function') window.actualiserInscriptionsEnCours();
     if (profilData.cmdr_nom) {
         const elCmdr = document.getElementById('cmdr-name-display');
@@ -471,7 +490,7 @@ window.ouvrirCarriere = function(quoi) {
     if (!window.__carriereChargement) {
         window.__carriereChargement = new Promise((ok, ko) => {
             const s = document.createElement('script');
-            s.src = 'carriere.js?v=1';
+            s.src = 'carriere.js?v=2';
             s.onload = ok; s.onerror = () => { window.__carriereChargement = null; ko(); };
             document.head.appendChild(s);
         });
@@ -486,7 +505,50 @@ window.ouvrirModal = function(id, e) {
     if (typeof hideHoloTooltip === 'function') hideHoloTooltip(); 
     if (typeof sonClic === 'function') sonClic(); 
     const modal = document.getElementById(id);
-    if (modal) modal.style.display = 'flex'; 
+    if (modal) modal.style.display = 'flex';
+    if (id === 'modal-gestion-compte' && typeof window.majBlocPhotoCompte === 'function') window.majBlocPhotoCompte();
+};
+
+// ---- Photo de commandant (fenetre Gestion du compte) : apercu, envoi, retrait. Le travail est dans photos.js ----
+window.majBlocPhotoCompte = async function() {
+    const P = window.EDTEAMPhotos, ap = document.getElementById('photo-compte-apercu');
+    const bloc = document.getElementById('bloc-photo-compte');
+    if (!ap || !bloc) return;
+    if (!P) { bloc.style.display = 'none'; return; }
+    await P.charger(false);
+    const moi = window.profilCommandant || {}, monUid = await P.monId();
+    ap.innerHTML = P.avatar({ uid: monUid, nom: moi.cmdr_nom || 'CMDR', p: moi, taille: 90 });
+    const a = !!P.maPhoto();
+    const b = document.getElementById('photo-compte-btn'), r = document.getElementById('photo-compte-retirer');
+    if (b) b.textContent = a ? '✎ CHANGER' : '+ AJOUTER';
+    if (r) r.style.display = a ? '' : 'none';
+};
+window.envoyerPhotoCompte = async function(input) {
+    const f = input && input.files && input.files[0];
+    if (!f) return;
+    const msg = document.getElementById('photo-compte-msg'), b = document.getElementById('photo-compte-btn');
+    try {
+        if (b) { b.disabled = true; b.textContent = 'ENVOI…'; }
+        await window.EDTEAMPhotos.envoyer(f, window.profilCommandant && window.profilCommandant.user_id);
+        if (msg) { msg.style.color = '#00FF66'; msg.textContent = 'Photo enregistrée.'; }
+    } catch (e) {
+        console.error('Photo :', e);
+        if (msg) { msg.style.color = '#FF6a6a'; msg.textContent = 'La photo n\'a pas pu être envoyée : ' + (e && e.message ? e.message : e); }
+    } finally {
+        input.value = '';
+        if (b) b.disabled = false;
+        window.majBlocPhotoCompte();
+    }
+};
+window.retirerPhotoCompte = async function() {
+    const msg = document.getElementById('photo-compte-msg');
+    try {
+        await window.EDTEAMPhotos.retirer();
+        if (msg) { msg.style.color = '#888'; msg.textContent = 'Photo retirée.'; }
+    } catch (e) {
+        console.error('Photo :', e);
+        if (msg) { msg.style.color = '#FF6a6a'; msg.textContent = 'Impossible de retirer la photo : ' + (e && e.message ? e.message : e); }
+    } finally { window.majBlocPhotoCompte(); }
 };
 
 window.fermerModal = function(id, e) { 
@@ -672,6 +734,7 @@ window.autoDetruireCompte = async function() {
     try {
         window.fermerModal('modal-gestion-compte');
 
+        if (window.EDTEAMPhotos) await window.EDTEAMPhotos.retirerFichierAvantSuppression();
         const { error } = await supabaseApp.rpc('supprimer_mon_compte');
         if (error) throw error;
         

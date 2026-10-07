@@ -17,7 +17,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=18"></script>
+    <script src="photos.js?v=1"></script>
+    <script src="navigation.js?v=21"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -1211,6 +1212,7 @@
             el.addEventListener('mousemove', ev => { if (typeof moveHoloTooltip === 'function') moveHoloTooltip(ev); });
             el.addEventListener('mouseleave', () => { if (typeof hideHoloTooltip === 'function') hideHoloTooltip(); });
         }
+        window.addEventListener('edteam-photos', () => { if (typeof chargerAccueilBGS === 'function' && profilCommandant) chargerAccueilBGS(true); });
         async function chargerAccueilBGS(force) {
             const haut = document.getElementById('bgs-accueil-haut');
             if (!haut || !profilCommandant) return;
@@ -1223,7 +1225,8 @@
                 const [rProfil, rSem, rTitres] = await Promise.all([
                     supabaseApp.from('profils').select('rang_bgs, points_bgs, palmares_bgs').eq('user_id', profilCommandant.user_id).single(),
                     supabaseApp.rpc('bgs_semaine_escadron'),
-                    window.chargerTitresSpecialistes(profilCommandant.escadron_id, force)
+                    window.chargerTitresSpecialistes(profilCommandant.escadron_id, force),
+                    window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null
                 ]);
                 titres = rTitres;
                 moi = rProfil.data || null;
@@ -2627,7 +2630,7 @@
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="medailles.js?v=3"></script>
+    <script src="medailles.js?v=4"></script>
     <script src="footer.js?v=16"></script>
 </body>
 </html>

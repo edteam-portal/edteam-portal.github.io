@@ -36,7 +36,8 @@
     <script src="quoifaire.js?v=6"></script>
     <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
-    <script src="navigation.js?v=18"></script>
+    <script src="photos.js?v=1"></script>
+    <script src="navigation.js?v=21"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -133,6 +134,9 @@
         .qg-vide { inset: 0; border: 2px dashed var(--accent); background: transparent; opacity: 0.7; }
         .qg-glyphe { color: var(--accent); font-size: 2.1em; text-shadow: 0 0 14px var(--accent); }
         .qg-valeur { color: #fff; font-size: 0.95em; font-weight: bold; }
+        .qg-ini { color: var(--accent); font-size: 2.1em; font-weight: bold; letter-spacing: 1px; text-shadow: 0 0 14px var(--accent); }
+        .qg-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+        .qg-pastille { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); z-index: 2; background: #000; border: 1px solid var(--accent); color: #fff; font-size: 0.78em; font-weight: bold; padding: 1px 9px; white-space: nowrap; letter-spacing: 0.5px; }
         .qg-texte { min-width: 0; display: flex; flex-direction: column; gap: 9px; }
         .qg-nom { color: #fff; font-size: 1.55em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 16px var(--accent); overflow-wrap: anywhere; }
         .qg-etiquettes { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -1541,6 +1545,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             if (data && data.est_approuve) {
                 profilCommandant = data;
+                window.profilCommandant = data;
                 if (window.QF) QF.monterBande('qf-bande');
                 if (window.QGSuivi) QGSuivi.monter('qg-carte-puissance', 'qg-carte-faction');
                 enregistrerTelemetrie('page', 'qg');
@@ -3154,7 +3159,23 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 ${contenu}
             </div>`;
         }
-        function medailleQG(glyphe, ring, texte, vide) {
+        function photoQG(uid, nom) { try { return window.EDTEAMPhotos ? window.EDTEAMPhotos.url(uid, nom) : ''; } catch (e) { return ''; } }
+        function inisQG(nom) { try { return window.EDTEAMPhotos ? window.EDTEAMPhotos.initiales(nom) : '?'; } catch (e) { return '?'; } }
+        function medailleQG(glyphe, ring, texte, vide, photo, nom) {
+            if (!vide && nom && !photo) return `<div class="qg-medaille">
+                <div class="qg-anneau-tourne"></div>
+                <div class="qg-halo"></div>
+                <div class="qg-progres" style="background: conic-gradient(var(--accent) ${ring * 3.6}deg, rgba(255,255,255,0.08) 0deg);"></div>
+                <div class="qg-disque"><span class="qg-ini">${escapeHtml(inisQG(nom))}</span></div>
+                <span class="qg-pastille">${glyphe} ${texte}</span>
+            </div>`;
+            if (photo && !vide) return `<div class="qg-medaille">
+                <div class="qg-anneau-tourne"></div>
+                <div class="qg-halo"></div>
+                <div class="qg-progres" style="background: conic-gradient(var(--accent) ${ring * 3.6}deg, rgba(255,255,255,0.08) 0deg);"></div>
+                <div class="qg-disque"><img class="qg-photo" src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>
+                <span class="qg-pastille">${glyphe} ${texte}</span>
+            </div>`;
             return `<div class="qg-medaille">
                 <div class="qg-anneau-tourne"></div>
                 <div class="qg-halo"></div>
@@ -3176,7 +3197,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const d = new Date(String(p.semaine) + 'T07:50:00Z');
             const quand = isNaN(d) ? '' : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
             const moi = p.user_id && profil && p.user_id === profil.user_id;
-            return cadrePrestigeQG('or', '&#9733;', titre, `<div class="qg-ligne-medaille">${medailleQG('&#9733;', pc, Math.round(pc) + ' %')}
+            return cadrePrestigeQG('or', '&#9733;', titre, `<div class="qg-ligne-medaille">${medailleQG('&#9733;', pc, Math.round(pc) + ' %', false, photoQG(p.user_id, p.cmdr_nom), p.cmdr_nom)}
                 <div class="qg-texte">
                     <div class="qg-nom">CMDR ${escapeHtml(String(p.cmdr_nom).toUpperCase())}</div>
                     <div class="qg-etiquettes">
@@ -3195,7 +3216,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             const pct = Math.round((Number(e.progres_pct) || 0) * 10) / 10;
             const ring = Math.max(8, Math.min(100, pct * 3));
             const moi = e.user_id && profil && e.user_id === profil.user_id;
-            return cadrePrestigeQG('cy', '&#9670;', titre, `<div class="qg-ligne-medaille">${medailleQG('&#9670;', ring, '+' + pct.toLocaleString('fr-FR') + ' %')}
+            return cadrePrestigeQG('cy', '&#9670;', titre, `<div class="qg-ligne-medaille">${medailleQG('&#9670;', ring, '+' + pct.toLocaleString('fr-FR') + ' %', false, photoQG(e.user_id, e.cmdr_nom), e.cmdr_nom)}
                 <div class="qg-texte">
                     <div class="qg-nom">CMDR ${escapeHtml(String(e.cmdr_nom).toUpperCase())}</div>
                     <div class="qg-etiquettes">
@@ -3222,6 +3243,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 el.addEventListener('mouseleave', () => { if (typeof hideHoloTooltip === 'function') hideHoloTooltip(); });
             });
         }
+        window.addEventListener('edteam-photos', () => { if (typeof profilCommandant !== 'undefined' && profilCommandant) chargerDistinctionsQG(profilCommandant); });
         async function chargerDistinctionsQG(profil) {
             const boxP = document.getElementById('qg-pilier'), boxE = document.getElementById('qg-elan');
             if (!boxP || !boxE) return;
@@ -3239,6 +3261,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), d })); } catch (e) {}
                 } catch (e) { d = { pilier: null, elan: undefined }; }
             }
+            if (window.EDTEAMPhotos) { try { await window.EDTEAMPhotos.charger(false); } catch (e) {} }
             boxP.innerHTML = htmlPilierQG(d.pilier, profil);
             if (d.elan === undefined) boxE.style.display = 'none'; else { boxE.style.display = 'flex'; boxE.innerHTML = htmlElanQG(d.elan, profil); }
             infoBullesDistinctionsQG();

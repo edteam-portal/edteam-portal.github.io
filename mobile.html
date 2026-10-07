@@ -16,11 +16,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
+    <script src="photos.js?v=1"></script>
     <script src="quoifaire.js?v=6"></script>
     <script src="qgsuivi.js?v=35"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
-    <script src="medailles.js?v=3"></script>
+    <script src="medailles.js?v=4"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -1037,6 +1038,19 @@
                 <span class="xbig" style="font-size: 1.1em; letter-spacing: 3px; color: #cfc7bb;">RÉGLAGES</span>
                 <span style="color: #888; cursor: pointer; font-size: 1.2em; padding: 4px 8px;" onclick="document.getElementById('modal-reglages').style.display='none'">✕</span>
             </div>
+            <div id="m-trombi-lien" class="xc click xlink" style="display: none;" onclick="window.location.href='trombinoscope.html'"><span class="e">🖼️</span><span style="font-size: 0.85em;">Photos des pilotes (Directeur)</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
+            <div id="m-photo-bloc" class="xc" style="padding: 12px 14px;">
+                <div class="xk" style="color: var(--ed-orange); margin-bottom: 10px;">Ma photo de commandant</div>
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div id="m-photo-apercu"></div>
+                    <div style="min-width: 0;">
+                        <input type="file" id="m-photo-fichier" accept="image/png,image/jpeg,image/webp" style="display: none;" onchange="envoyerPhotoMobile(this)">
+                        <button type="button" id="m-photo-btn" class="m-btn" style="background: transparent; border-color: var(--ed-orange); color: var(--ed-orange); font-size: 0.75em; padding: 9px 14px; border-radius: 11px; display: inline-block; width: auto;" onclick="document.getElementById('m-photo-fichier').click()">+ AJOUTER</button>
+                        <button type="button" id="m-photo-retirer" class="m-btn" style="background: transparent; border-color: #555; color: #999; font-size: 0.75em; padding: 9px 14px; border-radius: 11px; display: none; width: auto; margin-left: 6px;" onclick="retirerPhotoMobile()">RETIRER</button>
+                        <div id="m-photo-msg" class="xmut" style="font-size: 0.62em; margin-top: 8px; line-height: 1.5;">Visible par votre escadron et par les pilotes de votre Puissance. Remplace la précédente.</div>
+                    </div>
+                </div>
+            </div>
             <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; ouvrirAideMobile()"><span class="e">❓</span><span style="font-size: 0.85em;">Aide et questions fréquentes</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')"><span class="e">🎧</span><span style="font-size: 0.85em;">Rejoindre le Discord</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc xlink" style="cursor: default;"><span class="e">🔊</span><span style="font-size: 0.85em;">Sons de l'application</span><span class="chev"><button type="button" data-son-toggle class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; padding: 8px 14px; display: flex; align-items: center; justify-content: center; border-radius: 10px;"></button></span></div>
@@ -1173,6 +1187,7 @@
         const supabaseUrl = 'https://oailvdigfdoyfcydmabb.supabase.co';
         const supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
         const supabaseApp = window.supabase.createClient(supabaseUrl, supabaseKey);
+        if (window.EDTEAMPhotos) window.EDTEAMPhotos.init(supabaseApp);
 
         let profilCommandant = null;
 
@@ -1213,6 +1228,7 @@
             }
 
             profilCommandant = data;
+            window.profilCommandant = data;
             document.getElementById('auth-view').style.display = 'none';
             document.getElementById('app-main').style.display = 'flex';
 
@@ -1226,6 +1242,46 @@
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
 
         }
+
+        // ---- Photo de commandant (Reglages) : le travail est dans photos.js ----
+        async function majPhotoMobile() {
+            const P = window.EDTEAMPhotos, ap = document.getElementById('m-photo-apercu'), bloc = document.getElementById('m-photo-bloc');
+            if (!ap || !bloc) return;
+            if (!P) { bloc.style.display = 'none'; return; }
+            await P.charger(false);
+            const monUid = await P.monId();
+            ap.innerHTML = P.avatar({ uid: monUid, nom: (profilCommandant && profilCommandant.cmdr_nom) || 'CMDR', p: profilCommandant, taille: 64 });
+            const a = !!P.maPhoto();
+            document.getElementById('m-photo-btn').textContent = a ? '✎ CHANGER' : '+ AJOUTER';
+            document.getElementById('m-photo-retirer').style.display = a ? 'inline-block' : 'none';
+        }
+        window.envoyerPhotoMobile = async function (input) {
+            const f = input && input.files && input.files[0];
+            if (!f) return;
+            const msg = document.getElementById('m-photo-msg'), b = document.getElementById('m-photo-btn');
+            try {
+                b.disabled = true; b.textContent = 'ENVOI…';
+                await window.EDTEAMPhotos.envoyer(f, profilCommandant && profilCommandant.user_id);
+                msg.style.color = '#00FF66'; msg.textContent = 'Photo enregistrée.';
+            } catch (e) {
+                console.error('Photo :', e);
+                msg.style.color = '#FF6a6a'; msg.textContent = 'La photo n\'a pas pu être envoyée : ' + (e && e.message ? e.message : e);
+            } finally { input.value = ''; b.disabled = false; majPhotoMobile(); }
+        };
+        window.retirerPhotoMobile = async function () {
+            const msg = document.getElementById('m-photo-msg');
+            try { await window.EDTEAMPhotos.retirer(); msg.style.color = ''; msg.textContent = 'Photo retirée.'; }
+            catch (e) { console.error('Photo :', e); msg.style.color = '#FF6a6a'; msg.textContent = 'Impossible de retirer la photo : ' + (e && e.message ? e.message : e); }
+            finally { majPhotoMobile(); }
+        };
+        window.retirerPhotoMembreMobile = async function (userId) {
+            if (!confirm('Retirer la photo de ce pilote ? Il pourra en remettre une.')) return;
+            try { await window.EDTEAMPhotos.retirer(userId); document.getElementById('modal-profil-pilote').style.display = 'none'; }
+            catch (e) { console.error('Photo :', e); alert('La photo n\'a pas pu être retirée.'); }
+        };
+        // une photo change : on redessine la liste des membres et les distinctions de l accueil
+        window.addEventListener('edteam-photos', () => { if (typeof xChargerSemaine === 'function' && profilCommandant) { try { xChargerSemaine(false); } catch (e) {} } });
+        window.addEventListener('edteam-photos', () => { if (typeof escRendre === 'function' && typeof ESC !== 'undefined' && ESC.liste && ESC.liste.length) { try { escRendre(); } catch (e) {} } });
 
         async function deconnexionMobile() {
             await supabaseApp.auth.signOut();
@@ -1322,6 +1378,8 @@
             sonClic();
             suivreEvenementMobile('ouvrir_reglages');
             xEl('modal-reglages').style.display = 'flex';
+            if (typeof majPhotoMobile === 'function') majPhotoMobile();
+            { const t = document.getElementById('m-trombi-lien'); if (t) t.style.display = (profilCommandant && profilCommandant.est_directeur) ? '' : 'none'; }
         }
 
         // Pastille d'une sous-vue : rouge quand il y a du nouveau
@@ -1448,6 +1506,12 @@
             return d.toLocaleString('fr-FR', { weekday: 'long', hour: '2-digit', minute: '2-digit' });
         }
 
+        // portrait rond a la place de l'icone (anneau a la couleur de la distinction) ; sans photo : l'icone d'origine
+        function xIcPhoto(uid, nom, couleur) {
+            const u = window.EDTEAMPhotos ? window.EDTEAMPhotos.url(uid, nom) : '';
+            if (!u) { const ini = window.EDTEAMPhotos ? window.EDTEAMPhotos.initiales(nom) : '?'; return `<div style="width: 56px; height: 56px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 1.25em; font-weight: 700; color: ${couleur}; background: radial-gradient(circle at 50% 35%, ${couleur}33, #0a0806); border: 2px solid ${couleur}; box-shadow: 0 0 14px ${couleur}55;">${XESC(ini)}</div>`; }
+            return `<div style="width: 56px; height: 56px; border-radius: 50%; flex: none; overflow: hidden; border: 2px solid ${couleur}; box-shadow: 0 0 14px ${couleur}55;"><img src="${XESC(u)}" alt="" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.remove()"></div>`;
+        }
         function xHtmlPilier(p) {
             const icone = c => `<div style="width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 1.5em; color: ${c}; background: rgba(255,255,255,0.05); border: 1px solid ${c}55; flex: none; box-shadow: 0 0 14px ${c}33;">★</div>`;
             if (!p) {
@@ -1456,7 +1520,7 @@
             const pc = Math.max(0, Math.min(100, Number(p.part_pct) || 0));
             const activite = String(p.attribut || '').split('·').pop().trim();
             const moi = p.user_id && profilCommandant && p.user_id === profilCommandant.user_id;
-            return `<div class="xrow">${icone('#FFC83D')}<div class="xsp"><div class="xk" style="color: #c9a24a;">Pilier de la semaine</div><div class="xbig" style="font-size: 1.35em; margin-top: 4px; color: var(--x-gold); overflow-wrap: anywhere;">${XESC(String(p.cmdr_nom).toUpperCase())}</div>${activite && !/%/.test(activite) ? `<div class="xmut" style="margin-top: 3px;">${XESC(activite.toUpperCase())}</div>` : ''}</div><span class="xpill" style="color: var(--x-gold);">${Math.round(pc)} %</span></div>
+            return `<div class="xrow">${xIcPhoto(p.user_id, p.cmdr_nom, '#FFC83D') || icone('#FFC83D')}<div class="xsp"><div class="xk" style="color: #c9a24a;">Pilier de la semaine</div><div class="xbig" style="font-size: 1.35em; margin-top: 4px; color: var(--x-gold); overflow-wrap: anywhere;">${XESC(String(p.cmdr_nom).toUpperCase())}</div>${activite && !/%/.test(activite) ? `<div class="xmut" style="margin-top: 3px;">${XESC(activite.toUpperCase())}</div>` : ''}</div><span class="xpill" style="color: var(--x-gold);">${Math.round(pc)} %</span></div>
                 ${moi ? '<div style="color: var(--x-gold); font-size: 0.78em; letter-spacing: 2px; margin-top: 10px;">C\'EST VOUS ! BRAVO</div>' : ''}
                 <div class="xmut" style="font-size: 0.6em; margin-top: 9px;">${Math.round(pc)} % de l'effort BGS · désigné automatiquement chaque jeudi</div>`;
         }
@@ -1468,7 +1532,7 @@
             }
             const pct = Math.round((Number(e.progres_pct) || 0) * 10) / 10;
             const moi = e.user_id && profilCommandant && e.user_id === profilCommandant.user_id;
-            return `<div class="xrow">${icone}<div class="xsp"><div class="xk" style="color: #4fb8c0;">Élan Powerplay</div><div class="xbig" style="font-size: 1.35em; margin-top: 4px; color: var(--ed-blue); overflow-wrap: anywhere;">${XESC(String(e.cmdr_nom).toUpperCase())}</div>${e.puissance ? `<div class="xmut" style="margin-top: 3px;">${XESC(String(e.puissance).toUpperCase())}</div>` : ''}</div><span class="xpill" style="color: var(--ed-blue);">+${XESC(pct.toLocaleString('fr-FR'))} %</span></div>
+            return `<div class="xrow">${xIcPhoto(e.user_id, e.cmdr_nom, '#00F0FF') || icone}<div class="xsp"><div class="xk" style="color: #4fb8c0;">Élan Powerplay</div><div class="xbig" style="font-size: 1.35em; margin-top: 4px; color: var(--ed-blue); overflow-wrap: anywhere;">${XESC(String(e.cmdr_nom).toUpperCase())}</div>${e.puissance ? `<div class="xmut" style="margin-top: 3px;">${XESC(String(e.puissance).toUpperCase())}</div>` : ''}</div><span class="xpill" style="color: var(--ed-blue);">+${XESC(pct.toLocaleString('fr-FR'))} %</span></div>
                 ${moi ? '<div style="color: var(--ed-blue); font-size: 0.78em; letter-spacing: 2px; margin-top: 10px;">C\'EST VOUS ! BRAVO</div>' : ''}
                 <div class="xmut" style="font-size: 0.6em; margin-top: 9px;">de mérites en plus · progrès relatif du cycle, désigné chaque jeudi</div>`;
         }
@@ -1506,6 +1570,7 @@
                         return r.data;
                     }, force).catch(() => null)
                 ]);
+                if (window.EDTEAMPhotos) { try { await window.EDTEAMPhotos.charger(false); } catch (e) {} }
                 box.style.display = 'flex';
                 xEl('x-pilier').innerHTML = xHtmlPilier(dist.pilier);
                 const el = xEl('x-elan');
@@ -2136,7 +2201,7 @@
             const cont = xEl('m-squad-members-list');
             try {
                 const esc = profilCommandant.escadron_id;
-                const [membres, semaine, titres] = await Promise.all([
+                const [membres, semaine, titres, _photos] = await Promise.all([
                     xCache('membres', 180000, async () => {
                         let rep = await supabaseApp.from('profils_publics').select('cmdr_nom, est_amiral, est_officier, user_id, rang_bgs, rang_escadron_jeu, puissance_rang').eq('escadron_id', esc).eq('est_approuve', true);
                         if (rep.error) {
@@ -2151,7 +2216,8 @@
                         if (r.error) throw r.error;
                         return r.data || [];
                     }, force).catch(() => null),
-                    (typeof window.chargerTitresSpecialistes === 'function' ? window.chargerTitresSpecialistes(esc, force) : Promise.resolve(null)).catch(() => null)
+                    (typeof window.chargerTitresSpecialistes === 'function' ? window.chargerTitresSpecialistes(esc, force) : Promise.resolve(null)).catch(() => null),
+                    window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null
                 ]);
                 ESC.liste = membres;
                 ESC.semaine = null;
@@ -2220,7 +2286,7 @@
                 }
                 const titresHtml = titres.length ? `<div style="margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap;">${titres.slice(0, 2).map(t => `<span class="xtitre">🏆 ${XESC(t)}</span>`).join('')}${titres.length > 2 ? `<span class="xtitre">+${titres.length - 2}</span>` : ''}</div>` : '';
                 return `<div class="xc xpil click${actif ? '' : ' dim'}" onclick="ouvrirProfilPiloteMobile('${XESC(uid)}')">
-                    <div class="xav${actif && ESC.semaine ? ' a' : ''}">${XESC(init)}</div>
+                    ${window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ uid: uid, nom: nom(m), p: m, taille: 46, actif: actif && !!ESC.semaine }) : '<div class="xav' + (actif && ESC.semaine ? ' a' : '') + '">' + XESC(init) + '</div>'}
                     <div class="xsp"><div class="nm">${XESC(nom(m).toUpperCase() || 'RECRUE')}</div>
                         <div style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;"><span class="xrk">RANG ${m.rang_bgs || 1}</span>${m.puissance_rang ? `<span class="xrk b">PP R${m.puissance_rang}</span>` : ''}${badges.join('')}</div>
                         ${titresHtml}</div>
@@ -2710,6 +2776,17 @@
                 document.getElementById('m-modal-cmdr-nom').innerHTML = 'CMDR ' + escapeHtml(nom);
                 const mots = nom.trim().split(/\s+/);
                 xTxt('m-modal-av', (mots.length > 1 ? mots[0][0] + mots[1][0] : nom.slice(0, 2)).toUpperCase());
+                if (window.EDTEAMPhotos) {
+                    try { await window.EDTEAMPhotos.charger(false); } catch (e) {}
+                    const av = document.getElementById('m-modal-av'), P = window.EDTEAMPhotos, moiFiche = userId === profilCommandant.user_id, aPhoto = !!P.url(userId, profil.cmdr_nom);
+                    if (av) {
+                        av.className = ''; av.style.cssText = 'flex: none; text-align: center;';
+                        let lien = '';
+                        if (moiFiche) lien = '<div style="margin-top: 6px; font-size: 0.6em; letter-spacing: 1px; color: var(--ed-orange);" onclick="document.getElementById(\'modal-profil-pilote\').style.display=\'none\'; ouvrirReglagesMobile()">✎ MA PHOTO</div>';
+                        else if (aPhoto && (profilCommandant.est_amiral || profilCommandant.est_directeur)) lien = '<div style="margin-top: 6px; font-size: 0.6em; letter-spacing: 1px; color: #FF6a6a;" onclick="retirerPhotoMembreMobile(\'' + XESC(userId) + '\')">RETIRER</div>';
+                        av.innerHTML = P.avatar({ uid: userId, nom: profil.cmdr_nom || 'CMDR', p: profil, taille: 58 }) + lien;
+                    }
+                }
                 let badges = '';
                 if (profil.est_amiral) badges += '<span class="xrk r">AMIRAL</span>';
                 else {
@@ -2774,7 +2851,8 @@
             try {
                 const [resMoi, resTab] = await Promise.all([
                     supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.rpc('tableau_escadron_bgs')
+                    supabaseApp.rpc('tableau_escadron_bgs'),
+                    window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null
                 ]);
                 if (resMoi.error) throw resMoi.error;
                 const rang = resMoi.data.rang_bgs || 1;
@@ -3025,7 +3103,7 @@
 
             try {
                 // Cloisonnement : lecture stricte des partisans de la MÊME puissance (fonction serveur)
-                const { data, error } = await supabaseApp.rpc('tableau_partisans');
+                const [{ data, error }] = await Promise.all([supabaseApp.rpc('tableau_partisans'), window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null]);
                 if (error) throw error;
 
                 const partisans = data || [];
@@ -3065,6 +3143,7 @@
                     <div style="background: ${estMoi ? 'rgba(0,240,255,0.12)' : 'rgba(0,0,0,0.5)'}; border: 1px solid ${estMoi ? 'var(--ed-blue)' : '#333'}; padding: 8px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.85em;">
                         <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
                             <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; min-width: 26px;">#${index + 1}</span>
+                            ${window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ nom: p.cmdr_nom, role: 'pilote', taille: 34 }) : ''}
                             <div style="min-width: 0;">
                                 <div style="color: #fff; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((p.cmdr_nom || 'INCONNU').toUpperCase())}</div>
                                 <div style="color: #888; font-size: 0.75em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">[ ${tagSquad} ] <span style="color: var(--ed-blue);">RANG ${p.puissance_rang || 0}</span></div>

@@ -5,6 +5,9 @@
     'use strict';
     if (window.carriere) return;
 
+    // portrait de ligne : la photo si elle est visible, sinon les initiales (photos.js, jointure par nom de commandant)
+    const avLigne = p => window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ nom: p && p.cmdr_nom, role: 'pilote', taille: 38 }) : '';
+
     // ---------- styles propres aux fenetres (noms prefixes : aucun conflit avec les styles de la page hote)
     const st = document.createElement('style');
     st.id = 'carriere-style';
@@ -103,7 +106,8 @@
             try {
                 const [resMoi, resTab] = await Promise.all([
                     supabaseApp.from('profils').select('rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single(),
-                    supabaseApp.rpc('tableau_escadron_bgs')
+                    supabaseApp.rpc('tableau_escadron_bgs'),
+                    window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null
                 ]);
                 if (resMoi.error) throw resMoi.error;
                 const rang = resMoi.data.rang_bgs || 1;
@@ -170,7 +174,7 @@
                     html += `
                         <div style="background: ${estMoi ? 'rgba(255, 113, 0, 0.12)' : 'rgba(0,0,0,0.5)'}; border: 1px solid ${estMoi ? 'var(--ed-orange)' : '#333'}; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.95em;">
                             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                                <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${index + 1}</span>
+                                <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${index + 1}</span>${avLigne(p)}
                                 <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
                                 <span style="color: var(--ed-orange); font-size: 0.8em; border: 1px solid rgba(255,113,0,0.5); padding: 1px 6px; border-radius: 2px;">RANG ${p.rang_bgs || 1}</span>
                             </div>
@@ -389,7 +393,7 @@
             try {
                 // Cloisonnement OPSEC : lecture stricte sur les partisans de la MÊME puissance
                 // (fonction serveur : ne renvoie que les colonnes du tableau, triees par merites)
-                const { data, error } = await supabaseApp.rpc('tableau_partisans');
+                const [{ data, error }] = await Promise.all([supabaseApp.rpc('tableau_partisans'), window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null]);
 
                 if (error) throw error;
 
@@ -453,7 +457,7 @@
                     html += `
                     <div style="background: ${fondLigne}; border: 1px solid ${bordureLigne}; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95em;">
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <span style="color: ${rangNumero <= 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${rangNumero}</span>
+                            <span style="color: ${rangNumero <= 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${rangNumero}</span>${avLigne(p)}
                             <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
                             <span style="font-size: 0.85em;">${tagSquad}</span>
                             <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">RANG ${p.puissance_rang || 0}</span>
