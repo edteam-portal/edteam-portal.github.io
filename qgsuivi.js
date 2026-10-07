@@ -36,10 +36,10 @@
         if (document.getElementById('qs-style')) return;
         const st = document.createElement('style'); st.id = 'qs-style';
         st.textContent = `
-.qs-carte{--c:#00F0FF;--bdc:color-mix(in srgb,var(--c) 60%,transparent);position:relative;flex:1 1 auto;min-width:0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--c) 60%,transparent);padding:11px 14px 8px;display:flex;flex-direction:column;gap:7px;font-family:'Share Tech Mono',monospace;color:#ccc;
-  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 10%,transparent),rgba(5,3,1,.92) 60%);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
-.qs-carte:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;background:linear-gradient(to bottom right,transparent calc(50% - 1px),var(--bdc) calc(50% - 1px),var(--bdc) calc(50% + 1px),transparent calc(50% + 1px)) left top/14px 14px no-repeat,linear-gradient(to bottom right,transparent calc(50% - 1px),var(--bdc) calc(50% - 1px),var(--bdc) calc(50% + 1px),transparent calc(50% + 1px)) right bottom/14px 14px no-repeat}
-.qs-carte:before{content:"";position:absolute;top:0;left:14px;width:50px;height:3px;background:var(--c);box-shadow:0 0 10px var(--c)}
+.qs-carte{--c:#00F0FF;--bdc:color-mix(in srgb,var(--c) 75%,transparent);position:relative;flex:1 1 auto;min-width:0;box-sizing:border-box;border:1px solid var(--bdc);box-shadow:inset 0 0 26px color-mix(in srgb,var(--c) 9%,transparent);padding:11px 14px 8px;display:flex;flex-direction:column;gap:7px;font-family:'Share Tech Mono',monospace;color:#ccc;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 8%,transparent),rgba(10,5,0,.88) 80px);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.qs-carte:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 22px color-mix(in srgb,var(--c) 26%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--c) 24%,transparent);background:linear-gradient(var(--c),var(--c)) 14px 0/46px 3px no-repeat,radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--c) 60%,transparent),transparent 70%) 6px 0/62px 16px no-repeat,linear-gradient(to bottom right,transparent calc(50% - 1px),var(--bdc) calc(50% - 1px),var(--bdc) calc(50% + 1px),transparent calc(50% + 1px)) left top/14px 14px no-repeat,linear-gradient(to bottom right,transparent calc(50% - 1px),var(--bdc) calc(50% - 1px),var(--bdc) calc(50% + 1px),transparent calc(50% + 1px)) right bottom/14px 14px no-repeat}
+
 .qs-cap{display:flex;align-items:center;gap:12px}
 .qs-hx{width:52px;height:57px;flex:none;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,var(--c),transparent 120%);position:relative}
 .qs-hx:before{content:"";position:absolute;inset:2px;clip-path:inherit;background:rgba(6,4,2,.94)}
@@ -68,7 +68,7 @@
 #banner-gazette:hover{border-color:#00F0FF!important;background:linear-gradient(135deg,rgba(0,240,255,.34),rgba(0,0,0,.4))!important;box-shadow:0 0 14px rgba(0,240,255,.45)}
 #banner-gazette:active{background:linear-gradient(135deg,rgba(0,240,255,.5),rgba(0,0,0,.35))!important}
 .qs-ap{font-size:.6em;color:#8a8a8a;margin-right:4px;vertical-align:.25em}
-#m-suivi .qs-carte{clip-path:none;border-radius:18px;overflow:hidden;border-color:color-mix(in srgb,var(--c) 30%,transparent);box-shadow:inset 0 0 40px color-mix(in srgb,var(--c) 5%,transparent)}#m-suivi .qs-carte:before,#m-suivi .qs-carte:after{display:none}#m-suivi .qs-portrait{border-right-color:color-mix(in srgb,var(--c) 30%,transparent)}
+#m-suivi .qs-carte{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 10%,transparent),rgba(5,3,1,.92) 60%);clip-path:none;border-radius:18px;overflow:hidden;border-color:color-mix(in srgb,var(--c) 30%,transparent);box-shadow:inset 0 0 40px color-mix(in srgb,var(--c) 5%,transparent)}#m-suivi .qs-carte:before,#m-suivi .qs-carte:after{display:none}#m-suivi .qs-portrait{border-right-color:color-mix(in srgb,var(--c) 30%,transparent)}
 .qs-fm .qs-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}.qs-fm .qs-src{margin-top:0}.qs-fm .qs-src span{white-space:normal!important}
 .qs-t.cle .v{color:var(--c)}
 .qs-t .qs-v{display:block;margin:3px 0 0}

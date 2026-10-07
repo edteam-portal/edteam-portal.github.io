@@ -28,12 +28,13 @@
         + '.ft-nouv{position:relative;color:#FFD700;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.45)}'
         + '.ft-nouv:hover{background:rgba(255,215,0,.16);box-shadow:0 0 12px rgba(255,215,0,.45);color:#fff}'
         + '.ft-point{width:8px;height:8px;border-radius:50%;background:#FF7100;box-shadow:0 0 8px #FF7100;position:absolute;top:-3px;right:-3px}'
-        + '.ft-astuce.ft-haut{bottom:170px}'
+        + '.ft-astuce.ft-haut{bottom:150px}'
         + '.ft-mobile{color:var(--ed-blue,#00F0FF);background:rgba(0,240,255,.06);border:1px solid rgba(0,240,255,.5)}'
         + '.ft-mobile:hover{background:rgba(0,240,255,.18);box-shadow:0 0 12px rgba(0,240,255,.5);color:#fff}'
         /* pages de l\'application : bandeau fixe dans la bande libre du bas (le conteneur fait 95vh) */
-        + '.ft-fixe{position:fixed;left:60px;right:0;bottom:0;z-index:900;padding:3px 20px 4px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.9) 35%)}'
-        + 'body.menu-open .ft-fixe{left:250px}'
+        /* la zone qui defile va jusqu'en bas de la fenetre (le bandeau fixe n'occupe plus la bande libre de 5 %) */
+        + '#main-ui.hud-container{height:100vh !important;padding-bottom:0 !important}'
+        + '.ft-fixe{position:static;flex:none;margin:28px 0 0;padding:16px 20px 12px;border-top:1px solid rgba(255,255,255,.06)}'
         /* presentation : pied de page en fin de page */
         + '.ft-flux{background:#000;padding:50px 20px}'
         + '.ft-flux .ft-ligne{font-size:.9rem;letter-spacing:3px;gap:16px}'
@@ -52,7 +53,7 @@
         + '.ft-x{position:absolute;top:12px;right:16px;color:var(--ed-blue,#00F0FF);cursor:pointer;font-weight:bold;font-size:1.2rem}'
         + '.ft-x:hover{color:#fff}'
         /* astuce discrete */
-        + '.ft-astuce{position:fixed;right:18px;bottom:58px;width:300px;z-index:950;background:rgba(5,8,12,.96);border:1px solid rgba(0,240,255,.45);border-left:3px solid var(--ed-blue,#00F0FF);border-radius:4px;padding:12px 14px;color:#ccc;font-family:"Share Tech Mono",monospace;font-size:.8rem;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.7);opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;box-sizing:border-box}'
+        + '.ft-astuce{position:fixed;right:18px;bottom:20px;width:300px;z-index:950;background:rgba(5,8,12,.96);border:1px solid rgba(0,240,255,.45);border-left:3px solid var(--ed-blue,#00F0FF);border-radius:4px;padding:12px 14px;color:#ccc;font-family:"Share Tech Mono",monospace;font-size:.8rem;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.7);opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;box-sizing:border-box}'
         + '.ft-astuce.ft-vu{opacity:1;transform:none}'
         + '.ft-astuce b{color:var(--ed-blue,#00F0FF);letter-spacing:1px}'
         + '.ft-astuce .ft-acts{display:flex;gap:8px;margin-top:8px;align-items:center}'
@@ -103,11 +104,11 @@
         return entreesNouv().filter(function (e) { return e.date > seuil; });
     }
     window.edteamMajPointNouveautes = function () {
-        var pt = document.querySelector('.ft-nouv .ft-point');
+        var pt = document.querySelector('#nav-nouveautes .ft-point');
         if (!pt) return;
         var n = dansApp() ? nonLues().length : 0;
         pt.style.display = n ? 'inline-block' : 'none';
-        pt.parentNode.title = n ? n + (n > 1 ? ' nouveautés non lues' : ' nouveauté non lue') : 'Nouveautés';
+        var lien = document.getElementById('nav-nouveautes'); if (lien) lien.setAttribute('aria-label', n ? n + (n > 1 ? ' nouveautés non lues' : ' nouveauté non lue') : 'Nouveautés');
     };
     window.edteamOuvrirNouveautes = function () {
         function lancer() {
@@ -154,12 +155,20 @@
         var pied = document.getElementById('footer-edteam');
         if (!pied) { pied = el('footer', { id: 'footer-edteam' }); document.body.appendChild(pied); }
         pied.className = 'ft-edteam ' + (enApp ? 'ft-fixe' : 'ft-flux');
+        if (enApp) {
+            var zone = document.getElementById('display-area');
+            if (zone) {
+                var placer = function () { if (pied.parentNode !== zone || zone.lastElementChild !== pied) zone.appendChild(pied); };
+                placer();
+                // certaines pages remplacent le contenu de la zone : le pied de page revient tout seul en bas
+                new MutationObserver(placer).observe(zone, { childList: true });
+            }
+        }
         function contenuPied(visiteur) { return ''
             + '<div class="ft-ligne">'
             +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
-            +   (visiteur ? '' : '<button type="button" class="ft-btn ft-nouv" onclick="edteamOuvrirNouveautes()" title="Nouveautés">NOUVEAUTÉS<span class="ft-point" style="display:none"></span></button>')
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')

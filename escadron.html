@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=1"></script>
-    <script src="navigation.js?v=22"></script>
+    <script src="navigation.js?v=23"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -334,39 +334,45 @@
         .eff-puce { border: 1px solid #444; color: #999; padding: 3px 12px; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; border-radius: 12px; user-select: none; transition: 0.15s; }
         .eff-puce:hover { border-color: #888; color: #ccc; }
         .eff-puce.on { border-color: var(--ed-orange); color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); }
-        .eff-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 12px; align-items: stretch; }
-        .eff-carte { padding: 0; display: flex; align-items: stretch; gap: 0; cursor: pointer; margin-bottom: 0; transition: 0.2s; }
-        .eff-corps { flex: 1; min-width: 0; display: grid; gap: 10px; padding: 14px 18px; }
-        .eff-portrait { --c: #FF7100; position: relative; flex: none; width: 118px; overflow: hidden; border-right: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--c) 28%, #0a0604), #07090b 80%); }
-        .eff-portrait.amiral { --c: #FF3333; } .eff-portrait.officier { --c: #00FF66; } .eff-portrait.pilote { --c: #FF7100; }
-        .eff-portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
-        .eff-portrait:after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 55%, rgba(5, 3, 1, 0.7)), linear-gradient(0deg, rgba(5, 3, 1, 0.55), transparent 32%), linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 30%); }
-        .eff-ini { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.1em; font-weight: bold; letter-spacing: 1px; color: color-mix(in srgb, var(--c) 85%, #fff); text-shadow: 0 0 14px color-mix(in srgb, var(--c) 60%, transparent); }
+        .eff-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; padding: 6px 14px 10px; align-items: stretch; }
+        .eff-carte { --c: #FF7100; padding: 0; display: flex; flex-direction: column; cursor: pointer; margin-bottom: 0; transition: transform 0.2s cubic-bezier(.2,.8,.3,1.2), filter 0.2s; }
+        .eff-carte.amiral { --c: #FF3333; --bdc: rgba(255, 51, 51, .75); --teinte: rgba(255, 51, 51, .07); --lueur: rgba(255, 51, 51, .08); --accent: #FF3333; }
+        .eff-carte.officier { --c: #00FF66; --bdc: rgba(0, 255, 102, .7); --teinte: rgba(0, 255, 102, .06); --lueur: rgba(0, 255, 102, .07); --accent: #00FF66; }
+        .eff-carte.cy { --c: #00F0FF; --bdc: rgba(0, 240, 255, .75); --teinte: rgba(0, 240, 255, .07); --lueur: rgba(0, 240, 255, .08); --accent: #00F0FF; }
+        .eff-carte:before { z-index: 5; }
+        .eff-carte:hover { transform: translateY(-10px) scale(1.07); z-index: 20; filter: brightness(1.15); }
+        @media (hover: none) { .eff-carte:hover { transform: none; filter: none; } }
+        .eff-carte:after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 4; box-shadow: inset 0 0 22px color-mix(in srgb, var(--c) 26%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--c) 24%, transparent); background: linear-gradient(to bottom right, transparent calc(50% - 1px), var(--bdc) calc(50% - 1px), var(--bdc) calc(50% + 1px), transparent calc(50% + 1px)) left top / var(--coupe) var(--coupe) no-repeat, linear-gradient(to bottom right, transparent calc(50% - 1px), var(--bdc) calc(50% - 1px), var(--bdc) calc(50% + 1px), transparent calc(50% + 1px)) right bottom / var(--coupe) var(--coupe) no-repeat; }
+        .eff-img { position: relative; margin: 1px 1px 0; aspect-ratio: 1 / 1; background: #0a0604; overflow: hidden; }
+        .eff-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; display: block; }
+        .eff-ini { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 3.4em; font-weight: bold; color: color-mix(in srgb, var(--c) 85%, #fff); background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--c) 28%, #0a0604), #07090b 80%); text-shadow: 0 0 14px color-mix(in srgb, var(--c) 60%, transparent); }
+        .eff-tag { position: absolute; top: 8px; left: 8px; z-index: 1; background: var(--c); color: #000; font-size: 0.62em; font-weight: bold; letter-spacing: 1px; padding: 2px 7px; }
+        .eff-rang { position: absolute; top: 8px; right: 8px; z-index: 1; background: rgba(0, 0, 0, 0.65); border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); color: #fff; font-size: 0.66em; letter-spacing: 1px; padding: 2px 7px; }
+        .eff-rang b { color: var(--c); font-size: 1.25em; margin-left: 3px; }
+        .eff-voir { position: absolute; right: 8px; bottom: 8px; z-index: 1; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.3); color: #ddd; font-size: 0.62em; letter-spacing: 1px; padding: 2px 7px; white-space: nowrap; }
         .fp-entete { display: flex; align-items: center; gap: 20px; }
         .fp-photo { text-align: center; flex: none; }
         .fp-photo .ph { border-width: 2px; box-shadow: 0 0 14px rgba(255, 113, 0, 0.35); }
         .fp-photo-lien { display: block; margin-top: 8px; font-size: 0.7em; letter-spacing: 1px; cursor: pointer; color: var(--ed-orange); }
         .fp-photo-lien.rouge { color: #FF6a6a; }
-        .eff-carte:hover { --teinte: rgba(255, 113, 0, 0.22); --lueur: rgba(255, 113, 0, 0.22); }
-        .eff-carte.cy:hover { --teinte: rgba(0, 240, 255, 0.2); --lueur: rgba(0, 240, 255, 0.2); }
-        .eff-l1 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .eff-role { border: 1px solid; padding: 1px 8px; font-size: 0.72em; font-weight: bold; letter-spacing: 1px; }
-        .eff-nom { font-weight: bold; font-size: 1.15em; letter-spacing: 1px; }
-        .eff-badge { font-size: 0.68em; font-weight: bold; padding: 1px 6px; border: 1px solid; border-radius: 3px; letter-spacing: 1px; }
-        .eff-statut { margin-left: auto; font-size: 0.78em; color: #888; display: inline-flex; align-items: center; gap: 7px; }
-        .eff-point { width: 8px; height: 8px; border-radius: 50%; background: #444; }
-        .eff-point.actif { background: #00FF66; box-shadow: 0 0 6px #00FF66; }
-        .eff-l2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: end; }
-        .eff-mini-label { color: #777; font-size: 0.66em; letter-spacing: 1.5px; margin-bottom: 3px; }
-        .eff-mini-val { color: #fff; font-weight: bold; }
-        .eff-mini-val small { color: #888; font-weight: normal; margin-left: 4px; }
-        .eff-barre { height: 5px; background: rgba(255, 255, 255, 0.08); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .eff-etat { position: absolute; left: 8px; bottom: 8px; z-index: 1; font-size: 0.62em; letter-spacing: 1px; background: rgba(0, 0, 0, 0.65); padding: 2px 7px; color: #999; display: flex; align-items: center; gap: 6px; }
+        .eff-etat.actif { color: #00FF66; }
+        .eff-point { width: 7px; height: 7px; border-radius: 50%; background: #444; }
+        .eff-etat.actif .eff-point { background: #00FF66; box-shadow: 0 0 6px #00FF66; }
+        .eff-inf { padding: 9px 11px 10px; display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+        .eff-nom { color: #fff; font-weight: bold; letter-spacing: 1px; font-size: 0.88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .eff-carte.cy .eff-nom { color: var(--ed-blue); }
+        .eff-e { color: #888; font-size: 0.72em; height: 1.3em; display: flex; gap: 8px; align-items: center; white-space: nowrap; overflow: hidden; }
+        .eff-badge { flex: none; font-size: 0.8em; font-weight: bold; padding: 0 5px; border: 1px solid; border-radius: 3px; letter-spacing: 1px; }
+        .eff-ligne { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 10px; font-size: 0.72em; color: #777; white-space: nowrap; }
+        .eff-ligne > div { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+        .eff-ligne b { color: #fff; font-size: 1.15em; } .eff-ligne small { color: #888; }
+        .eff-barre { height: 3px; background: rgba(255, 255, 255, 0.08); margin-top: 3px; }
         .eff-barre > i { display: block; height: 100%; background: var(--ed-orange); }
-        .eff-l3 { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 9px; min-height: 40px; }
-        .eff-titres { display: flex; align-items: center; gap: 6px; }
-        .eff-plaques { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+        .eff-dec { display: flex; align-items: center; gap: 5px; height: 34px; border-top: 1px dashed rgba(255, 255, 255, 0.12); padding-top: 6px; margin-top: auto; overflow: hidden; }
+        .eff-plaques { display: flex; align-items: center; gap: 6px; zoom: 0.5; min-height: 44px; }
+        .eff-plaques > span { font-size: 1.7em !important; }
         .eff-rien { color: #666; font-size: 0.78em; font-style: italic; }
-        .eff-voir { color: #888; font-size: 0.7em; letter-spacing: 1px; }
 
         .fiche-pilote { max-width: 1060px !important; width: 95% !important; max-height: 90vh; overflow-y: auto; background: rgba(10, 5, 0, 0.96) !important; box-shadow: 0 0 30px rgba(255, 113, 0, 0.2); }
         .fp-nom { color: var(--ed-orange); font-size: 1.6em; font-weight: bold; letter-spacing: 3px; margin: 0 40px 0 0; }
@@ -399,7 +405,7 @@
         .fp-vide { color: #777; font-style: italic; text-align: center; padding: 18px 10px; line-height: 1.7; font-size: 0.85em; }
         .fp-hebdo { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 6px 0; border-bottom: 1px dashed #2a2a2a; font-size: 0.88em; }
         .fp-hebdo:last-child { border-bottom: none; }
-        @media (max-width: 800px) { .fp-duo { grid-template-columns: minmax(0, 1fr); } .eff-grille { grid-template-columns: minmax(0, 1fr); } .eff-l2 { grid-template-columns: 1fr; } }
+        @media (max-width: 800px) { .fp-duo { grid-template-columns: minmax(0, 1fr); } .eff-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } }
 
 </style>
 
@@ -442,9 +448,9 @@
                 <div class="eff-outils">
                     <input type="search" id="eff-recherche" placeholder="Rechercher un pilote…" oninput="effFiltrer()" autocomplete="off" spellcheck="false">
                     <select id="eff-tri" onchange="effFiltrer()">
+                        <option value="nom">Trier : nom du commandant</option>
                         <option value="role">Trier : rôle, puis rang BGS</option>
                         <option value="semaine">Trier : points de la semaine</option>
-                        <option value="nom">Trier : nom</option>
                     </select>
                 </div>
             </div>
@@ -454,7 +460,6 @@
                 <div style="grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; margin-top: 20px;">> CHARGEMENT DES EFFECTIFS...</div>
             </div>
 
-            <div style="text-align: right; margin-top: 18px;"><span onclick="quitterEscadron()" style="color: #555; font-size: .8em; letter-spacing: 1px; cursor: pointer; text-decoration: underline;" title="Repasser pilote indépendant">[ QUITTER L'ESCADRON ]</span></div>
 
             <!-- MODALE : DOSSIER DU PILOTE -->
             <div class="modal-overlay" id="modal-profil-pilote" onclick="fermerModal('modal-profil-pilote', event)">
@@ -576,7 +581,7 @@
         // ==========================================
         // LISTE DES PILOTES : cartes, recherche, tri et filtres (tout se fait dans le navigateur, sans relire la base)
         // ==========================================
-        const EFF = { liste: [], semaine: null, titres: null, recherche: '', tri: 'role', filtre: 'tous', promesseSemaine: null };
+        const EFF = { liste: [], semaine: null, titres: null, recherche: '', tri: 'nom', filtre: 'tous', promesseSemaine: null };
 
         // Points de la semaine de chaque pilote (script SQL 40). Renvoie null si la fonction serveur n'est pas installée : l'indicateur d'activité disparaît simplement.
         function semainePoints() {
@@ -597,7 +602,7 @@
 
         window.effFiltrer = function () {
             EFF.recherche = (document.getElementById('eff-recherche') || {}).value || '';
-            EFF.tri = (document.getElementById('eff-tri') || {}).value || 'role';
+            EFF.tri = (document.getElementById('eff-tri') || {}).value || 'nom';
             afficherEffectifs();
         };
         window.effPuce = function (f) {
@@ -606,12 +611,12 @@
             afficherEffectifs();
         };
 
-        // portrait de la carte : la photo sur toute la hauteur, sinon les initiales sur fond a la couleur du role
+        // portrait de la carte : photo carree, sinon les initiales sur fond a la couleur du role
         function portraitCarte(p) {
-            const P = window.EDTEAMPhotos, role = p.est_amiral ? 'amiral' : (p.est_officier ? 'officier' : 'pilote');
+            const P = window.EDTEAMPhotos;
             const u = P ? P.url(p.user_id, p.cmdr_nom) : '';
-            return '<div class="eff-portrait ' + role + '">' + '<span class="eff-ini">' + escapeHtml(P ? P.initiales(p.cmdr_nom) : '?') + '</span>'
-                + (u ? '<img src="' + escapeHtml(u) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</div>';
+            return '<span class="eff-ini">' + escapeHtml(P ? P.initiales(p.cmdr_nom) : '?') + '</span>'
+                + (u ? '<img src="' + escapeHtml(u) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '');
         }
         function afficherEffectifs() {
             const conteneur = document.getElementById('liste-effectifs');
@@ -638,7 +643,7 @@
             }).sort((a, b) => EFF.tri === 'semaine'
                 ? (pts(b) - pts(a)) || (mer(b) - mer(a)) || ((b.rang_bgs || 0) - (a.rang_bgs || 0))
                 : EFF.tri === 'nom'
-                    ? String(a.cmdr_nom || '').localeCompare(String(b.cmdr_nom || ''))
+                    ? (!a.cmdr_nom - !b.cmdr_nom) || String(a.cmdr_nom || '').localeCompare(String(b.cmdr_nom || ''), 'fr', { sensitivity: 'base' })
                     : (effRoleOrdre(a) - effRoleOrdre(b)) || ((b.rang_bgs || 0) - (a.rang_bgs || 0)) || ((Number(b.points_bgs) || 0) - (Number(a.points_bgs) || 0)));
 
             if (!liste.length) {
@@ -648,61 +653,56 @@
 
             conteneur.innerHTML = liste.map(p => {
                 const moi = p.user_id === profilCommandant.user_id;
-                const couleurRole = p.est_amiral ? '#FF3333' : 'var(--ed-orange)';
+                const roleClasse = p.est_amiral ? 'amiral' : (p.est_officier ? 'officier' : 'pilote');
                 let badges = '';
                 if (!p.est_amiral) {
-                    // Rang en jeu 4 = Recrue : pas d'accès aux pages d'escadron tant qu'un officier ne l'a pas passé Pilote en jeu
+                    // Rang en jeu 4 = Recrue : pas d'acces aux pages d'escadron tant qu'un officier ne l'a pas passe Pilote en jeu
                     if (Number(p.rang_escadron_jeu) === 4 && !p.est_officier) badges += '<span class="eff-badge" title="Recrue en jeu : pas d\'accès aux pages d\'escadron. Un officier doit la passer PILOTE dans le jeu." style="color: #FFC800;">RECRUE</span>';
                     if (p.est_officier) badges += '<span class="eff-badge" style="color: #00FF66;">OFFICIER BGS</span>';
                 }
                 const nom = p.cmdr_nom ? escapeHtml(p.cmdr_nom.toUpperCase()) : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
+                const actif = estActif(p);
 
-                // activité de la semaine
-                let statut = '';
-                if (estActif(p)) {
+                // activite de la semaine
+                let semaine = '<span>aucune activité</span>';
+                if (actif) {
                     const parts = [];
-                    if (pts(p) > 0) parts.push('<b style="color: #00FF66;">+' + fmtPts(pts(p)) + ' pts BGS</b>');
-                    if (mer(p) > 0) parts.push('<b style="color: #FFD700;">+' + fmtNb(mer(p)) + ' mérites</b>');
-                    statut = '<span class="eff-statut"><span class="eff-point actif"></span>ACTIF · ' + parts.join(' · ') + '</span>';
-                } else if (sem) statut = '<span class="eff-statut"><span class="eff-point"></span>inactif cette semaine</span>';
+                    if (pts(p) > 0) parts.push('<b style="color: #00FF66; font-size: 1em;">+' + fmtPts(pts(p)) + ' pts</b>');
+                    if (mer(p) > 0) parts.push('<b style="color: #FFD700; font-size: 1em;">+' + fmtNb(mer(p)) + '</b>');
+                    semaine = parts.join(' ');
+                }
 
                 // rang BGS et progression vers le suivant
-                let cellBgs = '<div class="eff-mini-val"><small>—</small></div>';
+                let cellBgs = '<b>—</b>', rangPuce = '';
                 if (p.rang_bgs) {
                     const rang = Math.min(100, Math.max(1, p.rang_bgs)), points = Number(p.points_bgs) || 0;
                     const min = seuilRangBgs(rang), max = rang >= 100 ? null : seuilRangBgs(rang + 1);
                     const pct = max === null ? 100 : Math.max(0, Math.min(100, (points - min) / (max - min) * 100));
-                    cellBgs = `<div class="eff-mini-val">${rang}<small>${max === null ? '· rang maximal' : '→ ' + (rang + 1)}</small></div><div class="eff-barre"><i style="width: ${pct.toFixed(1)}%;"></i></div>`;
+                    cellBgs = `BGS <b>${rang}</b> <small>${max === null ? '· max' : '→ ' + (rang + 1)}</small><div class="eff-barre"><i style="width: ${pct.toFixed(1)}%;"></i></div>`;
+                    rangPuce = `<span class="eff-rang">BGS<b>${rang}</b></span>`;
                 }
-                // Powerplay
-                const cellPp = p.puissance_nom
-                    ? `<div class="eff-mini-val" title="${escapeHtml(String(p.puissance_nom))}">RANG ${Number(p.puissance_rang) || 0}<small>· ${fmtNb(Number(p.puissance_merites_total) || 0)} mérites</small></div>`
-                    : '<div class="eff-mini-val"><small>—</small></div>';
+                const powerplay = p.puissance_nom ? 'Powerplay rang ' + (Number(p.puissance_rang) || 0) : 'Powerplay —';
 
-                // titres de spécialiste et meilleures plaques
-                const titresHtml = window.htmlTitresPilote ? window.htmlTitresPilote(titres, p.user_id, 34) : '';
+                // titres de specialiste et meilleures plaques
+                const titresHtml = window.htmlTitresPilote ? window.htmlTitresPilote(titres, p.user_id, 30) : '';
                 const rubans = rubansDepuisPalmares(p.palmares_bgs);
                 const totalPlaques = Math.max(rubans.length, p.palmares_total || 0);
-                const plaquesHtml = rubans.slice(0, 3).map(r => r.html).join('') + (totalPlaques > 3 ? `<span style="color: #666; font-size: 0.8em; font-weight: bold; margin-left: 4px;" title="+${totalPlaques - 3} autres décorations">+${totalPlaques - 3}</span>` : '');
+                const plaquesHtml = rubans.slice(0, 3).map(r => r.html).join('') + (totalPlaques > 3 ? `<span style="color: #666; font-size: 0.72em; font-weight: bold; margin-left: 3px;" title="+${totalPlaques - 3} autres décorations">+${totalPlaques - 3}</span>` : '');
 
                 return `
-                <div class="bloc eff-carte${moi ? ' cy' : ''}" onclick="ouvrirProfilPilote('${p.user_id}')">
-                    ${portraitCarte(p)}
-                    <div class="eff-corps">
-                    <div class="eff-l1">
-                        <span class="eff-role" style="color: ${couleurRole};">${p.est_amiral ? 'AMIRAL' : 'PILOTE'}</span>
-                        <span class="eff-nom" style="color: ${moi ? 'var(--ed-blue)' : '#fff'};">CMDR ${nom}</span>${moi ? '<span style="color: var(--ed-blue); font-size: 0.75em; letter-spacing: 1px;">[ VOUS ]</span>' : ''}${badges}
-                        ${statut}
+                <div class="bloc eff-carte ${roleClasse}${moi ? ' cy' : ''}" onclick="ouvrirProfilPilote('${p.user_id}')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                    <div class="eff-img">
+                        ${portraitCarte(p)}
+                        <span class="eff-tag">${p.est_amiral ? 'AMIRAL' : 'PILOTE'}</span>${rangPuce}
+                        <span class="eff-etat${actif ? ' actif' : ''}"><span class="eff-point"></span>${actif ? 'ACTIF' : 'INACTIF'}</span>
+                        <span class="eff-voir">VOIR LA FICHE</span>
                     </div>
-                    <div class="eff-l2">
-                        <div><div class="eff-mini-label">RANG BGS</div>${cellBgs}</div>
-                        <div><div class="eff-mini-label">POWERPLAY</div>${cellPp}</div>
-                    </div>
-                    <div class="eff-l3">
-                        <div class="eff-titres">${titresHtml || '<span class="eff-rien">aucun titre de spécialiste</span>'}</div>
+                    <div class="eff-inf">
+                        <div class="eff-nom">CMDR ${nom}${moi ? ' <span style="font-size: 0.8em;">[ VOUS ]</span>' : ''}</div>
+                        <div class="eff-e">${badges}<span>${powerplay}</span></div>
+                        <div class="eff-ligne"><div>${cellBgs}</div><div>Cette semaine<br>${semaine}</div></div>
+                        <div class="eff-dec">${titresHtml}</div>
                         <div class="eff-plaques">${plaquesHtml}</div>
-                        <span class="eff-voir">VOIR LA FICHE →</span>
-                    </div>
                     </div>
                 </div>`;
             }).join('');
@@ -1272,21 +1272,9 @@
             }
             btn.disabled = false;
         }
-        async function quitterEscadron() {
-            if (!confirm("Quitter l'escadron ?\n\nVous repasserez pilote indépendant, sans rôle. Pour revenir, il faudra le code d'invitation de l'escadron.")) return;
-            try {
-                const { data, error } = await window.supabaseApp.rpc('quitter_escadron');
-                if (error) throw error;
-                try { if (window.profilCommandant) sessionStorage.removeItem('edteam_profil_cache_' + window.profilCommandant.user_id); } catch (e) {}
-                ['edteam_acces_escadron', 'edteam_acces_bgs'].forEach(k => { try { localStorage.setItem(k, 'false'); } catch (e) {} });
-                window.location.href = 'index.html';
-            } catch (e) {
-                alert("Impossible de quitter l'escadron pour le moment.");
-            }
-        }
     </script>
 
     <script src="medailles.js?v=4"></script>
-    <script src="footer.js?v=18"></script>
+    <script src="footer.js?v=19"></script>
 </body>
 </html>

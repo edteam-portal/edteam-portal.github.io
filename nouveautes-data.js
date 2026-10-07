@@ -5,6 +5,16 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-menu-cloche-pied-de-page', date: '2026-10-07T22:03:56Z', type: 'AMELIORE',
+        titre: 'Menu plus pratique : cloche des nouveautés, pied de page en bas, compte sur deux colonnes',
+        texte: 'La cloche des nouveautés est maintenant dans le menu de gauche, juste au-dessus de la gestion du compte : un point orange vous prévient quand il y a du nouveau. Le pied de page ne reste plus collé en bas de l’écran, il se trouve tout en bas de chaque page et vous laisse toute la place pour le contenu. La fenêtre de gestion du compte s’affiche sur deux colonnes (une seule sur petit écran), votre clé de liaison EDMC tient sur une ligne, et le bouton « Quitter l’escadron » est rangé dans cette fenêtre, au lieu du bas de la page Escadron. Un petit son accompagne aussi l’ouverture de l’anecdote. Rien à faire de votre côté.'
+    },
+    {
+        id: '2026-10-escadron-cartes', date: '2026-10-07T22:02:56Z', type: 'AMELIORE',
+        titre: 'Page Escadron : vos camarades en cartes, et des cadres plus soignés',
+        texte: 'Les pilotes de l’escadron sont maintenant présentés en cartes de même taille, avec leur portrait, leur rang BGS, leur activité de la semaine, leurs titres et leurs plus belles plaques. Passez la souris sur une carte : elle se soulève comme si vous la tiriez d’un paquet. Les cartes sont classées par nom de commandant (vous pouvez choisir un autre tri). Les cadres de Ma puissance, Ma faction, Quoi faire et de l’anecdote reprennent aussi la finition lumineuse du Pilier et de l’Élan, et réagissent au survol quand ils ouvrent une fenêtre. Rien à faire de votre côté.'
+    },
+    {
         id: '2026-10-anecdotes-escadron', date: '2026-10-07T18:36:00Z', type: 'NOUVEAU',
         titre: 'Anecdotes de l’escadron : une petite histoire écrite à partir d’un exploit réel',
         texte: 'Trois à quatre fois par semaine, une IA raconte une courte anecdote de roleplay (drôle, épique, émouvante ou sérieuse) sur un pilote actif de votre escadron, à partir d’un fait réel de ses dernières 48 heures : tonnes livrées, victoires en zone de conflit, missions, primes… Elle apparaît dans une bande du QG et sur l’accueil du mobile ; cliquez dessus pour la lire en entier et retrouver les précédentes. Le fait réel est toujours cité, le reste est de la fiction. Vous ne voulez pas apparaître ? Décochez « Apparaître dans les anecdotes » dans Gestion du compte (PC) ou dans les Réglages (mobile). L’Amiral peut supprimer une anecdote. Rien à faire de votre côté, pas de mise à jour du plugin.',

@@ -17,7 +17,12 @@
         const st = document.createElement('style');
         st.id = 'edteam-anecdotes-css';
         st.textContent = [
-            '.an-bande{display:flex;gap:0;align-items:stretch;padding:0;min-height:128px;cursor:pointer}',
+            '.an-fil{position:absolute;right:16px;bottom:-34px;font-size:9em;line-height:1;color:#FF7100;opacity:.06;pointer-events:none;z-index:0}',
+            '.an-bande>.an-corps{position:relative;z-index:1}',
+            '.an-bande:before{z-index:5}',
+            '.an-lueur{position:absolute;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 22px rgba(255,113,0,.26),inset 0 0 0 1px rgba(255,113,0,.24)}',
+            '.an-bande{display:flex;gap:0;align-items:stretch;padding:0;min-height:128px;cursor:pointer;transition:filter .2s}',
+            '.an-bande:hover{filter:brightness(1.22)}',
             '.an-port{flex:none;width:118px;position:relative;overflow:hidden;border-right:1px solid rgba(255,113,0,.55);background:radial-gradient(circle at 50% 30%,#4a2608,#07090b 80%);display:flex;align-items:center;justify-content:center;font-size:2.1em;font-weight:bold;color:#ffab66}',
             '.an-port img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block}',
             '.an-port:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 55%,rgba(5,3,1,.7)),linear-gradient(0deg,rgba(5,3,1,.55),transparent 32%)}',
@@ -72,7 +77,7 @@
     function htmlBande(a) {
         css();
         const t = ton(a.ton), p = portrait(a);
-        return '<div class="bloc an-bande" onclick="EDTEAMAnecdotes.ouvrir()">'
+        return '<div class="bloc an-bande" onclick="EDTEAMAnecdotes.ouvrir()" onmouseenter="if(typeof sonHover===\'function\') sonHover()"><div class="an-fil">❝</div><div class="an-lueur"></div>'
             + '<div class="an-port">' + esc(p.ini) + (p.u ? '<img src="' + esc(p.u) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</div>'
             + '<div class="an-corps"><div class="an-k"><b>ANECDOTE DE L’ESCADRON</b><span class="an-ton" style="color:' + t[1] + ';border-color:' + t[1] + '">' + t[0] + '</span></div>'
             + '<div class="an-titre">' + esc(a.titre) + '</div><div class="an-ap">' + esc(String(a.texte || '').replace(/\n+/g, ' ')) + '</div>'
@@ -100,6 +105,7 @@
             + '<br>Histoire écrite par une IA à partir de ce fait ; le reste est de la fiction.</div>';
     }
     async function ouvrir() {
+        if (typeof sonClic === 'function') sonClic();
         css(); fermer();
         const v = document.createElement('div');
         v.id = 'an-voile'; v.className = 'an-voile';

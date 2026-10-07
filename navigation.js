@@ -62,7 +62,11 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18c.8-2.4 2.9-3.5 5.5-3.5s4.7 1.1 5.5 3.5"></path></svg></div>
             <span class="nav-text">PHOTOS DES PILOTES</span>
         </a>
-        <a href="#" id="nav-gestion-compte" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);" onclick="event.preventDefault(); ouvrirModal('modal-gestion-compte', event)" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'GESTION DU COMPTE<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Clé EDMC, e-mail, mot de passe, suppression du compte</span>', '#FF7100')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
+        <a href="#" id="nav-nouveautes" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);" onclick="event.preventDefault(); if(typeof edteamOuvrirNouveautes==='function') edteamOuvrirNouveautes()" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'NOUVEAUTÉS<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Ce qui vient d\\'être ajouté à EDTEAM</span>', '#FFD700')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
+            <div class="nav-icon" style="position: relative;"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="ft-point" style="display: none; position: absolute; top: -3px; right: -4px; width: 9px; height: 9px; border-radius: 50%; background: #FF7100; box-shadow: 0 0 8px #FF7100;"></span></div>
+            <span class="nav-text">NOUVEAUTÉS</span>
+        </a>
+        <a href="#" id="nav-gestion-compte" class="nav-link" onclick="event.preventDefault(); ouvrirModal('modal-gestion-compte', event)" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'GESTION DU COMPTE<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Clé EDMC, e-mail, mot de passe, suppression du compte</span>', '#FF7100')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
             <span class="nav-text">GESTION DU COMPTE</span>
         </a>
@@ -164,10 +168,11 @@ function injecterArchitectureGlobale() {
     // --- C. LES MODALES GLOBALES ---
     const modalesGlobalesHTML = `
         <div class="modal-overlay" id="modal-gestion-compte" onclick="fermerModal('modal-gestion-compte', event)" style="z-index: 3500;">
-            <div class="modal-content" style="max-width: 500px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+            <div class="modal-content" style="max-width: 980px; width: 95%; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); box-shadow: 0 0 30px rgba(255, 113, 0, 0.2);" onclick="event.stopPropagation()">
+                <style>#gc-grille { column-width: 380px; column-gap: 20px; } #gc-grille > * { break-inside: avoid; margin-bottom: 20px; } #gc-grille > .gc-danger { column-span: all; margin-bottom: 0; }</style>
                 <div class="modal-close" style="color: var(--ed-orange);" onclick="fermerModal('modal-gestion-compte')">X</div>
                 <div style="color: var(--ed-orange); border-bottom: 1px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 25px; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">⚙️ GESTION DU COMPTE</div>
-                <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div id="gc-grille">
                     <div id="bloc-photo-compte" style="background: rgba(255, 113, 0, 0.06); padding: 15px; border: 1px solid var(--ed-orange); border-radius: 4px;">
                         <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 10px;">MA PHOTO DE COMMANDANT :</label>
                         <div style="display: flex; gap: 16px; align-items: center;">
@@ -187,7 +192,7 @@ function injecterArchitectureGlobale() {
                     </div>
                     <div style="background: rgba(0, 240, 255, 0.05); padding: 15px; border: 1px solid var(--ed-blue); border-radius: 4px;">
                         <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">CLÉ DE LIAISON EDMC :</label>
-                        <div style="text-align: center; margin: 6px 0 8px;"><strong id="api-key-display" style="color: var(--ed-orange); font-size: 1.15em; cursor: pointer; letter-spacing: 2px; word-break: break-all;" onclick="copierNav(this.innerText, this, event)" title="Cliquer pour copier">[ CHARGEMENT DE LA CLÉ... ]</strong></div>
+                        <div style="text-align: center; margin: 6px 0 8px; overflow: hidden;"><strong id="api-key-display" style="display: inline-block; max-width: 100%; color: var(--ed-orange); font-size: 1.15em; cursor: pointer; letter-spacing: 1px; white-space: nowrap;" onclick="copierNav(this.innerText, this, event)" title="Cliquer pour copier">[ CHARGEMENT DE LA CLÉ... ]</strong></div>
                         <div style="color: #888; font-size: 0.78em; line-height: 1.5;">Cliquez sur la clé pour la copier, puis collez-la dans les paramètres du plugin EDMC (onglet SYS.EDTEAM, champ « Clé d'Accès »).</div>
                     </div>
                     <div style="background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
@@ -200,7 +205,12 @@ function injecterArchitectureGlobale() {
                         <input type="password" id="input-nouveau-mdp" style="width: 100%; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--ed-orange); color: #fff; padding: 10px 15px; font-family: 'Share Tech Mono', monospace; font-size: 1em; outline: none; box-sizing: border-box; margin-bottom: 10px;" placeholder="********">
                         <button style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.color='#ccc';" onclick="modifierMdpCompte()">METTRE À JOUR LE MOT DE PASSE</button>
                     </div>
-                    <div style="margin-top: 10px; border-top: 1px solid #FF3333; padding-top: 20px;">
+                    <div id="bloc-quitter-escadron" style="display: none; background: rgba(0,0,0,0.5); padding: 15px; border: 1px dashed #555; border-radius: 4px;">
+                        <label style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">MON ESCADRON :</label>
+                        <div style="color: #888; font-size: 0.78em; line-height: 1.5; margin-bottom: 10px;">Vous repasserez pilote indépendant, sans rôle. Pour revenir, il faudra le code d'invitation de l'escadron.</div>
+                        <button onclick="quitterEscadron()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid #888; color: #ccc; padding: 8px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.85em; width: 100%;">QUITTER L'ESCADRON</button>
+                    </div>
+                    <div class="gc-danger" style="margin-top: 10px; border-top: 1px solid #FF3333; padding-top: 20px;">
                         <button style="background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 12px 15px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 1em; width: 100%; transition: 0.2s;" onmouseover="this.style.background='#FF3333'; this.style.color='#000'; this.style.boxShadow='0 0 15px #FF3333';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333'; this.style.boxShadow='none';" onclick="autoDetruireCompte()">⚠️ SUPPRIMER DÉFINITIVEMENT MON COMPTE</button>
                     </div>
                 </div>
@@ -513,6 +523,8 @@ window.ouvrirModal = function(id, e) {
     if (modal) modal.style.display = 'flex';
     if (id === 'modal-gestion-compte' && typeof window.majBlocPhotoCompte === 'function') window.majBlocPhotoCompte();
     if (id === 'modal-gestion-compte' && typeof window.majOptionAnecdotesCompte === 'function') window.majOptionAnecdotesCompte();
+    if (id === 'modal-gestion-compte' && typeof window.majQuitterEscadronCompte === 'function') window.majQuitterEscadronCompte();
+    if (id === 'modal-gestion-compte' && typeof window.ajusterCleEdmc === 'function') window.ajusterCleEdmc();
 };
 
 // ---- Photo de commandant (fenetre Gestion du compte) : apercu, envoi, retrait. Le travail est dans photos.js ----
@@ -530,6 +542,37 @@ window.majBlocPhotoCompte = async function() {
     if (r) r.style.display = a ? '' : 'none';
 };
 // ---- Option « apparaitre dans les anecdotes » (SQL 60) : le bloc n'est affiche que si la fonction existe cote base ----
+// la cle EDMC tient sur UNE seule ligne : la police se reduit pour s'adapter a la largeur disponible (et se reajuste si la fenetre change de taille)
+window.ajusterCleEdmc = function() {
+    const k = document.getElementById('api-key-display'); if (!k || !k.parentNode) return;
+    k.style.fontSize = '1.15em';
+    let px = parseFloat(getComputedStyle(k).fontSize);
+    const dispo = k.parentNode.clientWidth;
+    while (k.scrollWidth > dispo && px > 8) { px -= 0.5; k.style.fontSize = px + 'px'; }
+};
+window.addEventListener('resize', function() { const m = document.getElementById('modal-gestion-compte'); if (m && m.style.display === 'flex') window.ajusterCleEdmc(); });
+window.majQuitterEscadronCompte = function() {
+    const bloc = document.getElementById('bloc-quitter-escadron'); if (!bloc) return;
+    const p = window.profilCommandant;
+    bloc.style.display = (p && p.escadron_id && p.escadron_id !== 'INDEPENDANT') ? 'block' : 'none';
+};
+window.quitterEscadron = async function() {
+    const message = "Vous repasserez pilote indépendant, sans rôle. Pour revenir, il faudra le code d'invitation de l'escadron.";
+    let ok = false;
+    if (typeof window.demanderConfirmation === 'function') ok = await window.demanderConfirmation("QUITTER L'ESCADRON ?", message, "#FF7100");
+    else ok = confirm("Quitter l'escadron ?\n\n" + message);
+    if (!ok) return;
+    try {
+        const { error } = await window.supabaseApp.rpc('quitter_escadron');
+        if (error) throw error;
+        try { if (window.profilCommandant) sessionStorage.removeItem('edteam_profil_cache_' + window.profilCommandant.user_id); } catch (e) {}
+        ['edteam_acces_escadron', 'edteam_acces_bgs'].forEach(k => { try { localStorage.setItem(k, 'false'); } catch (e) {} });
+        window.location.href = 'index.html';
+    } catch (e) {
+        if (typeof window.afficherAlerte === 'function') window.afficherAlerte("ERREUR", "Impossible de quitter l'escadron pour le moment.", "#FF3333");
+        else alert("Impossible de quitter l'escadron pour le moment.");
+    }
+};
 window.majOptionAnecdotesCompte = async function() {
     const bloc = document.getElementById('bloc-anecdotes-compte'), c = document.getElementById('anecdotes-option');
     if (!bloc || !c || typeof supabaseApp === 'undefined') return;
