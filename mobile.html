@@ -22,7 +22,7 @@
     <script src="qgsuivi.js?v=37"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
-    <script src="medailles.js?v=6"></script>
+    <script src="medailles.js?v=7"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -2168,7 +2168,13 @@
                     const limite = Date.now() - 30 * 86400000;
                     return ((data && data.lignes) || []).filter(l => l && l.t && new Date(l.t).getTime() >= limite).map(l => ({ type_action: 'STATION', date_action: l.t, station: l.station, systeme: l.systeme }));
                 }, force).catch(() => []);
-                if (!efforts.length && !stations.length) { cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">En attente de nouveaux rapports de vol.</div>'; return; }
+                // paliers de tonnes livrées (10 000, 25 000, 50 000, 100 000 t... cumulés par pilote, comme le titre « Bâtisseur ») : calculés par le serveur, 30 jours
+                const paliers = await xCache('exploits_paliers', 120000, async () => {
+                    const { data, error } = await supabaseApp.rpc('colonisation_paliers', { p_jours: 30 });
+                    if (error) throw error;
+                    return (Array.isArray(data) ? data : []).filter(l => l && l.t).map(l => ({ type_action: 'PALIER', date_action: l.t, cmdr: l.cmdr, palier: l.palier, total: l.total }));
+                }, force).catch(() => []);
+                if (!efforts.length && !stations.length && !paliers.length) { cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">En attente de nouveaux rapports de vol.</div>'; return; }
                 const noms = {};
                 dd.resume.forEach(r => (r.pilotes || []).forEach(x => { noms[String(x.u)] = x.nom; }));
                 // pilotes qui n'ont agi que hors directive : on ne lit que les noms manquants
@@ -2179,16 +2185,26 @@
                     (pp || []).forEach(p => { window.cacheNomsExploits[String(p.user_id)] = p.cmdr_nom; });
                 }
                 const compact = new Intl.NumberFormat('fr-FR', { notation: 'compact', compactDisplay: 'short' });
-                const pointsRang = (type, valeur) => {   // meme bareme que la colonne RANG BGS du PC
+                const pointsRang = (type, valeur, echecBaisse) => {   // meme bareme que la colonne RANG BGS du PC
                     const v = Math.abs(Number(valeur) || 0);
-                    if (type === 'ECHECS') return 0;
+                    if (type === 'ECHECS') return echecBaisse ? v : 0;   // un echec ne rapporte rien, sauf sous une directive de baisse
                     if (type === 'COLONISATION') return v / 400;
                     if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
                     return v > 10000 ? v / 2000000 : v;
                 };
                 const coloNomJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
-                const fusion = [...efforts, ...stations].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 60);
+                const fusion = [...efforts, ...stations, ...paliers].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 60);
                 cont.innerHTML = fusion.map(e => {
+                    if (e.type_action === 'PALIER') {
+                        const cp = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
+                        const dP = new Date(e.date_action);
+                        const quandP = dP.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + dP.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        return `<div class="xc exploit-item" style="padding: 10px 12px; border-left: 3px solid ${cp}; border-radius: 6px 14px 14px 6px;">
+                        <div class="xrow"><span style="color: #fff; font-size: 0.85em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">CMDR ${XESC(String(e.cmdr || 'INCONNU').toUpperCase())}</span><span class="xsp"></span><span class="xmut" style="font-size: 0.62em;">${quandP}</span></div>
+                        <div class="xrow" style="margin-top: 5px;"><span class="xmut" style="color: ${cp};">COLONISATION · CHANTIER</span><span class="xsp"></span><span style="color: ${cp}; font-size: 0.82em; font-weight: bold; text-align: right;">PALIER ${Number(e.palier).toLocaleString('fr-FR')} T${e.palier % 50000 === 0 ? ' ★' : ''}</span></div>
+                        <div class="xrow" style="margin-top: 4px;"><span class="xmut" style="font-size: 0.62em;">${Number(e.total).toLocaleString('fr-FR')} T LIVRÉES AU TOTAL</span></div>
+                    </div>`;
+                    }
                     if (e.type_action === 'STATION') {
                         const cb = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
                         const dS = new Date(e.date_action);
@@ -2204,10 +2220,10 @@
                     const ordre = ordres.find(o => String(o.id) === String(e.ordre_id));
                     const typeOrdre = ordre ? String(ordre.type_ordre).toUpperCase() : 'BGS';
                     // couleur = SPÉCIALITÉ de l'action (celle du mur des spécialistes), plus le type de directive
-                    const col = window.specialiteAction ? window.specialiteAction(action).couleur : '#8a8f98';
+                    const col = window.specialiteAction ? window.specialiteAction(action, ordre ? ordre.type_ordre : null).couleur : '#8a8f98';
                     const etiquette = action === 'COLONISATION' ? 'COLONISATION · CHANTIER' : ordre ? `OP.#${e.ordre_id} · ${action}` : `SOUTIEN LIBRE · ${action === 'SCIENCE' && e.details === 'Exobiologie' ? 'EXOBIOLOGIE' : action}`;
                     const lieu = XESC(String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase());
-                    const pr = pointsRang(action, e.valeur);
+                    const pr = pointsRang(action, e.valeur, action === 'ECHECS' && !!ordre && String(ordre.type_ordre).toUpperCase() === 'BAISSE');
                     const ptsTxt = !(pr > 0) ? '' : `${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS`;
                     let q = e.valeur;
                     if (action === 'COLONISATION') q = `+${Number(e.valeur).toLocaleString('fr-FR')} T${e.details ? ' (' + String(e.details).replace(/^Livraison de colonisation\s*:\s*/i, '') + ')' : ''}`;
@@ -3774,7 +3790,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=12', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=13', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

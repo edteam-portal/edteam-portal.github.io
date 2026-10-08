@@ -362,7 +362,7 @@
                         <summary style="color: var(--ed-blue); letter-spacing: 2px; cursor: pointer;">&gt; COMMENT ÇA MARCHE</summary>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 12px;">
                             <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">1 · AGIS POUR TA FACTION</b>Missions, combat, commerce, exploration, colonisation : tout ce qui sert ta faction d'escadron est relevé par le plugin, sans rien saisir.</div>
-                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">2 · CHAQUE ACTION RAPPORTE</b>Chaque action rapporte des points de carrière (voir la colonne RANG BGS du journal). Les échecs ne rapportent rien.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">2 · CHAQUE ACTION RAPPORTE</b>Chaque action rapporte des points de carrière (voir la colonne RANG BGS du journal). Les échecs ne rapportent rien, sauf sous une directive de baisse.</div>
                             <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">3 · TON RANG MONTE</b>Tes points cumulés font monter ton rang, de 1 à 100. L'Amiral peut demander un focus : il rapporte en plus une distinction.</div>
                         </div>
                     </details>
@@ -453,6 +453,7 @@
         let journalMemo = { ts: 0 };
         let journalEtat = { lignes: [], fin: true };   // actions déjà chargées (100 par page, 500 au plus)
         let memoireStations = [];                      // stations de colonisation terminées (affichées dans le journal avec les actions)
+        let memoirePaliers = [];                       // paliers de tonnes livrées (colonisation) franchis par les pilotes, annoncés dans le journal
         const nomStationJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
         window.ouvrirJournalBGS = function(e) {
             if (typeof sonClic === 'function') sonClic();
@@ -2121,19 +2122,19 @@
         // ==========================================
         // Journal : points de carrière (même barème que le script SQL 17, via pointsInvestissement) et progression du rang BGS du pilote
         const seuilRangBgs = n => n <= 1 ? 0 : Math.round(15 * Math.pow(n - 1, 1.6));
-        function celluleRangBgs(a) {
-            const p = pointsInvestissement(a.type_action, a.valeur);
+        function celluleRangBgs(a, echecBaisse) {
+            const p = pointsInvestissement(a.type_action, a.valeur, echecBaisse);
             if (!(p > 0)) return '<span style="text-align: right; color: #555; font-size: 0.95em;" title="Cette ligne ne rapporte aucun point de carrière">—</span>';
             const txt = p < 0.1 ? '< 0,1' : (p < 10 ? Math.round(p * 10) / 10 : Math.round(p)).toLocaleString('fr-FR');
             return `<span style="text-align: right; white-space: nowrap; color: var(--ed-orange); font-weight: bold; font-size: 0.95em;" title="Cette action rapporte ${txt} point(s) de carrière BGS">${p < 0.1 ? "" : "+"}${txt} PTS</span>`;
         }
         let monRangBgsMemo = { ts: 0, d: null };
         async function bandeauRangBgs() {
-            return '<div style="padding: 8px 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8a8a8a; font-size: 0.78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ⓘ <b style="color: var(--ed-orange);">RANG BGS</b> : les points de carrière que rapporte chaque action (les échecs : 0). Cumulés, ils font monter votre rang.</div>';
+            return '<div style="padding: 8px 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8a8a8a; font-size: 0.78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ⓘ <b style="color: var(--ed-orange);">RANG BGS</b> : les points de carrière que rapporte chaque action (les échecs : 0, sauf sous une directive de baisse : 1). Cumulés, ils font monter votre rang.</div>';
         }
-        function pointsInvestissement(type, valeur) {
+        function pointsInvestissement(type, valeur, echecBaisse) {
             const v = Math.abs(Number(valeur) || 0);
-            if (type === 'ECHECS') return 0;
+            if (type === 'ECHECS') return echecBaisse ? v : 0;   // un échec ne rapporte rien, sauf sous une directive de baisse (1 point, 10 par jour au plus)
             if (type === 'COLONISATION') return v / 400;
             if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
             return v > 10000 ? v / 2000000 : v;
@@ -2170,13 +2171,13 @@
                         queryEfforts = queryEfforts.eq('ordre_id', 'none'); 
                     }
                 } else if (filtreOrdre === 'LIBRE') {
-                    // Cible spécifiquement les actions sans ordre (soutien libre & chantiers de colonisation)
-                    queryEfforts = queryEfforts.is('ordre_id', null).gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+                    // Cible spécifiquement les actions sans ordre (soutien libre & chantiers de colonisation) ; la période est filtrée plus bas, sans plafond de 30 jours
+                    queryEfforts = queryEfforts.is('ordre_id', null);
                 } else if (filtreOrdre !== 'ALL') {
                     queryEfforts = queryEfforts.eq('ordre_id', filtreOrdre);
-                } else {
-                    queryEfforts = queryEfforts.gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
                 }
+                // « TOUTES LES ACTIVITÉS » : sans aucun filtre de directive, donc directives en cours, directives CLÔTURÉES et actions libres, sur la période choisie
+                // (avec « tout l'historique », vraiment tout l'historique : 100 lignes par page, 500 au plus)
 
                 // Pilote et période filtrés côté serveur, et seulement les 100 actions les plus récentes (celles qui sont affichées)
                 if (filtrePilote === 'ME') queryEfforts = queryEfforts.eq('user_id', profilCommandant.user_id);
@@ -2189,6 +2190,10 @@
                 const resStations = suite ? null : await supabaseApp.rpc('colonisation_journal', { p_limite: 100, p_decalage: 0, p_type: 'STATION TERMINEE', p_pilote: null, p_recherche: null }).then(r => r, () => ({ data: null }));
                 if (!suite) memoireStations = (resStations && resStations.data && Array.isArray(resStations.data.lignes) ? resStations.data.lignes : [])
                     .filter(l => l && l.t).map(l => ({ type_action: 'STATION', date_action: l.t, station: l.station, systeme: l.systeme }));
+                // Paliers de livraisons (10 000, 25 000, 50 000, 100 000 t... cumulés par pilote, comme le titre « Bâtisseur ») : calculés par le serveur, 30 jours
+                const resPaliers = suite ? null : await supabaseApp.rpc('colonisation_paliers', { p_jours: 30 }).then(r => r, () => ({ data: null }));
+                if (!suite) memoirePaliers = (resPaliers && Array.isArray(resPaliers.data) ? resPaliers.data : [])
+                    .filter(l => l && l.t).map(l => ({ type_action: 'PALIER', date_action: l.t, cmdr: l.cmdr, palier: l.palier, total: l.total }));
                 const [resEfforts, resProfils] = await Promise.all([
                     queryEfforts,
                     suite ? Promise.resolve({ data: null }) : supabaseApp.from('profils_publics')
@@ -2246,7 +2251,7 @@
 
                     if (filtrePeriode === 'TICK_HEBDO' && dateEffort < tickHebdoRef.getTime()) return false;
                     if (filtrePeriode === '7J' && now - dateEffort > 7 * 24 * 60 * 60 * 1000) return false;
-                    // Note : Le filtre 30J n'est plus utile ici car le serveur Supabase limite déjà à 30J sur le "ALL".
+                    // Les périodes 7 jours / 30 jours / dernier cycle sont déjà filtrées côté serveur ; « tout l'historique » n'est plus limité à 30 jours.
 
                     return true;
                 });
@@ -2261,9 +2266,20 @@
                     if (isNaN(t)) return false;
                     if (filtrePeriode === 'TICK_HEBDO') return t >= tickHebdoRef.getTime();
                     if (filtrePeriode === '7J') return now - t <= 7 * 86400000;
-                    return now - t <= 30 * 86400000;
+                    if (filtrePeriode === '30J') return now - t <= 30 * 86400000;
+                    return true;
                 });
-                const lastActions = [...effortsFiltres, ...stationsVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 500);
+                const enPeriodeJournal = s => {
+                    const t = new Date(s.date_action).getTime();
+                    if (isNaN(t)) return false;
+                    if (filtrePeriode === 'TICK_HEBDO') return t >= tickHebdoRef.getTime();
+                    if (filtrePeriode === '7J') return now - t <= 7 * 86400000;
+                    if (filtrePeriode === '30J') return now - t <= 30 * 86400000;
+                    return true;
+                };
+                const monNomJournal = String(profilCommandant.cmdr_nom || '').toUpperCase();
+                const paliersVisibles = !['ALL', 'LIBRE'].includes(filtreOrdre) ? [] : memoirePaliers.filter(p => enPeriodeJournal(p) && (filtrePilote !== 'ME' || String(p.cmdr || '').toUpperCase() === monNomJournal));
+                const lastActions = [...effortsFiltres, ...stationsVisibles, ...paliersVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 500);
                 
                 if (conteneurFeed) {
                     if (lastActions.length === 0) {
@@ -2301,11 +2317,30 @@
                             <div class="exploit-row" style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 300px 100px 100px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgS}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cb};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgS}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #888; font-weight: bold; white-space: nowrap;">ESCADRON</span>
-                                <div style="white-space: nowrap;"><span style="border: 1px solid #9fb0bf; color: #9fb0bf; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">COLONISATION</span></div>
+                                <div style="white-space: nowrap;"><span style="border: 1px solid ${cb}; color: ${cb}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">COLONISATION</span></div>
                                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;"><span style="color: var(--ed-orange); font-weight: bold;">${escapeHtml(String(a.systeme || 'SECTEUR LOCAL').toUpperCase())}</span><span style="color: #555; margin: 0 6px;">//</span><span style="color: #aaa;">${escapeHtml(nomStationJournal(a.station).toUpperCase())}</span></div>
                                 <span style="text-align: right; white-space: nowrap; color: ${cb}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${cb}40;">STATION TERMINÉE</span>
                                 <span style="text-align: right; color: ${cb}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ CHANTIER ]</span>
                                 <span style="text-align: right; color: #555; font-size: 0.95em;" title="Une station terminée ne rapporte pas de points : les livraisons les ont déjà comptés">—</span>
+                            </div>`;
+                                return;
+                            }
+
+                            // Palier de tonnes livrées franchi par un pilote (colonisation) : une ligne du journal, couleur du titre « Bâtisseur »
+                            if (a.type_action === 'PALIER') {
+                                const cp = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
+                                const bgP = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+                                const nomP = escapeHtml(String(a.cmdr || 'INCONNU').toUpperCase());
+                                const tP = new Intl.NumberFormat('fr-FR').format(a.palier) + ' T' + (a.palier % 50000 === 0 ? ' ★' : '');   // une étoile tous les 50 000 t
+                                feedHtml += `
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 300px 100px 100px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgP}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cp};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgP}';">
+                                <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
+                                <span style="color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="CMDR ${nomP}">CMDR ${nomP}</span>
+                                <div style="white-space: nowrap;"><span style="border: 1px solid ${cp}; color: ${cp}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">COLONISATION</span></div>
+                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;"><span style="color: var(--ed-orange); font-weight: bold;">LIVRAISONS</span><span style="color: #555; margin: 0 6px;">//</span><span style="color: #aaa;">${escapeHtml(new Intl.NumberFormat('fr-FR').format(a.total))} T AU TOTAL</span></div>
+                                <span style="text-align: right; white-space: nowrap; color: ${cp}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${cp}40;">PALIER ${tP}</span>
+                                <span style="text-align: right; color: ${cp}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ CHANTIER ]</span>
+                                <span style="text-align: right; color: #555; font-size: 0.95em;" title="Un palier ne rapporte pas de points : les livraisons les ont déjà comptés">—</span>
                             </div>`;
                                 return;
                             }
@@ -2319,7 +2354,8 @@
                             let typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "LIBRE";
                             let badgeOrdreTexte = ordreConcerne ? `#${ordreConcerne.id} | ${typeOrdre}` : "SOUTIEN LIBRE";
                             // Couleur de la ligne = SPÉCIALITÉ de l'action (celle du mur des spécialistes), plus le type de directive ; le badge, lui, reste neutre
-                            const spec = window.specialiteAction ? window.specialiteAction(a.type_action) : { couleur: '#8a8f98', nom: '' };
+                            const echecBaisse = a.type_action === 'ECHECS' && !!ordreConcerne && String(ordreConcerne.type_ordre).toUpperCase() === 'BAISSE';
+                            const spec = window.specialiteAction ? window.specialiteAction(a.type_action, ordreConcerne ? ordreConcerne.type_ordre : null) : { couleur: '#8a8f98', nom: '' };
                             const colorOrdre = spec.couleur;
 
                             if (a.type_action === 'COLONISATION') {
@@ -2368,7 +2404,7 @@
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
                                 <div style="white-space: nowrap;">
-                                    <span style="border: 1px solid #9fb0bf; color: #9fb0bf; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">${badgeOrdreTexte}</span>
+                                    <span style="border: 1px solid ${colorOrdre}; color: ${colorOrdre}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">${badgeOrdreTexte}</span>
                                 </div>
                                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;">
                                     <span style="color: var(--ed-orange); font-weight: bold;">${cibleSys}</span>
@@ -2377,7 +2413,7 @@
                                 </div>
                                 <span title="${String(formatValeur).replace(/"/g, '&quot;')}" style="text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${colorOrdre}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}</span>
                                 <span style="text-align: right; color: ${colorOrdre}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;" title="${spec.nom ? 'Spécialité : ' + spec.nom : 'Ne fait progresser aucun titre'}">[ ${vecteurTexte} ]</span>
-                                ${celluleRangBgs(a)}
+                                ${celluleRangBgs(a, echecBaisse)}
                             </div>`;
                         });
 
@@ -2636,7 +2672,7 @@
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="medailles.js?v=6"></script>
-    <script src="footer.js?v=20"></script>
+    <script src="medailles.js?v=7"></script>
+    <script src="footer.js?v=21"></script>
 </body>
 </html>

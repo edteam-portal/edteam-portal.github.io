@@ -13,7 +13,7 @@
         { code: 'ECO', nom: 'LE MAGNAT',           sous: 'ÉCONOMIE',     couleur: '#00FF66', unite: 'cr',  mesure: 'commerce et minage, en crédits cumulés',                   desc: "Le négociant qui a généré le plus de richesse par le commerce et le minage." },
         { code: 'BAT', nom: 'LE BÂTISSEUR',        sous: 'COLONISATION', couleur: '#FFD700', unite: 't',   mesure: 'tonnes livrées sur les chantiers de colonisation',          desc: "Le maître d'œuvre qui a livré le plus gros tonnage de matériaux sur les chantiers de colonisation." },
         { code: 'SCI', nom: "L'EXPERT SCIENTIFIQUE",         sous: 'SCIENCE',      couleur: '#B026FF', unite: 'cr',  mesure: 'cartographie et exobiologie, en crédits cumulés',          desc: "Le pilote qui a rapporté les données de cartographie et d'exobiologie les plus précieuses pour la faction de l'escadron." },
-        { code: 'EXE', nom: "L'EXÉCUTEUR",         sous: 'OP. NOIRES',   couleur: '#FF3333', unite: 'ops', mesure: "meurtres, vols, piratages et contrebande contre une autre faction que celle de l'escadron",    desc: "L'agent des ombres le plus actif contre les factions rivales : meurtres, vols, piratages et contrebande. Les échecs ne comptent pas." },
+        { code: 'EXE', nom: "L'EXÉCUTEUR",         sous: 'OP. NOIRES',   couleur: '#FF3333', unite: 'ops', mesure: "meurtres, vols, piratages et contrebande contre une autre faction que celle de l'escadron, et missions échouées sous une directive de baisse",    desc: "L'agent des ombres le plus actif contre les factions rivales : meurtres, vols, piratages, contrebande, et missions échouées sous une directive de baisse (10 par jour au plus). Les autres échecs ne comptent pas." },
         { code: 'GUE', nom: 'SEIGNEUR DE GUERRE',  sous: 'CONFLITS',     couleur: '#FF9A3C', unite: 'vict', mesure: 'victoires en zone de conflit',        desc: "Le vétéran qui a remporté le plus de victoires en zone de conflit pour la faction de l'escadron." },
     ];
     const PAR_CODE = {}; TITRES.forEach(t => { PAR_CODE[t.code] = t; });
@@ -207,8 +207,11 @@
     // sert a colorer le journal des exploits (PC et mobile). Un echec ne fait progresser aucun titre : gris neutre.
     const SPEC_DE_ACTION = { SECURITE: 'SEC', MISSIONS: 'LOG', ELECTION_MISSIONS: 'LOG', GUERRE_MISSIONS: 'LOG', ECONOMIE: 'ECO', COLONISATION: 'BAT', SCIENCE: 'SCI',
                              MEURTRES: 'EXE', VOLS: 'EXE', PIRATAGE: 'EXE', CONTREBANDE: 'EXE', CZ_VICTOIRES: 'GUE' };
-    window.specialiteAction = function (type) {
-        const t = PAR_CODE[SPEC_DE_ACTION[String(type || '').toUpperCase()]];
+    window.specialiteAction = function (type, typeOrdre) {
+        const T = String(type || '').toUpperCase();
+        // un echec n'a pas de specialite, SAUF sous une directive de BAISSE (action offensive : script SQL 66)
+        const code = (T === 'ECHECS' && String(typeOrdre || '').toUpperCase() === 'BAISSE') ? 'EXE' : SPEC_DE_ACTION[T];
+        const t = PAR_CODE[code];
         return t ? { code: t.code, nom: t.sous, couleur: t.couleur } : { code: '', nom: '', couleur: '#8a8f98' };
     };
     window.titreMeta = function (code) { return PAR_CODE[code] || null; };

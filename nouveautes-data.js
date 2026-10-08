@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-echecs-sous-baisse', date: '2026-10-08T20:41:09Z', type: 'AMELIORE',
+        titre: 'Missions échouées sous une directive de baisse : elles comptent',
+        texte: 'Faire échouer ou abandonner une mission de la faction visée par une directive de baisse est une action offensive : elle rapporte maintenant 1 point de rang BGS et compte pour le titre de l’Exécuteur, avec une ligne en rouge dans le journal des exploits. Au plus 10 échecs par pilote et par jour sont comptés. Partout ailleurs (hausse, élection, sans directive), un échec ne rapporte toujours rien.',
+        important: false
+    },
+    {
+        id: '2026-10-paliers-colonisation', date: '2026-10-08T20:40:09Z', type: 'NOUVEAU',
+        titre: 'Journal des exploits : les livraisons de colonisation y sont annoncées',
+        texte: 'Une ligne apparaît dans le journal des exploits à chaque tranche de 5 000 tonnes livrées par un pilote pour la colonisation (environ quatre allers-retours d’un Panther Clipper), avec une étoile à chaque 50 000 tonnes. Les étiquettes du journal prennent aussi la couleur de la spécialité, comme les lignes. Ceux qui livrent sont ainsi aussi visibles que ceux qui enchaînent les missions. Le filtre « tout l’historique » du journal remonte aussi maintenant jusqu’au début (il s’arrêtait à 30 jours), y compris pour les directives clôturées.',
+        important: false
+    },
+    {
         id: '2026-10-journal-bgs-couleurs', date: '2026-10-08T20:15:00Z', type: 'AMELIORE',
         titre: 'Journal des exploits : couleurs par spécialité et stations terminées',
         texte: 'Dans le journal des exploits du BGS (sur PC et sur mobile), chaque ligne prend maintenant la couleur de la spécialité qu’elle fait progresser, celle du mur des spécialistes : cyan pour la sécurité (Fer de Lance), orange pour les missions (Maître Logisticien), vert pour l’économie (Magnat), violet pour la science, rouge pour les opérations noires (Exécuteur), orange clair pour les zones de conflit (Seigneur de Guerre) et or pour la colonisation (Bâtisseur). Les stations de colonisation terminées apparaissent aussi dans le journal, une ligne par station.',
