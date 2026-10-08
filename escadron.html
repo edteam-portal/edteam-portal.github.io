@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=1"></script>
-    <script src="navigation.js?v=23"></script>
+    <script src="navigation.js?v=24"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -355,6 +355,8 @@
         .fp-photo .ph { border-width: 2px; box-shadow: 0 0 14px rgba(255, 113, 0, 0.35); }
         .fp-photo-lien { display: block; margin-top: 8px; font-size: 0.7em; letter-spacing: 1px; cursor: pointer; color: var(--ed-orange); }
         .fp-photo-lien.rouge { color: #FF6a6a; }
+        .eff-ajout { position: absolute; left: 8px; right: 8px; bottom: 34px; z-index: 2; text-align: center; background: rgba(0, 0, 0, 0.7); border: 1px dashed var(--ed-orange); color: var(--ed-orange); font-size: 0.66em; letter-spacing: 1px; padding: 6px 4px; cursor: pointer; }
+        .eff-ajout:hover { background: rgba(255, 113, 0, 0.22); color: #fff; }
         .eff-etat { position: absolute; left: 8px; bottom: 8px; z-index: 1; font-size: 0.62em; letter-spacing: 1px; background: rgba(0, 0, 0, 0.65); padding: 2px 7px; color: #999; display: flex; align-items: center; gap: 6px; }
         .eff-etat.actif { color: #00FF66; }
         .eff-point { width: 7px; height: 7px; border-radius: 50%; background: #444; }
@@ -693,6 +695,7 @@
                 <div class="bloc eff-carte ${roleClasse}${moi ? ' cy' : ''}" onclick="ouvrirProfilPilote('${p.user_id}')" onmouseenter="if(typeof sonHover==='function') sonHover()">
                     <div class="eff-img">
                         ${portraitCarte(p)}
+                        ${moi && !(window.EDTEAMPhotos && window.EDTEAMPhotos.url(p.user_id, p.cmdr_nom)) ? '<span class="eff-ajout" onclick="event.stopPropagation(); if(typeof sonClic===\'function\') sonClic(); ouvrirModal(\'modal-gestion-compte\')">+ AJOUTER MA PHOTO</span>' : ''}
                         <span class="eff-tag">${p.est_amiral ? 'AMIRAL' : 'PILOTE'}</span>${rangPuce}
                         <span class="eff-etat${actif ? ' actif' : ''}"><span class="eff-point"></span>${actif ? 'ACTIF' : 'INACTIF'}</span>
                         <span class="eff-voir">VOIR LA FICHE</span>
@@ -1275,6 +1278,6 @@
     </script>
 
     <script src="medailles.js?v=4"></script>
-    <script src="footer.js?v=19"></script>
+    <script src="footer.js?v=20"></script>
 </body>
 </html>

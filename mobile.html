@@ -1055,7 +1055,7 @@
                         <input type="file" id="m-photo-fichier" accept="image/png,image/jpeg,image/webp" style="display: none;" onchange="envoyerPhotoMobile(this)">
                         <button type="button" id="m-photo-btn" class="m-btn" style="background: transparent; border-color: var(--ed-orange); color: var(--ed-orange); font-size: 0.75em; padding: 9px 14px; border-radius: 11px; display: inline-block; width: auto;" onclick="document.getElementById('m-photo-fichier').click()">+ AJOUTER</button>
                         <button type="button" id="m-photo-retirer" class="m-btn" style="background: transparent; border-color: #555; color: #999; font-size: 0.75em; padding: 9px 14px; border-radius: 11px; display: none; width: auto; margin-left: 6px;" onclick="retirerPhotoMobile()">RETIRER</button>
-                        <div id="m-photo-msg" class="xmut" style="font-size: 0.62em; margin-top: 8px; line-height: 1.5;">Visible par votre escadron et par les pilotes de votre Puissance. Remplace la précédente.</div>
+                        <div id="m-photo-msg" class="xmut" style="font-size: 0.62em; margin-top: 8px; line-height: 1.5;">Visible par votre escadron et par les pilotes de votre Puissance. Remplace la précédente.<br>Astuce : faites une capture d'écran du visage de votre personnage (Holo-Me, écran de création de personnage) et envoyez-la ici.</div>
                     </div>
                 </div>
             </div>
@@ -3756,7 +3756,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=11', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=12', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {
