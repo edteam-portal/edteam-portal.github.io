@@ -94,6 +94,9 @@
         document.head.appendChild(st);
     }
 
+    // Note de fidelite : Spansh ne connait que les systemes visites par des joueurs, ses totaux peuvent donc differer de quelques % de ceux du jeu.
+    const NOTE_JEU = '<span title="Spansh ne met un système à jour que lorsqu’un joueur le visite : les systèmes peu fréquentés gardent leur ancien relevé, d’où un petit écart possible avec le jeu.">Petit écart possible avec le jeu (relevé Spansh) : le panneau en jeu fait foi.</span>';
+
     function cartePuissance(p) {
         if (!p) return '';
         const emb = EMBLEMES[p.nom_spansh] || [String(p.nom || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(), '#00F0FF'];
@@ -109,6 +112,7 @@
             + '<div class="qs-et"><div><div class="v" style="color:#FFD700">' + fmt(p.stronghold) + (v ? vari(v.stronghold) : '') + '</div><div class="l">STRONGHOLD</div></div>'
             + '<div><div class="v" style="color:#00F0FF">' + fmt(p.fortified) + (v ? vari(v.fortified) : '') + '</div><div class="l">FORTIFIED</div></div>'
             + '<div><div class="v" style="color:#6fb6d0">' + fmt(p.exploited) + (v ? vari(v.exploited) : '') + '</div><div class="l">EXPLOITED</div></div></div>'
+            + '<div class="qs-note qs-ecart">' + NOTE_JEU + '</div>'
             + (p.source === 'escadron' ? '<div class="qs-note">Puissance choisie par la majorité de votre escadron (vous n’êtes pas aligné).</div>' : '')
             + (v && v.rang ? '<div class="qs-note">' + (v.rang > 0 ? '▲ gagne ' + v.rang + ' place' + (v.rang > 1 ? 's' : '') : '▼ perd ' + Math.abs(v.rang) + ' place' + (Math.abs(v.rang) > 1 ? 's' : '')) + ' depuis le ' + esc(jj(v.depuis)) + '</div>' : '')
             + '</div><div class="qs-src"><span>SOURCE : SPANSH (DONNÉES EDDN)</span><span>RELEVÉ DU ' + esc(jj(p.releve_le)) + '</span></div>';
@@ -134,7 +138,8 @@
         if (!f) return '<div class="qs-vide">Le relevé de la faction de votre escadron s’affichera ici dès demain matin.</div>';
         const t = (cls, val, lib, va, unite) => '<div class="qs-t ' + cls + '"><div class="v"><span class="qs-ap">≈</span>' + val + (v ? vari(va, unite) : '') + '</div><div class="l">' + lib + '</div></div>';
         return '<div class="qs-tuiles" title="Chiffres estimés d’après Spansh : cette base ne met un système à jour que lorsqu’un joueur le visite (EDDN). Elle peut donc être en retard sur le jeu, surtout pour les petits systèmes peu visités (la présence et les résidents sont les plus concernés). Le panneau de faction en jeu reste la référence.">' + t('cle', fmt(f.systemes_controles), 'CONTRÔLÉS', v && v.systemes_controles) + t('', fmt(f.presence), 'PRÉSENCE', v && v.presence)
-             + t('', pop(f.population), 'RÉSIDENTS', v && v.population, pop) + t('', fmt(f.stations), 'STATIONS', v && v.stations) + '</div>';
+             + t('', pop(f.population), 'RÉSIDENTS', v && v.population, pop) + t('', fmt(f.stations), 'STATIONS', v && v.stations) + '</div>'
+             + '<div class="qs-note qs-ecart">' + NOTE_JEU + '</div>';
     }
 
     // Ligne de source de la faction + fraicheur : Spansh ne met un systeme a jour que lorsqu’un joueur le visite (EDDN). On compte les systemes a jour depuis 3 jours
