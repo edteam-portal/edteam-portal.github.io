@@ -227,7 +227,8 @@
         .bgs-carte .mini { font-size: 0.66em; color: #888; letter-spacing: 1px; margin-top: 4px; }
         .bgs-carte .eff { margin-top: auto; padding: 8px 9px 9px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; }
         .bgs-carte .eff .lab { color: var(--ed-orange); font-size: 0.62em; letter-spacing: 2px; margin-bottom: 4px; }
-        .bgs-carte .eff .nums { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; white-space: nowrap; font-size: 0.56em; color: #999; letter-spacing: 0.5px; }
+        .bgs-carte .eff .nums > span { white-space: nowrap; } .bgs-carte .eff .nums > span:last-child { margin-left: auto; }
+        .bgs-carte .eff .nums { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 6px; font-size: 0.56em; color: #999; letter-spacing: 0.5px; }
         .bgs-carte .eff .nums b { font-size: 1.85em; letter-spacing: 0; }
         .bgs-carte.large .eff .nums { font-size: 0.7em; }
         .bgs-carte.large .eff .nums b { font-size: 2.1em; }

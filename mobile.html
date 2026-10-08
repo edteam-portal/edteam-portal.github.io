@@ -403,7 +403,8 @@
         .mdc .mini { font-size: 0.6em; color: #888; letter-spacing: 0.5px; margin-top: 4px; }
         .mdc .eff { margin-top: auto; padding: 7px 8px 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; }
         .mdc .eff .lab { color: var(--ed-orange); font-size: 0.55em; letter-spacing: 2px; margin-bottom: 3px; }
-        .mdc .eff .nums { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; white-space: nowrap; font-size: 0.5em; color: #999; letter-spacing: 0; }
+        .mdc .eff .nums { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 4px; font-size: 0.5em; color: #999; letter-spacing: 0; }   /* « MA PART 100 % » passe a la ligne au lieu de deborder du cadre */
+        .mdc .eff .nums > span { white-space: nowrap; } .mdc .eff .nums > span:last-child { margin-left: auto; }
         .mdc .eff .nums b { font-size: 1.6em; font-weight: bold; letter-spacing: 0; }
         .mdc.seule .eff .nums { font-size: 0.6em; }
         .mdc.seule .eff .nums b { font-size: 1.9em; }
