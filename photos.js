@@ -5,7 +5,7 @@
 // - Envoi : image recadree en carre au centre, 256 px, webp (environ 10 a 25 Ko), nom reserve par la base.
 (function () {
     'use strict';
-    const CLE = 'edteam_photos_v1', DUREE = 300000, BUCKET = 'photos';
+    const CLE = 'edteam_photos_v1', DUREE = 900000, BUCKET = 'photos';
     let client = null, carte = null, pending = null, memoUid = null;
 
     const bd = () => client || window.supabaseApp || null;

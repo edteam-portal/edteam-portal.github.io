@@ -3,7 +3,7 @@
 // Le texte vient de l'IA : il est TOUJOURS affiche echappe (aucun HTML). Memoire de session de 10 minutes.
 (function () {
     'use strict';
-    const CLE = 'edteam_anecdote_v1', DUREE = 600000;
+    const CLE = 'edteam_anecdote_v1', DUREE = 1800000;
     const TON = { humour: ['HUMOUR', '#FFD700'], epique: ['ÉPIQUE', '#FF7100'], emotion: ['ÉMOTION', '#ff8fb0'], serieux: ['SÉRIEUX', '#00F0FF'] };
     let client = null;
     const bd = () => client || window.supabaseApp || null;

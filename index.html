@@ -33,12 +33,12 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=7"></script>
+    <script src="quoifaire.js?v=8"></script>
     <script src="qgsuivi.js?v=37"></script>
     <script src="son.js?v=1"></script>
-    <script src="photos.js?v=1"></script>
-    <script src="anecdotes.js?v=2"></script>
-    <script src="navigation.js?v=25"></script>
+    <script src="photos.js?v=2"></script>
+    <script src="anecdotes.js?v=3"></script>
+    <script src="navigation.js?v=26"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -1790,14 +1790,14 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 // 1. TÉLÉCHARGEMENT DES DONNÉES (PROJECTION STRICTE ANTI-EGRESS)
                 // La boîte aux lettres du plugin est lue à chaque tour ; la fiche et la position ne le sont que s'il y a du nouveau
-                // dans la boîte, ou au plus toutes les 3 minutes (les mérites Powerplay sont de toute façon relevés au plus toutes les 5 minutes).
+                // dans la boîte, ou au plus toutes les 10 minutes (les mérites Powerplay sont de toute façon relevés au plus toutes les 5 minutes).
                 const resRadar = await supabaseApp.from('radar_commercial').select('id, target_commodity, station_name, prix_unitaire').eq('user_id', profilCommandant.user_id).in('type_operation', ['STATUS', 'INFO', 'FINANCE']).order('id', { ascending: false }).limit(10);
                 let resParam, resProfil;
                 // "Du nouveau" = une ligne PLUS RÉCENTE que toutes celles déjà vues. Certaines lignes (étiquettes que ce code ne traite pas) restent
                 // dans la boîte : elles ne doivent pas forcer la relecture de la fiche à chaque tour.
                 const radarIdMax = (resRadar.data || []).reduce((m, d) => Math.max(m, d.id || 0), 0);
                 const radarNeuf = radarIdMax > (window.qgRadarIdVu || 0);
-                if (radarNeuf || !window.qgFicheCache || (Date.now() - window.qgFicheTs) >= 180000) {
+                if (radarNeuf || !window.qgFicheCache || (Date.now() - window.qgFicheTs) >= 600000) {
                     [resParam, resProfil] = await Promise.all([
                         supabaseApp.from('parametres_app').select('position_actuelle').eq('user_id', profilCommandant.user_id).limit(1).maybeSingle(),
                         supabaseApp.from('profils').select('cmdr_nom, solde_vaisseau, solde_fc, valeur_vaisseaux, cout_rachat, notoriete, rang_combat, prog_combat, rang_commerce, prog_commerce, rang_explo, prog_explore, rang_exobio, prog_exobio, rang_mercenary, prog_mercenary, rang_fed, prog_fed, rang_emp, prog_emp, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total, faction_choisie, rang_bgs, points_bgs').eq('user_id', profilCommandant.user_id).single()
@@ -1926,7 +1926,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 verifierPlaquesQG(profilCommandant);
                 verifierTitresQG(profilCommandant);   // titres de spécialiste pas encore découverts
 
-                // Distinctions de la semaine et chiffres clés de l'escadron (une fois par chargement, mémoire de 5 minutes)
+                // Distinctions de la semaine et chiffres clés de l'escadron (une fois par chargement, mémoire de 15 minutes)
                 chargerDistinctionsQG(profilCommandant);
                 chargerAnecdoteQG(profilCommandant);
                 chargerChiffresQG(profilCommandant);
@@ -1967,8 +1967,17 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             } catch (err) { console.error(err); }
             isSystemLooping = false;
-            window.qgTimer = setTimeout(systemLoop, 60000);
+            window.qgDernier = Date.now();
+            // Temps reel actif : un tour de sécurité toutes les 10 min (les trames du plugin réveillent la boucle, voir edteamReveilBoucle) ; sinon, toutes les minutes
+            window.qgTimer = setTimeout(systemLoop, window.edteamRtOk ? 600000 : 60000);
         }
+        // Réveil par le temps réel (covas.js) : au plus un tour par minute, jamais onglet caché (la reprise se fait au retour sur l'onglet)
+        window.edteamReveilBoucle = function () {
+            if (document.hidden) { window.qgBouclePause = true; return; }
+            if (isSystemLooping || window.qgReveil) return;
+            const delai = Math.max(1500, 60000 - (Date.now() - (window.qgDernier || 0)));
+            window.qgReveil = setTimeout(() => { window.qgReveil = null; if (Date.now() - (window.qgDernier || 0) < 30000) return; clearTimeout(window.qgTimer); systemLoop(); }, delai);
+        };
         // Retour sur l'onglet après une pause : on reprend immédiatement (sans attendre la prochaine minute)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && window.qgBouclePause) {
@@ -2050,6 +2059,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 if (accepter) {
                     const { error } = await supabaseApp.rpc('approuver_utilisateur', { target_user_id: userId });
+                    try { Object.keys(sessionStorage).filter(k => k.startsWith('edteam_effectifs_')).forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* ignore */ }
                     if (error) throw error;
                     
                     // L'Amiral est validé : on écrit dans le journal de SA flotte
@@ -2066,6 +2076,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 } else {
                     // Appel du guichet sécurisé côté serveur pour la destruction
                     const { error } = await supabaseApp.rpc('purger_utilisateur', { target_user_id: userId });
+                    try { Object.keys(sessionStorage).filter(k => k.startsWith('edteam_effectifs_')).forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* ignore */ }
                     if (error) throw error;
                 }
                 
@@ -2277,6 +2288,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 // Appel de la procédure stockée pour détruire le compte (profils + auth.users)
                 const { error } = await supabaseApp.rpc('purger_utilisateur', { target_user_id: userId });
+                try { Object.keys(sessionStorage).filter(k => k.startsWith('edteam_effectifs_')).forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* ignore */ }
                 if (error) throw error;
 
                 // Rafraîchissement des registres du Bureau
@@ -3267,7 +3279,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') { const col = document.getElementById('qg-colonne-distinctions'); if (col) col.style.display = 'none'; return; }
             const cle = 'edteam_qg_dist_' + profil.user_id;
             let d = null;
-            try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < 300000) d = c.d; } catch (e) {}
+            try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < 900000) d = c.d; } catch (e) {}
             if (!d) {
                 try {
                     const [rp, re] = await Promise.all([
@@ -3285,7 +3297,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         }
 
         // ---------------------------------------------------------------
-        //  CHIFFRES CLÉS : totaux de l'escadron, UN appel (qg_chiffres_cles), mémoire de 5 minutes
+        //  CHIFFRES CLÉS : totaux de l'escadron, UN appel (qg_chiffres_cles), mémoire de 15 minutes
         // ---------------------------------------------------------------
         async function chargerChiffresQG(profil) {
             const zone = document.getElementById('qg-chiffres');
@@ -3294,7 +3306,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') { zone.style.display = 'none'; return; }
             const cle = 'edteam_qg_chiffres_' + profil.user_id;
             let d = null;
-            try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < 300000) d = c.d; } catch (e) {}
+            try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < 900000) d = c.d; } catch (e) {}
             if (!d) {
                 try {
                     const { data, error } = await supabaseApp.rpc('qg_chiffres_cles');
@@ -3343,7 +3355,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT' || !window.edteamPlaques) return;
                 const memo = Number(sessionStorage.getItem('edteam_plaques_qg') || 0);
-                if (memo && Date.now() - memo < 600000) return;
+                if (memo && Date.now() - memo < 1800000) return;
                 sessionStorage.setItem('edteam_plaques_qg', String(Date.now()));
                 const { data } = await supabaseApp.from('profils').select('palmares_bgs').eq('user_id', profil.user_id).single();
                 const n = window.edteamPlaques.nouvelles(profil.user_id, data && data.palmares_bgs).length;
@@ -3371,7 +3383,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT' || !window.edteamTitres) return;
                 const memo = Number(sessionStorage.getItem('edteam_titres_qg') || 0);
-                if (memo && Date.now() - memo < 600000) return;
+                if (memo && Date.now() - memo < 1800000) return;
                 sessionStorage.setItem('edteam_titres_qg', String(Date.now()));
                 const { data, error } = await supabaseApp.from('titres_specialistes').select('code, user_id, depuis').eq('user_id', profil.user_id);
                 if (error || !data || !data.length) return;

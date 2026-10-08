@@ -134,8 +134,13 @@ window.initCovasRealtime = async function() {
                 window.traiterCiblageTactique(ligne.station_name);
                 return;
             }
+            // --- 2. NOUVELLE TRAME DU PLUGIN : on reveille la boucle de la page (elle ne sonde plus la boite aux lettres toutes les minutes) ---
+            if (typeof window.edteamReveilBoucle === 'function') window.edteamReveilBoucle();
         })
-        .subscribe();
+        .subscribe((status) => {
+            // Tant que le temps reel fonctionne, les boucles se contentent d'un tour de securite toutes les 10 minutes ; sinon elles reprennent la cadence d'une minute.
+            window.edteamRtOk = (status === 'SUBSCRIBED');
+        });
 };
 
 setTimeout(window.initCovasRealtime, 3000);

@@ -11,7 +11,7 @@
 (function () {
     'use strict';
     const QF = window.QF = {};
-    const DUREE_CACHE = 3 * 60 * 1000;
+    const DUREE_CACHE = 10 * 60 * 1000;
     let cache = null;          // { ts, d }
     let modele = null;         // dernier modele calcule
     let decalage = 0;          // rotation de « autres idees »

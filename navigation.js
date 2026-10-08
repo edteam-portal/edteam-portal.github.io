@@ -264,7 +264,7 @@ function injecterArchitectureGlobale() {
         // Chargement asynchrone du script d'interception COVAS
         if (!document.querySelector('script[src*="covas.js"]')) {
             const covasScript = document.createElement('script');
-            covasScript.src = 'covas.js?v=2';
+            covasScript.src = 'covas.js?v=3';
             document.body.appendChild(covasScript);
         }
 }
@@ -429,7 +429,7 @@ window.actualiserHeader = function(profilData) {
             const raw = sessionStorage.getItem(cacheKey);
             if (raw) {
                 const parsed = JSON.parse(raw);
-                if (Date.now() - parsed.ts < 30000) {
+                if (Date.now() - parsed.ts < 600000) {
                     if (elInscrits) elInscrits.innerText = parsed.data.total_inscrits;
                     if (elActifs) elActifs.innerText = parsed.data.actifs_semaine;
                     return;
@@ -1096,7 +1096,22 @@ window.demarrerSystemLoop = async function systemLoop() {
     }
 
     window.isSystemLoopRunning = false;
-    window.navTimer = setTimeout(window.demarrerSystemLoop, 60000);
+    window.navDernier = Date.now();
+    // Temps reel actif : un tour de securite toutes les 10 min (les trames du plugin reveillent la boucle, voir edteamReveilBoucle) ; sinon, toutes les minutes.
+    window.navTimer = setTimeout(window.demarrerSystemLoop, window.edteamRtOk ? 600000 : 60000);
+};
+
+// Reveil par le temps reel (covas.js) : au plus un tour par minute, jamais pendant que l'onglet est cache (la reprise se fait au retour sur l'onglet)
+window.edteamReveilBoucle = function() {
+    if (document.hidden) { window.navBouclePause = true; return; }
+    if (window.isSystemLoopRunning || window.navReveil) return;
+    const delai = Math.max(1500, 60000 - (Date.now() - (window.navDernier || 0)));
+    window.navReveil = setTimeout(function() {
+        window.navReveil = null;
+        if (Date.now() - (window.navDernier || 0) < 30000) return;   // un tour vient d'avoir lieu (tour de securite) : rien a faire
+        clearTimeout(window.navTimer);
+        if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+    }, delai);
 };
 
 // Retour sur l'onglet après une pause : on reprend immédiatement (sans attendre la prochaine minute)

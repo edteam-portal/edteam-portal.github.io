@@ -17,8 +17,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="photos.js?v=1"></script>
-    <script src="navigation.js?v=25"></script>
+    <script src="photos.js?v=2"></script>
+    <script src="navigation.js?v=26"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -722,6 +722,11 @@
                 const promesseTitres = window.chargerTitresSpecialistes ? window.chargerTitresSpecialistes(profilCommandant.escadron_id) : Promise.resolve(null);
                 const promessePhotos = window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : Promise.resolve(null);
 
+                // Effectif + palmarès : mémoire de session de 5 minutes (la liste ne change pas d'une navigation à l'autre)
+                const cleEff = 'edteam_effectifs_' + profilCommandant.escadron_id;
+                let effectifs = null;
+                try { const c = JSON.parse(sessionStorage.getItem(cleEff) || 'null'); if (c && Date.now() - c.ts < 300000 && Array.isArray(c.d)) effectifs = c.d; } catch (e) { /* mémoire de session indisponible */ }
+                if (!effectifs) {
                 // 1. On télécharge les profils (PROJECTION STRICTE ANTI-EGRESS)
                 const COLS_PP = ', puissance_nom, puissance_rang, puissance_merites_total, puissance_merites_cycle';
                 let repEff = await supabaseApp.from('profils_publics')
@@ -742,8 +747,9 @@
                         .eq('escadron_id', profilCommandant.escadron_id)
                         .eq('est_approuve', true);
                 }
-                const { data: effectifs, error } = repEff;
+                const { data: effData, error } = repEff;
                 if (error) throw error;
+                effectifs = effData;
 
                 // Palmarès : résumé calculé côté serveur (5 meilleures plaques + total) au lieu de tout télécharger
                 let resumes = null;
@@ -765,6 +771,8 @@
                     p.palmares_bgs = r && Array.isArray(r.top5) ? r.top5 : [];
                     p.palmares_total = r ? (r.total || p.palmares_bgs.length) : 0;
                 });
+                try { sessionStorage.setItem(cleEff, JSON.stringify({ ts: Date.now(), d: effectifs })); } catch (e) { /* ignore */ }
+                }
 
                 EFF.liste = effectifs;
                 EFF.semaine = await EFF.promesseSemaine;
@@ -1277,7 +1285,7 @@
         }
     </script>
 
-    <script src="medailles.js?v=4"></script>
+    <script src="medailles.js?v=5"></script>
     <script src="footer.js?v=20"></script>
 </body>
 </html>

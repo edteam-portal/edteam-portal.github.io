@@ -101,12 +101,12 @@
         </svg>`;
     };
 
-    // ---------- LECTURE (une requete legere, 5 minutes de memoire de session) ----------
+    // ---------- LECTURE (une requete legere, 15 minutes de memoire de session) ----------
     window.chargerTitresSpecialistes = async function (escadronId, force) {
         const cle = 'edteam_titres_' + (escadronId || 'x');
         try {
             const c = JSON.parse(sessionStorage.getItem(cle) || 'null');
-            if (!force && c && Date.now() - c.ts < 300000) return c.data;
+            if (!force && c && Date.now() - c.ts < 900000) return c.data;
         } catch (e) { /* memoire de session indisponible : on lit simplement */ }
         const data = {};
         try {

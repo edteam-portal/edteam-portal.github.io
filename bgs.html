@@ -17,8 +17,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
-    <script src="photos.js?v=1"></script>
-    <script src="navigation.js?v=25"></script>
+    <script src="photos.js?v=2"></script>
+    <script src="navigation.js?v=26"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -588,26 +588,6 @@
                 window.profilCommandant = data;
                 enregistrerTelemetrie('page', 'bgs');
                 synchroniserTelemetrie();
-
-                // TÉLÉCHARGEMENT DU LOGO DE L'ESCADRON (AVEC MISE EN CACHE NAVIGATEUR)
-                if (profilCommandant.escadron_id) {
-                    const cacheKey = 'logo_escadron_' + profilCommandant.escadron_id;
-                    const cachedLogo = localStorage.getItem(cacheKey);
-                    
-                    if (cachedLogo) {
-                        // Le logo est déjà dans le navigateur du pilote, zéro requête Supabase !
-                        if (typeof appliquerLogoSurInterface === 'function') appliquerLogoSurInterface(cachedLogo);
-                    } else {
-                        // On télécharge le logo une seule fois et on le stocke
-                        supabaseApp.from('logos_escadrons').select('logo_base64').eq('escadron_id', profilCommandant.escadron_id).single()
-                            .then(({ data: logoData }) => {
-                                if (logoData && logoData.logo_base64) {
-                                    localStorage.setItem(cacheKey, logoData.logo_base64);
-                                    if (typeof appliquerLogoSurInterface === 'function') appliquerLogoSurInterface(logoData.logo_base64);
-                                }
-                            }).catch(() => {});
-                    }
-                }
 
                 // AFFICHAGE DU BOUTON AMIRAUTÉ (Si Officier ou Directeur)
                 if (data.est_amiral || data.est_directeur) {
@@ -2630,7 +2610,7 @@
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="medailles.js?v=4"></script>
+    <script src="medailles.js?v=5"></script>
     <script src="footer.js?v=20"></script>
 </body>
 </html>
