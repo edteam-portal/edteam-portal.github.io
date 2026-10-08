@@ -55,6 +55,25 @@
         .tb-vign .tb-btn { margin: 0 11px 11px; }
         .tb-vide { grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; padding: 40px 10px; line-height: 1.8; }
 
+        /* rapport d'usage (au-dessus des photos) */
+        .rp-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 14px; margin-bottom: 14px; }
+        .rp-carte { border: 1px solid #5a3000; background: rgba(10, 6, 2, 0.9); padding: 14px 16px 16px; }
+        .rp-t2 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+        .rp-nom { color: #fff; font-weight: bold; letter-spacing: 1px; overflow-wrap: anywhere; }
+        .rp-taux { color: var(--ed-blue); font-size: 0.8em; letter-spacing: 1px; }
+        .rp-sous { color: #777; font-size: 0.72em; margin-bottom: 4px; }
+        .rp-sec { color: #777; font-size: 0.64em; letter-spacing: 2px; margin: 13px 0 6px; }
+        .rp-st { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+        .rp-s { border: 1px solid #2a1800; padding: 7px 8px; background: rgba(0, 0, 0, 0.35); min-width: 0; }
+        .rp-v { color: var(--ed-orange); font-size: 1.1em; font-weight: bold; overflow-wrap: anywhere; }
+        .rp-v small { color: #888; font-size: 0.65em; font-weight: normal; }
+        .rp-l { color: #888; font-size: 0.6em; letter-spacing: 1px; margin-top: 2px; line-height: 1.35; overflow-wrap: anywhere; }
+        @media (max-width: 520px) { .rp-l { letter-spacing: 0; } .rp-v { font-size: 1em; } }
+        .rp-barres { display: flex; align-items: flex-end; gap: 2px; height: 40px; border-bottom: 1px solid #3a2000; }
+        .rp-barres i { flex: 1; min-width: 2px; background: var(--ed-blue); opacity: 0.75; }
+        .rp-barres i:hover { opacity: 1; }
+        .rp-note { color: #666; font-size: 0.7em; line-height: 1.6; margin: 0 0 26px; }
+
         /* agrandissement : la photo en grand pour controler */
         .tb-voile { position: fixed; inset: 0; z-index: 4000; background: rgba(0, 0, 0, 0.88); display: none; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
         .tb-fiche { width: 100%; max-width: 1060px; max-height: 94vh; overflow-y: auto; border: 1px solid var(--ed-orange); background: rgba(8, 4, 0, 0.98); box-shadow: 0 0 40px rgba(255, 113, 0, 0.25); padding: 22px 26px; position: relative; box-sizing: border-box; }
@@ -161,7 +180,7 @@
             return l;
         }
         function dessiner(garderSaisie) {
-            const zone = document.getElementById('display-area');
+            const zone = document.getElementById('tb-photos') || document.getElementById('display-area');
             const escs = {}; ST.liste.forEach(p => { const k = nomEsc(p); escs[k] = (escs[k] || 0) + 1; });
             const nNouv = ST.liste.filter(estNouvelle).length;
             const puces = [['', 'TOUS (' + ST.liste.length + ')']].concat(Object.keys(escs).sort().map(k => [k, k + ' (' + escs[k] + ')']));
@@ -243,6 +262,62 @@
         }
 
         // ---------------------------------------------------------------
+        //  RAPPORT D'USAGE (au-dessus des photos) : UN appel (rapport_usage_directeur, reserve au Directeur par la base), garde 5 minutes dans la session.
+        //  Comptages par escadron uniquement (aucun contenu, aucun pilote nomme) ; releve fait chaque nuit cote base (script SQL 63).
+        // ---------------------------------------------------------------
+        const CLE_RP = 'edteam_rapport_usage_v1';
+        const RP = { lignes: [] };
+        async function chargerRapport() {
+            try { const c = JSON.parse(sessionStorage.getItem(CLE_RP) || 'null'); if (c && Date.now() - c.ts < 300000 && Array.isArray(c.d)) return c.d; } catch (e) {}
+            const r = await supabaseApp.rpc('rapport_usage_directeur', { p_jours: 30 });
+            if (r.error) throw r.error;
+            try { sessionStorage.setItem(CLE_RP, JSON.stringify({ ts: Date.now(), d: r.data || [] })); } catch (e) {}
+            return r.data || [];
+        }
+        function dateJour(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
+        function dessinerRapport(erreur) {
+            const zone = document.getElementById('tb-rapport'); if (!zone) return;
+            const entete = (sous) => '<div class="tb-tete"><h2>&gt; RAPPORT D\'USAGE <small>' + sous + '</small></h2></div>';
+            if (erreur) { zone.innerHTML = entete('TOUS LES ESCADRONS') + '<div class="rp-note">Le rapport n\'est pas disponible pour le moment (le script SQL 64 est-il lancé ?).</div>'; return; }
+            const par = {}; RP.lignes.forEach(l => { (par[l.escadron] = par[l.escadron] || []).push(l); });
+            const noms = Object.keys(par);
+            if (!noms.length) { zone.innerHTML = entete('TOUS LES ESCADRONS') + '<div class="rp-note">Aucun relevé pour le moment : le premier est fait chaque nuit (05:30, heure de Paris).</div>'; return; }
+            noms.sort((a, b) => (par[b][0].comptes - par[a][0].comptes) || a.localeCompare(b));
+            const fmt = new Intl.NumberFormat('fr-FR');
+            const tuile = (v, l, aide) => '<div class="rp-s"' + (aide ? ' title="' + esc(aide) + '"' : '') + '><div class="rp-v">' + v + '</div><div class="rp-l">' + l + '</div></div>';
+            const dernier = noms.map(n => par[n][0].releve_le).sort().pop();
+            const cartes = noms.map(n => {
+                const l = par[n][0];   // le plus recent (la base renvoie du plus recent au plus ancien)
+                const hist = par[n].slice().reverse();
+                const taux = l.approuves > 0 ? Math.round(100 * l.actifs_7j / l.approuves) : 0;
+                const max = Math.max(1, l.approuves, ...hist.map(h => h.actifs_24h));
+                const barres = hist.map(h => '<i style="height:' + Math.max(4, Math.round(100 * h.actifs_24h / max)) + '%" title="' + esc(dateJour(h.releve_le).slice(0, 5)) + ' : ' + h.actifs_24h + ' pilote(s) actif(s) sur 24 h"></i>').join('');
+                const nom = n === '(SANS ESCADRON)' ? 'SANS ESCADRON' : n;
+                return '<div class="rp-carte">'
+                    + '<div class="rp-t2"><span class="rp-nom">' + esc(nom) + '</span><span class="rp-taux" title="Pilotes actifs sur 7 jours / pilotes approuves">' + taux + ' % ACTIFS SUR 7 J</span></div>'
+                    + '<div class="rp-sous">' + l.approuves + ' pilote(s) approuvé(s) sur ' + l.comptes + ' compte(s)' + (l.non_confirmes ? ' · ' + l.non_confirmes + ' e-mail(s) non confirmé(s)' : '') + '</div>'
+                    + '<div class="rp-sec">PILOTES</div><div class="rp-st">'
+                    + tuile(l.actifs_24h, 'ACTIFS 24 H', 'Pilotes ayant produit des données (efforts, livraisons, budget, Powerplay, journal) ces dernières 24 h')
+                    + tuile(l.actifs_7j, 'ACTIFS 7 J') + tuile(l.actifs_30j, 'ACTIFS 30 J')
+                    + tuile(l.reguliers_30j, 'RÉGULIERS', 'Actifs au moins 15 jours sur les 30 derniers')
+                    + tuile(l.connectes_24h + ' <small>/ ' + l.connectes_7j + '</small>', 'CONNECTÉS 24 H / 7 J', 'Dernière connexion par mot de passe : sous-estimé, une session reste ouverte plusieurs jours')
+                    + tuile(l.nouveaux_comptes_7j, 'NOUVEAUX 7 J')
+                    + '</div><div class="rp-sec">VOLUME SUR 24 H</div><div class="rp-st">'
+                    + tuile(fmt.format(l.efforts_bgs_24h) + ' <small>dont ' + fmt.format(l.soutien_libre_24h) + ' libres</small>', 'EFFORTS BGS', 'Les « libres » sont les efforts hors directive (soutien libre)')
+                    + tuile(fmt.format(l.livraisons_colo_24h), 'LIVRAISONS COLONISATION') + tuile(fmt.format(l.lignes_budget_24h), 'LIGNES DE BUDGET')
+                    + tuile(fmt.format(l.releves_pp_24h), 'RELEVÉS POWERPLAY') + tuile(fmt.format(l.entrees_journal_24h), 'ENTRÉES DU JOURNAL')
+                    + '</div><div class="rp-sec">COMMANDEMENT ET ATTACHEMENT</div><div class="rp-st">'
+                    + tuile(l.directives_actives + ' <small>/ ' + l.directives_creees_7j + '</small>', 'DIRECTIVES ACTIVES / CRÉÉES 7 J')
+                    + tuile(l.photos, 'PHOTOS ENVOYÉES') + tuile(l.refus_anecdotes, 'REFUS DES ANECDOTES')
+                    + '</div><div class="rp-sec">PILOTES ACTIFS SUR 24 H, JOUR PAR JOUR (' + hist.length + ' JOUR' + (hist.length > 1 ? 'S' : '') + ')</div><div class="rp-barres">' + barres + '</div>'
+                    + '</div>';
+            }).join('');
+            zone.innerHTML = entete('TOUS LES ESCADRONS · RELEVÉ DU ' + dateJour(dernier))
+                + '<div class="rp-grille">' + cartes + '</div>'
+                + '<div class="rp-note">Comptages par escadron, sans aucun contenu. « Actifs » = pilotes ayant produit des données : cela vient surtout du plugin, donc cela mesure les pilotes qui jouent avec EDTEAM allumé, pas les pages consultées. Relevé fait chaque nuit à 03:30 UTC.</div>';
+        }
+
+        // ---------------------------------------------------------------
         //  DEMARRAGE : reserve au Directeur (la base le verifie aussi)
         // ---------------------------------------------------------------
         window.addEventListener('load', async () => {
@@ -258,10 +333,12 @@
             const mainUi = document.getElementById('main-ui');
             if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
             if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+            document.getElementById('display-area').innerHTML = '<div id="tb-rapport"></div><div id="tb-photos"></div>';
+            chargerRapport().then(l => { RP.lignes = l; dessinerRapport(false); }).catch(e => { console.error('Erreur rapport :', e); dessinerRapport(true); });
             try { ST.liste = await charger(false); dessiner(); }
             catch (e) {
                 console.error('Erreur trombinoscope :', e);
-                document.getElementById('display-area').innerHTML = '<div class="tb-vide">Impossible de lire les photos pour le moment.<br>Réessayez dans quelques instants.</div>';
+                (document.getElementById('tb-photos') || document.getElementById('display-area')).innerHTML = '<div class="tb-vide">Impossible de lire les photos pour le moment.<br>Réessayez dans quelques instants.</div>';
             }
         });
     </script>
