@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-journal-bgs-filtres-une-ligne', date: '2026-10-08T21:28:00Z', type: 'AMELIORE',
+        titre: 'Journal des exploits : les filtres tiennent sur une seule ligne',
+        texte: 'Dans le journal des exploits du BGS, les filtres (pilote, période, directive, spécialité, recherche) sont maintenant alignés sur une seule ligne au lieu de passer sur deux : plus de place pour la liste des actions.',
+        important: false
+    },
+    {
         id: '2026-10-journal-bgs-filtres', date: '2026-10-08T21:03:55Z', type: 'AMELIORE',
         titre: 'Journal des exploits : de nouveaux filtres pour retrouver une action',
         texte: 'Le journal des exploits du BGS se filtre maintenant par pilote (chaque pilote de l’escadron), par directive (en cours, clôturées, ou une directive précise), par spécialité (Fer de Lance, Maître Logisticien, Magnat, Bâtisseur, Expert scientifique, Exécuteur, Seigneur de guerre, missions échouées) et par texte (système, faction, pilote). Un bandeau vous prévient quand il reste des actions à charger, et les stations et paliers de colonisation ne s’affichent plus avant les actions plus récentes qui n’ont pas encore été chargées.',

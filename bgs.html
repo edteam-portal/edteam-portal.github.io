@@ -254,6 +254,11 @@
            ========================================= */
         .tactical-filter { background: rgba(0, 0, 0, 0.8); border: 1px solid var(--ed-orange-dim); color: var(--ed-orange); padding: 8px 15px; font-family: inherit; font-size: 0.9em; outline: none; cursor: pointer; }
         .tactical-filter:focus { border-color: var(--ed-orange); box-shadow: 0 0 10px rgba(255,113,0,0.2); }
+        /* Journal des exploits : les 5 filtres tiennent sur une seule ligne (repli sur plusieurs lignes seulement sur petit ecran) */
+        .barre-filtres-journal { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; margin-bottom: 14px; flex-shrink: 0; }
+        .barre-filtres-journal .tactical-filter { flex: 1 1 0; min-width: 0; padding: 8px 8px; font-size: 0.82em; text-overflow: ellipsis; }
+        .barre-filtres-journal #filtre-recherche { flex: 0.8 1 0; min-width: 0 !important; }
+        @media (max-width: 900px) { .barre-filtres-journal { flex-wrap: wrap; } .barre-filtres-journal .tactical-filter { flex: 1 1 45%; } }
         @keyframes slideInFeed { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
             /* =========================================
@@ -2661,12 +2666,12 @@
                 <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 3px; font-size: 1.3em;">> JOURNAL DES EXPLOITS : COMMUNICATIONS INTERCEPTÉES</span>
             </div>
             
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; flex-shrink: 0;">
+            <div class="barre-filtres-journal">
                 <select id="filtre-pilote" class="tactical-filter"><option value="ALL" selected>[ TOUT L'ESCADRON ]</option><option value="ME">> MON DOSSIER PERSONNEL</option></select>
                 <select id="filtre-periode" class="tactical-filter"><option value="ALL">TOUT L'HISTORIQUE</option><option value="TICK_HEBDO" selected>DEPUIS LE DERNIER CYCLE (JEUDI)</option><option value="7J">7 DERNIERS JOURS</option><option value="30J">30 DERNIERS JOURS</option></select>
                 <select id="filtre-ordre" class="tactical-filter" title="Directive"><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option><option value="ACTIF">[ DIRECTIVES EN COURS ]</option><option value="CLOS">[ DIRECTIVES CLÔTURÉES ]</option><option value="LIBRE">[ ACTIONS LIBRES ]</option></select>
                 <select id="filtre-specialite" class="tactical-filter" title="Spécialité (titres du mur des spécialistes)"><option value="ALL" selected>[ TOUTES LES SPÉCIALITÉS ]</option><option value="SEC">FER DE LANCE · SÉCURITÉ</option><option value="LOG">MAÎTRE LOGISTICIEN · MISSIONS</option><option value="ECO">LE MAGNAT · ÉCONOMIE</option><option value="BAT">LE BÂTISSEUR · COLONISATION</option><option value="SCI">EXPERT SCIENTIFIQUE · SCIENCE</option><option value="EXE">L'EXÉCUTEUR · OP. NOIRES</option><option value="GUE">SEIGNEUR DE GUERRE · CONFLITS</option><option value="ECH">MISSIONS ÉCHOUÉES</option></select>
-                <input id="filtre-recherche" class="tactical-filter" type="search" placeholder="Système, faction, pilote…" autocomplete="off" style="cursor: text; min-width: 210px;">
+                <input id="filtre-recherche" class="tactical-filter" type="search" placeholder="Système, faction, pilote…" autocomplete="off" style="cursor: text;">
             </div>
             <div id="modal-exploit-feed-content" style="overflow-y: auto; flex-grow: 1; padding-right: 10px;">
                 <!-- Les lignes du journal seront injectées ici en miroir par le JS -->
