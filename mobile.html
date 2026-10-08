@@ -22,7 +22,7 @@
     <script src="qgsuivi.js?v=37"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
-    <script src="medailles.js?v=5"></script>
+    <script src="medailles.js?v=6"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -2161,7 +2161,14 @@
                     if (error) throw error;
                     return data || [];
                 }, force);
-                if (!efforts.length) { cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">En attente de nouveaux rapports de vol.</div>'; return; }
+                // stations de colonisation terminees (pas chaque livraison : elles ont leur journal dans l'onglet Bâtir) : lues avec les actions, mises en memoire 2 minutes
+                const stations = await xCache('exploits_stations', 120000, async () => {
+                    const { data, error } = await supabaseApp.rpc('colonisation_journal', { p_limite: 100, p_decalage: 0, p_type: 'STATION TERMINEE', p_pilote: null, p_recherche: null });
+                    if (error) throw error;
+                    const limite = Date.now() - 30 * 86400000;
+                    return ((data && data.lignes) || []).filter(l => l && l.t && new Date(l.t).getTime() >= limite).map(l => ({ type_action: 'STATION', date_action: l.t, station: l.station, systeme: l.systeme }));
+                }, force).catch(() => []);
+                if (!efforts.length && !stations.length) { cont.innerHTML = '<div class="xmut" style="text-align: center; padding: 20px;">En attente de nouveaux rapports de vol.</div>'; return; }
                 const noms = {};
                 dd.resume.forEach(r => (r.pilotes || []).forEach(x => { noms[String(x.u)] = x.nom; }));
                 // pilotes qui n'ont agi que hors directive : on ne lit que les noms manquants
@@ -2179,14 +2186,25 @@
                     if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
                     return v > 10000 ? v / 2000000 : v;
                 };
-                cont.innerHTML = efforts.map(e => {
+                const coloNomJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
+                const fusion = [...efforts, ...stations].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 60);
+                cont.innerHTML = fusion.map(e => {
+                    if (e.type_action === 'STATION') {
+                        const cb = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
+                        const dS = new Date(e.date_action);
+                        const quandS = dS.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + dS.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        return `<div class="xc exploit-item" style="padding: 10px 12px; border-left: 3px solid ${cb}; border-radius: 6px 14px 14px 6px;">
+                        <div class="xrow"><span style="color: #888; font-size: 0.85em;">ESCADRON</span><span class="xsp"></span><span class="xmut" style="font-size: 0.62em;">${quandS}</span></div>
+                        <div class="xrow" style="margin-top: 5px;"><span class="xmut" style="color: ${cb};">COLONISATION · CHANTIER</span><span class="xsp"></span><span style="color: ${cb}; font-size: 0.82em; font-weight: bold; text-align: right;">STATION TERMINÉE</span></div>
+                        <div class="xrow" style="margin-top: 4px;"><span class="xmut" style="font-size: 0.62em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${XESC(String(e.systeme || '').toUpperCase())} · ${XESC(coloNomJournal(e.station).toUpperCase())}</span></div>
+                    </div>`;
+                    }
                     const cmdr = XESC(String(noms[String(e.user_id)] || window.cacheNomsExploits[String(e.user_id)] || 'INCONNU').toUpperCase());
                     const action = (e.type_action || 'ACTION').toUpperCase();
                     const ordre = ordres.find(o => String(o.id) === String(e.ordre_id));
                     const typeOrdre = ordre ? String(ordre.type_ordre).toUpperCase() : 'BGS';
-                    let col = ordre ? 'var(--ed-blue)' : '#B388FF';
-                    if (action === 'COLONISATION') col = 'var(--x-gold)';
-                    else if (typeOrdre === 'HAUSSE') col = 'var(--ed-green)'; else if (typeOrdre === 'BAISSE') col = 'var(--ed-red)'; else if (typeOrdre === 'GUERRE') col = 'var(--ed-orange)';
+                    // couleur = SPÉCIALITÉ de l'action (celle du mur des spécialistes), plus le type de directive
+                    const col = window.specialiteAction ? window.specialiteAction(action).couleur : '#8a8f98';
                     const etiquette = action === 'COLONISATION' ? 'COLONISATION · CHANTIER' : ordre ? `OP.#${e.ordre_id} · ${action}` : `SOUTIEN LIBRE · ${action === 'SCIENCE' && e.details === 'Exobiologie' ? 'EXOBIOLOGIE' : action}`;
                     const lieu = XESC(String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase());
                     const pr = pointsRang(action, e.valeur);

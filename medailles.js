@@ -203,6 +203,14 @@
         }).join('');
     };
 
+    // Specialite d'une action BGS = le titre que cette action fait progresser (meme correspondance que le calcul serveur des titres) ;
+    // sert a colorer le journal des exploits (PC et mobile). Un echec ne fait progresser aucun titre : gris neutre.
+    const SPEC_DE_ACTION = { SECURITE: 'SEC', MISSIONS: 'LOG', ELECTION_MISSIONS: 'LOG', GUERRE_MISSIONS: 'LOG', ECONOMIE: 'ECO', COLONISATION: 'BAT', SCIENCE: 'SCI',
+                             MEURTRES: 'EXE', VOLS: 'EXE', PIRATAGE: 'EXE', CONTREBANDE: 'EXE', CZ_VICTOIRES: 'GUE' };
+    window.specialiteAction = function (type) {
+        const t = PAR_CODE[SPEC_DE_ACTION[String(type || '').toUpperCase()]];
+        return t ? { code: t.code, nom: t.sous, couleur: t.couleur } : { code: '', nom: '', couleur: '#8a8f98' };
+    };
     window.titreMeta = function (code) { return PAR_CODE[code] || null; };
     window.formaterTitre = function (code, v) { return PAR_CODE[code] ? formater(PAR_CODE[code].unite, v) : String(v); };
 

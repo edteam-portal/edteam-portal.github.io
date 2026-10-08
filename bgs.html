@@ -452,6 +452,8 @@
         // ==========================================
         let journalMemo = { ts: 0 };
         let journalEtat = { lignes: [], fin: true };   // actions déjà chargées (100 par page, 500 au plus)
+        let memoireStations = [];                      // stations de colonisation terminées (affichées dans le journal avec les actions)
+        const nomStationJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
         window.ouvrirJournalBGS = function(e) {
             if (typeof sonClic === 'function') sonClic();
             ouvrirModal('modal-exploit-fullscreen', e);
@@ -2183,6 +2185,10 @@
                 queryEfforts = queryEfforts.order('date_action', { ascending: false }).range(decalage, decalage + 99);
 
                 // Récupération uniquement du nom des pilotes de l'escadron (Économie massive)
+                // Stations de colonisation terminees (pas chaque livraison : elles ont leur journal dans la page Colonisation) : lues avec les efforts, une seule fois
+                const resStations = suite ? null : await supabaseApp.rpc('colonisation_journal', { p_limite: 100, p_decalage: 0, p_type: 'STATION TERMINEE', p_pilote: null, p_recherche: null }).then(r => r, () => ({ data: null }));
+                if (!suite) memoireStations = (resStations && resStations.data && Array.isArray(resStations.data.lignes) ? resStations.data.lignes : [])
+                    .filter(l => l && l.t).map(l => ({ type_action: 'STATION', date_action: l.t, station: l.station, systeme: l.systeme }));
                 const [resEfforts, resProfils] = await Promise.all([
                     queryEfforts,
                     suite ? Promise.resolve({ data: null }) : supabaseApp.from('profils_publics')
@@ -2250,7 +2256,14 @@
                 const conteneurFeedModal = null;
                 
                 // On passe de 50 à 100 lignes pour profiter du mode plein écran !
-                const lastActions = [...effortsFiltres].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 500);
+                const stationsVisibles = (filtrePilote === 'ME' || !['ALL', 'LIBRE'].includes(filtreOrdre)) ? [] : memoireStations.filter(s => {
+                    const t = new Date(s.date_action).getTime();
+                    if (isNaN(t)) return false;
+                    if (filtrePeriode === 'TICK_HEBDO') return t >= tickHebdoRef.getTime();
+                    if (filtrePeriode === '7J') return now - t <= 7 * 86400000;
+                    return now - t <= 30 * 86400000;
+                });
+                const lastActions = [...effortsFiltres, ...stationsVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 500);
                 
                 if (conteneurFeed) {
                     if (lastActions.length === 0) {
@@ -2280,6 +2293,23 @@
                             const minStr = d.getMinutes().toString().padStart(2, '0');
                             const horodatageComplet = `${jourStr}/${moisStr}/${d.getFullYear()} ${heureStr}:${minStr}`;
 
+                            // Station de colonisation terminée : une ligne du journal (la couleur est celle du titre « Bâtisseur »)
+                            if (a.type_action === 'STATION') {
+                                const cb = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
+                                const bgS = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+                                feedHtml += `
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 300px 100px 100px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgS}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cb};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgS}';">
+                                <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
+                                <span style="color: #888; font-weight: bold; white-space: nowrap;">ESCADRON</span>
+                                <div style="white-space: nowrap;"><span style="border: 1px solid #9fb0bf; color: #9fb0bf; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">COLONISATION</span></div>
+                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;"><span style="color: var(--ed-orange); font-weight: bold;">${escapeHtml(String(a.systeme || 'SECTEUR LOCAL').toUpperCase())}</span><span style="color: #555; margin: 0 6px;">//</span><span style="color: #aaa;">${escapeHtml(nomStationJournal(a.station).toUpperCase())}</span></div>
+                                <span style="text-align: right; white-space: nowrap; color: ${cb}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${cb}40;">STATION TERMINÉE</span>
+                                <span style="text-align: right; color: ${cb}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ CHANTIER ]</span>
+                                <span style="text-align: right; color: #555; font-size: 0.95em;" title="Une station terminée ne rapporte pas de points : les livraisons les ont déjà comptés">—</span>
+                            </div>`;
+                                return;
+                            }
+
                             const cmdr = escapeHtml(dicoPilotes[a.user_id] || 'INCONNU');
 
                             const ordreConcerne = ordres.find(o => String(o.id) === String(a.ordre_id));
@@ -2288,17 +2318,13 @@
                             
                             let typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "LIBRE";
                             let badgeOrdreTexte = ordreConcerne ? `#${ordreConcerne.id} | ${typeOrdre}` : "SOUTIEN LIBRE";
-                            let colorOrdre = ordreConcerne ? 'var(--ed-blue)' : '#B388FF';
+                            // Couleur de la ligne = SPÉCIALITÉ de l'action (celle du mur des spécialistes), plus le type de directive ; le badge, lui, reste neutre
+                            const spec = window.specialiteAction ? window.specialiteAction(a.type_action) : { couleur: '#8a8f98', nom: '' };
+                            const colorOrdre = spec.couleur;
 
                             if (a.type_action === 'COLONISATION') {
                                 typeOrdre = "COLONISATION";
                                 badgeOrdreTexte = "COLONISATION";
-                                colorOrdre = '#FFD700';
-                            } else if (ordreConcerne) {
-                                if (typeOrdre === 'HAUSSE') colorOrdre = 'var(--ed-green)';
-                                else if (typeOrdre === 'BAISSE') colorOrdre = 'var(--ed-red)';
-                                else if (typeOrdre === 'GUERRE') colorOrdre = 'var(--ed-orange)';
-                                else if (typeOrdre === 'ELECTION') colorOrdre = 'var(--ed-blue)';
                             }
 
                             let formatValeur = a.valeur;
@@ -2342,7 +2368,7 @@
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
                                 <div style="white-space: nowrap;">
-                                    <span style="border: 1px solid ${colorOrdre}; color: ${colorOrdre}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">${badgeOrdreTexte}</span>
+                                    <span style="border: 1px solid #9fb0bf; color: #9fb0bf; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">${badgeOrdreTexte}</span>
                                 </div>
                                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;">
                                     <span style="color: var(--ed-orange); font-weight: bold;">${cibleSys}</span>
@@ -2350,7 +2376,7 @@
                                     <span style="color: #aaa;">${cibleFac}</span>
                                 </div>
                                 <span title="${String(formatValeur).replace(/"/g, '&quot;')}" style="text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${colorOrdre}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}</span>
-                                <span style="text-align: right; color: #777; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${vecteurTexte} ]</span>
+                                <span style="text-align: right; color: ${colorOrdre}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;" title="${spec.nom ? 'Spécialité : ' + spec.nom : 'Ne fait progresser aucun titre'}">[ ${vecteurTexte} ]</span>
                                 ${celluleRangBgs(a)}
                             </div>`;
                         });
@@ -2610,7 +2636,7 @@
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="medailles.js?v=5"></script>
+    <script src="medailles.js?v=6"></script>
     <script src="footer.js?v=20"></script>
 </body>
 </html>

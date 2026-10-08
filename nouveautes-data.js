@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-journal-bgs-couleurs', date: '2026-10-08T20:15:00Z', type: 'AMELIORE',
+        titre: 'Journal des exploits : couleurs par spécialité et stations terminées',
+        texte: 'Dans le journal des exploits du BGS (sur PC et sur mobile), chaque ligne prend maintenant la couleur de la spécialité qu’elle fait progresser, celle du mur des spécialistes : cyan pour la sécurité (Fer de Lance), orange pour les missions (Maître Logisticien), vert pour l’économie (Magnat), violet pour la science, rouge pour les opérations noires (Exécuteur), orange clair pour les zones de conflit (Seigneur de Guerre) et or pour la colonisation (Bâtisseur). Les stations de colonisation terminées apparaissent aussi dans le journal, une ligne par station.',
+        important: false
+    },
+    {
         id: '2026-10-menu-cloche-pied-de-page', date: '2026-10-07T22:03:56Z', type: 'AMELIORE',
         titre: 'Menu plus pratique : cloche des nouveautés, pied de page en bas, compte sur deux colonnes',
         texte: 'La cloche des nouveautés est maintenant dans le menu de gauche, juste au-dessus de la gestion du compte : un point orange vous prévient quand il y a du nouveau. Le pied de page ne reste plus collé en bas de l’écran, il se trouve tout en bas de chaque page et vous laisse toute la place pour le contenu. La fenêtre de gestion du compte s’affiche sur deux colonnes (une seule sur petit écran), votre clé de liaison EDMC tient sur une ligne, et le bouton « Quitter l’escadron » est rangé dans cette fenêtre, au lieu du bas de la page Escadron. Un petit son accompagne aussi l’ouverture de l’anecdote. Rien à faire de votre côté.'
