@@ -454,6 +454,12 @@
         let journalEtat = { lignes: [], fin: true };   // actions déjà chargées (100 par page, 500 au plus)
         let memoireStations = [];                      // stations de colonisation terminées (affichées dans le journal avec les actions)
         let memoirePaliers = [];                       // paliers de tonnes livrées (colonisation) franchis par les pilotes, annoncés dans le journal
+        // Filtre « spécialité » : types d'action qui font progresser chaque titre du mur des spécialistes (même correspondance que le calcul serveur des titres)
+        const TYPES_SPECIALITE = {
+            SEC: ['SECURITE'], LOG: ['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'], ECO: ['ECONOMIE'], SCI: ['SCIENCE'], GUE: ['CZ_VICTOIRES'], ECH: ['ECHECS'],
+            EXE: ['MEURTRES', 'VOLS', 'PIRATAGE', 'CONTREBANDE', 'ECHECS'],   // les échecs n'y comptent que sous une directive de baisse (filtré plus bas)
+            BAT: []                                                          // colonisation : stations terminées et paliers de livraisons seulement (pas chaque livraison)
+        };
         const nomStationJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
         window.ouvrirJournalBGS = function(e) {
             if (typeof sonClic === 'function') sonClic();
@@ -2149,6 +2155,7 @@
             const filtrePilote = document.getElementById('filtre-pilote').value;
             const filtrePeriode = document.getElementById('filtre-periode').value;
             const filtreOrdre = document.getElementById('filtre-ordre').value;
+            const filtreSpec = document.getElementById('filtre-specialite').value;
 
             try {
                 // 1. TÉLÉCHARGEMENT SÉCURISÉ ET OPTIMISÉ (EGRESS PROTÉGÉ)
@@ -2170,6 +2177,11 @@
                     } else {
                         queryEfforts = queryEfforts.eq('ordre_id', 'none'); 
                     }
+                } else if (filtreOrdre === 'CLOS') {
+                    // directives clôturées (archivées) : toutes celles qui ne sont plus en cours
+                    const idsActifs = ordres.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
+                    queryEfforts = queryEfforts.not('ordre_id', 'is', null);
+                    if (idsActifs.length) queryEfforts = queryEfforts.not('ordre_id', 'in', '(' + idsActifs.join(',') + ')');
                 } else if (filtreOrdre === 'LIBRE') {
                     // Cible spécifiquement les actions sans ordre (soutien libre & chantiers de colonisation) ; la période est filtrée plus bas, sans plafond de 30 jours
                     queryEfforts = queryEfforts.is('ordre_id', null);
@@ -2180,10 +2192,14 @@
                 // (avec « tout l'historique », vraiment tout l'historique : 100 lignes par page, 500 au plus)
 
                 // Pilote et période filtrés côté serveur, et seulement les 100 actions les plus récentes (celles qui sont affichées)
-                if (filtrePilote === 'ME') queryEfforts = queryEfforts.eq('user_id', profilCommandant.user_id);
+                if (filtrePilote !== 'ALL') queryEfforts = queryEfforts.eq('user_id', filtrePilote === 'ME' ? profilCommandant.user_id : filtrePilote);
+                if (filtreSpec !== 'ALL') {
+                    const typesSpec = TYPES_SPECIALITE[filtreSpec] || [];
+                    queryEfforts = typesSpec.length ? queryEfforts.in('type_action', typesSpec) : queryEfforts.eq('type_action', 'AUCUN_EFFORT_INDIVIDUEL');
+                }
                 const depuisMs = filtrePeriode === 'TICK_HEBDO' ? calculerDernierTickHebdo().getTime() : filtrePeriode === '7J' ? Date.now() - 7 * 86400000 : filtrePeriode === '30J' ? Date.now() - 30 * 86400000 : 0;
                 if (depuisMs) queryEfforts = queryEfforts.gte('date_action', new Date(depuisMs).toISOString());
-                queryEfforts = queryEfforts.order('date_action', { ascending: false }).range(decalage, decalage + 99);
+                queryEfforts = queryEfforts.order('date_action', { ascending: false }).range(decalage, decalage + 99);   // 100 actions par page (les plus récentes d'abord), 500 au plus
 
                 // Récupération uniquement du nom des pilotes de l'escadron (Économie massive)
                 // Stations de colonisation terminees (pas chaque livraison : elles ont leur journal dans la page Colonisation) : lues avec les efforts, une seule fois
@@ -2217,17 +2233,28 @@
                 });
                 memoireDicoPilotes = dicoPilotes;
 
+                // PEUPLEMENT DU FILTRE DES PILOTES (une fois) : chaque pilote de l'escadron, par ordre alphabétique
+                const selectPilote = document.getElementById('filtre-pilote');
+                if (selectPilote && !suite && selectPilote.options.length <= 2 && profils.length) {
+                    profils.filter(p => p.cmdr_nom && p.user_id !== profilCommandant.user_id).sort((a, b) => a.cmdr_nom.localeCompare(b.cmdr_nom)).forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.user_id; opt.textContent = 'CMDR ' + p.cmdr_nom.toUpperCase();
+                        selectPilote.appendChild(opt);
+                    });
+                }
+
                 // 2. PEUPLEMENT DU FILTRE DES ORDRES (AVEC NUMÉRO D'OPÉRATION)
                 const selectOrdre = document.getElementById('filtre-ordre');
-                if (selectOrdre && selectOrdre.options.length <= 1) {
-                    // NOUVEAU : On ne liste QUE les ordres actifs !
-                    const ordresActifs = ordres.filter(o => o.statut === 'ACTIF').sort((a, b) => b.id - a.id);
-                    ordresActifs.forEach(o => {
-                        const opt = document.createElement('option');
-                        opt.value = o.id;
-                        opt.innerText = `[ #${o.id} ] ${o.systeme_cible} (${o.type_ordre})`;
-                        selectOrdre.appendChild(opt);
-                    });
+                if (selectOrdre && !suite && !selectOrdre.dataset.pret && ordres.length) {
+                    selectOrdre.dataset.pret = '1';
+                    const groupe = (titre, liste) => {
+                        if (!liste.length) return;
+                        const g = document.createElement('optgroup'); g.label = titre;
+                        liste.forEach(o => { const opt = document.createElement('option'); opt.value = o.id; opt.textContent = '#' + o.id + ' · ' + String(o.systeme_cible || '').toUpperCase() + ' (' + o.type_ordre + ')'; g.appendChild(opt); });
+                        selectOrdre.appendChild(g);
+                    };
+                    groupe('DIRECTIVES EN COURS', ordres.filter(o => o.statut === 'ACTIF').sort((a, b) => b.id - a.id));
+                    groupe('DIRECTIVES CLÔTURÉES (40 DERNIÈRES)', ordres.filter(o => o.statut !== 'ACTIF').sort((a, b) => b.id - a.id).slice(0, 40));
                 }
 
                 // 3. FILTRAGE TEMPOREL, OPÉRATIONNEL ET PILOTE
@@ -2239,7 +2266,12 @@
                     // On ne garde que les petits filtres locaux secondaires :
                     
                     // 1. Filtre par Commandant
-                    if (filtrePilote === 'ME' && e.user_id !== profilCommandant.user_id) return false;
+                    if (filtrePilote !== 'ALL' && e.user_id !== (filtrePilote === 'ME' ? profilCommandant.user_id : filtrePilote)) return false;
+                    // Exécuteur : un échec n'y compte que sous une directive de baisse
+                    if (filtreSpec === 'EXE' && e.type_action === 'ECHECS') {
+                        const oe = ordres.find(o => String(o.id) === String(e.ordre_id));
+                        if (!oe || String(oe.type_ordre).toUpperCase() !== 'BAISSE') return false;
+                    }
                     
                     // 2. Filtres temporels (Tick, 7j, 30j)
                     let dateStr = e.date_action;
@@ -2261,9 +2293,15 @@
                 const conteneurFeedModal = null;
                 
                 // On passe de 50 à 100 lignes pour profiter du mode plein écran !
-                const stationsVisibles = (filtrePilote === 'ME' || !['ALL', 'LIBRE'].includes(filtreOrdre)) ? [] : memoireStations.filter(s => {
+                // Cohérence de la liste : les actions sont chargées 100 par 100 (les plus récentes d'abord). Tant qu'il en reste à charger, on n'affiche pas de station ni de palier
+                // PLUS ANCIENS que la dernière action chargée (sinon on voit une ligne du 04/10 alors que des actions du 07/10 ne sont pas encore affichées).
+                const limiteBasseJournal = journalEtat.fin ? 0 : journalEtat.lignes.reduce((m, e) => {
+                    const t = new Date(String(e.date_action).replace(' ', 'T')).getTime();
+                    return isNaN(t) ? m : Math.min(m, t);
+                }, Infinity);
+                const stationsVisibles = (filtrePilote !== 'ALL' || !['ALL', 'LIBRE'].includes(filtreOrdre) || !['ALL', 'BAT'].includes(filtreSpec)) ? [] : memoireStations.filter(s => {
                     const t = new Date(s.date_action).getTime();
-                    if (isNaN(t)) return false;
+                    if (isNaN(t) || t < limiteBasseJournal) return false;
                     if (filtrePeriode === 'TICK_HEBDO') return t >= tickHebdoRef.getTime();
                     if (filtrePeriode === '7J') return now - t <= 7 * 86400000;
                     if (filtrePeriode === '30J') return now - t <= 30 * 86400000;
@@ -2278,8 +2316,9 @@
                     return true;
                 };
                 const monNomJournal = String(profilCommandant.cmdr_nom || '').toUpperCase();
-                const paliersVisibles = !['ALL', 'LIBRE'].includes(filtreOrdre) ? [] : memoirePaliers.filter(p => enPeriodeJournal(p) && (filtrePilote !== 'ME' || String(p.cmdr || '').toUpperCase() === monNomJournal));
-                const lastActions = [...effortsFiltres, ...stationsVisibles, ...paliersVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 500);
+                const nomPiloteFiltre = filtrePilote === 'ALL' ? '' : (filtrePilote === 'ME' ? monNomJournal : String(dicoPilotes[filtrePilote] || '').toUpperCase());
+                const paliersVisibles = (!['ALL', 'LIBRE'].includes(filtreOrdre) || !['ALL', 'BAT'].includes(filtreSpec)) ? [] : memoirePaliers.filter(p => enPeriodeJournal(p) && new Date(p.date_action).getTime() >= limiteBasseJournal && (!nomPiloteFiltre || String(p.cmdr || '').toUpperCase() === nomPiloteFiltre));
+                const lastActions = [...effortsFiltres, ...stationsVisibles, ...paliersVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 600);
                 
                 if (conteneurFeed) {
                     if (lastActions.length === 0) {
@@ -2289,7 +2328,8 @@
                     } else {
                         // Retour à la grille de 6 colonnes propre
                         const bandeauRang = await bandeauRangBgs();
-                        let feedHtml = bandeauRang + `
+                        const bandeauSuite = journalEtat.fin ? '' : `<div style="padding: 7px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8a8a8a; font-size: 0.78em;">ⓘ Les ${journalEtat.lignes.length} actions les plus récentes de la période sont affichées, il en reste à charger : <span style="color: var(--ed-blue); cursor: pointer; text-decoration: underline;" onclick="chargerRegistreTactique(true)">charger la suite</span> (les stations et paliers plus anciens apparaîtront avec elles).</div>`;
+                        let feedHtml = bandeauRang + bandeauSuite + `
                         <div style="display: grid; grid-template-columns: 165px 160px 145px minmax(0,1fr) 300px 100px 100px; gap: 10px; padding: 8px 14px; color: #888; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
                             <span>HORODATAGE</span>
                             <span>COMMANDANT</span>
@@ -2424,6 +2464,7 @@
                         conteneurFeed.innerHTML = feedHtml;
                         if (suite) conteneurFeed.scrollTop = defilement;
                         if (conteneurFeedModal) conteneurFeedModal.innerHTML = feedHtml; // <-- Injection dans la modale
+                        if (typeof filtrerRechercheJournal === 'function') filtrerRechercheJournal();
                     }
                 }
 
@@ -2433,12 +2474,23 @@
         }
 
 
+        // Recherche par texte (système, faction, pilote, station...) : masque simplement les lignes déjà chargées, sans nouvelle lecture (les lignes sont des grilles : on remet « grid », on ne vide pas le style)
+        window.filtrerRechercheJournal = function () {
+            const champ = document.getElementById('filtre-recherche');
+            const q = champ ? champ.value.trim().toUpperCase() : '';
+            document.querySelectorAll('#modal-exploit-feed-content .exploit-row').forEach(l => { l.style.display = (!q || l.innerText.toUpperCase().includes(q)) ? 'grid' : 'none'; });
+        };
+
         // --- ÉCOUTEURS D'ÉVÉNEMENTS POUR LES FILTRES ---
         document.addEventListener('DOMContentLoaded', () => {
             const fPilote = document.getElementById('filtre-pilote');
             const fPeriode = document.getElementById('filtre-periode');
             const fOrdre = document.getElementById('filtre-ordre');
 
+            const fSpec = document.getElementById('filtre-specialite');
+            const fRecherche = document.getElementById('filtre-recherche');
+            if (fSpec) fSpec.addEventListener('change', () => { if(typeof sonClic === 'function') sonClic(); chargerRegistreTactique(); });
+            if (fRecherche) fRecherche.addEventListener('input', () => filtrerRechercheJournal());
             if (fPilote) fPilote.addEventListener('change', () => { if(typeof sonClic === 'function') sonClic(); chargerRegistreTactique(); });
             if (fPeriode) fPeriode.addEventListener('change', () => { if(typeof sonClic === 'function') sonClic(); chargerRegistreTactique(); });
             if (fOrdre) fOrdre.addEventListener('change', () => { if(typeof sonClic === 'function') sonClic(); chargerRegistreTactique(); });
@@ -2612,7 +2664,9 @@
             <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; flex-shrink: 0;">
                 <select id="filtre-pilote" class="tactical-filter"><option value="ALL" selected>[ TOUT L'ESCADRON ]</option><option value="ME">> MON DOSSIER PERSONNEL</option></select>
                 <select id="filtre-periode" class="tactical-filter"><option value="ALL">TOUT L'HISTORIQUE</option><option value="TICK_HEBDO" selected>DEPUIS LE DERNIER CYCLE (JEUDI)</option><option value="7J">7 DERNIERS JOURS</option><option value="30J">30 DERNIERS JOURS</option></select>
-                <select id="filtre-ordre" class="tactical-filter"><option value="ACTIF">[ DIRECTIVES EN COURS ]</option><option value="LIBRE">[ ACTIONS LIBRES ]</option><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option></select>
+                <select id="filtre-ordre" class="tactical-filter" title="Directive"><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option><option value="ACTIF">[ DIRECTIVES EN COURS ]</option><option value="CLOS">[ DIRECTIVES CLÔTURÉES ]</option><option value="LIBRE">[ ACTIONS LIBRES ]</option></select>
+                <select id="filtre-specialite" class="tactical-filter" title="Spécialité (titres du mur des spécialistes)"><option value="ALL" selected>[ TOUTES LES SPÉCIALITÉS ]</option><option value="SEC">FER DE LANCE · SÉCURITÉ</option><option value="LOG">MAÎTRE LOGISTICIEN · MISSIONS</option><option value="ECO">LE MAGNAT · ÉCONOMIE</option><option value="BAT">LE BÂTISSEUR · COLONISATION</option><option value="SCI">EXPERT SCIENTIFIQUE · SCIENCE</option><option value="EXE">L'EXÉCUTEUR · OP. NOIRES</option><option value="GUE">SEIGNEUR DE GUERRE · CONFLITS</option><option value="ECH">MISSIONS ÉCHOUÉES</option></select>
+                <input id="filtre-recherche" class="tactical-filter" type="search" placeholder="Système, faction, pilote…" autocomplete="off" style="cursor: text; min-width: 210px;">
             </div>
             <div id="modal-exploit-feed-content" style="overflow-y: auto; flex-grow: 1; padding-right: 10px;">
                 <!-- Les lignes du journal seront injectées ici en miroir par le JS -->
