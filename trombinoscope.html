@@ -55,24 +55,60 @@
         .tb-vign .tb-btn { margin: 0 11px 11px; }
         .tb-vide { grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; padding: 40px 10px; line-height: 1.8; }
 
-        /* rapport d'usage (au-dessus des photos) */
-        .rp-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 14px; margin-bottom: 14px; }
-        .rp-carte { border: 1px solid #5a3000; background: rgba(10, 6, 2, 0.9); padding: 14px 16px 16px; }
-        .rp-t2 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
-        .rp-nom { color: #fff; font-weight: bold; letter-spacing: 1px; overflow-wrap: anywhere; }
-        .rp-taux { color: var(--ed-blue); font-size: 0.8em; letter-spacing: 1px; }
-        .rp-sous { color: #777; font-size: 0.72em; margin-bottom: 4px; }
-        .rp-sec { color: #777; font-size: 0.64em; letter-spacing: 2px; margin: 13px 0 6px; }
-        .rp-st { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-        .rp-s { border: 1px solid #2a1800; padding: 7px 8px; background: rgba(0, 0, 0, 0.35); min-width: 0; }
-        .rp-v { color: var(--ed-orange); font-size: 1.1em; font-weight: bold; overflow-wrap: anywhere; }
-        .rp-v small { color: #888; font-size: 0.65em; font-weight: normal; }
-        .rp-l { color: #888; font-size: 0.6em; letter-spacing: 1px; margin-top: 2px; line-height: 1.35; overflow-wrap: anywhere; }
-        @media (max-width: 520px) { .rp-l { letter-spacing: 0; } .rp-v { font-size: 1em; } }
-        .rp-barres { display: flex; align-items: flex-end; gap: 2px; height: 40px; border-bottom: 1px solid #3a2000; }
-        .rp-barres i { flex: 1; min-width: 2px; background: var(--ed-blue); opacity: 0.75; }
-        .rp-barres i:hover { opacity: 1; }
-        .rp-note { color: #666; font-size: 0.7em; line-height: 1.6; margin: 0 0 26px; }
+        /* tableau de bord d'usage (au-dessus des photos) : statistiques, tous escadrons ou un seul */
+        .rp-filtres { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 14px; }
+        .rp-filtres label { color: #888; font-size: 0.72em; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .rp-filtres select, .rp-filtres input { background: rgba(0, 0, 0, 0.7); border: 1px solid #5a3000; color: #ddd; padding: 7px 12px; font-family: inherit; font-size: 0.88em; max-width: 100%; }
+        .rp-pills { display: flex; gap: 6px; }
+        .rp-pill { border: 1px solid #444; color: #999; padding: 4px 12px; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; border-radius: 12px; user-select: none; }
+        .rp-pill:hover { border-color: #888; color: #ccc; }
+        .rp-pill.on { border-color: var(--ed-orange); color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); }
+        .rp-info { color: #666; font-size: 0.72em; margin-left: auto; }
+        .rp-kpis { display: grid; grid-template-columns: 1.6fr repeat(5, 1fr); gap: 10px; margin-bottom: 12px; }
+        .rp-kpi { border: 1px solid #5a3000; background: rgba(10, 6, 2, 0.9); padding: 12px 14px; min-width: 0; display: flex; flex-direction: column; }
+        .rp-kpi.hero { border-color: rgba(0, 240, 255, 0.45); }
+        .rp-kl { color: #888; font-size: 0.66em; letter-spacing: 1.5px; line-height: 1.35; }
+        .rp-kv { color: #fff; font-size: 1.9em; font-weight: bold; margin: 6px 0 2px; line-height: 1.1; }
+        .rp-kpi.hero .rp-kv { font-size: 2.9em; }
+        .rp-kv small { color: #888; font-size: 0.42em; font-weight: normal; letter-spacing: 1px; margin-left: 6px; }
+        .rp-ks { color: #777; font-size: 0.7em; min-height: 1.2em; }
+        .rp-d { color: #aaa; }
+        .rp-kspark { margin-top: auto; padding-top: 8px; height: 26px; }
+        .rp-corps { display: grid; grid-template-columns: 1.7fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .rp-carte { border: 1px solid #5a3000; background: rgba(10, 6, 2, 0.9); padding: 14px 16px 14px; min-width: 0; }
+        .rp-titre { color: #777; font-size: 0.68em; letter-spacing: 2px; margin-bottom: 8px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .rp-titre b { color: #aaa; font-weight: normal; }
+        .rp-vols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .rp-vol { border: 1px solid #2a1800; background: rgba(0, 0, 0, 0.35); padding: 8px 10px; min-width: 0; }
+        .rp-vv { color: #fff; font-size: 1.25em; font-weight: bold; }
+        .rp-vv small { color: #888; font-size: 0.6em; font-weight: normal; margin-left: 4px; }
+        .rp-vl { color: #888; font-size: 0.6em; letter-spacing: 1px; margin: 1px 0 4px; line-height: 1.35; }
+        .rp-svg { display: block; width: 100%; overflow: visible; }
+        .rp-axe { fill: #777; font-size: 10px; font-family: inherit; }
+        .rp-tip { position: fixed; z-index: 6000; pointer-events: none; background: rgba(5, 3, 0, 0.97); border: 1px solid #5a3000; padding: 7px 10px; font-size: 0.78em; color: #bbb; display: none; max-width: 260px; }
+        .rp-tip b { color: #fff; font-size: 1.15em; }
+        .rp-tip i { display: inline-block; width: 12px; height: 2px; background: var(--ed-blue); vertical-align: middle; margin-right: 6px; }
+        .rp-tabdonnees { margin-top: 10px; color: #777; font-size: 0.72em; }
+        .rp-tabdonnees summary { cursor: pointer; letter-spacing: 1px; }
+        .rp-table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
+        .rp-table th { color: #888; font-weight: normal; font-size: 0.78em; letter-spacing: 1px; text-align: right; padding: 7px 10px; border-bottom: 1px solid #3a2000; white-space: nowrap; position: sticky; top: 0; background: #0a0602; }
+        .rp-table th:first-child, .rp-table td:first-child { text-align: left; }
+        .rp-table th[data-tri] { cursor: pointer; user-select: none; }
+        .rp-table th[data-tri]:hover { color: #ddd; }
+        .rp-table th.tri { color: var(--ed-orange); }
+        .rp-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid #1d1000; color: #ddd; white-space: nowrap; }
+        .rp-table tbody tr[data-esc] { cursor: pointer; }
+        .rp-table tbody tr[data-esc]:hover td { background: rgba(255, 113, 0, 0.07); }
+        .rp-table td.nom { color: #fff; font-weight: bold; letter-spacing: 1px; white-space: normal; overflow-wrap: anywhere; }
+        .rp-scroll { max-height: 460px; overflow: auto; border: 1px solid #1d1000; }
+        .rp-jauge { display: inline-block; width: 70px; height: 6px; background: #1d1000; vertical-align: middle; margin-right: 8px; }
+        .rp-jauge i { display: block; height: 100%; background: var(--ed-blue); opacity: 0.8; }
+        .rp-detail { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .rp-retour { color: var(--ed-blue); cursor: pointer; font-size: 0.78em; letter-spacing: 1px; }
+        .rp-retour:hover { text-decoration: underline; }
+        .rp-note { color: #666; font-size: 0.7em; line-height: 1.6; margin: 12px 0 26px; }
+        @media (max-width: 1100px) { .rp-kpis { grid-template-columns: repeat(3, 1fr); } .rp-kpi.hero { grid-column: 1 / -1; } .rp-corps { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { .rp-kpis { grid-template-columns: repeat(2, 1fr); } .rp-info { margin-left: 0; width: 100%; } .rp-vols { grid-template-columns: 1fr; } }
 
         /* agrandissement : la photo en grand pour controler */
         .tb-voile { position: fixed; inset: 0; z-index: 4000; background: rgba(0, 0, 0, 0.88); display: none; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
@@ -262,11 +298,21 @@
         }
 
         // ---------------------------------------------------------------
-        //  RAPPORT D'USAGE (au-dessus des photos) : UN appel (rapport_usage_directeur, reserve au Directeur par la base), garde 5 minutes dans la session.
-        //  Comptages par escadron uniquement (aucun contenu, aucun pilote nomme) ; releve fait chaque nuit cote base (script SQL 63).
+        //  TABLEAU DE BORD D'USAGE (au-dessus des photos) : UN appel (rapport_usage_directeur, reserve au Directeur par la base), garde 5 minutes dans la session.
+        //  Statistiques par escadron uniquement (aucun contenu, aucun pilote nomme) ; releve fait chaque nuit cote base (script SQL 63).
+        //  Vue generale (tous escadrons, somme) ou un escadron au choix ; periode 7 / 14 / 30 jours. Aucune requete de plus quand on change de vue.
         // ---------------------------------------------------------------
-        const CLE_RP = 'edteam_rapport_usage_v1';
-        const RP = { lignes: [] };
+        const CLE_RP = 'edteam_rapport_usage_v1', CLE_RP_PREFS = 'edteam_rapport_prefs';
+        const RP = { lignes: [], sel: '', jours: 14, tri: 'a7', sens: -1, q: '' };
+        try { const p = JSON.parse(localStorage.getItem(CLE_RP_PREFS) || 'null'); if (p && [7, 14, 30].includes(p.jours)) RP.jours = p.jours; } catch (e) {}
+        const CHAMPS = ['comptes', 'approuves', 'nouveaux_comptes_7j', 'non_confirmes', 'connectes_24h', 'connectes_7j', 'actifs_24h', 'actifs_7j', 'actifs_30j', 'reguliers_30j',
+            'efforts_bgs_24h', 'soutien_libre_24h', 'livraisons_colo_24h', 'lignes_budget_24h', 'releves_pp_24h', 'entrees_journal_24h', 'directives_actives', 'directives_creees_7j', 'photos', 'refus_anecdotes'];
+        const fmtN = new Intl.NumberFormat('fr-FR');
+        const jourDe = l => String(l.releve_le).slice(0, 10);
+        const jj = d => d.slice(8, 10) + '/' + d.slice(5, 7);
+        const jjaa = d => d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4);
+        const nomEscadron = n => n === '(SANS ESCADRON)' ? 'SANS ESCADRON' : n;
+
         async function chargerRapport() {
             try { const c = JSON.parse(sessionStorage.getItem(CLE_RP) || 'null'); if (c && Date.now() - c.ts < 300000 && Array.isArray(c.d)) return c.d; } catch (e) {}
             const r = await supabaseApp.rpc('rapport_usage_directeur', { p_jours: 30 });
@@ -274,48 +320,171 @@
             try { sessionStorage.setItem(CLE_RP, JSON.stringify({ ts: Date.now(), d: r.data || [] })); } catch (e) {}
             return r.data || [];
         }
-        function dateJour(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
+
+        // ---- calculs
+        function fenetre(lignes) {
+            const jours = [...new Set(lignes.map(jourDe))].sort();
+            if (!jours.length) return [];
+            const d = new Date(jours[jours.length - 1] + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - (RP.jours - 1));
+            const debut = d.toISOString().slice(0, 10);
+            return lignes.filter(l => jourDe(l) >= debut);
+        }
+        function agreger(lignes) {   // somme par jour (un pilote n'appartient qu'a un escadron : les sommes sont exactes)
+            const m = {};
+            lignes.forEach(l => { const k = jourDe(l); const o = m[k] || (m[k] = { d: k }); CHAMPS.forEach(c => { o[c] = (o[c] || 0) + (Number(l[c]) || 0); }); });
+            return Object.keys(m).sort().map(k => m[k]);
+        }
+        function ecartSur7j(serie, champ) {
+            if (serie.length < 2) return null;
+            const der = serie[serie.length - 1], d = new Date(der.d + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - 7);
+            const av = serie.find(s => s.d === d.toISOString().slice(0, 10));
+            return av ? der[champ] - av[champ] : null;
+        }
+        function nice(n) { const p = Math.pow(10, Math.floor(Math.log10(Math.max(n, 1)))), f = n / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
+
+        // ---- dessins (SVG a la main, une seule teinte : cyan ; texte en gris, jamais dans la couleur de la serie)
+        function sparkline(vals, w, h) {
+            if (vals.length < 2) return '';
+            const max = Math.max(1, ...vals), x = i => 3 + (w - 6) * i / (vals.length - 1), y = v => h - 4 - (h - 8) * v / max;
+            const pts = vals.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+            return '<svg class="rp-svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="#00F0FF" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>'
+                + '<circle cx="' + x(vals.length - 1).toFixed(1) + '" cy="' + y(vals[vals.length - 1]).toFixed(1) + '" r="3.5" fill="#00F0FF" stroke="#0a0602" stroke-width="2"/></svg>';
+        }
+        function graphe(el, pts, ref, refLib, serieLib) {   // pts : [{d, v}]
+            const W = Math.max(260, el.clientWidth || 600), H = 230, m = { l: 36, r: 14, t: 18, b: 26 }, w = W - m.l - m.r, h = H - m.t - m.b;
+            const max = nice(Math.max(1, ref || 0, ...pts.map(p => p.v)));
+            const x = i => pts.length > 1 ? m.l + w * i / (pts.length - 1) : m.l + w / 2, y = v => m.t + h * (1 - v / max);
+            let s = '<svg class="rp-svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="' + esc(serieLib) + ' par jour">';
+            [0, 0.5, 1].forEach(f => {
+                const yy = y(max * f).toFixed(1);
+                s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="#2a1800" stroke-width="1"/><text class="rp-axe" x="' + (m.l - 6) + '" y="' + (Number(yy) + 3) + '" text-anchor="end">' + fmtN.format(Math.round(max * f)) + '</text>';
+            });
+            const idx = pts.length <= 6 ? pts.map((_, i) => i) : [0, Math.round((pts.length - 1) / 2), pts.length - 1];
+            idx.forEach(i => { s += '<text class="rp-axe" x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (i === 0 && pts.length > 1 ? 'start' : i === pts.length - 1 && pts.length > 1 ? 'end' : 'middle') + '">' + jj(pts[i].d) + '</text>'; });
+            if (ref) s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + y(ref).toFixed(1) + '" y2="' + y(ref).toFixed(1) + '" stroke="#777" stroke-width="1"/><text class="rp-axe" x="' + (W - m.r) + '" y="' + (y(ref) - 5).toFixed(1) + '" text-anchor="end">' + esc(refLib) + '</text>';
+            if (pts.length > 1) {
+                const ligne = pts.map((p, i) => x(i).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ');
+                s += '<polygon points="' + x(0).toFixed(1) + ',' + y(0).toFixed(1) + ' ' + ligne + ' ' + x(pts.length - 1).toFixed(1) + ',' + y(0).toFixed(1) + '" fill="#00F0FF" opacity="0.10"/>'
+                    + '<polyline points="' + ligne + '" fill="none" stroke="#00F0FF" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+            }
+            const dern = pts[pts.length - 1];
+            s += '<circle cx="' + x(pts.length - 1).toFixed(1) + '" cy="' + y(dern.v).toFixed(1) + '" r="4" fill="#00F0FF" stroke="#0a0602" stroke-width="2"/>'
+                + '<g id="rp-croix" style="display:none"><line y1="' + m.t + '" y2="' + (m.t + h) + '" stroke="#999" stroke-width="1"/><circle r="4" fill="#00F0FF" stroke="#0a0602" stroke-width="2"/></g>'
+                + '<rect id="rp-hit" x="' + m.l + '" y="' + m.t + '" width="' + w + '" height="' + h + '" fill="transparent"/></svg>';
+            el.innerHTML = s;
+            { const t0 = document.getElementById('rp-tip'); if (t0) t0.style.display = 'none'; }   // une bulle restee ouverte pendant le redessin
+            if (pts.length < 2) { const n = document.createElement('div'); n.className = 'rp-ks'; n.style.marginTop = '4px'; n.textContent = 'Un seul relevé pour l\'instant : la courbe se dessine au fil des nuits.'; el.appendChild(n); }
+            // survol : la croix suit le pointeur et s'accroche au jour le plus proche ; la valeur s'affiche dans une bulle
+            const hit = el.querySelector('#rp-hit'), croix = el.querySelector('#rp-croix'), tip = document.getElementById('rp-tip');
+            const montrer = (ev) => {
+                const r = el.querySelector('svg').getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width);
+                let i = pts.length > 1 ? Math.round((px - m.l) / w * (pts.length - 1)) : 0; i = Math.max(0, Math.min(pts.length - 1, i));
+                croix.style.display = ''; croix.querySelector('line').setAttribute('x1', x(i)); croix.querySelector('line').setAttribute('x2', x(i));
+                croix.querySelector('circle').setAttribute('cx', x(i)); croix.querySelector('circle').setAttribute('cy', y(pts[i].v));
+                tip.textContent = '';
+                const a = document.createElement('div'); a.style.color = '#888'; a.textContent = jjaa(pts[i].d); tip.appendChild(a);
+                const b = document.createElement('div'); const k = document.createElement('i'); b.appendChild(k); const st = document.createElement('b'); st.textContent = fmtN.format(pts[i].v); b.appendChild(st); b.appendChild(document.createTextNode(' ' + serieLib.toLowerCase())); tip.appendChild(b);
+                tip.style.display = 'block'; tip.style.left = Math.min(window.innerWidth - 200, ev.clientX + 14) + 'px'; tip.style.top = (ev.clientY + 14) + 'px';
+            };
+            hit.addEventListener('pointermove', montrer);
+            hit.addEventListener('pointerleave', () => { croix.style.display = 'none'; tip.style.display = 'none'; });
+        }
+
+        // ---- le tableau de bord
+        function tuileKpi(lib, valeur, sous, serie, champ, hero, petit) {
+            const dl = ecartSur7j(serie, champ);
+            const dh = dl == null ? '' : ' <span class="rp-d">· ' + (dl > 0 ? '▲ +' + fmtN.format(dl) : dl < 0 ? '▼ ' + fmtN.format(dl) : '= 0') + ' vs 7 j</span>';
+            return '<div class="rp-kpi' + (hero ? ' hero' : '') + '"><div class="rp-kl">' + lib + '</div><div class="rp-kv">' + valeur + (petit ? '<small>' + petit + '</small>' : '') + '</div><div class="rp-ks">' + sous + dh + '</div>'
+                + '<div class="rp-kspark">' + sparkline(serie.map(s => s[champ]), 120, 26) + '</div></div>';
+        }
+        function tuileVolume(lib, serie, champ, extra) {
+            const v = serie.length ? serie[serie.length - 1][champ] : 0;
+            return '<div class="rp-vol"><div class="rp-vv">' + fmtN.format(v) + (extra ? '<small>' + extra + '</small>' : '') + '</div><div class="rp-vl">' + lib + '</div>' + sparkline(serie.map(s => s[champ]), 130, 26) + '</div>';
+        }
+        function lignesTableau(lignes) {
+            const par = {}; lignes.forEach(l => { (par[l.escadron] = par[l.escadron] || []).push(l); });
+            return Object.keys(par).map(n => {
+                const h = par[n].slice().sort((a, b) => jourDe(a).localeCompare(jourDe(b))), l = h[h.length - 1];
+                return { n, nom: nomEscadron(n), approuves: l.approuves, a7: l.actifs_7j, p7: l.approuves > 0 ? Math.round(100 * l.actifs_7j / l.approuves) : 0, reg: l.reguliers_30j, bgs: l.efforts_bgs_24h,
+                    libres: l.efforts_bgs_24h > 0 ? Math.round(100 * l.soutien_libre_24h / l.efforts_bgs_24h) : null, dir: l.directives_actives, spark: h.map(x => x.actifs_24h) };
+            });
+        }
+        function dessinerTableau() {
+            const zone = document.getElementById('rp-tab'); if (!zone) return;
+            const q = RP.q.trim().toUpperCase();
+            const lignes = lignesTableau(fenetre(RP.lignes));
+            let l = lignes.filter(r => !q || r.nom.toUpperCase().includes(q));
+            const cle = RP.tri;
+            l.sort((a, b) => cle === 'nom' ? a.nom.localeCompare(b.nom) * RP.sens : ((a[cle] == null ? -1 : a[cle]) - (b[cle] == null ? -1 : b[cle])) * RP.sens || a.nom.localeCompare(b.nom));
+            const th = (k, t, tri) => '<th' + (tri ? ' data-tri="' + k + '"' : '') + (RP.tri === k ? ' class="tri"' : '') + '>' + t + (RP.tri === k ? (RP.sens < 0 ? ' ▼' : ' ▲') : '') + '</th>';
+            const corps = l.map(r => '<tr data-esc="' + esc(r.n) + '" title="Voir le détail de cet escadron"><td class="nom">' + esc(r.nom) + '</td><td>' + fmtN.format(r.approuves) + '</td>'
+                + '<td><span class="rp-jauge"><i style="width:' + r.p7 + '%"></i></span>' + r.a7 + ' <span style="color:#888">· ' + r.p7 + ' %</span></td><td>' + r.reg + '</td><td>' + fmtN.format(r.bgs) + '</td>'
+                + '<td>' + (r.libres == null ? '—' : r.libres + ' %') + '</td><td>' + r.dir + '</td><td>' + sparkline(r.spark, 90, 22) + '</td></tr>').join('')
+                || '<tr><td colspan="8" style="text-align:center;color:#666;padding:20px;">Aucun escadron ne correspond.</td></tr>';
+            zone.innerHTML = '<div class="rp-scroll"><table class="rp-table"><thead><tr>' + th('nom', 'ESCADRON', true) + th('approuves', 'PILOTES', true) + th('a7', 'ACTIFS 7 J', true) + th('reg', 'RÉGULIERS', true)
+                + th('bgs', 'EFFORTS BGS 24 H', true) + th('libres', 'LIBRES', true) + th('dir', 'DIRECTIVES ACTIVES', true) + th('', 'ACTIFS 24 H, PAR JOUR', false) + '</tr></thead><tbody>' + corps + '</tbody></table></div>';
+        }
         function dessinerRapport(erreur) {
             const zone = document.getElementById('tb-rapport'); if (!zone) return;
-            const entete = (sous) => '<div class="tb-tete"><h2>&gt; RAPPORT D\'USAGE <small>' + sous + '</small></h2></div>';
-            if (erreur) { zone.innerHTML = entete('TOUS LES ESCADRONS') + '<div class="rp-note">Le rapport n\'est pas disponible pour le moment (le script SQL 64 est-il lancé ?).</div>'; return; }
-            const par = {}; RP.lignes.forEach(l => { (par[l.escadron] = par[l.escadron] || []).push(l); });
-            const noms = Object.keys(par);
-            if (!noms.length) { zone.innerHTML = entete('TOUS LES ESCADRONS') + '<div class="rp-note">Aucun relevé pour le moment : le premier est fait chaque nuit (05:30, heure de Paris).</div>'; return; }
-            noms.sort((a, b) => (par[b][0].comptes - par[a][0].comptes) || a.localeCompare(b));
-            const fmt = new Intl.NumberFormat('fr-FR');
-            const tuile = (v, l, aide) => '<div class="rp-s"' + (aide ? ' title="' + esc(aide) + '"' : '') + '><div class="rp-v">' + v + '</div><div class="rp-l">' + l + '</div></div>';
-            const dernier = noms.map(n => par[n][0].releve_le).sort().pop();
-            const cartes = noms.map(n => {
-                const l = par[n][0];   // le plus recent (la base renvoie du plus recent au plus ancien)
-                const hist = par[n].slice().reverse();
-                const taux = l.approuves > 0 ? Math.round(100 * l.actifs_7j / l.approuves) : 0;
-                const max = Math.max(1, l.approuves, ...hist.map(h => h.actifs_24h));
-                const barres = hist.map(h => '<i style="height:' + Math.max(4, Math.round(100 * h.actifs_24h / max)) + '%" title="' + esc(dateJour(h.releve_le).slice(0, 5)) + ' : ' + h.actifs_24h + ' pilote(s) actif(s) sur 24 h"></i>').join('');
-                const nom = n === '(SANS ESCADRON)' ? 'SANS ESCADRON' : n;
-                return '<div class="rp-carte">'
-                    + '<div class="rp-t2"><span class="rp-nom">' + esc(nom) + '</span><span class="rp-taux" title="Pilotes actifs sur 7 jours / pilotes approuves">' + taux + ' % ACTIFS SUR 7 J</span></div>'
-                    + '<div class="rp-sous">' + l.approuves + ' pilote(s) approuvé(s) sur ' + l.comptes + ' compte(s)' + (l.non_confirmes ? ' · ' + l.non_confirmes + ' e-mail(s) non confirmé(s)' : '') + '</div>'
-                    + '<div class="rp-sec">PILOTES</div><div class="rp-st">'
-                    + tuile(l.actifs_24h, 'ACTIFS 24 H', 'Pilotes ayant produit des données (efforts, livraisons, budget, Powerplay, journal) ces dernières 24 h')
-                    + tuile(l.actifs_7j, 'ACTIFS 7 J') + tuile(l.actifs_30j, 'ACTIFS 30 J')
-                    + tuile(l.reguliers_30j, 'RÉGULIERS', 'Actifs au moins 15 jours sur les 30 derniers')
-                    + tuile(l.connectes_24h + ' <small>/ ' + l.connectes_7j + '</small>', 'CONNECTÉS 24 H / 7 J', 'Dernière connexion par mot de passe : sous-estimé, une session reste ouverte plusieurs jours')
-                    + tuile(l.nouveaux_comptes_7j, 'NOUVEAUX 7 J')
-                    + '</div><div class="rp-sec">VOLUME SUR 24 H</div><div class="rp-st">'
-                    + tuile(fmt.format(l.efforts_bgs_24h) + ' <small>dont ' + fmt.format(l.soutien_libre_24h) + ' libres</small>', 'EFFORTS BGS', 'Les « libres » sont les efforts hors directive (soutien libre)')
-                    + tuile(fmt.format(l.livraisons_colo_24h), 'LIVRAISONS COLONISATION') + tuile(fmt.format(l.lignes_budget_24h), 'LIGNES DE BUDGET')
-                    + tuile(fmt.format(l.releves_pp_24h), 'RELEVÉS POWERPLAY') + tuile(fmt.format(l.entrees_journal_24h), 'ENTRÉES DU JOURNAL')
-                    + '</div><div class="rp-sec">COMMANDEMENT ET ATTACHEMENT</div><div class="rp-st">'
-                    + tuile(l.directives_actives + ' <small>/ ' + l.directives_creees_7j + '</small>', 'DIRECTIVES ACTIVES / CRÉÉES 7 J')
-                    + tuile(l.photos, 'PHOTOS ENVOYÉES') + tuile(l.refus_anecdotes, 'REFUS DES ANECDOTES')
-                    + '</div><div class="rp-sec">PILOTES ACTIFS SUR 24 H, JOUR PAR JOUR (' + hist.length + ' JOUR' + (hist.length > 1 ? 'S' : '') + ')</div><div class="rp-barres">' + barres + '</div>'
-                    + '</div>';
-            }).join('');
-            zone.innerHTML = entete('TOUS LES ESCADRONS · RELEVÉ DU ' + dateJour(dernier))
-                + '<div class="rp-grille">' + cartes + '</div>'
-                + '<div class="rp-note">Comptages par escadron, sans aucun contenu. « Actifs » = pilotes ayant produit des données : cela vient surtout du plugin, donc cela mesure les pilotes qui jouent avec EDTEAM allumé, pas les pages consultées. Relevé fait chaque nuit à 03:30 UTC.</div>';
+            const entete = (sous) => '<div class="tb-tete"><h2>&gt; TABLEAU DE BORD D\'USAGE <small>' + sous + '</small></h2></div>';
+            if (erreur) { zone.innerHTML = entete('') + '<div class="rp-note">Le tableau de bord n\'est pas disponible pour le moment (le script SQL 64 est-il lancé ?).</div>'; return; }
+            if (!RP.lignes.length) { zone.innerHTML = entete('') + '<div class="rp-note">Aucun relevé pour le moment : le premier est fait chaque nuit (05:30, heure de Paris).</div>'; return; }
+            const escs = [...new Set(RP.lignes.map(l => l.escadron))];
+            if (RP.sel && !escs.includes(RP.sel)) RP.sel = '';
+            const portee = fenetre(RP.sel ? RP.lignes.filter(l => l.escadron === RP.sel) : RP.lignes);
+            const serie = agreger(portee), der = serie[serie.length - 1];
+            const rang = {}; RP.lignes.forEach(l => { if (!(l.escadron in rang) || jourDe(l) > rang[l.escadron][0]) rang[l.escadron] = [jourDe(l), l.comptes]; });
+            const ordre = escs.slice().sort((a, b) => (rang[b][1] - rang[a][1]) || a.localeCompare(b));
+            const taux = der.approuves > 0 ? Math.round(100 * der.actifs_7j / der.approuves) : 0;
+            const portee0 = RP.sel ? nomEscadron(RP.sel) : 'TOUS LES ESCADRONS';
+            let h = entete('RELEVÉ DU ' + jjaa(der.d))
+                + '<div class="rp-filtres"><label>ESCADRON <select id="rp-esc"><option value="">TOUS LES ESCADRONS (' + escs.length + ')</option>'
+                + ordre.map(n => '<option value="' + esc(n) + '"' + (n === RP.sel ? ' selected' : '') + '>' + esc(nomEscadron(n)) + '</option>').join('') + '</select></label>'
+                + '<div class="rp-pills">' + [7, 14, 30].map(j => '<span class="rp-pill' + (RP.jours === j ? ' on' : '') + '" data-j="' + j + '">' + j + ' J</span>').join('') + '</div>'
+                + '<span class="rp-info">' + serie.length + ' jour' + (serie.length > 1 ? 's' : '') + ' d\'historique sur la période</span></div>'
+                + '<div class="rp-kpis">'
+                + tuileKpi('PILOTES ACTIFS SUR 7 JOURS', fmtN.format(der.actifs_7j), taux + ' % des pilotes approuvés', serie, 'actifs_7j', true, '')
+                + tuileKpi('ACTIFS SUR 24 H', fmtN.format(der.actifs_24h), 'ont produit des données', serie, 'actifs_24h')
+                + tuileKpi('RÉGULIERS', fmtN.format(der.reguliers_30j), '15 jours actifs sur 30', serie, 'reguliers_30j')
+                + tuileKpi('PILOTES APPROUVÉS', fmtN.format(der.approuves), fmtN.format(der.comptes) + ' compte(s)' + (der.non_confirmes ? ' · ' + der.non_confirmes + ' non confirmé(s)' : ''), serie, 'approuves')
+                + tuileKpi('NOUVEAUX COMPTES 7 J', fmtN.format(der.nouveaux_comptes_7j), 'inscrits cette semaine', serie, 'nouveaux_comptes_7j')
+                + tuileKpi('DIRECTIVES ACTIVES', fmtN.format(der.directives_actives), fmtN.format(der.directives_creees_7j) + ' créée(s) en 7 j', serie, 'directives_actives')
+                + '</div><div class="rp-corps"><div class="rp-carte"><div class="rp-titre"><span>PILOTES ACTIFS PAR JOUR (24 H)</span><b>' + esc(portee0) + '</b></div><div id="rp-graphe"></div>'
+                + '<details class="rp-tabdonnees"><summary>VOIR LES DONNÉES DU GRAPHIQUE</summary><div class="rp-scroll" style="max-height:220px;margin-top:8px;"><table class="rp-table"><thead><tr><th>JOUR</th><th>ACTIFS 24 H</th><th>ACTIFS 7 J</th><th>ACTIFS 30 J</th><th>APPROUVÉS</th></tr></thead><tbody>'
+                + serie.slice().reverse().map(s => '<tr><td>' + jjaa(s.d) + '</td><td>' + s.actifs_24h + '</td><td>' + s.actifs_7j + '</td><td>' + s.actifs_30j + '</td><td>' + s.approuves + '</td></tr>').join('') + '</tbody></table></div></details></div>'
+                + '<div class="rp-carte"><div class="rp-titre"><span>VOLUME D\'ACTIVITÉ SUR 24 H</span><b>' + esc(portee0) + '</b></div><div class="rp-vols">'
+                + tuileVolume('EFFORTS BGS', serie, 'efforts_bgs_24h', der.efforts_bgs_24h > 0 ? Math.round(100 * der.soutien_libre_24h / der.efforts_bgs_24h) + ' % libres' : '')
+                + tuileVolume('LIVRAISONS DE COLONISATION', serie, 'livraisons_colo_24h') + tuileVolume('LIGNES DE BUDGET', serie, 'lignes_budget_24h')
+                + tuileVolume('RELEVÉS POWERPLAY', serie, 'releves_pp_24h') + tuileVolume('ENTRÉES DU JOURNAL', serie, 'entrees_journal_24h') + tuileVolume('CONNECTÉS 24 H (MOT DE PASSE)', serie, 'connectes_24h')
+                + '</div></div></div>';
+            if (!RP.sel) {
+                h += '<div class="rp-carte"><div class="rp-titre"><span>ESCADRONS</span><input type="search" id="rp-q" placeholder="Rechercher un escadron…" value="' + esc(RP.q) + '" style="background:rgba(0,0,0,.7);border:1px solid #5a3000;color:#ddd;padding:5px 10px;font-family:inherit;font-size:.95em;"></div><div id="rp-tab"></div></div>';
+            } else {
+                const l = RP.lignes.filter(x => x.escadron === RP.sel && jourDe(x) === der.d)[0] || {};
+                const t = (lib, v) => '<div class="rp-vol"><div class="rp-vv">' + v + '</div><div class="rp-vl">' + lib + '</div></div>';
+                h += '<div class="rp-carte"><div class="rp-titre"><span>DÉTAIL · ' + esc(nomEscadron(RP.sel)) + '</span><span class="rp-retour" data-tous="1">← TOUS LES ESCADRONS</span></div><div class="rp-detail">'
+                    + t('CONNECTÉS 24 H / 7 J (MOT DE PASSE)', (l.connectes_24h || 0) + ' / ' + (l.connectes_7j || 0)) + t('ACTIFS 30 J', l.actifs_30j || 0)
+                    + t('EFFORTS LIBRES (HORS DIRECTIVE) 24 H', fmtN.format(l.soutien_libre_24h || 0)) + t('DIRECTIVES CRÉÉES 7 J', l.directives_creees_7j || 0)
+                    + t('PHOTOS ENVOYÉES', l.photos || 0) + t('REFUS DES ANECDOTES', l.refus_anecdotes || 0) + '</div></div>';
+            }
+            h += '<div class="rp-note">Statistiques par escadron, sans aucun contenu. « Actifs » = pilotes ayant produit des données : cela vient surtout du plugin, donc cela mesure les pilotes qui jouent avec EDTEAM allumé, pas les pages consultées. « Connectés » = dernière connexion par mot de passe (sous-estimé : une session reste ouverte plusieurs jours). Relevé fait chaque nuit à 03:30 UTC.</div>';
+            zone.innerHTML = h;
+            graphe(document.getElementById('rp-graphe'), serie.map(s => ({ d: s.d, v: s.actifs_24h })), der.approuves, 'APPROUVÉS ' + der.approuves, 'Pilotes actifs');
+            if (!RP.sel) dessinerTableau();
         }
+        // evenements (delegues : un seul ecouteur, rien a rebrancher)
+        document.addEventListener('click', e => {
+            const z = e.target.closest && e.target.closest('#tb-rapport'); if (!z) return;
+            const pill = e.target.closest('[data-j]'), tri = e.target.closest('th[data-tri]'), ligne = e.target.closest('tr[data-esc]'), retour = e.target.closest('[data-tous]');
+            if (pill) { RP.jours = Number(pill.dataset.j); try { localStorage.setItem(CLE_RP_PREFS, JSON.stringify({ jours: RP.jours })); } catch (x) {} dessinerRapport(false); }
+            else if (tri) { const k = tri.dataset.tri; if (RP.tri === k) RP.sens = -RP.sens; else { RP.tri = k; RP.sens = k === 'nom' ? 1 : -1; } dessinerTableau(); }
+            else if (ligne) { RP.sel = ligne.dataset.esc; dessinerRapport(false); if (typeof sonClic === 'function') sonClic(); }
+            else if (retour) { RP.sel = ''; dessinerRapport(false); }
+        });
+        document.addEventListener('change', e => { if (e.target && e.target.id === 'rp-esc') { RP.sel = e.target.value; dessinerRapport(false); } });
+        document.addEventListener('input', e => { if (e.target && e.target.id === 'rp-q') { RP.q = e.target.value; dessinerTableau(); } });
+        let rpRedim = null;
+        window.addEventListener('resize', () => { clearTimeout(rpRedim); rpRedim = setTimeout(() => { if (RP.lignes.length && document.getElementById('rp-graphe')) dessinerRapport(false); }, 200); });
 
         // ---------------------------------------------------------------
         //  DEMARRAGE : reserve au Directeur (la base le verifie aussi)
@@ -333,7 +502,7 @@
             const mainUi = document.getElementById('main-ui');
             if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
             if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
-            document.getElementById('display-area').innerHTML = '<div id="tb-rapport"></div><div id="tb-photos"></div>';
+            document.getElementById('display-area').innerHTML = '<div id="tb-rapport"></div><div class="rp-tip" id="rp-tip"></div><div id="tb-photos"></div>';
             chargerRapport().then(l => { RP.lignes = l; dessinerRapport(false); }).catch(e => { console.error('Erreur rapport :', e); dessinerRapport(true); });
             try { ST.liste = await charger(false); dessiner(); }
             catch (e) {
