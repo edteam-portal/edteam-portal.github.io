@@ -37,7 +37,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=8"></script>
+    <script src="quoifaire.js?v=10"></script>
     <script src="qgsuivi.js?v=37"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
@@ -1929,6 +1929,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // Plaques de campagne gagnées depuis la dernière visite : petite carte d'avertissement
                 verifierPlaquesQG(profilCommandant);
                 verifierTitresQG(profilCommandant);   // titres de spécialiste pas encore découverts
+                // Annonce d'une grande nouvelle fonction (une seule fois par pilote et par appareil) : annonce.js
+                if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { aller: () => { window.location.href = 'bgs.html'; } });
 
                 // Distinctions de la semaine et chiffres clés de l'escadron (une fois par chargement, mémoire de 15 minutes)
                 chargerDistinctionsQG(profilCommandant);
@@ -3417,6 +3419,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     </script>
 
     <script src="plaques-vues.js?v=2"></script>
-    <script src="footer.js?v=21"></script>
+    <script src="annonce.js?v=1"></script>
+    <script src="footer.js?v=23"></script>
 </body>
 </html>

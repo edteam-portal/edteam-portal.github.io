@@ -48,6 +48,14 @@
         "mainEntity": [
             {
                 "@type": "Question",
+                "name": "Puis-je fixer mes propres objectifs BGS ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui : tout pilote d'un escadron peut lancer une initiative (un système, une faction, une hausse ou une baisse). Elle s'affiche à côté des directives de l'Amiral, avec le nom du pilote et celui des participants, et compte comme une directive. Une seule initiative à la fois ; elle se clôture seule après 7 jours sans effort, et l'Amiral peut la retirer ou la transformer en directive officielle."
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "Qu'est-ce que sys.edteam ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
@@ -398,13 +406,13 @@
                 <button class="profil" data-profil="squad" style="--c:#FF7100;--cg:rgba(255,113,0,.10);">
                     <span class="qui">// MEMBRE D'UN ESCADRON</span>
                     <h3>Équipier</h3>
-                    <ul><li>Les directives BGS : vous savez où frapper</li><li>La colonisation commune de l'escadron</li><li>Plaques, titres de spécialiste, Pilier et Élan de la semaine</li><li>Votre rang BGS, gagné pour toujours</li></ul>
+                    <ul><li>Les directives BGS : vous savez où frapper</li><li>Vos initiatives : vous lancez un objectif, l'escadron vous suit</li><li>La colonisation commune de l'escadron</li><li>Plaques, titres de spécialiste, Pilier et Élan de la semaine</li><li>Votre rang BGS, gagné pour toujours</li></ul>
                     <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
                 </button>
                 <button class="profil" data-profil="officier" style="--c:#FFD700;--cg:rgba(255,215,0,.09);">
                     <span class="qui">// AMIRAL · OFFICIER</span>
                     <h3>Commandement</h3>
-                    <ul><li>Vous définissez les théâtres d'opération</li><li>Renseignement tactique : KOS, suspects et alliés VIP</li><li>Effectifs, rubans de campagne et palmarès</li><li>Les participants : l'effort de chaque pilote sur chaque directive</li></ul>
+                    <ul><li>Vous définissez les théâtres d'opération</li><li>Les initiatives des pilotes : retirez-les ou transformez-les en directives</li><li>Renseignement tactique : KOS, suspects et alliés VIP</li><li>Effectifs, rubans de campagne et palmarès</li><li>Les participants : l'effort de chaque pilote sur chaque directive</li></ul>
                     <span class="voir">[ VOIR CE QUI M'ATTEND ▸ ]</span>
                 </button>
             </div>
@@ -430,6 +438,7 @@
                 <button class="module" data-p="commander" data-m="qg" data-for="solo squad officier"><span>Quartier général</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="qf" data-for="solo squad officier"><span>Quoi faire</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="bgs" data-for="squad officier"><span>BGS tactique</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="commander" data-m="init" data-for="squad officier"><span>Initiatives des pilotes</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="pp" data-for="solo squad officier"><span>Powerplay 2.0</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="diplo" data-for="squad officier"><span>Renseignement tactique</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="esc" data-for="squad officier"><span>Escadron</span><span class="pour">POUR VOUS</span></button>
@@ -455,7 +464,11 @@
 
                 <article class="panel" id="module-bgs" data-p="commander" data-m="bgs">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/ordres.png" alt="BGS tactique : les directives par système, avec le résultat du jeu" loading="lazy"><img class="" data-i="1" src="images/ordres-detail.png" alt="BGS tactique : le détail d'une directive" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/ordres.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/ordres-detail.png')" aria-label="Écran 2"></button></div></div>
-                    <span class="kick">// MODULE 02 : BGS TACTIQUE</span><h3>FRAPPEZ OÙ ÇA FAIT MAL</h3><p>Ne demandez plus sur le Discord <em>« Où est-ce qu'on se bat aujourd'hui ? »</em>. Tout tient sur <strong>une seule page</strong> : votre engagement (rang, points, prochain rang), votre progression sur les 8 dernières semaines, la semaine de l'escadron avec son podium, et le mur des spécialistes.</p><p>Le <strong>Focus de l'Amiral</strong> range les directives (Guerre, Élection, Hausse, Baisse) par système, avec leur <strong>priorité</strong> (critique, haute, normale) bien visible. Chaque carte montre l'<strong>effort de l'escadron</strong> et votre part, et le <strong>résultat constaté dans le jeu</strong> : l'influence de la faction, sa variation depuis la directive et une mini-courbe, ou le score du conflit pour une guerre ou une élection.</p><p>Un clic ouvre le détail : l'effort par type d'action (missions, économie, sécurité, science…), la liste des participants et leurs efforts individuels, la courbe sur 30 jours, les factions du système et leurs états. Les chiffres du jeu viennent d'EDSM, relevés deux fois par jour : c'est un résultat constaté, pas la preuve que vos actions en sont la cause.</p><p>Les directives sont facultatives : sans directive, chaque effort compte déjà pour votre rang BGS. Le <strong>journal des exploits</strong> détaille chaque action.</p>
+                    <span class="kick">// MODULE 02 : BGS TACTIQUE</span><h3>FRAPPEZ OÙ ÇA FAIT MAL</h3><p>Ne demandez plus sur le Discord <em>« Où est-ce qu'on se bat aujourd'hui ? »</em>. Tout tient sur <strong>une seule page</strong> : votre engagement (rang, points, prochain rang), votre progression sur les 8 dernières semaines, la semaine de l'escadron avec son podium, et le mur des spécialistes.</p><p>Le <strong>Focus de l'Amiral</strong> (colonne de gauche) range les directives (Guerre, Élection, Hausse, Baisse) par système, avec leur <strong>priorité</strong> (critique, haute, normale) bien visible ; les <strong>initiatives des pilotes</strong> s'affichent à côté, dans leur propre colonne. Chaque carte montre l'<strong>effort de l'escadron</strong> et votre part, et le <strong>résultat constaté dans le jeu</strong> : l'influence de la faction, sa variation depuis la directive et une mini-courbe, ou le score du conflit pour une guerre ou une élection.</p><p>Un clic ouvre le détail : l'effort par type d'action (missions, économie, sécurité, science…), la liste des participants et leurs efforts individuels, la courbe sur 30 jours, les factions du système et leurs états. Les chiffres du jeu viennent d'EDSM, relevés deux fois par jour : c'est un résultat constaté, pas la preuve que vos actions en sont la cause.</p><p>Les directives sont facultatives : sans directive, chaque effort compte déjà pour votre rang BGS. Le <strong>journal des exploits</strong> détaille chaque action, et se filtre par pilote, directive, spécialité ou texte.</p>
+                </article>
+                <article class="panel" id="module-init" data-p="commander" data-m="init">
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/initiatives.png" alt="Initiatives des pilotes : deux initiatives avec leur créateur, leurs participants et leurs jauges" loading="lazy"><img class="" data-i="1" src="images/initiatives-lancer.png" alt="Lancer une initiative : système, faction, hausse ou baisse, message" loading="lazy"><img class="" data-i="2" src="images/initiatives-detail.png" alt="Le détail d'une initiative, en rose" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/initiatives.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/initiatives-lancer.png')" aria-label="Écran 2"></button><button class="" data-i="2" style="background-image:url('images/initiatives-detail.png')" aria-label="Écran 3"></button></div></div>
+                    <span class="kick">// MODULE 12 : INITIATIVES DES PILOTES</span><h3>VOUS AUSSI, FIXEZ LE CAP</h3><p>Jusqu'ici, seuls l'Amiral et les officiers choisissaient les cibles. Avec les <strong>initiatives</strong>, <strong>chaque pilote devient acteur de la stratégie</strong> de l'escadron : un objectif vous tient à cœur ? Lancez-le en quelques secondes depuis la page BGS ou le compagnon mobile : un système, une faction, une <strong>hausse</strong> ou une <strong>baisse</strong>, et un petit message pour motiver vos camarades.</p><p>Votre initiative s'affiche à côté des directives de l'Amiral, dans une colonne à part et en <strong>rose</strong> pour ne jamais les confondre. Elle porte <strong>votre nom</strong> et celui des pilotes qui y participent, avec ses jauges d'effort et le résultat constaté dans le jeu. Chaque effort compte comme pour une directive (mêmes points, rien à saisir), et le lancement est annoncé dans le journal de l'escadron : chacun voit qui s'investit.</p><p>Une seule initiative en cours par pilote ; elle se <strong>clôture seule après 7 jours sans aucun effort</strong> (chaque effort relance le compteur). L'Amiral et les officiers peuvent la retirer ou la <strong>transformer en directive officielle</strong>. La guerre et l'élection restent réservées au commandement.</p>
                 </article>
                 <article class="panel" id="module-pp" data-p="commander" data-m="pp">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/powerplay.png" alt="Powerplay 2.0" loading="lazy"></div></div>
@@ -560,6 +573,8 @@
                 <p style="margin: 0 0 26px;">Créez votre compte sur le site, téléchargez le plugin SYS.EDTEAM.zip et placez-le dans le dossier de votre utilitaire EDMC, puis copiez votre clé dans les réglages d'EDMC. Comptez environ deux minutes.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FAUT-IL APPARTENIR À UN ESCADRON ?</h3>
                 <p style="margin: 0 0 26px;">Le suivi BGS et la page Escadron sont réservés aux membres d'un escadron. Un pilote sans escadron accède au QG, au Powerplay, au journal tactique, au Budget et à la Colonisation (dans un espace personnel que lui seul voit).</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">PUIS-JE FIXER MES PROPRES OBJECTIFS BGS ?</h3>
+                <p style="margin: 0 0 26px;">Oui : tout pilote d'un escadron peut lancer une <strong>initiative</strong> (un système, une faction, une hausse ou une baisse). Elle s'affiche à côté des directives de l'Amiral, avec votre nom et celui des pilotes qui y participent, et compte comme une directive. Une seule initiative à la fois ; elle se clôture seule après 7 jours sans effort, et l'Amiral peut la retirer ou la transformer en directive officielle.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">QUELLES DONNÉES SONT COLLECTÉES ?</h3>
                 <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT SONT RÉCOMPENSÉS LES PILOTES ?</h3>
@@ -603,7 +618,7 @@
     /* ---------- Piliers, modules, profils (les textes sont dans le HTML : ce code ne fait qu'afficher / masquer) ---------- */
     (function () {
         const PILIERS = [{"id":"commander","c":"#00F0FF","g":"rgba(0,240,255,.12)"},{"id":"construire","c":"#FF7100","g":"rgba(255,113,0,.12)"},{"id":"progresser","c":"#FFD700","g":"rgba(255,215,0,.10)"},{"id":"connecte","c":"#00FF66","g":"rgba(0,255,102,.10)"}];
-        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"qf","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
+        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"qf","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"init","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"diplo","p":"commander","pour":["squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]},{"id":"covas","p":"connecte","pour":["squad","officier"]}];
         let pilier = 'commander', mod = 'qg', vue = 'tout';
         const $ = id => document.getElementById(id);
         const visible = m => vue === 'tout' || m.pour.indexOf(vue) >= 0;
@@ -1025,6 +1040,6 @@
     })();
     </script>
     <script>window.EDTEAM_PIED_VISITEUR = true;   // page publique : le pied de page n'affiche pas l'aide, les nouveautés ni le compagnon mobile (utiles une fois inscrit)</script>
-    <script src="footer.js?v=21"></script>
+    <script src="footer.js?v=23"></script>
 </body>
 </html>

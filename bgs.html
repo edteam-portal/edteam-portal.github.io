@@ -126,7 +126,63 @@
         @keyframes pilierHalo { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
         .pilier-bloc { background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.10), rgba(0,0,0,0.55) 70%) !important; }
         .acc-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; }
-        @media (max-width: 1100px) { #bgs-conteneur-ordres { grid-template-columns: minmax(0, 1fr) !important; } }
+        @media (max-width: 1100px) { #bgs-conteneur-ordres, #bgs-conteneur-initiatives { grid-template-columns: minmax(0, 1fr) !important; } #bgs-duo-ordres { grid-template-columns: minmax(0, 1fr) !important; } }
+        /* DIRECTIVES EN VEILLE : directives normales sans effort depuis 7 jours, repliees en etiquettes (l'influence reste suivie) */
+        #bgs-veille { border: 1px dashed #4a4a4a; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 3px; }
+        .veille-titre { color: #9aa; letter-spacing: 2px; font-weight: bold; font-size: 0.85em; }
+        .veille-titre small { color: #666; font-weight: normal; letter-spacing: 0.5px; margin-left: 8px; }
+        .veille-liste { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+        .veille-tag { display: grid; grid-template-columns: auto minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 5px 9px; background: rgba(0, 0, 0, 0.35); border-left: 2px solid #4a4a4a; cursor: pointer; font-size: 0.8em; color: #aaa; transition: background 0.15s; }
+        .veille-tag:hover { background: rgba(0, 240, 255, 0.07); }
+        .veille-tag .vt { border: 1px solid; padding: 0 6px; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+        .veille-tag .vf { color: #fff; font-weight: bold; letter-spacing: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .veille-tag .vs { color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .veille-tag .vi { white-space: nowrap; text-align: right; } .veille-tag .vi b { color: #fff; }
+        @media (max-width: 700px) { .veille-tag { grid-template-columns: auto minmax(0, 1fr) auto; } .veille-tag .vs { display: none; } }
+        /* SANS INITIATIVE : plus de colonne vide. Les directives reprennent toute la largeur (deux colonnes si elles sont au moins deux) et l'invitation devient une simple ligne en dessous */
+        /* MISE EN PAGE : directives, veille et initiatives sont des elements d'UNE SEULE grille a deux colonnes (les conteneurs sont « transparents »).
+           Chaque rangee a donc des cadres de MEME HAUTEUR, quoi qu'il y ait dedans ; placerDuo() (JS) donne a chaque element sa colonne et sa rangee. */
+        #bgs-duo-ordres { align-items: stretch !important; gap: 10px 16px !important; }
+        #bgs-duo-ordres > div, #bgs-conteneur-ordres, #bgs-conteneur-initiatives, #bgs-conteneur-ordres > div:not(.data-row), #bgs-conteneur-initiatives > div:not(.data-row) { display: contents !important; }
+        #bgs-duo-ordres .data-row.bloc { display: flex; flex-direction: column; margin-bottom: 0 !important; min-width: 0; }
+        #bgs-duo-ordres .data-row.bloc > .bgs-cartes { flex: 1; }
+        #bgs-duo-ordres .data-row.bloc.ini-vide { flex-direction: row; }
+        #bgs-veille { align-self: start; }
+        #bgs-duo-ordres.sans-init .ini-sous { display: none; }
+        @media (min-width: 1101px) {
+            #bgs-duo-ordres [data-c="1"] { grid-column: 1; grid-row: var(--r); }
+            #bgs-duo-ordres [data-c="2"] { grid-column: 2; grid-row: var(--r); }
+            #bgs-duo-ordres .sp { grid-column: 1 / -1; }
+        }
+        .ini-vide { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; padding: 12px 16px !important; color: #9aa; line-height: 1.5; }
+        .ini-vide b { color: #FF4FD8; font-weight: bold; }
+        .ini-vide .ini-btn { margin-left: auto; padding: 6px 14px; }
+        /* INITIATIVES DE PILOTES : meme mise en page que les directives, mais cadre en pointilles rose, etiquette et bandeau du createur */
+        .bloc.init { border: 1px dashed rgba(255, 79, 216, 0.75) !important; box-shadow: inset 4px 0 0 #FF4FD8, 0 0 18px rgba(255, 79, 216, 0.13) !important; }
+        .ini-tag { border: 1px solid #FF4FD8; color: #FF4FD8; background: rgba(255, 79, 216, 0.1); padding: 3px 10px; border-radius: 3px; font-weight: bold; letter-spacing: 2px; font-size: 0.8em; white-space: nowrap; }
+        .ini-titre { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; color: #FF4FD8; font-weight: bold; letter-spacing: 2px; }
+        .ini-titre small { color: #888; font-weight: normal; letter-spacing: 1px; font-size: 0.78em; }
+        .ini-bandeau { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; background: rgba(255, 79, 216, 0.08); border: 1px solid rgba(255, 79, 216, 0.35); border-radius: 4px; padding: 6px 9px; margin-bottom: 8px; font-size: 0.8em; cursor: default; }
+        .ini-bandeau .qui { line-height: 1.3; min-width: 0; }
+        .ini-bandeau .qui small { display: block; color: #888; letter-spacing: 1px; font-size: 0.78em; }
+        .ini-bandeau .qui b { color: #fff; }
+        .ini-bandeau .qui i { color: #FF4FD8; font-style: normal; font-size: 0.85em; }
+        .ini-bandeau .parts { display: inline-flex; align-items: center; color: #ccc; gap: 8px; }
+        .ini-bandeau .avs { display: inline-flex; padding-left: 6px; }
+        .ini-bandeau .avs .ph { margin-left: -6px; box-shadow: 0 0 0 2px #0a0a0a; }
+        .ini-bandeau .exp { color: #888; }
+        .ini-bandeau .acts { display: inline-flex; gap: 6px; margin-left: auto; }
+        .ini-btn { background: transparent; border: 1px solid #FF4FD8; color: #FF4FD8; padding: 3px 9px; font-family: inherit; font-size: 0.82em; font-weight: bold; letter-spacing: 1px; cursor: pointer; border-radius: 2px; }
+        .ini-btn:hover { background: #FF4FD8; color: #000; }
+        .ini-btn.gris { border-color: #666; color: #aaa; } .ini-btn.gris:hover { background: #aaa; color: #000; }
+        .ini-fenetre { max-width: 640px; width: 95%; display: flex; flex-direction: column; padding: 0 !important; background: rgba(10, 5, 8, 0.97); border: 1px solid #FF4FD8; box-shadow: 0 0 40px rgba(255, 79, 216, 0.2); }
+        .ini-fenetre .cmd-entete { border-bottom-color: rgba(255, 79, 216, 0.5); }
+        .ini-fenetre .cmd-titre, .ini-fenetre .cmd-etape-titre { color: #FF4FD8; }
+        .ini-fenetre .cmd-num { border-color: #FF4FD8; }
+        .ini-fenetre .cmd-champ { border-color: rgba(255, 79, 216, 0.55) !important; }
+        .ini-fenetre .cmd-pied { border-top-color: rgba(255, 79, 216, 0.35); }
+        #btn-lancer-initiative { background: rgba(255, 79, 216, 0.1); border: 1px solid #FF4FD8; color: #FF4FD8; padding: 12px; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 3px; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-weight: bold; }
+        #btn-lancer-initiative:hover { background: #FF4FD8; color: #000; box-shadow: 0 0 20px #FF4FD8; }
         @media (max-width: 1350px) { #bgs-accueil-haut { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; } #bgs-accueil-haut > :nth-child(3) { grid-column: 1 / -1; } }
         @media (max-width: 1000px) { .acc-grille, #bgs-accueil-haut { grid-template-columns: minmax(0, 1fr) !important; } #bgs-accueil-haut > :nth-child(3) { grid-column: auto; } }
         #bgs-comment details > summary { cursor: pointer; list-style: none; }
@@ -153,8 +209,9 @@
 
 
         /* RÉSULTATS DU JEU PAR DIRECTIVE : cartes carrées dans le bloc de chaque système */
-        .bgs-cartes { display: grid; grid-template-columns: repeat(auto-fill, 200px); gap: 12px; justify-content: start; }
-        .bgs-carte { width: 200px; min-height: 196px; box-sizing: border-box; border: 1px solid #333; border-top: 3px solid; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.5)); padding: 10px 11px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s; }
+        .bgs-cartes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }   /* les cartes se partagent toute la largeur du bloc (plus de colonne vide) et prennent la meme hauteur */
+        .bgs-cartes.une { grid-template-columns: minmax(0, 1fr); }
+        .bgs-carte { width: auto; min-width: 0; min-height: 196px; box-sizing: border-box; border: 1px solid #333; border-top: 3px solid; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.5)); padding: 10px 11px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s; }
         .bgs-carte:hover { background: rgba(0, 240, 255, 0.07); }
         .bgs-carte.ancien { opacity: 0.65; }
         .bgs-carte .haut { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
@@ -184,6 +241,8 @@
         .bgs-carte .eff .types .jg2 { position: relative; height: 6px; background: #222; }
         .bgs-carte .eff .types .jg2 i { position: absolute; left: 0; top: 0; bottom: 0; }
         .bgs-carte.large { width: auto; grid-column: 1 / -1; flex-direction: row; gap: 22px; min-height: 0; align-items: stretch; }
+        .bgs-carte.large.init-carte { flex-wrap: wrap; row-gap: 0; }
+        .bgs-carte.large.init-carte > .ini-bandeau { flex: 0 0 100%; box-sizing: border-box; }
         .bgs-carte.large .g1 { flex: 0 0 210px; display: flex; flex-direction: column; min-width: 0; }
         .bgs-carte.large .g2 { flex: 1; min-width: 0; display: flex; }
         .bgs-carte.large .g2 .eff { flex: 1; margin-top: 0; }
@@ -340,6 +399,7 @@
                     <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">&gt; BGS <span style="color: #777; font-size: 0.75em; letter-spacing: 1px; margin-left: 10px;">ENGAGEMENT, SPÉCIALISTES ET DIRECTIVES DE L'AMIRAL</span></h3>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button id="btn-journal-bgs" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirJournalBGS(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ JOURNAL DES EXPLOITS ]</button>
+                        <button id="btn-initiative" style="display: none; background: rgba(255, 79, 216, 0.1); border: 1px solid #FF4FD8; color: #FF4FD8; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirInitiative(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF4FD8'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 79, 216, 0.1)'; this.style.color='#FF4FD8';" title="Lancez un objectif BGS pour inviter l'escadron à vous rejoindre">[ + LANCER UNE INITIATIVE ]</button>
                         <button id="btn-amiral" style="display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirSalleCommandement(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';">
                         [ COMMANDEMENT ]
                     </button>
@@ -352,14 +412,28 @@
                 <!-- MUR DES SPÉCIALISTES : huit titres, au cumul total (calculés par le serveur, script SQL 37) -->
                 <div id="bgs-titres-acc" class="bloc" style="display: none; padding: 16px 20px;"></div>
 
+                <!-- DEUX COLONNES : FOCUS DE L'AMIRAL (directives) a gauche, INITIATIVES DES PILOTES a droite (une seule colonne sous 1100 px) -->
+                <div id="bgs-duo-ordres" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start;">
+                <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
                 <!-- FOCUS DE L'AMIRAL : directives en grille compacte -->
-                <div style="margin-top: 4px;">
+                <div id="bgs-entete-a" style="margin-top: 4px;">
                     <div><h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">> FOCUS DE L'AMIRAL</h3><div id="bgs-focus-info" style="color: #888; font-size: 0.8em; margin-top: 4px; cursor: help; display: inline-block;">Facultatif · une distinction à la clôture <span style="color: var(--ed-orange);">&#9432;</span></div></div>
                 </div>
 
                 <!-- LE SOUS-CONTENEUR POUR LES JAUGES -->
-                <div id="bgs-conteneur-ordres" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start;">
+                <div id="bgs-conteneur-ordres" style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start;">
                     <div style="grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; padding: 20px;">> SYNCHRONISATION DES DIRECTIVES DE L'AMIRAUTÉ EN COURS...</div>
+                </div>
+                <!-- DIRECTIVES EN VEILLE : rempli par afficherOrdresBGS (script SQL 69) -->
+                <div id="bgs-veille" style="display: none;"></div>
+                </div>
+                <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
+                <!-- INITIATIVES DES PILOTES : objectifs lancés par les pilotes de l'escadron (script SQL 68) -->
+                <div id="bgs-entete-b" style="margin-top: 4px;">
+                    <div><h3 style="margin: 0; color: #FF4FD8; letter-spacing: 2px; font-size: 1.2em;">> INITIATIVES DES PILOTES</h3><div class="ini-sous" style="color: #888; font-size: 0.8em; margin-top: 4px;">Lancées par les pilotes de l'escadron · rejoignez-les</div></div>
+                </div>
+                <div id="bgs-conteneur-initiatives" style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start;"></div>
+                </div>
                 </div>
                 <!-- COMMENT ÇA MARCHE (replié par défaut) -->
                 <div id="bgs-comment" class="bloc" style="padding: 14px 20px;">
@@ -449,6 +523,47 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL INITIATIVE : n'importe quel pilote de l'escadron peut lancer un objectif HAUSSE ou BAISSE -->
+    <div class="modal-overlay" id="modal-initiative" onclick="fermerModal('modal-initiative', event)">
+        <div class="modal-content ini-fenetre" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="fermerModal('modal-initiative')">X</div>
+            <div class="cmd-entete">
+                <div class="cmd-titre">&gt; LANCER UNE INITIATIVE</div>
+                <div class="cmd-sous">Un objectif pour l'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.</div>
+            </div>
+            <div class="cmd-col">
+                <div class="cmd-etape">
+                    <div class="cmd-etape-titre"><span class="cmd-num">1</span>SYSTÈME ET FACTION</div>
+                    <input type="search" id="ini-systeme" class="search-input cmd-champ" placeholder="Système, ex : ATHENA"
+                        name="ini_sector_query" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false"
+                        style="text-transform: uppercase;" onblur="scannerInitiative(this.value)" onchange="scannerInitiative(this.value)">
+                    <input type="text" id="ini-faction" list="liste-factions-ini" class="search-input cmd-champ" placeholder="Faction visée (liste lue dans le système)" style="margin-top: 8px;"
+                        name="ini_faction_query" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false">
+                    <datalist id="liste-factions-ini"></datalist>
+                    <input type="hidden" id="ini-population" value="0">
+                    <div class="cmd-aide" id="ini-aide">Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».</div>
+                </div>
+                <div class="cmd-etape">
+                    <div class="cmd-etape-titre"><span class="cmd-num">2</span>TYPE D'OBJECTIF</div>
+                    <div class="cmd-pills">
+                        <button type="button" class="cmd-pill actif" id="ini-type-HAUSSE" style="--pc: #00FF66;" onclick="choisirTypeInitiative('HAUSSE')">HAUSSE · aider cette faction</button>
+                        <button type="button" class="cmd-pill" id="ini-type-BAISSE" style="--pc: #FF3333;" onclick="choisirTypeInitiative('BAISSE')">BAISSE · affaiblir cette faction</button>
+                    </div>
+                    <div class="cmd-aide">Les directives de guerre et d'élection restent réservées à l'Amiral et aux officiers.</div>
+                </div>
+                <div class="cmd-etape">
+                    <div class="cmd-etape-titre"><span class="cmd-num">3</span>MESSAGE <em>facultatif · 200 signes</em></div>
+                    <textarea id="ini-message" class="search-input cmd-champ" maxlength="200" placeholder="Pourquoi cet objectif ? Un mot pour motiver l'escadron…" autocomplete="off" data-lpignore="true" style="height: 64px; resize: vertical;"></textarea>
+                </div>
+                <div class="cmd-aide">Une seule initiative en cours à la fois. Elle se clôture seule après 7 jours sans aucun effort ; chaque effort relance le compteur. L'Amiral peut la transformer en directive officielle.</div>
+            </div>
+            <div class="cmd-pied">
+                <button id="btn-lancer-initiative" onclick="lancerInitiative()" onmouseenter="if(typeof sonHover === 'function') sonHover()">LANCER L'INITIATIVE</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
 
@@ -641,6 +756,11 @@
                     const btnAmiral = document.getElementById('btn-amiral');
                     if (btnAmiral) btnAmiral.style.display = 'block';
                 }
+                // initiatives : ouvertes a tout pilote approuve d'un vrai escadron
+                if (data.escadron_id && String(data.escadron_id).trim() !== '' && String(data.escadron_id).trim().toUpperCase() !== 'INDEPENDANT') {
+                    const btnIni = document.getElementById('btn-initiative');
+                    if (btnIni) btnIni.style.display = '';
+                }
 
                 // (Spécifique Commerce) Historique du scan
                 const lastScanSaved = localStorage.getItem('edteam_last_scan_info');
@@ -822,6 +942,7 @@
                                 <div class="cmd-ordre-tags">
                                     <span class="cmd-tag" style="color: ${couleur};">${LIBELLES[ordre.type_ordre] || escapeHtml(ordre.type_ordre)}</span>
                                     ${tagPrio}
+                                    ${ordre.origine === 'PILOTE' ? '<span class="cmd-tag" style="color: #FF4FD8;">★ INITIATIVE</span>' : ''}
                                 </div>
                             </div>
                             <div class="cmd-ordre-actions">
@@ -1031,6 +1152,30 @@
             </div>`;
         }
 
+        // Bandeau d'une initiative de pilote : qui l'a lancee, qui y participe, quand elle se cloture, et les boutons de clôture / adoption
+        function bgsBandeauInitiative(ordre, init) {
+            const P = window.EDTEAMPhotos;
+            const info = init.info || {};
+            const nom = String(info.createur || 'inconnu');
+            const role = info.role || 'pilote';
+            const roleTxt = { amiral: 'Amiral', officier: 'Officier', pilote: 'Pilote' }[role] || 'Pilote';
+            const rangTxt = info.rang_bgs ? ' · rang BGS ' + escapeHtml(String(info.rang_bgs)) : '';
+            const av = P ? P.avatar({ uid: ordre.auteur_id, nom, role, taille: 30 }) : '';
+            const avs = (init.pilotes || []).slice(0, 5).map(x => P ? P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 22 }) : '').join('');
+            const nb = Number(init.nb) || 0;
+            const txtNb = nb === 0 ? 'aucun participant : soyez le premier !' : '<b style="color:#fff;">' + nb + '</b> pilote' + (nb > 1 ? 's y participent' : ' y participe');
+            const restant = info.expire_le ? Math.ceil((new Date(info.expire_le).getTime() - Date.now()) / 86400000) : null;
+            const txtExp = restant === null ? '' : (restant <= 0 ? '⏳ clôture imminente sans effort' : '⏳ clôture dans ' + restant + ' j sans effort');
+            const moi = profilCommandant || {};
+            const estCrea = String(ordre.auteur_id) === String(moi.user_id);
+            const estCmd = !!(moi.est_amiral || moi.est_officier || moi.est_directeur);
+            let actions = '';
+            if (estCmd) actions += `<button class="ini-btn" title="L'initiative devient une directive officielle de l'escadron" onclick="event.stopPropagation(); adopterInitiative('${ordre.id}')">TRANSFORMER EN DIRECTIVE</button><button class="ini-btn gris" title="Clôture l'initiative (les efforts déjà enregistrés sont conservés)" onclick="event.stopPropagation(); cloturerInitiative('${ordre.id}', false)">RETIRER</button>`;
+            else if (estCrea) actions += `<button class="ini-btn gris" title="Clôture votre initiative (les efforts déjà enregistrés sont conservés)" onclick="event.stopPropagation(); cloturerInitiative('${ordre.id}', true)">CLÔTURER</button>`;
+            return `<div class="ini-bandeau" onclick="event.stopPropagation()">${av}<div class="qui"><small>LANCÉE PAR</small><b>CMDR ${escapeHtml(nom.toUpperCase())}</b> <i>${roleTxt}${rangTxt}</i></div>
+                <span class="parts"><span class="avs">${avs}</span><span>${txtNb}</span></span>${txtExp ? `<span class="exp">${txtExp}</span>` : ''}${actions ? `<span class="acts">${actions}</span>` : ''}</div>`;
+        }
+
         function bgsCarteHTML(ordre, res, sens, meta) {
             const c = meta.couleur;
             const donnees = !!(res && res.donnees);
@@ -1053,12 +1198,13 @@
                 centre = `<div class="big"><span class="n">${bgsPct(res.influence)}<small> %</small></span>${res.variation !== null ? `<span class="d" style="color: ${couleurSens};">${fleche} ${bgsPts(res.variation)}</span>` : ''}</div>${bgsSpark(res.courbe, couleurSens)}`;
             }
             const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}" title="Dernière mise à jour du jeu connue d'EDSM">${ancien ? '⚠ ' : ''}${bgsAge(res.maj_edsm)}</span>` : '';
+            const bandeauInit = meta.init ? bgsBandeauInitiative(ordre, meta.init) : '';
             const entete = `<div class="haut"><span class="tag" style="color: ${c}; border-color: ${c};">#${ordre.id} // ${escapeHtml(ordre.type_ordre)}</span>${age}</div>
                 <div class="fac copy-click" onclick="event.stopPropagation(); copierNav('${String(ordre.faction_cible || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").toUpperCase()}', this, event)" title="Copier la faction">${nomFac}</div>`;
-            const attrs = `id="dir-carte-${ordre.id}" style="border-top-color: ${c};" onclick="ouvrirDetailResultat('${ordre.id}')" onmouseenter="if(typeof sonHover === 'function') sonHover()"`;
+            const attrs = `id="dir-carte-${ordre.id}" style="border-top-color: ${meta.init ? '#FF4FD8' : c};" onclick="ouvrirDetailResultat('${ordre.id}')" onmouseenter="if(typeof sonHover === 'function') sonHover()"`;
             if (meta.large) {
                 // directive seule dans son système : carte large, le résultat à gauche, l'effort par type d'action à droite
-                return `<div class="bgs-carte large${ancien ? ' ancien' : ''}" ${attrs}><div class="g1">${entete}${centre}</div><div class="g2">${bgsEffortPanel(meta, true)}</div></div>`;
+                return `<div class="bgs-carte large${meta.init ? ' init-carte' : ''}${ancien ? ' ancien' : ''}" ${attrs}>${bandeauInit}<div class="g1">${entete}${centre}</div><div class="g2">${bgsEffortPanel(meta, true)}</div></div>`;
             }
             return `<div class="bgs-carte${ancien ? ' ancien' : ''}" ${attrs}>${entete}${centre}${bgsEffortPanel(meta, false)}</div>`;
         }
@@ -1096,7 +1242,10 @@
             const meta = window.cacheMetaBgs[ordre.id] || { couleur: '#00F0FF', global: 0, part: 0, vous: 0 };
             const sens = bgsSens(ordre, res);
             const cs = BGS_SENS_COUL[sens || 'att'];
-            const c = meta.couleur;
+            const cType = meta.couleur;                       // couleur du type (vert hausse, rouge baisse...) : gardee pour l'etiquette du type
+            const estIni = ordre.origine === 'PILOTE';
+            const c = estIni ? '#FF4FD8' : cType;               // une initiative a toute sa fenetre en rose, hausse ou baisse
+            const infoIni = estIni ? (((window.cacheInfosInit || {})[ordre.id]) || {}) : null;
             const donnees = !!(res && res.donnees);
             const jours = Math.max(1, Math.ceil((Date.now() - new Date(ordre.date_emission || ordre.created_at).getTime()) / 86400000));
             const f = String(ordre.faction_cible || '').trim().toLowerCase();
@@ -1155,11 +1304,12 @@
 
             const html = `
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-right: 30px;">
-                    <span style="color: ${c}; border: 1px solid ${c}; padding: 1px 7px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px;">#${ordre.id} // ${escapeHtml(ordre.type_ordre)}</span>
+                    ${estIni ? '<span style="color: #FF4FD8; border: 1px solid #FF4FD8; background: rgba(255,79,216,0.1); padding: 1px 8px; font-size: 0.8em; font-weight: bold; letter-spacing: 2px;">★ INITIATIVE</span>' : ''}
+                    <span style="color: ${cType}; border: 1px solid ${cType}; padding: 1px 7px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px;">#${ordre.id} // ${escapeHtml(ordre.type_ordre)}</span>
                     <b style="color: #fff; letter-spacing: 2px; font-size: 1.15em;">${escapeHtml(String(ordre.faction_cible || '').toUpperCase())}</b>
                     <span style="color: #888;">· ${escapeHtml(String(ordre.systeme_cible || '').toUpperCase())}</span>
                 </div>
-                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">Directive émise il y a ${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}</div>
+                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}</div>
 
                 <!-- 1. L'EFFORT : le cœur de l'application -->
                 <div class="bgs-hero" style="border-color: ${c};">
@@ -1522,6 +1672,32 @@
             } catch (e) { console.error('Erreur titres :', e); }
         }
 
+        // Place chaque element dans la grille a deux colonnes : directives a gauche (colonne 1), initiatives a droite (colonne 2), rangee par rangee.
+        // Sans initiative : tout passe sur la largeur entiere (les directives en deux colonnes, l'invitation en une ligne en dessous).
+        window.placerDuo = function (nbInit) {
+            const duo = document.getElementById('bgs-duo-ordres');
+            if (!duo) return;
+            const blocs = cont => {
+                const out = [];
+                if (!cont) return out;
+                [...cont.children].forEach(ch => { if (ch.classList.contains('data-row')) out.push(ch); else [...ch.children].forEach(x => { if (x.classList.contains('data-row')) out.push(x); }); });
+                return out;
+            };
+            const A = blocs(document.getElementById('bgs-conteneur-ordres')), B = blocs(document.getElementById('bgs-conteneur-initiatives'));
+            const hA = document.getElementById('bgs-entete-a'), hB = document.getElementById('bgs-entete-b'), veille = document.getElementById('bgs-veille');
+            [hA, hB, veille, ...A, ...B].filter(Boolean).forEach(el => { delete el.dataset.c; el.classList.remove('sp'); el.style.removeProperty('--r'); el.style.gridColumn = ''; });
+            const poser = (el, c, r) => { if (!el) return; el.dataset.c = String(c); el.style.setProperty('--r', String(r)); };
+            const sansInit = nbInit === 0;
+            duo.classList.toggle('sans-init', sansInit);
+            if (!sansInit) {
+                poser(hA, 1, 1); A.forEach((el, i) => poser(el, 1, i + 2)); poser(veille, 1, A.length + 2);
+                poser(hB, 2, 1); B.forEach((el, j) => poser(el, 2, j + 2));
+            } else {
+                [hA, veille, hB, ...B].forEach(el => { if (el) el.classList.add('sp'); });
+                if (A.length === 1) A[0].classList.add('sp');
+            }
+        };
+
         async function afficherOrdresBGS() {
             if (!profilCommandant) return;
             const container = document.getElementById('bgs-conteneur-ordres');
@@ -1605,13 +1781,28 @@
                 }
                 window.memoireEffortsGlobaux = totalEffortsActuel;
 
-                if (ordresData.length === 0) {
-                    container.innerHTML = '<div class="data-row bloc" style="grid-column: 1 / -1; text-align: center; color: #9aa; padding: 28px; line-height: 1.7;">Aucun focus demandé par l\'Amiral pour le moment.<br><b style="color: var(--ed-orange);">Continue d\'agir pour ta faction : tout compte pour ton rang BGS.</b><br><span style="font-size: 0.85em; color: #777;">Quand l\'Amiral demandera un focus, il apparaîtra ici avec la distinction à gagner.</span></div>';
-                    return;
+                // Directives de l'Amiral (en haut) et initiatives de pilotes (section separee, script SQL 68)
+                // Directives EN VEILLE (script SQL 69) : normales, sans effort depuis 7 jours. Elles restent suivies (influence) mais quittent la grille pour laisser la place aux directives vivantes.
+                const veilleIds = new Set();
+                if (ordresData.some(o => o.origine !== 'PILOTE')) {
+                    const rAct = await supabaseApp.rpc('directives_activite').then(r => r, () => ({ data: null }));
+                    (Array.isArray(rAct.data) ? rAct.data : []).forEach(a => { if (a.veille) veilleIds.add(String(a.ordre_id)); });
                 }
+                const ordresVeille = ordresData.filter(o => o.origine !== 'PILOTE' && veilleIds.has(String(o.id)));
+                const ordresAmiral = ordresData.filter(o => o.origine !== 'PILOTE' && !veilleIds.has(String(o.id)));
+                const ordresInit = ordresData.filter(o => o.origine === 'PILOTE');
+                const infosInit = {};
+                if (ordresInit.length) {
+                    const rInfos = await supabaseApp.rpc('initiatives_infos').then(r => r, () => ({ data: null }));
+                    (Array.isArray(rInfos.data) ? rInfos.data : []).forEach(i => { infosInit[i.ordre_id] = i; });
+                    try { if (window.EDTEAMPhotos) await window.EDTEAMPhotos.charger(false); } catch (e) { /* sans photos : initiales */ }
+                }
+                window.cacheInfosInit = infosInit;
+                const containerInit = document.getElementById('bgs-conteneur-initiatives');
 
+                const rendreOrdres = (ordresListe, container, estInit) => {
                 const groupesSystemes = {};
-                ordresData.forEach(o => {
+                ordresListe.forEach(o => {
                     const sys = o.systeme_cible.toUpperCase();
                     if (!groupesSystemes[sys]) groupesSystemes[sys] = [];
                     groupesSystemes[sys].push(o);
@@ -1778,7 +1969,8 @@
                         const miniJauges = (window.__jc || []).slice(); window.__jc = null;
                         window.cacheMetaBgs[ordre.id] = { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc };
 
-                        htmlAccordionsFactions += bgsCarteHTML(ordre, res, sens, { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, poids: poidsTotalEscadron, mini: miniJauges, large: factionsDuSysteme.length === 1 });
+                        htmlAccordionsFactions += bgsCarteHTML(ordre, res, sens, { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, poids: poidsTotalEscadron, mini: miniJauges, large: estInit || factionsDuSysteme.length === 1,
+                            init: estInit ? { info: infosInit[ordre.id], pilotes: rs.pilotes || [], nb: rs.nb_participants || 0 } : null });
                     }
 
                     const estEpingle = pinnedSystems.includes(nomSysteme);
@@ -1794,29 +1986,24 @@
 
                     const briefingSysteme = factionsDuSysteme.find(o => o.briefing_amiral && o.briefing_amiral.trim() !== '')?.briefing_amiral || null;
 
-                    let btnBriefingHTML = '';
+                    // Plus de bouton : le briefing de l'Amiral (ou le message du pilote) s'affiche au survol de la pastille de priorite (directive) ou de l'etiquette INITIATIVE
+                    const couleurTip = estInit ? '#FF4FD8' : colorTheme;
+                    let attrsBriefing = '';
                     if (briefingSysteme) {
                         const safeBriefing = briefingSysteme.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
-                        btnBriefingHTML = `
-                            <div style="cursor: help; background: ${colorThemeBg}; border: 1px solid ${colorTheme}; padding: 6px 15px; border-radius: 4px; color: ${colorTheme}; font-weight: bold; font-size: 0.85em; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: 0.2s;"
-                                 onmouseenter="if(typeof showHoloTooltip==='function') showHoloTooltip(event, '<div style=\\'white-space: normal; max-width: 400px; line-height: 1.5;\\'><strong style=\\'color: ${colorTheme}; font-size: 1.1em;\\'>> TRANSMISSION SECURISEE</strong><br><br><span style=\\'color: #ccc; font-style: italic; font-size: 0.95em;\\'>&quot;${safeBriefing}&quot;</span></div>', '${colorTheme}')"
-                                 onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()"
-                                 onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)"
-                                 onmouseover="this.style.background='${colorTheme}'; this.style.color='#000'; this.style.boxShadow='0 0 10px ${colorTheme}';"
-                                 onmouseout="this.style.background='${colorThemeBg}'; this.style.color='${colorTheme}'; this.style.boxShadow='none';">
-                                <span style="font-size: 1.2em;">💬</span> <span>BRIEFING</span>
-                            </div>
-                        `;
+                        attrsBriefing = ` style="cursor: help;" onmouseenter="if(typeof showHoloTooltip==='function') showHoloTooltip(event, '<div style=\\'white-space: normal; max-width: 400px; line-height: 1.5;\\'><strong style=\\'color: ${couleurTip}; font-size: 1.1em;\\'>> ${estInit ? 'MESSAGE DU PILOTE' : 'TRANSMISSION SECURISEE'}</strong><br><br><span style=\\'color: #ccc; font-style: italic; font-size: 0.95em;\\'>&quot;${safeBriefing}&quot;</span></div>', '${couleurTip}')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)"`;
                     }
+                    const iconeBriefing = briefingSysteme ? ' 💬' : '';
 
                     // --- NOUVEAU : CALCUL DE LA PRIORITÉ MAXIMALE DU SYSTÈME ---
                     const sysPriorite = Math.min(...factionsDuSysteme.map(o => o.priorite || 3));
                     // PRIORITE (D) : pastille pleine fixe + liseré épais sur le bloc (le critique garde un halo lent a l'interieur du bloc)
                     const prioCle = sysPriorite === 1 ? 'c' : sysPriorite === 2 ? 'h' : 'n';
-                    const badgePrioSysteme = `<span class="pa ${prioCle}" title="Priorité de la directive la plus urgente de ce système">${sysPriorite === 1 ? '▲ CRITIQUE' : sysPriorite === 2 ? '▲ HAUTE' : 'NORMALE'}</span>`;
+                    const badgePrioSysteme = estInit ? `<span class="ini-tag"${attrsBriefing || ' title="Objectif lancé par un pilote de l\'escadron"'}>★ INITIATIVE${iconeBriefing}</span>`
+                        : `<span class="pa ${prioCle}"${attrsBriefing || ' title="Priorité de la directive la plus urgente de ce système"'}>${sysPriorite === 1 ? '▲ CRITIQUE' : sysPriorite === 2 ? '▲ HAUTE' : 'NORMALE'}${iconeBriefing}</span>`;
 
                     cartes.push({ poids: 1 + factionsDuSysteme.length, html: `
-                    <div class="data-row bloc${estEpingle ? ' or' : ''} prio-${prioCle}" style="margin-bottom: 0; padding: 12px 14px; transition: all 0.3s ease;">
+                    <div class="data-row bloc${estEpingle ? ' or' : ''}${estInit ? ' init' : ' prio-' + prioCle}" style="margin-bottom: 0; padding: 12px 14px; transition: all 0.3s ease;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed ${colorThemeDim}; padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                             
                             <!-- Zone Gauche : Infos du Système -->
@@ -1843,24 +2030,55 @@
                                 ${badgePrioSysteme}
                             </div>
 
-                            <!-- Zone Droite : Le bouton de Briefing -->
-                            <div style="display: flex; justify-content: flex-end;">
-                                ${btnBriefingHTML}
-                            </div>
                         </div>
 
-                        <div class="bgs-cartes">
+                        <div class="bgs-cartes${(estInit || factionsDuSysteme.length === 1) ? ' une' : ''}">
                             ${htmlAccordionsFactions}
                         </div>
                     </div>` });
                 }
 
                 // répartition équilibrée : les plus gros systèmes d'abord, chacun dans la colonne la moins chargée ; l'ordre de priorité est conservé dans chaque colonne
-                const colonnes = [[], []]; const poidsCol = [0, 0];
-                cartes.map((c, idx) => ({ ...c, idx })).sort((x, y) => y.poids - x.poids || x.idx - y.idx).forEach(c => { const i = poidsCol[1] < poidsCol[0] ? 1 : 0; colonnes[i].push(c); poidsCol[i] += c.poids; });
+                const colonnes = [[]]; const poidsCol = [0];   // une seule colonne : les directives et les initiatives ont chacune la moitie de la largeur
+                cartes.map((c, idx) => ({ ...c, idx })).sort((x, y) => y.poids - x.poids || x.idx - y.idx).forEach(c => { colonnes[0].push(c); poidsCol[0] += c.poids; });
                 colonnes.forEach((col, i) => { colonnes[i] = col.sort((x, y) => x.idx - y.idx).map(c => c.html); });
-                container.style.gridTemplateColumns = cartes.length > 1 ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 1fr)';
+                container.style.gridTemplateColumns = 'minmax(0, 1fr)';
+                container.dataset.nb = String(cartes.length);
                 container.innerHTML = colonnes.filter(c => c.length).map(c => `<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">${c.join('')}</div>`).join('');
+                };
+
+                // l'encadre des directives en veille (type, faction, systeme, influence) ; on calcule quand meme leurs jauges pour que le detail s'ouvre normalement
+                const veilleBox = document.getElementById('bgs-veille');
+                if (ordresVeille.length) rendreOrdres(ordresVeille, document.createElement('div'), false);
+                if (veilleBox) {
+                    if (!ordresVeille.length) { veilleBox.style.display = 'none'; veilleBox.innerHTML = ''; }
+                    else {
+                        const COL_TYPE = { HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' };
+                        veilleBox.innerHTML = `<div class="veille-titre">DIRECTIVES EN VEILLE <small>aucun effort depuis 7 jours · l'influence reste suivie · cliquez pour le détail</small></div><div class="veille-liste">${ordresVeille.map(o => {
+                            const res = resultats.dir[o.id] || null;
+                            const cs = BGS_SENS_COUL[bgsSens(o, res) || 'att'];
+                            const infl = res && res.donnees ? `<b>${bgsPct(res.influence)} %</b>${res.variation !== null ? ` <span style="color: ${cs};">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '='} ${bgsPts(res.variation)}</span>` : ''}` : '<span style="color: #666;">—</span>';
+                            const c = COL_TYPE[o.type_ordre] || '#aaa';
+                            return `<div class="veille-tag" onclick="ouvrirDetailResultat('${o.id}')" title="Aucun effort depuis 7 jours : directive en veille"><span class="vt" style="color: ${c}; border-color: ${c};">#${o.id} ${escapeHtml(o.type_ordre)}</span><span class="vf">${escapeHtml(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${escapeHtml(String(o.systeme_cible || '').toUpperCase())}</span><span class="vi">${infl}</span></div>`;
+                        }).join('')}</div>`;
+                        veilleBox.style.display = '';
+                    }
+                }
+                if (ordresAmiral.length === 0 && ordresVeille.length) {
+                    container.style.gridTemplateColumns = 'minmax(0, 1fr)';
+                    container.innerHTML = '<div class="data-row bloc" style="text-align: center; color: #9aa; padding: 18px; line-height: 1.6;">Aucune directive active en ce moment : celles qui restent sont en veille, ci-dessous.</div>';
+                } else if (ordresAmiral.length === 0) {
+                    container.style.gridTemplateColumns = 'minmax(0, 1fr)';
+                    container.innerHTML = '<div class="data-row bloc" style="grid-column: 1 / -1; text-align: center; color: #9aa; padding: 28px; line-height: 1.7;">Aucun focus demandé par l\'Amiral pour le moment.<br><b style="color: var(--ed-orange);">Continue d\'agir pour ta faction : tout compte pour ton rang BGS.</b><br><span style="font-size: 0.85em; color: #777;">Quand l\'Amiral demandera un focus, il apparaîtra ici avec la distinction à gagner.</span></div>';
+                } else rendreOrdres(ordresAmiral, container, false);
+                if (containerInit) {
+                    if (ordresInit.length === 0) {
+                        containerInit.style.gridTemplateColumns = 'minmax(0, 1fr)';
+                        containerInit.innerHTML = '<div class="data-row bloc init ini-vide" style="grid-column: 1 / -1;"><span>Aucune initiative en cours. <b>Un objectif qui vous tient à cœur ?</b> L\'escadron la verra et pourra vous rejoindre.</span><button class="ini-btn" onclick="ouvrirInitiative(event)">+ LANCER UNE INITIATIVE</button></div>';
+                    } else rendreOrdres(ordresInit, containerInit, true);
+                }
+                // sans initiative : les directives passent sur toute la largeur (pas de colonne vide), l'invitation tient sur une ligne
+                window.placerDuo(ordresInit.length);
 
                 for (const [id, display] of Object.entries(etatsAccordions)) {
                     const el = document.getElementById(id);
@@ -1929,6 +2147,78 @@
                 console.error("Erreur liaison EDSM :", e);
             }
         }
+
+        // --- INITIATIVES DE PILOTES : lancement, clôture, adoption (regles et droits cote serveur, script SQL 68) ---
+        let initiativeType = 'HAUSSE';
+        window.ouvrirInitiative = function(event) {
+            if (typeof sonClic === 'function') sonClic();
+            ouvrirModal('modal-initiative', event);
+            choisirTypeInitiative('HAUSSE');
+        };
+        window.choisirTypeInitiative = function(t) {
+            initiativeType = t;
+            ['HAUSSE', 'BAISSE'].forEach(x => { const b = document.getElementById('ini-type-' + x); if (b) b.classList.toggle('actif', x === t); });
+        };
+        window.scannerInitiative = async function(systemName) {
+            const nom = String(systemName || '').trim();
+            if (!nom) return;
+            const aide = document.getElementById('ini-aide'); const liste = document.getElementById('liste-factions-ini'); const pop = document.getElementById('ini-population');
+            if (aide) aide.textContent = 'Lecture du système…';
+            try {
+                const [resF, resI] = await Promise.all([
+                    fetch('https://www.edsm.net/api-system-v1/factions?systemName=' + encodeURIComponent(nom)),
+                    fetch('https://www.edsm.net/api-v1/system?systemName=' + encodeURIComponent(nom) + '&showInformation=1')
+                ]);
+                const dF = await resF.json(), dI = await resI.json();
+                if (pop) pop.value = String((dI && dI.information && dI.information.population) || 0).replace(/[^0-9]/g, '') || '0';
+                const noms = (dF && dF.factions || []).map(f => f.name).filter(Boolean);
+                if (liste) liste.innerHTML = noms.map(n => '<option value="' + escapeHtml(n) + '"></option>').join('');
+                if (aide) aide.textContent = noms.length ? noms.length + ' factions trouvées : choisissez-en une dans la liste du champ « Faction ».' : 'Système introuvable dans EDSM : vérifiez l\'orthographe, ou saisissez la faction à la main.';
+            } catch (e) { if (aide) aide.textContent = 'Lecture du système impossible pour le moment : saisissez la faction à la main.'; }
+        };
+        window.lancerInitiative = async function() {
+            if (typeof sonClic === 'function') sonClic();
+            const btn = document.getElementById('btn-lancer-initiative');
+            const sys = document.getElementById('ini-systeme').value.trim();
+            const fac = document.getElementById('ini-faction').value.trim();
+            const msg = document.getElementById('ini-message').value.trim();
+            const pop = parseInt(document.getElementById('ini-population').value || '0', 10) || 0;
+            if (!sys || !fac) { btn.innerText = 'ERREUR : SYSTÈME ET FACTION REQUIS'; setTimeout(() => btn.innerText = "LANCER L'INITIATIVE", 2200); return; }
+            btn.innerText = 'TRANSMISSION…'; btn.style.pointerEvents = 'none';
+            const { error } = await supabaseApp.rpc('lancer_initiative', { p_systeme: sys, p_faction: fac, p_type: initiativeType, p_message: msg || null, p_population: pop });
+            if (error) {
+                console.error(error);
+                const m = String(error.message || 'Échec du lancement.');
+                btn.innerText = m.length > 60 ? 'REFUSÉ : VOIR LE MESSAGE CI-DESSUS' : 'REFUSÉ : ' + m.toUpperCase();
+                const aide = document.getElementById('ini-aide'); if (aide) { aide.textContent = m; aide.style.color = '#FF4FD8'; }
+                setTimeout(() => { btn.innerText = "LANCER L'INITIATIVE"; btn.style.pointerEvents = 'auto'; }, 3200);
+                return;
+            }
+            if (typeof sonSucces === 'function') sonSucces();
+            btn.innerText = 'INITIATIVE LANCÉE';
+            setTimeout(() => {
+                fermerModal('modal-initiative');
+                document.getElementById('ini-systeme').value = ''; document.getElementById('ini-faction').value = ''; document.getElementById('ini-message').value = ''; document.getElementById('ini-population').value = '0';
+                const aide = document.getElementById('ini-aide'); if (aide) { aide.style.color = ''; aide.textContent = 'Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».'; }
+                btn.innerText = "LANCER L'INITIATIVE"; btn.style.pointerEvents = 'auto';
+                afficherOrdresBGS();
+            }, 1200);
+        };
+        window.cloturerInitiative = async function(id, parCreateur) {
+            const ok = await demanderConfirmation(parCreateur ? 'CLÔTURER VOTRE INITIATIVE ?' : 'RETIRER CETTE INITIATIVE ?',
+                parCreateur ? 'L\'initiative sera close. Les efforts déjà enregistrés par les pilotes sont conservés.' : 'L\'initiative sera close pour tout l\'escadron. Les efforts déjà enregistrés par les pilotes sont conservés.', '#FF4FD8');
+            if (!ok) return;
+            const { error } = await supabaseApp.rpc('cloturer_initiative', { p_id: Number(id) });
+            if (error) { console.error(error); alert(error.message || 'Échec de la clôture.'); return; }
+            afficherOrdresBGS();
+        };
+        window.adopterInitiative = async function(id) {
+            const ok = await demanderConfirmation('TRANSFORMER EN DIRECTIVE ?', 'L\'initiative devient une directive officielle de l\'escadron (priorité normale) : l\'annonce figure dans le journal de l\'escadron. Vous pourrez ensuite modifier sa priorité comme pour toute directive.', '#FF4FD8');
+            if (!ok) return;
+            const { error } = await supabaseApp.rpc('adopter_initiative', { p_id: Number(id), p_priorite: 3 });
+            if (error) { console.error(error); alert(error.message || 'Échec de la transformation.'); return; }
+            afficherOrdresBGS();
+        };
 
         // --- SUPPRESSION DÉFINITIVE D'UN ORDRE (NIVEAU AMIRAL) ---
         async function supprimerOrdre(idOrdre) {
@@ -2732,6 +3022,6 @@
 
     <script src="plaques-vues.js?v=2"></script>
     <script src="medailles.js?v=7"></script>
-    <script src="footer.js?v=21"></script>
+    <script src="footer.js?v=23"></script>
 </body>
 </html>

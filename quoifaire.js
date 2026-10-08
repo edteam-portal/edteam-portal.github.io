@@ -100,6 +100,7 @@
         if (d.membre && accesBgs) {
             const resume = {}; (d.resume || []).forEach(r => { resume[r.ordre_id] = r; });
             (d.ordres || []).forEach(o => {
+                if (o.veille) return;   // directive en veille (normale, sans effort depuis 7 jours) : jamais recommandee
                 const acts = activitesOrdre(o, resume[o.id] || {}).filter(a => a.ratio < 100 && a.reste > 0);
                 if (!acts.length) return;
                 // style choisi a la main : il passe avant le retard de la jauge (jamais avant la priorite du commandement) ; en automatique il ne depart que les egalites
@@ -108,16 +109,16 @@
                 const a = acts[0];
                 cands.push({ o, a, prio: o.priorite || 3 });
             });
-            cands.sort((x, y) => (x.prio - y.prio) || (styleForce ? ((y.a.style === styleForce) - (x.a.style === styleForce)) : 0) || (Math.round(x.a.ratio) - Math.round(y.a.ratio))
+            cands.sort((x, y) => ((x.o.origine === 'PILOTE') - (y.o.origine === 'PILOTE')) || (x.prio - y.prio) || (styleForce ? ((y.a.style === styleForce) - (x.a.style === styleForce)) : 0) || (Math.round(x.a.ratio) - Math.round(y.a.ratio))
                 || ((y.a.style === styleSouhaite) - (x.a.style === styleSouhaite)) || (Date.parse(x.o.date_emission) - Date.parse(y.o.date_emission)));
         }
         const idees = cands.map(c => {
             const reste = c.a.genre === 'cr' ? fmtCr(c.a.reste) + ' cr' : fmt(c.a.reste) + ' ' + (c.a.mot || '');
             return {
                 id: 'bgs-' + c.o.id + '-' + c.a.cle, domaine: 'bgs',
-                etiquette: 'DIRECTIVE ' + c.o.id + (c.prio < 3 ? ' · PRIORITÉ ' + LIB_PRIO[c.prio] + ' FIXÉE PAR LE COMMANDEMENT' : ''),
+                etiquette: (c.o.origine === 'PILOTE' ? 'INITIATIVE ' : 'DIRECTIVE ') + c.o.id + (c.o.origine === 'PILOTE' ? ' · LANCÉE PAR UN PILOTE DE L\'ESCADRON' : '') + (c.prio < 3 ? ' · PRIORITÉ ' + LIB_PRIO[c.prio] + ' FIXÉE PAR LE COMMANDEMENT' : ''),
                 titre: c.a.libelle + ' : il manque ' + reste.trim(),
-                pourquoi: 'La directive ' + c.o.id + ' est à ' + Math.round(c.a.ratio) + ' % de son objectif sur cette activité (cible : ' + (c.o.faction_cible || '?') + ', système ' + (c.o.systeme_cible || '?') + ').'
+                pourquoi: (c.o.origine === 'PILOTE' ? 'L\'initiative ' : 'La directive ') + c.o.id + ' est à ' + Math.round(c.a.ratio) + ' % de son objectif sur cette activité (cible : ' + (c.o.faction_cible || '?') + ', système ' + (c.o.systeme_cible || '?') + ').'
                     + (c.prio < 3 ? ' Le commandement l\'a classée en priorité ' + LIB_PRIO[c.prio].toLowerCase() + '.' : ''),
                 ratio: c.a.ratio, chiffre: c.a.genre === 'cr' ? fmtCr(c.a.reste) : fmt(c.a.reste), unite: c.a.genre === 'cr' ? 'cr' : (c.a.mot || ''),
                 lien: 'bgs'

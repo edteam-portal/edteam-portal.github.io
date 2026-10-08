@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-directives-en-veille', date: '2026-10-08T23:21:00Z', type: 'AMELIORE',
+        titre: 'Directives en veille : la place aux missions vivantes',
+        texte: 'Une directive de priorité normale pour laquelle aucun effort n’a été enregistré depuis 7 jours est maintenant repliée dans un encadré « Directives en veille » (type, faction, système et influence), sur la page BGS et sur le mobile. Elle n’est pas supprimée : l’Amiral continue de voir l’évolution d’influence, et un clic ouvre son détail. Dès qu’un effort est enregistré, elle revient parmi les directives. Les directives de priorité haute ou critique restent toujours affichées, et « Quoi faire » ne recommande plus une directive en veille.',
+        important: false
+    },
+    {
+        id: '2026-10-initiatives-pilotes', date: '2026-10-08T23:20:00Z', type: 'NOUVEAU',
+        titre: 'Initiatives : lancez vos propres objectifs BGS',
+        texte: 'Tout pilote de l’escadron peut maintenant lancer une initiative : un système, une faction et un objectif de hausse ou de baisse, avec un petit message pour motiver les camarades. Elle s’affiche dans une section à part de la page BGS (et de l’onglet BGS du mobile), avec votre nom, ceux des pilotes qui y participent et le temps restant. Elle fonctionne comme une directive : mêmes jauges, mêmes points, rien à changer côté plugin. Une initiative par pilote ; elle se clôture seule après 7 jours sans aucun effort (chaque effort relance le compteur). L’Amiral et les officiers peuvent la retirer ou la transformer en directive officielle, et chaque lancement ou transformation est annoncé dans le journal de l’escadron. Les directives de guerre et d’élection restent réservées au commandement.',
+        important: false
+    },
+    {
         id: '2026-10-journal-bgs-filtres-une-ligne', date: '2026-10-08T21:28:00Z', type: 'AMELIORE',
         titre: 'Journal des exploits : les filtres tiennent sur une seule ligne',
         texte: 'Dans le journal des exploits du BGS, les filtres (pilote, période, directive, spécialité, recherche) sont maintenant alignés sur une seule ligne au lieu de passer sur deux : plus de place pour la liste des actions.',
