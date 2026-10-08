@@ -247,28 +247,6 @@ function injecterArchitectureGlobale() {
     // --- INJECTION GLOBALE DU SYSTÈME COVAS & CIBLAGE TACTIQUE ---
         const covasHTML = `
         <style>
-            #covas-overlay {
-                position: fixed; top: 50%; left: 50%; width: 450px;
-                background: rgba(5, 10, 15, 0.95); border: 1px solid var(--ed-blue);
-                box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); border-radius: 4px;
-                padding: 20px; font-family: 'Share Tech Mono', monospace; color: #00F0FF;
-                z-index: 10000; backdrop-filter: blur(5px); pointer-events: none;
-                transform: translate(-50%, -50%) scale(0.95); opacity: 0; visibility: hidden;
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-            #covas-overlay.deploye { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
-            .covas-ligne { margin-bottom: 8px; font-size: 0.9em; letter-spacing: 1px; line-height: 1.4; text-shadow: 0 0 5px currentColor; }
-            .covas-alerte { color: #FF3333; }
-            .covas-neutre { color: #00FF66; }
-            .covas-curseur { animation: covas-blink 0.8s infinite; }
-            @keyframes covas-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-            #covas-badge {
-                position: fixed; bottom: 20px; right: 20px; background: rgba(0, 240, 255, 0.1);
-                border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 8px 15px;
-                font-family: 'Share Tech Mono', monospace; font-weight: bold; border-radius: 4px;
-                cursor: pointer; z-index: 9999; display: none; transition: 0.2s;
-            }
-            #covas-badge:hover { background: var(--ed-blue); color: #000; box-shadow: 0 0 15px var(--ed-blue); }
             #tactical-overlay {
                 position: fixed; top: 50%; left: 50%; width: 480px; background: rgba(10, 0, 0, 0.95);
                 border: 2px solid #FF3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4); border-radius: 4px;
@@ -279,8 +257,6 @@ function injecterArchitectureGlobale() {
             }
             #tactical-overlay.deploye { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
         </style>
-        <div id="covas-overlay"><div id="covas-contenu"></div><span class="covas-curseur">_</span></div>
-        <div id="covas-badge" onclick="if(typeof deployerCovasManuel === 'function') deployerCovasManuel()">>_ SYS: EN ATTENTE</div>
         <div id="tactical-overlay"><div id="tactical-contenu"></div></div>
         `;
         document.body.insertAdjacentHTML('beforeend', covasHTML);
@@ -288,7 +264,7 @@ function injecterArchitectureGlobale() {
         // Chargement asynchrone du script d'interception COVAS
         if (!document.querySelector('script[src*="covas.js"]')) {
             const covasScript = document.createElement('script');
-            covasScript.src = 'covas.js';
+            covasScript.src = 'covas.js?v=2';
             document.body.appendChild(covasScript);
         }
 }
