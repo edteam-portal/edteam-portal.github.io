@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYS.EDTEAM — Outil communautaire gratuit pour escadrons Elite Dangerous</title>
-    <meta name="description" content="SYS.EDTEAM est l'outil communautaire gratuit pour les escadrons Elite Dangerous : suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Installation en 2 minutes via EDMC.">
+    <meta name="description" content="SYS.EDTEAM est l'outil communautaire gratuit pour les escadrons Elite Dangerous : suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et alerte COVAS en jeu. Installation en 2 minutes via EDMC.">
     <link rel="icon" href="icon-192.png" type="image/png">
 
     <!-- Open Graph / Discord & réseaux sociaux -->
@@ -13,14 +13,18 @@
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="SYS.EDTEAM">
     <meta property="og:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
-    <meta property="og:description" content="Suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
+    <meta property="og:description" content="Suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et alerte COVAS en jeu. Gratuit, installation en 2 minutes via EDMC.">
     <meta property="og:image" content="https://edteam-portal.github.io/images/qg.png">
     <meta property="og:url" content="https://edteam-portal.github.io/presentation.html">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SYS.EDTEAM — Outil communautaire pour escadrons Elite Dangerous">
-    <meta name="twitter:description" content="Suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué. Gratuit, installation en 2 minutes via EDMC.">
+    <meta name="twitter:description" content="Suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et alerte COVAS en jeu. Gratuit, installation en 2 minutes via EDMC.">
     <meta name="twitter:image" content="https://edteam-portal.github.io/images/qg.png">
     <link rel="canonical" href="https://edteam-portal.github.io/presentation.html">
+
+    <script type="application/ld+json">
+    { "@context": "https://schema.org", "@type": "WebSite", "name": "SYS.EDTEAM", "alternateName": ["EDTEAM", "SYS EDTEAM"], "url": "https://edteam-portal.github.io/", "inLanguage": "fr" }
+    </script>
 
     <script type="application/ld+json">
     {
@@ -29,7 +33,7 @@
         "name": "SYS.EDTEAM",
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Windows (plugin EDMC) + Web",
-        "description": "Outil communautaire gratuit pour escadrons Elite Dangerous : suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et assistant COVAS embarqué.",
+        "description": "Outil communautaire gratuit pour escadrons Elite Dangerous : suivi BGS avec le résultat du jeu sur chaque directive, QG de commandement, Powerplay 2.0, renseignement tactique et alerte COVAS en jeu.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
         "url": "https://edteam-portal.github.io/presentation.html",
         "inLanguage": "fr"
@@ -88,6 +92,14 @@
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "Par cinq systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Photo et anecdotes : qui voit quoi ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "La photo de commandant est facultative : elle est visible par votre escadron et par les pilotes de votre puissance, et vous pouvez la retirer quand vous voulez. Les anecdotes sont de courtes histoires de roleplay écrites par une IA à partir d'un fait réel de votre activité, visibles seulement par votre escadron ; vous pouvez refuser d'y apparaître à tout moment."
                 }
             },
             {
@@ -429,12 +441,12 @@
                 <button class="module" data-p="progresser" data-m="elan" data-for="squad officier"><span>Élan Powerplay</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="progresser" data-m="rang" data-for="squad officier"><span>Rang BGS de carrière</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="connecte" data-m="mobile" data-for="solo squad officier"><span>Compagnon mobile</span><span class="pour">POUR VOUS</span></button>
-                <button class="module" data-p="connecte" data-m="covas" data-for="squad officier"><span>IA embarquée (COVAS)</span><span class="pour">POUR VOUS</span></button>
+                <button class="module" data-p="connecte" data-m="covas" data-for="squad officier"><span>COVAS embarqué</span><span class="pour">POUR VOUS</span></button>
                 </div>
                 <div class="detail" id="detail">
                 <article class="panel" id="module-qg" data-p="commander" data-m="qg">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/qg.png" alt="Quartier général (écran 1)"><img class="" data-i="1" src="images/puissance-faction.png" alt="Ma puissance, Ma faction et Quoi faire (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/qg.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/puissance-faction.png')" aria-label="Écran 2"></button></div></div>
-                    <span class="kick">// MODULE 01 : SUPERVISION</span><h3>VISION STRATÉGIQUE</h3><p>Votre <strong>Quartier Général</strong> résume votre carrière d'un coup d'œil : rangs Powerplay, BGS, Fédération et auxiliaires dans l'en-tête (un clic ouvre le détail, sur toutes les pages), le <strong>nom de votre escadron</strong> et vos grades. En tête de page, trois cartes : <strong>Ma puissance</strong> (le portrait de votre puissance, son classement parmi les douze et la répartition de ses systèmes), <strong>Ma faction</strong> (le logo de votre escadron, déposé par l'Amiral, et les chiffres de votre faction) et <strong>Quoi faire</strong>.</p><p>Le <strong>Pilier de la semaine</strong> et l'<strong>Élan Powerplay</strong> sont mis à l'honneur, les <strong>chiffres clés</strong> tiennent sur un seul écran, et le <strong>Journal Tactique</strong> diffuse en direct les directives, les distinctions et le bilan du réseau. Chaque jeudi, une fenêtre vous présente la <strong>nouvelle édition d'EDNews</strong> de votre escadron.</p><p class="note-sobre" style="font-size:.85em;color:#8a9;">Les chiffres de puissance et de faction viennent de la base communautaire Spansh, relevée chaque jour : ils peuvent avoir quelques jours de retard sur le jeu.</p>
+                    <span class="kick">// MODULE 01 : SUPERVISION</span><h3>VISION STRATÉGIQUE</h3><p>Votre <strong>Quartier Général</strong> résume votre carrière d'un coup d'œil : rangs Powerplay, BGS, Fédération et auxiliaires dans l'en-tête (un clic ouvre le détail, sur toutes les pages), le <strong>nom de votre escadron</strong> et vos grades. En tête de page, trois cartes : <strong>Ma puissance</strong> (le portrait de votre puissance, son classement parmi les douze et la répartition de ses systèmes), <strong>Ma faction</strong> (le logo de votre escadron, déposé par l'Amiral, et les chiffres de votre faction) et <strong>Quoi faire</strong>.</p><p>Le <strong>Pilier de la semaine</strong> et l'<strong>Élan Powerplay</strong> sont mis à l'honneur, les <strong>chiffres clés</strong> tiennent sur un seul écran, et le <strong>Journal Tactique</strong> diffuse en direct les directives, les distinctions et le bilan du réseau. Chaque jeudi, une fenêtre vous présente la <strong>nouvelle édition d'EDNews</strong> de votre escadron. Plusieurs fois par semaine, une <strong>anecdote de l'escadron</strong> raconte, en courte histoire de roleplay, un fait réel d'un pilote (une livraison, un combat…) : chacun peut refuser d'y apparaître.</p><p class="note-sobre" style="font-size:.85em;color:#8a9;">Les chiffres de puissance et de faction viennent de la base communautaire Spansh, relevée chaque jour : ils peuvent avoir quelques jours de retard sur le jeu, dont le panneau fait foi.</p>
                 </article>
                 <article class="panel" id="module-qf" data-p="commander" data-m="qf">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/quoi-faire.png" alt="Quoi faire : recommandations" loading="lazy"></div></div>
@@ -455,7 +467,7 @@
                 </article>
                 <article class="panel" id="module-esc" data-p="commander" data-m="esc">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/escadron.png" alt="Escadron" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 07 : ESCADRON</span><h3>VOTRE ÉQUIPAGE</h3><p>La page <strong>Escadron</strong> présente chaque pilote sur une carte : grade, rang BGS avec sa progression, rang Powerplay, titres de spécialiste, plaques de campagne et activité de la semaine.</p><p>Recherchez un pilote, triez (rôle, points de la semaine, nom) et filtrez (actifs cette semaine, officiers, avec titre). Un clic ouvre la fiche : carrière BGS, Powerplay, architecte de colonisation, titres, plaques et distinctions.</p>
+                    <span class="kick">// MODULE 07 : ESCADRON</span><h3>VOTRE ÉQUIPAGE</h3><p>La page <strong>Escadron</strong> présente chaque pilote sur une carte, avec son <strong>portrait</strong> (la photo de commandant est facultative) : grade, rang BGS avec sa progression, rang Powerplay, titres de spécialiste, plaques de campagne et activité de la semaine.</p><p>Recherchez un pilote, triez (rôle, points de la semaine, nom) et filtrez (actifs cette semaine, officiers, avec titre). Un clic ouvre la fiche : carrière BGS, Powerplay, architecte de colonisation, titres, plaques et distinctions. Les portraits apparaissent aussi sur le mur des spécialistes, le Pilier, l'Élan et les classements.</p>
                 </article>
                 <article class="panel" id="module-colo" data-p="construire" data-m="colo">
                     <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/colonisation.png" alt="Colonisation (écran 1)" loading="lazy"><img class="" data-i="1" src="images/colonisation-detail.png" alt="Colonisation (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/colonisation.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/colonisation-detail.png')" aria-label="Écran 2"></button></div></div>
@@ -491,7 +503,7 @@
                 </article>
                 <article class="panel" id="module-covas" data-p="connecte" data-m="covas">
                     <div class="ecran-d"><div class="cadre-d"><div class="fiche-faux"><div style="color:#FF3333;font-size:1.1em;font-weight:bold;border-bottom:1px dashed #FF3333;padding-bottom:5px;margin-bottom:14px;letter-spacing:2px;display:flex;justify-content:space-between;"><span>⚠️ ALERTE TACTIQUE</span><span style="opacity:.5;">SYS.EDTEAM</span></div><div style="margin-bottom:16px;color:#ddd;">CIBLE VERROUILLÉE : <strong style="color:#fff;">CMDR GRIMLOCK VANE</strong> <span style="color:#FF7100;font-size:.85em;margin-left:8px;">[ CRVR ]</span></div><div style="padding:14px;background:rgba(0,0,0,.5);border:1px solid #333;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#888;font-size:.85em;">DOSSIER INDIVIDUEL :</span><strong style="color:#000;background:#FF3333;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #FF3333;">K.O.S (HOSTILE)</strong></div><div style="display:flex;justify-content:space-between;"><span style="color:#888;font-size:.85em;">RÉSEAU EDTEAM :</span><strong style="color:#000;background:#00F0FF;padding:2px 8px;border-radius:2px;box-shadow:0 0 10px #00F0FF;">✓ RÉPERTORIÉ</strong></div></div><div style="color:#555;font-size:.8em;margin-top:16px;font-weight:bold;text-align:center;">[ ANALYSE COMPLÈTE... ] _</div></div></div></div>
-                    <span class="kick">// MODULE 03 : IA EMBARQUÉE</span><h3>ASSISTANCE HOLOGRAPHIQUE EN DIRECT</h3><p><strong>Verrouillage tactique</strong> : ciblez un vaisseau, le COVAS affiche sa fiche de renseignement et s'il est répertorié sur EDTEAM. Ne tirez plus à l'aveugle.</p>
+                    <span class="kick">// MODULE 03 : COVAS EMBARQUÉ</span><h3>ASSISTANCE HOLOGRAPHIQUE EN DIRECT</h3><p><strong>Verrouillage tactique</strong> : ciblez un vaisseau, le COVAS affiche sa fiche de renseignement et s'il est répertorié sur EDTEAM. Ne tirez plus à l'aveugle.</p>
                 </article>
                 </div>
             </div>
@@ -514,6 +526,8 @@
                     <li>Toujours depuis le plugin : à son démarrage, il relit en local vos journaux de jeu des dernières semaines pour retrouver les mérites Powerplay que vous avez gagnés sans EDMC, cycle par cycle. Seuls le total de mérites et le rang de chaque cycle sont envoyés, jamais le contenu de vos journaux.</li>
                     <li>Pour la colonisation (plugin 2.5 ou plus) : l'état des chantiers que vous consultez (station, système, avancement, marchandises), vos livraisons (marchandise, tonnage, date), les systèmes que vous revendiquez et leur position dans la galaxie, la faction qui les contrôle, et les stations terminées de votre escadron où vous vous amarrez (seulement dans un système déjà colonisé). Rien n'est enregistré pour un pilote sans escadron.</li>
                     <li>Pour le budget (plugin 2.5 ou plus) : chaque mouvement d'argent de votre compte (vente, achat, mission, prime, réparation, carburant…) avec sa date, son montant, sa catégorie et le lieu où il a eu lieu, ainsi que les totaux par cycle et votre solde. Ces données ne sont lisibles que par vous.</li>
+                    <li>Si vous le souhaitez : une <strong>photo de commandant</strong> que vous envoyez vous-même (recadrée en carré et réduite à 256 pixels). Elle est facultative et vous pouvez la retirer à tout moment.</li>
+                    <li>Pour les anecdotes de l'escadron : un court texte écrit par une IA (service Gemini de Google) à partir d'un fait de vos dernières 48 heures déjà visible par votre escadron (livraison de colonisation, zone de conflit, économie…), avec votre nom de CMDR et celui de l'escadron. Elle ne reçoit jamais votre position, votre vaisseau, vos finances, votre e-mail ni votre clé. Vous pouvez <strong>refuser d'apparaître</strong> dans les anecdotes (« Gestion du compte » sur PC, « Réglages » sur mobile) : vos anecdotes déjà écrites sont alors effacées.</li>
                     <li>Pour les résultats des directives BGS : aucune donnée de votre compte. Notre serveur relève deux fois par jour l'influence des factions dans les systèmes visés par les directives, à partir d'EDSM, une base communautaire publique.</li>
                 </ul>
                 <p style="margin-bottom: 30px;"><strong style="color:#fff;">Ce que nous ne recevons pas :</strong> vos identifiants Frontier, le contenu de vos discussions en jeu, ni aucun fichier de votre ordinateur.</p>
@@ -526,7 +540,8 @@
                     <li>Les autres pilotes ne voient que votre nom de CMDR dans la liste des destinataires. Dans le tableau Powerplay, ils voient votre nom, votre rang et vos mérites (du cycle et cumulés), uniquement si vous êtes de la même puissance. Votre historique par cycle (« Ma progression ») n'est lisible que par vous.</li>
                     <li>Les membres d'un escadron voient les chantiers de colonisation de cet escadron, avec le nom des pilotes qui y ont livré et le tonnage de chacun. Les autres escadrons n'en voient rien. Un pilote sans escadron a son propre espace de colonisation, lisible par lui seul.</li>
                     <li>Votre budget (revenus, charges, livre de compte) n'est lisible que par vous : ni les membres de votre escadron, ni l'Amiral, ni le Directeur ne le voient sur le site.</li>
-                    <li>Le Directeur de l'application peut consulter les fiches pour l'administrer.</li>
+                    <li>Votre photo est visible par les membres de votre escadron et par les pilotes de votre puissance Powerplay. Les anecdotes ne sont visibles que par votre escadron (les 30 derniers jours). L'Amiral de votre escadron peut retirer une photo ou supprimer une anecdote de son escadron, et le Directeur peut retirer n'importe quelle photo.</li>
+                    <li>Le Directeur de l'application peut consulter les fiches pour l'administrer. Il consulte aussi des statistiques d'usage par escadron (nombre de pilotes actifs, volumes d'activité), sans aucun détail individuel.</li>
                 </ul>
 
                 <p style="margin-bottom: 0;">Le plugin ne tourne que lorsque EDMC est lancé, et vous pouvez le retirer à tout moment. Vous pouvez modifier votre email, votre mot de passe ou <strong style="color:#fff;">supprimer votre compte</strong> depuis « Gestion du compte » : vos données sont alors effacées.</p>
@@ -549,6 +564,8 @@
                 <p style="margin: 0 0 26px;">Votre adresse email et des informations tirées de votre journal de jeu. Le détail, ce que voient les autres pilotes et la suppression du compte sont décrits dans la section <a href="#vos-donnees" style="color: var(--ed-blue);">« Vos données »</a>.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">COMMENT SONT RÉCOMPENSÉS LES PILOTES ?</h3>
                 <p style="margin: 0 0 26px;">Par cinq systèmes complémentaires : les états de service (une plaque par opération clôturée), le mur des spécialistes (sept titres), le Pilier de la semaine et l'Élan Powerplay (deux distinctions chaque jeudi, sur la fiche du pilote et dans le journal tactique), et le rang BGS de carrière (de 1 à 100, permanent, calculé sur l'ensemble des efforts).</p>
+                <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">PHOTO ET ANECDOTES : QUI VOIT QUOI ?</h3>
+                <p style="margin: 0 0 26px;">La photo de commandant est facultative : elle est visible par votre escadron et par les pilotes de votre puissance, et vous pouvez la retirer quand vous voulez. Les anecdotes sont de courtes histoires de roleplay écrites par une IA à partir d'un fait réel de votre activité, visibles seulement par votre escadron ; vous pouvez refuser d'y apparaître à tout moment.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FONCTIONNE-T-IL SUR MOBILE ?</h3>
                 <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les directives avec leur résultat dans le jeu et votre effort BGS, la colonisation, le budget, l'escadron et la recommandation « Quoi faire », depuis un téléphone.</p>
             </div>
