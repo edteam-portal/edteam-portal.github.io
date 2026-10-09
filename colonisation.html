@@ -362,6 +362,7 @@
         .colo-haut { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:12px; }
         @media (max-width:1000px) { .colo-haut { grid-template-columns:minmax(0,1fr); } }
         .colo-cols { column-count:2; column-gap:30px; }
+        details > summary::-webkit-details-marker { display:none; }
         @keyframes coloTourne { to { transform: rotate(360deg); } }
         .colo-tourne { display:inline-block; }
         #colo-btn-maj.maj-en-cours { border-color:#00F0FF; color:#00F0FF; box-shadow:0 0 10px rgba(0,240,255,.5); pointer-events:none; }
@@ -419,10 +420,13 @@
         function noteFraicheur(data) {
             const f = coloChantiersNonReleves(data.systemes);
             if (!f.anciens) return '';
-            return '<div style="border:1px solid rgba(255,113,0,.55);background:rgba(255,113,0,.07);padding:7px 10px;margin-bottom:10px;font-size:.78em;line-height:1.5;color:#d9a066;">'
-                + '<b style="color:#FF7100;letter-spacing:2px;font-weight:normal;">IMPORTANT</b> · Module récent : à son lancement, les chantiers ont été reconstitués à partir des anciens journaux de jeu. '
-                + f.anciens + ' chantier' + (f.anciens > 1 ? 's' : '') + ' sur ' + f.total + ' n\'' + (f.anciens > 1 ? 'ont' : 'a') + ' pas encore été relevé' + (f.anciens > 1 ? 's' : '') + ' à quai depuis : '
-                + 'les quantités affichées peuvent être dépassées. Dès qu\'un pilote dock sur un chantier, ses chiffres sont à jour et le restent. Cette note disparaîtra quand tous les chantiers auront été visités une fois.</div>';
+            const n = f.anciens, pl = n > 1 ? 's' : '';
+            // repliee par defaut (un clic deplie l'explication) ; l'etat ouvert survit a la reconstruction de la page
+            return '<details' + (window.__noteFraicheurOuverte ? ' open' : '') + ' ontoggle="window.__noteFraicheurOuverte = this.open" style="border:1px solid rgba(255,113,0,.55);background:rgba(255,113,0,.07);padding:6px 10px;margin-bottom:10px;font-size:.78em;line-height:1.5;color:#d9a066;">'
+                + '<summary style="cursor:pointer;list-style:none;"><b style="color:#FF7100;letter-spacing:2px;font-weight:normal;">IMPORTANT</b> · ' + n + ' chantier' + pl + ' sur ' + f.total + ' pas encore relevé' + pl + ' à quai : les quantités affichées peuvent être dépassées. <span style="color:#FF7100;white-space:nowrap;">[ + PLUS D\'EXPLICATIONS ]</span></summary>'
+                + '<div style="margin-top:6px;">Module récent : à son lancement, les chantiers ont été reconstitués à partir des anciens journaux de jeu. '
+                + n + ' chantier' + pl + ' sur ' + f.total + ' n\'' + (n > 1 ? 'ont' : 'a') + ' pas encore été relevé' + pl + ' à quai depuis : '
+                + 'les quantités affichées peuvent être dépassées. Dès qu\'un pilote dock sur un chantier, ses chiffres sont à jour et le restent. Cette note disparaîtra quand tous les chantiers auront été visités une fois.</div></details>';
         }
         // barre segmentée façon voyant de cockpit : la couleur dit où on en est
         const couleurAvancement = p => p >= 100 ? G : p >= 66 ? B : p >= 33 ? O : '#FF4D2E';
