@@ -446,8 +446,37 @@
         // ---------------------------------------------------------------
         //  CALCULS SUR UN CHANTIER (à partir des marchandises relevées)
         // ---------------------------------------------------------------
+        // Categories des marches du jeu (source : FDevIDs, commodity.csv, categorie de chaque marchandise). Cle = identifiant du jeu ($xxx_name;), sans casse.
+        const CATEGORIES_JEU = {
+          'PRODUITS CHIMIQUES': ['liquidoxygen', 'pesticides', 'surfacestabilisers', 'water'],
+          'PRODUITS DE CONSOMMATION': ['evacuationshelter', 'survivalequipment'],
+          'ALIMENTATION': ['animalmeat', 'coffee', 'fish', 'foodcartridges', 'fruitandvegetables', 'grain', 'tea'],
+          'MATÉRIAUX INDUSTRIELS': ['ceramiccomposites', 'cmmcomposite', 'insulatingmembrane', 'polymers', 'semiconductors', 'superconductors'],
+          'DROGUES LÉGALES': ['beer', 'liquor', 'wine'],
+          'MACHINES': ['buildingfabricators', 'cropharvesters', 'emergencypowercells', 'geologicalequipment', 'heliostaticfurnaces', 'mineralextractors', 'powergenerators', 'thermalcoolingunits', 'waterpurifiers'],
+          'MÉDICAMENTS': ['agriculturalmedicines', 'basicmedicines', 'combatstabilisers'],
+          'MÉTAUX': ['aluminium', 'copper', 'steel', 'titanium'],
+          'TECHNOLOGIE': ['advancedcatalysers', 'autofabricators', 'bioreducinglichen', 'computercomponents', 'hazardousenvironmentsuits', 'medicaldiagnosticequipment', 'microcontrollers', 'mutomimager', 'resonatingseparators', 'robotics', 'structuralregulators', 'terrainenrichmentsystems'],
+          'TEXTILES': ['militarygradefabrics'],
+          'DÉCHETS': ['biowaste'],
+          'ARMES': ['battleweapons', 'nonlethalweapons', 'reactivearmour']
+        };
+        const CATEGORIE_DE = {};
+        Object.keys(CATEGORIES_JEU).forEach(cat => CATEGORIES_JEU[cat].forEach(k => { CATEGORIE_DE[k] = cat; }));
+        const categorieMarchandise = l => CATEGORIE_DE[String(l.cle || '').toLowerCase().replace(/^\$/, '').replace(/_name;?$/, '')] || 'AUTRES';
+        // vue des marchandises d'un chantier : 'cat' (par categorie, comme les marches du jeu) ou 'qte' (par quantite restante). Choix retenu sur l'appareil.
+        function vueMarchandises() { try { return localStorage.getItem('edteam_colo_vue') === 'qte' ? 'qte' : 'cat'; } catch (e) { return 'cat'; } }
+        window.changerVueMarchandises = function (v) {
+            try { localStorage.setItem('edteam_colo_vue', v); } catch (e) {}
+            const i = ((window.__colo && window.__colo.systemes) || []).findIndex(x => x.nom === window.__coloOuvert);
+            if (i < 0) return;
+            const cont = document.querySelector('#modal-colo .modal-content'), haut = cont ? cont.scrollTop : 0;
+            ouvrirSysteme(i, true);
+            const c2 = document.querySelector('#modal-colo .modal-content'); if (c2) c2.scrollTop = haut;
+        };
+
         function calculerChantier(c) {
-            const lignes = (c.marchandises || []).map(m => ({ nom: m.nom_fr || m.nom, req: +m.requis || 0, liv: +m.livre || 0 }))
+            const lignes = (c.marchandises || []).map(m => ({ nom: m.nom_fr || m.nom, cle: m.nom, req: +m.requis || 0, liv: +m.livre || 0 }))
                 .map(l => Object.assign(l, { reste: Math.max(0, l.req - l.liv), pct: l.req > 0 ? Math.round(100 * l.liv / l.req) : 100 }))
                 .sort((a, b) => (a.reste === 0) - (b.reste === 0) || b.reste - a.reste);
             const req = lignes.reduce((t, l) => t + l.req, 0), liv = lignes.reduce((t, l) => t + Math.min(l.liv, l.req), 0);
@@ -1178,13 +1207,22 @@
             if (!maj && typeof sonClic === 'function') sonClic();
             const chantiers = s.chantiers.map(c => {
                 const k = calculerChantier(c), col = couleurAvancement(k.pct), total = (c.contributions || []).reduce((t, p) => t + p.tonnes, 0), finies = k.lignes.filter(l => l.reste === 0).length;
-                const marchandises = k.lignes.map(l => {
+                const htmlLigne = l => {
                     const fin = l.reste === 0;
                     return `<div style="break-inside:avoid;padding:5px 0;border-bottom:1px dashed #221a10;${fin ? 'opacity:.6;' : ''}">
                         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><span style="color:${fin ? G : '#fff'};">${fin ? '✔ ' : ''}${esc(l.nom)}</span><span style="color:${fin ? G : '#fff'};font-weight:bold;">${fin ? 'complète' : fmt(l.reste) + ' t'}</span></div>
                         <div style="display:flex;align-items:center;gap:10px;margin-top:3px;"><div style="flex:1;">${barreSeg(l.pct, 8)}</div><span style="color:${couleurAvancement(l.pct)};font-size:.8em;width:38px;text-align:right;">${l.pct}%</span></div>
                         <div style="color:#7d7d7d;font-size:.75em;margin-top:1px;">${fmt(l.liv)} livrées sur ${fmt(l.req)} t</div></div>`;
-                }).join('');
+                };
+                let marchandises;
+                if (vueMarchandises() === 'cat') {
+                    const grp = {};
+                    k.lignes.forEach(l => { (grp[categorieMarchandise(l)] = grp[categorieMarchandise(l)] || []).push(l); });
+                    marchandises = Object.keys(grp).sort((a, b) => (a === 'AUTRES') - (b === 'AUTRES') || a.localeCompare(b, 'fr')).map(cat => {
+                        const lg = grp[cat], resteCat = lg.reduce((t, l) => t + l.reste, 0);
+                        return '<div style="break-after:avoid;margin:' + '10px 0 2px;color:' + (resteCat ? O : G) + ';letter-spacing:2px;font-size:.85em;font-weight:bold;border-bottom:1px solid ' + (resteCat ? 'rgba(255,113,0,.4)' : 'rgba(0,255,102,.35)') + ';padding-bottom:3px;display:flex;justify-content:space-between;gap:8px;"><span>&gt; ' + cat + '</span><span style="color:' + (resteCat ? '#aaa' : G) + ';font-weight:normal;">' + (resteCat ? 'reste ' + fmt(resteCat) + ' t' : '✔ complet') + '</span></div>' + lg.map(htmlLigne).join('');
+                    }).join('');
+                } else marchandises = k.lignes.map(htmlLigne).join('');
                 // bandeau des contributions : simple, qui / combien de tonnes / quelle part
                 const contrib = (c.contributions || []).map((p, n) => `<div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);border:1px solid ${n === 0 ? GOLD + '77' : '#2c2c2c'};border-left:3px solid ${n === 0 ? GOLD : '#555'};border-radius:4px;padding:6px 12px;">
                         <span style="color:${n === 0 ? GOLD : '#888'};font-weight:bold;width:26px;">#${n + 1}</span>
@@ -1215,7 +1253,7 @@
                     <div onclick="document.getElementById('modal-colo').style.display='none'" style="position:absolute;top:14px;right:20px;color:${O};cursor:pointer;font-weight:bold;">X</div>
                 </div>
                 <div style="padding:16px 24px;display:flex;flex-direction:column;gap:14px;">
-                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#888;font-size:.8em;"><button class="c-zoom" style="width:auto;padding:3px 12px;" onclick="actualiserFenetreColo(true)">↻ ACTUALISER</button><span>mise à jour automatique toutes les 60 secondes · dernière lecture à <b id="colo-maj-heure" style="color:#ccc;font-weight:normal;">${new Date().toLocaleTimeString('fr-FR')}</b></span></div>
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#888;font-size:.8em;"><button class="c-zoom" style="width:auto;padding:3px 12px;" onclick="actualiserFenetreColo(true)">↻ ACTUALISER</button><span style="display:inline-flex;gap:4px;align-items:center;">marchandises : <button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'cat' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('cat')">PAR CATÉGORIE</button><button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'qte' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('qte')">PAR QUANTITÉ</button></span><span>mise à jour automatique toutes les 60 secondes · dernière lecture à <b id="colo-maj-heure" style="color:#ccc;font-weight:normal;">${new Date().toLocaleTimeString('fr-FR')}</b></span></div>
                     <div><div style="color:${G};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; TERMINÉS (${s.finies.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;">rien de terminé pour l\'instant</span>'}</div></div>
                     ${s.chantiers.length ? `<div><div style="color:${O};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; EN CHANTIER (${s.chantiers.length})</div>${chantiers}</div>` : ''}
                     <div style="color:#888;font-size:.82em;border-top:1px dashed #2a2a2a;padding-top:10px;">ⓘ Seules les constructions que le plugin a vues sont listées : le jeu peut en indiquer d'autres (chantiers que personne n'a encore consultés, installations déjà existantes). Il ne fournit pas non plus le nombre d'emplacements encore libres.</div>
