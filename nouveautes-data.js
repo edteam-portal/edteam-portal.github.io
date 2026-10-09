@@ -6,8 +6,8 @@
 window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-journal-rafales', date: '2026-10-09T22:05:00Z', type: 'AMELIORE',
-        titre: 'Journal des exploits : meurtres et piratages regroupés par 5',
-        texte: 'Quand vous enchaînez des meurtres ou des piratages, le journal n’affiche plus une ligne par action : il en crée une pour 5 (par exemple « 5 MEURTRES »), et une ligne en cours grossit jusqu’à 5. Les points ne changent pas : 1 point de rang BGS par meurtre ou par piratage, la ligne regroupée en rapporte donc 5. Un enchaînement est regroupé tant que vous restez sur la même directive, la même faction et le même système, et qu’il n’y a pas plus de 30 minutes entre deux actions. Sur PC et sur mobile.',
+        titre: 'Journal des exploits : meurtres, piratages et échecs regroupés par 5',
+        texte: 'Quand vous enchaînez des meurtres, des piratages ou des échecs de mission (sous une directive de baisse), le journal n’affiche plus une ligne par action : il en crée une pour 5 (par exemple « 5 MEURTRES »), et une ligne en cours grossit jusqu’à 5. Les points ne changent pas : 1 point de rang BGS par meurtre, par piratage ou par échec sous une directive de baisse, la ligne regroupée en rapporte donc 5. Un enchaînement est regroupé tant que vous restez sur la même directive, la même faction et le même système, et qu’il n’y a pas plus de 30 minutes entre deux actions. Sur PC et sur mobile.',
         important: false
     },
     {

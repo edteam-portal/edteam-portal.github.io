@@ -203,12 +203,12 @@
         }).join('');
     };
 
-    // Journal des exploits : les rafales de MEURTRES et de PIRATAGES (une ligne par action cote base, 1 point chacune) sont presentees 5 par ligne.
+    // Journal des exploits : les rafales de MEURTRES, de PIRATAGES et d'ECHECS de mission (une ligne par action cote base, 1 point chacune sous BAISSE) sont presentees 5 par ligne.
     // Meme pilote, meme type, meme directive (ou soutien libre), meme faction et meme systeme ; une pause de plus de 30 min ouvre une nouvelle ligne.
     // Seul l'affichage change : la valeur de la ligne regroupee est la SOMME (donc 1 point par meurtre ou piratage dans la colonne RANG BGS). Une ligne en cours (moins de 5) grossit au fil des actions.
     // Entree et sortie : lignes du journal triees de la plus recente a la plus ancienne.
     window.regrouperRafalesJournal = function (lignes, taille) {
-        const N = taille || 5, PAUSE = 30 * 60000, TYPES = { MEURTRES: 1, PIRATAGE: 1 };
+        const N = taille || 5, PAUSE = 30 * 60000, TYPES = { MEURTRES: 1, PIRATAGE: 1, ECHECS: 1 };
         const ts = e => { const t = new Date(String(e.date_action || '').replace(' ', 'T')).getTime(); return isNaN(t) ? 0 : t; };
         const sortie = [], ouverts = {};
         const fermer = c => sortie.push(Object.assign({}, c.derniere, { valeur: c.somme, regroupe: c.n, date_action: c.derniere.date_action }));
