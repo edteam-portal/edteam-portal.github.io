@@ -267,12 +267,12 @@
 .qf-bande .qf-k{font-size:.66em;letter-spacing:4px;color:var(--c)}.qf-bande .qf-l{color:#fff;font-size:1em;margin-top:3px;line-height:1.35}.qf-bande .qf-s{color:#8a8a8a;font-size:.76em;margin-top:2px}
 .qf-bande .qf-f{color:var(--c);font-size:1.5em;opacity:.85}
 .qf-slot .qf-bande{width:100%;height:100%;box-sizing:border-box;align-content:center}
-.qf-carte{--c:#FF7100;--bdc:color-mix(in srgb,var(--c) 75%,transparent);transition:filter .2s;position:relative;flex:1 1 auto;min-width:0;box-sizing:border-box;border:1px solid var(--bdc);padding:14px 16px 12px;display:flex;flex-direction:column;gap:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;
+.qf-carte{--c:#FF7100;--bdc:color-mix(in srgb,var(--c) 75%,transparent);transition:filter .2s;position:relative;flex:1 1 auto;min-width:0;box-sizing:border-box;border:1px solid var(--bdc);padding:11px 14px 9px;display:flex;flex-direction:column;gap:7px;cursor:pointer;font-family:'Share Tech Mono',monospace;
   background:linear-gradient(180deg,color-mix(in srgb,var(--c) 8%,transparent),rgba(10,5,0,.88) 80px);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
 .qf-carte:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 22px color-mix(in srgb,var(--c) 26%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--c) 24%,transparent);background:linear-gradient(to bottom right,transparent calc(50% - 1px),var(--bdc) calc(50% - 1px),var(--bdc) calc(50% + 1px),transparent calc(50% + 1px)) left top/14px 14px no-repeat,linear-gradient(to bottom right,transparent calc(50% - 1px),var(--bdc) calc(50% - 1px),var(--bdc) calc(50% + 1px),transparent calc(50% + 1px)) right bottom/14px 14px no-repeat}
 .qf-carte:before{content:"";position:absolute;top:0;left:14px;width:46px;height:3px;background:var(--c);box-shadow:0 0 10px var(--c);z-index:5}
 .qf-carte:hover{filter:brightness(1.22)}
-.qf-carte .qf-t{color:#fff;font-size:1.12em;line-height:1.3}.qf-carte .qf-po{color:#9a9a9a;font-size:.78em;line-height:1.45}
+.qf-carte .qf-t{color:#fff;font-size:1.02em;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.qf-carte .qf-po{color:#9a9a9a;font-size:.74em;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .qf-carte .qf-jauge{margin-top:0}.qf-carte .qf-jauge i{width:auto;flex:1;max-width:none}
 .qf-pied2{margin-top:auto;color:var(--c);font-size:.7em;letter-spacing:2px;display:flex;justify-content:space-between;gap:8px}
 .qf-slot .qf-bande .qf-l{font-size:1.15em}

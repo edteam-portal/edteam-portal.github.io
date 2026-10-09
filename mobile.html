@@ -18,9 +18,10 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="photos.js?v=2"></script>
     <script src="annonce.js?v=1"></script>
+    <script src="revelations.js?v=2"></script>
     <script src="anecdotes.js?v=3"></script>
-    <script src="quoifaire.js?v=10"></script>
-    <script src="qgsuivi.js?v=37"></script>
+    <script src="quoifaire.js?v=11"></script>
+    <script src="qgsuivi.js?v=38"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=7"></script>
@@ -1203,6 +1204,7 @@
             else if (type === 'SCI') { grad = 'gradPlatine'; icone = '<ellipse cx="50" cy="60" rx="18" ry="6" transform="rotate(45 50 60)" fill="none" stroke="url(#gradPlatine)" stroke-width="3"/><ellipse cx="50" cy="60" rx="18" ry="6" transform="rotate(-45 50 60)" fill="none" stroke="url(#gradPlatine)" stroke-width="3"/><circle cx="50" cy="60" r="4" fill="#B026FF" filter="url(#glowMedal)"/>'; } 
             else if (type === 'EXE') { grad = 'gradSombre'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="38" x2="50" y2="46" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="74" x2="50" y2="82" stroke="#FF3333" stroke-width="3"/><line x1="28" y1="60" x2="36" y2="60" stroke="#FF3333" stroke-width="3"/><line x1="64" y1="60" x2="72" y2="60" stroke="#FF3333" stroke-width="3"/>'; } 
             else if (type === 'GUE') { grad = 'gradAcier'; icone = '<line x1="38" y1="48" x2="62" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><line x1="62" y1="48" x2="38" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="60" r="4" fill="#FF7100" filter="url(#glowMedal)"/>'; } 
+            else if (type === 'BAT') { grad = 'gradOr'; icone = '<polygon points="50,40 68,50 68,70 50,80 32,70 32,50" fill="none" stroke="url(#gradOr)" stroke-width="3"/><path d="M50,40 L50,80 M32,50 L68,70 M32,70 L68,50" stroke="url(#gradOr)" stroke-width="2"/>'; }
             else if (type === 'ELE') { grad = 'gradOr'; icone = '<polygon points="50,42 54,52 64,53 56,60 58,70 50,65 42,70 44,60 36,53 46,52" fill="url(#gradOr)"/>'; }
 
             return `
@@ -1292,6 +1294,8 @@
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
             // Annonce d'une grande nouvelle fonction (une seule fois par pilote et par appareil) : annonce.js
             if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { aller: () => { switchMobileTab('bgs'); bgsVue('dir'); } });
+            // Révélations plein écran (nouveau rang, Pilier, Élan, distinction, anecdote) : revelations.js
+            if (window.edteamRevelations) window.edteamRevelations.verifier(profilCommandant, { db: supabaseApp, rangs: { combat: TABLES_ED_RANGS.combat, trade: TABLES_ED_RANGS.trade, explore: TABLES_ED_RANGS.explore, exobio: TABLES_ED_RANGS.exobiologist, mercenary: TABLES_ED_RANGS.mercenary, fed: TABLES_ED_RANGS.federation, emp: TABLES_ED_RANGS.empire } });
 
         }
 

@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-qg-rangee-compacte', date: '2026-10-09T09:59:00Z', type: 'AMELIORE',
+        titre: 'QG : la rangée « Ma puissance / Ma faction / Quoi faire » est plus compacte',
+        texte: 'Les trois cartes du haut du QG prennent moins de place en hauteur : les quatre chiffres de la faction tiennent sur une ligne, la note sur l’écart avec le jeu tient sur une seule ligne, et la recommandation « Quoi faire » est plus serrée. Le bas de la page remonte d’autant.',
+        important: false
+    },
+    {
+        id: '2026-10-revelations-plein-ecran', date: '2026-10-09T09:45:00Z', type: 'NOUVEAU',
+        titre: 'Les grands moments s’affichent en plein écran, sur toutes les pages',
+        texte: 'Quand quelque chose de marquant arrive, une fenêtre plein écran vous le montre une seule fois, où que vous soyez sur le site (PC et mobile). Pour vous seul : un nouveau rang BGS, Powerplay, Fédération, Empire ou l’un des rangs de votre cercle de pilote (combat, commerce, exploration, exobiologie, mercenaire). Pour tous les pilotes de l’escadron : la distinction d’un nouveau spécialiste, le Pilier de la semaine et l’Élan Powerplay, avec une mise en scène animée. Une nouvelle anecdote apparaît, elle, sous la forme d’une petite carte discrète que vous pouvez lire ou ignorer. Si plusieurs événements arrivent d’un coup, ils s’enchaînent avec un compteur et un bouton « Tout passer ». Les médailles du Pilier et de l’Élan sur le QG ont aussi reçu la même animation.',
+        important: false
+    },
+    {
         id: '2026-10-directives-en-veille', date: '2026-10-08T23:21:00Z', type: 'AMELIORE',
         titre: 'Directives en veille : la place aux missions vivantes',
         texte: 'Une directive de priorité normale pour laquelle aucun effort n’a été enregistré depuis 7 jours est maintenant repliée dans un encadré « Directives en veille » (type, faction, système et influence), sur la page BGS et sur le mobile. Elle n’est pas supprimée : l’Amiral continue de voir l’évolution d’influence, et un clic ouvre son détail. Dès qu’un effort est enregistré, elle revient parmi les directives. Les directives de priorité haute ou critique restent toujours affichées, et « Quoi faire » ne recommande plus une directive en veille.',

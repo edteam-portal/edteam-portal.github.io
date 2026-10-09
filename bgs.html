@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=26"></script>
+    <script src="navigation.js?v=27"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -95,33 +95,6 @@
         .data-row { padding: 20px; margin-bottom: 12px; }
         /* l'espace entre cadres vient du conteneur (gap 12 px) : pas de marge en plus, sinon elles s'additionnent */
         #bgs-tab-ordres .data-row { margin-bottom: 0; }
-        #bgs-plaques-overlay, #bgs-titres-overlay { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 20px; --plq: #FFD700; }
-        .plq-fond { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(20,14,0,0.9), rgba(0,0,0,0.97) 65%); animation: plqFond 0.5s ease-out; }
-        .plq-fond::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, var(--plq) 0%, transparent 55%); opacity: 0.2; }
-        .plq-contenu { position: relative; text-align: center; width: min(94vw, 780px); display: flex; flex-direction: column; align-items: center; gap: 10px; animation: plqEntree 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .plq-legende { letter-spacing: 6px; color: #FFD700; font-size: 0.95em; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .plq-titre { font-size: 2em; color: #fff; letter-spacing: 3px; text-shadow: 0 0 18px var(--plq); }
-        .plq-faction { color: #9aa; letter-spacing: 1px; }
-        .plq-ruban { position: relative; width: min(88vw, 660px); margin: 16px 0; pointer-events: none; overflow: hidden; filter: drop-shadow(0 0 26px var(--plq)); }
-        .plq-ruban svg { width: 100% !important; height: auto !important; }
-        .plq-medaille { position: relative; width: 210px; height: 210px; margin: 14px 0 8px; pointer-events: none; overflow: hidden; border-radius: 50%; filter: drop-shadow(0 0 26px var(--plq)); animation: plqMedaille 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
-        .plq-medaille svg { width: 100% !important; height: 100% !important; }
-        @keyframes plqMedaille { from { transform: scale(0.4) rotate(-25deg); opacity: 0; } to { transform: none; opacity: 1; } }
-        .plq-reflet { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%); transform: translateX(-120%); animation: plqReflet 2.6s ease-in-out 0.7s infinite; pointer-events: none; }
-        .plq-distinction { font-size: 1.7em; color: var(--plq); letter-spacing: 3px; font-weight: bold; text-shadow: 0 0 16px var(--plq); }
-        .plq-place { color: #fff; letter-spacing: 2px; }
-        .plq-stats { color: #aaa; font-size: 0.9em; }
-        .plq-stats b { color: #fff; }
-        .plq-actions { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
-        .plq-btn { background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 22px; font-family: inherit; font-size: 1em; letter-spacing: 2px; cursor: pointer; border-radius: 3px; }
-        .plq-btn:hover { color: #fff; border-color: #aaa; }
-        .plq-principal { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); font-weight: bold; }
-        .plq-principal:hover { background: #FFD700; color: #000; border-color: #FFD700; }
-        .plq-fiche { color: var(--ed-blue); font-size: 0.8em; text-decoration: none; margin-top: 6px; letter-spacing: 1px; }
-        @keyframes plqEntree { from { opacity: 0; transform: translateY(16px) scale(0.92); } to { opacity: 1; transform: none; } }
-        @keyframes plqFond { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes plqReflet { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(120%); } }
-        @media (prefers-reduced-motion: reduce) { .plq-contenu, .plq-fond, .plq-reflet, .plq-medaille { animation: none; } }
         .pilier-halo { position: absolute; inset: -14px; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.38) 0%, rgba(255,215,0,0) 68%); animation: pilierHalo 3.2s ease-in-out infinite; pointer-events: none; }
         @keyframes pilierHalo { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
         .pilier-bloc { background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.10), rgba(0,0,0,0.55) 70%) !important; }
@@ -1375,8 +1348,6 @@
                 ]);
                 titres = rTitres;
                 moi = rProfil.data || null;
-                if (titres && !window.__titresProposes) window.__titresReveal = titres;   // lus pour le mur : la révélation des titres s'en sert
-                if (moi && !window.__plaquesProposees) { window.__plaquesProposees = true; window.__titresProposes = true; proposerPlaquesBGS(moi.palmares_bgs); }   // plein écran, une fois par chargement ; les titres suivent
                 sem = (!rSem.error && rSem.data && rSem.data.escadron) ? rSem.data : null;   // absent tant que le script SQL 34 n'est pas lancé : le bloc est simplement masqué
             } catch (e) { console.error('Erreur accueil BGS :', e); }
 
@@ -1521,156 +1492,6 @@
                 console.error('Erreur progression BGS :', err);
                 zone.innerHTML = '<div style="color: #888; font-size: 0.85em;">Progression indisponible pour le moment.</div>';
             }
-        }
-
-        // ==========================================
-        // RÉVÉLATION DES PLAQUES : à l'ouverture de la page, plein écran, pour chaque plaque gagnée depuis la dernière visite (clôture d'un ordre par l'Amiral)
-        // ==========================================
-        function libellePlaque(m) {
-            const sc = Number(m.score) || 0;
-            let distinction = 'RUBAN DE CAMPAGNE';
-            if (sc >= 200) distinction = '3 ÉTOILES DE DIAMANT'; else if (sc >= 150) distinction = '2 ÉTOILES DE DIAMANT'; else if (sc >= 100) distinction = '1 ÉTOILE DE DIAMANT';
-            else if (sc >= 90) distinction = "3 ÉTOILES D'OR"; else if (sc >= 80) distinction = "2 ÉTOILES D'OR"; else if (sc >= 70) distinction = "1 ÉTOILE D'OR";
-            else if (sc >= 60) distinction = "3 ÉTOILES D'ARGENT"; else if (sc >= 50) distinction = "2 ÉTOILES D'ARGENT"; else if (sc >= 40) distinction = "1 ÉTOILE D'ARGENT";
-            else if (sc >= 30) distinction = '3 ÉTOILES DE BRONZE'; else if (sc >= 20) distinction = '2 ÉTOILES DE BRONZE'; else if (sc >= 10) distinction = '1 ÉTOILE DE BRONZE';
-            const rang = Number(m.rang) || 0;
-            const place = rang === 1 ? { txt: '1ÈRE PLACE DE LA CAMPAGNE', col: '#00FFFF' } : rang === 2 ? { txt: '2E PLACE DE LA CAMPAGNE', col: '#FFD700' } : rang === 3 ? { txt: '3E PLACE DE LA CAMPAGNE', col: '#C0C0C0' } : { txt: 'PARTICIPATION À LA CAMPAGNE', col: '#FF7100' };
-            return { distinction, place };
-        }
-
-        let plaquesFile = [], plaquesIdx = 0;
-        function fermerPlaquesBGS(toutMarquer) {
-            const ov = document.getElementById('bgs-plaques-overlay');
-            if (ov) ov.remove();
-            document.removeEventListener('keydown', clavierPlaquesBGS);
-            if (toutMarquer && window.edteamPlaques) window.edteamPlaques.marquerVues(profilCommandant.user_id, plaquesFile);
-            plaquesFile = [];
-            proposerTitresBGS();   // les titres de spécialiste viennent après les plaques
-        }
-        function clavierPlaquesBGS(e) {
-            if (e.key === 'Escape') fermerPlaquesBGS(true);
-            else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); suivantePlaqueBGS(); }
-        }
-        function suivantePlaqueBGS() {
-            if (plaquesIdx + 1 >= plaquesFile.length) { fermerPlaquesBGS(true); return; }
-            plaquesIdx++;
-            afficherPlaqueBGS();
-        }
-        function afficherPlaqueBGS() {
-            const m = plaquesFile[plaquesIdx];
-            if (!m) return;
-            if (window.edteamPlaques) window.edteamPlaques.marquerVues(profilCommandant.user_id, [m]);   // vue dès qu'elle est montrée
-            const info = libellePlaque(m);
-            const jjmmaaaa = s => { const r = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return r ? `${r[3]}/${r[2]}/${r[1]}` : ''; };
-            const dernier = plaquesIdx + 1 >= plaquesFile.length;
-            let ov = document.getElementById('bgs-plaques-overlay');
-            if (!ov) {
-                ov = document.createElement('div');
-                ov.id = 'bgs-plaques-overlay';
-                ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Nouvelle distinction');
-                document.body.appendChild(ov);
-                document.addEventListener('keydown', clavierPlaquesBGS);
-            }
-            const ruban = (typeof window.forgerRubanSVG === 'function') ? window.forgerRubanSVG(m.type_ordre, Number(m.jours) || 0, Number(m.score) || 0, Number(m.rang) || 0, '') : '';
-            ov.style.setProperty('--plq', info.place.col);
-            ov.innerHTML = `
-                <div class="plq-fond"></div>
-                <div class="plq-contenu" key="${plaquesIdx}">
-                    <div class="plq-legende">NOUVELLE DISTINCTION${plaquesFile.length > 1 ? ` <span style="color: #888;">· ${plaquesIdx + 1} / ${plaquesFile.length}</span>` : ''}</div>
-                    <div class="plq-titre">${escapeHtml(String(m.type_ordre || '').toUpperCase())} · ${escapeHtml(String(m.systeme || '').toUpperCase())}</div>
-                    <div class="plq-faction">${escapeHtml(String(m.faction || ''))}</div>
-                    <div class="plq-ruban">${ruban}<div class="plq-reflet"></div></div>
-                    <div class="plq-distinction">${escapeHtml(info.distinction)}</div>
-                    <div class="plq-place">${escapeHtml(info.place.txt)}</div>
-                    <div class="plq-stats">Score <b>${Math.floor(Number(m.score) || 0).toLocaleString('fr-FR')}</b> · <b>${escapeHtml(String(m.jours || '?'))}</b> jour(s) d'engagement · clôturée le ${jjmmaaaa(m.date_cloture)}</div>
-                    <div class="plq-actions">
-                        <button type="button" class="plq-btn plq-principal" onclick="suivantePlaqueBGS()">${dernier ? 'TERMINER' : 'SUIVANTE &rarr;'}</button>
-                        ${dernier ? '' : '<button type="button" class="plq-btn" onclick="fermerPlaquesBGS(true)">PASSER</button>'}
-                    </div>
-                    <a class="plq-fiche" href="escadron.html?fiche=moi">Voir toutes mes plaques sur ma fiche pilote &rarr;</a>
-                </div>`;
-            if (typeof sonSucces === 'function') sonSucces();
-        }
-        // appelée une fois par chargement de page, avec le palmarès du pilote
-        function proposerPlaquesBGS(palmares) {
-            try {
-                if (!window.edteamPlaques || !profilCommandant) return;
-                const nouvelles = window.edteamPlaques.nouvelles(profilCommandant.user_id, palmares);
-                if (!nouvelles.length) { proposerTitresBGS(); return; }
-                plaquesFile = nouvelles; plaquesIdx = 0;
-                afficherPlaqueBGS();
-            } catch (e) { console.error('Erreur plaques :', e); }
-        }
-
-        // ==========================================
-        // RÉVÉLATION DES TITRES DE SPÉCIALISTE : même principe que les plaques, plein écran, pour chaque titre pris depuis la dernière visite
-        // (mémoire par appareil dans plaques-vues.js ; jouée après les plaques s'il y en a)
-        // ==========================================
-        let titresFile = [], titresIdx = 0;
-        function fermerTitresBGS(toutMarquer) {
-            const ov = document.getElementById('bgs-titres-overlay');
-            if (ov) ov.remove();
-            document.removeEventListener('keydown', clavierTitresBGS);
-            if (toutMarquer && window.edteamTitres) window.edteamTitres.marquerVus(profilCommandant.user_id, titresFile);
-            titresFile = [];
-        }
-        function clavierTitresBGS(e) {
-            if (e.key === 'Escape') fermerTitresBGS(true);
-            else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); suivantTitreBGS(); }
-        }
-        function suivantTitreBGS() {
-            if (titresIdx + 1 >= titresFile.length) { fermerTitresBGS(true); return; }
-            titresIdx++;
-            afficherTitreBGS();
-        }
-        function afficherTitreBGS() {
-            const t = titresFile[titresIdx];
-            if (!t) return;
-            if (window.edteamTitres) window.edteamTitres.marquerVus(profilCommandant.user_id, [t]);   // vu dès qu'il est montré
-            const meta = (typeof window.titreMeta === 'function' && window.titreMeta(t.code)) || { nom: t.code, sous: '', couleur: '#FFD700', mesure: '', desc: '' };
-            const valeur = typeof window.formaterTitre === 'function' ? window.formaterTitre(t.code, t.valeur) : String(t.valeur);
-            const avance = t.second_nom
-                ? `<b>${escapeHtml(valeur)}</b> · en tête de <b>${escapeHtml(String(t.second_nom).toUpperCase())}</b> (${escapeHtml(typeof window.formaterTitre === 'function' ? window.formaterTitre(t.code, t.second_valeur) : String(t.second_valeur))})`
-                : `<b>${escapeHtml(valeur)}</b> · seul en lice pour l'instant`;
-            const dernier = titresIdx + 1 >= titresFile.length;
-            let ov = document.getElementById('bgs-titres-overlay');
-            if (!ov) {
-                ov = document.createElement('div');
-                ov.id = 'bgs-titres-overlay';
-                ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Nouveau titre de spécialiste');
-                document.body.appendChild(ov);
-                document.addEventListener('keydown', clavierTitresBGS);
-            }
-            ov.style.setProperty('--plq', meta.couleur);
-            ov.innerHTML = `
-                <div class="plq-fond"></div>
-                <div class="plq-contenu" key="${titresIdx}">
-                    <div class="plq-legende">NOUVEAU TITRE DE SPÉCIALISTE${titresFile.length > 1 ? ` <span style="color: #888;">· ${titresIdx + 1} / ${titresFile.length}</span>` : ''}</div>
-                    <div class="plq-titre">${escapeHtml(meta.nom)}</div>
-                    <div class="plq-faction">${escapeHtml(meta.sous)}</div>
-                    <div class="plq-medaille">${typeof window.forgerMedailleSVG === 'function' ? window.forgerMedailleSVG(t.code, meta.couleur) : ''}<div class="plq-reflet"></div></div>
-                    <div class="plq-distinction">SPÉCIALISTE DE L'ESCADRON</div>
-                    <div class="plq-place">${avance}</div>
-                    <div class="plq-stats">${escapeHtml(meta.desc)}<br><span style="color: #777;">Un titre se perd quand un autre pilote vous dépasse de plus de 2 %.</span></div>
-                    <div class="plq-actions">
-                        <button type="button" class="plq-btn plq-principal" onclick="suivantTitreBGS()">${dernier ? 'TERMINER' : 'SUIVANT &rarr;'}</button>
-                        ${dernier ? '' : '<button type="button" class="plq-btn" onclick="fermerTitresBGS(true)">PASSER</button>'}
-                    </div>
-                    <a class="plq-fiche" href="escadron.html?fiche=moi">Voir tous mes titres sur ma fiche pilote &rarr;</a>
-                </div>`;
-            if (typeof sonSucces === 'function') sonSucces();
-        }
-        // appelée après les plaques (ou tout de suite s'il n'y en a pas) ; les titres viennent du mur de l'accueil (déjà lus, aucune requête de plus)
-        function proposerTitresBGS() {
-            try {
-                if (!window.edteamTitres || !profilCommandant || !window.__titresReveal) return;
-                if (document.getElementById('bgs-plaques-overlay') || document.getElementById('bgs-titres-overlay')) return;
-                const nouveaux = window.edteamTitres.nouveaux(profilCommandant.user_id, window.__titresReveal);
-                window.__titresReveal = null;
-                if (!nouveaux.length) return;
-                titresFile = nouveaux; titresIdx = 0;
-                afficherTitreBGS();
-            } catch (e) { console.error('Erreur titres :', e); }
         }
 
         // Place chaque element dans la grille a deux colonnes : directives a gauche (colonne 1), initiatives a droite (colonne 2), rangee par rangee.
@@ -2286,122 +2107,6 @@
         let memoireDicoPilotes = {};
 
         // (la forge des médailles de titres est dans medailles.js)
-
-        // ==========================================
-        // FORGE À RUBANS MILITAIRES (PLAQUES MÉTALLIQUES)
-        // ==========================================
-        window.forgerRubanSVG = function(typeOrdre, jours, points, rang, tooltipText, onclickAction = '') {
-            let bg1, bg2, accent;
-            const t = (typeOrdre || '').toUpperCase();
-            
-            if (t.includes('GUERRE')) { bg1 = '#800000'; bg2 = '#330000'; accent = '#FF3333'; } 
-            else if (t.includes('HAUSSE')) { bg1 = '#004D00'; bg2 = '#001A00'; accent = '#33FF33'; } 
-            else if (t.includes('BAISSE')) { bg1 = '#993D00'; bg2 = '#4D1F00'; accent = '#FF9933'; } 
-            else if (t.includes('ELECTION')) { bg1 = '#002060'; bg2 = '#000A20'; accent = '#00FFFF'; } 
-            else { bg1 = '#404040'; bg2 = '#1A1A1A'; accent = '#CCCCCC'; } 
-
-            const randId = Math.random().toString(36).substring(7);
-
-            let nbStripes = Math.min(jours, 10);
-            let stripes = '';
-            if (nbStripes > 0) {
-                let spacing = 100 / (nbStripes + 1);
-                for(let i=1; i<=nbStripes; i++) {
-                    stripes += `<rect x="${spacing*i - 2}" y="0" width="4" height="28" fill="${accent}" opacity="0.85"/><line x1="${spacing*i - 2}" y1="0" x2="${spacing*i - 2}" y2="28" stroke="#ffffff" stroke-width="1" opacity="0.4"/><line x1="${spacing*i + 2}" y1="0" x2="${spacing*i + 2}" y2="28" stroke="#000000" stroke-width="1" opacity="0.6"/>`;
-                }
-            }
-
-            let stars = '';
-            const drawStar = (cx, cy, gradId, glow, scale=0.65) => `<g transform="translate(${cx}, ${cy}) scale(${scale})"><polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="url(#${gradId})" stroke="#111" stroke-width="1" filter="drop-shadow(0px 2px 2px ${glow})"/></g>`;
-
-            const renderStars = (count, gradId, glow) => {
-                if (count === 1) return drawStar(50, 14, gradId, glow, 0.65);
-                if (count === 2) return drawStar(40, 14, gradId, glow, 0.6) + drawStar(68, 14, gradId, glow, 0.6);
-                if (count === 3) return drawStar(33, 14, gradId, glow, 0.5) + drawStar(56, 14, gradId, glow, 0.5) + drawStar(79, 14, gradId, glow, 0.5);
-                return '';
-            };
-
-            let starGrads = '';
-            if (points >= 10) {
-                if (points >= 100) {
-                    starGrads = `<linearGradient id="gradDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
-                    let count = points >= 200 ? 3 : (points >= 150 ? 2 : 1);
-                    stars = renderStars(count, `gradDia_${randId}`, 'rgba(0,255,255,1)');
-                } else if (points >= 70) {
-                    starGrads = `<linearGradient id="gradGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="40%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
-                    let count = points >= 90 ? 3 : (points >= 80 ? 2 : 1);
-                    stars = renderStars(count, `gradGold_${randId}`, 'rgba(255,215,0,0.9)');
-                } else if (points >= 40) {
-                    starGrads = `<linearGradient id="gradSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
-                    let count = points >= 60 ? 3 : (points >= 50 ? 2 : 1);
-                    stars = renderStars(count, `gradSilv_${randId}`, 'rgba(255,255,255,0.8)');
-                } else if (points >= 10) {
-                    starGrads = `<linearGradient id="gradBro_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFDAB9"/><stop offset="50%" stop-color="#CD7F32"/><stop offset="100%" stop-color="#8B4513"/></linearGradient>`;
-                    let count = points >= 30 ? 3 : (points >= 20 ? 2 : 1);
-                    stars = renderStars(count, `gradBro_${randId}`, 'rgba(205,127,50,0.8)');
-                }
-            }
-
-            let frame = ''; let frameGrads = '';
-            if (rang === 1) {
-                frameGrads = `<linearGradient id="frameDia_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#00FFFF"/><stop offset="100%" stop-color="#008888"/></linearGradient>`;
-                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameDia_${randId})" stroke-width="2" filter="drop-shadow(0 0 4px #00FFFF)"/>`;
-            } else if (rang === 2) {
-                frameGrads = `<linearGradient id="frameGold_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFCC"/><stop offset="50%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/></linearGradient>`;
-                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameGold_${randId})" stroke-width="2" filter="drop-shadow(0 0 3px #FFD700)"/>`;
-            } else if (rang === 3) {
-                frameGrads = `<linearGradient id="frameSilv_${randId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#C0C0C0"/><stop offset="100%" stop-color="#808080"/></linearGradient>`;
-                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="url(#frameSilv_${randId})" stroke-width="2" filter="drop-shadow(0 0 2px #FFFFFF)"/>`;
-            } else {
-                frame = `<rect x="1" y="1" width="98" height="26" fill="none" stroke="#555555" stroke-width="2"/>`;
-            }
-
-            // Disque de podium (rang 1, 2, 3) dans le coin : le cadre montre la place, le chiffre la confirme
-            let podium = '';
-            if (rang >= 1 && rang <= 3) {
-                const pc = rang === 1 ? '#00FFFF' : (rang === 2 ? '#FFD700' : '#C0C0C0');
-                podium = `<circle cx="8" cy="8.5" r="6.2" fill="#050505" stroke="${pc}" stroke-width="1.3"/><text x="8" y="12" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-size="9.5" font-weight="bold" fill="${pc}">${rang}</text>`;
-            }
-
-            let clickHandler = onclickAction ? `onclick="${onclickAction}; if(typeof hideHoloTooltip === 'function') hideHoloTooltip();"` : '';
-
-            return `
-            <div style="position: relative; cursor: help; transition: 0.1s;" 
-                 ${clickHandler}
-                 onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, '${tooltipText}', '#fff')" 
-                 onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" 
-                 onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)"
-                 onmouseover="this.style.transform='scale(1.15)'; this.style.zIndex='50';"
-                 onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
-                
-                <svg viewBox="0 0 100 28" style="width: 120px; height: 33px; display: block; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));">
-                    <defs>
-                        <linearGradient id="gradBg_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="${bg1}" />
-                            <stop offset="100%" stop-color="${bg2}" />
-                        </linearGradient>
-
-                        <linearGradient id="metalGlare_${randId}" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-                            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.1"/>
-                            <stop offset="49%" stop-color="#ffffff" stop-opacity="0.3"/>
-                            <stop offset="50%" stop-color="transparent" />
-                            <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
-                        </linearGradient>
-
-                        ${starGrads}
-                        ${frameGrads}
-                    </defs>
-                    
-                    <rect x="0" y="0" width="100" height="28" fill="url(#gradBg_${randId})"/>
-                    ${stripes}
-                    <rect x="0" y="0" width="100" height="28" fill="url(#metalGlare_${randId})" pointer-events="none"/>
-                    ${frame}
-                    ${stars}
-                    ${podium}
-                </svg>
-            </div>`;
-        };
 
         // ==========================================
         // MOTEUR DE PAGINATION DES PLAQUES MILITAIRES
@@ -3021,8 +2726,8 @@
         };
     </script>
 
-    <script src="plaques-vues.js?v=2"></script>
     <script src="medailles.js?v=7"></script>
+    <script src="rubans.js?v=1"></script>
     <script src="footer.js?v=23"></script>
 </body>
 </html>

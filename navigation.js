@@ -337,6 +337,19 @@ window.actualiserHeader = function(profilData) {
                         'rang_fed', 'prog_fed', 'rang_emp', 'prog_emp', 'puissance_nom', 'puissance_rang', 'puissance_merites_cycle', 'puissance_merites_total', 'rang_bgs', 'points_bgs'];
         const memo = window.__profilRangs = window.__profilRangs || {};
         CHAMPS.forEach(k => { if (profilData[k] !== undefined) memo[k] = profilData[k]; });
+        // Révélations plein écran (nouveau rang, Pilier, Élan, distinction, anecdote) : revelations.js, chargé une fois, aucune requête pour les rangs
+        try {
+            const pRev = Object.assign({}, window.profilCommandant || {}, memo, profilData.user_id ? { user_id: profilData.user_id } : {});
+            const lancerRev = () => { if (window.edteamRevelations) window.edteamRevelations.verifier(pRev); };
+            if (window.edteamRevelations) lancerRev();
+            else if (!window.__revelChargement) {
+                window.__revelChargement = true;
+                const sRev = document.createElement('script');
+                sRev.src = 'revelations.js?v=2';
+                sRev.onload = lancerRev;
+                document.head.appendChild(sRev);
+            }
+        } catch (e) { /* une révélation ne doit jamais gêner la page */ }
         const zone = document.getElementById('header-rangs');
         if (zone && (memo.rang_fed !== undefined || memo.puissance_nom !== undefined || memo.rang_bgs !== undefined)) {
             const R = window.EDTEAM_RANGS;

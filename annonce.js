@@ -97,7 +97,7 @@
                 var a = ANNONCES.filter(function (x) { return vues.indexOf(x.id) < 0; })[0];
                 if (!a) return;
                 setTimeout(function () {
-                    if (document.getElementById('edteam-annonce') || document.getElementById('bgs-plaques-overlay') || document.getElementById('bgs-titres-overlay')) return;
+                    if (document.getElementById('edteam-annonce') || document.getElementById('edteam-revel')) return;
                     monter(a, profil.user_id, opts.aller);
                 }, typeof opts.delai === 'number' ? opts.delai : 1800);
             } catch (e) { /* une annonce ne doit jamais gener la page */ }

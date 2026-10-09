@@ -37,12 +37,12 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
-    <script src="quoifaire.js?v=10"></script>
-    <script src="qgsuivi.js?v=37"></script>
+    <script src="quoifaire.js?v=11"></script>
+    <script src="qgsuivi.js?v=38"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="anecdotes.js?v=3"></script>
-    <script src="navigation.js?v=26"></script>
+    <script src="navigation.js?v=27"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -134,7 +134,13 @@
         @keyframes qgTourne { to { transform: rotate(360deg); } }
         .qg-halo { position: absolute; inset: -16px; border-radius: 50%; background: radial-gradient(circle, var(--accent) 0%, transparent 66%); opacity: 0.3; animation: qgHalo 3.4s ease-in-out infinite; pointer-events: none; }
         @keyframes qgHalo { 0%, 100% { opacity: 0.18; } 50% { opacity: 0.4; } }
-        .qg-progres { position: absolute; inset: 0; border-radius: 50%; }
+        /* Médaille animée (même effet que la modale plein écran) : 2 anneaux en plus (pointillés inversés, arc rapide) et anneau de progression qui se remplit */
+        .qg-anneau-inverse { position: absolute; inset: -20px; border-radius: 50%; border: 1px dotted var(--accent); opacity: 0.32; animation: qgTourne 50s linear infinite reverse; pointer-events: none; }
+        .qg-anneau-arc { position: absolute; inset: -4px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--accent); border-bottom-color: var(--accent); filter: drop-shadow(0 0 5px var(--accent)); opacity: 0.85; animation: qgTourne 6s linear infinite; pointer-events: none; }
+        @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+        @keyframes qgRempli { from { --p: 0; } to { --p: var(--v); } }
+        .qg-progres { position: absolute; inset: 0; border-radius: 50%; --p: var(--v, 0); background: conic-gradient(var(--accent) calc(var(--p) * 1%), rgba(255,255,255,0.08) 0); animation: qgRempli 1.8s ease-out both; }
+        @media (prefers-reduced-motion: reduce) { .qg-anneau-inverse, .qg-anneau-arc, .qg-progres { animation: none; } }
         .qg-disque { position: absolute; inset: 7px; border-radius: 50%; background: #070400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; box-shadow: inset 0 0 18px rgba(0,0,0,0.9); }
         .qg-vide { inset: 0; border: 2px dashed var(--accent); background: transparent; opacity: 0.7; }
         .qg-glyphe { color: var(--accent); font-size: 2.1em; text-shadow: 0 0 14px var(--accent); }
@@ -1926,9 +1932,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // Rangs de carriere (Powerplay, BGS, Federation, Auxiliaires) : affiches dans l'en-tete par navigation.js (actualiserHeader), fenetres dans carriere.js
                 if (typeof window.actualiserHeader === 'function') window.actualiserHeader(profilData);
 
-                // Plaques de campagne gagnées depuis la dernière visite : petite carte d'avertissement
-                verifierPlaquesQG(profilCommandant);
-                verifierTitresQG(profilCommandant);   // titres de spécialiste pas encore découverts
                 // Annonce d'une grande nouvelle fonction (une seule fois par pilote et par appareil) : annonce.js
                 if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { aller: () => { window.location.href = 'bgs.html'; } });
 
@@ -3186,24 +3189,30 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         function inisQG(nom) { try { return window.EDTEAMPhotos ? window.EDTEAMPhotos.initiales(nom) : '?'; } catch (e) { return '?'; } }
         function medailleQG(glyphe, ring, texte, vide, photo, nom) {
             if (!vide && nom && !photo) return `<div class="qg-medaille">
+                <div class="qg-anneau-inverse"></div>
                 <div class="qg-anneau-tourne"></div>
+                <div class="qg-anneau-arc"></div>
                 <div class="qg-halo"></div>
-                <div class="qg-progres" style="background: conic-gradient(var(--accent) ${ring * 3.6}deg, rgba(255,255,255,0.08) 0deg);"></div>
+                <div class="qg-progres" style="--v: ${ring};"></div>
                 <div class="qg-disque"><span class="qg-ini">${escapeHtml(inisQG(nom))}</span></div>
                 <span class="qg-pastille">${glyphe} ${texte}</span>
             </div>`;
             if (photo && !vide) return `<div class="qg-medaille">
+                <div class="qg-anneau-inverse"></div>
                 <div class="qg-anneau-tourne"></div>
+                <div class="qg-anneau-arc"></div>
                 <div class="qg-halo"></div>
-                <div class="qg-progres" style="background: conic-gradient(var(--accent) ${ring * 3.6}deg, rgba(255,255,255,0.08) 0deg);"></div>
+                <div class="qg-progres" style="--v: ${ring};"></div>
                 <div class="qg-disque"><img class="qg-photo" src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>
                 <span class="qg-pastille">${glyphe} ${texte}</span>
             </div>`;
             return `<div class="qg-medaille">
+                <div class="qg-anneau-inverse"></div>
                 <div class="qg-anneau-tourne"></div>
+                <div class="qg-anneau-arc"></div>
                 <div class="qg-halo"></div>
                 ${vide ? '<div class="qg-disque qg-vide"><span class="qg-glyphe">' + glyphe + '</span></div>'
-                       : `<div class="qg-progres" style="background: conic-gradient(var(--accent) ${ring * 3.6}deg, rgba(255,255,255,0.08) 0deg);"></div>
+                       : `<div class="qg-progres" style="--v: ${ring};"></div>
                 <div class="qg-disque"><span class="qg-glyphe">${glyphe}</span><span class="qg-valeur">${texte}</span></div>`}
             </div>`;
         }
@@ -3355,70 +3364,11 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             ].join('');
         }
 
-        // Carte d'avertissement : plaques de campagne pas encore découvertes (la révélation plein écran se fait sur la page BGS).
-        // Au plus une vérification toutes les 10 minutes par session ; la carte se referme seule après 25 s et reviendra à la prochaine session tant que les plaques ne sont pas vues.
-        async function verifierPlaquesQG(profil) {
-            try {
-                if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT' || !window.edteamPlaques) return;
-                const memo = Number(sessionStorage.getItem('edteam_plaques_qg') || 0);
-                if (memo && Date.now() - memo < 1800000) return;
-                sessionStorage.setItem('edteam_plaques_qg', String(Date.now()));
-                const { data } = await supabaseApp.from('profils').select('palmares_bgs').eq('user_id', profil.user_id).single();
-                const n = window.edteamPlaques.nouvelles(profil.user_id, data && data.palmares_bgs).length;
-                if (!n) return;
-                setTimeout(() => {
-                    const c = document.createElement('div');
-                    c.className = 'ft-astuce';
-                    c.setAttribute('role', 'status');
-                    c.style.borderColor = 'rgba(255,215,0,0.6)'; c.style.borderLeftColor = '#FFD700';
-                    c.innerHTML = '<b style="color: #FFD700;">&#127941; NOUVELLE PLAQUE !</b><br>' + (n > 1 ? 'Tu as gagné ' + n + ' distinctions de campagne.' : 'Tu as gagné une distinction de campagne.') + ' Va ' + (n > 1 ? 'les' : 'la') + ' découvrir dans le BGS.'
-                        + '<div class="ft-acts"><button type="button" class="ft-voir" style="color: #FFD700; border-color: rgba(255,215,0,0.6); background: rgba(255,215,0,0.08);">VOIR</button><button type="button" class="ft-non">PLUS TARD</button></div>';
-                    const retirer = () => { c.classList.remove('ft-vu'); setTimeout(() => { if (c.parentNode) c.parentNode.removeChild(c); }, 500); };
-                    c.querySelector('.ft-voir').addEventListener('click', () => { window.location.href = 'bgs.html'; });
-                    c.querySelector('.ft-non').addEventListener('click', retirer);
-                    document.body.appendChild(c);
-                    setTimeout(() => c.classList.add('ft-vu'), 30);
-                    setTimeout(retirer, 25000);
-                }, 3500);
-            } catch (e) { console.error('Erreur plaques QG :', e); }
-        }
 
-        // Carte d'avertissement : titres de spécialiste pas encore découverts (la révélation plein écran se fait sur la page BGS).
-        // Une toute petite lecture (SES titres seulement, 7 lignes au plus), au plus toutes les 10 minutes par session. La carte se pose au-dessus des autres cartes du pied de page.
-        async function verifierTitresQG(profil) {
-            try {
-                if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT' || !window.edteamTitres) return;
-                const memo = Number(sessionStorage.getItem('edteam_titres_qg') || 0);
-                if (memo && Date.now() - memo < 1800000) return;
-                sessionStorage.setItem('edteam_titres_qg', String(Date.now()));
-                const { data, error } = await supabaseApp.from('titres_specialistes').select('code, user_id, depuis').eq('user_id', profil.user_id);
-                if (error || !data || !data.length) return;
-                const titres = {}; data.forEach(r => { titres[r.code] = r; });
-                const n = window.edteamTitres.nouveaux(profil.user_id, titres).length;
-                if (!n) return;
-                const montrer = () => {
-                    const c = document.createElement('div');
-                    c.className = 'ft-astuce';
-                    c.setAttribute('role', 'status');
-                    c.style.bottom = '340px';   // au-dessus des cartes du pied de page (58 px : « Le saviez-vous ? », 170 px : nouveauté importante)
-                    c.style.borderColor = 'rgba(255,215,0,0.6)'; c.style.borderLeftColor = '#FFD700';
-                    c.innerHTML = '<b style="color: #FFD700;">&#127894; NOUVEAU TITRE !</b><br>' + (n > 1 ? 'Tu as décroché ' + n + ' titres de spécialiste.' : 'Tu as décroché un titre de spécialiste.') + ' Va ' + (n > 1 ? 'les' : 'le') + ' découvrir dans le BGS.'
-                        + '<div class="ft-acts"><button type="button" class="ft-voir" style="color: #FFD700; border-color: rgba(255,215,0,0.6); background: rgba(255,215,0,0.08);">VOIR</button><button type="button" class="ft-non">PLUS TARD</button></div>';
-                    const retirer = () => { c.classList.remove('ft-vu'); setTimeout(() => { if (c.parentNode) c.parentNode.removeChild(c); }, 500); };
-                    c.querySelector('.ft-voir').addEventListener('click', () => { window.location.href = 'bgs.html'; });
-                    c.querySelector('.ft-non').addEventListener('click', retirer);
-                    document.body.appendChild(c);
-                    setTimeout(() => c.classList.add('ft-vu'), 30);
-                    setTimeout(retirer, 25000);
-                };
-                setTimeout(montrer, 3500);
-            } catch (e) { console.error('Erreur titres QG :', e); }
-        }
 
 
     </script>
 
-    <script src="plaques-vues.js?v=2"></script>
     <script src="annonce.js?v=1"></script>
     <script src="footer.js?v=23"></script>
 </body>

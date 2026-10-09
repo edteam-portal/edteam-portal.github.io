@@ -61,9 +61,9 @@
 .qs-fgrid #qg-faction-stats{grid-area:stats;display:flex;flex-direction:column;justify-content:center;min-width:0}.qs-fgrid #qg-faction-src{grid-area:src}
 .qs-tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .qs-fgrid #qg-faction-stats{container-type:inline-size}
-@container (max-width:455px){.qs-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.qs-t{border:1px solid color-mix(in srgb,var(--c) 38%,transparent);background:rgba(0,0,0,.35);padding:7px 8px;display:flex;flex-direction:column;justify-content:center;min-width:0}
-.qs-t .v{color:#fff;font-size:1.3em;overflow:hidden;text-overflow:ellipsis;line-height:1.1;white-space:nowrap}.qs-t .l{font-size:.58em;letter-spacing:2px;color:#888;margin-top:3px}
+@container (max-width:360px){.qs-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.qs-t{border:1px solid color-mix(in srgb,var(--c) 38%,transparent);background:rgba(0,0,0,.35);padding:5px 7px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.qs-t .v{color:#fff;font-size:1.15em;overflow:hidden;text-overflow:ellipsis;line-height:1.1;white-space:nowrap}.qs-t .l{font-size:.58em;letter-spacing:2px;color:#888;margin-top:3px}
 #banner-gazette{transition:border-color .2s,background .2s,box-shadow .2s}
 #banner-gazette:hover{border-color:#00F0FF!important;background:linear-gradient(135deg,rgba(0,240,255,.34),rgba(0,0,0,.4))!important;box-shadow:0 0 14px rgba(0,240,255,.45)}
 #banner-gazette:active{background:linear-gradient(135deg,rgba(0,240,255,.5),rgba(0,0,0,.35))!important}
@@ -95,7 +95,7 @@
     }
 
     // Note de fidelite : Spansh ne connait que les systemes visites par des joueurs, ses totaux peuvent donc differer de quelques % de ceux du jeu.
-    const NOTE_JEU = '<span title="Spansh ne met un système à jour que lorsqu’un joueur le visite : les systèmes peu fréquentés gardent leur ancien relevé, d’où un petit écart possible avec le jeu.">Petit écart possible avec le jeu (relevé Spansh) : le panneau en jeu fait foi.</span>';
+    const NOTE_JEU = '<span title="Spansh ne met un système à jour que lorsqu’un joueur le visite : les systèmes peu fréquentés gardent leur ancien relevé, d’où un petit écart possible avec le jeu. Le panneau de faction ou de puissance affiché en jeu fait foi.">Écart possible avec le jeu (Spansh)</span>';
 
     function cartePuissance(p) {
         if (!p) return '';
