@@ -1263,8 +1263,8 @@
                 </div>
                 <div style="padding:16px 24px;display:flex;flex-direction:column;gap:14px;">
                     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#888;font-size:.8em;"><button id="colo-btn-maj" class="c-zoom" style="width:auto;padding:3px 12px;min-width:150px;" onclick="actualiserFenetreColo(true)"><span class="colo-tourne">↻</span> ACTUALISER</button><span style="display:inline-flex;gap:4px;align-items:center;">marchandises : <button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'cat' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('cat')">PAR CATÉGORIE</button><button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'qte' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('qte')">PAR QUANTITÉ</button></span><span>mise à jour automatique toutes les 60 secondes · dernière lecture à <b id="colo-maj-heure" style="color:#ccc;font-weight:normal;">${new Date().toLocaleTimeString('fr-FR')}</b></span></div>
-                    <div><div style="color:${G};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; TERMINÉS (${s.finies.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;">rien de terminé pour l\'instant</span>'}</div></div>
                     ${s.chantiers.length ? `<div><div style="color:${O};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; EN CHANTIER (${s.chantiers.length})</div>${chantiers}</div>` : ''}
+                    <div><div style="color:${G};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; TERMINÉS (${s.finies.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;">rien de terminé pour l\'instant</span>'}</div></div>
                     <div style="color:#888;font-size:.82em;border-top:1px dashed #2a2a2a;padding-top:10px;">ⓘ Seules les constructions que le plugin a vues sont listées : le jeu peut en indiquer d'autres (chantiers que personne n'a encore consultés, installations déjà existantes). Il ne fournit pas non plus le nombre d'emplacements encore libres.</div>
                 </div></div>`;
             m.style.display = 'flex';
@@ -1335,7 +1335,7 @@
                     construirePage(data);   // la page derriere se met a jour aussi (la fenetre est dans son contenu : on la rouvre ensuite)
                     ouvrirSysteme(i, true);
                     const c2 = document.querySelector('#modal-colo .modal-content'); if (c2) c2.scrollTop = haut;
-                    window.sonColoUpdate();
+                    if (manuel) window.sonColoUpdate();   // son seulement sur clic ACTUALISER : la mise a jour automatique (60 s) reste silencieuse
                 } else {
                     const h = document.getElementById('colo-maj-heure'); if (h) h.textContent = new Date().toLocaleTimeString('fr-FR');
                 }
