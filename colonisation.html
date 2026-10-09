@@ -1171,10 +1171,11 @@
         // ---------------------------------------------------------------
         //  FENÊTRE DE DÉTAIL D'UN SYSTÈME
         // ---------------------------------------------------------------
-        window.ouvrirSysteme = function (i) {
+        window.ouvrirSysteme = function (i, maj) {
             const s = (window.__colo && window.__colo.systemes || [])[i];
             if (!s) return;
-            if (typeof sonClic === 'function') sonClic();
+            window.__coloOuvert = s.nom;   // retenu pour la mise a jour de la fenetre (par le nom : l'ordre des systemes peut changer)
+            if (!maj && typeof sonClic === 'function') sonClic();
             const chantiers = s.chantiers.map(c => {
                 const k = calculerChantier(c), col = couleurAvancement(k.pct), total = (c.contributions || []).reduce((t, p) => t + p.tonnes, 0), finies = k.lignes.filter(l => l.reste === 0).length;
                 const marchandises = k.lignes.map(l => {
@@ -1214,11 +1215,75 @@
                     <div onclick="document.getElementById('modal-colo').style.display='none'" style="position:absolute;top:14px;right:20px;color:${O};cursor:pointer;font-weight:bold;">X</div>
                 </div>
                 <div style="padding:16px 24px;display:flex;flex-direction:column;gap:14px;">
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#888;font-size:.8em;"><button class="c-zoom" style="width:auto;padding:3px 12px;" onclick="actualiserFenetreColo(true)">↻ ACTUALISER</button><span>mise à jour automatique toutes les 60 secondes · dernière lecture à <b id="colo-maj-heure" style="color:#ccc;font-weight:normal;">${new Date().toLocaleTimeString('fr-FR')}</b></span></div>
                     <div><div style="color:${G};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; TERMINÉS (${s.finies.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;">rien de terminé pour l\'instant</span>'}</div></div>
                     ${s.chantiers.length ? `<div><div style="color:${O};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; EN CHANTIER (${s.chantiers.length})</div>${chantiers}</div>` : ''}
                     <div style="color:#888;font-size:.82em;border-top:1px dashed #2a2a2a;padding-top:10px;">ⓘ Seules les constructions que le plugin a vues sont listées : le jeu peut en indiquer d'autres (chantiers que personne n'a encore consultés, installations déjà existantes). Il ne fournit pas non plus le nombre d'emplacements encore libres.</div>
                 </div></div>`;
             m.style.display = 'flex';
+            if (!maj) demarrerMajFenetreColo();
+        };
+
+        // ---------------------------------------------------------------
+        //  MISE A JOUR DE LA FENETRE D'UN SYSTEME (toutes les 60 s tant qu'elle est ouverte et visible + bouton ACTUALISER)
+        //  Un son est joue quand les donnees du systeme ont change (nouvelle livraison enregistree).
+        // ---------------------------------------------------------------
+        window.sonColoUpdate = function () {   // meme son que la validation d'un effort BGS (bgs.html)
+            try {
+                if (!audioCtx && typeof window.initAudio === 'function') window.initAudio();
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const t = audioCtx.currentTime, osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, t);
+                osc.frequency.exponentialRampToValueAtTime(600, t + 0.4);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 1);
+                const delay = audioCtx.createDelay(); delay.delayTime.value = 0.25;
+                const feedback = audioCtx.createGain(); feedback.gain.value = 0.3;
+                delay.connect(feedback); feedback.connect(delay);
+                osc.connect(gain); gain.connect(audioCtx.destination); gain.connect(delay);
+                delay.connect(audioCtx.destination);
+                osc.start(t); osc.stop(t + 1);
+            } catch (e) { /* le son ne doit jamais gener la page */ }
+        };
+        const coloFenetreOuverte = () => { const m = document.getElementById('modal-colo'); return !!m && m.style.display === 'flex' && !!window.__coloOuvert; };
+        let coloMajTimer = null, coloMajEnCours = false, coloMajDernier = 0;
+        function demarrerMajFenetreColo() {
+            coloMajDernier = Date.now();
+            if (coloMajTimer) return;
+            coloMajTimer = setInterval(() => {
+                if (!coloFenetreOuverte()) { clearInterval(coloMajTimer); coloMajTimer = null; return; }
+                if (document.visibilityState === 'visible') actualiserFenetreColo(false);
+            }, 60000);
+        }
+        document.addEventListener('visibilitychange', () => {   // retour sur l'onglet apres une longue absence : mise a jour tout de suite
+            if (document.visibilityState === 'visible' && coloFenetreOuverte() && Date.now() - coloMajDernier > 60000) actualiserFenetreColo(false);
+        });
+        window.actualiserFenetreColo = async function (manuel) {
+            if (coloMajEnCours || !coloFenetreOuverte()) return;
+            coloMajEnCours = true;
+            const nom = window.__coloOuvert;
+            try {
+                const avant = JSON.stringify(((window.__colo && window.__colo.systemes) || []).find(x => x.nom === nom) || null);
+                if (manuel && typeof sonClic === 'function') sonClic();
+                const data = await chargerSynthese(true);
+                const i = ((data && data.systemes) || []).findIndex(x => x.nom === nom);
+                if (i < 0) return;
+                const change = JSON.stringify(data.systemes[i]) !== avant;
+                coloMajDernier = Date.now();
+                if (change) {
+                    const cont = document.querySelector('#modal-colo .modal-content'), haut = cont ? cont.scrollTop : 0;
+                    construirePage(data);   // la page derriere se met a jour aussi (la fenetre est dans son contenu : on la rouvre ensuite)
+                    ouvrirSysteme(i, true);
+                    const c2 = document.querySelector('#modal-colo .modal-content'); if (c2) c2.scrollTop = haut;
+                    window.sonColoUpdate();
+                } else {
+                    const h = document.getElementById('colo-maj-heure'); if (h) h.textContent = new Date().toLocaleTimeString('fr-FR');
+                }
+            } catch (e) { console.error('Erreur mise à jour colonisation :', e); }
+            finally { coloMajEnCours = false; }
         };
 
         // Le pilote verse LUI-MEME son espace personnel a l'escadron (jamais automatique, operation unique).
