@@ -362,6 +362,11 @@
         .colo-haut { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:12px; }
         @media (max-width:1000px) { .colo-haut { grid-template-columns:minmax(0,1fr); } }
         .colo-cols { column-count:2; column-gap:30px; }
+        @keyframes coloTourne { to { transform: rotate(360deg); } }
+        .colo-tourne { display:inline-block; }
+        #colo-btn-maj.maj-en-cours { border-color:#00F0FF; color:#00F0FF; box-shadow:0 0 10px rgba(0,240,255,.5); pointer-events:none; }
+        #colo-btn-maj.maj-en-cours .colo-tourne { animation: coloTourne .8s linear infinite; }
+        #colo-btn-maj.maj-ok { border-color:#00FF66; color:#00FF66; box-shadow:0 0 12px rgba(0,255,102,.55); pointer-events:none; }
         @media (max-width:850px) { .colo-cols { column-count:1; } }
     </style>
 
@@ -1253,7 +1258,7 @@
                     <div onclick="document.getElementById('modal-colo').style.display='none'" style="position:absolute;top:14px;right:20px;color:${O};cursor:pointer;font-weight:bold;">X</div>
                 </div>
                 <div style="padding:16px 24px;display:flex;flex-direction:column;gap:14px;">
-                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#888;font-size:.8em;"><button class="c-zoom" style="width:auto;padding:3px 12px;" onclick="actualiserFenetreColo(true)">↻ ACTUALISER</button><span style="display:inline-flex;gap:4px;align-items:center;">marchandises : <button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'cat' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('cat')">PAR CATÉGORIE</button><button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'qte' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('qte')">PAR QUANTITÉ</button></span><span>mise à jour automatique toutes les 60 secondes · dernière lecture à <b id="colo-maj-heure" style="color:#ccc;font-weight:normal;">${new Date().toLocaleTimeString('fr-FR')}</b></span></div>
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#888;font-size:.8em;"><button id="colo-btn-maj" class="c-zoom" style="width:auto;padding:3px 12px;min-width:150px;" onclick="actualiserFenetreColo(true)"><span class="colo-tourne">↻</span> ACTUALISER</button><span style="display:inline-flex;gap:4px;align-items:center;">marchandises : <button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'cat' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('cat')">PAR CATÉGORIE</button><button class="c-zoom" style="width:auto;padding:3px 10px;${vueMarchandises() === 'qte' ? 'border-color:#FFD700;color:#FFD700;' : ''}" onclick="changerVueMarchandises('qte')">PAR QUANTITÉ</button></span><span>mise à jour automatique toutes les 60 secondes · dernière lecture à <b id="colo-maj-heure" style="color:#ccc;font-weight:normal;">${new Date().toLocaleTimeString('fr-FR')}</b></span></div>
                     <div><div style="color:${G};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; TERMINÉS (${s.finies.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${finies || '<span style="color:#777;">rien de terminé pour l\'instant</span>'}</div></div>
                     ${s.chantiers.length ? `<div><div style="color:${O};letter-spacing:2px;font-size:1em;margin-bottom:8px;">&gt; EN CHANTIER (${s.chantiers.length})</div>${chantiers}</div>` : ''}
                     <div style="color:#888;font-size:.82em;border-top:1px dashed #2a2a2a;padding-top:10px;">ⓘ Seules les constructions que le plugin a vues sont listées : le jeu peut en indiquer d'autres (chantiers que personne n'a encore consultés, installations déjà existantes). Il ne fournit pas non plus le nombre d'emplacements encore libres.</div>
@@ -1299,10 +1304,18 @@
         document.addEventListener('visibilitychange', () => {   // retour sur l'onglet apres une longue absence : mise a jour tout de suite
             if (document.visibilityState === 'visible' && coloFenetreOuverte() && Date.now() - coloMajDernier > 60000) actualiserFenetreColo(false);
         });
+        // Retour visuel du bouton ACTUALISER : « ACTUALISATION… » (icone qui tourne) pendant la lecture, puis « ✔ À JOUR » ou « ✔ NOUVELLES DONNÉES » pendant 2 s
+        function coloBoutonMaj(etat, texte) {
+            const b = document.getElementById('colo-btn-maj'); if (!b) return;
+            b.classList.toggle('maj-en-cours', etat === 'cours'); b.classList.toggle('maj-ok', etat === 'ok');
+            b.innerHTML = etat === 'ok' ? texte : '<span class="colo-tourne">↻</span> ' + (etat === 'cours' ? 'ACTUALISATION…' : 'ACTUALISER');
+        }
         window.actualiserFenetreColo = async function (manuel) {
             if (coloMajEnCours || !coloFenetreOuverte()) return;
             coloMajEnCours = true;
-            const nom = window.__coloOuvert;
+            const nom = window.__coloOuvert, debut = Date.now();
+            let resultat = null;
+            if (manuel) coloBoutonMaj('cours');
             try {
                 const avant = JSON.stringify(((window.__colo && window.__colo.systemes) || []).find(x => x.nom === nom) || null);
                 if (manuel && typeof sonClic === 'function') sonClic();
@@ -1310,6 +1323,8 @@
                 const i = ((data && data.systemes) || []).findIndex(x => x.nom === nom);
                 if (i < 0) return;
                 const change = JSON.stringify(data.systemes[i]) !== avant;
+                resultat = change ? '✔ NOUVELLES DONNÉES' : '✔ À JOUR';
+                if (manuel) { const reste = 700 - (Date.now() - debut); if (reste > 0) await new Promise(r => setTimeout(r, reste)); }   // l'effet doit rester visible meme si la lecture est instantanee
                 coloMajDernier = Date.now();
                 if (change) {
                     const cont = document.querySelector('#modal-colo .modal-content'), haut = cont ? cont.scrollTop : 0;
@@ -1321,7 +1336,13 @@
                     const h = document.getElementById('colo-maj-heure'); if (h) h.textContent = new Date().toLocaleTimeString('fr-FR');
                 }
             } catch (e) { console.error('Erreur mise à jour colonisation :', e); }
-            finally { coloMajEnCours = false; }
+            finally {
+                coloMajEnCours = false;
+                if (manuel) {
+                    if (resultat) { coloBoutonMaj('ok', resultat); setTimeout(() => coloBoutonMaj('repos'), 2000); }
+                    else coloBoutonMaj('repos');
+                }
+            }
         };
 
         // Le pilote verse LUI-MEME son espace personnel a l'escadron (jamais automatique, operation unique).
