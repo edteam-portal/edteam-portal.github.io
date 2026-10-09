@@ -1229,7 +1229,7 @@
                     k.lignes.forEach(l => { (grp[categorieMarchandise(l)] = grp[categorieMarchandise(l)] || []).push(l); });
                     marchandises = Object.keys(grp).sort((a, b) => (a === 'AUTRES') - (b === 'AUTRES') || a.localeCompare(b, 'fr')).map(cat => {
                         const lg = grp[cat], resteCat = lg.reduce((t, l) => t + l.reste, 0);
-                        return '<div style="break-after:avoid;margin:' + '10px 0 2px;color:' + (resteCat ? O : G) + ';letter-spacing:2px;font-size:.85em;font-weight:bold;border-bottom:1px solid ' + (resteCat ? 'rgba(255,113,0,.4)' : 'rgba(0,255,102,.35)') + ';padding-bottom:3px;display:flex;justify-content:space-between;gap:8px;"><span>&gt; ' + cat + '</span><span style="color:' + (resteCat ? '#aaa' : G) + ';font-weight:normal;">' + (resteCat ? 'reste ' + fmt(resteCat) + ' t' : '✔ complet') + '</span></div>' + lg.map(htmlLigne).join('');
+                        return '<div style="break-after:avoid;margin:' + '10px 0 2px;color:' + (resteCat ? O : G) + ';letter-spacing:2px;font-size:.85em;font-weight:bold;border-bottom:1px solid ' + (resteCat ? 'rgba(255,113,0,.4)' : 'rgba(0,255,102,.35)') + ';padding-bottom:3px;display:flex;justify-content:space-between;gap:8px;"><span>&gt; ' + cat + '</span><span style="color:' + (resteCat ? '#aaa' : G) + ';font-weight:normal;">' + (resteCat ? 'reste ' + fmt(resteCat) + ' t' : '✔ complet') + '</span></div>' + lg.slice().sort((x, y) => String(x.nom).localeCompare(String(y.nom), 'fr', { sensitivity: 'base' })).map(htmlLigne).join('');
                     }).join('');
                 } else marchandises = k.lignes.map(htmlLigne).join('');
                 // bandeau des contributions : simple, qui / combien de tonnes / quelle part
