@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-journal-rafales', date: '2026-10-09T22:05:00Z', type: 'AMELIORE',
+        titre: 'Journal des exploits : meurtres et piratages regroupés par 5',
+        texte: 'Quand vous enchaînez des meurtres ou des piratages, le journal n’affiche plus une ligne par action : il en crée une pour 5 (par exemple « 5 MEURTRES »), et une ligne en cours grossit jusqu’à 5. Les points ne changent pas : 1 point de rang BGS par meurtre ou par piratage, la ligne regroupée en rapporte donc 5. Un enchaînement est regroupé tant que vous restez sur la même directive, la même faction et le même système, et qu’il n’y a pas plus de 30 minutes entre deux actions. Sur PC et sur mobile.',
+        important: false
+    },
+    {
         id: '2026-10-bgs-suite-de-cartes', date: '2026-10-09T18:54:00Z', type: 'AMELIORE',
         titre: 'Page BGS : directives et initiatives à la suite, sans titres ni colonnes',
         texte: 'Les directives de l’Amiral et les initiatives des pilotes forment désormais une seule suite de cartes sur deux colonnes, sans trous : d’abord les directives de l’Amiral, puis les initiatives (reconnaissables à leur cadre rose et à l’étiquette « INITIATIVE »). Les titres « Focus de l’Amiral » et « Initiatives des pilotes » disparaissent, et quand aucune initiative n’est en cours, plus aucun bloc ne lui est consacré : le bouton « Lancer une initiative » en haut de la page suffit. Même chose sur mobile.',

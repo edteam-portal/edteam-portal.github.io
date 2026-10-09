@@ -203,6 +203,28 @@
         }).join('');
     };
 
+    // Journal des exploits : les rafales de MEURTRES et de PIRATAGES (une ligne par action cote base, 1 point chacune) sont presentees 5 par ligne.
+    // Meme pilote, meme type, meme directive (ou soutien libre), meme faction et meme systeme ; une pause de plus de 30 min ouvre une nouvelle ligne.
+    // Seul l'affichage change : la valeur de la ligne regroupee est la SOMME (donc 1 point par meurtre ou piratage dans la colonne RANG BGS). Une ligne en cours (moins de 5) grossit au fil des actions.
+    // Entree et sortie : lignes du journal triees de la plus recente a la plus ancienne.
+    window.regrouperRafalesJournal = function (lignes, taille) {
+        const N = taille || 5, PAUSE = 30 * 60000, TYPES = { MEURTRES: 1, PIRATAGE: 1 };
+        const ts = e => { const t = new Date(String(e.date_action || '').replace(' ', 'T')).getTime(); return isNaN(t) ? 0 : t; };
+        const sortie = [], ouverts = {};
+        const fermer = c => sortie.push(Object.assign({}, c.derniere, { valeur: c.somme, regroupe: c.n, date_action: c.derniere.date_action }));
+        lignes.slice().sort((a, b) => ts(a) - ts(b)).forEach(e => {
+            if (!TYPES[e.type_action]) { sortie.push(e); return; }
+            const cle = [e.user_id, e.type_action, e.ordre_id || '', e.faction || '', e.systeme || ''].join('|'), t = ts(e), v = Number(e.valeur) || 1;
+            let c = ouverts[cle];
+            if (c && t - c.t > PAUSE) { fermer(c); c = null; }
+            if (!c) c = ouverts[cle] = { somme: 0, n: 0, t: t, derniere: e };
+            c.somme += v; c.n += 1; c.t = t; c.derniere = e;
+            if (c.somme >= N) { fermer(c); delete ouverts[cle]; }
+        });
+        Object.keys(ouverts).forEach(k => fermer(ouverts[k]));
+        return sortie.sort((a, b) => ts(b) - ts(a));
+    };
+
     // Specialite d'une action BGS = le titre que cette action fait progresser (meme correspondance que le calcul serveur des titres) ;
     // sert a colorer le journal des exploits (PC et mobile). Un echec ne fait progresser aucun titre : gris neutre.
     const SPEC_DE_ACTION = { SECURITE: 'SEC', MISSIONS: 'LOG', ELECTION_MISSIONS: 'LOG', GUERRE_MISSIONS: 'LOG', ECONOMIE: 'ECO', COLONISATION: 'BAT', SCIENCE: 'SCI',

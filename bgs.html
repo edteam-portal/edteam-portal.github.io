@@ -2373,6 +2373,9 @@
                     return true;
                 });
 
+                // Rafales de meurtres / piratages : 5 par ligne (medailles.js ; la valeur de la ligne est la somme, donc 1 point chacun)
+                if (typeof window.regrouperRafalesJournal === 'function') effortsFiltres = window.regrouperRafalesJournal(effortsFiltres);
+
                 // 6. JOURNAL DES EXPLOITS (FILTRÉ DYNAMIQUEMENT)
                 const conteneurFeed = document.getElementById('modal-exploit-feed-content');
                 const conteneurFeedModal = null;
@@ -2810,7 +2813,7 @@
         };
     </script>
 
-    <script src="medailles.js?v=7"></script>
+    <script src="medailles.js?v=8"></script>
     <script src="rubans.js?v=1"></script>
     <script src="footer.js?v=23"></script>
 </body>
