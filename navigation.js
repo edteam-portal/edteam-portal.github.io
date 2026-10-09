@@ -350,6 +350,21 @@ window.actualiserHeader = function(profilData) {
                 document.head.appendChild(sRev);
             }
         } catch (e) { /* une révélation ne doit jamais gêner la page */ }
+        // Présence de l'Amiral (script SQL 70) : sert à remettre les initiatives en mode LIBRE s'il est absent plus de 7 jours ; au plus un appel par 6 h
+        try {
+            if (memo.est_amiral) {
+                const pAmi = Object.assign({}, memo, profilData.user_id ? { user_id: profilData.user_id } : {});
+                const lancerPresence = () => window.edteamIniMode && window.edteamIniMode.presence(pAmi);
+                if (window.edteamIniMode) lancerPresence();
+                else if (!window.__iniModeChargement) {
+                    window.__iniModeChargement = true;
+                    const sIni = document.createElement('script');
+                    sIni.src = 'initiatives-mode.js?v=1';
+                    sIni.onload = lancerPresence;
+                    document.head.appendChild(sIni);
+                }
+            }
+        } catch (e) { /* la présence ne doit jamais gêner la page */ }
         const zone = document.getElementById('header-rangs');
         if (zone && (memo.rang_fed !== undefined || memo.puissance_nom !== undefined || memo.rang_bgs !== undefined)) {
             const R = window.EDTEAM_RANGS;

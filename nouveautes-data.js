@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-bgs-suite-de-cartes', date: '2026-10-09T18:54:00Z', type: 'AMELIORE',
+        titre: 'Page BGS : directives et initiatives à la suite, sans titres ni colonnes',
+        texte: 'Les directives de l’Amiral et les initiatives des pilotes forment désormais une seule suite de cartes sur deux colonnes, sans trous : d’abord les directives de l’Amiral, puis les initiatives (reconnaissables à leur cadre rose et à l’étiquette « INITIATIVE »). Les titres « Focus de l’Amiral » et « Initiatives des pilotes » disparaissent, et quand aucune initiative n’est en cours, plus aucun bloc ne lui est consacré : le bouton « Lancer une initiative » en haut de la page suffit. Même chose sur mobile.',
+        important: false
+    },
+    {
+        id: '2026-10-initiatives-mode-amiral', date: '2026-10-09T16:54:00Z', type: 'NOUVEAU',
+        titre: 'Initiatives : l’Amiral choisit comment elles fonctionnent dans son escadron',
+        texte: 'Sur la page Escadron (et dans l’onglet BGS du mobile), l’Amiral règle désormais les initiatives des pilotes. Libre : comme avant, tout pilote lance une initiative, active tout de suite. Sur validation : les pilotes proposent, et rien n’est actif tant que l’Amiral ou un officier n’a pas accepté ; une proposition non traitée expire après 48 h. Désactivé : le bouton disparaît pour les pilotes (l’Amiral et les officiers peuvent toujours en lancer). Quand l’Amiral quitte le mode « sur validation », les propositions en attente sont supprimées. Si l’Amiral n’ouvre pas le site pendant 7 jours, l’escadron repasse automatiquement en mode Libre pour ne rien bloquer ; son réglage revient dès qu’il rouvre le site. Côté pilote, une proposition et son résultat (acceptée, refusée, expirée) s’affichent dans un petit bandeau discret sur la page BGS.',
+        important: false
+    },
+    {
         id: '2026-10-qg-rangee-compacte', date: '2026-10-09T09:59:00Z', type: 'AMELIORE',
         titre: 'QG : la rangée « Ma puissance / Ma faction / Quoi faire » est plus compacte',
         texte: 'Les trois cartes du haut du QG prennent moins de place en hauteur : les quatre chiffres de la faction tiennent sur une ligne, la note sur l’écart avec le jeu tient sur une seule ligne, et la recommandation « Quoi faire » est plus serrée. Le bas de la page remonte d’autant.',

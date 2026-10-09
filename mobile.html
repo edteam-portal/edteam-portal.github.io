@@ -19,6 +19,7 @@
     <script src="photos.js?v=2"></script>
     <script src="annonce.js?v=1"></script>
     <script src="revelations.js?v=2"></script>
+    <script src="initiatives-mode.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
     <script src="quoifaire.js?v=11"></script>
     <script src="qgsuivi.js?v=38"></script>
@@ -731,16 +732,11 @@
                 </div>
 
                 <div id="x-bgs-dir" style="display: flex; flex-direction: column; gap: 12px;">
-                    <div class="xc o">
-                        <div class="xrow"><span class="xk" style="color: var(--ed-orange);">★ Focus de l'Amiral</span><span class="xsp"></span><span class="xtag">FACULTATIF</span></div>
-                        <div style="font-size: 0.78em; color: #bbb; margin-top: 8px; line-height: 1.5;">L'Amiral peut demander de concentrer l'effort sur une cible. Les actions d'une directive comptent <b style="color: #fff; font-weight: normal;">en plus</b> de votre rang BGS et servent à la distinction de campagne.</div>
-                    </div>
+                    <div style="display: flex; justify-content: flex-end;"><button class="ibtn" id="m-ini-btn" onclick="xOuvrirInitiative()">+ LANCER UNE INITIATIVE</button></div>
+                    <div id="m-mode-ini" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    <div id="m-propositions" style="display: flex; flex-direction: column; gap: 12px;"></div>
                     <div id="m-ordres-container" style="display: flex; flex-direction: column; gap: 12px;">
                         <div class="xmut" style="text-align: center; padding: 15px;">Chargement des directives...</div>
-                    </div>
-                    <div class="xc init" id="m-init-entete">
-                        <div class="xrow"><span class="xk" style="color: #FF4FD8;">★ Initiatives des pilotes</span><span class="xsp"></span><button class="ibtn" onclick="xOuvrirInitiative()">+ LANCER</button></div>
-                        <div style="font-size: 0.78em; color: #bbb; margin-top: 8px; line-height: 1.5;">Objectifs lancés par les pilotes de l'escadron : rejoignez-les, chacun est reconnu pour son effort.</div>
                     </div>
                     <div id="m-initiatives-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
                 </div>
@@ -908,8 +904,8 @@
 <!-- MODAL DÉTAILS DE L'ORDRE -->
 <div class="modal-overlay" id="modal-initiative-m" onclick="xFermerInitiative(event)" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 560; padding: 16px;">
     <div class="xc init" style="width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto;" onclick="event.stopPropagation()">
-        <div class="xrow"><span class="xk" style="color: #FF4FD8;">★ Lancer une initiative</span><span class="xsp"></span><span style="color: #FF4FD8; font-size: 1.2em; padding: 0 6px;" onclick="xFermerInitiative()">✕</span></div>
-        <div class="xmut" style="margin: 8px 0 12px; line-height: 1.5;">Un objectif pour l'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.</div>
+        <div class="xrow"><span class="xk" style="color: #FF4FD8;" id="im-titre">★ Lancer une initiative</span><span class="xsp"></span><span style="color: #FF4FD8; font-size: 1.2em; padding: 0 6px;" onclick="xFermerInitiative()">✕</span></div>
+        <div class="xmut" id="im-sous" style="margin: 8px 0 12px; line-height: 1.5;">Un objectif pour l'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.</div>
         <input type="search" id="im-systeme" class="ichamp" placeholder="Système, ex : ATHENA" autocomplete="off" spellcheck="false" style="text-transform: uppercase;" onblur="xScannerInitiative(this.value)" onchange="xScannerInitiative(this.value)">
         <input type="text" id="im-faction" list="liste-factions-im" class="ichamp" placeholder="Faction visée" autocomplete="off" spellcheck="false" style="margin-top: 8px;">
         <datalist id="liste-factions-im"></datalist>
@@ -1285,6 +1281,7 @@
             document.getElementById('app-main').style.display = 'flex';
 
             chargerQGMobile();
+            if (window.edteamIniMode) window.edteamIniMode.presence(profilCommandant);   // presence de l'Amiral (script SQL 70), au plus un appel par 6 h
             initNouveautesMobile();
             chargerGazetteListMobile();
             chargerRegistreTactiqueMobile();
@@ -1988,7 +1985,7 @@
                 <div class="xrow" style="margin-top: 6px; gap: 8px; flex-wrap: wrap;"><span class="iavs">${avs}</span><span class="xmut" style="font-size: 0.7em;">${txtNb}</span></div>${txtExp ? `<div class="xmut" style="font-size: 0.66em; margin-top: 4px;">${txtExp}</div>` : ''}${actions ? `<div style="display: flex; gap: 6px; margin-top: 8px;">${actions}</div>` : ''}</div>`;
         }
         let xTypeIni = 'HAUSSE';
-        window.xOuvrirInitiative = function () { sonClic(); xTypeInitiative('HAUSSE'); xEl('modal-initiative-m').style.display = 'flex'; };
+        window.xOuvrirInitiative = function () { sonClic(); xTypeInitiative('HAUSSE'); xTextesModalIni(); xEl('modal-initiative-m').style.display = 'flex'; };
         window.xFermerInitiative = function (e) { if (e && e.target && e.target.id !== 'modal-initiative-m') return; xEl('modal-initiative-m').style.display = 'none'; };
         window.xTypeInitiative = function (t) { xTypeIni = t; ['HAUSSE', 'BAISSE'].forEach(x => xEl('im-type-' + x).classList.toggle('actif', x === t)); };
         window.xScannerInitiative = async function (systemName) {
@@ -2007,16 +2004,106 @@
         window.xLancerInitiative = async function () {
             sonClic();
             const btn = xEl('im-envoyer'), sys = xEl('im-systeme').value.trim(), fac = xEl('im-faction').value.trim(), msg = xEl('im-message').value.trim(), pop = parseInt(xEl('im-population').value || '0', 10) || 0;
-            if (!sys || !fac) { btn.innerText = 'SYSTÈME ET FACTION REQUIS'; setTimeout(() => btn.innerText = "LANCER L'INITIATIVE", 2200); return; }
+            if (!sys || !fac) { btn.innerText = 'SYSTÈME ET FACTION REQUIS'; setTimeout(() => btn.innerText = xIniLibelle(), 2200); return; }
             btn.innerText = 'TRANSMISSION…'; btn.disabled = true;
-            const { error } = await supabaseApp.rpc('lancer_initiative', { p_systeme: sys, p_faction: fac, p_type: xTypeIni, p_message: msg || null, p_population: pop });
+            const { error } = xIniPropose() ? await window.edteamIniMode.proposer(sys, fac, xTypeIni, msg, pop)
+                                            : await supabaseApp.rpc('lancer_initiative', { p_systeme: sys, p_faction: fac, p_type: xTypeIni, p_message: msg || null, p_population: pop });
             btn.disabled = false;
-            if (error) { const aide = xEl('im-aide'); aide.textContent = String(error.message || 'Échec du lancement.'); aide.style.color = '#FF4FD8'; btn.innerText = "LANCER L'INITIATIVE"; return; }
-            btn.innerText = "LANCER L'INITIATIVE";
+            if (error) { const aide = xEl('im-aide'); aide.textContent = String(error.message || 'Échec du lancement.'); aide.style.color = '#FF4FD8'; btn.innerText = xIniLibelle(); return; }
+            btn.innerText = xIniLibelle();
             ['im-systeme', 'im-faction', 'im-message'].forEach(i => { xEl(i).value = ''; }); xEl('im-population').value = '0';
             xEl('im-aide').style.color = ''; xEl('im-aide').textContent = 'Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».';
-            xFermerInitiative(); chargerDirectivesMobile(true);
+            xFermerInitiative(); xRafraichirModeIni(true); chargerDirectivesMobile(true);
         };
+        // --- MODE DES INITIATIVES (script SQL 70) : meme logique que la page BGS du PC (initiatives-mode.js) ---
+        window.modeIni = null;
+        function xIniEstCmd() { const m = profilCommandant || {}; return !!(m.est_amiral || m.est_officier || m.est_directeur); }
+        function xIniPropose() { return !!(window.modeIni && window.modeIni.effectif === 'VALIDATION' && !xIniEstCmd()); }
+        function xIniLibelle() { return xIniPropose() ? "PROPOSER L'INITIATIVE" : "LANCER L'INITIATIVE"; }
+        function xTextesModalIni() {
+            const p = xIniPropose();
+            const t = xEl('im-titre'); if (t) t.textContent = p ? '★ Proposer une initiative' : '★ Lancer une initiative';
+            const so = xEl('im-sous'); if (so) so.textContent = p ? 'Votre Amiral valide les initiatives : votre proposition lui est soumise. Elle devient active s\'il (ou un officier) l\'accepte, et expire après 48 h sans réponse.' : 'Un objectif pour l\'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.';
+            const b = xEl('im-envoyer'); if (b && !b.disabled) b.innerText = xIniLibelle();
+        }
+        function xAppliquerModeIni() {
+            const g = window.modeIni; if (!g) return;
+            const cmd = xIniEstCmd(), E = window.edteamIniMode;
+            const desact = !cmd && g.effectif === 'DESACTIVE';
+            const btn = xEl('m-ini-btn'); if (btn) { btn.textContent = xIniPropose() ? '+ PROPOSER UNE INITIATIVE' : '+ LANCER UNE INITIATIVE'; btn.style.display = desact ? 'none' : ''; }
+            xTextesModalIni();
+            const zone = xEl('m-mode-ini'); if (!zone) return;
+            let h = '';
+            window.__iniInfo = desact ? 'Les initiatives sont désactivées par votre Amiral pour le moment.'
+                : (!cmd && g.absent) ? 'Votre Amiral est absent depuis plus de 7 jours : les initiatives sont libres en attendant son retour.'
+                : (!cmd && g.effectif === 'VALIDATION') ? 'Votre Amiral valide les initiatives : vous les proposez, sa décision arrive sous 48 h au plus.' : '';
+            if (g.amiral) {
+                const nom = { LIBRE: 'LIBRE', VALIDATION: 'SUR VALIDATION', DESACTIVE: 'DÉSACTIVÉ' };
+                if (E && E.retourAAfficher()) h += '<div class="xc" style="border-color:#00F0FF; color:#00F0FF; font-size:0.78em; line-height:1.5;">Vous étiez absent plus de 7 jours : vos pilotes étaient repassés en mode LIBRE. ' + (g.mode === 'LIBRE' ? '' : 'Votre réglage « ' + nom[g.mode] + ' » est de nouveau en vigueur. ') + '<button class="ibtn" style="margin-left:8px;" onclick="window.edteamIniMode.retourVu(); xAppliquerModeIni();">OK</button></div>';
+                h += '<div class="xc init"><div class="xk" style="color:#FF4FD8;">★ Initiatives des pilotes · réglage</div><div style="display:flex; gap:6px; margin-top:8px;">'
+                    + ['LIBRE', 'VALIDATION', 'DESACTIVE'].map(m => '<button type="button" class="ipill' + (g.mode === m ? ' actif h' : '') + '" onclick="xChoisirModeIni(\'' + m + '\')">' + nom[m] + '</button>').join('')
+                    + '</div><div class="xmut" style="margin-top:6px; font-size:0.66em; line-height:1.5;">Libre : les pilotes lancent, actif tout de suite. Sur validation : ils proposent, vous ou un officier acceptez (expire après 48 h). Désactivé : plus de bouton pour les pilotes. Sans visite de votre part pendant 7 jours, retour automatique en mode Libre ; votre choix revient dès que vous rouvrez le site.</div></div>';
+            }
+            zone.innerHTML = h;
+        }
+        function xRendreProposition(liste) {
+            const zone = xEl('m-propositions'); if (!zone) return;
+            const moi = profilCommandant || {};
+            const typeL = q => '<b style="color:' + (q.type === 'HAUSSE' ? '#00FF66' : '#FF3333') + ';">' + XESC(String(q.type)) + '</b> · <b style="color:#fff; overflow-wrap:anywhere;">' + XESC(String(q.faction || '').toUpperCase()) + '</b> · ' + XESC(String(q.systeme || '').toUpperCase());
+            const msg = q => q.message ? '<div style="color:#aaa; font-size:0.78em; margin-top:4px; font-style:italic;">« ' + XESC(String(q.message)) + ' »</div>' : '';
+            let h = '';
+            if (xIniEstCmd()) {
+                const att = liste.filter(q => q.statut === 'EN_ATTENTE');
+                if (att.length) h = '<div class="xc init"><div class="xk" style="color:#FF4FD8;">★ Propositions à valider (' + att.length + ')</div>'
+                    + att.map(q => '<div style="border-top:1px solid rgba(255,79,216,0.25); margin-top:10px; padding-top:10px;">' + typeL(q)
+                        + '<div class="xmut" style="font-size:0.68em; margin-top:3px;">CMDR ' + XESC(String(q.createur || 'inconnu').toUpperCase()) + (q.rang_bgs ? ' · RANG ' + XESC(String(q.rang_bgs)) : '') + ' · ' + window.edteamIniMode.restant(q.expire_le) + '</div>' + msg(q)
+                        + '<div style="display:flex; gap:8px; margin-top:8px;"><button class="ibtn" style="flex:1; border-color:#00FF66; color:#00FF66;" onclick="xTraiterProposition(\'' + q.id + '\', \'ACCEPTER\')">ACCEPTER</button><button class="ibtn" style="flex:1; border-color:#FF3333; color:#FF3333;" onclick="xTraiterProposition(\'' + q.id + '\', \'REFUSER\')">REFUSER</button></div></div>').join('') + '</div>';
+            } else {
+                const miennes = liste.filter(q => String(q.auteur_id) === String(moi.user_id) && q.statut !== 'RETIREE');
+                const info = window.__iniInfo || '';
+                if (info || miennes.length) h = '<div class="xc init">' + (info ? '<div style="color:#ffc400; font-size:0.74em; line-height:1.5;">ⓘ ' + XESC(info) + '</div>' : '')
+                    + miennes.map(q => {
+                        let e;
+                        if (q.statut === 'EN_ATTENTE') e = '<span style="color:#ffc400;">EN ATTENTE</span> <span class="xmut">· ' + window.edteamIniMode.restant(q.expire_le) + '</span> <button class="ibtn g" style="margin-left:6px;" onclick="xTraiterProposition(\'' + q.id + '\', \'RETIRER\')">RETIRER</button>';
+                        else if (q.statut === 'ACCEPTEE') e = '<span style="color:#00FF66;">ACCEPTÉE</span> <span class="xmut">· votre initiative est active</span>';
+                        else if (q.statut === 'REFUSEE') e = '<span style="color:#FF3333;">REFUSÉE</span>';
+                        else e = '<span style="color:#999;">EXPIRÉE</span> <span class="xmut">· non traitée en 48 h</span>';
+                        return '<div style="margin-top:8px;"><span style="color:#FF4FD8; font-size:0.7em; font-weight:bold; letter-spacing:1px;">' + (miennes.length > 1 ? 'PROPOSITION' : 'MA PROPOSITION') + '</span><br>' + typeL(q) + msg(q) + '<div style="margin-top:4px; font-size:0.75em; font-weight:bold; letter-spacing:1px;">' + e + '</div></div>';
+                    }).join('') + '</div>';
+            }
+            zone.innerHTML = h;
+        }
+        window.xRafraichirModeIni = async function (force) {
+            const E = window.edteamIniMode; if (!E || !profilCommandant) return;
+            try {
+                const t = Date.now();
+                if (force || !window.__modeIniTs || t - window.__modeIniTs > 60000) {
+                    window.__modeIniTs = t;
+                    window.modeIni = await E.reglage(true);
+                    const g = window.modeIni;
+                    window.listeProps = (g && (g.mode !== 'LIBRE' || window.__avaitProps)) ? await E.liste() : [];
+                    window.__avaitProps = (window.listeProps || []).some(q => q.statut === 'EN_ATTENTE');
+                }
+                if (!window.modeIni) return;
+                xAppliquerModeIni();
+                xRendreProposition(window.listeProps || []);
+            } catch (e) { console.error(e); }
+        };
+        window.xChoisirModeIni = async function (mode) {
+            sonClic();
+            const { error } = await window.edteamIniMode.definir(mode);
+            if (error) { alert(error.message || 'Réglage impossible.'); return; }
+            await xRafraichirModeIni(true);
+        };
+        window.xTraiterProposition = async function (id, action) {
+            sonClic();
+            if (action === 'ACCEPTER' && !confirm('Accepter cette proposition ? Elle devient une initiative active de l\'escadron (vous pourrez ensuite la transformer en directive).')) return;
+            const { error } = await window.edteamIniMode.traiter(id, action);
+            if (error) alert(error.message || 'Échec du traitement de la proposition.');
+            await xRafraichirModeIni(true);
+            chargerDirectivesMobile(true);
+        };
+
         window.xCloturerInitiative = async function (id, parCreateur) {
             if (!confirm(parCreateur ? 'Clôturer votre initiative ? Les efforts déjà enregistrés sont conservés.' : 'Retirer cette initiative pour tout l\'escadron ? Les efforts déjà enregistrés sont conservés.')) return;
             const { error } = await supabaseApp.rpc('cloturer_initiative', { p_id: Number(id) });
@@ -2033,6 +2120,7 @@
         async function chargerDirectivesMobile(force) {
             const cont = xEl('m-ordres-container');
             if (!cont || !profilCommandant) return;
+            xRafraichirModeIni(false);   // mode des initiatives et propositions a valider (script SQL 70), sans attendre
             try {
                 const d = await xLireDirectives(force);
                 const resume = {};
@@ -2050,7 +2138,7 @@
                         const rs = resume[o.id] || { nb_participants: 0, types: {}, pilotes: [] };
                         const jours = Math.max(1, Math.ceil((Date.now() - new Date(o.date_emission || o.created_at || Date.now()).getTime()) / 86400000));
                         return `<div class="xc init"><div class="xrow" style="flex-wrap: wrap; gap: 6px;"><span class="xk" style="color: #FF4FD8; overflow-wrap: anywhere;">${XESC(String(o.systeme_cible || 'SECTEUR').toUpperCase())}</span><span class="xmut">· depuis ${jours} j</span><span class="xsp"></span><span class="itag">★ INITIATIVE</span></div>${xBandeauInitiative(o, rs, d.infos[o.id])}<div class="mdc-grille" style="grid-template-columns: 1fr;">${xCarteDirective(o, index, resultats.dir[o.id] || null, xSensDirective(o, resultats.dir[o.id] || null), xAvancementOrdre(o, rs), true, rs)}</div></div>`;
-                    }).join('') : `<div class="xc init" style="text-align: center; line-height: 1.7; padding: 18px 14px; color: #aab;">Aucune initiative en cours.<br><b style="color: #FF4FD8; font-weight: normal;">Un objectif qui vous tient à cœur ? Lancez une initiative.</b></div>`;
+                    }).join('') : '';
                 }
                 const veilleIds = new Set(d.veille || []);
                 // encadre des directives en veille (type, faction, systeme, influence) : replie pour laisser la place aux directives vivantes

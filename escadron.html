@@ -18,7 +18,8 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=27"></script>
+    <script src="navigation.js?v=28"></script>
+    <script src="initiatives-mode.js?v=1"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -98,7 +99,16 @@
         .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
 
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
-        .data-row { padding: 20px; margin-bottom: 12px; }   /* cadre : classe .bloc (style.css) */
+        .data-row { padding: 20px; margin-bottom: 12px; }
+        .mode-ini-cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 4px; }
+        @media (max-width: 800px) { .mode-ini-cartes { grid-template-columns: minmax(0, 1fr); } }
+        .mode-ini-carte { position: relative; text-align: left; font-family: inherit; background: rgba(0,0,0,0.35); border: 1px solid #444; color: #aaa; padding: 12px; cursor: pointer; transition: 0.15s; }
+        .mode-ini-carte b { display: block; letter-spacing: 2px; margin-bottom: 4px; font-size: 1.05em; }
+        .mode-ini-carte span { display: block; font-size: 0.8em; line-height: 1.45; color: #999; }
+        .mode-ini-carte:hover { border-color: #FF4FD8; color: #FF4FD8; }
+        .mode-ini-carte.actif { border-color: #FF4FD8; color: #FF4FD8; background: rgba(255,79,216,0.08); box-shadow: 0 0 10px rgba(255,79,216,0.25); }
+        .mode-ini-carte.actif::after { content: "ACTIF"; position: absolute; top: 8px; right: 10px; font-size: 0.65em; letter-spacing: 2px; }
+        .mode-ini-retour { border: 1px solid #00F0FF; background: rgba(0,240,255,0.06); color: #00F0FF; padding: 10px 12px; font-size: 0.85em; line-height: 1.5; margin-bottom: 10px; }   /* cadre : classe .bloc (style.css) */
         
         .rank-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,113,0,0.1); transition: 0.2s; }
         .rank-row:hover { background: rgba(255,113,0,0.05); }
@@ -442,6 +452,18 @@
                     <button type="button" id="code-renouveler" onclick="renouvelerCodeInvitation()" style="display: none; color: #aaa; background: transparent; border: 1px solid #555; padding: 8px 16px; letter-spacing: 1.5px; font-family: inherit; cursor: pointer;">RENOUVELER</button>
                 </div>
                 <div class="bloc-note" id="code-note">Sans ce code, personne ne peut rejoindre l'escadron. Donnez-le à vos pilotes ; ils le saisissent à leur première connexion (ou depuis le Quartier Général s'ils sont déjà inscrits). Le grade de chacun (Officier, Amiral) est repris automatiquement du jeu.</div>
+            </div>
+
+            <!-- MODE DES INITIATIVES DES PILOTES (script SQL 70) : l'Amiral seul le regle -->
+            <div id="carte-mode-ini" class="bloc" style="display: none; margin-bottom: 14px; --bdc: rgba(255,79,216,.75); --teinte: rgba(255,79,216,.07); --lueur: rgba(255,79,216,.08); --accent: #FF4FD8;">
+                <h2 style="color: #FF4FD8;">INITIATIVES DES PILOTES <em>réglage de l'Amiral</em></h2>
+                <div id="mode-ini-retour" style="display: none;"></div>
+                <div class="mode-ini-cartes">
+                    <button type="button" class="mode-ini-carte" data-mode="LIBRE" onclick="choisirModeInitiatives('LIBRE')"><b>LIBRE</b><span>Tout pilote lance une initiative, active tout de suite. C'est le fonctionnement par défaut.</span></button>
+                    <button type="button" class="mode-ini-carte" data-mode="VALIDATION" onclick="choisirModeInitiatives('VALIDATION')"><b>SUR VALIDATION</b><span>Les pilotes proposent. Rien n'est actif tant que vous ou un officier n'avez pas accepté. Une proposition non traitée expire après 48 h.</span></button>
+                    <button type="button" class="mode-ini-carte" data-mode="DESACTIVE" onclick="choisirModeInitiatives('DESACTIVE')"><b>DÉSACTIVÉ</b><span>Le bouton « Lancer une initiative » disparaît pour les pilotes. Vous et vos officiers pouvez toujours en lancer.</span></button>
+                </div>
+                <div class="bloc-note">Si vous n'ouvrez pas le site pendant 7 jours, vos pilotes retrouvent automatiquement le mode LIBRE. Votre choix est conservé et revient dès que vous rouvrez le site.</div>
             </div>
 
             <div class="eff-tete">
@@ -1118,6 +1140,7 @@
                 // Démarrage des effectifs
                 chargerEffectifsEscadron();
                 chargerCodeInvitation(data);
+                chargerModeInitiatives(data);
 
                 // Lien « Mes distinctions » de la page BGS : ouvre directement sa propre fiche pilote
                 if (/[?&]fiche=moi(&|$)/.test(location.search)) {
@@ -1136,6 +1159,34 @@
 
 
     <script>
+        // ----- Mode des initiatives (script SQL 70) : visible de l'Amiral seul -----
+        async function chargerModeInitiatives(profil) {
+            const carte = document.getElementById('carte-mode-ini');
+            if (!carte || !profil || !profil.est_amiral || !window.edteamIniMode) return;
+            try {
+                const g = await window.edteamIniMode.reglage(true);
+                if (!g || !g.amiral) return;
+                carte.style.display = 'block';
+                marquerModeInitiatives(g.mode);
+                const r = document.getElementById('mode-ini-retour');
+                if (r && window.edteamIniMode.retourAAfficher()) {
+                    const nom = { LIBRE: 'LIBRE', VALIDATION: 'SUR VALIDATION', DESACTIVE: 'DÉSACTIVÉ' }[g.mode] || g.mode;
+                    r.className = 'mode-ini-retour';
+                    r.innerHTML = 'Vous étiez absent plus de 7 jours : vos pilotes étaient repassés en mode LIBRE. ' + (g.mode === 'LIBRE' ? '' : 'Votre réglage « ' + nom + ' » est de nouveau en vigueur. ') + '<button type="button" style="margin-left: 10px; background: transparent; border: 1px solid #00F0FF; color: #00F0FF; font-family: inherit; padding: 2px 10px; cursor: pointer;" onclick="window.edteamIniMode.retourVu(); this.parentElement.style.display = \'none\';">OK</button>';
+                    r.style.display = 'block';
+                }
+            } catch (e) { /* le reglage reste masque */ }
+        }
+        function marquerModeInitiatives(mode) {
+            document.querySelectorAll('.mode-ini-carte').forEach(b => b.classList.toggle('actif', b.dataset.mode === mode));
+        }
+        async function choisirModeInitiatives(mode) {
+            if (typeof sonClic === 'function') sonClic();
+            const { error } = await window.edteamIniMode.definir(mode);
+            if (error) { alert(error.message || 'Réglage impossible.'); return; }
+            marquerModeInitiatives(mode);
+            if (typeof sonSucces === 'function') sonSucces();
+        }
         // ----- Code d'invitation de l'escadron (Amiral et officiers) + depart de l'escadron -----
         async function chargerCodeInvitation(profil) {
             if (!profil || !(profil.est_amiral || profil.est_officier) || !window.supabaseApp) return;

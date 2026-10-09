@@ -18,7 +18,8 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=27"></script>
+    <script src="navigation.js?v=28"></script>
+    <script src="initiatives-mode.js?v=1"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -112,24 +113,14 @@
         .veille-tag .vs { color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .veille-tag .vi { white-space: nowrap; text-align: right; } .veille-tag .vi b { color: #fff; }
         @media (max-width: 700px) { .veille-tag { grid-template-columns: auto minmax(0, 1fr) auto; } .veille-tag .vs { display: none; } }
-        /* SANS INITIATIVE : plus de colonne vide. Les directives reprennent toute la largeur (deux colonnes si elles sont au moins deux) et l'invitation devient une simple ligne en dessous */
-        /* MISE EN PAGE : directives, veille et initiatives sont des elements d'UNE SEULE grille a deux colonnes (les conteneurs sont « transparents »).
-           Chaque rangee a donc des cadres de MEME HAUTEUR, quoi qu'il y ait dedans ; placerDuo() (JS) donne a chaque element sa colonne et sa rangee. */
+        /* MISE EN PAGE : directives de l'Amiral PUIS initiatives des pilotes forment UNE SEULE suite de cartes, sur deux colonnes (les conteneurs sont « transparents »).
+           Chaque rangee a des cadres de MEME HAUTEUR ; une carte restee seule en derniere rangee prend toute la largeur (classe .sp, posee par placerDuo) ; les directives en veille ferment la page (order). */
         #bgs-duo-ordres { align-items: stretch !important; gap: 10px 16px !important; }
         #bgs-duo-ordres > div, #bgs-conteneur-ordres, #bgs-conteneur-initiatives, #bgs-conteneur-ordres > div:not(.data-row), #bgs-conteneur-initiatives > div:not(.data-row) { display: contents !important; }
         #bgs-duo-ordres .data-row.bloc { display: flex; flex-direction: column; margin-bottom: 0 !important; min-width: 0; }
         #bgs-duo-ordres .data-row.bloc > .bgs-cartes { flex: 1; }
-        #bgs-duo-ordres .data-row.bloc.ini-vide { flex-direction: row; }
-        #bgs-veille { align-self: start; }
-        #bgs-duo-ordres.sans-init .ini-sous { display: none; }
-        @media (min-width: 1101px) {
-            #bgs-duo-ordres [data-c="1"] { grid-column: 1; grid-row: var(--r); }
-            #bgs-duo-ordres [data-c="2"] { grid-column: 2; grid-row: var(--r); }
-            #bgs-duo-ordres .sp { grid-column: 1 / -1; }
-        }
-        .ini-vide { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; padding: 12px 16px !important; color: #9aa; line-height: 1.5; }
-        .ini-vide b { color: #FF4FD8; font-weight: bold; }
-        .ini-vide .ini-btn { margin-left: auto; padding: 6px 14px; }
+        #bgs-veille { align-self: start; grid-column: 1 / -1; order: 9; }
+        @media (min-width: 1101px) { #bgs-duo-ordres .sp { grid-column: 1 / -1; } }
         /* INITIATIVES DE PILOTES : meme mise en page que les directives, mais cadre en pointilles rose, etiquette et bandeau du createur */
         .bloc.init { border: 1px dashed rgba(255, 79, 216, 0.75) !important; box-shadow: inset 4px 0 0 #FF4FD8, 0 0 18px rgba(255, 79, 216, 0.13) !important; }
         .ini-tag { border: 1px solid #FF4FD8; color: #FF4FD8; background: rgba(255, 79, 216, 0.1); padding: 3px 10px; border-radius: 3px; font-weight: bold; letter-spacing: 2px; font-size: 0.8em; white-space: nowrap; }
@@ -147,6 +138,16 @@
         .ini-bandeau .acts { display: inline-flex; gap: 6px; margin-left: auto; }
         .ini-btn { background: transparent; border: 1px solid #FF4FD8; color: #FF4FD8; padding: 3px 9px; font-family: inherit; font-size: 0.82em; font-weight: bold; letter-spacing: 1px; cursor: pointer; border-radius: 2px; }
         .ini-btn:hover { background: #FF4FD8; color: #000; }
+        .ini-btn.ok { border-color: #00FF66; color: #00FF66; } .ini-btn.ok:hover { background: #00FF66; color: #000; }
+        .ini-btn.ko { border-color: #FF3333; color: #FF3333; } .ini-btn.ko:hover { background: #FF3333; color: #000; }
+        .prop-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between; padding: 10px 0; border-top: 1px solid rgba(255, 79, 216, 0.25); }
+        .prop-ligne:first-of-type { border-top: 0; }
+        .prop-etat { display: inline-block; border: 1px solid; padding: 1px 8px; font-size: 0.75em; letter-spacing: 2px; font-weight: bold; }
+        .ini-info { border: 1px solid #ffc400; background: rgba(255,196,0,0.07); color: #ffc400; padding: 10px 14px; font-size: 0.82em; line-height: 1.5; margin-bottom: 12px; }
+        .ini-leger { border-left: 3px solid #FF4FD8; background: rgba(255,79,216,0.05); padding: 8px 14px; margin-bottom: 14px; font-size: 0.85em; line-height: 1.7; }
+        .ini-leger-info { color: #ffc400; font-size: 0.92em; }
+        .prop-l { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; padding-top: 4px; }
+        .ini-info.bleu { border-color: #00F0FF; color: #00F0FF; background: rgba(0,240,255,0.06); }
         .ini-btn.gris { border-color: #666; color: #aaa; } .ini-btn.gris:hover { background: #aaa; color: #000; }
         .ini-fenetre { max-width: 640px; width: 95%; display: flex; flex-direction: column; padding: 0 !important; background: rgba(10, 5, 8, 0.97); border: 1px solid #FF4FD8; box-shadow: 0 0 40px rgba(255, 79, 216, 0.2); }
         .ini-fenetre .cmd-entete { border-bottom-color: rgba(255, 79, 216, 0.5); }
@@ -386,14 +387,12 @@
                 <!-- MUR DES SPÉCIALISTES : huit titres, au cumul total (calculés par le serveur, script SQL 37) -->
                 <div id="bgs-titres-acc" class="bloc" style="display: none; padding: 16px 20px;"></div>
 
-                <!-- DEUX COLONNES : FOCUS DE L'AMIRAL (directives) a gauche, INITIATIVES DES PILOTES a droite (une seule colonne sous 1100 px) -->
+                <!-- UNE SEULE SUITE DE CARTES (deux colonnes, une sous 1100 px) : directives de l'Amiral, puis initiatives des pilotes ; ni titres ni colonnes propres -->
+                <!-- MODE DES INITIATIVES (script SQL 70) : information du mode en vigueur et propositions a valider (rempli par rafraichirModeIni) -->
+                <div id="bgs-mode-ini" style="display: none;"></div>
+                <div id="bgs-propositions" style="display: none;"></div>
                 <div id="bgs-duo-ordres" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start;">
                 <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
-                <!-- FOCUS DE L'AMIRAL : directives en grille compacte -->
-                <div id="bgs-entete-a" style="margin-top: 4px;">
-                    <div><h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">> FOCUS DE L'AMIRAL</h3><div id="bgs-focus-info" style="color: #888; font-size: 0.8em; margin-top: 4px; cursor: help; display: inline-block;">Facultatif · une distinction à la clôture <span style="color: var(--ed-orange);">&#9432;</span></div></div>
-                </div>
-
                 <!-- LE SOUS-CONTENEUR POUR LES JAUGES -->
                 <div id="bgs-conteneur-ordres" style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start;">
                     <div style="grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; padding: 20px;">> SYNCHRONISATION DES DIRECTIVES DE L'AMIRAUTÉ EN COURS...</div>
@@ -402,10 +401,7 @@
                 <div id="bgs-veille" style="display: none;"></div>
                 </div>
                 <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
-                <!-- INITIATIVES DES PILOTES : objectifs lancés par les pilotes de l'escadron (script SQL 68) -->
-                <div id="bgs-entete-b" style="margin-top: 4px;">
-                    <div><h3 style="margin: 0; color: #FF4FD8; letter-spacing: 2px; font-size: 1.2em;">> INITIATIVES DES PILOTES</h3><div class="ini-sous" style="color: #888; font-size: 0.8em; margin-top: 4px;">Lancées par les pilotes de l'escadron · rejoignez-les</div></div>
-                </div>
+                <!-- INITIATIVES DES PILOTES (script SQL 68) : cartes a la suite de celles de l'Amiral, sans titre ni colonne propre ; rien du tout s'il n'y en a pas -->
                 <div id="bgs-conteneur-initiatives" style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start;"></div>
                 </div>
                 </div>
@@ -503,8 +499,8 @@
         <div class="modal-content ini-fenetre" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-initiative')">X</div>
             <div class="cmd-entete">
-                <div class="cmd-titre">&gt; LANCER UNE INITIATIVE</div>
-                <div class="cmd-sous">Un objectif pour l'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.</div>
+                <div class="cmd-titre" id="ini-titre">&gt; LANCER UNE INITIATIVE</div>
+                <div class="cmd-sous" id="ini-sous">Un objectif pour l'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.</div>
             </div>
             <div class="cmd-col">
                 <div class="cmd-etape">
@@ -530,7 +526,7 @@
                     <div class="cmd-etape-titre"><span class="cmd-num">3</span>MESSAGE <em>facultatif · 200 signes</em></div>
                     <textarea id="ini-message" class="search-input cmd-champ" maxlength="200" placeholder="Pourquoi cet objectif ? Un mot pour motiver l'escadron…" autocomplete="off" data-lpignore="true" style="height: 64px; resize: vertical;"></textarea>
                 </div>
-                <div class="cmd-aide">Une seule initiative en cours à la fois. Elle se clôture seule après 7 jours sans aucun effort ; chaque effort relance le compteur. L'Amiral peut la transformer en directive officielle.</div>
+                <div class="cmd-aide" id="ini-aide-regles">Une seule initiative en cours à la fois. Elle se clôture seule après 7 jours sans aucun effort ; chaque effort relance le compteur. L'Amiral peut la transformer en directive officielle.</div>
             </div>
             <div class="cmd-pied">
                 <button id="btn-lancer-initiative" onclick="lancerInitiative()" onmouseenter="if(typeof sonHover === 'function') sonHover()">LANCER L'INITIATIVE</button>
@@ -734,6 +730,7 @@
                 if (data.escadron_id && String(data.escadron_id).trim() !== '' && String(data.escadron_id).trim().toUpperCase() !== 'INDEPENDANT') {
                     const btnIni = document.getElementById('btn-initiative');
                     if (btnIni) btnIni.style.display = '';
+                    if (typeof appliquerModeIni === 'function') appliquerModeIni();
                 }
 
                 // (Spécifique Commerce) Historique du scan
@@ -1434,7 +1431,6 @@
             haut.style.gridTemplateColumns = sem ? 'minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr)' : 'minmax(0, 1fr) minmax(0, 1fr)';
             haut.innerHTML = blocEngagement + blocProgression + blocEscadron;
             attacherInfoBulle('bgs-aide-engagement', '<b>TA PRIORITÉ</b><br>Agir pour ta faction d\'escadron. <b style="color: #fff;">Chaque action compte</b> (missions, combat, commerce, exploration, colonisation), <b style="color: #fff;">avec ou sans mission de l\'Amiral</b>, et fait monter ton rang.');
-            attacherInfoBulle('bgs-focus-info', '<b>FOCUS DE L\'AMIRAL</b><br>Facultatif : l\'Amiral peut demander de concentrer l\'effort sur une cible. Les actions d\'une directive comptent <b style="color: #fff;">en plus</b> de ton rang BGS : elles servent aussi à la distinction (médaille de campagne, classée par score à la clôture), visible sur ta fiche pilote.');
             chargerProgressionAccueil();   // le graphique des 8 semaines se remplit tout de suite (huit lignes, très léger)
         }
 
@@ -1494,9 +1490,8 @@
             }
         }
 
-        // Place chaque element dans la grille a deux colonnes : directives a gauche (colonne 1), initiatives a droite (colonne 2), rangee par rangee.
-        // Sans initiative : tout passe sur la largeur entiere (les directives en deux colonnes, l'invitation en une ligne en dessous).
-        window.placerDuo = function (nbInit) {
+        // Une seule suite de cartes : directives de l'Amiral d'abord, puis initiatives, deux par rangee ; la derniere carte, si elle est seule, prend toute la largeur.
+        window.placerDuo = function () {
             const duo = document.getElementById('bgs-duo-ordres');
             if (!duo) return;
             const blocs = cont => {
@@ -1505,19 +1500,9 @@
                 [...cont.children].forEach(ch => { if (ch.classList.contains('data-row')) out.push(ch); else [...ch.children].forEach(x => { if (x.classList.contains('data-row')) out.push(x); }); });
                 return out;
             };
-            const A = blocs(document.getElementById('bgs-conteneur-ordres')), B = blocs(document.getElementById('bgs-conteneur-initiatives'));
-            const hA = document.getElementById('bgs-entete-a'), hB = document.getElementById('bgs-entete-b'), veille = document.getElementById('bgs-veille');
-            [hA, hB, veille, ...A, ...B].filter(Boolean).forEach(el => { delete el.dataset.c; el.classList.remove('sp'); el.style.removeProperty('--r'); el.style.gridColumn = ''; });
-            const poser = (el, c, r) => { if (!el) return; el.dataset.c = String(c); el.style.setProperty('--r', String(r)); };
-            const sansInit = nbInit === 0;
-            duo.classList.toggle('sans-init', sansInit);
-            if (!sansInit) {
-                poser(hA, 1, 1); A.forEach((el, i) => poser(el, 1, i + 2)); poser(veille, 1, A.length + 2);
-                poser(hB, 2, 1); B.forEach((el, j) => poser(el, 2, j + 2));
-            } else {
-                [hA, veille, hB, ...B].forEach(el => { if (el) el.classList.add('sp'); });
-                if (A.length === 1) A[0].classList.add('sp');
-            }
+            const tous = [...blocs(document.getElementById('bgs-conteneur-ordres')), ...blocs(document.getElementById('bgs-conteneur-initiatives'))];
+            tous.forEach(el => el.classList.remove('sp'));
+            if (tous.length % 2 === 1) tous[tous.length - 1].classList.add('sp');
         };
 
         async function afficherOrdresBGS() {
@@ -1525,6 +1510,7 @@
             const container = document.getElementById('bgs-conteneur-ordres');
             if (!container) return;
             chargerAccueilBGS();   // engagement du pilote, semaine de l'escadron, distinctions (mémoire d'une minute)
+            rafraichirModeIni(false);   // mode des initiatives et propositions a valider (script SQL 70), sans attendre
 
             const etatsAccordions = {};
             document.querySelectorAll('[id^="details-"]').forEach(el => {
@@ -1886,7 +1872,9 @@
                         veilleBox.style.display = '';
                     }
                 }
-                if (ordresAmiral.length === 0 && ordresVeille.length) {
+                if (ordresAmiral.length === 0 && ordresInit.length > 0) {
+                    container.innerHTML = '';   // seules des initiatives sont en cours : pas de message « aucune directive »
+                } else if (ordresAmiral.length === 0 && ordresVeille.length) {
                     container.style.gridTemplateColumns = 'minmax(0, 1fr)';
                     container.innerHTML = '<div class="data-row bloc" style="text-align: center; color: #9aa; padding: 18px; line-height: 1.6;">Aucune directive active en ce moment : celles qui restent sont en veille, ci-dessous.</div>';
                 } else if (ordresAmiral.length === 0) {
@@ -1895,12 +1883,11 @@
                 } else rendreOrdres(ordresAmiral, container, false);
                 if (containerInit) {
                     if (ordresInit.length === 0) {
-                        containerInit.style.gridTemplateColumns = 'minmax(0, 1fr)';
-                        containerInit.innerHTML = '<div class="data-row bloc init ini-vide" style="grid-column: 1 / -1;"><span>Aucune initiative en cours. <b>Un objectif qui vous tient à cœur ?</b> L\'escadron la verra et pourra vous rejoindre.</span><button class="ini-btn" onclick="ouvrirInitiative(event)">+ LANCER UNE INITIATIVE</button></div>';
+                        containerInit.innerHTML = '';   // aucune initiative : aucun bloc
                     } else rendreOrdres(ordresInit, containerInit, true);
                 }
-                // sans initiative : les directives passent sur toute la largeur (pas de colonne vide), l'invitation tient sur une ligne
-                window.placerDuo(ordresInit.length);
+                window.placerDuo();
+                if (typeof appliquerModeIni === 'function') appliquerModeIni();   // les boutons « lancer » viennent d'etre redessines
 
                 for (const [id, display] of Object.entries(etatsAccordions)) {
                     const el = document.getElementById(id);
@@ -1970,12 +1957,106 @@
             }
         }
 
+        // --- MODE DES INITIATIVES (script SQL 70) : l'Amiral choisit LIBRE / VALIDATION / DESACTIVE ; 7 jours d'absence de l'Amiral = LIBRE (regle cote serveur) ---
+        window.modeIni = null;
+        function iniEstCmd() { const m = profilCommandant || {}; return !!(m.est_amiral || m.est_officier || m.est_directeur); }
+        function iniPropose() { return !!(window.modeIni && window.modeIni.effectif === 'VALIDATION' && !iniEstCmd()); }
+        function iniLibelleLancer() { return iniPropose() ? "PROPOSER L'INITIATIVE" : "LANCER L'INITIATIVE"; }
+        function appliquerTextesModalIni() {
+            const p = iniPropose();
+            const t = document.getElementById('ini-titre'); if (t) t.innerHTML = p ? '&gt; PROPOSER UNE INITIATIVE' : '&gt; LANCER UNE INITIATIVE';
+            const so = document.getElementById('ini-sous'); if (so) so.textContent = p ? 'Votre Amiral valide les initiatives : votre proposition lui est soumise. Elle devient active s\'il (ou un officier) l\'accepte, et expire après 48 h sans réponse.' : 'Un objectif pour l\'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.';
+            const b = document.getElementById('btn-lancer-initiative'); if (b && b.style.pointerEvents !== 'none') b.innerText = iniLibelleLancer();
+        }
+        function appliquerModeIni() {
+            const g = window.modeIni; if (!g) return;
+            const cmd = iniEstCmd(), E = window.edteamIniMode;
+            const desact = !cmd && g.effectif === 'DESACTIVE';
+            const libelle = iniPropose() ? '+ PROPOSER UNE INITIATIVE' : '+ LANCER UNE INITIATIVE';
+            const btn = document.getElementById('btn-initiative');
+            if (btn) { btn.innerText = '[ ' + libelle + ' ]'; if (desact) btn.style.display = 'none'; }
+            document.querySelectorAll('.ini-lancer').forEach(b => { b.innerText = libelle; b.style.display = desact ? 'none' : ''; });
+            appliquerTextesModalIni();
+            const zi = document.getElementById('bgs-mode-ini'); if (!zi) return;
+            let h = '';
+            window.__iniInfo = desact ? 'Les initiatives sont désactivées par votre Amiral pour le moment.'
+                : (!cmd && g.absent) ? 'Votre Amiral est absent depuis plus de 7 jours : les initiatives sont libres en attendant son retour.'
+                : (!cmd && g.effectif === 'VALIDATION') ? 'Votre Amiral valide les initiatives : vous les proposez, sa décision arrive sous 48 h au plus.' : '';
+            if (g.amiral && E && E.retourAAfficher()) {
+                const nom = { LIBRE: 'LIBRE', VALIDATION: 'SUR VALIDATION', DESACTIVE: 'DÉSACTIVÉ' }[g.mode] || g.mode;
+                h = '<div class="ini-info bleu">Vous étiez absent plus de 7 jours : vos pilotes étaient repassés en mode LIBRE. ' + (g.mode === 'LIBRE' ? '' : 'Votre réglage « ' + nom + ' » est de nouveau en vigueur. ') + '<button class="ini-btn" style="margin-left: 10px;" onclick="window.edteamIniMode.retourVu(); appliquerModeIni();">OK</button></div>';
+            }
+            zi.innerHTML = h; zi.style.display = h ? 'block' : 'none';
+        }
+        function rendrePropositionsIni(liste) {
+            const zone = document.getElementById('bgs-propositions'); if (!zone) return;
+            const moi = profilCommandant || {};
+            const typeLigne = q => '<b style="color:' + (q.type === 'HAUSSE' ? '#00FF66' : '#FF3333') + ';">' + escapeHtml(String(q.type)) + '</b> · <b style="color:#fff;">' + escapeHtml(String(q.faction || '').toUpperCase()) + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>';
+            const age = q => { const h = Math.floor((Date.now() - new Date(q.cree_le).getTime()) / 3600000); return h < 1 ? 'il y a moins d\'une heure' : 'il y a ' + h + ' h'; };
+            const msg = q => q.message ? '<div style="color:#aaa; font-size:0.8em; margin-top:5px; font-style:italic;">« ' + escapeHtml(String(q.message)) + ' »</div>' : '';
+            const enTete = (titre, nb) => '<div style="color:#FF4FD8; letter-spacing:2px; font-weight:bold;">&gt; ' + titre + (nb ? ' <span class="prop-etat" style="color:#ffc400; border-color:#ffc400; margin-left:8px;">' + nb + '</span>' : '') + '</div>';
+            let html = '';
+            if (iniEstCmd()) {
+                const att = liste.filter(q => q.statut === 'EN_ATTENTE');
+                if (att.length) {
+                    html = '<div class="bloc init" style="padding:16px 18px; margin-bottom:14px;">' + enTete('PROPOSITIONS À VALIDER', att.length + ' EN ATTENTE')
+                        + '<div style="color:#888; font-size:0.78em; margin:4px 0 8px;">Proposées par les pilotes · non actives tant que vous n\'avez pas accepté · expirent après 48 h</div>'
+                        + att.map(q => '<div class="prop-ligne"><div style="min-width:0;">' + typeLigne(q)
+                            + '<div style="color:#777; font-size:0.75em; margin-top:4px;">Proposée par CMDR ' + escapeHtml(String(q.createur || 'inconnu').toUpperCase()) + (q.rang_bgs ? ' · RANG ' + escapeHtml(String(q.rang_bgs)) : '') + ' · ' + age(q) + ' · ' + window.edteamIniMode.restant(q.expire_le) + '</div>' + msg(q) + '</div>'
+                            + '<div style="display:flex; gap:8px;"><button class="ini-btn ok" onclick="traiterProposition(\'' + q.id + '\', \'ACCEPTER\')">ACCEPTER</button><button class="ini-btn ko" onclick="traiterProposition(\'' + q.id + '\', \'REFUSER\')">REFUSER</button></div></div>').join('')
+                        + '<div style="color:#777; font-size:0.75em; margin-top:8px;">Accepter = elle devient une initiative active ; vous pourrez ensuite la transformer en directive.</div></div>';
+                }
+            } else {
+                const miennes = liste.filter(q => String(q.auteur_id) === String(moi.user_id) && q.statut !== 'RETIREE');
+                const etat = q => {
+                    if (q.statut === 'EN_ATTENTE') return '<span class="prop-etat" style="color:#ffc400; border-color:#ffc400;">EN ATTENTE</span> <span style="color:#777; font-size:0.85em;">' + window.edteamIniMode.restant(q.expire_le) + '</span> <button class="ini-btn gris" onclick="traiterProposition(\'' + q.id + '\', \'RETIRER\')">RETIRER</button>';
+                    if (q.statut === 'ACCEPTEE') return '<span class="prop-etat" style="color:#00FF66; border-color:#00FF66;">ACCEPTÉE</span> <span style="color:#777; font-size:0.85em;">votre initiative est active</span>';
+                    if (q.statut === 'REFUSEE') return '<span class="prop-etat" style="color:#FF3333; border-color:#FF3333;">REFUSÉE</span>';
+                    return '<span class="prop-etat" style="color:#999; border-color:#666;">EXPIRÉE</span> <span style="color:#777; font-size:0.85em;">non traitée en 48 h</span>';
+                };
+                const info = window.__iniInfo || '';
+                if (info || miennes.length) {
+                    html = '<div class="ini-leger">' + (info ? '<div class="ini-leger-info">ⓘ ' + escapeHtml(info) + '</div>' : '')
+                        + miennes.map(q => '<div class="prop-l"><b style="color:#FF4FD8; letter-spacing:1px;">' + (miennes.length > 1 ? 'PROPOSITION' : 'MA PROPOSITION') + '</b>' + typeLigne(q) + etat(q) + '</div>').join('') + '</div>';
+                }
+            }
+            zone.innerHTML = html; zone.style.display = html ? 'block' : 'none';
+        }
+        window.rafraichirModeIni = async function (force) {
+            const E = window.edteamIniMode; if (!E) return;
+            try {
+                const t = Date.now();
+                if (force || !window.__modeIniTs || t - window.__modeIniTs > 60000) {
+                    window.__modeIniTs = t;
+                    window.modeIni = await E.reglage(true);
+                    const g = window.modeIni;
+                    window.listeProps = (g && (g.mode !== 'LIBRE' || window.__avaitProps)) ? await E.liste() : [];
+                    window.__avaitProps = (window.listeProps || []).some(q => q.statut === 'EN_ATTENTE');
+                }
+                if (!window.modeIni) return;
+                appliquerModeIni();
+                rendrePropositionsIni(window.listeProps || []);
+            } catch (e) { console.error(e); }
+        };
+        window.traiterProposition = async function (id, action) {
+            if (typeof sonClic === 'function') sonClic();
+            if (action === 'ACCEPTER') {
+                const ok = await demanderConfirmation('ACCEPTER CETTE PROPOSITION ?', 'Elle devient une initiative active de l\'escadron : le pilote et ses camarades peuvent y participer tout de suite. Vous pourrez ensuite la transformer en directive.', '#FF4FD8');
+                if (!ok) return;
+            }
+            const { error } = await window.edteamIniMode.traiter(id, action);
+            if (error) { console.error(error); alert(error.message || 'Échec du traitement de la proposition.'); }
+            await rafraichirModeIni(true);
+            afficherOrdresBGS();
+        };
+
         // --- INITIATIVES DE PILOTES : lancement, clôture, adoption (regles et droits cote serveur, script SQL 68) ---
         let initiativeType = 'HAUSSE';
         window.ouvrirInitiative = function(event) {
             if (typeof sonClic === 'function') sonClic();
             ouvrirModal('modal-initiative', event);
             choisirTypeInitiative('HAUSSE');
+            appliquerTextesModalIni();
         };
         window.choisirTypeInitiative = function(t) {
             initiativeType = t;
@@ -2005,24 +2086,27 @@
             const fac = document.getElementById('ini-faction').value.trim();
             const msg = document.getElementById('ini-message').value.trim();
             const pop = parseInt(document.getElementById('ini-population').value || '0', 10) || 0;
-            if (!sys || !fac) { btn.innerText = 'ERREUR : SYSTÈME ET FACTION REQUIS'; setTimeout(() => btn.innerText = "LANCER L'INITIATIVE", 2200); return; }
+            if (!sys || !fac) { btn.innerText = 'ERREUR : SYSTÈME ET FACTION REQUIS'; setTimeout(() => btn.innerText = iniLibelleLancer(), 2200); return; }
             btn.innerText = 'TRANSMISSION…'; btn.style.pointerEvents = 'none';
-            const { error } = await supabaseApp.rpc('lancer_initiative', { p_systeme: sys, p_faction: fac, p_type: initiativeType, p_message: msg || null, p_population: pop });
+            const propose = iniPropose();
+            const { error } = propose ? await window.edteamIniMode.proposer(sys, fac, initiativeType, msg, pop)
+                                      : await supabaseApp.rpc('lancer_initiative', { p_systeme: sys, p_faction: fac, p_type: initiativeType, p_message: msg || null, p_population: pop });
             if (error) {
                 console.error(error);
                 const m = String(error.message || 'Échec du lancement.');
                 btn.innerText = m.length > 60 ? 'REFUSÉ : VOIR LE MESSAGE CI-DESSUS' : 'REFUSÉ : ' + m.toUpperCase();
                 const aide = document.getElementById('ini-aide'); if (aide) { aide.textContent = m; aide.style.color = '#FF4FD8'; }
-                setTimeout(() => { btn.innerText = "LANCER L'INITIATIVE"; btn.style.pointerEvents = 'auto'; }, 3200);
+                setTimeout(() => { btn.innerText = iniLibelleLancer(); btn.style.pointerEvents = 'auto'; }, 3200);
                 return;
             }
             if (typeof sonSucces === 'function') sonSucces();
-            btn.innerText = 'INITIATIVE LANCÉE';
+            btn.innerText = propose ? 'PROPOSITION ENVOYÉE' : 'INITIATIVE LANCÉE';
             setTimeout(() => {
                 fermerModal('modal-initiative');
                 document.getElementById('ini-systeme').value = ''; document.getElementById('ini-faction').value = ''; document.getElementById('ini-message').value = ''; document.getElementById('ini-population').value = '0';
                 const aide = document.getElementById('ini-aide'); if (aide) { aide.style.color = ''; aide.textContent = 'Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».'; }
-                btn.innerText = "LANCER L'INITIATIVE"; btn.style.pointerEvents = 'auto';
+                btn.innerText = iniLibelleLancer(); btn.style.pointerEvents = 'auto';
+                rafraichirModeIni(true);
                 afficherOrdresBGS();
             }, 1200);
         };
