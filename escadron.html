@@ -1162,11 +1162,16 @@
         // ----- Mode des initiatives (script SQL 70) : visible de l'Amiral seul -----
         async function chargerModeInitiatives(profil) {
             const carte = document.getElementById('carte-mode-ini');
-            if (!carte || !profil || !profil.est_amiral || !window.edteamIniMode) return;
+            if (!carte || !profil || !(profil.est_amiral || profil.est_directeur) || !window.edteamIniMode) return;
             try {
                 const g = await window.edteamIniMode.reglage(true);
-                if (!g || !g.amiral) return;
+                if (!g || !(g.amiral || profil.est_directeur)) return;
                 carte.style.display = 'block';
+                if (!g.amiral) {   // Directeur : il voit le choix de l'Amiral de son escadron, sans pouvoir le changer
+                    document.querySelectorAll('.mode-ini-carte').forEach(b => { b.disabled = true; b.style.cursor = 'default'; b.style.pointerEvents = 'none'; });
+                    const note = carte.querySelector('.bloc-note');
+                    if (note) note.textContent = 'Réglage de l\'Amiral de l\'escadron, en lecture seule pour vous. Si l\'Amiral n\'ouvre pas le site pendant 7 jours, les pilotes retrouvent automatiquement le mode LIBRE.';
+                }
                 marquerModeInitiatives(g.mode);
                 const r = document.getElementById('mode-ini-retour');
                 if (r && window.edteamIniMode.retourAAfficher()) {
