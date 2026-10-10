@@ -101,6 +101,7 @@
     .ec-spin{display:inline-block;width:14px;height:14px;border:2px solid #FFD700;border-top-color:transparent;border-radius:50%;animation:ecTourne .9s linear infinite;vertical-align:-2px;margin-right:8px}
     @keyframes ecTourne{to{transform:rotate(360deg)}}
     .ec-bandeau{border:1px solid rgba(255,215,0,.45);background:rgba(255,215,0,.07);color:#FFD700;padding:7px 12px;font-size:.76em;margin-bottom:14px;letter-spacing:1px}
+    .ec-etats{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin:-8px 0 16px;padding:8px 14px;border:1px solid #2c2c2c;background:rgba(0,0,0,.35)}
     .ec-pied{padding:6px 22px 16px;color:#777;font-size:.72em;line-height:1.6}
     @media (max-width:760px){
       #ec-overlay{padding:8px}.ec-corps{padding:12px 12px 6px}.ec-tete,.ec-regl,.ec-pied{padding-left:12px;padding-right:12px}
@@ -130,6 +131,10 @@
         const h = ageHeures(maj), frais = h !== null && h <= 48;
         return '<span class="ec-pill ' + (frais ? 'ec-ok' : 'ec-vx') + '">' + (frais ? 'RELEVÉ FRAIS · ' : 'RELEVÉ ') + E(ageTxtH(h).toUpperCase()) + '</span>';
     }
+    // etats de la faction (module etats-faction.js) : information pure, jamais pris en compte dans le classement des routes
+    const resEtat = () => (window.edteamEtats ? window.edteamEtats.lecture(etat.ordre) : null);
+    function etatsLigne() { const r = resEtat(); return r && r.donnees ? '<div class="ec-etats"><span class="ec-s" style="margin:0">ÉTATS DE LA FACTION</span>' + window.edteamEtats.bloc(r) + '</div>' : ''; }
+    const etiquetteRoute = m => (window.edteamEtats && m ? window.edteamEtats.etiquette(resEtat(), m.categorie) : '');
     function ouvert() { const o = document.getElementById('ec-overlay'); return !!o && o.style.display !== 'none'; }
 
     function assurerDom() {
@@ -212,7 +217,7 @@
             + '<div class="sous">' + cp(systeme, String(systeme).toUpperCase()) + ' · ' + (st.planetaire ? 'planétaire' : 'orbitale') + (st.grande ? ' · grande piste' : ' · petite piste') + ' · ' + toutes.length + ' station' + (toutes.length > 1 ? 's' : '') + ' de la faction ' + (toutes.length > 1 ? 'ont' : 'a') + ' un marché noir dans le système'
             + (autresDest.length ? '<br>aussi : ' + autresDest.map(x => cp(x.station)).join(' · ') : '') + '</div></div>'
             + '<div class="ec-fr" style="min-width:0"><span class="ec-pill ec-rouge-pill">VENDRE ICI : L\'INFLUENCE DE LA FACTION BAISSE</span></div></div>'
-            + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
+            + etatsLigne() + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
         if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou désactivez « Relevés de moins de 24 h » ou « Grande piste ».');
         const best = routes[0], autres = routes.slice(1, 7), coul = ['#FF7100', '#FF3333', '#FFD700', '#00F0FF', '#FF4FD8', '#c9ccd1'];
         h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>'
@@ -256,8 +261,9 @@
           + '<div class="ec-dest"><div><div class="lib">STATION DE LA FACTION · LA MIEUX PLACÉE POUR CETTE ROUTE</div><div class="nom">' + cp(best.v.station, String(best.v.station).toUpperCase()) + '</div>'
           + '<div class="sous">' + E(String(d.systeme || etat.systeme).toUpperCase()) + ' · ' + (best.v.planetaire ? 'planétaire' : 'orbitale') + (best.v.grande ? ' · grande piste' : ' · petite piste') + ' · ' + nbDest + ' station' + (nbDest > 1 ? 's' : '') + ' de la faction avec marché dans le système</div></div>'
           + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (7 jours, ou 24 h).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
+        h += etatsLigne();
         h += '<div class="ec-s">LA MEILLEURE ROUTE POUR <b>' + prefs.soute() + ' t</b></div>';
-        h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
+        h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + '</span>' + '</div>'
           + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(d.systeme || etat.systeme) + '</div>'
           + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
           + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecf" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00FF66"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#00FF66" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecf)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
@@ -269,7 +275,7 @@
             const maxT = best.total || 1, coul = ['#FFD700', '#c9ccd1', '#00F0FF', '#FF7100', '#FF4FD8', '#00FF66'];
             h += '<div class="ec-s">AUTRES ROUTES POSSIBLES <b style="color:#666;letter-spacing:1px;font-size:.95em">· la barre compare chaque bénéfice total à celui de la meilleure route</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span>+' + fmt(r.gain) + ' / t</span></div>'
                 + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u>' + cp(r.v.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
-                + '<div class="l3"><span>' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>'
+                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>'
                 + '<div class="ba" title="Bénéfice total comparé à la meilleure route"><i style="width:' + Math.max(4, Math.round(100 * r.total / maxT)) + '%"></i></div></div>').join('') + '</div>';
         }
         return h;

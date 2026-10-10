@@ -26,7 +26,7 @@
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=9"></script>
-    <script src="commerce.js?v=5"></script>
+    <script src="etats-faction.js?v=1"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -1923,7 +1923,7 @@
         }
         function xJaugesOrdre(o, rs) {
             return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
-                    <div style="color: #fff; font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span>${titre}</span>${window.edteamCommerce && /^(💰 ÉCONOMIE|📦 CONTREBANDE)/.test(titre) ? window.edteamCommerce.bouton(o, 'compact') : ''}</div>
+                    <div style="color: #fff; font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span>${titre}</span></div>
                     <div style="color: #bbb; margin-top: 3px;">Moi <b style="color: #fff;">${f(moi)}${u}</b> <span style="color: #666;">|</span> Escadron <b style="color: #fff;">${f(esc)} / ${f(plafond)}${u}</b></div>
                 </div>`).join('');
         }
@@ -1957,9 +1957,11 @@
                 centre = `<div class="big"><span class="n">${xPct(res.influence)}<small> %</small></span>${res.variation !== null ? `<span class="d" style="color: ${cs};">${fl} ${xPts(res.variation)}</span>` : ''}</div>${xSpark(res.courbe, cs)}`;
             }
             const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}">${ancien ? '⚠ ' : ''}${xAge(res.maj_edsm)}</span>` : '';
+            const etatsC = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
             return `<div class="mdc${ancien ? ' ancien' : ''}${seule ? ' seule' : ''}" id="mdc-${o.id}" style="border-top-color: ${o.origine === 'PILOTE' ? '#FF4FD8' : c};" onclick="ouvrirModalOrdre(${index}, '${o.origine === 'PILOTE' ? '#FF4FD8' : c}')">
                 <div class="haut"><span class="xtag" style="color: ${c};">#${o.id} ${XESC(type)}</span>${age}</div>
                 <div class="fac">${XESC(String(o.faction_cible || 'CIBLE').toUpperCase())}</div>
+                ${etatsC ? `<div style="margin: 2px 0 6px;">${etatsC}</div>` : ''}
                 ${centre}
                 ${xEffortPanel(av, c, seule ? xJaugesDonnees(o, rs) : null)}
             </div>`;
@@ -2282,6 +2284,7 @@
                 } else {
                     corps += '<div class="xmut" style="padding: 18px 8px; text-align: center; border: 1px dashed #333; border-radius: 8px;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>';
                 }
+                if (donnees && window.edteamEtats) corps += `<div class="mdet-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div>` + window.edteamEtats.bloc(res);
                 if (voisines.length) {
                     corps += `<div class="mdet-sec" style="margin-top: 12px;">FACTIONS DU SYSTÈME</div>` + voisines.map(x => {
                         const moi = String(x.n || '').trim().toLowerCase() === f;

@@ -1169,15 +1169,17 @@
                 centre = `<div class="big"><span class="n">${bgsPct(res.influence)}<small> %</small></span>${res.variation !== null ? `<span class="d" style="color: ${couleurSens};">${fleche} ${bgsPts(res.variation)}</span>` : ''}</div>${bgsSpark(res.courbe, couleurSens)}`;
             }
             const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}" title="Dernière mise à jour du jeu connue d'EDSM">${ancien ? '⚠ ' : ''}${bgsAge(res.maj_edsm)}</span>` : '';
+            const etatsCarte = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
+            const ligneEtats = etatsCarte ? `<div style="margin: 2px 0 6px;">${etatsCarte}</div>` : '';
             const bandeauInit = meta.init ? bgsBandeauInitiative(ordre, meta.init) : '';
             const entete = `<div class="haut"><span class="tag" style="color: ${c}; border-color: ${c};">#${ordre.id} // ${escapeHtml(ordre.type_ordre)}</span>${age}</div>
                 <div class="fac copy-click" onclick="event.stopPropagation(); copierNav('${String(ordre.faction_cible || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").toUpperCase()}', this, event)" title="Copier la faction">${nomFac}</div>`;
             const attrs = `id="dir-carte-${ordre.id}" style="border-top-color: ${meta.init ? '#FF4FD8' : c};" onclick="ouvrirDetailResultat('${ordre.id}')" onmouseenter="if(typeof sonHover === 'function') sonHover()"`;
             if (meta.large) {
                 // directive seule dans son système : carte large, le résultat à gauche, l'effort par type d'action à droite
-                return `<div class="bgs-carte large${meta.init ? ' init-carte' : ''}${ancien ? ' ancien' : ''}" ${attrs}>${bandeauInit}<div class="g1">${entete}${centre}</div><div class="g2">${bgsEffortPanel(meta, true)}</div></div>`;
+                return `<div class="bgs-carte large${meta.init ? ' init-carte' : ''}${ancien ? ' ancien' : ''}" ${attrs}>${bandeauInit}<div class="g1">${entete}${ligneEtats}${centre}</div><div class="g2">${bgsEffortPanel(meta, true)}</div></div>`;
             }
-            return `<div class="bgs-carte${ancien ? ' ancien' : ''}" ${attrs}>${entete}${centre}${bgsEffortPanel(meta, false)}</div>`;
+            return `<div class="bgs-carte${ancien ? ' ancien' : ''}" ${attrs}>${entete}${ligneEtats}${centre}${bgsEffortPanel(meta, false)}</div>`;
         }
 
         // courbe 30 jours avec le repère « directive émise »
@@ -1302,7 +1304,7 @@
                     <div>
                         <div class="bgs-sec">FACTIONS DU SYSTÈME</div>
                         ${tableVoisines}
-                        ${donnees ? `<div class="bgs-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div><div style="font-size: 0.85em; color: #ccc;">Actifs : <b>${escapeHtml((res.actifs && res.actifs.length ? res.actifs.join(', ') : 'aucun'))}</b>${res.attente && res.attente.length ? `<br>En attente : <b style="color: var(--ed-green, #2fe07a);">${escapeHtml(res.attente.join(', '))}</b>` : ''}${res.recuperation && res.recuperation.length ? `<br>En récupération : <b>${escapeHtml(res.recuperation.join(', '))}</b>` : ''}</div>` : ''}
+                        ${donnees ? `<div class="bgs-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div>${window.edteamEtats ? window.edteamEtats.bloc(res) : ''}` : ''}
                     </div>
                 </div>
                 <div style="color: #777; font-size: 0.75em; line-height: 1.5; margin-top: 14px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
@@ -2809,7 +2811,8 @@
 
     <script src="medailles.js?v=9"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="commerce.js?v=5"></script>
+    <script src="etats-faction.js?v=1"></script>
+    <script src="commerce.js?v=6"></script>
     <script src="footer.js?v=23"></script>
 </body>
 </html>

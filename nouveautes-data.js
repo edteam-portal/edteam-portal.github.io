@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-etats-faction', date: '2026-10-10T11:00:00Z', type: 'AMELIORE',
+        titre: 'Directives : les états de la faction (Boom, Guerre civile, Famine…) s’affichent',
+        texte: 'Sur les cartes de directives et dans leur détail (PC et mobile), des badges montrent maintenant les états de la faction ciblée : actifs en plein, en attente ou en récupération en pointillés, avec l’âge du relevé EDSM. Dans « Où vendre ? », la ligne « États de la faction » apparaît sous la destination, et une route dont la marchandise correspond à l’état (armes en guerre, nourriture en famine, médicaments en épidémie) porte l’étiquette « en phase avec l’état ». Information seulement : le classement des routes reste calculé sur les crédits gagnés.',
+        important: false
+    },
+    {
         id: '2026-10-routes-releves-recents', date: '2026-10-10T02:28:00Z', type: 'AMELIORE',
         titre: 'Routes commerciales : seulement des relevés de moins de 7 jours, ou de moins de 24 h',
         texte: 'Dans « Où vendre ? » et « Route de contrebande », seuls les marchés relevés depuis moins de 7 jours sont désormais proposés, aussi bien pour les stations où acheter que pour les stations de la faction. Une nouvelle case « Relevés de moins de 24 h » (à la place de « moins de 90 jours ») resserre la limite à 24 heures. Les âges des relevés s’affichent en heures (« il y a 4 h ») et la jauge de fraîcheur suit la limite choisie. Corrige aussi les cas où agrandir le rayon faisait disparaître des routes : les porte-vaisseaux de joueurs, aux prix peu fiables, ne remplissent plus les résultats.',
@@ -19,13 +25,13 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-route-contrebande', date: '2026-10-10T01:40:00Z', type: 'NOUVEAU',
         titre: 'Directives de baisse : « Route de contrebande » vers le marché noir de la faction',
-        texte: 'Dans le détail d’une directive de baisse, le nouveau bouton « 🏴 ROUTE DE CONTREBANDE » montre où faire baisser la faction en vendant de la contrebande : les stations de la faction qui ont un marché noir dans le système, et les stations proches où acheter de la marchandise généralement illégale (esclaves, narcotiques, armes…) au meilleur prix, avec le coût pour votre soute. Même fenêtre que « Où vendre ? » : réglages de soute, rayon, grande piste et fraîcheur, noms à copier. Attention : le prix de reprise du marché noir n’est relevé par personne, il se découvre en jeu, et la marchandise doit être illégale dans le système. Si la faction n’a aucun marché noir dans le système, la fenêtre le dit. Sur PC et sur mobile.',
+        texte: 'Dans le détail d’une directive de baisse, le nouveau bouton « 🏴 ROUTE DE CONTREBANDE » montre où faire baisser la faction en vendant de la contrebande : les stations de la faction qui ont un marché noir dans le système, et les stations proches où acheter de la marchandise généralement illégale (esclaves, narcotiques, armes…) au meilleur prix, avec le coût pour votre soute. Même fenêtre que « Où vendre ? » : réglages de soute, rayon, grande piste et fraîcheur, noms à copier. Attention : le prix de reprise du marché noir n’est relevé par personne, il se découvre en jeu, et la marchandise doit être illégale dans le système. Si la faction n’a aucun marché noir dans le système, la fenêtre le dit. Sur PC.',
         important: false
     },
     {
         id: '2026-10-routes-commerciales', date: '2026-10-10T01:15:00Z', type: 'NOUVEAU',
         titre: 'Directives de hausse : « Où vendre ? », la route commerciale la plus rentable',
-        texte: 'Dans le détail d’une directive de hausse, le nouveau bouton « 💰 OÙ VENDRE ? » vous propose la meilleure route pour faire monter la faction : la station de la faction qui achète le plus cher dans le système, et la station proche où acheter la marchandise le moins cher, avec le gain par tonne et le bénéfice total pour votre soute. Réglez votre soute, le rayon d’achat (20, 40 ou 80 al), la grande piste et la fraîcheur des relevés ; cliquez sur un nom de système ou de station pour le copier. Les prix viennent de Spansh (relevés des joueurs) : une pastille indique l’âge de chaque relevé, vérifiez toujours le marché à l’arrivée. La première recherche d’une directive prend une trentaine de secondes, puis le résultat est partagé avec tout l’escadron pendant 2 heures. Sur PC et sur mobile. Astuce : plus vous vous amarrez dans les stations de l’escadron, plus les relevés sont frais.',
+        texte: 'Dans le détail d’une directive de hausse, le nouveau bouton « 💰 OÙ VENDRE ? » vous propose la meilleure route pour faire monter la faction : la station de la faction qui achète le plus cher dans le système, et la station proche où acheter la marchandise le moins cher, avec le gain par tonne et le bénéfice total pour votre soute. Réglez votre soute, le rayon d’achat (20, 40 ou 80 al), la grande piste et la fraîcheur des relevés ; cliquez sur un nom de système ou de station pour le copier. Les prix viennent de Spansh (relevés des joueurs) : une pastille indique l’âge de chaque relevé, vérifiez toujours le marché à l’arrivée. La première recherche d’une directive prend une trentaine de secondes, puis le résultat est partagé avec tout l’escadron pendant 2 heures. Sur PC. Astuce : plus vous vous amarrez dans les stations de l’escadron, plus les relevés sont frais.',
         important: false
     },
     {
