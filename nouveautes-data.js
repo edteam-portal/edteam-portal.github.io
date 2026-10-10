@@ -5,6 +5,19 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-tableau-de-bord', date: '2026-10-10T15:46:22Z', type: 'NOUVEAU',
+        titre: 'Le tableau de bord en jeu : votre second écran',
+        texte: 'Nouvelle page TABLEAU DE BORD, à garder ouverte sur un second écran ou une tablette pendant que vous jouez : elle suit votre session en direct grâce au plugin. Onglet Commerce : votre soute, vos crédits gagnés depuis le lancement du jeu, le registre de vos achats et ventes, une feuille de route de plusieurs étapes calculée autour de vous (ou la meilleure route pour votre porte-vaisseaux), et un bloc « Vendre ce que je transporte » pour les marchandises dont vous ne savez que faire. Onglet Missions : vos missions en cours, l’ordre de passage le plus court, et l’effet des missions terminées sur la réputation et l’influence de chaque faction. Un clic sur un nom de système ou de station le copie. Visible de vous seul, avec ou sans escadron.',
+        important: false,
+        action: 'Relancez EDMC une fois : le plugin v2.14 se met à jour tout seul.'
+    },
+    {
+        id: '2026-10-entete-allege', date: '2026-10-10T15:46:22Z', type: 'AMELIORE',
+        titre: 'En-tête allégé',
+        texte: 'Le statut du pilote (« Casier vierge » / « Recherché ») et la pastille de rang « Auxiliaires » ont été retirés de l’en-tête pour laisser de la place. Les rangs Powerplay, BGS et Fédération restent affichés.',
+        important: false
+    },
+    {
         id: '2026-10-etats-faction', date: '2026-10-10T11:00:00Z', type: 'AMELIORE',
         titre: 'Directives : les états de la faction (Boom, Guerre civile, Famine…) s’affichent',
         texte: 'Sur les cartes de directives et dans leur détail (PC et mobile), des badges montrent maintenant les états de la faction ciblée : actifs en plein, en attente ou en récupération en pointillés, avec l’âge du relevé EDSM. Dans « Où vendre ? », la ligne « États de la faction » apparaît sous la destination, et une route dont la marchandise correspond à l’état (armes en guerre, nourriture en famine, médicaments en épidémie) porte l’étiquette « en phase avec l’état ». Information seulement : le classement des routes reste calculé sur les crédits gagnés.',

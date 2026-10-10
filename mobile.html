@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="photos.js?v=2"></script>
-    <script src="annonce.js?v=1"></script>
+    <script src="annonce.js?v=2"></script>
     <script src="revelations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
@@ -1291,7 +1291,7 @@
             verifierNouvellesLivraisonsMobile();
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
             // Annonce d'une grande nouvelle fonction (une seule fois par pilote et par appareil) : annonce.js
-            if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { aller: () => { switchMobileTab('bgs'); bgsVue('dir'); } });
+            if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { mobile: true, aller: () => { switchMobileTab('bgs'); bgsVue('dir'); } });
             // Révélations plein écran (nouveau rang, Pilier, Élan, distinction, anecdote) : revelations.js
             if (window.edteamRevelations) window.edteamRevelations.verifier(profilCommandant, { db: supabaseApp, rangs: { combat: TABLES_ED_RANGS.combat, trade: TABLES_ED_RANGS.trade, explore: TABLES_ED_RANGS.explore, exobio: TABLES_ED_RANGS.exobiologist, mercenary: TABLES_ED_RANGS.mercenary, fed: TABLES_ED_RANGS.federation, emp: TABLES_ED_RANGS.empire } });
 

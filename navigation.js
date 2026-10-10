@@ -43,6 +43,10 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="7" ry="3"></ellipse><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"></path><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"></path></svg></div>
             <span class="nav-text">BUDGET</span>
         </a>
+        <a href="tableau-de-bord.html" id="nav-link-tableau" class="nav-link ${page === 'tableau-de-bord.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"></path><line x1="12" y1="18" x2="16" y2="10"></line><circle cx="12" cy="18" r="1.2"></circle></svg></div>
+            <span class="nav-text">TABLEAU DE BORD</span>
+        </a>
         <a href="escadron.html" id="nav-link-escadron" class="nav-link ${page === 'escadron.html' ? 'active' : ''}${indep ? ' verrou' : ''}" ${indep ? 'title="Réservé aux membres d\'un escadron"' : ''} style="display: ${(indep || localStorage.getItem('edteam_acces_escadron') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <span class="nav-text">ESCADRON</span>
@@ -82,7 +86,7 @@ function injecterArchitectureGlobale() {
             @media (max-width: 900px) { #beta-badge { margin-left: 5px !important; padding: 1px 4px !important; letter-spacing: 1px !important; } }
             .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
             .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
-            /* pastilles de rang : Powerplay, BGS, Federation, Auxiliaires (fenetres : carriere.js, ouvrables depuis toutes les pages) */
+            /* pastilles de rang : Powerplay, BGS, Federation (fenetres : carriere.js, ouvrables depuis toutes les pages) */
             .hd-sep { width: 1px; align-self: stretch; margin: 6px 2px; background: linear-gradient(transparent, #333, transparent); flex: none; }
             .hd-rangs { display: flex; align-items: center; gap: 8px; flex: none; }
             .hd-rg { --c: #00F0FF; position: relative; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px 0 8px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); border-radius: 5px; cursor: pointer; white-space: nowrap;
@@ -126,10 +130,6 @@ function injecterArchitectureGlobale() {
                     style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; font-size: 0.8em; letter-spacing: 1px; gap: 4px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.3); border-radius: 4px; padding: 5px 14px; white-space: nowrap; box-sizing: border-box; min-width: 150px;">
                     <div id="header-escadron-nom" style="color: var(--ed-orange); font-size: 1.1em; font-weight: bold; letter-spacing: 2px; line-height: 1.1;">---</div>
                     <div id="header-grades" style="display: flex; gap: 6px; flex-wrap: nowrap;"></div>
-                </div>
-                <div id="header-recherche" style="display: none; align-items: center; background: rgba(255, 51, 51, 0.08); border: 1px solid rgba(255, 51, 51, 0.5); border-radius: 4px; padding: 8px 12px; cursor: help; white-space: nowrap; box-sizing: border-box;"
-                    onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                    <span id="header-recherche-txt" style="color: #FF3333; font-size: 0.85em; font-weight: bold; letter-spacing: 2px;">RECHERCHÉ</span>
                 </div>
 
                 <div class="hd-sep"></div>
@@ -406,11 +406,6 @@ window.actualiserHeader = function(profilData) {
             h += chip('', 'fed', '#00FF66', 'FÉDÉRATION', meilleur.rang, meilleur.rang, {},
                 tip('#00FF66', 'FÉDÉRATION DES PILOTES', 'Meilleur rang : ' + meilleur.rang + ' (' + meilleur.nom.toLowerCase() + '). Détail des cinq carrières.'),
                 '<path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>');
-            // Auxiliaires : Marine federale et Empire
-            const nf = R.fed[parseInt(memo.rang_fed) || 0] || 'INCONNU', ne = R.emp[parseInt(memo.rang_emp) || 0] || 'INCONNU';
-            h += chip('', 'aux', '#B026FF', 'AUXILIAIRES', nf + '<small>· ' + ne + '</small>', abr(nf) + ' · ' + abr(ne), {},
-                tip('#B026FF', 'RANGS AUXILIAIRES', 'Marine fédérale : ' + nf + ' · Empire : ' + ne + '.'),
-                '<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6L12 16.7 6.7 19.6l1.1-6L3.4 9.4l6-.8z"/>');
             zone.innerHTML = h;
             zone.style.display = 'flex';
             if (!zone.__tips) {
@@ -430,15 +425,7 @@ window.actualiserHeader = function(profilData) {
         }
     }
 
-    // --- STATUT « RECHERCHÉ » : n'apparaît que si le pilote est recherché (notoriété > 0) ; rien quand son casier est vierge ---
-    if (profilData.notoriete !== undefined) {
-        const recherche = document.getElementById('header-recherche');
-        if (recherche) {
-            const notoriete = parseInt(profilData.notoriete) || 0;
-            recherche.style.display = notoriete > 0 ? 'flex' : 'none';
-            recherche.setAttribute('onmouseenter', "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'STATUT LÉGAL : SOUS SURVEILLANCE<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Niveau de notoriété : " + notoriete + "</span>', '#FF3333')");
-        }
-    }
+
 };
 
 // Statistiques globales de l'escadron (inscrits + actifs depuis le tick hebdo, tous

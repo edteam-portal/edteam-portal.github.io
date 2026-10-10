@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <title>EDTEAM // TABLEAU DE BORD</title>
+    <meta name="robots" content="noindex, nofollow">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=3"></script>
+    <script src="son.js?v=1"></script>
+    <script src="photos.js?v=2"></script>
+    <script src="navigation.js?v=30"></script>
+
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; display: flex; align-items: flex-start; justify-content: center; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid rgba(255, 113, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; box-shadow: 0 0 10px var(--ed-orange); }
+
+        /* =========================================
+           BALAYAGE HOLOGRAPHIQUE (SCANLINE)
+           ========================================= */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--ed-orange);
+            box-shadow: 0 0 15px var(--ed-orange-glow), 0 0 5px var(--ed-orange);
+            opacity: 0.15;
+            z-index: 9999;
+            pointer-events: none;
+            animation: scanline-anim 8s linear infinite;
+        }
+
+        @keyframes scanline-anim {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(100vh); }
+        }
+
+
+        /* =========================================
+           MENU LATÉRAL TACTIQUE
+           ========================================= */
+        #side-menu {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 60px;
+            background: rgba(10, 10, 10, 0.95); border-right: 1px solid var(--ed-orange-dim);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px;
+        }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-orange); }
+        
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-link:hover { color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); border-left: 3px solid var(--ed-orange); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }
+
+        /* =========================================
+           CONTENEUR CENTRAL DYNAMIQUE
+           ========================================= */
+        .hud-container { 
+            width: calc(100% - 60px); max-width: 1920px; height: 95vh; display: flex; flex-direction: column; 
+            margin-left: 60px; padding: 20px 30px; box-sizing: border-box;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+
+        .hud-header { display: flex; flex-direction: column; margin-bottom: 15px; flex-shrink: 0; }
+        .app-logo { height: 45px; width: 45px; filter: drop-shadow(0 0 5px var(--ed-orange-glow)); transition: 0.3s; }
+        
+        /* STYLE DU HEADER UNIFIÉ */
+        #fc-inventory-percent { font-size: 0.9em; color: #fff; letter-spacing: 2px; font-weight: bold; background: rgba(0, 240, 255, 0.08); padding: 4px 15px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .info-btn { cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-block; padding: 0 4px; }
+        .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
+        
+        .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px; }
+        .tab-bar { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
+        .tab-btn:hover { background: rgba(255, 113, 0, 0.1); opacity: 0.8; }
+        .tab-btn.active { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
+
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .data-row { border: 1px solid rgba(255, 113, 0, 0.2); border-radius: 4px; background: rgba(10, 5, 0, 0.6); padding: 20px; margin-bottom: 15px; }
+        
+        /* CARD PILOTE (Membres de l'escadron) */
+        .pilot-card { background: rgba(10, 5, 0, 0.6); border: 1px solid var(--ed-orange-dim); border-radius: 4px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .pilot-card:hover { background: rgba(255, 113, 0, 0.1); border-color: var(--ed-orange); box-shadow: 0 0 10px rgba(255, 113, 0, 0.2); }
+
+        .rank-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,113,0,0.1); transition: 0.2s; }
+        .rank-row:hover { background: rgba(255,113,0,0.05); }
+        .rank-1 { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 1.2em; font-weight: bold; }
+        .rank-2 { color: #C0C0C0; font-size: 1.1em; font-weight: bold; }
+        .rank-3 { color: #CD7F32; font-size: 1.1em; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes alertPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        #holo-tooltip { position: fixed; display: none; background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); color: #fff; padding: 6px 12px; font-size: 0.85em; z-index: 10000; pointer-events: none; border-radius: 3px; font-weight: bold; letter-spacing: 1px; white-space: nowrap;}
+
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;
+            padding: 40px; /* Force une belle marge noire tout autour de la modale */
+            box-sizing: border-box;
+        }
+        
+        .modal-content { 
+            background: rgba(10, 5, 0, 0.95); border: 1px solid var(--ed-orange); padding: 30px; 
+            max-width: 600px; width: 100%; color: #ccc; position: relative; 
+            max-height: 100%; /* S'arrête exactement avant la marge de l'overlay */
+            overflow-y: auto; box-sizing: border-box;
+        }
+
+        /* Optimisation automatique pour les écrans 14" (Petite hauteur) */
+        @media (max-width: 1400px), (max-height: 800px) {
+            .modal-overlay { padding: 15px; } /* Marge réduite pour gagner de l'espace */
+            .modal-content { padding: 20px; } /* On réduit un peu l'espace vide à l'intérieur */
+        }
+
+        /* Fiche pilote : les colonnes se replient sur un écran étroit */
+        @media (max-width: 800px) {
+            #grille-fiche-pilote, #bandeau-fiche-pilote { grid-template-columns: 1fr !important; }
+        }
+
+        /* Correction spécifique pour la barre de scroll des modales PC */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.4); border-left: 1px solid rgba(255, 113, 0, 0.1); }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--ed-orange); border-radius: 4px; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: var(--ed-orange); cursor: pointer; font-size: 1.2em; font-weight: bold; }
+
+        .copy-click { cursor: pointer; transition: all 0.2s; padding: 2px 5px; border-radius: 3px; }
+
+        /* ===== TABLEAU DE BORD EN JEU : cadre = classe .bloc du site (bloc.css) ; tout le reste est propre a cette page ===== */
+        .tb-top { display:flex; justify-content:space-between; align-items:center; gap:10px 18px; flex-wrap:wrap; margin-bottom:12px; }
+        .tb-cmdr { font-size:1.15em; letter-spacing:3px; color:var(--ed-orange); }
+        .tb-cmdr small { color:#888; letter-spacing:1px; margin-left:10px; font-size:.7em; }
+        .tb-live { display:inline-flex; align-items:center; gap:8px; font-size:.85em; letter-spacing:1px; color:#00FF66; }
+        .tb-live i { width:9px; height:9px; border-radius:50%; background:#00FF66; box-shadow:0 0 8px #00FF66; animation:alertPulse 1.6s infinite; }
+        .tb-live.off { color:#888; } .tb-live.off i { background:#666; box-shadow:none; animation:none; }
+        .tb-live.old { color:#e8a35a; } .tb-live.old i { background:#e8a35a; box-shadow:0 0 8px #e8a35a; }
+        .tb-tabs { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:14px; border-bottom:2px solid var(--ed-orange); }
+        .tb-tab { background:transparent; border:1px solid rgba(255,113,0,.22); border-bottom:none; color:var(--ed-orange); padding:9px 24px; font:inherit; letter-spacing:2px; cursor:pointer; opacity:.7; }
+        .tb-tab:hover { opacity:.95; background:rgba(255,113,0,.1); }
+        .tb-tab.on { opacity:1; background:var(--ed-orange); color:#000; font-weight:bold; }
+        .tb-tab.off { opacity:.35; border-style:dashed; cursor:not-allowed; }
+        .tb-banner { border:1px solid rgba(232,163,90,.55); background:rgba(232,163,90,.08); color:#e8a35a; padding:9px 14px; margin-bottom:12px; font-size:.9em; line-height:1.5; }
+        .tb-grid4 { display:grid; grid-template-columns:1.6fr repeat(3,1fr); gap:12px; margin-bottom:12px; }
+        .tb-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+        @media (max-width:1100px) { .tb-grid4 { grid-template-columns:1fr 1fr; } .tb-grid2 { grid-template-columns:1fr; } }
+        .tb-big { font-size:1.9em; color:#fff; text-shadow:0 0 14px currentColor; line-height:1.1; white-space:nowrap; }
+        .tb-up { color:#00FF66; } .tb-down { color:#FF3333; } .tb-cy { color:#00F0FF; } .tb-gold { color:#FFD700; } .tb-mut { color:#777; }
+        .tb-sub { font-size:.85em; color:#8a9; margin-top:6px; letter-spacing:1px; }
+        .tb-jauge { height:9px; background:rgba(255,255,255,.07); position:relative; margin:9px 0 5px; }
+        .tb-jauge i { position:absolute; left:0; top:0; bottom:0; background:#00FF66; box-shadow:0 0 8px #00FF66; }
+        /* soute holographique : le cadre est ENTIEREMENT rempli de caisses (capacite du vaisseau), sans ecart entre les cases (sinon la survol clignote) */
+        .tb-grille { display:grid; gap:0; margin-top:6px; }
+        .tb-cr { aspect-ratio:1; position:relative; }
+        .tb-cr:after { content:""; position:absolute; inset:1.5px; border:1px dashed rgba(0,240,255,.22); background:rgba(0,240,255,.03); }
+        .tb-cr.f { cursor:pointer; }
+        .tb-cr.f:after { border:1px solid var(--cl); background:color-mix(in srgb,var(--cl) 24%,transparent); box-shadow:0 0 6px color-mix(in srgb,var(--cl) 45%,transparent); }
+        .tb-cr.f.m:after { border-style:dashed; }
+        .tb-cr.f:before { content:""; position:absolute; left:14%; right:14%; top:50%; height:1px; background:var(--cl); opacity:.65; z-index:1; }
+        .tb-cr.f.hl:after { background:color-mix(in srgb,var(--cl) 55%,transparent); box-shadow:0 0 12px var(--cl); }
+        .tb-cr.f.hl { z-index:2; }
+        .tb-grille.dim .tb-cr.f:not(.hl):after { opacity:.3; }
+        .tb-leg { display:flex; gap:6px 16px; flex-wrap:wrap; font-size:.9em; margin-top:10px; color:#b8c2c8; }
+        .tb-leg span { cursor:pointer; } .tb-leg i { display:inline-block; width:10px; height:10px; background:var(--cl); margin-right:6px; }
+        .tb-cap { display:flex; justify-content:space-between; font-size:.85em; color:#8a9; margin-top:8px; gap:8px; flex-wrap:wrap; }
+        #tb-tip { position:fixed; z-index:3000; pointer-events:none; background:#000; border:1px solid #00F0FF; padding:6px 10px; font-size:.85em; display:none; line-height:1.5; color:#ddd; }
+        #tb-tip b { color:#FFD700; font-weight:normal; }
+        .tb-table { width:100%; border-collapse:collapse; font-size:.92em; }
+        .tb-table th { color:#777; font-weight:normal; letter-spacing:1px; font-size:.8em; text-align:left; padding:6px 8px; border-bottom:1px solid #2a2a2a; }
+        .tb-table td { padding:7px 8px; border-bottom:1px solid #161616; }
+        .tb-table .r { text-align:right; } .tb-ach { color:#00F0FF; } .tb-ven { color:#00FF66; }
+        .tb-vide { color:#777; text-align:center; padding:26px 10px; border:1px dashed #333; line-height:1.7; }
+        .tb-bientot { opacity:.55; }
+        /* missions */
+        .tb-ms { display:grid; grid-template-columns:44px 1fr auto; gap:12px; align-items:center; border:1px solid #2c3338; border-left:4px solid var(--cl2,#00FF66); background:rgba(0,0,0,.4); padding:10px 12px; margin-bottom:10px; }
+        .tb-ms.ko { --cl2:#FF3333; } .tb-ms.wa { --cl2:#FFD700; } .tb-ms.ok { --cl2:#00FF66; }
+        .tb-ms .ic { font-size:1.6em; text-align:center; } .tb-ms .ti { color:#fff; } .tb-ms .sb { color:#8a9; font-size:.85em; margin-top:2px; overflow-wrap:anywhere; }
+        .tb-ms .lx { color:#00F0FF; }
+        .tb-ms .mt { display:flex; gap:6px 10px; flex-wrap:wrap; margin-top:6px; font-size:.8em; color:#b8c2c8; }
+        .tb-ms .mt span { border:1px solid #2c3338; padding:1px 8px; background:rgba(255,255,255,.03); }
+        .tb-cd { text-align:center; min-width:62px; } .tb-cd b { display:block; font-weight:normal; font-size:.85em; color:#fff; margin-top:2px; }
+        .tb-gps { position:relative; padding-left:20px; }
+        .tb-gps:before { content:""; position:absolute; left:6px; top:8px; bottom:8px; width:2px; background:repeating-linear-gradient(180deg,#00F0FF 0 6px,transparent 6px 10px); }
+        .tb-st { position:relative; padding:6px 0 12px; }
+        .tb-st:before { content:""; position:absolute; left:-20px; top:11px; width:12px; height:12px; border-radius:50%; border:2px solid #00F0FF; background:#000; }
+        .tb-st.fin:before { border-color:#00FF66; background:#00FF66; } .tb-st.dep:before { border-color:#8b97a0; }
+        .tb-st b { color:#00F0FF; font-weight:normal; } .tb-st span { display:block; color:#8a9; font-size:.85em; margin-top:2px; line-height:1.5; }
+        .tb-rp { display:grid; grid-template-columns:minmax(110px,1.2fr) 2fr 36px minmax(80px,1fr); gap:10px; align-items:center; padding:7px 0; border-bottom:1px solid #161616; font-size:.92em; }
+        .tb-rp .rb { height:7px; background:rgba(255,255,255,.07); } .tb-rp .rb i { display:block; height:100%; background:#00FF66; box-shadow:0 0 6px #00FF66; }
+        .tb-rp em { font-style:normal; color:#777; font-size:.85em; }
+        .tb-carte { width:100%; height:auto; display:block; }
+        /* feuille de route */
+        .tb-barre { display:flex; gap:14px 24px; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; margin-bottom:14px; padding-bottom:14px; border-bottom:1px dashed #2f353a; }
+        .tb-regl { display:flex; gap:14px 28px; flex-wrap:wrap; }
+        .tb-regl .g { display:flex; flex-direction:column; gap:5px; }
+        .tb-regl label { font-size:.72em; letter-spacing:2px; color:#8a9; }
+        .tb-regl small { font-size:.72em; color:#667; }
+        .tb-seg { display:inline-flex; border:1px solid #444; align-self:flex-start; }
+        .tb-seg button { background:transparent; border:0; border-right:1px solid #333; color:#999; font:inherit; font-size:.95em; padding:6px 13px; cursor:pointer; }
+        .tb-seg button:last-child { border:0; } .tb-seg button.on { background:rgba(0,240,255,.15); color:#00F0FF; box-shadow:inset 0 0 8px rgba(0,240,255,.25); }
+        .tb-tg { display:inline-flex; align-items:center; gap:8px; cursor:pointer; background:none; border:1px solid #444; color:#999; font:inherit; font-size:.9em; letter-spacing:1px; padding:6px 12px; align-self:flex-start; }
+        .tb-tg i { width:26px; height:14px; border-radius:8px; background:#333; position:relative; display:inline-block; }
+        .tb-tg i:after { content:""; position:absolute; top:2px; left:2px; width:10px; height:10px; border-radius:50%; background:#888; transition:.15s; }
+        .tb-tg.on { color:#00FF66; border-color:rgba(0,255,102,.5); } .tb-tg.on i { background:rgba(0,255,102,.35); } .tb-tg.on i:after { left:14px; background:#00FF66; }
+        .tb-btn { background:rgba(255,215,0,.1); border:1px solid #FFD700; color:#FFD700; font:inherit; letter-spacing:2px; font-size:.95em; padding:11px 22px; cursor:pointer; }
+        .tb-btn:hover:not(:disabled) { background:#FFD700; color:#000; } .tb-btn:disabled { opacity:.4; cursor:not-allowed; }
+        .tb-btn.vert { background:rgba(0,255,102,.1); border-color:#00FF66; color:#00FF66; } .tb-btn.vert:hover { background:#00FF66; color:#000; }
+        .tb-invite { border:1px dashed #3a3a2a; padding:20px 22px; color:#aaa; line-height:1.6; }
+        .tb-invite b { display:block; color:#fff; font-weight:normal; font-size:1.05em; margin-bottom:4px; } .tb-invite span { display:block; font-size:.9em; }
+        .tb-attente { display:flex; align-items:center; gap:16px; padding:22px; border:1px solid rgba(255,215,0,.4); background:rgba(255,215,0,.05); }
+        .tb-attente b { display:block; color:#FFD700; font-weight:normal; letter-spacing:1px; } .tb-attente span { color:#9a9; font-size:.85em; }
+        .tb-spin { flex:0 0 auto; width:22px; height:22px; border:3px solid #FFD700; border-top-color:transparent; border-radius:50%; animation:tbTourne .9s linear infinite; }
+        @keyframes tbTourne { to { transform:rotate(360deg); } }
+        .tb-vx { color:#e8a35a; } .tb-ok { color:#8a9; }
+        .tb-kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:10px; }
+        @media (max-width:1000px) { .tb-kpi { grid-template-columns:1fr 1fr; } }
+        .tb-kpi .k { border:1px solid #2c3338; background:rgba(0,0,0,.4); padding:10px 14px; display:flex; flex-direction:column; gap:3px; }
+        .tb-kpi .k span { font-size:.72em; letter-spacing:2px; color:#8a9; } .tb-kpi .k b { font-weight:normal; font-size:1.55em; color:#fff; } .tb-kpi .k small { font-size:.75em; color:#778; }
+        .tb-prog { height:6px; background:rgba(255,255,255,.07); margin-bottom:16px; } .tb-prog i { display:block; height:100%; background:#00FF66; box-shadow:0 0 8px #00FF66; }
+        /* la route : un arret par ligne, comme une feuille de route de chauffeur */
+        .tb-route { display:flex; flex-direction:column; }
+        .tb-arret { display:grid; grid-template-columns:54px 1fr; }
+        .tb-arret .rail { position:relative; display:flex; justify-content:center; }
+        .tb-arret .num { z-index:1; width:36px; height:36px; border-radius:50%; border:2px solid #556; background:#050607; color:#99a; display:grid; place-items:center; font-size:1em; margin-top:10px; }
+        .tb-arret.fait .num { border-color:#00FF66; background:rgba(0,255,102,.18); color:#00FF66; }
+        .tb-arret.cours .num { border-color:#FFD700; background:rgba(255,215,0,.2); color:#FFD700; box-shadow:0 0 14px rgba(255,215,0,.5); }
+        .tb-arret .corps { border:1px solid #2c3338; background:rgba(0,0,0,.4); padding:12px 16px; min-width:0; }
+        .tb-arret.fait .corps { border-color:rgba(0,255,102,.45); background:rgba(0,255,102,.04); }
+        .tb-arret.cours .corps { border-color:#FFD700; background:rgba(255,215,0,.05); box-shadow:0 0 16px rgba(255,215,0,.15); }
+        .tb-arret .tete { display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+        .tb-arret .lieu { color:#fff; font-size:1.2em; font-weight:normal; letter-spacing:1px; margin-right:12px; } .tb-arret .sys { color:#00F0FF; font-size:.9em; }
+        .tb-arret .etat { font-size:.75em; letter-spacing:2px; color:#778; } .tb-arret.fait .etat { color:#00FF66; } .tb-arret.cours .etat { color:#FFD700; }
+        .tb-arret .cols { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        @media (max-width:900px) { .tb-arret .cols { grid-template-columns:1fr; } }
+        .tb-arret .col { border:1px solid #232a2f; padding:8px 12px; background:rgba(255,255,255,.015); }
+        .tb-arret .col h4 { margin:0 0 6px; font-weight:normal; font-size:.72em; letter-spacing:2px; color:#778; }
+        .tb-arret .ln { display:grid; grid-template-columns:18px minmax(110px,1.6fr) 62px minmax(78px,1fr) minmax(70px,.9fr); gap:6px; align-items:baseline; padding:5px 0; border-top:1px solid #1a1f23; font-size:.92em; }
+        .tb-arret .ln:first-of-type { border-top:0; } .tb-arret .ln.ven .nom { color:#00FF66; } .tb-arret .ln.ach .nom { color:#00F0FF; }
+        .tb-arret .ln .qt, .tb-arret .ln .px { color:#ddd; white-space:nowrap; } .tb-arret .ln small { color:#778; font-size:.8em; } .tb-arret .ln .gn { text-align:right; white-space:nowrap; } .tb-arret .ln .c { color:#00FF66; }
+        .tb-arret .rien { color:#556; font-size:.85em; padding:4px 0; }
+        .tb-arret .age { margin-top:8px; font-size:.75em; }
+        .tb-trajet { display:grid; grid-template-columns:54px 1fr; }
+        .tb-trajet span { grid-column:2; color:#778; font-size:.8em; letter-spacing:1px; padding:6px 4px 6px 16px; position:relative; }
+        .tb-trajet:before { content:""; justify-self:center; width:2px; background:repeating-linear-gradient(180deg,#00F0FF 0 6px,transparent 6px 10px); grid-column:1; min-height:26px; }
+        .tb-pied { margin-top:14px; padding-top:12px; border-top:1px dashed #2a2f33; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; color:#8a9; font-size:.8em; line-height:1.5; }
+        .tb-pied > span { flex:1; min-width:260px; }
+        .tb-outils { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; margin:2px 0 8px; font-size:.78em; color:#778; }
+        .tb-outils button { background:transparent; border:1px solid #444; color:#9aa; font:inherit; font-size:.95em; letter-spacing:1px; padding:3px 10px; margin-left:6px; cursor:pointer; } .tb-outils button:hover { color:#00F0FF; border-color:#00F0FF; }
+        .tb-arret.ferme { cursor:pointer; }
+        .tb-arret .corps.compact { display:grid; grid-template-columns:210px 150px minmax(200px,1fr) 150px 14px; gap:6px 14px; align-items:center; padding:7px 14px; }
+        .tb-arret .corps.compact:hover { border-color:#00F0FF; background:rgba(0,240,255,.05); }
+        .tb-arret .corps.compact .lieu { font-size:1em; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .tb-arret .corps.compact .sys { font-size:.82em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .tb-arret .corps.compact .res { display:flex; gap:4px 16px; flex-wrap:wrap; font-size:.85em; color:#aab; } .tb-arret .corps.compact .res .ven { color:#00FF66; } .tb-arret .corps.compact .res .ach { color:#00F0FF; }
+        .tb-arret .corps.compact .suite { font-size:.75em; color:#778; white-space:nowrap; text-align:right; } .tb-arret .corps.compact .chev { color:#667; text-align:right; }
+        .tb-arret.ferme .num { width:28px; height:28px; font-size:.9em; margin-top:5px; }
+        @media (max-width:1000px) { .tb-arret .corps.compact { grid-template-columns:1fr 1fr; } }
+        /* arret deplie : gros caracteres, fleche vers la station de vente */
+        .tb-arret.ouvert .corps { padding:16px 20px; }
+        .tb-arret.ouvert .lieu { font-size:1.5em; } .tb-arret.ouvert .sys { font-size:1em; }
+        .tb-vente { border:1px solid rgba(0,255,102,.4); border-left:4px solid #00FF66; background:rgba(0,255,102,.05); padding:10px 16px; margin-bottom:12px; }
+        .tb-vente .ent, .tb-flux .e { display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; margin-bottom:6px; } .tb-vente .ent small { color:#778; font-size:.8em; }
+        .chip { display:inline-block; font-size:.85em; letter-spacing:2px; padding:3px 12px; border:1px solid; } .chip.ven { color:#00FF66; border-color:#00FF66; background:rgba(0,255,102,.1); } .chip.ach { color:#00F0FF; border-color:#00F0FF; background:rgba(0,240,255,.1); }
+        .lgr { display:grid; grid-template-columns:22px minmax(150px,2fr) 90px minmax(110px,1.1fr) minmax(110px,1fr); gap:8px 12px; align-items:baseline; padding:7px 0; border-top:1px solid #1a1f23; }
+        .lgr:first-of-type { border-top:0; } .lgr .c { color:#00FF66; font-size:1.2em; }
+        .lgr .nom { font-size:1.4em; letter-spacing:1px; overflow-wrap:anywhere; } .lgr.ven .nom { color:#00FF66; } .lgr.ach .nom { color:#00F0FF; }
+        .lgr .qt { font-size:1.25em; color:#fff; white-space:nowrap; } .lgr .px { font-size:1.25em; color:#FFD700; white-space:nowrap; } .lgr small { font-size:.62em; color:#889; }
+        .lgr .gn { text-align:right; font-size:1.25em; white-space:nowrap; } .lgr .gn b { font-weight:normal; } .lgr .gn small { font-size:.7em; }
+        .tb-flux { display:grid; grid-template-columns:1fr 200px 1fr; align-items:center; margin-bottom:6px; }
+        .tb-flux .n { border:1px solid #2c3338; background:rgba(0,0,0,.45); padding:12px 16px; min-width:0; height:100%; }
+        .tb-flux .n.a { border-left:4px solid #00F0FF; } .tb-flux .n.v { border-right:4px solid #00FF66; }
+        .tb-flux .n.a .e { color:#00F0FF; font-size:.85em; letter-spacing:3px; } .tb-flux .n.v .e { color:#00FF66; font-size:.85em; letter-spacing:3px; }
+        .tb-flux .lien { text-align:center; padding:0 6px; } .tb-flux .lien svg { display:block; width:100%; height:40px; }
+        .tb-flux .lien .g { color:#00FF66; font-size:1.8em; text-shadow:0 0 14px rgba(0,255,102,.5); line-height:1.1; } .tb-flux .lien small { color:#778; font-size:.78em; display:block; margin-top:3px; }
+        .tb-flux .st { color:#fff; font-size:1.35em; margin:2px 0; overflow-wrap:anywhere; } .tb-flux .sy { color:#00F0FF; font-size:.95em; margin-bottom:8px; }
+        .tb-flux .lg { display:flex; justify-content:space-between; gap:10px; font-size:1.05em; padding:3px 0; color:#cfd; } .tb-flux .lg b { color:#FFD700; font-weight:normal; } .tb-flux .lg small { font-size:.7em; color:#889; }
+        .tb-flux .age { margin-top:6px; }
+        .tb-fin { border:1px dashed rgba(0,255,102,.5); padding:14px; text-align:center; color:#00FF66; letter-spacing:2px; font-size:1.05em; }
+        @media (max-width:1000px) { .tb-flux { grid-template-columns:1fr; } .tb-flux .lien svg { transform:rotate(90deg); height:30px; width:60px; margin:0 auto; } .lgr { grid-template-columns:22px 1fr 1fr; } }
+        /* missions */
+        .tb-trj { color:#778; font-size:.78em; margin-left:10px; letter-spacing:0; font-weight:normal; }
+        .tb-rp2 { display:grid; grid-template-columns:minmax(140px,1.6fr) 90px 1fr 1fr; gap:8px 12px; align-items:baseline; padding:8px 0; border-bottom:1px solid #161616; font-size:.95em; }
+        .tb-rp2.tete { color:#778; font-size:.72em; letter-spacing:2px; border-bottom:1px solid #2a2f33; }
+        .tb-rp2 .f { color:#fff; overflow-wrap:anywhere; } .tb-rp2 .n { color:#99a; font-size:.85em; } .tb-rp2 .v { font-size:1.25em; } .tb-rp2 .v small { display:block; font-size:.55em; color:#778; margin-top:1px; }
+        /* commerce de porte-vaisseaux */
+        .tb-modes { margin-bottom:12px; } .tb-seg.grand button { padding:9px 18px; letter-spacing:2px; font-size:.95em; }
+        .tb-inp { background:#000; border:1px solid #444; color:#00F0FF; font:inherit; padding:7px 10px; min-width:200px; } .tb-inp:focus { outline:none; border-color:#00F0FF; }
+        .tb-fcbest { border:1px solid rgba(255,215,0,.5); background:rgba(255,215,0,.04); padding:14px 18px; margin-top:6px; }
+        .tb-fcbest .tete { display:flex; gap:8px 20px; align-items:baseline; flex-wrap:wrap; margin-bottom:12px; }
+        .tb-fcbest .nomc { color:#fff; font-weight:normal; font-size:1.7em; letter-spacing:2px; } .tb-fcbest .vol { color:#ddd; font-size:1.3em; } .tb-fcbest .gros { font-size:1.9em; text-shadow:0 0 14px rgba(0,255,102,.5); }
+        .tb-fcetapes { margin:14px 0 0; padding-left:22px; color:#bcc; line-height:1.9; font-size:.95em; } .tb-fcetapes b { color:#fff; font-weight:normal; }
+        .tb-fcautre { display:grid; grid-template-columns:28px minmax(120px,1.2fr) 90px minmax(260px,3fr) 110px; gap:8px 14px; align-items:baseline; padding:8px 12px; border:1px solid #232a2f; background:rgba(0,0,0,.35); margin-bottom:6px; font-size:.92em; }
+        .tb-invite span.tb-cp { display:inline; }
+        .tb-puces { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; } .tb-puce { border:1px solid #3a3a2a; background:rgba(255,215,0,.05); color:#FFD700; padding:3px 12px; font-size:.9em; }
+        .tb-cp { cursor:copy; border-bottom:1px dotted rgba(255,255,255,.3); } .tb-cp:hover { background:rgba(255,113,0,.2); color:#fff; text-shadow:0 0 6px var(--ed-orange); }
+        .copie { color:#00FF66 !important; } svg text[data-copie] { cursor:copy; } svg text[data-copie]:hover { fill:#FF7100; }
+        #tb-toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:#000; border:1px solid #00FF66; color:#00FF66; padding:8px 18px; z-index:5000; opacity:0; pointer-events:none; transition:opacity .2s; font-size:.9em; letter-spacing:1px; max-width:80vw; overflow-wrap:anywhere; } #tb-toast.on { opacity:1; }
+        .tb-facres { display:flex; gap:8px 26px; flex-wrap:wrap; font-size:.9em; color:#99a; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed #2a2f33; } .tb-facres b { font-size:1.35em; font-weight:normal; color:#fff; margin-right:4px; }
+        .tb-facs { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:10px; }
+        .tb-fac { border:1px solid #2c3338; border-left:3px solid #00FF66; background:rgba(0,0,0,.4); padding:10px 14px; }
+        .tb-fac .tete { display:flex; justify-content:space-between; gap:8px; align-items:baseline; margin-bottom:8px; } .tb-fac .tete b { color:#fff; font-weight:normal; font-size:1.05em; overflow-wrap:anywhere; } .tb-fac .n { color:#778; font-size:.78em; white-space:nowrap; }
+        .tb-fac .lg { display:grid; grid-template-columns:86px 1fr 44px; gap:8px; align-items:center; padding:3px 0; } .tb-fac .lg .t { color:#8a9; font-size:.7em; letter-spacing:2px; } .tb-fac .lg b { text-align:right; font-weight:normal; font-size:1.2em; }
+        .tb-fac .der { margin-top:6px; font-size:.75em; color:#667; } .tb-fac .der b { color:#aab; font-weight:normal; }
+        .tb-pips { display:inline-flex; gap:3px; } .tb-pips i { width:100%; max-width:15px; height:9px; background:#171b1e; border:1px solid #2c3338; display:block; flex:1; }
+        .tb-pips i.on.ok { background:#00FF66; border-color:#00FF66; box-shadow:0 0 6px rgba(0,255,102,.55); } .tb-pips i.on.ko { background:#FF3333; border-color:#FF3333; box-shadow:0 0 6px rgba(255,51,51,.55); }
+        .tb-fcautre .rg { color:#778; } .tb-fcautre .nomc { color:#fff; font-weight:normal; } .tb-fcautre small { color:#778; } .tb-fcautre i { color:#00FF66; font-style:normal; margin:0 4px; } .tb-fcautre > b:last-child { text-align:right; font-weight:normal; }
+        @media (max-width:1000px) { .tb-fcautre { grid-template-columns:28px 1fr 1fr; } }
+        .tb-kpi .k { padding:6px 12px; gap:1px; } .tb-kpi .k b { font-size:1.25em; } .tb-kpi { margin-bottom:8px; } .tb-prog { margin-bottom:10px; }
+        /* vendre ce que je transporte */
+        .tb-vm { border:1px solid #2c3338; background:rgba(0,0,0,.4); margin-bottom:12px; }
+        .tb-vm .tete { display:flex; gap:6px 16px; flex-wrap:wrap; align-items:baseline; padding:9px 14px; border-bottom:1px solid #232a2f; background:rgba(255,215,0,.05); }
+        .tb-vm .tete b { color:#FFD700; font-weight:normal; font-size:1.1em; letter-spacing:1px; } .tb-vm .tete span { color:#ddd; font-size:.9em; }
+        .tb-vm .rien { color:#778; font-size:.88em; padding:12px 14px; line-height:1.5; }
+        .tb-vm .cd { display:grid; grid-template-columns:minmax(150px,2fr) minmax(90px,.9fr) minmax(110px,1fr) minmax(120px,1fr); gap:8px 14px; align-items:center; padding:9px 14px; border-top:1px solid #1a1f23; }
+        .tb-vm .cd:first-of-type { border-top:0; }
+        .tb-vm .cd.best { background:rgba(0,255,102,.05); box-shadow:inset 3px 0 0 #00FF66; }
+        .tb-vm .cd .st b { display:block; color:#fff; font-weight:normal; overflow-wrap:anywhere; } .tb-vm .cd small { display:block; color:#778; font-size:.78em; margin-top:2px; }
+        .tb-vm .cd .px { color:#FFD700; font-size:1.05em; white-space:nowrap; } .tb-vm .cd .px small { display:inline; }
+        .tb-vm .cd .gn b { font-weight:normal; font-size:1.05em; } .tb-vm .cd .ag { font-size:.8em; }
+        @media (max-width:1100px) { .tb-vm .cd { grid-template-columns:1fr 1fr; } }
+    </style>
+
+    <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjMDIwMTAwIi8+PHBvbHlnb24gcG9pbnRzPSI0OCwxNSAxNSwzNSAzMCw1MCAxMCw3MCA0OCw4NSA0OCw2NSAzMCw1NSA0OCw0MCIgZmlsbD0iIzAwRjBGRiIvPjxwb2x5Z29uIHBvaW50cz0iNTIsMTUgODUsMzUgNzAsNTAgOTAsNzAgNTIsODUgNTIsNjUgNzAsNTUgNTIsNDAiIGZpbGw9IiNGRjcxMDAiLz48cG9seWdvbiBwb2ludHM9IjUwLDQ1IDQyLDU1IDUwLDY1IDU4LDU1IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjkiLz48L3N2Zz4=">
+
+    <!-- Icône lors de l'installation sur iPhone / iPad (iOS) -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+</head>
+
+<body>
+
+    <div class="scanline"></div>
+
+    <div id="holo-tooltip"></div>
+    <div id="tb-tip"></div>
+
+    <!-- MENU LATÉRAL -->
+    <nav id="side-menu"></nav>
+
+    <!-- ZONE PRINCIPALE -->
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+
+        <main class="data-window" id="display-area" style="padding-top: 5px;">
+            <div style="color: #666; font-style: italic; text-align: center; margin-top: 40px;">&gt; CHARGEMENT DU TABLEAU DE BORD...</div>
+        </main>
+
+    </div>
+
+    <script>
+        // ===== TABLEAU DE BORD EN JEU (script SQL 77 + plugin 2.9) : la session du pilote en direct, lue dans session_live (SA ligne seulement) =====
+        // Lecture : une fois a l'ouverture (rpc live_lire), puis en TEMPS REEL sur sa ligne ; relecture de secours toutes les 60 s si le temps reel coupe.
+        // Tout ce qui bouge a l'ecran (decomptes, duree de jeu) est calcule ICI, sans requete.
+        const supabaseApp = window.supabaseApp;
+        let profilCommandant = null, uid = null;
+        let S = null;                 // etat de la session (champ etat de session_live) ; null = aucune session recue
+        let MAJ = null;               // maj_le du serveur (ISO)
+        let MODE = lire("edteam_tb_mode") === "mis" ? "mis" : "com";
+        let canal = null, rtOk = false, derniereLecture = 0;
+
+        function lire(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+        function ecrire(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* sans stockage : le mode de depart sera le defaut */ } }
+        const esc = escapeHtml;
+        // tout nom de systeme ou de station est cliquable : un clic le copie (pour le coller dans la carte galactique ou la recherche du jeu)
+        const cp = (nom, aff) => nom ? `<span class="tb-cp" data-copie="${esc(nom)}" title="Cliquer pour copier : ${esc(nom)}">${esc(aff == null ? nom : aff)}</span>` : "";
+        function toastCopie(txt) {
+            let t = document.getElementById("tb-toast");
+            if (!t) { t = document.createElement("div"); t.id = "tb-toast"; document.body.appendChild(t); }
+            t.textContent = "Copié : " + txt; t.classList.add("on"); clearTimeout(t._m); t._m = setTimeout(() => t.classList.remove("on"), 1600);
+        }
+        function copierNom(txt, el) {
+            const fin = () => { toastCopie(txt); if (typeof sonClic === "function") sonClic(); if (el && el.classList) { el.classList.add("copie"); setTimeout(() => el.classList.remove("copie"), 900); } };
+            const repli = () => { const t = document.createElement("textarea"); t.value = txt; t.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); fin(); } catch (e) { /* copie impossible */ } t.remove(); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(fin).catch(repli); else repli();
+        }
+        document.addEventListener("click", e => {
+            const c = e.target && e.target.closest ? e.target.closest("[data-copie]") : null;
+            if (!c) return;
+            e.stopPropagation(); e.preventDefault();
+            copierNom(c.getAttribute("data-copie"), c);
+        }, true);
+        const fmtN = n => String(Math.round(Math.abs(Number(n) || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        function fmtM(v, signe) {
+            const x = Number(v) || 0, a = Math.abs(x);
+            const s = a >= 1e9 ? (a / 1e9).toFixed(2).replace(".", ",") + " Md" : a >= 1e6 ? (a / 1e6).toFixed(2).replace(".", ",") + " M" : fmtN(a) + " cr";
+            return signe ? (x > 0 ? "+ " : x < 0 ? "- " : "") + s : s;
+        }
+        function duree(sec) {
+            sec = Math.max(0, Math.round(sec));
+            const j = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+            if (j > 0) return j + " j " + h + " h";
+            if (h > 0) return h + " h " + ("0" + m).slice(-2);
+            if (m > 0) return m + " min " + ("0" + s).slice(-2) + " s";
+            return s + " s";
+        }
+        const heure = iso => { const d = new Date(iso); return isNaN(d) ? "" : ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
+
+        // rangs du jeu (memes tables que le mobile)
+        const RANGS_COMMERCE = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
+        // noms des vaisseaux (le journal donne le nom interne)
+        const VAISSEAUX = { sidewinder: "Sidewinder", eagle: "Eagle", hauler: "Hauler", adder: "Adder", viper: "Viper Mk III", viper_mkiv: "Viper Mk IV", cobramkiii: "Cobra Mk III", cobramkiv: "Cobra Mk IV", cobramkv: "Cobra Mk V",
+            type6: "Type-6 Transporter", type7: "Type-7 Transporter", type9: "Type-9 Heavy", type9_military: "Type-10 Defender", type8: "Type-8 Transporter", asp: "Asp Explorer", asp_scout: "Asp Scout", python: "Python",
+            python_nx: "Python Mk II", diamondback: "Diamondback Scout", diamondbackxl: "Diamondback Explorer", empire_courier: "Imperial Courier", empire_eagle: "Imperial Eagle", empire_trader: "Imperial Clipper",
+            federation_dropship: "Federal Dropship", federation_dropship_mkii: "Federal Assault Ship", federation_gunship: "Federal Gunship", federation_corvette: "Federal Corvette", independant_trader: "Keelback",
+            ferdelance: "Fer-de-Lance", mamba: "Mamba", krait_mkii: "Krait Mk II", krait_light: "Krait Phantom", anaconda: "Anaconda", cutter: "Imperial Cutter", belugaliner: "Beluga Liner", orca: "Orca",
+            dolphin: "Dolphin", typex: "Alliance Chieftain", typex_2: "Alliance Crusader", typex_3: "Alliance Challenger", panthermkii: "Panther Clipper Mk II", mandalay: "Mandalay", corsair: "Corsair" };
+        const nomVaisseau = m => { const k = String(m || "").toLowerCase(); return VAISSEAUX[k] || (m ? String(m).charAt(0).toUpperCase() + String(m).slice(1) : ""); };
+        const TYPES = { don: ["🤝", "Donation"], passagers: ["🧑‍🚀", "Passagers"], courrier: ["✉", "Courrier"], collecte: ["📦", "Collecte"], livraison: ["📦", "Livraison"], sauvetage: ["🛟", "Sauvetage"],
+            minage: ["⛏", "Minage"], massacre: ["☠", "Massacre"], assassinat: ["🎯", "Assassinat"], exploration: ["🔭", "Exploration"], autre: ["📜", "Mission"] };
+        const COUL_MARCH = ["#FFD700", "#00F0FF", "#00FF66", "#FF7100", "#FF4FD8", "#c9ccd1", "#7B8CFF", "#FF3333"];
+
+        // ---------------------------------------------------------------
+        //  LECTURE : ouverture, temps reel, relecture de secours
+        // ---------------------------------------------------------------
+        function appliquer(r) {
+            if (!r || !r.etat || typeof r.etat !== "object") return;
+            S = r.etat; MAJ = r.maj_le || null;
+            rendre();
+        }
+        async function relire() {
+            if (document.hidden && S) return;
+            derniereLecture = Date.now();
+            try {
+                const { data, error } = await supabaseApp.rpc("live_lire");
+                if (error) throw error;
+                if (data && data.etat) appliquer(data); else if (!S) rendre();
+            } catch (e) { console.error("Erreur tableau de bord :", e); if (!S) rendre(); }
+        }
+        function ecouter() {
+            try {
+                canal = supabaseApp.channel("tb-live-" + uid)
+                    .on("postgres_changes", { event: "*", schema: "public", table: "session_live", filter: "user_id=eq." + uid }, p => {
+                        derniereLecture = Date.now();
+                        if (p && p.new && p.new.etat) appliquer({ etat: p.new.etat, maj_le: p.new.maj_le });
+                    })
+                    .subscribe(st => { rtOk = (st === "SUBSCRIBED"); });
+            } catch (e) { console.error("Temps reel indisponible :", e); }
+        }
+        setInterval(() => {
+            if (document.hidden) return;
+            const age = Date.now() - derniereLecture;
+            if ((!rtOk && age > 60000) || age > 600000) relire();
+        }, 15000);
+        document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - derniereLecture > 30000) relire(); });
+        window.addEventListener("beforeunload", () => { try { if (canal) supabaseApp.removeChannel(canal); } catch (e) {} });
+
+        // ---------------------------------------------------------------
+        //  PAGE
+        // ---------------------------------------------------------------
+        function changerMode(m) {
+            if (typeof sonClic === "function") sonClic();
+            MODE = m; ecrire("edteam_tb_mode", m); rendre();
+        }
+
+        function rendre() {
+            const zone = document.getElementById("display-area");
+            if (!zone) return;
+            if (S && FC.reprise) { FC.reprise = false; FC.statut = "EN_COURS"; FC.essais = 0; const jf = ++FC.jeton; interrogerFc(jf); }
+            if (S && TOURNEE.reprise) { TOURNEE.reprise = false; TOURNEE.statut = "EN_COURS"; TOURNEE.essais = 0; const jt = ++TOURNEE.jeton; interroger(jt); }
+            const haut = zone.scrollTop;
+            let h = "";
+            if (!S) {
+                h = entete() + onglets() + `<div class="bloc cy"><h2>AUCUNE SESSION REÇUE <em>tableau de bord en jeu</em></h2>
+                    <div class="tb-vide">Lancez Elite Dangerous avec EDMC et le plugin SYS.EDTEAM <b>2.9</b> (ou plus récent) : votre session apparaît ici toute seule, en direct, sans rien faire.<br>
+                    <span class="tb-mut">Si le plugin est déjà à jour et que rien n'arrive, redémarrez EDMC puis changez de système en jeu.</span></div></div>`;
+            } else {
+                h = entete() + onglets() + alertes() + (MODE === "mis" ? panneauMissions() : panneauCommerce());
+            }
+            zone.innerHTML = h + `<div class="bloc-note" style="margin-top:14px;">ⓘ Source : le journal du jeu, lu par le plugin. Rien à saisir : ce tableau se remplit tout seul. Strictement personnel : personne d'autre ne voit votre session.</div>`;
+            zone.scrollTop = haut;
+            brancherSoute();
+            tic();
+            declencherVente();
+        }
+
+        function entete() {
+            const v = S && S.vaisseau ? S.vaisseau : {};
+            const lieu = S ? (S.systeme ? `<span class="tb-cy">${cp(S.systeme)}</span>` + (S.amarre && S.station ? ` · ${cp(S.station)}` : "") : "") : "";
+            const vsx = S && (v.modele || v.nom) ? ` · ${esc(nomVaisseau(v.modele))}${v.nom ? " « " + esc(v.nom) + " »" : ""}` : "";
+            const cr = S && S.credits != null ? ` · <span class="tb-gold">${fmtM(S.credits)}</span>` : "";
+            return `<div class="tb-top"><div class="tb-cmdr">CMDR ${esc((profilCommandant && profilCommandant.cmdr_nom) || "")}<small>${lieu}${vsx}${cr}</small></div><span class="tb-live ${etatLive().classe}" id="tb-live"><i></i><span id="tb-live-txt">${etatLive().texte}</span></span></div>`;
+        }
+        function etatLive() {
+            if (!S) return { classe: "off", texte: "EN ATTENTE DU JEU" };
+            const age = MAJ ? (Date.now() - new Date(MAJ).getTime()) / 1000 : 0;
+            if (!S.en_ligne) return { classe: "off", texte: "HORS LIGNE · dernière session il y a " + duree(age) };
+            if (age > 720) return { classe: "old", texte: "SANS NOUVELLES DEPUIS " + duree(age) };
+            return { classe: "", texte: "EN DIRECT · mis à jour il y a " + duree(age) };
+        }
+        function onglets() {
+            const t = (c, ic, nom) => `<button class="tb-tab${MODE === c ? " on" : ""}" onclick="changerMode('${c}')">${ic} ${nom}</button>`;
+            const g = (ic, nom) => `<button class="tb-tab off" title="À venir" disabled>${ic} ${nom}</button>`;
+            return `<div class="tb-tabs">${t("com", "💰", "COMMERCE")}${t("mis", "📜", "MISSIONS")}${g("⛏", "MINAGE")}${g("⚔", "COMBAT")}${g("🔭", "EXPLORATION")}${g("🧬", "EXOBIOLOGIE")}</div>`;
+        }
+        function alertes() {
+            let h = "";
+            if (S && !S.en_ligne) h += `<div class="tb-banner">Le jeu n'est pas lancé (ou EDMC est fermé) : voici votre dernière session connue.</div>`;
+            return h;
+        }
+
+        // ---------------------------------------------------------------
+        //  COMMERCE
+        // ---------------------------------------------------------------
+        function bandeauRang() {
+            const r = S.rang || {}, p = S.prog || {};
+            const n = r.Trade;
+            if (n == null) return `<div class="bloc"><h2>RANG COMMERCE <em>relevé à la connexion</em></h2><div class="tb-vide" style="padding:12px;">Rang non encore relevé : il arrive à la prochaine connexion au jeu.</div></div>`;
+            const nom = RANGS_COMMERCE[n] || ("RANG " + n), max = n >= RANGS_COMMERCE.length - 1, pr = Math.max(0, Math.min(100, Number(p.Trade) || 0));
+            return `<div class="bloc vert"><h2>RANG COMMERCE <em>valeur exacte relevée par le jeu</em></h2>
+                <div class="tb-big tb-up">${esc(nom)}</div>
+                <div class="tb-jauge"><i style="width:${max ? 100 : pr}%"></i></div>
+                <div class="tb-sub">${max ? "RANG MAXIMUM ATTEINT" : pr + " % vers le rang suivant"} · le jeu ne met à jour la progression qu'à la connexion ou à la promotion</div></div>`;
+        }
+        function cartes() {
+            const t = S.tot || {};
+            const benef = Number(t.benef) || 0;
+            return `<div class="bloc or"><h2>BÉNÉFICE SESSION</h2><div class="tb-big ${benef >= 0 ? "tb-up" : "tb-down"}">${fmtM(benef, true)}</div><div class="tb-sub">${fmtN(t.nb)} opération${(t.nb || 0) > 1 ? "s" : ""}</div></div>
+                <div class="bloc cy"><h2>TEMPS DE JEU</h2><div class="tb-big" id="tb-duree">${S.debut ? duree((Date.now() - new Date(S.debut).getTime()) / 1000) : "—"}</div><div class="tb-sub">depuis le lancement du jeu</div></div>
+                <div class="bloc"><h2>TONNES VENDUES</h2><div class="tb-big">${fmtN(t.tonnes)} t</div><div class="tb-sub">${fmtM(t.ventes)} de ventes · ${fmtM(t.achats)} d'achats</div></div>`;
+        }
+        function panneauCommerce() {
+            return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
+                ${feuilleHtml()}
+                ${(() => { const vh = venteHtml(); return vh ? `<div class="tb-grid2"><div class="bloc holo"><div class="holo-balayage"></div>${souteHtml()}</div><div>${vh}</div></div>` : `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>`; })()}
+                ${registreHtml()}`;
+        }
+
+        // soute : le cadre est rempli de caisses (capacite totale du vaisseau) ; unite automatique (la plus petite parmi 1, 2, 5, 10, 20, 50 t qui garde au plus 200 caisses)
+        const SOUTE = { items: [], U: 1, N: 0 };
+        function souteHtml() {
+            const so = S.soute || {}, cap = Number(so.cap) || 0;
+            const items = (so.items || []).filter(x => (Number(x.q) || 0) > 0);
+            const total = items.reduce((a, x) => a + (Number(x.q) || 0), 0);
+            if (!cap) return `<h2>CE QUE JE TRANSPORTE</h2><div class="tb-vide">Capacité de soute non encore relevée : elle arrive au prochain changement de vaisseau ou de modules en jeu.</div>`;
+            const U = [1, 2, 5, 10, 20, 50].find(u => cap / u <= 200) || 50, N = Math.ceil(cap / U);
+            let COLS = 22;
+            for (let c = 14, pire = 1e9; c <= 30; c++) { const perte = Math.ceil(N / c) * c - N, ecart = Math.abs(c - 22); if (perte < pire || (perte === pire && ecart < Math.abs(COLS - 22))) { pire = perte; COLS = c; } }
+            const ROWS = Math.ceil(N / COLS);
+            SOUTE.items = items; SOUTE.U = U; SOUTE.N = N;
+            const prop = [];
+            items.forEach((x, i) => { const k = Math.max(1, Math.round((Number(x.q) || 0) / U)); for (let j = 0; j < k && prop.length < N; j++) prop.push(i); });
+            let cases = "";
+            for (let i = 0; i < ROWS * COLS; i++) {
+                const r = ROWS - 1 - Math.floor(i / COLS), c = i % COLS;
+                const pos = `grid-row:${r + 1};grid-column:${c + 1};`;
+                if (i >= N) { cases += `<div class="tb-cr" style="${pos}visibility:hidden"></div>`; continue; }
+                if (i < prop.length) { const it = items[prop[i]]; cases += `<div class="tb-cr f${it.m ? " m" : ""}" data-l="${prop[i]}" style="${pos}--cl:${COUL_MARCH[prop[i] % COUL_MARCH.length]}"></div>`; }
+                else cases += `<div class="tb-cr" style="${pos}"></div>`;
+            }
+            const leg = items.map((x, i) => `<span data-i="${i}" style="--cl:${COUL_MARCH[i % COUL_MARCH.length]}"><i></i>${esc(x.n)} · ${fmtN(x.q)} t${x.m ? " (mission)" : ""}</span>`).join("");
+            return `<h2>CE QUE JE TRANSPORTE <em>${fmtN(total)} / ${fmtN(cap)} t · ${Math.round(total / cap * 100)} % plein</em></h2>
+                <div class="tb-grille" id="tb-grille" style="grid-template-columns:repeat(${COLS},1fr)">${cases}</div>
+                ${items.length ? `<div class="tb-leg" id="tb-leg">${leg}</div>` : `<div class="tb-sub">Soute vide.</div>`}
+                <div class="tb-cap"><span>1 caisse = ${U} t · ${N} caisses = capacité du vaisseau</span><span>survolez une caisse pour voir la marchandise</span></div>`;
+        }
+        function brancherSoute() {
+            const g = document.getElementById("tb-grille"), leg = document.getElementById("tb-leg");
+            if (!g) return;
+            const tip = document.getElementById("tb-tip");
+            let courant = null;
+            const cases = Array.from(g.querySelectorAll(".tb-cr.f"));
+            const hl = idx => { g.classList.toggle("dim", idx !== null); cases.forEach(x => x.classList.toggle("hl", idx !== null && x.dataset.l === String(idx))); };
+            g.addEventListener("mouseover", e => {
+                const x = e.target.closest(".tb-cr.f"); if (!x) return;
+                if (x.dataset.l === courant) return;
+                courant = x.dataset.l; hl(courant);
+                const it = SOUTE.items[Number(courant)] || {};
+                tip.innerHTML = `<b>${esc(it.n)}</b> · ${fmtN(it.q)} t${it.m ? "<br>cargaison de mission" : ""}${it.v ? "<br>volée" : ""}${it.paye ? "<br>prix moyen payé : " + fmtN(it.paye) + " cr/t" : ""}`;
+                tip.style.display = "block";
+            });
+            g.addEventListener("mousemove", e => { tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+            g.addEventListener("mouseleave", () => { courant = null; hl(null); tip.style.display = "none"; });
+            if (leg) {
+                leg.addEventListener("mouseover", e => { const s = e.target.closest("span[data-i]"); if (s) hl(s.dataset.i); });
+                leg.addEventListener("mouseleave", () => hl(null));
+            }
+        }
+        function registreHtml() {
+            const reg = (S.registre || []).slice().reverse();
+            const lignes = reg.map(r => {
+                const achat = r.k === "A";
+                return `<tr><td>${heure(r.t)}</td><td class="${achat ? "tb-ach" : "tb-ven"}">${achat ? "ACHAT" : (r.nm ? "VENTE · MARCHÉ NOIR" : "VENTE")} · ${esc(r.n)}</td><td>${cp(r.s)}${r.y ? `<br><span class="tb-mut">${cp(r.y)}</span>` : ""}</td>
+                    <td class="r">${fmtN(r.q)} t</td><td class="r">${fmtN(r.p)}</td><td class="r ${r.b >= 0 ? "tb-up" : "tb-down"}">${fmtM(r.b, true)}</td></tr>`;
+            }).join("");
+            return `<div class="bloc"><h2>REGISTRE DE LA SESSION <em>les 30 dernières opérations · bénéfice d'une vente = prix de vente − prix moyen payé</em></h2>
+                ${reg.length ? `<table class="tb-table"><tr><th>HEURE</th><th>OPÉRATION</th><th>STATION</th><th class="r">QUANTITÉ</th><th class="r">PRIX / T</th><th class="r">RÉSULTAT</th></tr>${lignes}</table>` : `<div class="tb-vide">Aucun achat ni vente pour l'instant : le registre se remplit dès votre première opération.</div>`}</div>`;
+        }
+
+        // ---------------------------------------------------------------
+        //  MISSIONS
+        // ---------------------------------------------------------------
+        const restant = m => m && m.exp ? (new Date(m.exp).getTime() - Date.now()) / 1000 : null;
+        const urgence = s => s === null ? "ok" : s < 7200 ? "ko" : s < 43200 ? "wa" : "ok";
+        const COUL_URG = { ko: "#FF3333", wa: "#FFD700", ok: "#00FF66" };
+        function actionMission(m) {
+            const lieu = m.st ? " à " + cp(m.st) : "";
+            switch (m.type) {
+                case "livraison": case "collecte": return "Livrer " + (m.march ? esc(m.march) : "la marchandise") + lieu;
+                case "courrier": return "Remettre le courrier" + lieu;
+                case "passagers": return "Déposer les passagers" + lieu;
+                case "don": return "Faire la donation";
+                default: return esc(m.nom || "Mission") + lieu;
+            }
+        }
+        function panneauMissions() {
+            const act = (S.missions || []).slice().sort((a, b) => String(a.exp || "9999").localeCompare(String(b.exp || "9999")));
+            const fin = S.terminees || [];
+            const encaisser = act.reduce((a, m) => a + (Number(m.rec) || 0), 0), connues = act.filter(m => m.rec != null).length;
+            const prochaine = act.find(m => m.exp);
+            const encaisse = fin.reduce((a, m) => a + (Number(m.rec) || 0), 0);
+            const bandeau = `<div class="tb-grid4" style="grid-template-columns:repeat(4,1fr);">
+                <div class="bloc"><h2>MISSIONS EN COURS</h2><div class="tb-big">${act.length}</div></div>
+                <div class="bloc vert"><h2>TERMINÉES · SESSION</h2><div class="tb-big tb-up">${fin.length}</div><div class="tb-sub">${fmtM(encaisse)} encaissés</div></div>
+                <div class="bloc or"><h2>À ENCAISSER</h2><div class="tb-big tb-gold">${encaisser ? "≈ " + fmtM(encaisser) : "—"}</div><div class="tb-sub">${connues} mission${connues > 1 ? "s" : ""} avec récompense connue</div></div>
+                <div class="bloc cy"><h2>PROCHAINE ÉCHÉANCE</h2><div class="tb-big" ${prochaine ? `data-cd="${esc(prochaine.exp)}"` : ""}>${prochaine ? duree(restant(prochaine)) : "—"}</div><div class="tb-sub">${prochaine ? esc(prochaine.nom) : "aucune mission à échéance"}</div></div></div>`;
+            if (!act.length) {
+                return bandeau + `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>` + reputationHtml();
+            }
+            const plan = planTrajet(act);
+            return bandeau + carteHtml(plan) + `<div class="tb-grid2"><div class="bloc"><h2>MISSIONS EN COURS <em>classées par échéance</em></h2>${act.map(carteMission).join("")}</div><div>${passageHtml(plan)}${reputationHtml()}</div></div>`;
+        }
+        function carteMission(m) {
+            const [ic, lib] = TYPES[m.type] || TYPES.autre;
+            const s = restant(m), u = urgence(s);
+            const total = m.exp && m.t ? Math.max(60, (new Date(m.exp).getTime() - new Date(m.t).getTime()) / 1000) : null;
+            const frac = s !== null && total ? Math.max(0, Math.min(1, s / total)) : 1;
+            const meta = [`<span>${esc(lib)}</span>`, m.rec != null ? `<span>récompense ${fmtM(m.rec)}</span>` : "", m.q ? `<span>${m.type === "courrier" ? m.q + " colis" : "soute : " + fmtN(m.q) + " t"}</span>` : "", m.pas ? `<span>${m.pas} passager${m.pas > 1 ? "s" : ""}</span>` : "",
+                m.don ? `<span>don : ${fmtM(m.don)}</span>` : "", m.rep ? `<span>réputation ${esc(m.rep)}</span>` : "", m.inf ? `<span>influence ${esc(m.inf)}</span>` : ""].join("");
+            return `<div class="tb-ms ${u}"><div class="ic">${ic}</div><div><div class="ti">${esc(m.nom || lib)}</div>
+                <div class="sb">${cp(m.faction || "")}${m.sys ? ` · <span class="lx">${cp(m.sys)}</span>${m.st ? " / " + cp(m.st) : ""}` : " · aucun trajet"}</div><div class="mt">${meta}</div></div>
+                <div class="tb-cd">${s === null ? "" : `<svg viewBox="0 0 44 44" width="52" height="52"><circle cx="22" cy="22" r="18" fill="none" stroke="#1d2226" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" stroke="${COUL_URG[u]}" stroke-width="5" stroke-dasharray="113.1" stroke-dashoffset="${(113.1 * (1 - frac)).toFixed(1)}" transform="rotate(-90 22 22)" data-ring="${esc(m.exp)}" data-t="${esc(m.t || "")}"/></svg><b data-cd="${esc(m.exp)}">${duree(s)}</b>`}</div></div>`;
+        }
+        // ---------------------------------------------------------------
+        //  TRAJET DES MISSIONS : vraies distances entre systemes (coordonnees EDSM, comme bgs.html : appel du navigateur, garde en memoire locale)
+        //  L'ordre de passage minimise la DISTANCE totale a parcourir (l'echeance est deja visible a gauche : c'est au pilote d'y faire attention).
+        // ---------------------------------------------------------------
+        const COORDS = (() => { try { return JSON.parse(lire("edteam_tb_coords") || "{}"); } catch (e) { return {}; } })();
+        let coordsEnCours = false, coordsPause = 0;
+        const cle = n => String(n || "").toLowerCase();
+        function demandeCoords(noms) {
+            const manquants = [...new Set(noms.filter(n => n && !(cle(n) in COORDS)))].slice(0, 15);
+            if (!manquants.length || coordsEnCours || Date.now() < coordsPause) return;
+            coordsEnCours = true;
+            const url = "https://www.edsm.net/api-v1/systems?showCoordinates=1&" + manquants.map(n => "systemName[]=" + encodeURIComponent(n)).join("&");
+            fetch(url).then(r => r.json()).then(arr => {
+                manquants.forEach(n => {
+                    const f = (Array.isArray(arr) ? arr : []).find(x => x && cle(x.name) === cle(n));
+                    COORDS[cle(n)] = f && f.coords ? [Number(f.coords.x), Number(f.coords.y), Number(f.coords.z)] : false;   // false = inconnu d'EDSM : on ne redemande pas
+                });
+                ecrire("edteam_tb_coords", JSON.stringify(COORDS));
+            }).catch(() => { coordsPause = Date.now() + 60000; }).finally(() => { coordsEnCours = false; rendre(); });
+        }
+        const dist3 = (a, b) => Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
+        // regroupement par systeme de destination
+        function groupes(act) {
+            const ordre = [], par = {};
+            act.forEach(m => {
+                const sys = m.sys || "";
+                if (!sys) return;
+                if (!par[sys]) { par[sys] = { sys, ms: [], exp: m.exp || "9999" }; ordre.push(par[sys]); }
+                par[sys].ms.push(m);
+                if (m.exp && m.exp < par[sys].exp) par[sys].exp = m.exp;
+            });
+            return ordre;
+        }
+        // meilleur ordre de visite (distance totale la plus courte, depuis la position du pilote) : essai de toutes les combinaisons jusqu'a 8 systemes, sinon plus proche voisin
+        function meilleurOrdre(depart, pts) {
+            const n = pts.length;
+            if (n <= 1) return pts.map((_, i) => i);
+            if (n > 8) {
+                const reste = pts.map((_, i) => i), res = []; let cur = depart;
+                while (reste.length) { let b = 0; reste.forEach((k, j) => { if (dist3(cur, pts[k]) < dist3(cur, pts[reste[b]])) b = j; }); const k = reste.splice(b, 1)[0]; res.push(k); cur = pts[k]; }
+                return res;
+            }
+            let meilleur = null, mDist = Infinity;
+            (function rec(cur, restes, chemin, d) {
+                if (d >= mDist) return;
+                if (!restes.length) { mDist = d; meilleur = chemin.slice(); return; }
+                restes.forEach((k, j) => { const r2 = restes.slice(); r2.splice(j, 1); chemin.push(k); rec(pts[k], r2, chemin, d + dist3(cur, pts[k])); chemin.pop(); });
+            })(depart, pts.map((_, i) => i), [], 0);
+            return meilleur;
+        }
+        function planTrajet(act) {
+            const g = groupes(act), depart = S.systeme || "";
+            demandeCoords(g.map(x => x.sys).concat(depart ? [depart] : []));
+            const posDep = (S.pos && S.pos.length === 3) ? S.pos : (COORDS[cle(depart)] || null);
+            const saut = Math.max(8, sautUtilise());
+            const ici = g.filter(x => cle(x.sys) === cle(depart));
+            const avec = g.filter(x => cle(x.sys) !== cle(depart) && COORDS[cle(x.sys)]);
+            const sans = g.filter(x => cle(x.sys) !== cle(depart) && !COORDS[cle(x.sys)]);
+            let arrets = [];
+            ici.forEach(x => arrets.push({ ...x, pos: posDep, d: 0, sauts: 0 }));
+            if (posDep && avec.length) {
+                const pts = avec.map(x => COORDS[cle(x.sys)]);
+                const ord = meilleurOrdre(posDep, pts);
+                let cur = posDep;
+                ord.forEach(k => { const p = pts[k], d = dist3(cur, p); arrets.push({ ...avec[k], pos: p, d, sauts: Math.max(1, Math.ceil(d / saut)) }); cur = p; });
+            } else {
+                avec.sort((a, b) => String(a.exp).localeCompare(String(b.exp))).forEach(x => arrets.push({ ...x, pos: COORDS[cle(x.sys)], d: null, sauts: null }));
+            }
+            sans.forEach(x => arrets.push({ ...x, pos: null, d: null, sauts: null }));
+            arrets.forEach(a => { a.min = a.sauts === null ? null : a.sauts * 0.9 + (a.sauts ? 2 : 0) + 3; });     // sauts + approche + amarrage : ESTIMATION
+            const total = arrets.reduce((t, a) => ({ d: t.d + (a.d || 0), sauts: t.sauts + (a.sauts || 0), min: t.min + (a.min || 0) }), { d: 0, sauts: 0, min: 0 });
+            return { depart: { sys: depart, pos: posDep }, arrets, total, complet: !!posDep && !sans.length && !avec.some(x => !COORDS[cle(x.sys)]) };
+        }
+        // carte : vraie position des systemes (vue du dessus), parcours dans l'ordre de passage
+        function carteHtml(plan) {
+            if (!plan.arrets.length) return "";
+            const W = 900, H = 250, pts = [{ sys: plan.depart.sys, pos: plan.depart.pos, dep: true, ms: [] }].concat(plan.arrets.filter(a => cle(a.sys) !== cle(plan.depart.sys)).map(a => ({ ...a })));
+            const ici = plan.arrets.find(a => cle(a.sys) === cle(plan.depart.sys)); if (ici) pts[0].ms = ici.ms;
+            const connus = pts.filter(p => p.pos);
+            let xs, zs;
+            if (connus.length >= 2) { xs = connus.map(p => p.pos[0]); zs = connus.map(p => p.pos[2]); }
+            let place;
+            if (connus.length >= 2 && (Math.max(...xs) - Math.min(...xs) > 0.5 || Math.max(...zs) - Math.min(...zs) > 0.5)) {
+                const mx = Math.min(...xs), Mx = Math.max(...xs), mz = Math.min(...zs), Mz = Math.max(...zs);
+                // carte schematique : on etire un peu (3,5 fois au plus) pour remplir le cadre quand les systemes sont proches ; les distances exactes sont ecrites sur les trajets
+                const sx = Math.max(Mx - mx, 1), sz = Math.max(Mz - mz, 1);
+                let kx = (W - 260) / sx, kz = (H - 130) / sz; const kmin = Math.min(kx, kz); kx = Math.min(kx, kmin * 3.5); kz = Math.min(kz, kmin * 3.5);
+                const ox = (W - sx * kx) / 2, oz = (H - 70 - sz * kz) / 2;
+                place = p => p.pos ? { x: ox + (p.pos[0] - mx) * kx, y: 30 + oz + (p.pos[2] - mz) * kz } : null;
+            } else place = null;
+            const xy = pts.map((p, i) => (place && place(p)) || { x: 110 + i * ((W - 220) / Math.max(1, pts.length - 1)), y: 120 });
+            let svg = `<svg class="tb-carte" viewBox="0 0 ${W} ${H}"><defs><marker id="tbf" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00F0FF"/></marker></defs>`;
+            for (let i = 0; i < pts.length - 1; i++) {
+                const a = xy[i], b = xy[i + 1], len = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / len, uy = (b.y - a.y) / len;
+                svg += `<line x1="${a.x + ux * 22}" y1="${a.y + uy * 22}" x2="${b.x - ux * 25}" y2="${b.y - uy * 25}" stroke="#00F0FF" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#tbf)"/>`;
+                const arr = plan.arrets.find(x => cle(x.sys) === cle(pts[i + 1].sys));
+                if (arr && arr.d !== null) svg += `<text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 8}" fill="#8b97a0" font-size="12" text-anchor="middle">${arr.d.toFixed(1)} al · ${arr.sauts} saut${arr.sauts > 1 ? "s" : ""}</text>`;
+            }
+            pts.forEach((x, i) => {
+                const p = xy[i], plus = x.ms && x.ms.length ? x.ms.slice().sort((a, b) => String(a.exp || "9999").localeCompare(String(b.exp || "9999")))[0] : null;
+                const u = plus ? urgence(restant(plus)) : "ok", col = x.dep && !(x.ms && x.ms.length) ? "#8b97a0" : COUL_URG[u];
+                svg += `<circle cx="${p.x}" cy="${p.y}" r="${x.ms && x.ms.length ? 17 : 12}" fill="${col}22" stroke="${col}" stroke-width="2.5"/>`;
+                if (x.ms && x.ms.length) svg += `<text x="${p.x}" y="${p.y + 5}" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold">${x.ms.length}</text>`;
+                const ancre = p.x < 90 ? "start" : p.x > W - 90 ? "end" : "middle";
+                svg += `<text x="${p.x}" y="${p.y + 36}" fill="#fff" font-size="13" text-anchor="${ancre}" data-copie="${esc(x.sys)}"><title>Cliquer pour copier : ${esc(x.sys)}</title>${esc(String(x.sys).toUpperCase().slice(0, 24))}</text>`;
+                svg += `<text x="${p.x}" y="${p.y + 52}" fill="#8b97a0" font-size="11" text-anchor="${ancre}">${x.dep ? "vous êtes ici" : "arrêt " + i}</text>`;
+            });
+            svg += `</svg>`;
+            const note = plan.complet ? `${plan.arrets.length} système${plan.arrets.length > 1 ? "s" : ""} · ${plan.total.d.toFixed(1)} al · ${plan.total.sauts} saut${plan.total.sauts > 1 ? "s" : ""} · ≈ ${duree(plan.total.min * 60)}` : "positions des systèmes en cours de chargement…";
+            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${svg}</div>`;
+        }
+        function passageHtml(plan) {
+            const depart = plan.depart.sys, sansTrajet = [];
+            let h = `<div class="bloc cy" style="margin-bottom:12px;"><h2>ORDRE DE PASSAGE <em>le plus court en distance</em></h2><div class="tb-gps"><div class="tb-st dep"><b>${depart ? cp(depart, String(depart).toUpperCase()) : "POSITION INCONNUE"}</b><span>vous êtes ici</span></div>`;
+            plan.arrets.forEach((a, i) => {
+                const dernier = i === plan.arrets.length - 1;
+                const trajet = a.d === null ? "distance inconnue" : (a.d === 0 ? "même système" : `${a.d.toFixed(1)} al · ${a.sauts} saut${a.sauts > 1 ? "s" : ""} · ≈ ${duree(a.min * 60)}`);
+                h += `<div class="tb-st${dernier ? " fin" : ""}"><b>${cp(a.sys, String(a.sys).toUpperCase())} <small class="tb-trj">${trajet}</small></b><span>${a.ms.map(m => actionMission(m)).join("<br>")}</span></div>`;
+            });
+            const sans = (S.missions || []).filter(m => !m.sys);
+            if (sans.length) h += `<div class="tb-st fin"><b>SANS TRAJET</b><span>${sans.map(m => esc(m.nom || "Mission")).join("<br>")}</span></div>`;
+            return h + `</div><div class="bloc-note">Ordre calculé sur les distances entre les systèmes (coordonnées EDSM), au départ de votre position. Les échéances sont à gauche : à vous d'en tenir compte. Durées : estimations.</div></div>`;
+        }
+        // reputation : le jeu ne donne PAS le niveau de reputation avec une faction, seulement l'EFFET de chaque mission terminee (+ = faible ... +++++ = tres fort)
+        const FORCE = ["aucun effet", "faible", "moyen", "bon", "fort", "très fort"];
+        const nbPlus = x => { const t = String(x || ""); return (t.match(/\+/g) || []).length - (t.match(/-/g) || []).length; };
+        // jauge de « + » : une case par +, 10 cases au plus (au-dela, la jauge est pleine et le nombre exact est ecrit a cote)
+        const pips = v => { const n = Math.min(Math.abs(v), 10), c = v >= 0 ? "ok" : "ko"; let h = ""; for (let i = 0; i < 10; i++) h += `<i class="${i < n ? "on " + c : ""}"></i>`; return `<span class="tb-pips">${h}</span>`; };
+        const signe = v => (v >= 0 ? "+" : "−") + Math.abs(v);
+        function reputationHtml() {
+            const rep = S.rep || {}, noms = Object.keys(rep);
+            const note = `<div class="bloc-note">Le jeu n'indique pas votre <b>niveau</b> de réputation avec une faction : il donne seulement l'effet de chaque mission, de + (faible) à +++++ (très fort). Ici, ces + sont <b>additionnés</b> pour la session : une case = un +.</div>`;
+            if (!noms.length) return `<div class="bloc" style="margin-bottom:12px;"><h2>EFFET DES MISSIONS TERMINÉES <em>cette session, par faction</em></h2><div class="tb-vide">Aucune mission terminée pour l'instant : l'effet sur chaque faction s'affiche ici dès la première.</div>${note}</div>`;
+            const data = noms.map(f => {
+                const r = rep[f] || {};
+                return { f, n: Number(r.nm) || 1, pr: r.pr != null ? Number(r.pr) : nbPlus(r.rep), pi: r.pi != null ? Number(r.pi) : nbPlus(r.infl), dr: String(r.rep || "—"), di: String(r.infl || "—") };
+            }).sort((a, b) => b.pi - a.pi || b.pr - a.pr);
+            const totPr = data.reduce((t, x) => t + x.pr, 0), totPi = data.reduce((t, x) => t + x.pi, 0), totN = data.reduce((t, x) => t + x.n, 0);
+            const cartes = data.map(x => `<div class="tb-fac"><div class="tete"><b>${cp(x.f)}</b><span class="n">${x.n} mission${x.n > 1 ? "s" : ""}</span></div>
+                <div class="lg"><span class="t">RÉPUTATION</span>${pips(x.pr)}<b class="${x.pr >= 0 ? "tb-up" : "tb-down"}">${signe(x.pr)}</b></div>
+                <div class="lg"><span class="t">INFLUENCE</span>${pips(x.pi)}<b class="${x.pi >= 0 ? "tb-up" : "tb-down"}">${signe(x.pi)}</b></div>
+                <div class="der">dernière mission : réputation <b>${esc(x.dr)}</b> · influence <b>${esc(x.di)}</b></div></div>`).join("");
+            return `<div class="bloc" style="margin-bottom:12px;"><h2>EFFET DES MISSIONS TERMINÉES <em>cette session, par faction</em></h2>
+                <div class="tb-facres"><span><b class="tb-up">${signe(totPr)}</b> réputation</span><span><b class="tb-up">${signe(totPi)}</b> influence</span><span><b>${data.length}</b> faction${data.length > 1 ? "s" : ""}</span><span><b>${totN}</b> mission${totN > 1 ? "s" : ""}</span></div>
+                <div class="tb-facs">${cartes}</div>${note}</div>`;
+        }
+
+        // ---------------------------------------------------------------
+        //  FEUILLE DE ROUTE : tournee de plusieurs etapes calculee a la demande chez Spansh (script SQL 78, rpc tournee_commerce)
+        //  Le calcul prend ~1 min cote serveur : on relit toutes les 4 s. Resultat garde 30 min par le serveur (partage). Les durees sont des ESTIMATIONS.
+        // ---------------------------------------------------------------
+        const REGL = { etapes: [4, 6, 8, 10].includes(Number(lire("edteam_tb_etapes"))) ? Number(lire("edteam_tb_etapes")) : 8, heures: Number(lire("edteam_tb_heures")) || 72, grande: lire("edteam_tb_grande") !== "0", saut: Number(lire("edteam_tb_saut")) || 0 };
+        const TOURNEE = { statut: "vide", donnees: null, message: "", calcule: null, essais: 0, minuteur: null, jeton: 0, t0: lire("edteam_tb_t0") || null, regl: null };
+        const CLE_STOCK = "edteam_tb_tournee", CLE_ATTENTE = "edteam_tb_attente";
+        const sautAuto = () => { const v = S && S.vaisseau && Number(S.vaisseau.saut); return v ? Math.max(8, Math.floor(v * 0.85)) : 30; };
+        const sautUtilise = () => REGL.saut || sautAuto();
+        const reglCourants = () => ({ etapes: REGL.etapes, heures: REGL.heures, grande: REGL.grande, saut: sautUtilise() });
+        const reglModifies = () => !!(TOURNEE.regl && JSON.stringify(TOURNEE.regl) !== JSON.stringify(reglCourants()));
+        // la tournee calculee est GARDEE dans le navigateur (3 h) : un rechargement de la page ou un changement de reglage ne l'efface plus
+        function sauverTournee() {
+            if (!TOURNEE.donnees) return;
+            ecrire(CLE_STOCK, JSON.stringify({ donnees: TOURNEE.donnees, calcule: TOURNEE.calcule, t0: TOURNEE.t0, regl: TOURNEE.regl }));
+        }
+        (function restaurerTournee() {
+            try {
+                const o = JSON.parse(lire(CLE_STOCK) || "null");
+                if (o && o.donnees && o.calcule && Date.now() - new Date(o.calcule).getTime() < 3 * 3600e3) { TOURNEE.statut = "PRET"; TOURNEE.donnees = o.donnees; TOURNEE.calcule = o.calcule; TOURNEE.t0 = o.t0 || TOURNEE.t0; TOURNEE.regl = o.regl || null; }
+            } catch (e) { /* donnees illisibles : on repart sans tournee */ }
+        })();
+        (function reprendreAttente() {
+            try {
+                const o = JSON.parse(lire(CLE_ATTENTE) || "null");
+                if (o && o.t0 && Date.now() - new Date(o.t0).getTime() < 5.5 * 60e3) { TOURNEE.reprise = true; TOURNEE.t0 = o.t0; }
+                else if (o) ecrire(CLE_ATTENTE, "");
+            } catch (e) { /* rien a reprendre */ }
+        })();
+        function reglage(k, v) {
+            REGL[k] = v;
+            if (k === "grande") ecrire("edteam_tb_grande", v ? "1" : "0"); else ecrire("edteam_tb_" + k, String(v));
+            if (typeof sonClic === "function") sonClic();
+            rendre();       // la tournee affichee reste ; un bandeau invite a recalculer
+        }
+        async function lancerTournee() {
+            if (!S || !S.systeme) return;
+            if (typeof sonClic === "function") sonClic();
+            const jeton = ++TOURNEE.jeton; clearTimeout(TOURNEE.minuteur);
+            TOURNEE.statut = "EN_COURS"; TOURNEE.essais = 0; TOURNEE.message = "";
+            for (const k in OUVERTS) delete OUVERTS[k];
+            TOURNEE.t0 = new Date().toISOString(); ecrire("edteam_tb_t0", TOURNEE.t0); ecrire(CLE_ATTENTE, JSON.stringify({ t0: TOURNEE.t0 }));
+            rendre();
+            interroger(jeton);
+        }
+        async function interroger(jeton) {
+            if (jeton !== TOURNEE.jeton || !S) return;
+            const so = S.soute || {};
+            const args = { p_systeme: S.systeme, p_station: S.amarre && S.station ? S.station : null, p_cap: Number(so.cap) || 100, p_capital: Number(S.credits) || 50000000,
+                p_saut: sautUtilise(), p_etapes: REGL.etapes, p_grande: REGL.grande, p_heures: REGL.heures };
+            let r;
+            try { r = await supabaseApp.rpc("tournee_commerce", args); } catch (e) { r = { error: { message: "Connexion impossible." } }; }
+            if (jeton !== TOURNEE.jeton) return;
+            if (r.error || !r.data) { TOURNEE.statut = "ERREUR"; TOURNEE.message = (r.error && r.error.message) || "Réponse vide."; ecrire(CLE_ATTENTE, ""); rendre(); return; }
+            const j = r.data;
+            if (j.statut === "PRET") { ecrire(CLE_ATTENTE, ""); TOURNEE.statut = "PRET"; TOURNEE.donnees = j.donnees; TOURNEE.calcule = j.calcule_le; TOURNEE.regl = reglCourants(); sauverTournee(); rendre(); return; }
+            if (j.statut === "ERREUR") { ecrire(CLE_ATTENTE, ""); TOURNEE.statut = "ERREUR"; TOURNEE.message = j.message || "Recherche impossible pour le moment."; rendre(); return; }
+            if (++TOURNEE.essais > 40) { ecrire(CLE_ATTENTE, ""); TOURNEE.statut = "ERREUR"; TOURNEE.message = "Le calcul prend trop de temps chez Spansh : réessayez dans quelques minutes."; rendre(); return; }
+            rendre();
+            TOURNEE.minuteur = setTimeout(() => interroger(jeton), Math.min(4000 + TOURNEE.essais * 400, 12000));
+        }
+        // duree estimee d'une etape : sauts (portee du vaisseau) + approche de la station (distance d'arrivee en Ls) + amarrage et echanges. ESTIMATION.
+        function minutesEtape(e) {
+            const sauts = Math.max(1, Math.ceil((Number(e.saut) || 0) / Math.max(8, sautUtilise())));
+            const approche = 1 + Math.min(Number(e.vers && e.vers.arrivee) || 0, 20000) / 2000;
+            return sauts * 0.9 + approche + 5;      // 5 min : demande d'amarrage, amarrage, achats et ventes, decollage
+        }
+        // une station de la tournee est « faite » quand le journal confirme les achats et ventes prevus (apres le lancement de la tournee)
+        function progressionTournee(d) {
+            const reg = (S.registre || []).filter(r => !TOURNEE.t0 || r.t >= TOURNEE.t0);
+            const et = d.etapes || [], n = et.length;
+            const stations = [];
+            for (let k = 0; k <= n; k++) {
+                const lieu = k < n ? et[k].de : et[n - 1].vers;
+                const vend = k > 0 ? et[k - 1].marchandises : [], achete = k < n ? et[k].marchandises : [];
+                const aFait = (liste, type) => liste.map(m => reg.some(r => r.k === type && r.s === lieu.station && String(r.n).toLowerCase() === String(nomFr(m.nom)).toLowerCase()));
+                stations.push({ lieu, vend, achete, vendFait: aFait(vend, "V"), acheteFait: aFait(achete, "A"), maj: k > 0 ? (et[k - 1].vers || {}).maj : (et[k].de || {}).maj });
+            }
+            const fait = s => s.vendFait.every(Boolean) && s.acheteFait.every(Boolean);
+            const courant = stations.findIndex(s => !fait(s));
+            const reel = reg.filter(r => r.k === "V" && stations.some(s => s.lieu.station === r.s)).reduce((a, r) => a + (Number(r.b) || 0), 0);
+            return { stations, courant, fini: courant === -1, reel };
+        }
+        // noms francais des marchandises courantes (Spansh donne le nom anglais, le journal donne le nom du jeu dans la langue du pilote)
+        const NOMS_FR = { "Gold": "Or", "Silver": "Argent", "Platinum": "Platine", "Palladium": "Palladium", "Cobalt": "Cobalt", "Coffee": "Café", "Tea": "Thé", "Wine": "Vin", "Beer": "Bière", "Fish": "Poisson", "Grain": "Céréales", "Tobacco": "Tabac",
+            "Basic Medicines": "Médicaments simples", "Beryllium": "Béryllium", "Gallium": "Gallium", "Indium": "Indium", "Lithium": "Lithium", "Tantalum": "Tantale", "Uranium": "Uranium", "Bauxite": "Bauxite", "Water": "Eau", "Polymers": "Polymères",
+            "Semiconductors": "Semi-conducteurs", "Superconductors": "Supraconducteurs", "Clothing": "Vêtements", "Robotics": "Robots", "Biowaste": "Biodéchets", "Meta-Alloys": "Méta-alliages", "Personal Weapons": "Armes personnelles", "Battle Weapons": "Armes militaires",
+            "Auto-Fabricators": "Auto-bâtisseurs", "Scrap": "Ferraille", "Agronomic Treatment": "Traitement agronomique", "Military Grade Fabrics": "Tissus de qualité militaire", "Land Enrichment Systems": "Systèmes d'enrichissement des sols" };
+        const nomFr = n => NOMS_FR[n] || n;
+        function ageH(iso) { const t = new Date(iso).getTime(); if (isNaN(t)) return null; return (Date.now() - t) / 3600000; }
+        function ageTxt(iso) { const h = ageH(iso); if (h === null) return "date inconnue"; return h < 1 ? "il y a " + Math.max(1, Math.round(h * 60)) + " min" : h < 48 ? "il y a " + Math.round(h) + " h" : "il y a " + Math.round(h / 24) + " j"; }
+        const fraicheur = iso => { const h = ageH(iso); const vieux = h === null || h > 48; return `<span class="${vieux ? "tb-vx" : "tb-ok"}">relevé ${ageTxt(iso)}${vieux ? " · à vérifier à l'arrivée" : ""}</span>`; };
+
+        // ---------------------------------------------------------------
+        //  FEUILLE DE ROUTE : affichage
+        // ---------------------------------------------------------------
+        function reglagesTournee() {
+            const seg = (k, vals, cur, suf) => `<span class="tb-seg">${vals.map(v => `<button type="button" class="${v[0] === cur ? "on" : ""}" onclick="reglage('${k}', ${v[0]})">${v[1]}${suf || ""}</button>`).join("")}</span>`;
+            const s = sautUtilise();
+            const saut = REGL.saut || (s <= 25 ? 20 : s <= 35 ? 30 : s <= 45 ? 40 : 50);
+            return `<div class="tb-regl">
+                <div class="g"><label>NOMBRE D'ÉTAPES</label>${seg("etapes", [[4, "4"], [6, "6"], [8, "8"], [10, "10"]], REGL.etapes)}<small>8 ≈ 1 heure</small></div>
+                <div class="g"><label>RELEVÉS DES MARCHÉS</label>${seg("heures", [[24, "1 j"], [72, "3 j"], [168, "7 j"]], REGL.heures)}<small>âge maximal</small></div>
+                <div class="g"><label>PORTÉE DE SAUT</label>${seg("saut", [[20, "20"], [30, "30"], [40, "40"], [50, "50"]], saut, " al")}<small>${REGL.saut ? "réglée à la main" : (S && S.vaisseau && S.vaisseau.saut ? "lue dans le jeu" : "par défaut")}</small></div>
+                <div class="g"><label>PISTE</label><button type="button" class="tb-tg ${REGL.grande ? "on" : ""}" onclick="reglage('grande', ${!REGL.grande})"><i></i>GRANDE PISTE</button><small>vaisseaux de grande taille</small></div></div>`;
+        }
+        function feuilleHtml() {
+            if (MODE_ROUTE.v === "fc") return fcHtml();
+            const so = S.soute || {}, ok = !!(S.systeme) && Number(so.cap) > 0;
+            const enCours = TOURNEE.statut === "EN_COURS", aTournee = !!(TOURNEE.donnees && (TOURNEE.donnees.etapes || []).length);
+            const bouton = `<button type="button" class="tb-btn" ${ok && !enCours ? "" : "disabled"} onclick="lancerTournee()">${aTournee ? "↻ RECALCULER LA TOURNÉE" : "▶ CALCULER MA TOURNÉE"}</button>`;
+            const dep = S.amarre && S.station ? cp(S.station) : "la station la plus proche de " + cp(S.systeme || "?");
+            let corps = "";
+            if (enCours) {
+                const att = TOURNEE.t0 ? (Date.now() - new Date(TOURNEE.t0).getTime()) / 1000 : 0;
+                corps = `<div class="tb-attente"><span class="tb-spin"></span><div><b>Calcul en cours chez Spansh · ${duree(att)}</b><span>environ une minute · vous pouvez continuer à jouer ou recharger la page, la tournée s'affiche toute seule</span>${att > 90 ? `<span class="tb-vx">Spansh est occupé : votre recherche attend son tour dans leur file d'attente (jusqu'à 5 minutes).</span>` : ""}</div></div>`;
+            }
+            else if (TOURNEE.statut === "ERREUR") corps = `<div class="tb-banner">${esc(TOURNEE.message)}</div>`;
+            if (!enCours && aTournee) corps += tourneeResultat();
+            if (!enCours && !aTournee && TOURNEE.statut !== "ERREUR") {
+                corps = `<div class="tb-invite"><div><b>Une tournée d'environ une heure, depuis votre position.</b><span>Le tableau de bord cherche, chez Spansh, la suite d'achats et de ventes la plus rentable pour votre soute (${fmtN(so.cap)} t) : quoi acheter, combien, où, puis où vendre, avec le gain estimé.</span>
+                    ${ok ? "" : `<span class="tb-vx">En attente de votre position et de la capacité de votre soute (jeu lancé, plugin à jour).</span>`}</div></div>`;
+            }
+            return `<div class="bloc or" style="margin-bottom:12px;"><h2>FEUILLE DE ROUTE <em>départ : ${dep} · capital ${fmtM(S.credits)}</em></h2>${selecteurMode()}
+                <div class="tb-barre">${reglagesTournee()}<div class="tb-cta">${bouton}</div></div>${corps}</div>`;
+        }
+        function tourneeResultat() {
+            const d = TOURNEE.donnees || {}, et = d.etapes || [];
+            const minutes = et.reduce((a, e) => a + minutesEtape(e), 0), gain = Number(d.gain) || 0;
+            const p = progressionTournee(d), dep = d.depart || {};
+            const n = p.stations.length, fait = p.fini ? n : Math.max(0, p.courant);
+            let h = "";
+            if (reglModifies()) h += `<div class="tb-banner">Vous avez changé les réglages : la tournée ci-dessous a été calculée avec les précédents. Cliquez sur « RECALCULER LA TOURNÉE ».</div>`;
+            if (dep.distance > 0) h += `<div class="tb-banner">Départ : rejoignez d'abord <b>${cp(dep.station)}</b> (${cp(dep.systeme)}, à ${esc(dep.distance)} al de votre position).</div>`;
+            h += `<div class="tb-kpi">
+                <div class="k"><span>GAIN ESTIMÉ</span><b class="tb-up">${fmtM(gain, true)}</b><small>${et.length} trajets · ${n} arrêts</small></div>
+                <div class="k"><span>DURÉE ESTIMÉE</span><b>≈ ${duree(minutes * 60)}</b><small>sauts, approche, amarrage</small></div>
+                <div class="k"><span>GAIN PAR HEURE</span><b>≈ ${fmtM(gain / Math.max(0.25, minutes / 60))}</b><small>estimation</small></div>
+                <div class="k"><span>AVANCEMENT</span><b>${p.fini ? "TERMINÉE" : "arrêt " + (p.courant + 1) + " / " + n}</b><small>gain réel : <span class="${p.reel >= 0 ? "tb-up" : "tb-down"}">${fmtM(p.reel, true)}</span></small></div></div>`;
+            h += `<div class="tb-prog"><i style="width:${Math.round(fait / n * 100)}%"></i></div>`;
+            h += `<div class="tb-outils"><span>${p.fini ? "Tournée terminée" : "Seul l'arrêt en cours est déplié"} · cliquez sur un arrêt pour le déplier ou le replier</span><span><button type="button" onclick="ouvrirTout(true)">TOUT DÉPLIER</button><button type="button" onclick="ouvrirTout(false)">TOUT REPLIER</button></span></div>`;
+            h += `<div class="tb-route">${p.stations.map((s, i) => arretHtml(s, i, p, et)).join("")}</div>`;
+            h += `<div class="tb-pied"><span>Calculée ${esc(ageTxt(TOURNEE.calcule))} d'après les relevés des joueurs (Spansh). Durées : estimations. Les arrêts se cochent quand le journal confirme l'achat ou la vente.</span>
+                ${p.fini ? `<button type="button" class="tb-btn vert" onclick="lancerTournee()">↻ REFAIRE UNE HEURE DE COMMERCE</button>` : ""}</div>`;
+            return h;
+        }
+        function ligneMarchandise(m, vente, fait) {
+            const px = vente ? m.vente : m.achat;
+            return `<div class="ln ${vente ? "ven" : "ach"}${fait ? " ok" : ""}"><span class="c">${fait ? "✔" : ""}</span><span class="nom">${esc(nomFr(m.nom))}</span><span class="qt">${fmtN(m.q)} t</span>
+                <span class="px">${fmtN(px)} <small>cr/t</small></span><span class="gn">${vente ? `<b class="tb-up">${fmtM(m.benef, true)}</b>` : `<small>stock ${fmtN(m.stock)}</small>`}</span></div>`;
+        }
+        // arrets : seul l'arret EN COURS est deplie ; les autres tiennent sur une ligne (clic = deplier ou replier)
+        const OUVERTS = {};
+        const estOuvert = (i, p) => (i in OUVERTS ? OUVERTS[i] : i === p.courant);
+        function basculerArret(i) {
+            if (typeof sonClic === "function") sonClic();
+            const p = progressionTournee(TOURNEE.donnees);
+            OUVERTS[i] = !estOuvert(i, p);
+            rendre();
+        }
+        function ouvrirTout(ouvert) {
+            if (typeof sonClic === "function") sonClic();
+            const n = (progressionTournee(TOURNEE.donnees).stations || []).length;
+            for (let i = 0; i < n; i++) OUVERTS[i] = ouvert;
+            rendre();
+        }
+        const noms = l => l.map(m => esc(nomFr(m.nom))).join(" + ");
+        function ligneGrosse(m, vente, fait) {
+            const px = vente ? m.vente : m.achat;
+            return `<div class="lgr ${vente ? "ven" : "ach"}${fait ? " ok" : ""}"><span class="c">${fait ? "✔" : ""}</span><span class="nom">${esc(nomFr(m.nom))}</span><span class="qt">${fmtN(m.q)} <small>t</small></span>
+                <span class="px">${fmtN(px)} <small>cr/t</small></span><span class="gn">${vente ? `<b class="tb-up">${fmtM(m.benef, true)}</b>` : `<small>stock ${fmtN(m.stock)} t</small>`}</span></div>`;
+        }
+        // arret DEPLIE : d'abord ce qu'on vend ici, puis « ACHETER ICI ━━► A VENDRE A » avec le gain du trajet, comme la route commerciale des directives
+        function corpsDeplie(s, i, p, et) {
+            const dernier = i === p.stations.length - 1, hop = !dernier ? et[i] : null;
+            let h = "";
+            if (s.vend.length) h += `<div class="tb-vente"><div class="ent"><span class="chip ven">▼ VENDRE ICI</span><small>ce que vous avez chargé à l'arrêt précédent</small></div>${s.vend.map((m, k) => ligneGrosse(m, true, s.vendFait[k])).join("")}</div>`;
+            if (hop) {
+                const v = hop.vers || {};
+                h += `<div class="tb-flux"><div class="n a"><div class="e">▲ ACHETER ICI</div>${s.achete.map((m, k) => ligneGrosse(m, false, s.acheteFait[k])).join("")}</div>
+                    <div class="lien"><svg viewBox="0 0 210 40"><defs><marker id="tbfl" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00FF66"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#00FF66" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#tbfl)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>
+                        <div class="g">${fmtM(hop.benefice, true)}</div><small>${esc(String(hop.saut))} al · ≈ ${duree(minutesEtape(hop) * 60)}</small></div>
+                    <div class="n v"><div class="e">▼ À VENDRE À</div><div class="st">${cp(v.station)}</div><div class="sy">${cp(v.systeme)}${v.arrivee ? " · " + fmtN(v.arrivee) + " Ls" : ""}</div>
+                        ${hop.marchandises.map(m => `<div class="lg"><span>${esc(nomFr(m.nom))}</span><b>${fmtN(m.vente)} <small>cr/t</small></b></div>`).join("")}<div class="age">${fraicheur(v.maj)}</div></div></div>`;
+            } else h += `<div class="tb-fin">🏁 FIN DE LA TOURNÉE · plus rien à acheter ici</div>`;
+            return h;
+        }
+        function arretHtml(s, i, p, et) {
+            const etat = p.fini || i < p.courant ? "fait" : i === p.courant ? "cours" : "";
+            const dernier = i === p.stations.length - 1, ouvert = estOuvert(i, p);
+            const suite = !dernier && et[i] ? `→ ${esc(String(et[i].saut))} al · ≈ ${duree(minutesEtape(et[i]) * 60)}` : "";
+            const lib = etat === "fait" ? "FAIT" : etat === "cours" ? "▶ EN COURS" : "À VENIR";
+            const num = `<div class="rail"><span class="num">${etat === "fait" ? "✔" : i + 1}</span></div>`;
+            if (!ouvert) {
+                const gainVente = s.vend.reduce((a, m) => a + (Number(m.benef) || 0), 0);
+                const res = (s.vend.length ? `<span class="ven">▼ ${noms(s.vend)} <b class="tb-up">${fmtM(gainVente, true)}</b></span>` : "") +
+                            (s.achete.length ? `<span class="ach">▲ ${noms(s.achete)}</span>` : (dernier ? `<span class="tb-mut">fin de la tournée</span>` : ""));
+                return `<div class="tb-arret ${etat} ferme" onclick="basculerArret(${i})" title="Cliquer pour déplier">${num}<div class="corps compact"><b class="lieu">${cp(s.lieu.station)}</b><span class="sys">${cp(s.lieu.systeme)}</span>
+                    <span class="res">${res}</span><span class="suite">${suite}</span><span class="chev">▸</span></div></div>`;
+            }
+            return `<div class="tb-arret ${etat} ouvert">${num}
+                <div class="corps"><div class="tete" onclick="basculerArret(${i})" title="Cliquer pour replier" style="cursor:pointer;"><div><b class="lieu">${cp(s.lieu.station)}</b><span class="sys">${cp(s.lieu.systeme)}${s.lieu.arrivee ? " · " + fmtN(s.lieu.arrivee) + " Ls" : ""}</span></div>
+                    <span class="etat">${lib} ▾</span></div>${corpsDeplie(s, i, p, et)}<div class="age">${fraicheur(s.maj)}</div></div></div>`;
+        }
+
+
+        // ---------------------------------------------------------------
+        //  COMMERCE DE PORTE-VAISSEAUX (script SQL 80, rpc fc_route) : LA meilleure route « acheter en masse la ou c'est le moins cher, vendre le plus cher a un saut de FC ».
+        //  La recherche prend ~3 minutes cote serveur (une centaine d'appels a Spansh, par lots) : la page relit toutes les 5 s et affiche l'avancement.
+        // ---------------------------------------------------------------
+        const MODE_ROUTE = { v: lire("edteam_tb_moderoute") === "fc" ? "fc" : "tournee" };
+        const FCR = { cap: [5000, 10000, 20000, 25000].includes(Number(lire("edteam_tb_fccap"))) ? Number(lire("edteam_tb_fccap")) : 20000, rayon: [100, 250, 500].includes(Number(lire("edteam_tb_fcrayon"))) ? Number(lire("edteam_tb_fcrayon")) : 250, systeme: lire("edteam_tb_fcsys") || "",
+            stations: ["orbitales", "mega", "toutes"].includes(lire("edteam_tb_fcstations")) ? lire("edteam_tb_fcstations") : "toutes", grande: lire("edteam_tb_fcgrande") !== "0" };
+        const FC = { statut: "vide", donnees: null, message: "", avancement: 0, total: 0, essais: 0, minuteur: null, jeton: 0, calcule: null, regl: null, t0: null, reprise: false };
+        const CLE_FC = "edteam_tb_fc", CLE_FC_ATTENTE = "edteam_tb_fc_attente";
+        const fcSysteme = () => (FCR.systeme || (S && S.systeme) || "").trim();
+        const fcRegl = () => ({ cap: FCR.cap, rayon: FCR.rayon, heures: REGL.heures, systeme: fcSysteme(), stations: FCR.stations, grande: FCR.grande });
+        const fcModifies = () => !!(FC.regl && JSON.stringify(FC.regl) !== JSON.stringify(fcRegl()));
+        (function restaurerFc() {
+            try {
+                const o = JSON.parse(lire(CLE_FC) || "null");
+                if (o && o.donnees && o.calcule && Date.now() - new Date(o.calcule).getTime() < 3 * 3600e3) { FC.statut = "PRET"; FC.donnees = o.donnees; FC.calcule = o.calcule; FC.regl = o.regl || null; }
+                const a = JSON.parse(lire(CLE_FC_ATTENTE) || "null");
+                if (a && a.t0 && Date.now() - new Date(a.t0).getTime() < 9.5 * 60e3) { FC.reprise = true; FC.t0 = a.t0; } else if (a) ecrire(CLE_FC_ATTENTE, "");
+            } catch (e) { /* rien a reprendre */ }
+        })();
+        function modeRoute(m) {
+            if (typeof sonClic === "function") sonClic();
+            MODE_ROUTE.v = m; ecrire("edteam_tb_moderoute", m); rendre();
+        }
+        function reglageFc(k, v) {
+            if (k === "systeme") { FCR.systeme = String(v || "").trim(); ecrire("edteam_tb_fcsys", FCR.systeme); }
+            else { FCR[k] = v; ecrire("edteam_tb_fc" + k, typeof v === "boolean" ? (v ? "1" : "0") : String(v)); }
+            if (typeof sonClic === "function" && k !== "systeme") sonClic();
+            rendre();
+        }
+        async function lancerFc() {
+            if (!S || !fcSysteme()) return;
+            if (typeof sonClic === "function") sonClic();
+            const jeton = ++FC.jeton; clearTimeout(FC.minuteur);
+            FC.statut = "EN_COURS"; FC.essais = 0; FC.message = ""; FC.avancement = 0; FC.total = 0;
+            FC.t0 = new Date().toISOString(); ecrire(CLE_FC_ATTENTE, JSON.stringify({ t0: FC.t0 }));
+            rendre();
+            interrogerFc(jeton);
+        }
+        async function interrogerFc(jeton) {
+            if (jeton !== FC.jeton || !S) return;
+            let r;
+            try { r = await supabaseApp.rpc("fc_route", { p_systeme: fcSysteme(), p_capacite: FCR.cap, p_rayon: FCR.rayon, p_heures: REGL.heures, p_stations: FCR.stations, p_grande: FCR.grande }); } catch (e) { r = { error: { message: "Connexion impossible." } }; }
+            if (jeton !== FC.jeton) return;
+            if (r.error || !r.data) { FC.statut = "ERREUR"; FC.message = (r.error && r.error.message) || "Réponse vide."; ecrire(CLE_FC_ATTENTE, ""); rendre(); return; }
+            const j = r.data;
+            FC.avancement = Number(j.avancement) || 0; FC.total = Number(j.total) || 0;
+            if (j.statut === "PRET") { ecrire(CLE_FC_ATTENTE, ""); FC.statut = "PRET"; FC.donnees = j.donnees; FC.calcule = j.calcule_le; FC.regl = fcRegl(); ecrire(CLE_FC, JSON.stringify({ donnees: FC.donnees, calcule: FC.calcule, regl: FC.regl })); rendre(); return; }
+            if (j.statut === "ERREUR") { ecrire(CLE_FC_ATTENTE, ""); FC.statut = "ERREUR"; FC.message = j.message || "Recherche impossible pour le moment."; rendre(); return; }
+            if (++FC.essais > 60) { ecrire(CLE_FC_ATTENTE, ""); FC.statut = "ERREUR"; FC.message = "La recherche prend trop de temps : réessayez dans quelques minutes."; rendre(); return; }
+            rendre();
+            FC.minuteur = setTimeout(() => interrogerFc(jeton), Math.min(5000 + FC.essais * 300, 15000));
+        }
+        function selecteurMode() {
+            const b = (m, t) => `<button type="button" class="${MODE_ROUTE.v === m ? "on" : ""}" onclick="modeRoute('${m}')">${t}</button>`;
+            return `<div class="tb-modes"><span class="tb-seg grand">${b("tournee", "🚀 TOURNÉE DE VAISSEAU")}${b("fc", "🛰 PORTE-VAISSEAUX (FC)")}</span></div>`;
+        }
+        function reglagesFc() {
+            const seg = (k, vals, cur) => `<span class="tb-seg">${vals.map(v => `<button type="button" class="${v[0] === cur ? "on" : ""}" onclick="reglageFc('${k}', ${v[0]})">${v[1]}</button>`).join("")}</span>`;
+            return `<div class="tb-regl">
+                <div class="g"><label>SYSTÈME DU PORTE-VAISSEAUX</label><input class="tb-inp" id="tb-fcsys" type="text" value="${esc(fcSysteme())}" placeholder="${esc((S && S.systeme) || "système")}" onchange="reglageFc('systeme', this.value)"><small>par défaut : votre position</small></div>
+                <div class="g"><label>PLACE LIBRE DU FC</label>${seg("cap", [[5000, "5 000 t"], [10000, "10 000 t"], [20000, "20 000 t"], [25000, "25 000 t"]], FCR.cap)}<small>tonnes à charger</small></div>
+                <div class="g"><label>RAYON D'ACHAT</label>${seg("rayon", [[100, "100"], [250, "250"], [500, "500"]], FCR.rayon)}<small>al autour du FC</small></div>
+                <div class="g"><label>RELEVÉS DES MARCHÉS</label>${seg("heures", [[24, "1 j"], [72, "3 j"], [168, "7 j"]], REGL.heures).replace(/reglageFc\('heures'/g, "reglage('heures'")}<small>âge maximal</small></div>
+                <div class="g"><label>TYPES DE STATIONS</label><span class="tb-seg">${[["orbitales", "ORBITALES"], ["mega", "+ MÉGA-VAISSEAUX"], ["toutes", "TOUTES"]].map(v => `<button type="button" class="${v[0] === FCR.stations ? "on" : ""}" onclick="reglageFc('stations', '${v[0]}')">${v[1]}</button>`).join("")}</span><small>« toutes » = comme Inara (planétaires, méga-vaisseaux)</small></div>
+                <div class="g"><label>PISTE</label><button type="button" class="tb-tg ${FCR.grande ? "on" : ""}" onclick="reglageFc('grande', ${!FCR.grande})"><i></i>GRANDE PISTE</button><small>plateforme de grande taille</small></div></div>`;
+        }
+        function fcHtml() {
+            const enCours = FC.statut === "EN_COURS", aRes = !!(FC.donnees && (FC.donnees.routes || []).length);
+            const ok = !!fcSysteme();
+            const bouton = `<button type="button" class="tb-btn" ${ok && !enCours ? "" : "disabled"} onclick="lancerFc()">${FC.donnees ? "↻ RECHERCHER À NOUVEAU" : "▶ CHERCHER LA MEILLEURE ROUTE"}</button>`;
+            let corps = "";
+            if (enCours) {
+                const att = FC.t0 ? (Date.now() - new Date(FC.t0).getTime()) / 1000 : 0, pc = FC.total ? Math.round(FC.avancement / FC.total * 100) : 0;
+                corps = `<div class="tb-attente"><span class="tb-spin"></span><div style="flex:1"><b>Analyse des marchés en cours · ${duree(att)}</b>
+                    <span>${FC.total ? FC.avancement + " marchandises étudiées sur " + FC.total : "préparation de la recherche…"} · environ 3 minutes · vous pouvez continuer à jouer ou recharger la page</span>
+                    <div class="tb-prog" style="margin:8px 0 0;"><i style="width:${pc}%"></i></div></div></div>`;
+            } else if (FC.statut === "ERREUR") corps = `<div class="tb-banner">${esc(FC.message)}</div>`;
+            if (!enCours && FC.donnees) corps += fcResultat();
+            if (!enCours && !FC.donnees && FC.statut !== "ERREUR") {
+                corps = `<div class="tb-invite"><div><b>La meilleure route pour remplir un porte-vaisseaux, en une seule fois.</b><span>Le tableau de bord étudie une cinquantaine de marchandises : où acheter ${fmtN(FCR.cap)} t (ou le plus possible, avec au moins 5 000 t de stock) au prix le plus bas autour du FC, puis où les vendre le plus cher à un saut de FC (500 al au plus) de là. Une seule route, la plus rentable.</span>
+                    ${ok ? "" : `<span class="tb-vx">Indiquez le système de votre porte-vaisseaux.</span>`}</div></div>`;
+            }
+            return `<div class="bloc or" style="margin-bottom:12px;"><h2>COMMERCE DE PORTE-VAISSEAUX <em>départ : ${cp(fcSysteme() || "?")}</em></h2>${selecteurMode()}<div class="tb-barre">${reglagesFc()}<div class="tb-cta">${bouton}</div></div>${corps}</div>`;
+        }
+        function fcResultat() {
+            const d = FC.donnees || {}, rs = (d.routes || []).slice().sort((x, y) => (Number(y.benefice) || 0) - (Number(x.benefice) || 0));
+            if (!rs.length) return `<div class="tb-vide">Aucune route rentable trouvée avec ces réglages. Essayez un rayon plus grand, des relevés plus anciens ou une place libre plus petite.</div>`;
+            const b = rs[0];
+            let h = "";
+            if (fcModifies()) h += `<div class="tb-banner">Vous avez changé les réglages : les routes ci-dessous ont été calculées avec les précédents. Cliquez sur « RECHERCHER À NOUVEAU ».</div>`;
+            h += `<div class="tb-banner">⚠ Gain <b>optimiste</b> : les prix sont ceux du dernier relevé (premières unités). Acheter des milliers de tonnes fait monter le prix, en vendre fait baisser la demande. Le carburant (tritium) et les délais du saut ne sont pas calculés.</div>`;
+            h += fcMeilleure(b, d) + (rs.length > 1 ? `<div class="tb-sub" style="margin:14px 0 6px;">AUTRES ROUTES POSSIBLES</div>${rs.slice(1).map((r, i) => fcAutre(r, i + 2)).join("")}` : "");
+            h += `<div class="tb-pied"><span>Calculée ${esc(ageTxt(FC.calcule))} d'après les relevés des joueurs (Spansh) : stations orbitales, hors porte-vaisseaux de joueurs. Volume = le plus petit de la place libre, du stock à l'achat et de la demande à la vente.</span></div>`;
+            return h;
+        }
+        const TYPES_STATION = { "Coriolis Starport": "station orbitale", "Orbis Starport": "station orbitale", "Ocellus Starport": "station orbitale", "Dodec Starport": "station orbitale", "Asteroid base": "base astéroïde", "Outpost": "avant-poste",
+            "Mega ship": "méga-vaisseau", "Planetary Outpost": "avant-poste PLANÉTAIRE (au sol)", "Planetary Port": "port PLANÉTAIRE (au sol)", "Settlement": "colonie PLANÉTAIRE (au sol)", "Dockable Planet Station": "station PLANÉTAIRE (au sol)" };
+        const typeSt = t => TYPES_STATION[t] || (t ? String(t) : "");
+        function fcMeilleure(r, d) {
+            const a = r.achat || {}, v = r.vente || {}, nom = esc(nomFr(r.nom)), vol = Number(r.volume) || 0, ecart = Number(v.prix) - Number(a.prix);
+            const atyp = (r.alertes || []).map(x => `<span class="tb-vx">⚠ ${esc(x)}</span>`).join(" ") + ((r.alertes || []).length ? ` <span class="tb-mut">· à vérifier en jeu avant de partir</span>` : "");
+            const limite = vol < FCR.cap ? `<span class="tb-vx">volume limité à ${fmtN(vol)} t sur ${fmtN(FCR.cap)} (stock ou demande)</span>` : "";
+            return `<div class="tb-fcbest"><div class="tete"><span class="chip ven">🏆 MEILLEURE ROUTE</span><b class="nomc">${nom}</b><span class="vol">${fmtN(vol)} t</span><span class="tb-up gros">${fmtM(r.benefice, true)}</span>${limite}${atyp}</div>
+                <div class="tb-flux"><div class="n a"><div class="e">① SAUT 1 · ACHETER ICI</div><div class="st">${cp(a.station)}</div><div class="sy">${cp(a.systeme)}${a.arrivee ? " · " + fmtN(a.arrivee) + " Ls" : ""}${a.type ? " · " + esc(typeSt(a.type)) : ""}</div>
+                        <div class="lg"><span>prix d'achat</span><b>${fmtN(a.prix)} <small>cr/t</small></b></div><div class="lg"><span>stock</span><b>${fmtN(a.stock)} <small>t</small></b></div><div class="age">${fraicheur(a.maj)}</div></div>
+                    <div class="lien"><svg viewBox="0 0 210 40"><defs><marker id="tbfc" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00FF66"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#00FF66" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#tbfc)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>
+                        <div class="g">+ ${fmtN(ecart)}</div><small>cr / t</small><small>② saut 2 : ${esc(String(v.distance))} al</small></div>
+                    <div class="n v"><div class="e">③ VENDRE ICI</div><div class="st">${cp(v.station)}</div><div class="sy">${cp(v.systeme)}${v.arrivee ? " · " + fmtN(v.arrivee) + " Ls" : ""}${v.type ? " · " + esc(typeSt(v.type)) : ""}</div>
+                        <div class="lg"><span>prix de vente</span><b>${fmtN(v.prix)} <small>cr/t</small></b></div><div class="lg"><span>demande</span><b>${fmtN(v.demande)} <small>t</small></b></div><div class="age">${fraicheur(v.maj)}</div></div></div>
+                <ol class="tb-fcetapes"><li>Faire sauter le FC vers <b>${cp(a.systeme)}</b>${a.distance > 0 ? ` (${esc(String(a.distance))} al de ${cp(String(d.depart || fcSysteme()))})` : " (déjà sur place)"}.</li>
+                    <li>Remplir le FC : acheter <b>${fmtN(vol)} t de ${nom}</b> à <b>${cp(a.station)}</b> (${fmtN(a.prix)} cr/t).</li>
+                    <li>Faire sauter le FC vers <b>${cp(v.systeme)}</b> (${esc(String(v.distance))} al).</li>
+                    <li>Vendre à <b>${cp(v.station)}</b> (${fmtN(v.prix)} cr/t) : gain estimé <b class="tb-up">${fmtM(r.benefice, true)}</b>.</li></ol></div>`;
+        }
+        function fcAutre(r, i) {
+            const a = r.achat || {}, v = r.vente || {};
+            return `<div class="tb-fcautre"><span class="rg">${i}</span><b class="nomc">${esc(nomFr(r.nom))}${(r.alertes || []).length ? ` <span class="tb-vx" title="${esc((r.alertes || []).join(" · "))}">⚠</span>` : ""}</b><span>${fmtN(r.volume)} t</span>
+                <span class="tr">${cp(a.systeme)} <small>(${fmtN(a.prix)} cr/t)</small> <i>━►</i> ${cp(v.systeme)} <small>(${fmtN(v.prix)} cr/t · ${esc(String(v.distance))} al)</small></span><b class="tb-up">${fmtM(r.benefice, true)}</b></div>`;
+        }
+
+        // ---------------------------------------------------------------
+        //  VENDRE CE QUE JE TRANSPORTE (script SQL 79, rpc vente_soute) : pour chaque marchandise en soute, les meilleures stations acheteuses autour du pilote,
+        //  quelle que soit l'origine de la marchandise. Se lance TOUT SEUL quand la soute ou la position change (au plus une recherche toutes les 20 s) ; memoire de 15 min cote serveur.
+        // ---------------------------------------------------------------
+        const VENTE = { statut: "vide", donnees: null, message: "", essais: 0, minuteur: null, relance: null, jeton: 0, sig: "", dernier: 0, enAttente: null, force: false, rayon: [20, 40, 80, 120].includes(Number(lire("edteam_tb_rayon"))) ? Number(lire("edteam_tb_rayon")) : 40 };
+        const PALIERS_Q = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000];
+        const palierQ = q => PALIERS_Q.find(p => p >= q) || 5000;
+        // noms internes du journal qui ne se rapprochent pas tout seuls de ceux de Spansh (le prefixe « usscargo » est retire : usscargoblackbox -> blackbox)
+        const ALIAS_K = { occupiedcryopod: "occupiedescapepod", comercialsamples: "commercialsamples" };
+        const cleSpansh = k => { const c = String(k || "").toLowerCase().replace(/^usscargo/, ""); return ALIAS_K[c] || c; };
+        // marchandises dont on peut chercher un acheteur : ni cargaison de mission, ni limpets
+        const vendables = () => ((S && S.soute && S.soute.items) || []).filter(x => (Number(x.q) || 0) > 0 && !x.m && String(x.k || "").toLowerCase() !== "drones");
+        const sansCle = () => vendables().some(x => !x.k);
+        function signatureVente() {
+            const it = vendables().filter(x => x.k).map(x => cleSpansh(x.k) + ":" + palierQ(Number(x.q))).sort().join(",");
+            return it ? [S.systeme || "", REGL.heures, REGL.grande ? 1 : 0, VENTE.rayon, it].join("|") : "";
+        }
+        function rayonVente(v) {
+            VENTE.rayon = v; ecrire("edteam_tb_rayon", String(v));
+            if (typeof sonClic === "function") sonClic();
+            rendre();       // pas de recherche automatique : le bouton « chercher » relance
+        }
+        // Ce cadre sert UNIQUEMENT quand le pilote a des marchandises dont il ne sait pas ou les vendre (boites noires, capsules, echantillons...) : AUCUNE recherche automatique,
+        // il faut cliquer. (Une tournee ou un commerce de FC n'ont pas besoin de lui : zero requete, zero egress tant qu'on ne clique pas.)
+        function lancerVente() {
+            if (!S || !signatureVente()) return;
+            if (typeof sonClic === "function") sonClic();
+            VENTE.sig = signatureVente(); VENTE.dernier = Date.now();
+            const jeton = ++VENTE.jeton; clearTimeout(VENTE.minuteur);
+            VENTE.statut = "EN_COURS"; VENTE.essais = 0; VENTE.message = "";
+            rendre();
+            interrogerVente(jeton);
+        }
+        function declencherVente() { /* plus de recherche automatique (voir ci-dessus) */ }
+        async function interrogerVente(jeton) {
+            if (jeton !== VENTE.jeton || !S) return;
+            const items = vendables().filter(x => x.k).map(x => ({ k: cleSpansh(x.k), q: palierQ(Number(x.q)) }));
+            let r;
+            try { r = await supabaseApp.rpc("vente_soute", { p_systeme: S.systeme, p_items: items, p_rayon: VENTE.rayon, p_grande: REGL.grande, p_heures: REGL.heures }); } catch (e) { r = { error: { message: "Connexion impossible." } }; }
+            if (jeton !== VENTE.jeton) return;
+            if (r.error || !r.data) { VENTE.statut = "ERREUR"; VENTE.message = (r.error && r.error.message) || "Réponse vide."; rendre(); return; }
+            const j = r.data;
+            if (j.statut === "PRET") { VENTE.statut = "PRET"; VENTE.donnees = j.donnees; VENTE.calcule = j.calcule_le; rendre(); return; }
+            if (j.statut === "ERREUR") { VENTE.statut = "ERREUR"; VENTE.message = j.message || "Recherche impossible pour le moment."; rendre(); return; }
+            if (++VENTE.essais > 30) { VENTE.statut = "ERREUR"; VENTE.message = "La recherche prend trop de temps : réessayez dans quelques minutes."; rendre(); return; }
+            rendre();
+            VENTE.minuteur = setTimeout(() => interrogerVente(jeton), Math.min(4000 + VENTE.essais * 400, 10000));
+        }
+        function venteHtml() {
+            const items = vendables();
+            if (!items.length) return "";       // rien a chercher : le cadre n'apparait pas
+            const perime = !!(VENTE.donnees && VENTE.sig !== signatureVente());
+            const enCours = VENTE.statut === "EN_COURS";
+            const seg = `<span class="tb-seg">${[20, 40, 80, 120].map(v => `<button type="button" class="${v === VENTE.rayon ? "on" : ""}" onclick="rayonVente(${v})">${v}</button>`).join("")}</span>`;
+            const bouton = `<button type="button" class="tb-btn" ${enCours || sansCle() ? "disabled" : ""} onclick="lancerVente()">${VENTE.donnees ? "↻ CHERCHER À NOUVEAU" : "▶ CHERCHER OÙ VENDRE"}</button>`;
+            const puces = items.map(x => `<span class="tb-puce">${esc(x.n)} · ${fmtN(x.q)} t</span>`).join("");
+            let corps = "";
+            if (sansCle()) corps = `<div class="tb-banner">Le plugin de votre ordinateur ne transmet pas encore le nom interne des marchandises : mettez SYS_EDTEAM à jour et relancez EDMC.</div>`;
+            else if (VENTE.statut === "ERREUR") corps = `<div class="tb-banner">${esc(VENTE.message)}</div>`;
+            else if (enCours && !VENTE.donnees) corps = `<div class="tb-attente"><span class="tb-spin"></span><div><b>Recherche des meilleures stations…</b><span>quelques secondes</span></div></div>`;
+            else if (!VENTE.donnees) corps = `<div class="tb-invite"><div><b>Vous ne savez pas où vendre quelque chose ?</b><span>Boîtes noires, capsules, échantillons… Le tableau de bord cherche les meilleures stations autour de ${cp(S.systeme || "?")} pour ce que vous transportez. Aucune recherche ne part tant que vous ne cliquez pas.</span><div class="tb-puces">${puces}</div></div></div>`;
+            if (VENTE.donnees && !sansCle()) {
+                const res = {}; (VENTE.donnees.items || []).forEach(x => { res[x.k] = x; });
+                const maj = enCours ? `<div class="tb-sub" style="margin-bottom:8px;"><span class="tb-spin" style="width:10px;height:10px;border-width:2px;vertical-align:-1px;margin-right:6px;"></span>mise à jour…</div>` : "";
+                const vieux = perime && !enCours ? `<div class="tb-banner">La soute, la position ou les réglages ont changé depuis la dernière recherche : cliquez sur « CHERCHER À NOUVEAU ».</div>` : "";
+                corps += maj + vieux + items.filter(x => x.k).map(x => blocMarchandise(x, res[cleSpansh(x.k)])).join("");
+            }
+            return `<div class="bloc or"><h2>VENDRE CE QUE JE TRANSPORTE <em>autour de ${cp(S.systeme || "?")} · ${seg} al</em></h2><div class="tb-barre" style="margin-bottom:10px;padding-bottom:10px;"><span class="tb-mut" style="font-size:.85em;">à utiliser quand vous ne savez pas où vendre une marchandise</span><div class="tb-cta">${bouton}</div></div>${corps}
+                <div class="bloc-note">Meilleures stations qui <b>achètent</b> chaque marchandise de la soute (demande suffisante pour toute la quantité), d'après les relevés des joueurs de moins de ${REGL.heures === 24 ? "1 jour" : REGL.heures / 24 + " jours"} (réglage de la feuille de route). Les prix sont ceux du relevé indiqué : vérifiez-les à l'arrivée.</div></div>`;
+        }
+        function blocMarchandise(x, r) {
+            const q = Number(x.q) || 0, paye = Number(x.paye) || 0;
+            const tete = `<div class="tete"><b>${esc(x.n)}</b><span>${fmtN(q)} t</span>${paye ? `<span class="tb-mut">payé ${fmtN(paye)} cr/t en moyenne</span>` : ""}</div>`;
+            if (!r) return `<div class="tb-vm">${tete}<div class="rien">recherche en cours…</div></div>`;
+            if (r.inconnue) return `<div class="tb-vm">${tete}<div class="rien">Marchandise inconnue de Spansh : impossible de trouver un acheteur.</div></div>`;
+            const c = r.candidats || [];
+            if (!c.length) return `<div class="tb-vm">${tete}<div class="rien">Aucune station proche n'achète ${fmtN(q)} t de ${esc(x.n)} dans ce rayon avec ces relevés. Essayez un rayon plus grand ou des relevés plus anciens.</div></div>`;
+            const lignes = c.slice(0, 4).map((s, i) => {
+                const total = s.prix * q, gain = paye ? (s.prix - paye) * q : null;
+                return `<div class="cd${i === 0 ? " best" : ""}"><span class="st"><b>${cp(s.station)}</b><small>${cp(s.systeme)} · ${s.distance > 0 ? esc(String(s.distance)) + " al" : "même système"} · ${fmtN(s.arrivee)} Ls${s.grande ? "" : " · petite piste"}</small></span>
+                    <span class="px">${fmtN(s.prix)} <small>cr/t</small></span>
+                    <span class="gn"><b class="tb-up">${fmtM(total)}</b><small>${gain === null ? "pour " + fmtN(q) + " t" : (gain >= 0 ? "+ " : "− ") + fmtM(Math.abs(gain)) + " vs payé"}</small></span>
+                    <span class="ag"><small>demande ${fmtN(s.demande)} t</small>${fraicheur(s.maj)}</span></div>`;
+            }).join("");
+            return `<div class="tb-vm">${tete}${lignes}</div>`;
+        }
+
+        // ---------------------------------------------------------------
+        //  HORLOGE : decomptes et duree de jeu, chaque seconde, sans requete
+        // ---------------------------------------------------------------
+        function tic() {
+            const live = document.getElementById("tb-live");
+            if (live) { const e = etatLive(); live.className = "tb-live " + e.classe; document.getElementById("tb-live-txt").textContent = e.texte; }
+            const d = document.getElementById("tb-duree");
+            if (d && S && S.debut && S.en_ligne) d.textContent = duree((Date.now() - new Date(S.debut).getTime()) / 1000);
+            document.querySelectorAll("[data-cd]").forEach(el => { const s = (new Date(el.dataset.cd).getTime() - Date.now()) / 1000; el.textContent = s <= 0 ? "expirée" : duree(s); });
+            document.querySelectorAll("circle[data-ring]").forEach(c => {
+                const fin = new Date(c.dataset.ring).getTime(), t0 = c.dataset.t ? new Date(c.dataset.t).getTime() : NaN;
+                const total = !isNaN(t0) ? Math.max(60000, fin - t0) : null;
+                if (total) c.setAttribute("stroke-dashoffset", (113.1 * (1 - Math.max(0, Math.min(1, (fin - Date.now()) / total)))).toFixed(1));
+            });
+        }
+        setInterval(tic, 1000);
+
+        // ---------------------------------------------------------------
+        //  DEMARRAGE (tout pilote approuve : la session est strictement personnelle)
+        // ---------------------------------------------------------------
+        window.addEventListener("load", async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = "index.html"; return; }
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            if (data && data.est_approuve) {
+                profilCommandant = data; window.profilCommandant = data; uid = session.user.id;
+                if (data.est_amiral || data.est_directeur) {
+                    const navAmiraute = document.getElementById("nav-bureau-amiraute");
+                    if (navAmiraute) navAmiraute.style.display = "flex";
+                    if (typeof actualiserBadgeAmiraute === "function") actualiserBadgeAmiraute();
+                }
+                const navBgs = document.getElementById("nav-bgs-factions");
+                if (navBgs && lire("edteam_acces_bgs") === "true") navBgs.style.display = "flex";
+                if (typeof window.actualiserHeader === "function") window.actualiserHeader(data);
+                const apiKeyDisplay = document.getElementById("api-key-display");
+                if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;
+                const mainUi = document.getElementById("main-ui");
+                if (mainUi) { mainUi.style.display = "flex"; mainUi.style.opacity = "1"; }
+                if (typeof window.demarrerSystemLoop === "function") window.demarrerSystemLoop();
+                await relire();
+                ecouter();
+            } else {
+                await supabaseApp.auth.signOut();
+                window.location.href = "index.html";
+            }
+        });
+
+    </script>
+
+    <script src="footer.js?v=23"></script>
+</body>
+</html>
