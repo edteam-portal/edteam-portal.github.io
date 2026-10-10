@@ -109,7 +109,8 @@
       .ec-gr{grid-template-columns:1fr}.ec-fr{margin-left:0;text-align:left;min-width:0;width:100%}.ec-tete h2{font-size:1.2em}
     }`;
 
-    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
+    const STOCKS = [100, 500, 1000, 2000], RAYONS = [20, 40, 80, 120, 200];
+    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
         grande: () => lire('edteam_com_grande') !== '0',
@@ -168,7 +169,8 @@
     function reglages() {
         const s = prefs.soute(), seg = (vals, cur, fn, suf) => '<span class="ec-seg">' + vals.map(v => '<button type="button" class="' + (v === cur ? 'on' : '') + '" onclick="edteamCommerce.' + fn + '(' + v + ')">' + v + suf + '</button>').join('') + '</span>';
         return '<div class="ec-regl"><span>MA SOUTE' + seg([100, 200, 400, 700], s, 'regler', ' t') + ' <input class="ec-soute" type="number" min="10" max="5000" value="' + s + '" onchange="edteamCommerce.regler(this.value)" title="Capacité de votre soute, en tonnes"></span>'
-            + '<span>RAYON D\'ACHAT' + seg([20, 40, 80], etat.rayon, 'rayon', ' al') + '</span>'
+            + '<span>RAYON D\'ACHAT' + seg(RAYONS, etat.rayon, 'rayon', ' al') + '</span>'
+            + '<span title="Ne cherche que les stations qui ont au moins ce stock">STOCK MINI À L\'ACHAT' + seg(STOCKS, etat.stock, 'stock', ' t') + '</span>'
             + '<button type="button" class="ec-tg ' + (prefs.grande() ? 'on' : '') + '" onclick="edteamCommerce.bascule(\'grande\')"><i></i>GRANDE PISTE</button>'
             + '<button type="button" class="ec-tg ' + (prefs.frais() ? 'on' : '') + '" onclick="edteamCommerce.bascule(\'frais\')"><i></i>RELEVÉS DE MOINS DE 90 JOURS</button></div>';
     }
@@ -204,7 +206,7 @@
             + (autresDest.length ? '<br>aussi : ' + autresDest.map(x => cp(x.station)).join(' · ') : '') + '</div></div>'
             + '<div class="ec-fr" style="min-width:0"><span class="ec-pill ec-rouge-pill">VENDRE ICI : L\'INFLUENCE DE LA FACTION BAISSE</span></div></div>'
             + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
-        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec ces réglages.<br>Essayez un rayon plus grand, ou désactivez « Relevés de moins de 90 jours » ou « Grande piste ».');
+        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou désactivez « Relevés de moins de 90 jours » ou « Grande piste ».');
         const best = routes[0], autres = routes.slice(1, 7), coul = ['#FF7100', '#FF3333', '#FFD700', '#00F0FF', '#FF4FD8', '#c9ccd1'];
         h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>'
           + '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
@@ -234,7 +236,7 @@
         if (etat.mode === 'contrebande') return h + corpsContre(d);
         const dest = d.destinations || [];
         if (!dest.length || !(d.marchandises || []).length) {
-            return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché connu de Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière.<br>Essayez un rayon plus grand.');
+            return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché connu de Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand ou un stock minimal plus faible.');
         }
         const routes = calculer(d);
         if (!routes.length) {
@@ -280,7 +282,7 @@
         const c = db();
         if (!c) { etat.statut = 'ERREUR'; etat.message = 'Connexion indisponible.'; rendre(); return; }
         let r;
-        try { r = await c.rpc(etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
+        try { r = await c.rpc(etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon, p_stock: etat.stock }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
         if (jeton !== etat.jeton || !ouvert()) return;
         if (r.error || !r.data) { etat.statut = 'ERREUR'; etat.message = (r.error && r.error.message) || 'Réponse vide.'; etat.donnees = null; rendre(); return; }
         const j = r.data;
@@ -296,12 +298,14 @@
         ouvrir(ordreId, systeme, faction, mode) {
             if (typeof sonClic === 'function') sonClic();
             Object.assign(etat, { mode: mode === 'contrebande' ? 'contrebande' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
-            if (![20, 40, 80].includes(etat.rayon)) etat.rayon = 40;
+            if (!RAYONS.includes(etat.rayon)) etat.rayon = 40;
+            if (!STOCKS.includes(etat.stock)) etat.stock = 100;
             rendre(); charger();
         },
         fermer() { etat.jeton++; clearTimeout(etat.minuteur); const o = document.getElementById('ec-overlay'); if (o) { o.style.display = 'none'; o.innerHTML = ''; } },
         regler(v) { ecrire('edteam_com_soute', String(Math.max(10, Math.min(5000, parseInt(v, 10) || 200)))); rendre(); },
         rayon(v) { if (v === etat.rayon) return; etat.rayon = v; etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
+        stock(v) { if (v === etat.stock) return; etat.stock = v; ecrire('edteam_com_stock', String(v)); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
         bascule(k) { ecrire(k === 'grande' ? 'edteam_com_grande' : 'edteam_com_frais', (k === 'grande' ? prefs.grande() : prefs.frais()) ? '0' : '1'); rendre(); },
         copie(el, txt, ev) { copier(String(txt), el, ev); },
         // bouton « Où vendre ? » d'une directive de hausse en cours ; vide pour les autres
