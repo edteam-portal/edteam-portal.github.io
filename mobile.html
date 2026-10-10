@@ -26,6 +26,7 @@
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=9"></script>
+    <script src="commerce.js?v=1"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -2219,7 +2220,7 @@
             xEl('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
 
             const prio = ordre.priorite || 3;
-            xEl('ordre-modal-prio').innerHTML = `<div style="margin-top: 6px;"><span class="pa ${prio === 1 ? 'c' : prio === 2 ? 'h' : 'n'}">${prio === 1 ? '▲ PRIORITÉ CRITIQUE' : prio === 2 ? '▲ PRIORITÉ HAUTE' : 'PRIORITÉ NORMALE'}</span></div>`;
+            xEl('ordre-modal-prio').innerHTML = `<div style="margin-top: 6px;"><span class="pa ${prio === 1 ? 'c' : prio === 2 ? 'h' : 'n'}">${prio === 1 ? '▲ PRIORITÉ CRITIQUE' : prio === 2 ? '▲ PRIORITÉ HAUTE' : 'PRIORITÉ NORMALE'}</span></div>${window.edteamCommerce ? '<div style="margin-top: 8px;">' + window.edteamCommerce.bouton(ordre) + '</div>' : ''}`;
             // signataire = le commandant qui a cree l'ordre (auteur_id -> nom, lu une fois et garde)
             const zoneAuteur = xEl('ordre-modal-auteur');
             window.cacheNomsAuteurs = window.cacheNomsAuteurs || {};

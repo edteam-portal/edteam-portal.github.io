@@ -1279,6 +1279,7 @@
                     <span style="color: ${cType}; border: 1px solid ${cType}; padding: 1px 7px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px;">#${ordre.id} // ${escapeHtml(ordre.type_ordre)}</span>
                     <b style="color: #fff; letter-spacing: 2px; font-size: 1.15em;">${escapeHtml(String(ordre.faction_cible || '').toUpperCase())}</b>
                     <span style="color: #888;">· ${escapeHtml(String(ordre.systeme_cible || '').toUpperCase())}</span>
+                    ${window.edteamCommerce ? window.edteamCommerce.bouton(ordre) : ''}
                 </div>
                 <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}</div>
 
@@ -2815,6 +2816,7 @@
 
     <script src="medailles.js?v=9"></script>
     <script src="rubans.js?v=1"></script>
+    <script src="commerce.js?v=1"></script>
     <script src="footer.js?v=23"></script>
 </body>
 </html>
