@@ -110,18 +110,25 @@
     }`;
 
     const STOCKS = [100, 500, 1000, 2000], RAYONS = [20, 40, 80, 120, 200];
-    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
+    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, heures: lire('edteam_com_h24') === '1' ? 24 : 168, stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
-        grande: () => lire('edteam_com_grande') !== '0',
-        frais: () => lire('edteam_com_frais') !== '0'
+        grande: () => lire('edteam_com_grande') !== '0'
     };
 
     function jours(maj) { const t = Date.parse(maj || ''); return isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000)); }
+    function ageHeures(maj) { const t = Date.parse(maj || ''); return isNaN(t) ? null : Math.max(0, (Date.now() - t) / 3600000); }
+    function ageTxtH(h) {
+        if (h === null) return 'date inconnue';
+        if (h < 1) return 'il y a moins d\'1 h';
+        if (h < 24) return 'il y a ' + Math.round(h) + ' h';
+        const j = Math.floor(h / 24);
+        return j === 1 ? 'hier' : j < 60 ? 'il y a ' + j + ' j' : 'il y a ' + Math.round(j / 30) + ' mois';
+    }
     function ageTxt(j) { return j === null ? 'date inconnue' : j < 1 ? 'aujourd\'hui' : j === 1 ? 'hier' : j < 60 ? 'il y a ' + j + ' j' : 'il y a ' + Math.round(j / 30) + ' mois'; }
     function pastilleAge(maj) {
-        const j = jours(maj);
-        return '<span class="ec-pill ' + (j !== null && j <= 30 ? 'ec-ok' : 'ec-vx') + '">' + (j !== null && j <= 30 ? 'RELEVÉ FRAIS · ' : 'RELEVÉ ') + E(ageTxt(j).toUpperCase()) + '</span>';
+        const h = ageHeures(maj), frais = h !== null && h <= 48;
+        return '<span class="ec-pill ' + (frais ? 'ec-ok' : 'ec-vx') + '">' + (frais ? 'RELEVÉ FRAIS · ' : 'RELEVÉ ') + E(ageTxtH(h).toUpperCase()) + '</span>';
     }
     function ouvert() { const o = document.getElementById('ec-overlay'); return !!o && o.style.display !== 'none'; }
 
@@ -139,8 +146,8 @@
 
     // ----- calcul des routes (navigateur) -----
     function calculer(donnees) {
-        const soute = prefs.soute(), grande = prefs.grande(), frais = prefs.frais();
-        const okStation = s => !(grande && !s.grande) && !(frais && !(jours(s.maj) !== null && jours(s.maj) <= 90));
+        const soute = prefs.soute(), grande = prefs.grande();
+        const okStation = s => !(grande && !s.grande);
         const routes = [];
         ((donnees && donnees.marchandises) || []).forEach(m => {
             let meilleure = null;
@@ -172,7 +179,7 @@
             + '<span>RAYON D\'ACHAT' + seg(RAYONS, etat.rayon, 'rayon', ' al') + '</span>'
             + '<span title="Ne cherche que les stations qui ont au moins ce stock">STOCK MINI À L\'ACHAT' + seg(STOCKS, etat.stock, 'stock', ' t') + '</span>'
             + '<button type="button" class="ec-tg ' + (prefs.grande() ? 'on' : '') + '" onclick="edteamCommerce.bascule(\'grande\')"><i></i>GRANDE PISTE</button>'
-            + '<button type="button" class="ec-tg ' + (prefs.frais() ? 'on' : '') + '" onclick="edteamCommerce.bascule(\'frais\')"><i></i>RELEVÉS DE MOINS DE 90 JOURS</button></div>';
+            + '<button type="button" class="ec-tg ' + (etat.heures === 24 ? 'on' : '') + '" onclick="edteamCommerce.h24()" title="Par défaut, seuls les marchés relevés depuis moins de 7 jours sont proposés"><i></i>RELEVÉS DE MOINS DE 24 H</button></div>';
     }
     function msg(titre, texte, spin) { return '<div class="ec-msg"><b>' + (spin ? '<span class="ec-spin"></span>' : '') + E(titre) + '</b>' + texte + '</div>'; }
     function copier(texte, el, ev) {
@@ -185,12 +192,12 @@
 
     // ----- contrebande (directive de baisse) : marché noir de la faction + où acheter de l'illégal, SANS bénéfice calculé -----
     function corpsContre(d) {
-        const soute = prefs.soute(), grande = prefs.grande(), frais = prefs.frais(), faction = d.faction || etat.faction, systeme = d.systeme || etat.systeme;
+        const soute = prefs.soute(), grande = prefs.grande(), faction = d.faction || etat.faction, systeme = d.systeme || etat.systeme;
         const toutes = d.destinations || [];
         if (!toutes.length) return msg('AUCUN MARCHÉ NOIR CHEZ CETTE FACTION', 'Spansh ne connaît aucune station de ' + E(faction) + ' avec un marché noir dans ' + E(systeme) + '.<br>Vendre de la contrebande ailleurs ne ferait pas baisser cette faction : l\'effet touche la faction qui contrôle la station où l\'on vend.');
         const dest = toutes.filter(x => !(grande && !x.grande));
         if (!dest.length) return msg('AUCUN MARCHÉ NOIR À GRANDE PISTE', 'Les marchés noirs de ' + E(faction) + ' dans ' + E(systeme) + ' n\'ont pas de grande piste.<br>Désactivez « Grande piste » pour les voir.');
-        const okS = x => !(grande && !x.grande) && !(frais && !(jours(x.maj) !== null && jours(x.maj) <= 90));
+        const okS = x => !(grande && !x.grande);
         const routes = [];
         (d.marchandises || []).forEach(m => {
             const c = (m.sources || []).filter(okS).filter(x => (Number(x.stock) || 0) > 0).sort((a, b) => (Number(a.distance) || 0) - (Number(b.distance) || 0));
@@ -206,7 +213,7 @@
             + (autresDest.length ? '<br>aussi : ' + autresDest.map(x => cp(x.station)).join(' · ') : '') + '</div></div>'
             + '<div class="ec-fr" style="min-width:0"><span class="ec-pill ec-rouge-pill">VENDRE ICI : L\'INFLUENCE DE LA FACTION BAISSE</span></div></div>'
             + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
-        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou désactivez « Relevés de moins de 90 jours » ou « Grande piste ».');
+        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou désactivez « Relevés de moins de 24 h » ou « Grande piste ».');
         const best = routes[0], autres = routes.slice(1, 7), coul = ['#FF7100', '#FF3333', '#FFD700', '#00F0FF', '#FF4FD8', '#c9ccd1'];
         h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>'
           + '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
@@ -236,19 +243,19 @@
         if (etat.mode === 'contrebande') return h + corpsContre(d);
         const dest = d.destinations || [];
         if (!dest.length || !(d.marchandises || []).length) {
-            return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché connu de Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand ou un stock minimal plus faible.');
+            return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché relevé depuis moins de ' + (etat.heures === 24 ? '24 h' : '7 jours') + ' chez Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand ou un stock minimal plus faible.');
         }
         const routes = calculer(d);
         if (!routes.length) {
-            return h + msg('AUCUNE ROUTE AVEC CES RÉGLAGES', 'Aucune marchandise ne rapporte avec votre soute, la taille de piste et la fraîcheur choisies.<br>Essayez de désactiver « Relevés de moins de 90 jours » ou « Grande piste », ou d\'agrandir le rayon.');
+            return h + msg('AUCUNE ROUTE AVEC CES RÉGLAGES', 'Aucune marchandise ne rapporte avec votre soute, la taille de piste et la fraîcheur choisies.<br>Essayez de désactiver « Relevés de moins de 24 h » ou « Grande piste », ou d\'agrandir le rayon.');
         }
         const best = routes[0], autres = routes.slice(1, 7);
-        const jv = jours(best.v.maj), vFrais = jv !== null && jv <= 30;
+        const jv = ageHeures(best.v.maj), vFrais = jv !== null && jv <= 48;
         const nbDest = dest.length;
         h += '<div class="ec-s">DESTINATION <b>· là où vendre fait monter ' + E(d.faction || etat.faction) + '</b></div>'
           + '<div class="ec-dest"><div><div class="lib">STATION DE LA FACTION · LA MIEUX PLACÉE POUR CETTE ROUTE</div><div class="nom">' + cp(best.v.station, String(best.v.station).toUpperCase()) + '</div>'
           + '<div class="sous">' + E(String(d.systeme || etat.systeme).toUpperCase()) + ' · ' + (best.v.planetaire ? 'planétaire' : 'orbitale') + (best.v.grande ? ' · grande piste' : ' · petite piste') + ' · ' + nbDest + ' station' + (nbDest > 1 ? 's' : '') + ' de la faction avec marché dans le système</div></div>'
-          + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé du jour. Barre vide : 180 jours ou plus.">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / 180 * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxt(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
+          + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (7 jours, ou 24 h).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
         h += '<div class="ec-s">LA MEILLEURE ROUTE POUR <b>' + prefs.soute() + ' t</b></div>';
         h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
           + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(d.systeme || etat.systeme) + '</div>'
@@ -271,7 +278,7 @@
         const o = assurerDom();
         o.innerHTML = '<div class="ec-m' + (etat.mode === 'contrebande' ? ' ec-rouge' : '') + '">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
             + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : 'Routes classées par bénéfice total pour votre soute')
-            + (etat.calc_le ? ' · recherche faite ' + E(ageTxt(jours(etat.calc_le)).replace('aujourd\'hui', 'récemment')) : '') + '.</div></div>';
+            + (etat.calc_le ? ' · recherche faite ' + E(ageTxtH(ageHeures(etat.calc_le))) : '') + ' · marchés relevés depuis moins de ' + (etat.heures === 24 ? '24 h' : '7 jours') + '.</div></div>';
         o.style.display = 'flex';
     }
 
@@ -282,7 +289,7 @@
         const c = db();
         if (!c) { etat.statut = 'ERREUR'; etat.message = 'Connexion indisponible.'; rendre(); return; }
         let r;
-        try { r = await c.rpc(etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon, p_stock: etat.stock }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
+        try { r = await c.rpc(etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon, p_stock: etat.stock, p_heures: etat.heures }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
         if (jeton !== etat.jeton || !ouvert()) return;
         if (r.error || !r.data) { etat.statut = 'ERREUR'; etat.message = (r.error && r.error.message) || 'Réponse vide.'; etat.donnees = null; rendre(); return; }
         const j = r.data;
@@ -306,7 +313,8 @@
         regler(v) { ecrire('edteam_com_soute', String(Math.max(10, Math.min(5000, parseInt(v, 10) || 200)))); rendre(); },
         rayon(v) { if (v === etat.rayon) return; etat.rayon = v; etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
         stock(v) { if (v === etat.stock) return; etat.stock = v; ecrire('edteam_com_stock', String(v)); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
-        bascule(k) { ecrire(k === 'grande' ? 'edteam_com_grande' : 'edteam_com_frais', (k === 'grande' ? prefs.grande() : prefs.frais()) ? '0' : '1'); rendre(); },
+        h24() { etat.heures = etat.heures === 24 ? 168 : 24; ecrire('edteam_com_h24', etat.heures === 24 ? '1' : '0'); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
+        bascule(k) { ecrire('edteam_com_grande', prefs.grande() ? '0' : '1'); rendre(); },
         copie(el, txt, ev) { copier(String(txt), el, ev); },
         // bouton « Où vendre ? » d'une directive de hausse en cours ; vide pour les autres
         bouton(ordre, classe) {

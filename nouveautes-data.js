@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-routes-releves-recents', date: '2026-10-10T02:28:00Z', type: 'AMELIORE',
+        titre: 'Routes commerciales : seulement des relevés de moins de 7 jours, ou de moins de 24 h',
+        texte: 'Dans « Où vendre ? » et « Route de contrebande », seuls les marchés relevés depuis moins de 7 jours sont désormais proposés, aussi bien pour les stations où acheter que pour les stations de la faction. Une nouvelle case « Relevés de moins de 24 h » (à la place de « moins de 90 jours ») resserre la limite à 24 heures. Les âges des relevés s’affichent en heures (« il y a 4 h ») et la jauge de fraîcheur suit la limite choisie. Corrige aussi les cas où agrandir le rayon faisait disparaître des routes : les porte-vaisseaux de joueurs, aux prix peu fiables, ne remplissent plus les résultats.',
+        important: false
+    },
+    {
         id: '2026-10-routes-stock-rayon', date: '2026-10-10T02:14:00Z', type: 'AMELIORE',
         titre: 'Routes commerciales et de contrebande : rayon jusqu’à 200 al et stock minimal',
         texte: 'Dans les fenêtres « Où vendre ? » (hausse) et « Route de contrebande » (baisse), le rayon d’achat va maintenant jusqu’à 120 et 200 années-lumière, et un nouveau réglage « Stock mini à l’achat » (100, 500, 1 000 ou 2 000 t) ne garde que les stations qui ont assez de marchandise pour remplir votre soute. Changer le rayon ou le stock lance une nouvelle recherche (quelques secondes à une trentaine de secondes la première fois), partagée ensuite avec tout l’escadron pendant 2 heures.',
