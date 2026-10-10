@@ -1,4 +1,5 @@
-// ROUTES COMMERCIALES D'UNE DIRECTIVE DE HAUSSE (« Où vendre ? ») : fenêtre commune au PC (bgs.html) et au mobile (mobile.html).
+// ROUTES COMMERCIALES D'UNE DIRECTIVE DE HAUSSE (« Où vendre ? ») ET ROUTES DE CONTREBANDE D'UNE DIRECTIVE DE BAISSE : fenêtre commune au PC (bgs.html) et au mobile (mobile.html).
+// Baisse : rpc routes_contrebande (script SQL 73) = stations de la faction avec marché noir + où acheter de la marchandise généralement illégale ; aucun bénéfice calculé (prix du marché noir inconnus).
 // Données : rpc routes_commerce(ordre, rayon) (script SQL 72) = marchandises que les stations de la faction achètent dans le système cible + stations proches où les acheter,
 //   tirées de Spansh, gardées 2 h côté serveur pour tout l'escadron. Si rien n'est en mémoire, la base lance la recherche en tâche de fond (EN_COURS) : on relit toutes les 4 s.
 // Le calcul des routes (bénéfice par tonne, total pour la soute) et les réglages (soute, grande piste, relevés récents) se font ICI, dans le navigateur : aucun appel de plus.
@@ -12,7 +13,7 @@
     const ecrire = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sans stockage : réglages par défaut à chaque ouverture */ } };
 
     // noms français des marchandises courantes (le reste reste en anglais, comme dans le jeu en anglais)
-    const FR = { 'Gold': 'Or', 'Silver': 'Argent', 'Platinum': 'Platine', 'Palladium': 'Palladium', 'Copper': 'Cuivre', 'Aluminium': 'Aluminium', 'Titanium': 'Titane', 'Steel': 'Acier',
+    const FR = { 'Slaves': 'Esclaves', 'Imperial Slaves': 'Esclaves impériaux', 'Narcotics': 'Narcotiques', 'Nerve Agents': 'Agents neurotoxiques', 'Gold': 'Or', 'Silver': 'Argent', 'Platinum': 'Platine', 'Palladium': 'Palladium', 'Copper': 'Cuivre', 'Aluminium': 'Aluminium', 'Titanium': 'Titane', 'Steel': 'Acier',
         'Gallium': 'Gallium', 'Indium': 'Indium', 'Lithium': 'Lithium', 'Beryllium': 'Béryllium', 'Cobalt': 'Cobalt', 'Tantalum': 'Tantale', 'Uranium': 'Uranium', 'Bauxite': 'Bauxite',
         'Water': 'Eau', 'Liquid oxygen': 'Oxygène liquide', 'Hydrogen Fuel': 'Carburant hydrogène', 'Polymers': 'Polymères', 'Semiconductors': 'Semi-conducteurs', 'Superconductors': 'Supraconducteurs',
         'Computer Components': 'Composants d\'ordinateur', 'Consumer Technology': 'Technologie grand public', 'Power Generators': 'Générateurs', 'Coffee': 'Café', 'Tea': 'Thé', 'Wine': 'Vin',
@@ -83,6 +84,18 @@
     .ec-rc .l3{display:flex;justify-content:space-between;align-items:center;font-size:.72em;color:#8a9;gap:8px;flex-wrap:wrap}.ec-rc .l3 .tt{color:#FFD700;white-space:nowrap}
     .ec-rc .ba{height:5px;background:#1c1c1c;margin-top:8px}.ec-rc .ba i{display:block;height:100%;background:var(--c);box-shadow:0 0 6px var(--c)}
     .ec-cp{cursor:copy;border-bottom:1px dotted currentColor;transition:.12s}.ec-cp:hover{filter:brightness(1.35);text-shadow:0 0 8px currentColor}
+    .ec-rouge{border-color:#FF3333;box-shadow:0 0 30px rgba(255,51,51,.16);background:linear-gradient(180deg,rgba(255,51,51,.07),rgba(8,5,2,.98) 140px)}
+    .ec-rouge .ec-tete{border-bottom-color:rgba(255,51,51,.35)}.ec-rouge .ec-tete h2{color:#FF3333;text-shadow:0 0 14px rgba(255,51,51,.4)}.ec-rouge .ec-tete h2 > span{color:#fff}
+    .ec-rouge .ec-x{color:#FF3333}.ec-rouge .ec-pas b{border-color:#FF3333;color:#FF3333}.ec-rouge .ec-s b{color:#FF3333}
+    .ec-rouge .ec-vd{border-color:#FF3333;background:linear-gradient(135deg,rgba(255,51,51,.1),rgba(8,5,2,.9) 60%);box-shadow:0 0 22px rgba(255,51,51,.14)}
+    .ec-rouge .ec-vd:before{background:#FF3333;content:"ROUTE LA PLUS PROCHE"}
+    .ec-rouge .ec-dest{border-color:rgba(255,51,51,.45);border-left-color:#FF3333;background:rgba(255,51,51,.06)}.ec-rouge .ec-dest .lib{color:#FF3333}
+    .ec-rouge .ec-ven{border-right-color:#FF3333}.ec-rouge .ec-ven .e{color:#FF3333}.ec-rouge .ec-bas{border-top-color:rgba(255,51,51,.3)}
+    .ec-rouge .ec-gl{background:linear-gradient(160deg,#ff8a8a,#a82727)}
+    .ec-rouge .ec-rouge-pill{color:#FF3333;border-color:#FF3333;background:rgba(255,51,51,.1)}
+    .ec-avert{border:1px solid rgba(232,163,90,.5);background:rgba(232,163,90,.07);color:#e8a35a;padding:8px 14px;font-size:.76em;line-height:1.55;margin-bottom:16px}
+    .ec-cout{color:#FFD700;font-size:1.5em;line-height:1}.ec-cout small{font-size:.42em;color:#8a9;letter-spacing:2px;display:block;margin-top:3px}
+    .ec-px2{color:#e8a35a;font-size:1.02em;line-height:1.4}
     .ec-msg{padding:34px 18px;text-align:center;color:#aaa;line-height:1.7}
     .ec-msg b{color:#FFD700;letter-spacing:2px;font-weight:normal;display:block;margin-bottom:6px}
     .ec-spin{display:inline-block;width:14px;height:14px;border:2px solid #FFD700;border-top-color:transparent;border-radius:50%;animation:ecTourne .9s linear infinite;vertical-align:-2px;margin-right:8px}
@@ -96,7 +109,7 @@
       .ec-gr{grid-template-columns:1fr}.ec-fr{margin-left:0;text-align:left;min-width:0;width:100%}.ec-tete h2{font-size:1.2em}
     }`;
 
-    const etat = { ordre: null, systeme: '', faction: '', rayon: 40, donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
+    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
         grande: () => lire('edteam_com_grande') !== '0',
@@ -146,9 +159,10 @@
 
     // ----- affichage -----
     function entete() {
-        return '<div class="ec-tete"><div><small>DIRECTIVE #' + E(etat.ordre) + ' · HAUSSE · COMMERCE</small>'
-            + '<h2>ROUTE COMMERCIALE<span>' + cp(etat.systeme, String(etat.systeme).toUpperCase()) + ' · ' + E(String(etat.faction).toUpperCase()) + '</span></h2>'
-            + '<div class="ec-pas"><b>1</b>ACHETEZ<i>›</i><b>2</b>TRANSPORTEZ<i>›</i><b>3</b>VENDEZ À UNE STATION DE LA FACTION</div></div>'
+        const c = etat.mode === 'contrebande';
+        return '<div class="ec-tete"><div><small>DIRECTIVE #' + E(etat.ordre) + (c ? ' · BAISSE · CONTREBANDE' : ' · HAUSSE · COMMERCE') + '</small>'
+            + '<h2>' + (c ? 'ROUTE DE CONTREBANDE' : 'ROUTE COMMERCIALE') + '<span>' + cp(etat.systeme, String(etat.systeme).toUpperCase()) + ' · ' + E(String(etat.faction).toUpperCase()) + '</span></h2>'
+            + '<div class="ec-pas">' + (c ? '<b>1</b>ACHETEZ DE L\'ILLÉGAL<i>›</i><b>2</b>TRANSPORTEZ<i>›</i><b>3</b>VENDEZ AU MARCHÉ NOIR DE LA FACTION' : '<b>1</b>ACHETEZ<i>›</i><b>2</b>TRANSPORTEZ<i>›</i><b>3</b>VENDEZ À UNE STATION DE LA FACTION') + '</div></div>'
             + '<span class="ec-x" onclick="edteamCommerce.fermer()">✕</span></div>';
     }
     function reglages() {
@@ -167,6 +181,47 @@
     function cp(nom, affichage) { return '<span class="ec-cp" title="Cliquer pour copier" onclick="edteamCommerce.copie(this, ' + E(JSON.stringify(String(nom))).replace(/&quot;/g, '&#34;') + ', event)">' + E(affichage == null ? nom : affichage) + '</span>'; }
     function boutonCopie(txt) { return '<button type="button" class="ec-bt" onclick="edteamCommerce.copie(this, ' + E(JSON.stringify(txt)).replace(/&quot;/g, '&#34;') + ', event)">COPIER « ' + E(String(txt)) + ' »</button>'; }
 
+    // ----- contrebande (directive de baisse) : marché noir de la faction + où acheter de l'illégal, SANS bénéfice calculé -----
+    function corpsContre(d) {
+        const soute = prefs.soute(), grande = prefs.grande(), frais = prefs.frais(), faction = d.faction || etat.faction, systeme = d.systeme || etat.systeme;
+        const toutes = d.destinations || [];
+        if (!toutes.length) return msg('AUCUN MARCHÉ NOIR CHEZ CETTE FACTION', 'Spansh ne connaît aucune station de ' + E(faction) + ' avec un marché noir dans ' + E(systeme) + '.<br>Vendre de la contrebande ailleurs ne ferait pas baisser cette faction : l\'effet touche la faction qui contrôle la station où l\'on vend.');
+        const dest = toutes.filter(x => !(grande && !x.grande));
+        if (!dest.length) return msg('AUCUN MARCHÉ NOIR À GRANDE PISTE', 'Les marchés noirs de ' + E(faction) + ' dans ' + E(systeme) + ' n\'ont pas de grande piste.<br>Désactivez « Grande piste » pour les voir.');
+        const okS = x => !(grande && !x.grande) && !(frais && !(jours(x.maj) !== null && jours(x.maj) <= 90));
+        const routes = [];
+        (d.marchandises || []).forEach(m => {
+            const c = (m.sources || []).filter(okS).filter(x => (Number(x.stock) || 0) > 0).sort((a, b) => (Number(a.distance) || 0) - (Number(b.distance) || 0));
+            if (!c.length) return;
+            const x = c[0], qte = Math.min(soute, Number(x.stock) || 0);
+            routes.push({ m, s: x, qte, cout: qte * (Number(x.prix) || 0) });
+        });
+        routes.sort((a, b) => (Number(a.s.distance) || 0) - (Number(b.s.distance) || 0));
+        const st = dest[0], autresDest = dest.slice(1, 4);
+        let h = '<div class="ec-s">DESTINATION <b>· là où vendre fait baisser ' + E(faction) + '</b></div>'
+            + '<div class="ec-dest"><div><div class="lib">MARCHÉ NOIR · STATION DE LA FACTION</div><div class="nom">' + cp(st.station, String(st.station).toUpperCase()) + '</div>'
+            + '<div class="sous">' + cp(systeme, String(systeme).toUpperCase()) + ' · ' + (st.planetaire ? 'planétaire' : 'orbitale') + (st.grande ? ' · grande piste' : ' · petite piste') + ' · ' + toutes.length + ' station' + (toutes.length > 1 ? 's' : '') + ' de la faction ' + (toutes.length > 1 ? 'ont' : 'a') + ' un marché noir dans le système'
+            + (autresDest.length ? '<br>aussi : ' + autresDest.map(x => cp(x.station)).join(' · ') : '') + '</div></div>'
+            + '<div class="ec-fr" style="min-width:0"><span class="ec-pill ec-rouge-pill">VENDRE ICI : L\'INFLUENCE DE LA FACTION BAISSE</span></div></div>'
+            + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
+        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec ces réglages.<br>Essayez un rayon plus grand, ou désactivez « Relevés de moins de 90 jours » ou « Grande piste ».');
+        const best = routes[0], autres = routes.slice(1, 7), coul = ['#FF7100', '#FF3333', '#FFD700', '#00F0FF', '#FF4FD8', '#c9ccd1'];
+        h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>'
+          + '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
+          + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(systeme) + '</div>'
+          + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
+          + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecr" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#FF3333"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#FF3333" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecr)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
+          + '<div class="ec-cout">' + fmt(best.cout) + ' cr<small>COÛT D\'ACHAT POUR ' + fmt(best.qte) + ' t</small></div></div>'
+          + '<div class="ec-n ec-ven"><div class="e">③ VENDRE ICI</div><div class="st">' + cp(st.station) + '</div><div class="sy">' + cp(systeme) + ' · marché noir</div>'
+          + '<div class="ec-px2">prix de reprise : à voir en jeu</div><div class="de">vendez la marchandise au marché noir, pas au marché normal</div></div></div>'
+          + '<div class="ec-bas"><div class="ec-tot">② TRANSPORTEZ ' + fmt(best.qte) + ' t · à emporter<b>' + mil(best.cout) + ' cr</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(best.s.systeme) + boutonCopie(systeme) + '</div></div></div>';
+        if (autres.length) {
+            h += '<div class="ec-s">AUTRES MARCHANDISES <b style="color:#666;letter-spacing:1px;font-size:.95em">· la source la plus proche de chacune</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span style="color:#FFD700">' + fmt(r.s.prix) + ' cr / t</span></div>'
+                + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u style="color:#FF3333">' + cp(st.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
+                + '<div class="l3"><span>' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · stock ' + fmt(r.s.stock) + ' t' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.cout) + ' cr · ' + fmt(r.qte) + ' t</span></div></div>').join('') + '</div>';
+        }
+        return h;
+    }
     function corps() {
         const d = etat.donnees;
         let h = '';
@@ -176,6 +231,7 @@
             if (etat.statut === 'EN_COURS') return h + msg('RECHERCHE EN COURS', 'La base interroge Spansh pour la première fois sur cette directive (environ 15 à 30 secondes).<br>Le résultat sera ensuite gardé 2 heures pour tout l\'escadron.', true);
             return h + msg('AUCUN RÉSULTAT', 'La recherche n\'a rien donné pour le moment. Réessayez dans quelques minutes.');
         }
+        if (etat.mode === 'contrebande') return h + corpsContre(d);
         const dest = d.destinations || [];
         if (!dest.length || !(d.marchandises || []).length) {
             return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché connu de Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière.<br>Essayez un rayon plus grand.');
@@ -211,8 +267,8 @@
     }
     function rendre() {
         const o = assurerDom();
-        o.innerHTML = '<div class="ec-m">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
-            + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. Routes classées par bénéfice total pour votre soute'
+        o.innerHTML = '<div class="ec-m' + (etat.mode === 'contrebande' ? ' ec-rouge' : '') + '">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
+            + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : 'Routes classées par bénéfice total pour votre soute')
             + (etat.calc_le ? ' · recherche faite ' + E(ageTxt(jours(etat.calc_le)).replace('aujourd\'hui', 'récemment')) : '') + '.</div></div>';
         o.style.display = 'flex';
     }
@@ -224,7 +280,7 @@
         const c = db();
         if (!c) { etat.statut = 'ERREUR'; etat.message = 'Connexion indisponible.'; rendre(); return; }
         let r;
-        try { r = await c.rpc('routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
+        try { r = await c.rpc(etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
         if (jeton !== etat.jeton || !ouvert()) return;
         if (r.error || !r.data) { etat.statut = 'ERREUR'; etat.message = (r.error && r.error.message) || 'Réponse vide.'; etat.donnees = null; rendre(); return; }
         const j = r.data;
@@ -237,9 +293,9 @@
     }
 
     const api = {
-        ouvrir(ordreId, systeme, faction) {
+        ouvrir(ordreId, systeme, faction, mode) {
             if (typeof sonClic === 'function') sonClic();
-            Object.assign(etat, { ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
+            Object.assign(etat, { mode: mode === 'contrebande' ? 'contrebande' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
             if (![20, 40, 80].includes(etat.rayon)) etat.rayon = 40;
             rendre(); charger();
         },
@@ -250,9 +306,11 @@
         copie(el, txt, ev) { copier(String(txt), el, ev); },
         // bouton « Où vendre ? » d'une directive de hausse en cours ; vide pour les autres
         bouton(ordre, classe) {
-            if (!ordre || String(ordre.type_ordre || '').toUpperCase() !== 'HAUSSE' || String(ordre.statut || 'ACTIF').toUpperCase() !== 'ACTIF') return '';
-            const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || ''].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
-            return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: rgba(255,215,0,0.1); border: 1px solid #FFD700; color: #FFD700; padding: 7px 14px; font-family: inherit; font-size: 0.8em; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 10px rgba(255,215,0,0.2);">💰 OÙ VENDRE ?</button>';
+            const type = ordre ? String(ordre.type_ordre || '').toUpperCase() : '';
+            if (!ordre || (type !== 'HAUSSE' && type !== 'BAISSE') || String(ordre.statut || 'ACTIF').toUpperCase() !== 'ACTIF') return '';
+            const baisse = type === 'BAISSE';
+            const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || '', baisse ? 'contrebande' : 'commerce'].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
+            return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: ' + (baisse ? 'rgba(255,51,51,0.1); border: 1px solid #FF3333; color: #FF3333' : 'rgba(255,215,0,0.1); border: 1px solid #FFD700; color: #FFD700') + '; padding: 7px 14px; font-family: inherit; font-size: 0.8em; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 10px ' + (baisse ? 'rgba(255,51,51,0.2)' : 'rgba(255,215,0,0.2)') + ';">' + (baisse ? '🏴 ROUTE DE CONTREBANDE' : '💰 OÙ VENDRE ?') + '</button>';
         }
     };
     window.edteamCommerce = api;
