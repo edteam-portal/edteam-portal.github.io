@@ -357,6 +357,18 @@
         @container carte (max-width: 620px) { .carte-tete { gap:6px; } .carte-controles { gap:4px; } .c-select { max-width:100px; padding:2px 3px; letter-spacing:0; } .c-pastille { padding:2px 5px; letter-spacing:.5px; } #carte-zoom-val { min-width:26px !important; } .carte-titre { letter-spacing:1px; } }
         @container carte (max-width: 500px) { .carte-tete { flex-wrap:wrap; } .carte-controles { flex-wrap:wrap; } .c-select { max-width:100%; } }
         .c-select option { background:#06141a; color:#dff; }
+        /* Comptes de la carte : trois listes deroulantes (systemes, stations terminees, chantiers en cours) ; un clic sur une ligne ouvre la fenetre du systeme */
+        .c-compte { background:rgba(0,0,0,.55); border:1px solid; font-family:inherit; font-size:.8em; font-weight:bold; letter-spacing:1px; padding:5px 12px; border-radius:3px; cursor:pointer; transition:.15s; white-space:nowrap; }
+        .c-compte b { font-size:1.25em; margin:0 4px 0 2px; }
+        .c-compte:hover, .c-compte.ouvert { background:rgba(255,255,255,.08); box-shadow:0 0 10px currentColor; }
+        .c-liste { position:absolute; left:0; top:calc(100% + 4px); z-index:20; width:min(440px, 100%); max-height:300px; overflow-y:auto; background:rgba(4,12,16,.97); border:1px solid; border-radius:3px; box-shadow:0 8px 24px rgba(0,0,0,.7); display:none; }
+        .c-liste.ouvert { display:block; }
+        .c-liste-item { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:6px 12px; border-bottom:1px dashed #1d2a30; font-size:.8em; color:#cfd; cursor:pointer; }
+        .c-liste-item:hover { background:rgba(255,255,255,.07); }
+        .c-liste-item .n { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .c-liste-item .d { flex:none; color:#8a9; font-size:.9em; }
+        .c-liste-vide { padding:10px 12px; color:#777; font-style:italic; font-size:.8em; }
+        .c-liste::-webkit-scrollbar { width:6px; } .c-liste::-webkit-scrollbar-thumb { background:rgba(0,240,255,.5); border-radius:3px; }
         .c-zoom { width:24px; height:22px; background:rgba(0,0,0,.6); color:#00F0FF; border:1px solid rgba(0,240,255,.6); border-radius:3px; font-family:inherit; font-size:.85em; cursor:pointer; line-height:1; padding:0; }
         .c-zoom:hover { background:rgba(0,240,255,.2); box-shadow:0 0 8px rgba(0,240,255,.4); }
         .colo-haut { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:12px; }
@@ -746,6 +758,20 @@
         // clic sur un système : ignoré si l'on vient de faire glisser la carte
         function carteClic(i) { if (window.__carteDeplace) return; ouvrirSysteme(i); }
         // liste déroulante : on se centre sur le système, on le repère, et on ouvre sa fenêtre de détail
+        // ----- Comptes de la carte : trois listes deroulantes -----
+        window.basculerListeCarte = function (k, ev) {
+            if (ev) ev.stopPropagation();
+            const ouvrait = document.getElementById('c-liste-' + k) && document.getElementById('c-liste-' + k).classList.contains('ouvert');
+            fermerListesCarte();
+            if (ouvrait) return;
+            const l = document.getElementById('c-liste-' + k), b = document.getElementById('c-compte-' + k);
+            if (l) l.classList.add('ouvert'); if (b) b.classList.add('ouvert');
+            if (typeof sonClic === 'function') sonClic();
+        };
+        window.fermerListesCarte = function () { document.querySelectorAll('.c-liste.ouvert, .c-compte.ouvert').forEach(e => e.classList.remove('ouvert')); };
+        window.choisirDansListeCarte = function (i) { fermerListesCarte(); carteSelectionner(String(i)); };
+        document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('#carte-comptes')) fermerListesCarte(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerListesCarte(); });
         function carteSelectionner(val) {
             const sel = document.getElementById('carte-select');
             if (val === '' || !window.__colo) return;
@@ -1114,6 +1140,23 @@
                 <div id="journal-feed" class="journal-feed">${journal}</div>
             </div>`;
 
+            // Comptes de la carte : systemes colonisés, stations terminees, chantiers en cours (listes deroulantes ; un clic ouvre la fenetre du systeme)
+            const triSys = systemes.map((sy, i) => ({ sy, i })).sort((a, b) => courtSysteme(a.sy.nom).localeCompare(courtSysteme(b.sy.nom), 'fr'));
+            const itemListe = (i, gauche, droite) => '<div class="c-liste-item" onclick="choisirDansListeCarte(' + i + ')"><span class="n">' + gauche + '</span><span class="d">' + droite + '</span></div>';
+            const listeSys = triSys.map(({ sy, i }) => itemListe(i, esc(courtSysteme(sy.nom)), sy.finies.length + ' term. · ' + sy.chantiers.length + ' chantier' + (sy.chantiers.length > 1 ? 's' : ''))).join('');
+            const listeFin = [], listeCours = [];
+            triSys.forEach(({ sy, i }) => {
+                sy.finies.forEach(c => listeFin.push(itemListe(i, esc(nomStation(c.station)) + ' <span style="color:#6f9aa3;">· ' + esc(courtSysteme(sy.nom)) + '</span>', c.termine_le ? esc(jj(c.termine_le)) : '')));
+                sy.chantiers.forEach(c => { const p = calculerChantier(c).pct; listeCours.push(itemListe(i, esc(nomStation(c.station)) + ' <span style="color:#6f9aa3;">· ' + esc(courtSysteme(sy.nom)) + '</span>', '<b style="color:' + couleurAvancement(p) + ';">' + p + ' %</b>')); });
+            });
+            const compte = (k, titre, nb, col, items) => '<span style="position:relative;display:inline-block;"><button type="button" id="c-compte-' + k + '" class="c-compte" style="color:' + col + ';border-color:' + col + '88;" onclick="basculerListeCarte(\'' + k + '\', event)">' + titre + ' <b>' + nb + '</b> ▾</button>'
+                + '<div id="c-liste-' + k + '" class="c-liste" style="border-color:' + col + ';">' + (items || '<div class="c-liste-vide">Rien pour l\'instant.</div>') + '</div></span>';
+            const barreComptes = '<div id="carte-comptes" style="position:relative;z-index:6;flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">'
+                + compte('sys', 'SYSTÈMES COLONISÉS', systemes.length, B, listeSys)
+                + compte('fin', 'STATIONS TERMINÉES', listeFin.length, G, listeFin.join(''))
+                + compte('cours', 'CHANTIERS EN COURS', listeCours.length, O, listeCours.join(''))
+                + '</div>';
+
             // hauteur = les deux blocs de droite (340 + 12 + 340) : la carte occupe toute la colonne de gauche
             const carteHolo = `<div id="carte-holo" class="bloc holo" style="height:692px;padding:12px 16px;display:flex;flex-direction:column;">
                 <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg, rgba(0,240,255,.05) 0px, rgba(0,240,255,.05) 1px, transparent 1px, transparent 4px);pointer-events:none;"></div>
@@ -1136,6 +1179,7 @@
                         </span>
                     </span>
                 </div>
+                ${barreComptes}
                 <div style="position:relative;flex:1;min-height:0;">
                     <div id="carte-chip" style="display:none;position:absolute;left:8px;top:6px;z-index:3;align-items:center;gap:10px;background:rgba(0,0,0,.78);border:1px solid ${GOLD};color:${GOLD};padding:3px 10px;border-radius:3px;font-size:.8em;letter-spacing:1px;"><span class="chip-lib">MATÉRIAU :</span><span class="chip-nom" style="color:#fff;font-weight:bold;"></span><span onclick="carteEffacerMateriau()" style="cursor:pointer;font-weight:bold;padding:0 2px;" title="Effacer le repérage sur la carte">✕</span></div>
                     <div id="carte-svg-zone" style="position:absolute;inset:0;">${svgCarte(systemes, ordreIdx, carteVue(), window.__carte.actif)}</div></div>
