@@ -356,19 +356,7 @@
         @container carte (max-width: 800px) { .c-filtre .lg, .c-zoom .lg { display:none; } .c-filtre .sm, .c-zoom .sm { display:inline; } .c-select { max-width:130px; } .c-pastille { padding:2px 7px; } .carte-titre .t-lg { display:none; } }
         @container carte (max-width: 620px) { .carte-tete { gap:6px; } .carte-controles { gap:4px; } .c-select { max-width:100px; padding:2px 3px; letter-spacing:0; } .c-pastille { padding:2px 5px; letter-spacing:.5px; } #carte-zoom-val { min-width:26px !important; } .carte-titre { letter-spacing:1px; } }
         @container carte (max-width: 500px) { .carte-tete { flex-wrap:wrap; } .carte-controles { flex-wrap:wrap; } .c-select { max-width:100%; } }
-        .c-select option { background:#06141a; color:#dff; }
-        /* Comptes de la carte : trois listes deroulantes (systemes, stations terminees, chantiers en cours) ; un clic sur une ligne ouvre la fenetre du systeme */
-        .c-compte { background:rgba(0,0,0,.55); border:1px solid; font-family:inherit; font-size:.8em; font-weight:bold; letter-spacing:1px; padding:5px 12px; border-radius:3px; cursor:pointer; transition:.15s; white-space:nowrap; }
-        .c-compte b { font-size:1.25em; margin:0 4px 0 2px; }
-        .c-compte:hover, .c-compte.ouvert { background:rgba(255,255,255,.08); box-shadow:0 0 10px currentColor; }
-        .c-liste { position:absolute; left:0; top:calc(100% + 4px); z-index:20; width:440px; max-width:calc(100vw - 40px); max-height:300px; overflow-y:auto; background:rgba(4,12,16,.97); border:1px solid; border-radius:3px; box-shadow:0 8px 24px rgba(0,0,0,.7); display:none; }
-        .c-liste.ouvert { display:block; }
-        .c-liste-item { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:6px 12px; border-bottom:1px dashed #1d2a30; font-size:.8em; color:#cfd; cursor:pointer; }
-        .c-liste-item:hover { background:rgba(255,255,255,.07); }
-        .c-liste-item .n { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .c-liste-item .d { flex:none; color:#8a9; font-size:.9em; }
-        .c-liste-vide { padding:10px 12px; color:#777; font-style:italic; font-size:.8em; }
-        .c-liste::-webkit-scrollbar { width:6px; } .c-liste::-webkit-scrollbar-thumb { background:rgba(0,240,255,.5); border-radius:3px; }
+        .c-select option, #colo-pilote option { background:#06141a; color:#dff; font-size:.8em; }
         .c-zoom { width:24px; height:22px; background:rgba(0,0,0,.6); color:#00F0FF; border:1px solid rgba(0,240,255,.6); border-radius:3px; font-family:inherit; font-size:.85em; cursor:pointer; line-height:1; padding:0; }
         .c-zoom:hover { background:rgba(0,240,255,.2); box-shadow:0 0 8px rgba(0,240,255,.4); }
         .colo-haut { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:12px; }
@@ -705,7 +693,26 @@
         //  window.__carte = { zoom, cx, cz (centre en années-lumière, null = vue d'ensemble), filtre, actif (système repéré) }
         // ---------------------------------------------------------------
         const carteVue = () => { const c = window.__carte; return { zoom: c.zoom, cx: c.cx === null ? undefined : c.cx, cz: c.cz === null ? undefined : c.cz }; };
-        const carteGeom = () => placerSystemes((window.__colo && window.__colo.systemes) || [], carteVue());
+        // ----- Filtre PILOTE : la page n'affiche que les systemes dont le pilote est l'ARCHITECTE (par defaut : moi) -----
+        function nomPiloteColo() {
+            const brut = window.__coloBrut;
+            if (!brut || brut.perso || !window.profilCommandant) return null;
+            let c = window.__coloPilote;
+            if (!c) { try { c = localStorage.getItem('edteam_colo_pilote'); } catch (e) {} }
+            const moi = String(window.profilCommandant.cmdr_nom || '');
+            if (!c) c = (moi && (brut.systemes || []).some(s => s.architecte && memeNom(s.architecte, moi))) ? 'MOI' : 'TOUS';   // sans systeme a mon nom : on montre tout
+            return c === 'TOUS' ? null : (c === 'MOI' ? moi : c);
+        }
+        const systemeVisible = s => { const n = nomPiloteColo(); return !n || !!(s.architecte && memeNom(s.architecte, n)); };
+        const visiblesDe = liste => { const n = nomPiloteColo(); return n ? (liste || []).filter(s => s.architecte && memeNom(s.architecte, n)) : (liste || []); };
+        window.changerPiloteColo = function (v) {
+            window.__coloPilote = v;
+            try { localStorage.setItem('edteam_colo_pilote', v); } catch (e) {}
+            if (window.__carte) Object.assign(window.__carte, { zoom: 1, cx: null, cz: null, actif: null });
+            if (typeof sonClic === 'function') sonClic();
+            if (window.__coloBrut) construirePage(window.__coloBrut);
+        };
+        const carteGeom = () => placerSystemes(visiblesDe((window.__colo && window.__colo.systemes) || []), carteVue());
         function appliquerFiltreCarte() {
             const f = window.__carte.filtre, mat = window.__carte.apercu || window.__carte.materiau;   // l'aperçu au survol prime sur le choix validé par un clic
             document.querySelectorAll('.noeud-carte').forEach(n => {
@@ -727,7 +734,7 @@
             if (!zone || !window.__colo) return;
             const systemes = window.__colo.systemes || [];
             const ordreIdx = new Map(systemes.map((s, i) => [s, i]));
-            zone.innerHTML = svgCarte(systemes, ordreIdx, carteVue(), window.__carte.actif);
+            zone.innerHTML = svgCarte(visiblesDe(systemes), ordreIdx, carteVue(), window.__carte.actif);
             zone.style.cursor = window.__carte.zoom > 1 ? 'grab' : 'default';
             appliquerFiltreCarte();
             const g = carteGeom(), lib = document.getElementById('carte-zoom-val');
@@ -758,20 +765,6 @@
         // clic sur un système : ignoré si l'on vient de faire glisser la carte
         function carteClic(i) { if (window.__carteDeplace) return; ouvrirSysteme(i); }
         // liste déroulante : on se centre sur le système, on le repère, et on ouvre sa fenêtre de détail
-        // ----- Comptes de la carte : trois listes deroulantes -----
-        window.basculerListeCarte = function (k, ev) {
-            if (ev) ev.stopPropagation();
-            const ouvrait = document.getElementById('c-liste-' + k) && document.getElementById('c-liste-' + k).classList.contains('ouvert');
-            fermerListesCarte();
-            if (ouvrait) return;
-            const l = document.getElementById('c-liste-' + k), b = document.getElementById('c-compte-' + k);
-            if (l) l.classList.add('ouvert'); if (b) b.classList.add('ouvert');
-            if (typeof sonClic === 'function') sonClic();
-        };
-        window.fermerListesCarte = function () { document.querySelectorAll('.c-liste.ouvert, .c-compte.ouvert').forEach(e => e.classList.remove('ouvert')); };
-        window.choisirDansListeCarte = function (i) { fermerListesCarte(); carteSelectionner(String(i)); };
-        document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('#carte-comptes')) fermerListesCarte(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerListesCarte(); });
         function carteSelectionner(val) {
             const sel = document.getElementById('carte-select');
             if (val === '' || !window.__colo) return;
@@ -836,7 +829,7 @@
         const memeMateriau = (m, p) => p.cle ? (m.nom === p.cle || (!m.nom && m.nom_fr === p.cle)) : nomMateriau(m) === p.nom;
         function sitesPourMateriau(p) {
             const sites = [];
-            ((window.__colo && window.__colo.systemes) || []).forEach((s, i) => (s.chantiers || []).forEach(c => {
+            ((window.__colo && window.__colo.systemes) || []).forEach((s, i) => systemeVisible(s) && (s.chantiers || []).forEach(c => {
                 (c.marchandises || []).forEach(m => {
                     if (!memeMateriau(m, p)) return;
                     const req = +m.requis || 0, liv = +m.livre || 0;
@@ -1111,14 +1104,34 @@
         function construirePage(data) {
             const zone = document.getElementById('display-area');
             if (!data || !data.escadron) { zone.innerHTML = vide('Cette page est réservée aux pilotes approuvés.'); return; }
-            const systemes = data.systemes || [];
-            window.__colo = data;
+            window.__coloBrut = data;
+            const tousSystemes = data.systemes || [];
+            const nomFiltre = nomPiloteColo();
+            const systemes = nomFiltre ? tousSystemes.filter(systemeVisible) : tousSystemes;
+            let prioritesVue = data.priorites || [];
+            if (nomFiltre) {   // « A apporter en priorite » recalcule sur les chantiers de CE pilote seulement (meme regle que le serveur : reste a livrer par marchandise, 12 premieres)
+                const cumul = {};
+                systemes.forEach(sy => (sy.chantiers || []).forEach(c => {
+                    (c.marchandises || []).forEach(m => {
+                        const reste = (+m.requis || 0) - (+m.livre || 0);
+                        if (reste <= 0) return;
+                        const nom = m.nom_fr || m.nom, e = cumul[nom] = cumul[nom] || { nom, reste: 0, chantiers: 0 };
+                        e.reste += reste; e.chantiers += 1;
+                    });
+                }));
+                prioritesVue = Object.keys(cumul).map(k => cumul[k]).sort((a, b) => b.reste - a.reste).slice(0, 12);
+            }
+            window.__colo = nomFiltre ? Object.assign({}, data, { priorites: prioritesVue }) : data;
             // état de la carte : la vue (zoom, centre, repère) survit à « ACTUALISER » ; le filtre revient à TOUS
             window.__carte = Object.assign({ zoom: 1, cx: null, cz: null, actif: null }, window.__carte || {}, { filtre: 'tous', materiau: null, apercu: null });
-            const kpi = data.kpi || {};
-            const ordreIdx = new Map(systemes.map((s, i) => [s, i]));
+            const kpi0 = data.kpi || {};
+            const kpi = nomFiltre ? Object.assign({}, kpi0, {
+                systemes: systemes.length,
+                construites: systemes.reduce((t, sy) => t + (sy.finies || []).length, 0),
+                chantiers: systemes.reduce((t, sy) => t + (sy.chantiers || []).length, 0) }) : kpi0;
+            const ordreIdx = new Map(tousSystemes.map((s, i) => [s, i]));   // l'index d'un systeme reste celui de la liste complete (fenetres, carte, listes)
             const sansPosition = systemes.filter(s => !(typeof s.x === 'number' && typeof s.z === 'number'));
-            const aucun = !systemes.length && !(kpi.chantiers || 0) && !(kpi.construites || 0);
+            const aucun = !tousSystemes.length && !(kpi0.chantiers || 0) && !(kpi0.construites || 0);
 
             const architectes = (data.architectes || []).map((a, i) => `<div class="archi-ligne" onclick="ouvrirArchitecte(${i})" onmouseenter="apercuArchitecte(${i})" onmouseleave="finApercu()" title="Survol : repère ses systèmes sur la carte · Clic : ses systèmes, installations et chantiers" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.5);border:1px solid ${i === 0 ? GOLD + '88' : '#333'};border-left:3px solid ${i === 0 ? GOLD : '#555'};border-radius:4px;padding:8px 14px;margin-bottom:8px;">
                 <span style="color:${i === 0 ? GOLD : '#888'};font-weight:bold;font-size:1.2em;width:30px;">#${i + 1}</span>
@@ -1126,8 +1139,8 @@
                 <div style="text-align:right;"><div style="color:${GOLD};font-weight:bold;font-size:1.1em;">${fmt(a.tonnes)} t</div><div style="color:#777;font-size:.75em;">livrées au total</div></div></div>`).join('')
                 || vide('Aucun architecte identifié pour l\'instant.<br>Le système doit avoir été revendiqué par un pilote dont le plugin est à jour.');
 
-            const maxReste = Math.max(1, ...(data.priorites || []).map(p => +p.reste || 0));
-            const prio = (data.priorites || []).map((p, k) => `<div class="prio-ligne" onclick="ouvrirMateriau(${k})" onmouseenter="apercuMateriau(${k})" onmouseleave="finApercu()" title="Survol : repère les systèmes sur la carte · Clic : liste des chantiers et noms à copier" style="display:grid;grid-template-columns:1fr 70px 82px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px dashed #222;cursor:pointer;"><span style="color:#fff;">${esc(p.nom)} <small style="color:#777;font-size:.75em;">${p.chantiers} chantier${p.chantiers > 1 ? 's' : ''}</small></span><div style="height:7px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;"><div style="width:${Math.max(3, Math.round(100 * p.reste / maxReste))}%;height:100%;background:${B};"></div></div><span style="color:${GOLD};text-align:right;font-weight:bold;">${fmt(p.reste)} t</span></div>`).join('')
+            const maxReste = Math.max(1, ...prioritesVue.map(p => +p.reste || 0));
+            const prio = prioritesVue.map((p, k) => `<div class="prio-ligne" onclick="ouvrirMateriau(${k})" onmouseenter="apercuMateriau(${k})" onmouseleave="finApercu()" title="Survol : repère les systèmes sur la carte · Clic : liste des chantiers et noms à copier" style="display:grid;grid-template-columns:1fr 70px 82px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px dashed #222;cursor:pointer;"><span style="color:#fff;">${esc(p.nom)} <small style="color:#777;font-size:.75em;">${p.chantiers} chantier${p.chantiers > 1 ? 's' : ''}</small></span><div style="height:7px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;"><div style="width:${Math.max(3, Math.round(100 * p.reste / maxReste))}%;height:100%;background:${B};"></div></div><span style="color:${GOLD};text-align:right;font-weight:bold;">${fmt(p.reste)} t</span></div>`).join('')
                 || vide('Rien à apporter : aucun chantier en cours.');
 
             const journal = vide('Chargement du journal…');   // rempli par chargerJournalBloc (colonisation_journal, 100 dernières lignes)
@@ -1140,25 +1153,14 @@
                 <div id="journal-feed" class="journal-feed">${journal}</div>
             </div>`;
 
-            // Comptes de la carte : systemes colonisés, stations terminees, chantiers en cours (listes deroulantes ; un clic ouvre la fenetre du systeme)
-            const monNom = String((window.profilCommandant && window.profilCommandant.cmdr_nom) || ''), mesIdx = new Set(monNom ? systemesDe(monNom).map(x => x.i) : []);
-            const triSys = systemes.map((sy, i) => ({ sy, i })).filter(x => mesIdx.has(x.i)).sort((a, b) => courtSysteme(a.sy.nom).localeCompare(courtSysteme(b.sy.nom), 'fr'));
-            const itemListe = (i, gauche, droite) => '<div class="c-liste-item" onclick="choisirDansListeCarte(' + i + ')"><span class="n">' + gauche + '</span><span class="d">' + droite + '</span></div>';
-            const listeSys = triSys.map(({ sy, i }) => itemListe(i, esc(courtSysteme(sy.nom)), sy.finies.length + ' term. · ' + sy.chantiers.length + ' chantier' + (sy.chantiers.length > 1 ? 's' : ''))).join('');
-            const listeFin = [], listeCours = [];
-            triSys.forEach(({ sy, i }) => {
-                sy.finies.forEach(c => listeFin.push(itemListe(i, esc(nomStation(c.station)) + ' <span style="color:#6f9aa3;">· ' + esc(courtSysteme(sy.nom)) + '</span>', c.termine_le ? esc(jj(c.termine_le)) : '')));
-                sy.chantiers.forEach(c => { const p = calculerChantier(c).pct; listeCours.push(itemListe(i, esc(nomStation(c.station)) + ' <span style="color:#6f9aa3;">· ' + esc(courtSysteme(sy.nom)) + '</span>', '<b style="color:' + couleurAvancement(p) + ';">' + p + ' %</b>')); });
-            });
-            const compte = (k, titre, nb, col, items) => '<span style="position:relative;display:inline-block;"><button type="button" id="c-compte-' + k + '" class="c-compte" style="color:' + col + ';border-color:' + col + '88;" onclick="basculerListeCarte(\'' + k + '\', event)">' + titre + ' <b>' + nb + '</b> ▾</button>'
-                + '<div id="c-liste-' + k + '" class="c-liste" style="border-color:' + col + ';">' + (items || '<div class="c-liste-vide">Rien pour l\'instant.</div>') + '</div></span>';
-            const barreComptes = !triSys.length ? '' : '<div id="carte-comptes" style="position:relative;z-index:6;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px;padding:10px 14px;border:1px solid ' + GOLD + '66;background:rgba(255,215,0,.04);border-radius:4px;">'
-                + '<span style="color:' + GOLD + ';letter-spacing:2px;font-weight:bold;margin-right:6px;">&gt; MES COLONIES</span>'
-                + compte('sys', 'SYSTÈMES', triSys.length, B, listeSys)
-                + compte('fin', 'STATIONS TERMINÉES', listeFin.length, G, listeFin.join(''))
-                + compte('cours', 'CHANTIERS EN COURS', listeCours.length, O, listeCours.join(''))
-                + '<button type="button" class="c-compte" style="color:' + GOLD + ';border-color:' + GOLD + '88;margin-left:auto;" onclick="ouvrirArchitecteParNom(window.profilCommandant.cmdr_nom)" title="Tous vos systèmes, installations et chantiers dans une seule fenêtre">TOUT VOIR</button>'
-                + '</div>';
+            // Selecteur de pilote (architecte) : MOI par defaut, TOUS LES PILOTES, puis chaque architecte
+            const moiNom = String((window.profilCommandant && window.profilCommandant.cmdr_nom) || '');
+            const autres = (data.architectes || []).map(a => a.cmdr).filter(n => n && !memeNom(n, moiNom)).sort((a, b) => String(a).localeCompare(String(b), 'fr'));
+            const valSel = nomFiltre ? (memeNom(nomFiltre, moiNom) ? 'MOI' : nomFiltre) : 'TOUS';
+            const opt = (v, lib) => '<option value="' + esc(v) + '"' + (v === valSel ? ' selected' : '') + '>' + esc(lib) + '</option>';
+            const selecteurPilote = data.perso ? '' : '<label style="display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:300px;border:1px solid ' + GOLD + ';background:rgba(255,215,0,.07);box-shadow:0 0 12px rgba(255,215,0,.2);border-radius:3px;padding:6px 16px;text-align:center;cursor:pointer;">'
+                + '<select id="colo-pilote" onchange="changerPiloteColo(this.value)" style="width:100%;background:transparent;color:#fff;border:0;outline:0;font-family:inherit;font-weight:bold;font-size:1.25em;line-height:1.2;letter-spacing:1px;text-align:center;text-align-last:center;cursor:pointer;" title="Ne montre que les systèmes dont ce pilote est l\'architecte (celui qui les a revendiqués)">'
+                + (moiNom ? opt('MOI', 'MOI · CMDR ' + moiNom.toUpperCase()) : '') + opt('TOUS', 'TOUS LES PILOTES') + autres.map(n => opt(n, 'CMDR ' + String(n).toUpperCase())).join('') + '</select><span style="color:' + GOLD + ';font-size:.7em;letter-spacing:2px;">PILOTE · CLIQUEZ POUR CHANGER ▾</span></label>';
 
             // hauteur = les deux blocs de droite (340 + 12 + 340) : la carte occupe toute la colonne de gauche
             const carteHolo = `<div id="carte-holo" class="bloc holo" style="height:692px;padding:12px 16px;display:flex;flex-direction:column;">
@@ -1172,7 +1174,7 @@
                         <button class="c-pastille c-filtre" data-f="fini" style="color:${G};border-color:${G};"><span class="lg">TERMINÉS</span><span class="sm">TERM.</span></button>
                         <select id="carte-select" class="c-select" onchange="carteSelectionner(this.value)" title="Aller directement à un système : la carte se centre dessus et sa fenêtre s'ouvre">
                             <option value="">SYSTÈME…</option>
-                            ${systemes.map((s, i) => ({ s, i })).sort((a, b) => courtSysteme(a.s.nom).localeCompare(courtSysteme(b.s.nom), 'fr')).map(({ s, i }) => `<option value="${i}">${esc(courtSysteme(s.nom))} · ${s.finies.length} term. · ${s.chantiers.length} chant.</option>`).join('')}
+                            ${systemes.map(s => ({ s, i: ordreIdx.get(s) })).sort((a, b) => courtSysteme(a.s.nom).localeCompare(courtSysteme(b.s.nom), 'fr')).map(({ s, i }) => `<option value="${i}">${esc(courtSysteme(s.nom))} · ${s.finies.length} term. · ${s.chantiers.length} chant.</option>`).join('')}
                         </select>
                         <span style="display:inline-flex;gap:3px;align-items:center;margin-left:4px;">
                             <button class="c-zoom" onclick="carteZoom(1/1.6)" title="Éloigner">−</button>
@@ -1194,23 +1196,23 @@
                     <h3 style="margin:0;color:${O};letter-spacing:2px;font-size:1.2em;">&gt; COLONISATION <span style="color:#777;font-size:.75em;letter-spacing:1px;margin-left:10px;">${esc(data.escadron)}</span>
                         <span style="color:#666;font-size:.65em;letter-spacing:1px;margin-left:10px;">${kpi.maj ? 'dernier relevé ' + esc(ilYa(kpi.maj)) : ''}</span>
                         <span onclick="actualiserPage()" style="color:${B};font-size:.65em;letter-spacing:1px;margin-left:10px;cursor:pointer;border-bottom:1px dashed ${B};">ACTUALISER</span></h3>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">${pilule('SYSTÈMES', fmt(kpi.systemes), B)}${pilule('TERMINÉES', fmt(kpi.construites), G)}${pilule('CHANTIERS', fmt(kpi.chantiers), O)}${pilule('LIVRÉES CE CYCLE', fmt(kpi.tonnes_cycle) + ' t', GOLD)}</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;">${selecteurPilote}${pilule('SYSTÈMES', fmt(kpi.systemes), B)}${pilule('TERMINÉES', fmt(kpi.construites), G)}${pilule('CHANTIERS', fmt(kpi.chantiers), O)}${nomFiltre ? '' : pilule('LIVRÉES CE CYCLE', fmt(kpi.tonnes_cycle) + ' t', GOLD)}</div>
                 </div>
                 <div style="color:#8a8a8a;font-size:.8em;line-height:1.5;margin:-4px 0 12px;">ⓘ Tableau établi d'après ce que ${data.perso ? 'votre plugin a relevé' : "les plugins de l'escadron ont relevé"} (chantiers consultés, livraisons, revendications). Il peut être en retard ou incomplet par rapport à l'état réel du jeu : un chantier n'apparaît qu'après avoir été consulté ou alimenté par un pilote dont le plugin est à jour.</div>
                 ${data.perso_a_verser ? `<div style="background:rgba(255,215,0,.07);border:1px solid ${GOLD};border-radius:4px;padding:12px 16px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
                     <div style="color:#ddd;font-size:.9em;line-height:1.6;"><span style="color:${GOLD};letter-spacing:2px;font-weight:bold;">ESPACE PERSONNEL</span><br>Avant de rejoindre l'escadron, vous aviez relevé ${fmt(data.perso_a_verser.systemes)} système${data.perso_a_verser.systemes > 1 ? 's' : ''}, ${fmt(data.perso_a_verser.chantiers)} chantier${data.perso_a_verser.chantiers > 1 ? 's' : ''} et ${fmt(data.perso_a_verser.livraisons)} livraison${data.perso_a_verser.livraisons > 1 ? 's' : ''}. Seul vous les voyez pour l'instant ; ils ne sont pas affichés ici.</div>
                     <button onclick="verserEspacePerso()" style="background:transparent;border:1px solid ${GOLD};color:${GOLD};padding:8px 16px;cursor:pointer;letter-spacing:1.5px;font-family:inherit;">VERSER À L'ESCADRON</button>
                 </div>` : ''}
+                ${(nomFiltre && !systemes.length && tousSystemes.length) ? `<div style="background:rgba(255,215,0,.06);border:1px solid ${GOLD}66;border-radius:4px;padding:10px 16px;margin:0 0 12px;color:#ddd;font-size:.9em;line-height:1.5;">Aucun système n'est enregistré à ce nom d'architecte. Choisissez « TOUS LES PILOTES » dans la liste ci-dessus pour voir la colonisation de l'escadron.</div>` : ''}
                 ${aucun ? `<div style="background:rgba(0,0,0,.45);border:1px dashed #555;border-radius:4px;padding:40px 20px;text-align:center;color:#ccc;line-height:1.8;">
                     <div style="color:${O};font-size:1.2em;letter-spacing:2px;margin-bottom:10px;">AUCUN CHANTIER RELEVÉ POUR L'INSTANT</div>
                     Les systèmes, les chantiers et les livraisons ${data.perso ? 'que vous avez consultés ou alimentés' : "de l'escadron"} apparaissent ici automatiquement,<br>dès que ${data.perso ? 'votre plugin (version 2.5 ou plus)' : "le plugin d'un pilote"} relève la consultation d'un chantier de colonisation ou une livraison de marchandises.</div>` : `
-                ${barreComptes}
                 <div class="colo-haut">
                     <div style="display:flex;flex-direction:column;">
                         ${carteHolo}
                     </div>
                     <div style="display:flex;flex-direction:column;gap:12px;">
-                        ${bloc('&gt; À APPORTER EN PRIORITÉ ' + sm('TOUS CHANTIERS'), noteFraicheur(data) + prio, 340)}
+                        ${bloc('&gt; À APPORTER EN PRIORITÉ ' + sm(nomFiltre ? (memeNom(nomFiltre, moiNom) ? 'MES CHANTIERS' : 'CHANTIERS DE ' + String(nomFiltre).toUpperCase()) : 'TOUS CHANTIERS'), noteFraicheur(data) + prio, 340)}
                         ${bloc('&gt; ARCHITECTES DE L\'ESCADRON ' + sm((data.architectes || []).length + ' PILOTE' + ((data.architectes || []).length > 1 ? 'S' : '')), architectes, 340)}
                     </div>
                 </div>
