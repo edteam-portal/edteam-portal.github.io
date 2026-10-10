@@ -700,7 +700,7 @@
             let c = window.__coloPilote;
             if (!c) { try { c = localStorage.getItem('edteam_colo_pilote'); } catch (e) {} }
             const moi = String(window.profilCommandant.cmdr_nom || '');
-            if (!c) c = (moi && (brut.systemes || []).some(s => s.architecte && memeNom(s.architecte, moi))) ? 'MOI' : 'TOUS';   // sans systeme a mon nom : on montre tout
+            if (!c) c = 'TOUS';   // par defaut : toute la colonisation de l'escadron ; le choix d'un pilote est ensuite retenu sur l'appareil
             return c === 'TOUS' ? null : (c === 'MOI' ? moi : c);
         }
         const systemeVisible = s => { const n = nomPiloteColo(); return !n || !!(s.architecte && memeNom(s.architecte, n)); };
