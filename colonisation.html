@@ -361,7 +361,7 @@
         .c-compte { background:rgba(0,0,0,.55); border:1px solid; font-family:inherit; font-size:.8em; font-weight:bold; letter-spacing:1px; padding:5px 12px; border-radius:3px; cursor:pointer; transition:.15s; white-space:nowrap; }
         .c-compte b { font-size:1.25em; margin:0 4px 0 2px; }
         .c-compte:hover, .c-compte.ouvert { background:rgba(255,255,255,.08); box-shadow:0 0 10px currentColor; }
-        .c-liste { position:absolute; left:0; top:calc(100% + 4px); z-index:20; width:min(440px, 100%); max-height:300px; overflow-y:auto; background:rgba(4,12,16,.97); border:1px solid; border-radius:3px; box-shadow:0 8px 24px rgba(0,0,0,.7); display:none; }
+        .c-liste { position:absolute; left:0; top:calc(100% + 4px); z-index:20; width:440px; max-width:calc(100vw - 40px); max-height:300px; overflow-y:auto; background:rgba(4,12,16,.97); border:1px solid; border-radius:3px; box-shadow:0 8px 24px rgba(0,0,0,.7); display:none; }
         .c-liste.ouvert { display:block; }
         .c-liste-item { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:6px 12px; border-bottom:1px dashed #1d2a30; font-size:.8em; color:#cfd; cursor:pointer; }
         .c-liste-item:hover { background:rgba(255,255,255,.07); }
@@ -1141,7 +1141,8 @@
             </div>`;
 
             // Comptes de la carte : systemes colonisés, stations terminees, chantiers en cours (listes deroulantes ; un clic ouvre la fenetre du systeme)
-            const triSys = systemes.map((sy, i) => ({ sy, i })).sort((a, b) => courtSysteme(a.sy.nom).localeCompare(courtSysteme(b.sy.nom), 'fr'));
+            const monNom = String((window.profilCommandant && window.profilCommandant.cmdr_nom) || ''), mesIdx = new Set(monNom ? systemesDe(monNom).map(x => x.i) : []);
+            const triSys = systemes.map((sy, i) => ({ sy, i })).filter(x => mesIdx.has(x.i)).sort((a, b) => courtSysteme(a.sy.nom).localeCompare(courtSysteme(b.sy.nom), 'fr'));
             const itemListe = (i, gauche, droite) => '<div class="c-liste-item" onclick="choisirDansListeCarte(' + i + ')"><span class="n">' + gauche + '</span><span class="d">' + droite + '</span></div>';
             const listeSys = triSys.map(({ sy, i }) => itemListe(i, esc(courtSysteme(sy.nom)), sy.finies.length + ' term. · ' + sy.chantiers.length + ' chantier' + (sy.chantiers.length > 1 ? 's' : ''))).join('');
             const listeFin = [], listeCours = [];
@@ -1151,10 +1152,12 @@
             });
             const compte = (k, titre, nb, col, items) => '<span style="position:relative;display:inline-block;"><button type="button" id="c-compte-' + k + '" class="c-compte" style="color:' + col + ';border-color:' + col + '88;" onclick="basculerListeCarte(\'' + k + '\', event)">' + titre + ' <b>' + nb + '</b> ▾</button>'
                 + '<div id="c-liste-' + k + '" class="c-liste" style="border-color:' + col + ';">' + (items || '<div class="c-liste-vide">Rien pour l\'instant.</div>') + '</div></span>';
-            const barreComptes = '<div id="carte-comptes" style="position:relative;z-index:6;flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">'
-                + compte('sys', 'SYSTÈMES COLONISÉS', systemes.length, B, listeSys)
+            const barreComptes = !triSys.length ? '' : '<div id="carte-comptes" style="position:relative;z-index:6;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px;padding:10px 14px;border:1px solid ' + GOLD + '66;background:rgba(255,215,0,.04);border-radius:4px;">'
+                + '<span style="color:' + GOLD + ';letter-spacing:2px;font-weight:bold;margin-right:6px;">&gt; MES COLONIES</span>'
+                + compte('sys', 'SYSTÈMES', triSys.length, B, listeSys)
                 + compte('fin', 'STATIONS TERMINÉES', listeFin.length, G, listeFin.join(''))
                 + compte('cours', 'CHANTIERS EN COURS', listeCours.length, O, listeCours.join(''))
+                + '<button type="button" class="c-compte" style="color:' + GOLD + ';border-color:' + GOLD + '88;margin-left:auto;" onclick="ouvrirArchitecteParNom(window.profilCommandant.cmdr_nom)" title="Tous vos systèmes, installations et chantiers dans une seule fenêtre">TOUT VOIR</button>'
                 + '</div>';
 
             // hauteur = les deux blocs de droite (340 + 12 + 340) : la carte occupe toute la colonne de gauche
@@ -1179,7 +1182,6 @@
                         </span>
                     </span>
                 </div>
-                ${barreComptes}
                 <div style="position:relative;flex:1;min-height:0;">
                     <div id="carte-chip" style="display:none;position:absolute;left:8px;top:6px;z-index:3;align-items:center;gap:10px;background:rgba(0,0,0,.78);border:1px solid ${GOLD};color:${GOLD};padding:3px 10px;border-radius:3px;font-size:.8em;letter-spacing:1px;"><span class="chip-lib">MATÉRIAU :</span><span class="chip-nom" style="color:#fff;font-weight:bold;"></span><span onclick="carteEffacerMateriau()" style="cursor:pointer;font-weight:bold;padding:0 2px;" title="Effacer le repérage sur la carte">✕</span></div>
                     <div id="carte-svg-zone" style="position:absolute;inset:0;">${svgCarte(systemes, ordreIdx, carteVue(), window.__carte.actif)}</div></div>
@@ -1202,6 +1204,7 @@
                 ${aucun ? `<div style="background:rgba(0,0,0,.45);border:1px dashed #555;border-radius:4px;padding:40px 20px;text-align:center;color:#ccc;line-height:1.8;">
                     <div style="color:${O};font-size:1.2em;letter-spacing:2px;margin-bottom:10px;">AUCUN CHANTIER RELEVÉ POUR L'INSTANT</div>
                     Les systèmes, les chantiers et les livraisons ${data.perso ? 'que vous avez consultés ou alimentés' : "de l'escadron"} apparaissent ici automatiquement,<br>dès que ${data.perso ? 'votre plugin (version 2.5 ou plus)' : "le plugin d'un pilote"} relève la consultation d'un chantier de colonisation ou une livraison de marchandises.</div>` : `
+                ${barreComptes}
                 <div class="colo-haut">
                     <div style="display:flex;flex-direction:column;">
                         ${carteHolo}
