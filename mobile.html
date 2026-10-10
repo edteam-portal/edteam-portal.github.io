@@ -2047,9 +2047,9 @@
             }
             else if ((profilCommandant || {}).est_directeur) {   // Directeur : il voit le choix de l'Amiral de son escadron, sans pouvoir le changer
                 const nom = { LIBRE: 'LIBRE', VALIDATION: 'SUR VALIDATION', DESACTIVE: 'DÉSACTIVÉ' };
-                h += '<div class="xc init"><div class="xk" style="color:#FF4FD8;">★ Initiatives des pilotes · réglage de l'Amiral</div><div style="display:flex; gap:6px; margin-top:8px;">'
+                h += '<div class="xc init"><div class="xk" style="color:#FF4FD8;">★ Initiatives des pilotes · réglage de l\'Amiral</div><div style="display:flex; gap:6px; margin-top:8px;">'
                     + ['LIBRE', 'VALIDATION', 'DESACTIVE'].map(m => '<button type="button" class="ipill' + (g.mode === m ? ' actif h' : '') + '" disabled style="pointer-events:none;">' + nom[m] + '</button>').join('')
-                    + '</div><div class="xmut" style="margin-top:6px; font-size:0.66em; line-height:1.5;">Réglage de l'Amiral, en lecture seule pour vous. Sans visite de l'Amiral pendant 7 jours, les pilotes retrouvent automatiquement le mode Libre.</div></div>';
+                    + '</div><div class="xmut" style="margin-top:6px; font-size:0.66em; line-height:1.5;">Réglage de l\'Amiral, en lecture seule pour vous. Sans visite de l\'Amiral pendant 7 jours, les pilotes retrouvent automatiquement le mode Libre.</div></div>';
             }
             zone.innerHTML = h;
         }
