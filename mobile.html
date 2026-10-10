@@ -26,7 +26,7 @@
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=9"></script>
-    <script src="commerce.js?v=2"></script>
+    <script src="commerce.js?v=3"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -1923,7 +1923,7 @@
         }
         function xJaugesOrdre(o, rs) {
             return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
-                    <div style="color: #fff; font-weight: bold;">${titre}</div>
+                    <div style="color: #fff; font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span>${titre}</span>${window.edteamCommerce && /^(💰 ÉCONOMIE|📦 CONTREBANDE)/.test(titre) ? window.edteamCommerce.bouton(o, 'compact') : ''}</div>
                     <div style="color: #bbb; margin-top: 3px;">Moi <b style="color: #fff;">${f(moi)}${u}</b> <span style="color: #666;">|</span> Escadron <b style="color: #fff;">${f(esc)} / ${f(plafond)}${u}</b></div>
                 </div>`).join('');
         }
@@ -2220,7 +2220,7 @@
             xEl('ordre-modal-type').innerText = ordre.type_ordre || 'DIRECTIVE';
 
             const prio = ordre.priorite || 3;
-            xEl('ordre-modal-prio').innerHTML = `<div style="margin-top: 6px;"><span class="pa ${prio === 1 ? 'c' : prio === 2 ? 'h' : 'n'}">${prio === 1 ? '▲ PRIORITÉ CRITIQUE' : prio === 2 ? '▲ PRIORITÉ HAUTE' : 'PRIORITÉ NORMALE'}</span></div>${window.edteamCommerce ? '<div style="margin-top: 8px;">' + window.edteamCommerce.bouton(ordre) + '</div>' : ''}`;
+            xEl('ordre-modal-prio').innerHTML = `<div style="margin-top: 6px;"><span class="pa ${prio === 1 ? 'c' : prio === 2 ? 'h' : 'n'}">${prio === 1 ? '▲ PRIORITÉ CRITIQUE' : prio === 2 ? '▲ PRIORITÉ HAUTE' : 'PRIORITÉ NORMALE'}</span></div>`;
             // signataire = le commandant qui a cree l'ordre (auteur_id -> nom, lu une fois et garde)
             const zoneAuteur = xEl('ordre-modal-auteur');
             window.cacheNomsAuteurs = window.cacheNomsAuteurs || {};

@@ -310,7 +310,9 @@
             if (!ordre || (type !== 'HAUSSE' && type !== 'BAISSE') || String(ordre.statut || 'ACTIF').toUpperCase() !== 'ACTIF') return '';
             const baisse = type === 'BAISSE';
             const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || '', baisse ? 'contrebande' : 'commerce'].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
-            return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: ' + (baisse ? 'rgba(255,51,51,0.1); border: 1px solid #FF3333; color: #FF3333' : 'rgba(255,215,0,0.1); border: 1px solid #FFD700; color: #FFD700') + '; padding: 7px 14px; font-family: inherit; font-size: 0.8em; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 10px ' + (baisse ? 'rgba(255,51,51,0.2)' : 'rgba(255,215,0,0.2)') + ';">' + (baisse ? '🏴 ROUTE DE CONTREBANDE' : '💰 OÙ VENDRE ?') + '</button>';
+            const compact = classe === 'compact';
+            const pad = compact ? 'padding: 2px 8px; font-size: 0.85em; letter-spacing: 0;' : 'padding: 7px 14px; font-size: 0.8em; letter-spacing: 2px;';
+            return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: ' + (baisse ? 'rgba(255,51,51,0.1); border: 1px solid #FF3333; color: #FF3333' : 'rgba(255,215,0,0.1); border: 1px solid #FFD700; color: #FFD700') + '; ' + pad + ' font-family: inherit; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px ' + (baisse ? 'rgba(255,51,51,0.2)' : 'rgba(255,215,0,0.2)') + ';">' + (baisse ? (compact ? '🏴 OÙ VENDRE ?' : '🏴 ROUTE DE CONTREBANDE') : '💰 OÙ VENDRE ?') + '</button>';
         }
     };
     window.edteamCommerce = api;
