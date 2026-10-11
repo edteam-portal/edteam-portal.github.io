@@ -731,7 +731,7 @@
                 // initiatives : ouvertes a tout pilote approuve d'un vrai escadron
                 if (data.escadron_id && String(data.escadron_id).trim() !== '' && String(data.escadron_id).trim().toUpperCase() !== 'INDEPENDANT') {
                     const btnIni = document.getElementById('btn-initiative');
-                    if (btnIni) btnIni.style.display = (data.est_amiral || data.est_officier || data.est_directeur) ? 'none' : '';
+                    if (btnIni) btnIni.style.display = ((data.est_amiral || data.est_officier) && !data.est_directeur) ? 'none' : '';   // le Directeur garde le bouton (tests)
                     if (typeof appliquerModeIni === 'function') appliquerModeIni();
                 }
 
@@ -1957,6 +1957,7 @@
 
         // --- MODE DES INITIATIVES (script SQL 70) : l'Amiral choisit LIBRE / VALIDATION / DESACTIVE ; 7 jours d'absence de l'Amiral = LIBRE (regle cote serveur) ---
         window.modeIni = null;
+        function iniSansBouton() { const m = profilCommandant || {}; return !!((m.est_amiral || m.est_officier) && !m.est_directeur); }   // Amiral / officier : ils ont les directives ; le Directeur garde le bouton
         function iniEstCmd() { const m = profilCommandant || {}; return !!(m.est_amiral || m.est_officier || m.est_directeur); }
         function iniPropose() { return !!(window.modeIni && window.modeIni.effectif === 'VALIDATION' && !iniEstCmd()); }
         function iniLibelleLancer() { return iniPropose() ? "PROPOSER L'INITIATIVE" : "LANCER L'INITIATIVE"; }
@@ -1972,8 +1973,8 @@
             const desact = !cmd && g.effectif === 'DESACTIVE';   // le commandement a ses directives : il n'a pas de bouton d'initiative (cache plus bas)
             const libelle = iniPropose() ? '+ PROPOSER UNE INITIATIVE' : '+ LANCER UNE INITIATIVE';
             const btn = document.getElementById('btn-initiative');
-            if (btn) { btn.innerText = '[ ' + libelle + ' ]'; if (desact || cmd) btn.style.display = 'none'; }
-            document.querySelectorAll('.ini-lancer').forEach(b => { b.innerText = libelle; b.style.display = (desact || cmd) ? 'none' : ''; });
+            if (btn) { btn.innerText = '[ ' + libelle + ' ]'; if (desact || iniSansBouton()) btn.style.display = 'none'; }
+            document.querySelectorAll('.ini-lancer').forEach(b => { b.innerText = libelle; b.style.display = (desact || iniSansBouton()) ? 'none' : ''; });
             appliquerTextesModalIni();
             const zi = document.getElementById('bgs-mode-ini'); if (!zi) return;
             let h = '';
