@@ -494,7 +494,7 @@
         </div>
     </div>
 
-    <!-- MODAL INITIATIVE : n'importe quel pilote de l'escadron peut lancer un objectif HAUSSE ou BAISSE -->
+    <!-- MODAL INITIATIVE : n'importe quel pilote de l'escadron peut lancer un objectif HAUSSE, BAISSE, GUERRE ou ELECTION -->
     <div class="modal-overlay" id="modal-initiative" onclick="fermerModal('modal-initiative', event)">
         <div class="modal-content ini-fenetre" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-initiative')">X</div>
@@ -519,8 +519,10 @@
                     <div class="cmd-pills">
                         <button type="button" class="cmd-pill actif" id="ini-type-HAUSSE" style="--pc: #00FF66;" onclick="choisirTypeInitiative('HAUSSE')">HAUSSE · aider cette faction</button>
                         <button type="button" class="cmd-pill" id="ini-type-BAISSE" style="--pc: #FF3333;" onclick="choisirTypeInitiative('BAISSE')">BAISSE · affaiblir cette faction</button>
+                        <button type="button" class="cmd-pill" id="ini-type-GUERRE" style="--pc: #FF7100;" onclick="choisirTypeInitiative('GUERRE')">GUERRE · conflit contre cette faction</button>
+                        <button type="button" class="cmd-pill" id="ini-type-ELECTION" style="--pc: #00F0FF;" onclick="choisirTypeInitiative('ELECTION')">ÉLECTION · soutenir son camp</button>
                     </div>
-                    <div class="cmd-aide">Les directives de guerre et d'élection restent réservées à l'Amiral et aux officiers.</div>
+                    <div class="cmd-aide">Une guerre ne peut pas viser la faction de votre propre escadron.</div>
                 </div>
                 <div class="cmd-etape">
                     <div class="cmd-etape-titre"><span class="cmd-num">3</span>MESSAGE <em>facultatif · 200 signes</em></div>
@@ -729,7 +731,7 @@
                 // initiatives : ouvertes a tout pilote approuve d'un vrai escadron
                 if (data.escadron_id && String(data.escadron_id).trim() !== '' && String(data.escadron_id).trim().toUpperCase() !== 'INDEPENDANT') {
                     const btnIni = document.getElementById('btn-initiative');
-                    if (btnIni) btnIni.style.display = '';
+                    if (btnIni) btnIni.style.display = (data.est_amiral || data.est_officier || data.est_directeur) ? 'none' : '';
                     if (typeof appliquerModeIni === 'function') appliquerModeIni();
                 }
 
@@ -1967,11 +1969,11 @@
         function appliquerModeIni() {
             const g = window.modeIni; if (!g) return;
             const cmd = iniEstCmd(), E = window.edteamIniMode;
-            const desact = !cmd && g.effectif === 'DESACTIVE';
+            const desact = !cmd && g.effectif === 'DESACTIVE';   // le commandement a ses directives : il n'a pas de bouton d'initiative (cache plus bas)
             const libelle = iniPropose() ? '+ PROPOSER UNE INITIATIVE' : '+ LANCER UNE INITIATIVE';
             const btn = document.getElementById('btn-initiative');
-            if (btn) { btn.innerText = '[ ' + libelle + ' ]'; if (desact) btn.style.display = 'none'; }
-            document.querySelectorAll('.ini-lancer').forEach(b => { b.innerText = libelle; b.style.display = desact ? 'none' : ''; });
+            if (btn) { btn.innerText = '[ ' + libelle + ' ]'; if (desact || cmd) btn.style.display = 'none'; }
+            document.querySelectorAll('.ini-lancer').forEach(b => { b.innerText = libelle; b.style.display = (desact || cmd) ? 'none' : ''; });
             appliquerTextesModalIni();
             const zi = document.getElementById('bgs-mode-ini'); if (!zi) return;
             let h = '';
@@ -1987,7 +1989,7 @@
         function rendrePropositionsIni(liste) {
             const zone = document.getElementById('bgs-propositions'); if (!zone) return;
             const moi = profilCommandant || {};
-            const typeLigne = q => '<b style="color:' + (q.type === 'HAUSSE' ? '#00FF66' : '#FF3333') + ';">' + escapeHtml(String(q.type)) + '</b> · <b style="color:#fff;">' + escapeHtml(String(q.faction || '').toUpperCase()) + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>';
+            const typeLigne = q => '<b style="color:' + ({ HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' }[q.type] || '#FF3333') + ';">' + escapeHtml(String(q.type)) + '</b> · <b style="color:#fff;">' + escapeHtml(String(q.faction || '').toUpperCase()) + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>';
             const age = q => { const h = Math.floor((Date.now() - new Date(q.cree_le).getTime()) / 3600000); return h < 1 ? 'il y a moins d\'une heure' : 'il y a ' + h + ' h'; };
             const msg = q => q.message ? '<div style="color:#aaa; font-size:0.8em; margin-top:5px; font-style:italic;">« ' + escapeHtml(String(q.message)) + ' »</div>' : '';
             const enTete = (titre, nb) => '<div style="color:#FF4FD8; letter-spacing:2px; font-weight:bold;">&gt; ' + titre + (nb ? ' <span class="prop-etat" style="color:#ffc400; border-color:#ffc400; margin-left:8px;">' + nb + '</span>' : '') + '</div>';
@@ -2056,7 +2058,7 @@
         };
         window.choisirTypeInitiative = function(t) {
             initiativeType = t;
-            ['HAUSSE', 'BAISSE'].forEach(x => { const b = document.getElementById('ini-type-' + x); if (b) b.classList.toggle('actif', x === t); });
+            ['HAUSSE', 'BAISSE', 'GUERRE', 'ELECTION'].forEach(x => { const b = document.getElementById('ini-type-' + x); if (b) b.classList.toggle('actif', x === t); });
         };
         window.scannerInitiative = async function(systemName) {
             const nom = String(systemName || '').trim();

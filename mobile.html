@@ -444,7 +444,7 @@
         .ibtn { background: transparent; border: 1px solid #FF4FD8; color: #FF4FD8; padding: 6px 12px; font-family: inherit; font-size: 0.72em; font-weight: bold; letter-spacing: 1px; border-radius: 6px; }
         .ibtn.g { border-color: #666; color: #aaa; }
         .ipill { flex: 1; background: transparent; border: 1px solid #555; color: #aaa; padding: 9px 6px; font-family: inherit; font-size: 0.72em; font-weight: bold; letter-spacing: 1px; border-radius: 6px; }
-        .ipill.actif.h { border-color: #00FF66; color: #00FF66; background: rgba(0,255,102,0.12); } .ipill.actif.b { border-color: #FF3333; color: #FF3333; background: rgba(255,51,51,0.12); }
+        .ipill.actif.h { border-color: #00FF66; color: #00FF66; background: rgba(0,255,102,0.12); } .ipill.actif.b { border-color: #FF3333; color: #FF3333; background: rgba(255,51,51,0.12); } .ipill.actif.g { border-color: #FF7100; color: #FF7100; background: rgba(255,113,0,0.12); } .ipill.actif.e { border-color: #00F0FF; color: #00F0FF; background: rgba(0,240,255,0.12); }
         .ichamp { width: 100%; box-sizing: border-box; background: #000; border: 1px solid rgba(255,79,216,0.55); color: #fff; padding: 10px; font-family: inherit; font-size: 16px; border-radius: 6px; }
         @keyframes mHalo { 0%, 100% { box-shadow: inset 6px 0 0 #ff3b3b, inset 0 0 8px rgba(255,59,59,0.08); } 50% { box-shadow: inset 6px 0 0 #ff3b3b, inset 0 0 34px rgba(255,59,59,0.30); } }
         @media (prefers-reduced-motion: reduce) { .xc.prio-c { animation: none; } }
@@ -915,8 +915,10 @@
         <div style="display: flex; gap: 8px; margin-top: 12px;">
             <button type="button" class="ipill h actif" id="im-type-HAUSSE" onclick="xTypeInitiative('HAUSSE')">HAUSSE</button>
             <button type="button" class="ipill b" id="im-type-BAISSE" onclick="xTypeInitiative('BAISSE')">BAISSE</button>
+            <button type="button" class="ipill g" id="im-type-GUERRE" onclick="xTypeInitiative('GUERRE')">GUERRE</button>
+            <button type="button" class="ipill e" id="im-type-ELECTION" onclick="xTypeInitiative('ELECTION')">ÉLECTION</button>
         </div>
-        <div class="xmut" style="margin-top: 5px; font-size: 0.66em;">Hausse : aider cette faction. Baisse : l'affaiblir. Guerre et élection : réservées au commandement.</div>
+        <div class="xmut" style="margin-top: 5px; font-size: 0.66em;">Hausse : aider cette faction. Baisse : l'affaiblir. Guerre : conflit contre elle (pas contre votre propre faction). Élection : soutenir son camp.</div>
         <textarea id="im-message" class="ichamp" maxlength="200" placeholder="Message facultatif (200 signes) : pourquoi cet objectif ?" style="margin-top: 12px; height: 70px; resize: none;"></textarea>
         <div class="xmut" style="margin-top: 8px; font-size: 0.66em; line-height: 1.5;">Une seule initiative à la fois. Elle se clôture seule après 7 jours sans aucun effort ; chaque effort relance le compteur.</div>
         <button class="ibtn" id="im-envoyer" style="width: 100%; margin-top: 12px; padding: 12px; font-size: 0.85em;" onclick="xLancerInitiative()">LANCER L'INITIATIVE</button>
@@ -1990,7 +1992,7 @@
         let xTypeIni = 'HAUSSE';
         window.xOuvrirInitiative = function () { sonClic(); xTypeInitiative('HAUSSE'); xTextesModalIni(); xEl('modal-initiative-m').style.display = 'flex'; };
         window.xFermerInitiative = function (e) { if (e && e.target && e.target.id !== 'modal-initiative-m') return; xEl('modal-initiative-m').style.display = 'none'; };
-        window.xTypeInitiative = function (t) { xTypeIni = t; ['HAUSSE', 'BAISSE'].forEach(x => xEl('im-type-' + x).classList.toggle('actif', x === t)); };
+        window.xTypeInitiative = function (t) { xTypeIni = t; ['HAUSSE', 'BAISSE', 'GUERRE', 'ELECTION'].forEach(x => xEl('im-type-' + x).classList.toggle('actif', x === t)); };
         window.xScannerInitiative = async function (systemName) {
             const nom = String(systemName || '').trim(); if (!nom) return;
             const aide = xEl('im-aide'), liste = xEl('liste-factions-im'), pop = xEl('im-population');
@@ -2058,7 +2060,7 @@
         function xRendreProposition(liste) {
             const zone = xEl('m-propositions'); if (!zone) return;
             const moi = profilCommandant || {};
-            const typeL = q => '<b style="color:' + (q.type === 'HAUSSE' ? '#00FF66' : '#FF3333') + ';">' + XESC(String(q.type)) + '</b> · <b style="color:#fff; overflow-wrap:anywhere;">' + XESC(String(q.faction || '').toUpperCase()) + '</b> · ' + XESC(String(q.systeme || '').toUpperCase());
+            const typeL = q => '<b style="color:' + ({ HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' }[q.type] || '#FF3333') + ';">' + XESC(String(q.type)) + '</b> · <b style="color:#fff; overflow-wrap:anywhere;">' + XESC(String(q.faction || '').toUpperCase()) + '</b> · ' + XESC(String(q.systeme || '').toUpperCase());
             const msg = q => q.message ? '<div style="color:#aaa; font-size:0.78em; margin-top:4px; font-style:italic;">« ' + XESC(String(q.message)) + ' »</div>' : '';
             let h = '';
             if (xIniEstCmd()) {

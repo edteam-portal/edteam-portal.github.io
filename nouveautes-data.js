@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-initiatives-guerre-election', date: '2026-10-11T17:10:00Z', type: 'AMELIORE',
+        titre: 'Initiatives : guerre et élection aussi',
+        texte: 'Les initiatives de pilotes ne se limitent plus à la hausse et à la baisse : vous pouvez aussi lancer une guerre ou une élection. Elles suivent le réglage de votre Amiral : libres (actives tout de suite), sur validation (vous les proposez, un officier ou l’Amiral les accepte) ou désactivées. Une guerre ne peut pas viser la faction de votre propre escadron. L’Amiral et les officiers n’ont plus le bouton d’initiative : ils lancent leurs directives depuis le bouton Commandement.',
+        important: false
+    },
+    {
         id: '2026-10-modules-vaisseau', date: '2026-10-11T15:40:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : les modules de votre vaisseau',
         texte: 'Dans l’onglet Missions, l’hologramme de votre vaisseau (Panther Clipper Mk II ou Lynx Highliner) montre maintenant tous vos modules. Sur les côtés, des traits relient les modules primordiaux, les points d’emport et les utilitaires à leur place dans la coque, avec leur niveau d’ingénierie (G1 à G5) ou « STOCK » s’ils ne sont pas ingénierés. Dans la coque, vos modules optionnels forment des compartiments proportionnels à la taille de chaque emplacement, regroupés par type (cabines, racks de soute…) avec un rendu de scanner infrarouge : vous voyez d’un coup d’œil ce que contient votre vaisseau, vos emplacements vides, et par exemple 3 cabines et pas de soute. Les passagers se promènent dans les cabines, les marchandises remplissent les racks. Survolez un compartiment pour son détail : module, places ou capacité, plan d’ingénierie, effet expérimental, ingénieur et modifications. Le même hologramme est dans l’onglet Commerce, à la place de la soute en vue séparée : un pilote qui ne fait que du commerce voit sa coque remplie de racks et de sa cargaison (survolez une caisse pour la marchandise), avec le bouton « Vendre ce que je transporte ». Chaque pilote voit son propre équipement. Les noms des modules sont ceux du jeu (en anglais). La disposition dans la coque est stylisée : le jeu ne donne pas la position des modules.',
