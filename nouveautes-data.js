@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-tableau-bord-parcours', date: '2026-10-10T23:45:00Z', type: 'AMELIORE',
+        titre: 'Tableau de bord : un parcours de missions plus clair',
+        texte: 'Dans l’onglet Missions, chaque arrêt du parcours est maintenant une carte qui contient ses propres missions, sans colonne vide. La carte et la liste partagent les mêmes numéros et couleurs : vous voyez où vous êtes, où aller ensuite, les systèmes déjà passés dont la mission n’est pas terminée (en ambre) et ceux qui sont terminés (en gris). Si vous avez des missions à rendre là où vous les avez prises (massacre, minage, collecte…), le parcours finit par ce retour. Chaque mission indique aussi quand et où elle a été prise, sa récompense par heure restante et sa distance depuis votre position. Les effets des missions terminées passent en bas, sur toute la largeur.',
+        important: false,
+        action: 'Relancez EDMC une fois : le plugin v2.15 se met à jour tout seul (nécessaire pour le retour au point de prise).'
+    },
+    {
         id: '2026-10-tableau-de-bord', date: '2026-10-10T15:46:22Z', type: 'NOUVEAU',
         titre: 'Le tableau de bord en jeu : votre second écran',
         texte: 'Nouvelle page TABLEAU DE BORD, à garder ouverte sur un second écran ou une tablette pendant que vous jouez : elle suit votre session en direct grâce au plugin. Onglet Commerce : votre soute, vos crédits gagnés depuis le lancement du jeu, le registre de vos achats et ventes, une feuille de route de plusieurs étapes calculée autour de vous (ou la meilleure route pour votre porte-vaisseaux), et un bloc « Vendre ce que je transporte » pour les marchandises dont vous ne savez que faire. Onglet Missions : vos missions en cours, l’ordre de passage le plus court, et l’effet des missions terminées sur la réputation et l’influence de chaque faction. Un clic sur un nom de système ou de station le copie. Visible de vous seul, avec ou sans escadron.',
