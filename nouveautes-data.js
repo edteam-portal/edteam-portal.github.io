@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-commerce-disposition', date: '2026-10-11T18:09:00Z', type: 'AMELIORE',
+        titre: 'Tableau de bord, Commerce : une route plus lisible',
+        texte: 'Les réglages de la tournée se replient en une ligne de résumé, les indicateurs tiennent sur une ligne, et un arrêt déplié montre simplement ce qu’il faut acheter et vendre (nom, quantité, prix, stock). Entre deux arrêts, une petite pastille donne la distance, la durée et le gain du trajet. La route est à gauche et le vaisseau reste visible à droite, comme dans l’onglet Missions. Troisième choix à côté de « Tournée de vaisseau » et « Porte-vaisseaux » : « Vendre mes soutes », qui cherche où vendre ce que vous transportez, directement dans la colonne de gauche (plus de fenêtre).',
+        important: false
+    },
+    {
         id: '2026-10-missions-disposition', date: '2026-10-11T17:46:00Z', type: 'AMELIORE',
         titre: 'Tableau de bord, Missions : liste compacte et carte en grand',
         texte: 'Chaque mission tient maintenant sur une seule ligne (type, titre, récompense, échéance) ; un clic ouvre ses détails juste dessous. À droite, un bouton bascule entre la vue vaisseau et la vue carte : la carte des missions est bien plus grande et lisible, et une petite carte reste visible dans un coin du vaisseau (un clic l’agrandit). Le bouton de la carte clignote quand une mission arrive ou que le prochain arrêt change. Votre choix de vue est mémorisé.',

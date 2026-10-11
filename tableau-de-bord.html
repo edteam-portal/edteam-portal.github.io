@@ -365,6 +365,7 @@
         .tb-etroit { container:tbe / inline-size; min-width:0; }
         @container tbe (max-width:700px) {
             .tb-kpi { grid-template-columns:1fr 1fr; }
+            .tb-etroit .tb-seg.grand button { padding:11px 4px; letter-spacing:0; font-size:.8em; white-space:nowrap; }
             .tb-kpi .k b { font-size:1.1em; }
             .tb-arret, .tb-trajet { grid-template-columns:40px minmax(0,1fr); }
             .tb-arret .num { width:30px; height:30px; }
@@ -409,6 +410,16 @@
         .tb-lien.fait { border-color:#444; background:none; color:#667; } .tb-lien.fait::before, .tb-lien.fait::after { border-left-color:#555; }
         @media (max-width:700px) { .tb-ml .lg { grid-template-columns:22px minmax(0,1fr) auto 60px 12px; } .tb-ml .ty { display:none; } }
         .tb-noteo { margin-top:10px; } .tb-noteo button { background:none; border:0; color:#778; font:inherit; font-size:.78em; letter-spacing:2px; cursor:pointer; padding:2px 0; } .tb-noteo button:hover { color:#00F0FF; }
+        /* Commerce : reglages replies, indicateurs sur une ligne, arret deplie lisible, trajets en pastilles */
+        .tb-barre.cp { margin-bottom:10px; padding-bottom:10px; align-items:center; flex-wrap:nowrap; } .tb-barre.cp .tb-rg { flex:1 1 160px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .tb-rg { background:none; border:1px solid #2f353a; color:#9ab; font:inherit; font-size:.8em; letter-spacing:2px; padding:7px 12px; cursor:pointer; text-align:left; } .tb-rg span { color:#778; letter-spacing:0; margin:0 6px; } .tb-rg:hover { border-color:#00F0FF; color:#00F0FF; }
+        .tb-regl-box { margin:0 0 12px; padding:10px 12px; border:1px dashed #2f353a; }
+        .tb-kpi1 { display:flex; flex-wrap:wrap; gap:4px 22px; margin:0 0 8px; font-size:.8em; color:#778; letter-spacing:1px; } .tb-kpi1 span { white-space:nowrap; } .tb-kpi1 b { color:#aab; font-weight:normal; font-size:1.2em; letter-spacing:0; margin-left:4px; } .tb-kpi1 b.tb-up { color:#00FF66; } .tb-kpi1 small { color:#667; letter-spacing:0; margin-left:8px; }
+        .tb-ophead { font-size:.72em; letter-spacing:2px; margin:8px 0 2px; } .tb-ophead small { color:#667; letter-spacing:0; margin-left:8px; } .tb-ophead.ven { color:#00FF66; } .tb-ophead.ach { color:#00F0FF; }
+        .tb-op { display:grid; grid-template-columns:16px minmax(0,1fr) auto auto auto; gap:4px 14px; align-items:baseline; padding:3px 0; font-size:.92em; } .tb-op .nom { color:#e6eef2; overflow-wrap:anywhere; } .tb-op.ven .nom { color:#cfe; } .tb-op .qt, .tb-op .px { color:#9ab; white-space:nowrap; text-align:right; } .tb-op .gn { text-align:right; white-space:nowrap; } .tb-op .gn small { color:#667; } .tb-op .c { color:#00FF66; }
+        .tb-apres { margin-top:8px; padding-top:6px; border-top:1px dashed #2a2f33; color:#778; font-size:.82em; line-height:1.6; } .tb-apres b { color:#8a9; font-weight:normal; } .tb-apres .l { padding-left:14px; }
+        .tb-arret.ouvert .corps { padding:10px 14px; } .tb-arret.ouvert .lieu { font-size:1.2em; }
+        .tb-trajet { margin:2px 0; } .tb-trajet span { color:#6f7d86; font-size:.78em; letter-spacing:0; padding:12px 4px 12px 16px; } .tb-trajet b { font-weight:normal; }
         .tb-fin { border:1px dashed rgba(0,255,102,.5); padding:14px; text-align:center; color:#00FF66; letter-spacing:2px; font-size:1.05em; }
         @media (max-width:1000px) { .tb-flux { grid-template-columns:1fr; } .tb-flux .lien svg { transform:rotate(90deg); height:30px; width:60px; margin:0 auto; } .lgr { grid-template-columns:22px 1fr 1fr; } }
         /* missions */
@@ -417,7 +428,10 @@
         .tb-rp2.tete { color:#778; font-size:.72em; letter-spacing:2px; border-bottom:1px solid #2a2f33; }
         .tb-rp2 .f { color:#fff; overflow-wrap:anywhere; } .tb-rp2 .n { color:#99a; font-size:.85em; } .tb-rp2 .v { font-size:1.25em; } .tb-rp2 .v small { display:block; font-size:.55em; color:#778; margin-top:1px; }
         /* commerce de porte-vaisseaux */
-        .tb-modes { margin-bottom:12px; } .tb-seg.grand button { padding:9px 18px; letter-spacing:2px; font-size:.95em; }
+        .tb-modes { margin-bottom:12px; } .tb-seg.grand { display:flex; width:100%; border:0; gap:6px; } .tb-seg.grand button { flex:1; padding:12px 14px; letter-spacing:2px; font-size:.95em; border:1px solid rgba(0,240,255,.55); background:rgba(0,240,255,.06); color:#9fe; box-shadow:0 0 10px rgba(0,240,255,.12); transition:.15s; }
+        .tb-seg.grand button:hover:not(:disabled):not(.on) { background:rgba(0,240,255,.16); color:#fff; box-shadow:0 0 14px rgba(0,240,255,.35); } .tb-seg.grand button.on { background:#00F0FF; color:#000; font-weight:bold; box-shadow:0 0 16px rgba(0,240,255,.5); }
+        .tb-seg.grand button:disabled { background:transparent; border:1px dashed #3a4046; color:#556; box-shadow:none; opacity:.55; cursor:not-allowed; text-decoration:line-through; }
+        .tb-rayon { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 12px; color:#8a9; font-size:.8em; letter-spacing:2px; } .tb-rayon b { color:#cde; font-weight:normal; } .tb-rayon .tb-seg { align-self:center; }
         .tb-inp { background:#000; border:1px solid #444; color:#00F0FF; font:inherit; padding:7px 10px; min-width:200px; } .tb-inp:focus { outline:none; border-color:#00F0FF; }
         .tb-fcbest { border:1px solid rgba(255,215,0,.5); background:rgba(255,215,0,.04); padding:14px 18px; margin-top:6px; }
         .tb-fcbest .tete { display:flex; gap:8px 20px; align-items:baseline; flex-wrap:wrap; margin-bottom:12px; }
@@ -657,10 +671,10 @@
         }
         function panneauCommerce() {
             // meme hologramme (modules du vaisseau) que l'onglet Missions : les racks de soute portent la cargaison (survol par marchandise) ; repli sur l'ancienne soute sans modules (plugin < 2.18) ou sans silhouette
-            const nv = vendables().length, pied = `<div class="tbm-vente">${nv ? `<button type="button" class="tb-btn" onclick="ouvrirVente()">▶ VENDRE CE QUE JE TRANSPORTE</button>` : ""}${boutonRegistre()}${nv ? `<span>${nv} marchandise${nv > 1 ? "s" : ""} · trouver où les vendre</span>` : ""}</div>`;
+            const nv = vendables().length, pied = `<div class="tbm-vente">${boutonRegistre()}</div>`;
             const v = S && S.vaisseau, mod = v && v.mods && v.mods.length && typeof modulesHtml === "function" ? modulesHtml(S.missions || [], { pied }) : "";
             if (mod) return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
-                <div class="tbp-duo tbs"><div class="tb-etroit">${feuilleHtml()}</div>${mod}</div>`;
+                <div class="tbp-duo tbs tbmis"><div class="tb-etroit">${feuilleHtml()}</div><div class="tbp-droite">${mod}</div></div>`;
             return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
                 <div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>
                 ${feuilleHtml()}
@@ -1353,6 +1367,9 @@
         function grilleMissions(cartes) { return `<div class="tb-mlst">${cartes.join("")}</div>`; }
         // parcours : une carte par arret, avec ses missions dedans. MEMES numeros et couleurs que la carte (suiteParcours) :
         // magenta = vous etes ici, blanc/cyan lumineux = ou aller, cyan = a faire, ambre = deja passe mais mission PAS terminee, gris = termine, vert = retour (rendre les missions)
+        const NOTES = {};
+        function basculerNote(k) { NOTES[k] = !NOTES[k]; if (typeof sonClic === "function") sonClic(); rendre(); }
+        const noteRepliee = (k, titre, html) => `<div class="tb-noteo"><button type="button" onclick="basculerNote('${k}')">ⓘ ${titre} ${NOTES[k] ? "▾" : "▸"}</button>${NOTES[k] ? html : ""}</div>`;
         const NOTE_ORDRE = { v: false };
         function basculerNoteOrdre() { NOTE_ORDRE.v = !NOTE_ORDRE.v; if (typeof sonClic === "function") sonClic(); rendre(); }
         function parcoursHtml(plan, act) {
@@ -1526,7 +1543,10 @@
                 <div class="g"><label>PORTÉE DE SAUT</label>${seg("saut", [[20, "20"], [30, "30"], [40, "40"], [50, "50"]], saut, " al")}<small>${REGL.saut ? "réglée à la main" : (S && S.vaisseau && S.vaisseau.saut ? "lue dans le jeu" : "par défaut")}</small></div>
                 <div class="g"><label>PISTE</label><button type="button" class="tb-tg ${REGL.grande ? "on" : ""}" onclick="reglage('grande', ${!REGL.grande})"><i></i>GRANDE PISTE</button><small>vaisseaux de grande taille</small></div></div>`;
         }
+        const REGLOUV = { set: false, v: false };
+        function basculerReglages(v) { REGLOUV.set = true; REGLOUV.v = !!v; if (typeof sonClic === "function") sonClic(); rendre(); }
         function feuilleHtml() {
+            if (MODE_ROUTE.v === "vente") { if (vendables().length) return venteHtml(true); MODE_ROUTE.v = lire("edteam_tb_moderoute") === "fc" ? "fc" : "tournee"; }
             if (MODE_ROUTE.v === "fc") return fcHtml();
             const so = S.soute || {}, ok = !!(S.systeme) && Number(so.cap) > 0;
             const enCours = TOURNEE.statut === "EN_COURS", aTournee = !!(TOURNEE.donnees && (TOURNEE.donnees.etapes || []).length);
@@ -1540,11 +1560,12 @@
             else if (TOURNEE.statut === "ERREUR") corps = `<div class="tb-banner">${esc(TOURNEE.message)}</div>`;
             if (!enCours && aTournee) corps += tourneeResultat();
             if (!enCours && !aTournee && TOURNEE.statut !== "ERREUR") {
-                corps = `<div class="tb-invite"><div><b>Une tournée d'environ une heure, depuis votre position.</b><span>Le tableau de bord cherche, chez Spansh, la suite d'achats et de ventes la plus rentable pour votre soute (${fmtN(so.cap)} t) : quoi acheter, combien, où, puis où vendre, avec le gain estimé.</span>
-                    ${ok ? "" : `<span class="tb-vx">En attente de votre position et de la capacité de votre soute (jeu lancé, plugin à jour).</span>`}</div></div>`;
+                corps = (ok ? "" : `<div class="tb-banner">En attente de votre position et de la capacité de votre soute (jeu lancé, plugin à jour).</div>`) + noteRepliee("tournee", "UNE TOURNÉE D'ENVIRON UNE HEURE, DEPUIS VOTRE POSITION", `<div class="bloc-note">Le tableau de bord cherche, chez Spansh, la suite d'achats et de ventes la plus rentable pour votre soute (${fmtN(so.cap)} t) : quoi acheter, combien, où, puis où vendre, avec le gain estimé.</div>`);
             }
+            const ouvR = REGLOUV.set ? REGLOUV.v : !aTournee, sa = sautUtilise(), hTxt = REGL.heures === 24 ? "1 j" : REGL.heures === 72 ? "3 j" : "7 j";
+            const resume = REGL.etapes + " étapes · relevés " + hTxt + " · saut " + sa + " al" + (REGL.grande ? " · grande piste" : "");
             return `<div class="bloc or" style="margin-bottom:12px;"><h2>FEUILLE DE ROUTE <em>départ : ${dep} · capital ${fmtM(S.credits)}</em></h2>${selecteurMode()}
-                <div class="tb-barre">${reglagesTournee()}<div class="tb-cta">${bouton}</div></div>${corps}</div>`;
+                <div class="tb-barre cp"><button type="button" class="tb-rg" onclick="basculerReglages(${!ouvR})" title="Réglages de la tournée">⚙ RÉGLAGES <span>${resume}</span> ${ouvR ? "▾" : "▸"}</button><div class="tb-cta">${bouton}</div></div>${ouvR ? `<div class="tb-regl-box">${reglagesTournee()}</div>` : ""}${corps}</div>`;
         }
         function tourneeResultat() {
             const d = TOURNEE.donnees || {}, et = d.etapes || [];
@@ -1554,14 +1575,10 @@
             let h = "";
             if (reglModifies()) h += `<div class="tb-banner">Vous avez changé les réglages : la tournée ci-dessous a été calculée avec les précédents. Cliquez sur « RECALCULER LA TOURNÉE ».</div>`;
             if (dep.distance > 0) h += `<div class="tb-banner">Départ : rejoignez d'abord <b>${cp(dep.station)}</b> (${cp(dep.systeme)}, à ${esc(dep.distance)} al de votre position).</div>`;
-            h += `<div class="tb-kpi">
-                <div class="k"><span>GAIN ESTIMÉ</span><b class="tb-up">${fmtM(gain, true)}</b><small>${et.length} trajets · ${n} arrêts</small></div>
-                <div class="k"><span>DURÉE ESTIMÉE</span><b>≈ ${duree(minutes * 60)}</b><small>sauts, approche, amarrage</small></div>
-                <div class="k"><span>GAIN PAR HEURE</span><b>≈ ${fmtM(gain / Math.max(0.25, minutes / 60))}</b><small>estimation</small></div>
-                <div class="k"><span>AVANCEMENT</span><b>${p.fini ? "TERMINÉE" : "arrêt " + (p.courant + 1) + " / " + n}</b><small>gain réel : <span class="${p.reel >= 0 ? "tb-up" : "tb-down"}">${fmtM(p.reel, true)}</span></small></div></div>`;
-            h += `<div class="tb-prog"><i style="width:${Math.round(fait / n * 100)}%"></i></div>`;
-            h += `<div class="tb-outils"><span>${p.fini ? "Tournée terminée" : "Seul l'arrêt en cours est déplié"} · cliquez sur un arrêt pour le déplier ou le replier</span><span><button type="button" onclick="ouvrirTout(true)">TOUT DÉPLIER</button><button type="button" onclick="ouvrirTout(false)">TOUT REPLIER</button></span></div>`;
-            h += `<div class="tb-route">${p.stations.map((s, i) => arretHtml(s, i, p, et)).join("")}</div>`;
+            h += `<div class="tb-kpi1"><span>GAIN <b class="tb-up">${fmtM(gain, true)}</b></span><span>DURÉE <b>≈ ${duree(minutes * 60)}</b></span><span>PAR HEURE <b>≈ ${fmtM(gain / Math.max(0.25, minutes / 60))}</b></span></div>`;
+                        h += `<div class="tb-prog"><i style="width:${Math.round(fait / n * 100)}%"></i></div>`;
+            h += `<div class="tb-outils"><span>${p.fini ? "Tournée terminée" : "Clic sur un arrêt : le déplier ou le replier"}</span><span><button type="button" onclick="ouvrirTout(true)">TOUT DÉPLIER</button><button type="button" onclick="ouvrirTout(false)">TOUT REPLIER</button></span></div>`;
+            h += `<div class="tb-route">${p.stations.map((s, i) => arretHtml(s, i, p, et) + (i < p.stations.length - 1 && et[i] ? `<div class="tb-trajet"><span>↓ ${esc(String(et[i].saut))} al · ≈ ${duree(minutesEtape(et[i]) * 60)} · <b class="tb-up">${fmtM(et[i].benefice, true)}</b></span></div>` : "")).join("")}</div>`;
             h += `<div class="tb-pied"><span>Calculée ${esc(ageTxt(TOURNEE.calcule))} d'après les relevés des joueurs (Spansh). Durées : estimations. Les arrêts se cochent quand le journal confirme l'achat ou la vente.</span>
                 ${p.fini ? `<button type="button" class="tb-btn vert" onclick="lancerTournee()">↻ REFAIRE UNE HEURE DE COMMERCE</button>` : ""}</div>`;
             return h;
@@ -1593,17 +1610,19 @@
                 <span class="px">${fmtN(px)} <small>cr/t</small></span><span class="gn">${vente ? `<b class="tb-up">${fmtM(m.benef, true)}</b>` : `<small>stock ${fmtN(m.stock)} t</small>`}</span></div>`;
         }
         // arret DEPLIE : d'abord ce qu'on vend ici, puis « ACHETER ICI ━━► A VENDRE A » avec le gain du trajet, comme la route commerciale des directives
+        function ligneOp(m, vente, fait) {
+            const px = vente ? m.vente : m.achat;
+            return `<div class="tb-op ${vente ? "ven" : "ach"}${fait ? " ok" : ""}"><span class="c">${fait ? "✔" : ""}</span><span class="nom">${esc(nomFr(m.nom))}</span><span class="qt">${fmtN(m.q)} t</span><span class="px">${fmtN(px)} cr/t</span><span class="gn">${vente ? `<b class="tb-up">${fmtM(m.benef, true)}</b>` : `<small>stock ${fmtN(m.stock)} t</small>`}</span></div>`;
+        }
+        // arret DEPLIE : ce qu'on vend ici, ce qu'on achete ici, puis une ligne discrete sur la destination (le trajet est la pastille sous l'arret)
         function corpsDeplie(s, i, p, et) {
             const dernier = i === p.stations.length - 1, hop = !dernier ? et[i] : null;
             let h = "";
-            if (s.vend.length) h += `<div class="tb-vente"><div class="ent"><span class="chip ven">▼ VENDRE ICI</span><small>ce que vous avez chargé à l'arrêt précédent</small></div>${s.vend.map((m, k) => ligneGrosse(m, true, s.vendFait[k])).join("")}</div>`;
+            if (s.vend.length) h += `<div class="tb-ophead ven">▼ VENDRE ICI <small>ce que vous avez chargé à l'arrêt précédent</small></div>${s.vend.map((m, k) => ligneOp(m, true, s.vendFait[k])).join("")}`;
             if (hop) {
                 const v = hop.vers || {};
-                h += `<div class="tb-flux"><div class="n a"><div class="e">▲ ACHETER ICI</div>${s.achete.map((m, k) => ligneGrosse(m, false, s.acheteFait[k])).join("")}</div>
-                    <div class="lien"><svg viewBox="0 0 210 40"><defs><marker id="tbfl" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00FF66"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#00FF66" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#tbfl)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>
-                        <div class="g">${fmtM(hop.benefice, true)}</div><small>${esc(String(hop.saut))} al · ≈ ${duree(minutesEtape(hop) * 60)}</small></div>
-                    <div class="n v"><div class="e">▼ À VENDRE À</div><div class="st">${cp(v.station)}</div><div class="sy">${cp(v.systeme)}${v.arrivee ? " · " + fmtN(v.arrivee) + " Ls" : ""}</div>
-                        ${hop.marchandises.map(m => `<div class="lg"><span>${esc(nomFr(m.nom))}</span><b>${fmtN(m.vente)} <small>cr/t</small></b></div>`).join("")}<div class="age">${fraicheur(v.maj)}</div></div></div>`;
+                h += `<div class="tb-ophead ach">▲ ACHETER ICI</div>${s.achete.map((m, k) => ligneOp(m, false, s.acheteFait[k])).join("")}
+                    <div class="tb-apres">puis à vendre à <b>${cp(v.station)}</b> · ${cp(v.systeme)}${v.arrivee ? " · " + fmtN(v.arrivee) + " Ls" : ""} · ${fraicheur(v.maj)}${hop.marchandises.map(m => `<div class="l">${esc(nomFr(m.nom))} <b>${fmtN(m.vente)} cr/t</b></div>`).join("")}</div>`;
             } else h += `<div class="tb-fin">🏁 FIN DE LA TOURNÉE · plus rien à acheter ici</div>`;
             return h;
         }
@@ -1615,14 +1634,14 @@
             const num = `<div class="rail"><span class="num">${etat === "fait" ? "✔" : i + 1}</span></div>`;
             if (!ouvert) {
                 const gainVente = s.vend.reduce((a, m) => a + (Number(m.benef) || 0), 0);
-                const res = (s.vend.length ? `<span class="ven">▼ ${noms(s.vend)} <b class="tb-up">${fmtM(gainVente, true)}</b></span>` : "") +
+                const res = (s.vend.length ? `<span class="ven">▼ ${noms(s.vend)}</span>` : "") +
                             (s.achete.length ? `<span class="ach">▲ ${noms(s.achete)}</span>` : (dernier ? `<span class="tb-mut">fin de la tournée</span>` : ""));
                 return `<div class="tb-arret ${etat} ferme" onclick="basculerArret(${i})" title="Cliquer pour déplier">${num}<div class="corps compact"><b class="lieu">${cp(s.lieu.station)}</b><span class="sys">${cp(s.lieu.systeme)}</span>
-                    <span class="res">${res}</span><span class="suite">${suite}</span><span class="chev">▸</span></div></div>`;
+                    <span class="res">${res}</span><span class="chev">▸</span></div></div>`;
             }
             return `<div class="tb-arret ${etat} ouvert">${num}
                 <div class="corps"><div class="tete" onclick="basculerArret(${i})" title="Cliquer pour replier" style="cursor:pointer;"><div><b class="lieu">${cp(s.lieu.station)}</b><span class="sys">${cp(s.lieu.systeme)}${s.lieu.arrivee ? " · " + fmtN(s.lieu.arrivee) + " Ls" : ""}</span></div>
-                    <span class="etat">${lib} ▾</span></div>${corpsDeplie(s, i, p, et)}<div class="age">${fraicheur(s.maj)}</div></div></div>`;
+                    <span class="etat">${lib} ▾</span></div>${corpsDeplie(s, i, p, et)}<div class="age">cet arrêt : ${fraicheur(s.maj)}</div></div></div>`;
         }
 
 
@@ -1648,7 +1667,7 @@
         })();
         function modeRoute(m) {
             if (typeof sonClic === "function") sonClic();
-            MODE_ROUTE.v = m; ecrire("edteam_tb_moderoute", m); rendre();
+            MODE_ROUTE.v = m; if (m !== "vente") ecrire("edteam_tb_moderoute", m); rendre();
         }
         function reglageFc(k, v) {
             if (k === "systeme") { FCR.systeme = String(v || "").trim(); ecrire("edteam_tb_fcsys", FCR.systeme); }
@@ -1681,7 +1700,8 @@
         }
         function selecteurMode() {
             const b = (m, t) => `<button type="button" class="${MODE_ROUTE.v === m ? "on" : ""}" onclick="modeRoute('${m}')">${t}</button>`;
-            return `<div class="tb-modes"><span class="tb-seg grand">${b("tournee", "🚀 TOURNÉE DE VAISSEAU")}${b("fc", "🛰 PORTE-VAISSEAUX (FC)")}</span></div>`;
+            const nv = vendables().length;
+            return `<div class="tb-modes"><span class="tb-seg grand"><button type="button" class="${MODE_ROUTE.v === "vente" ? "on" : ""}" ${nv ? "" : "disabled title=\"Rien à vendre : votre soute est vide\""} onclick="modeRoute('vente')">💰 VENDRE MES SOUTES${nv ? " · " + nv : ""}</button>${b("tournee", "🚀 TOURNÉE DE VAISSEAU")}${b("fc", "🛰 PORTE-VAISSEAUX (FC)")}</span></div>`;
         }
         function reglagesFc() {
             const seg = (k, vals, cur) => `<span class="tb-seg">${vals.map(v => `<button type="button" class="${v[0] === cur ? "on" : ""}" onclick="reglageFc('${k}', ${v[0]})">${v[1]}</button>`).join("")}</span>`;
@@ -1706,8 +1726,7 @@
             } else if (FC.statut === "ERREUR") corps = `<div class="tb-banner">${esc(FC.message)}</div>`;
             if (!enCours && FC.donnees) corps += fcResultat();
             if (!enCours && !FC.donnees && FC.statut !== "ERREUR") {
-                corps = `<div class="tb-invite"><div><b>La meilleure route pour remplir un porte-vaisseaux, en une seule fois.</b><span>Le tableau de bord étudie une cinquantaine de marchandises : où acheter ${fmtN(FCR.cap)} t (ou le plus possible, avec au moins 5 000 t de stock) au prix le plus bas autour du FC, puis où les vendre le plus cher à un saut de FC (500 al au plus) de là. Une seule route, la plus rentable.</span>
-                    ${ok ? "" : `<span class="tb-vx">Indiquez le système de votre porte-vaisseaux.</span>`}</div></div>`;
+                corps = (ok ? "" : `<div class="tb-banner">Indiquez le système de votre porte-vaisseaux.</div>`) + noteRepliee("fc", "LA MEILLEURE ROUTE POUR REMPLIR UN PORTE-VAISSEAUX, EN UNE SEULE FOIS", `<div class="bloc-note">Le tableau de bord étudie une cinquantaine de marchandises : où acheter ${fmtN(FCR.cap)} t (ou le plus possible, avec au moins 5 000 t de stock) au prix le plus bas autour du FC, puis où les vendre le plus cher à un saut de FC (500 al au plus) de là. Une seule route, la plus rentable.</div>`);
             }
             return `<div class="bloc or" style="margin-bottom:12px;"><h2>COMMERCE DE PORTE-VAISSEAUX <em>départ : ${cp(fcSysteme() || "?")}</em></h2>${selecteurMode()}<div class="tb-barre">${reglagesFc()}<div class="tb-cta">${bouton}</div></div>${corps}</div>`;
         }
@@ -1808,7 +1827,7 @@
             rendre();
             VENTE.minuteur = setTimeout(() => interrogerVente(jeton), Math.min(4000 + VENTE.essais * 400, 10000));
         }
-        function venteHtml() {
+        function venteHtml(enPlace) {
             const items = vendables();
             if (!items.length) return "";       // rien a chercher : le cadre n'apparait pas
             const perime = !!(VENTE.donnees && VENTE.sig !== signatureVente());
@@ -1827,8 +1846,8 @@
                 const vieux = perime && !enCours ? `<div class="tb-banner">La soute, la position ou les réglages ont changé depuis la dernière recherche : cliquez sur « CHERCHER À NOUVEAU ».</div>` : "";
                 corps += maj + vieux + items.filter(x => x.k).map(x => blocMarchandise(x, res[cleSpansh(x.k)])).join("");
             }
-            return `<div class="bloc or"><h2>VENDRE CE QUE JE TRANSPORTE <em>autour de ${cp(S.systeme || "?")} · ${seg} al</em></h2><div class="tb-barre" style="margin-bottom:10px;padding-bottom:10px;"><span class="tb-mut" style="font-size:.85em;">à utiliser quand vous ne savez pas où vendre une marchandise</span><div class="tb-cta">${bouton}</div></div>${corps}
-                <div class="bloc-note">Meilleures stations qui <b>achètent</b> chaque marchandise de la soute (demande suffisante pour toute la quantité), d'après les relevés des joueurs de moins de ${REGL.heures === 24 ? "1 jour" : REGL.heures / 24 + " jours"} (réglage de la feuille de route). Les prix sont ceux du relevé indiqué : vérifiez-les à l'arrivée.</div></div>`;
+            return `<div class="bloc or"${enPlace ? ' style="margin-bottom:12px;"' : ""}><h2>${enPlace ? "VENDRE MES SOUTES" : "VENDRE CE QUE JE TRANSPORTE"}${enPlace ? "" : ` <em>autour de ${cp(S.systeme || "?")} · ${seg} al</em>`}</h2>${enPlace ? selecteurMode() + `<div class="tb-rayon"><span>RECHERCHE AUTOUR DE <b>${cp(S.systeme || "?")}</b></span>${seg}<span>al</span></div>` : ""}<div class="tb-barre" style="margin-bottom:10px;padding-bottom:10px;"><span class="tb-mut" style="font-size:.85em;">à utiliser quand vous ne savez pas où vendre une marchandise</span><div class="tb-cta">${bouton}</div></div>${corps}
+                ${noteRepliee("vente", "COMMENT LES STATIONS SONT CHOISIES", `<div class="bloc-note">Meilleures stations qui <b>achètent</b> chaque marchandise de la soute (demande suffisante pour toute la quantité), d'après les relevés des joueurs de moins de ${REGL.heures === 24 ? "1 jour" : REGL.heures / 24 + " jours"} (réglage de la feuille de route). Les prix sont ceux du relevé indiqué : vérifiez-les à l'arrivée.</div>`)}</div>`;
         }
         function blocMarchandise(x, r) {
             const q = Number(x.q) || 0, paye = Number(x.paye) || 0;
