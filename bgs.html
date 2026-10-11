@@ -342,7 +342,11 @@
         #btn-transmettre:hover { background: #FF3333; color: #000; box-shadow: 0 0 20px #FF3333; }
         @media (max-width: 900px) { .cmd-corps { grid-template-columns: minmax(0, 1fr); overflow-y: auto; } .cmd-col { overflow: visible; } .cmd-col + .cmd-col { border-left: none; border-top: 1px dashed rgba(255, 51, 51, 0.3); } }
 
-</style>
+        .ini-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .ini-chip { background: rgba(255,79,216,0.06); border: 1px solid rgba(255,79,216,0.5); color: #ddd; padding: 6px 12px; font-family: inherit; font-size: 0.8em; cursor: pointer; transition: 0.15s; text-align: left; max-width: 100%; overflow-wrap: anywhere; }
+        .ini-chip:hover { background: rgba(255,79,216,0.18); color: #fff; }
+        .ini-chip.actif { background: #FF4FD8; border-color: #FF4FD8; color: #000; font-weight: bold; }
+    </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjMDIwMTAwIi8+PHBvbHlnb24gcG9pbnRzPSI0OCwxNSAxNSwzNSAzMCw1MCAxMCw3MCA0OCw4NSA0OCw2NSAzMCw1NSA0OCw0MCIgZmlsbD0iIzAwRjBGRiIvPjxwb2x5Z29uIHBvaW50cz0iNTIsMTUgODUsMzUgNzAsNTAgOTAsNzAgNTIsODUgNTIsNjUgNzAsNTUgNTIsNDAiIGZpbGw9IiNGRjcxMDAiLz48cG9seWdvbiBwb2ludHM9IjUwLDQ1IDQyLDU1IDUwLDY1IDU4LDU1IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjkiLz48L3N2Zz4=">
@@ -511,6 +515,7 @@
                     <input type="text" id="ini-faction" list="liste-factions-ini" class="search-input cmd-champ" placeholder="Faction visée (liste lue dans le système)" style="margin-top: 8px;"
                         name="ini_faction_query" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false">
                     <datalist id="liste-factions-ini"></datalist>
+                    <div id="ini-chips" class="ini-chips"></div>
                     <input type="hidden" id="ini-population" value="0">
                     <div class="cmd-aide" id="ini-aide">Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».</div>
                 </div>
@@ -2061,11 +2066,15 @@
             initiativeType = t;
             ['HAUSSE', 'BAISSE', 'GUERRE', 'ELECTION'].forEach(x => { const b = document.getElementById('ini-type-' + x); if (b) b.classList.toggle('actif', x === t); });
         };
+        window.choisirFactionIni = function(b) {
+            const champ = document.getElementById('ini-faction'); if (champ) champ.value = b.getAttribute('data-f') || '';
+            document.querySelectorAll('#ini-chips .ini-chip').forEach(x => x.classList.toggle('actif', x === b));
+        };
         window.scannerInitiative = async function(systemName) {
             const nom = String(systemName || '').trim();
             if (!nom) return;
             const aide = document.getElementById('ini-aide'); const liste = document.getElementById('liste-factions-ini'); const pop = document.getElementById('ini-population');
-            if (aide) aide.textContent = 'Lecture du système…';
+            if (aide) aide.textContent = 'Lecture du système…'; const _c0 = document.getElementById('ini-chips'); if (_c0) _c0.innerHTML = '';
             try {
                 const [resF, resI] = await Promise.all([
                     fetch('https://www.edsm.net/api-system-v1/factions?systemName=' + encodeURIComponent(nom)),
@@ -2075,7 +2084,9 @@
                 if (pop) pop.value = String((dI && dI.information && dI.information.population) || 0).replace(/[^0-9]/g, '') || '0';
                 const noms = (dF && dF.factions || []).map(f => f.name).filter(Boolean);
                 if (liste) liste.innerHTML = noms.map(n => '<option value="' + escapeHtml(n) + '"></option>').join('');
-                if (aide) aide.textContent = noms.length ? noms.length + ' factions trouvées : choisissez-en une dans la liste du champ « Faction ».' : 'Système introuvable dans EDSM : vérifiez l\'orthographe, ou saisissez la faction à la main.';
+                const chips = document.getElementById('ini-chips');
+                if (chips) { chips.innerHTML = noms.map(n => '<button type="button" class="ini-chip" data-f="' + escapeHtml(n) + '" onclick="choisirFactionIni(this)">' + escapeHtml(n) + '</button>').join(''); }
+                if (aide) aide.textContent = noms.length ? noms.length + ' factions trouvées : cliquez sur celle que vous visez ci-dessous.' : 'Système introuvable dans EDSM : vérifiez l\'orthographe, ou saisissez la faction à la main.';
             } catch (e) { if (aide) aide.textContent = 'Lecture du système impossible pour le moment : saisissez la faction à la main.'; }
         };
         window.lancerInitiative = async function() {
@@ -2102,7 +2113,7 @@
             btn.innerText = propose ? 'PROPOSITION ENVOYÉE' : 'INITIATIVE LANCÉE';
             setTimeout(() => {
                 fermerModal('modal-initiative');
-                document.getElementById('ini-systeme').value = ''; document.getElementById('ini-faction').value = ''; document.getElementById('ini-message').value = ''; document.getElementById('ini-population').value = '0';
+                document.getElementById('ini-systeme').value = ''; document.getElementById('ini-faction').value = ''; const _ch = document.getElementById('ini-chips'); if (_ch) _ch.innerHTML = ''; document.getElementById('ini-message').value = ''; document.getElementById('ini-population').value = '0';
                 const aide = document.getElementById('ini-aide'); if (aide) { aide.style.color = ''; aide.textContent = 'Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».'; }
                 btn.innerText = iniLibelleLancer(); btn.style.pointerEvents = 'auto';
                 rafraichirModeIni(true);

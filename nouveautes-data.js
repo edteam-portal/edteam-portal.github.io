@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-initiatives-liste-factions', date: '2026-10-11T17:26:00Z', type: 'CORRIGE',
+        titre: 'Initiatives : les factions du système s’affichent en boutons',
+        texte: 'Quand vous saisissez un système pour lancer une initiative, les factions trouvées apparaissent sous le champ : un clic ou un toucher sur celle que vous visez suffit, sur PC comme sur mobile. Plus besoin de deviner où cliquer pour ouvrir la liste.',
+        important: false
+    },
+    {
         id: '2026-10-initiatives-guerre-election', date: '2026-10-11T17:10:00Z', type: 'AMELIORE',
         titre: 'Initiatives : guerre et élection aussi',
         texte: 'Les initiatives de pilotes ne se limitent plus à la hausse et à la baisse : vous pouvez aussi lancer une guerre ou une élection. Elles suivent le réglage de votre Amiral : libres (actives tout de suite), sur validation (vous les proposez, un officier ou l’Amiral les accepte) ou désactivées. Une guerre ne peut pas viser la faction de votre propre escadron. L’Amiral et les officiers n’ont plus le bouton d’initiative : ils lancent leurs directives depuis le bouton Commandement.',

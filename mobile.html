@@ -910,6 +910,7 @@
         <input type="search" id="im-systeme" class="ichamp" placeholder="Système, ex : ATHENA" autocomplete="off" spellcheck="false" style="text-transform: uppercase;" onblur="xScannerInitiative(this.value)" onchange="xScannerInitiative(this.value)">
         <input type="text" id="im-faction" list="liste-factions-im" class="ichamp" placeholder="Faction visée" autocomplete="off" spellcheck="false" style="margin-top: 8px;">
         <datalist id="liste-factions-im"></datalist>
+        <div id="im-chips" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;"></div>
         <input type="hidden" id="im-population" value="0">
         <div class="xmut" id="im-aide" style="margin-top: 6px; font-size: 0.7em; line-height: 1.5;">Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».</div>
         <div style="display: flex; gap: 8px; margin-top: 12px;">
@@ -1993,17 +1994,22 @@
         window.xOuvrirInitiative = function () { sonClic(); xTypeInitiative('HAUSSE'); xTextesModalIni(); xEl('modal-initiative-m').style.display = 'flex'; };
         window.xFermerInitiative = function (e) { if (e && e.target && e.target.id !== 'modal-initiative-m') return; xEl('modal-initiative-m').style.display = 'none'; };
         window.xTypeInitiative = function (t) { xTypeIni = t; ['HAUSSE', 'BAISSE', 'GUERRE', 'ELECTION'].forEach(x => xEl('im-type-' + x).classList.toggle('actif', x === t)); };
+        window.xChoisirFactionIni = function (b) {
+            xEl('im-faction').value = b.getAttribute('data-f') || '';
+            document.querySelectorAll('#im-chips .ipill').forEach(x => { x.classList.toggle('actif', x === b); x.classList.toggle('h', x === b); });
+        };
         window.xScannerInitiative = async function (systemName) {
             const nom = String(systemName || '').trim(); if (!nom) return;
             const aide = xEl('im-aide'), liste = xEl('liste-factions-im'), pop = xEl('im-population');
-            aide.textContent = 'Lecture du système…';
+            aide.textContent = 'Lecture du système…'; xEl('im-chips').innerHTML = '';
             try {
                 const [resF, resI] = await Promise.all([fetch('https://www.edsm.net/api-system-v1/factions?systemName=' + encodeURIComponent(nom)), fetch('https://www.edsm.net/api-v1/system?systemName=' + encodeURIComponent(nom) + '&showInformation=1')]);
                 const dF = await resF.json(), dI = await resI.json();
                 pop.value = String((dI && dI.information && dI.information.population) || 0).replace(/[^0-9]/g, '') || '0';
                 const noms = (dF && dF.factions || []).map(f => f.name).filter(Boolean);
                 liste.innerHTML = noms.map(n => '<option value="' + XESC(n) + '"></option>').join('');
-                aide.textContent = noms.length ? noms.length + ' factions trouvées : choisissez-en une dans le champ « Faction ».' : 'Système introuvable dans EDSM : vérifiez l\'orthographe, ou saisissez la faction.';
+                xEl('im-chips').innerHTML = noms.map(n => '<button type="button" class="ipill" style="flex: 0 1 auto; text-align: left; overflow-wrap: anywhere; padding: 8px 10px;" data-f="' + XESC(n) + '" onclick="xChoisirFactionIni(this)">' + XESC(n) + '</button>').join('');
+                aide.textContent = noms.length ? noms.length + ' factions trouvées : touchez celle que vous visez ci-dessous.' : 'Système introuvable dans EDSM : vérifiez l\'orthographe, ou saisissez la faction.';
             } catch (e) { aide.textContent = 'Lecture du système impossible pour le moment : saisissez la faction.'; }
         };
         window.xLancerInitiative = async function () {
@@ -2016,7 +2022,7 @@
             btn.disabled = false;
             if (error) { const aide = xEl('im-aide'); aide.textContent = String(error.message || 'Échec du lancement.'); aide.style.color = '#FF4FD8'; btn.innerText = xIniLibelle(); return; }
             btn.innerText = xIniLibelle();
-            ['im-systeme', 'im-faction', 'im-message'].forEach(i => { xEl(i).value = ''; }); xEl('im-population').value = '0';
+            ['im-systeme', 'im-faction', 'im-message'].forEach(i => { xEl(i).value = ''; }); xEl('im-population').value = '0'; xEl('im-chips').innerHTML = '';
             xEl('im-aide').style.color = ''; xEl('im-aide').textContent = 'Les factions du système sont lues automatiquement dès que vous quittez le champ « Système ».';
             xFermerInitiative(); xRafraichirModeIni(true); chargerDirectivesMobile(true);
         };
