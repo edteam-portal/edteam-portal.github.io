@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-soute-vaisseau', date: '2026-10-11T00:37:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : votre soute dans le vaisseau',
+        texte: 'Dans l’onglet Commerce, la soute s’affiche maintenant dans une vue holographique de votre vaisseau : les caisses sont réparties dans la coque, comme vues par un capteur infrarouge, et la baie de soute est agrandie à côté avec de grosses caisses carrées. Survolez une caisse ou la légende pour voir la marchandise. Disponible pour le Panther Clipper Mk II ; les autres vaisseaux gardent la grille actuelle, en attendant leur dessin. La soute passe au-dessus de la feuille de route, et « Vendre ce que je transporte » s’ouvre maintenant dans une fenêtre, depuis un bouton de l’hologramme (plus de bloc en bas de page).',
+        important: false
+    },
+    {
         id: '2026-10-tableau-bord-parcours', date: '2026-10-10T23:45:00Z', type: 'AMELIORE',
         titre: 'Tableau de bord : un parcours de missions plus clair',
         texte: 'Dans l’onglet Missions, chaque arrêt du parcours est maintenant une carte qui contient ses propres missions, sans colonne vide. La carte et la liste partagent les mêmes numéros et couleurs : vous voyez où vous êtes, où aller ensuite, les systèmes déjà passés dont la mission n’est pas terminée (en ambre) et ceux qui sont terminés (en gris). Si vous avez des missions à rendre là où vous les avez prises (massacre, minage, collecte…), le parcours finit par ce retour. Chaque mission indique aussi quand et où elle a été prise, sa récompense par heure restante et sa distance depuis votre position. Les effets des missions terminées passent en bas, sur toute la largeur.',

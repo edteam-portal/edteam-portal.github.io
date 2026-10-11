@@ -180,6 +180,17 @@
         .tb-cr.f.hl:after { background:color-mix(in srgb,var(--cl) 55%,transparent); box-shadow:0 0 12px var(--cl); }
         .tb-cr.f.hl { z-index:2; }
         .tb-grille.dim .tb-cr.f:not(.hl):after { opacity:.3; }
+        .tb-bsvg { cursor:pointer; } .tb-bsvg:hover rect { fill:rgba(255,215,0,.26); } .tb-bsvg:focus { outline:none; } .tb-bsvg:focus rect { stroke-width:3; }
+        .tb-modale { position:fixed; inset:0; z-index:2500; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.74); }
+        .tb-modale.on { display:flex; }
+        .tb-mpanneau { position:relative; width:min(1000px,100%); max-height:90vh; overflow:auto; }
+        .tb-mpanneau .bloc { margin:0; background:linear-gradient(180deg,#0e0b02,#050403); } .tb-mpanneau .bloc > h2 { padding-right:44px; }
+        .tb-mx { position:absolute; top:12px; right:12px; z-index:2; background:#000; border:1px solid #FFD700; color:#FFD700; width:32px; height:32px; cursor:pointer; font-size:1em; } .tb-mx:hover { background:#FFD700; color:#000; }
+        .tb-bientotv { color:#8b97a0; font-size:.82em; margin-top:10px; padding-top:8px; border-top:1px dashed #2a2f33; } .tb-bientotv b { color:#00F0FF; font-weight:normal; }
+        .tb-scene { margin-top:4px; } .tb-svgv { width:100%; height:auto; display:block; } .tb-svgv text { paint-order:stroke; stroke:#04090c; stroke-width:3px; }
+        .tb-c { cursor:pointer; } .tb-c.dim { opacity:.2; } .tb-c.hl { filter:drop-shadow(0 0 5px currentColor); }
+        @keyframes tbMot { 0%,100% { opacity:.45; } 50% { opacity:1; } } .tb-mot { animation:tbMot 1.8s ease-in-out infinite; }
+        .tb-leg span.hl { background:rgba(255,255,255,.08); }
         .tb-leg { display:flex; gap:6px 16px; flex-wrap:wrap; font-size:.9em; margin-top:10px; color:#b8c2c8; }
         .tb-leg span { cursor:pointer; } .tb-leg i { display:inline-block; width:10px; height:10px; background:var(--cl); margin-right:6px; }
         .tb-cap { display:flex; justify-content:space-between; font-size:.85em; color:#8a9; margin-top:8px; gap:8px; flex-wrap:wrap; }
@@ -228,7 +239,7 @@
         .tb-pa.prochain { border-color:#fff; border-left-color:#00F0FF; } .tb-pa.prochain .eti { color:#fff; font-weight:bold; }
         .tb-pa.passe { border-left-color:#FFB000; border-style:dashed; border-left-style:solid; background:rgba(255,176,0,.05); } .tb-pa.passe .num { border-color:#FFB000; color:#FFB000; border-style:dashed; } .tb-pa.passe .eti { color:#FFB000; }
         @keyframes tbPouls { 0%,100% { box-shadow:0 0 10px rgba(255,79,216,.15); } 50% { box-shadow:0 0 26px rgba(255,79,216,.5); } }
-        .tb-leg { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.78em; color:#99a; margin:0 0 10px; } .tb-leg span { display:inline-flex; align-items:center; gap:6px; } .tb-leg i { width:11px; height:11px; border-radius:50%; background:var(--c); display:inline-block; } .tb-leg i.tr { background:none; border:2px dashed var(--c); box-sizing:border-box; }
+        .tb-lgp { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.78em; color:#99a; margin:0 0 10px; } .tb-lgp span { display:inline-flex; align-items:center; gap:6px; } .tb-lgp i { width:11px; height:11px; border-radius:50%; background:var(--c); display:inline-block; } .tb-lgp i.tr { background:none; border:2px dashed var(--c); box-sizing:border-box; }
         .tb-rp { display:grid; grid-template-columns:minmax(110px,1.2fr) 2fr 36px minmax(80px,1fr); gap:10px; align-items:center; padding:7px 0; border-bottom:1px solid #161616; font-size:.92em; }
         .tb-rp .rb { height:7px; background:rgba(255,255,255,.07); } .tb-rp .rb i { display:block; height:100%; background:#00FF66; box-shadow:0 0 6px #00FF66; }
         .tb-rp em { font-style:normal; color:#777; font-size:.85em; }
@@ -378,6 +389,7 @@
 
     <div id="holo-tooltip"></div>
     <div id="tb-tip"></div>
+    <div id="tb-modale" class="tb-modale" onclick="if (event.target === this) fermerVente()"><div class="tb-mpanneau"><button type="button" class="tb-mx" onclick="fermerVente()" title="Fermer (Échap)">✕</button><div id="tb-mcorps"></div></div></div>
 
     <!-- MENU LATÉRAL -->
     <nav id="side-menu"></nav>
@@ -513,6 +525,7 @@
             zone.innerHTML = h + `<div class="bloc-note" style="margin-top:14px;">ⓘ Source : le journal du jeu, lu par le plugin. Rien à saisir : ce tableau se remplit tout seul. Strictement personnel : personne d'autre ne voit votre session.</div>`;
             zone.scrollTop = haut;
             brancherSoute();
+            majModale();
             tic();
             declencherVente();
         }
@@ -564,9 +577,112 @@
         }
         function panneauCommerce() {
             return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
+                <div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>
                 ${feuilleHtml()}
-                ${(() => { const vh = venteHtml(); return vh ? `<div class="tb-grid2"><div class="bloc holo"><div class="holo-balayage"></div>${souteHtml()}</div><div>${vh}</div></div>` : `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>`; })()}
-                ${registreHtml()}`;
+                <div style="margin-top:12px;">${registreHtml()}</div>`;
+        }
+
+        // ---------------------------------------------------------------
+        //  SOUTE « VAISSEAU EN HOLOGRAMME » : le vaisseau (image decoupee, teintee) avec ses caisses reparties dans la coque, comme vues par un capteur
+        //  infrarouge, et la baie de soute agrandie a droite (caisses carrees). Silhouettes disponibles : voir SILHOUETTES ; les autres vaisseaux (et les
+        //  ecrans etroits) gardent la grille simple ci-dessous. Pour ajouter un vaisseau : image decoupee (webp, fond transparent) + contour + zone de coque.
+        // ---------------------------------------------------------------
+        const SILHOUETTES = {
+            panthermkii: {
+                img: "images/vaisseaux/panther-dessus.webp", W: 488, H: 541, axe: 244, arriere: 120, nez: 452,
+                coque: [[0, 116], [58, 116], [78, 150], [92, 205], [100, 240], [124, 276], [130, 318], [124, 352], [98, 388], [78, 432], [62, 470], [52, 504], [26, 526], [0, 530]],
+                moteurs: [[-120, 50], [-146, 50], [120, 50], [146, 50], [-150, 270], [-176, 270], [150, 270], [176, 270]],
+                formes: ["M244.0 116.0 L302.0 116.0 L322.0 150.0 L336.0 205.0 L344.0 240.0 L368.0 276.0 L374.0 318.0 L368.0 352.0 L342.0 388.0 L322.0 432.0 L306.0 470.0 L296.0 504.0 L270.0 526.0 L244.0 530.0 L244.0 530.0 L218.0 526.0 L192.0 504.0 L182.0 470.0 L166.0 432.0 L146.0 388.0 L120.0 352.0 L114.0 318.0 L120.0 276.0 L144.0 240.0 L152.0 205.0 L166.0 150.0 L186.0 116.0 L244.0 116.0 Z","M328.0 84.0 L350.0 84.0 L352.0 232.0 L336.0 232.0 Z","M152.0 232.0 L136.0 232.0 L138.0 84.0 L160.0 84.0 Z","M344.0 52.0 L362.0 42.0 L402.0 42.0 L408.0 60.0 L408.0 150.0 L394.0 186.0 L356.0 172.0 L344.0 120.0 Z","M144.0 120.0 L132.0 172.0 L94.0 186.0 L80.0 150.0 L80.0 60.0 L86.0 42.0 L126.0 42.0 L144.0 52.0 Z","M376.0 272.0 L390.0 262.0 L430.0 262.0 L432.0 300.0 L430.0 400.0 L416.0 414.0 L380.0 404.0 L374.0 340.0 Z","M114.0 340.0 L108.0 404.0 L72.0 414.0 L58.0 400.0 L56.0 300.0 L58.0 262.0 L98.0 262.0 L112.0 272.0 Z"]
+            }
+        };
+        const LARGE = 1000;
+        const silhouetteActive = () => { const v = S && S.vaisseau ? S.vaisseau : {}; return window.innerWidth >= LARGE ? (SILHOUETTES[String(v.modele || "").toLowerCase()] || null) : null; };
+        let ecranLarge = window.innerWidth >= LARGE;
+        window.addEventListener("resize", () => { const l = window.innerWidth >= LARGE; if (l !== ecranLarge) { ecranLarge = l; rendre(); } });
+        function pointDans(poly, x, y) { let r = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) r = !r; } return r; }
+        function souteDessus(sil, items, cap, U, N, total, vend) {
+            const prop = [];
+            items.forEach((x, i) => { const k = Math.max(1, Math.round((Number(x.q) || 0) / U)); for (let j = 0; j < k && prop.length < N; j++) prop.push(i); });
+            const OX = 30, OY = 34, IW = sil.W, IH = sil.H, AXE = OX + IW - sil.axe, ZOOM = { x: 610, y: 70, w: 810, h: 400 };
+            const coul = i => COUL_MARCH[i % COUL_MARCH.length], mis = i => !!items[i].m;
+            // caisses de la coque : cellules carrees dans le contour reduit, remplies depuis l'arriere (le bas) vers le nez, du centre vers les bords
+            const poly = sil.coque.map(([dx, y]) => [AXE + dx * 0.9, OY + IH - y]).concat(sil.coque.slice().reverse().map(([dx, y]) => [AXE - dx * 0.9, OY + IH - y]));
+            const yArr = OY + IH - sil.arriere, yMax = OY + IH - sil.nez;
+            const cellules = t => {
+                const L = [];
+                for (let r = 0; ; r++) {
+                    const y1 = yArr - r * t, y0 = y1 - t; if (y0 < yMax) break;
+                    for (let c = -24; c < 24; c++) { const x0 = AXE + c * t, x1 = x0 + t; if ([[x0, y0], [x1, y0], [x0, y1], [x1, y1]].every(([x, y]) => pointDans(poly, x, y))) L.push({ r, x: x0, y: y0, t, d: Math.abs(x0 + t / 2 - AXE) }); }
+                }
+                return L.sort((a, b) => a.r - b.r || a.d - b.d);
+            };
+            let t = 40, L = cellules(t); while (L.length < N && t > 6) { t -= 0.5; L = cellules(t); }
+            L = L.slice(0, N);
+            let nuage = "", maxx = 0, miny = 1e9, maxy = 0;
+            L.forEach((q, i) => {
+                maxx = Math.max(maxx, q.x + q.t); miny = Math.min(miny, q.y); maxy = Math.max(maxy, q.y + q.t);
+                if (i < prop.length) {
+                    const k = prop[i], cl = coul(k);
+                    nuage += `<g class="tb-c" data-l="${k}" style="color:${cl}"><rect x="${q.x}" y="${q.y}" width="${q.t}" height="${q.t}" fill="rgba(0,0,0,0)"/><rect x="${q.x + 1}" y="${q.y + 1}" width="${q.t - 2}" height="${q.t - 2}" rx="1.5" fill="url(#tbir${k % 8})" stroke="${cl}" stroke-opacity=".9"${mis(k) ? ' stroke-dasharray="3 2"' : ""}/><path d="M${q.x + 3} ${q.y + 3.5}H${q.x + q.t - 3}" stroke="#fff" stroke-opacity=".4"/><path d="M${q.x + 3} ${q.y + q.t / 2}H${q.x + q.t - 3}" stroke="${cl}" stroke-opacity=".45"/></g>`;
+                } else nuage += `<rect x="${q.x + 1.5}" y="${q.y + 1.5}" width="${q.t - 3}" height="${q.t - 3}" rx="1.5" fill="none" stroke="rgba(0,240,255,.28)" stroke-dasharray="2 3"/>`;
+            });
+            // baie agrandie : le nombre de colonnes qui donne les plus grosses caisses carrees
+            let best = null;
+            for (let cols = 4; cols <= 40; cols++) { const rows = Math.ceil(N / cols), c = Math.min(ZOOM.w / cols, ZOOM.h / rows); if (!best || c > best.c + 0.01) best = { cols, rows, c }; }
+            const ox = ZOOM.x + (ZOOM.w - best.c * best.cols) / 2, oy = ZOOM.y + (ZOOM.h - best.c * best.rows) / 2;
+            let grand = "";
+            for (let i = 0; i < N; i++) {
+                const col = i % best.cols, row = best.rows - 1 - Math.floor(i / best.cols), x = ox + col * best.c, y = oy + row * best.c, c = best.c;
+                if (i < prop.length) {
+                    const k = prop[i], cl = coul(k);
+                    grand += `<g class="tb-c" data-l="${k}" style="color:${cl}"><rect x="${x}" y="${y}" width="${c}" height="${c}" fill="rgba(0,0,0,0)"/><rect x="${x + 2}" y="${y + 2}" width="${c - 4}" height="${c - 4}" fill="url(#tbcg${k % 8})" stroke="${cl}" stroke-width="1.5"${mis(k) ? ' stroke-dasharray="4 3"' : ""}/><rect x="${x + 5}" y="${y + 5}" width="${c - 10}" height="${c - 10}" fill="none" stroke="${cl}" stroke-opacity=".35"/><path d="M${x + 5} ${y + c / 2}H${x + c - 5}" stroke="${cl}" stroke-opacity=".5"/><path d="M${x + 5} ${y + 5}H${x + c - 5}" stroke="#fff" stroke-opacity=".35"/></g>`;
+                } else grand += `<rect x="${x + 2}" y="${y + 2}" width="${c - 4}" height="${c - 4}" fill="rgba(0,240,255,.03)" stroke="rgba(0,240,255,.25)" stroke-dasharray="3 3"/>`;
+            }
+            const defs = COUL_MARCH.map((cl, i) => `<radialGradient id="tbir${i}" cx=".5" cy=".5" r=".75"><stop offset="0" stop-color="${cl}" stop-opacity=".5"/><stop offset=".6" stop-color="${cl}" stop-opacity=".34"/><stop offset="1" stop-color="${cl}" stop-opacity=".16"/></radialGradient><linearGradient id="tbcg${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${cl}" stop-opacity=".55"/><stop offset="1" stop-color="${cl}" stop-opacity=".18"/></linearGradient>`).join("");
+            const moteurs = sil.moteurs.map(([dx, y]) => `<circle class="tb-mot" cx="${sil.axe + dx}" cy="${y}" r="5" fill="#FF7100"/><circle class="tb-mot" cx="${sil.axe + dx}" cy="${y}" r="12" fill="#FF7100" fill-opacity=".18"/>`).join("");
+            const v = S && S.vaisseau ? S.vaisseau : {}; const nomV = nomVaisseau(v.modele);
+            const svg = `<svg class="tb-svgv" viewBox="0 0 1450 630" role="img" aria-label="Soute de votre vaisseau">
+                <defs>${defs}
+                    <filter id="tbholo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0"/><feComponentTransfer><feFuncG type="gamma" amplitude="1.25" exponent="1.45" offset="0"/><feFuncB type="gamma" amplitude="1.25" exponent="1.45" offset="0"/></feComponentTransfer></filter>
+                    <filter id="tblueur"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <filter id="tbir" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <pattern id="tblignes" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1.4" fill="#000" opacity=".28"/></pattern>
+                    <radialGradient id="tbsol"><stop offset="0" stop-color="#00F0FF" stop-opacity=".5"/><stop offset="1" stop-color="#00F0FF" stop-opacity="0"/></radialGradient></defs>
+                <ellipse cx="${OX + IW / 2}" cy="${OY + IH + 30}" rx="230" ry="13" fill="url(#tbsol)" opacity=".75"/>
+                <g transform="translate(${OX} ${OY}) rotate(180 ${IW / 2} ${IH / 2})">
+                    <image href="${sil.img}" width="${IW}" height="${IH}" filter="url(#tbholo)" opacity=".95"/>
+                    <rect width="${IW}" height="${IH}" fill="url(#tblignes)"/>
+                    <g filter="url(#tblueur)" stroke="#00F0FF" stroke-width="2" fill="none" stroke-linejoin="round">${sil.formes.map(d => `<path d="${d}"/>`).join("")}</g>
+                    ${moteurs}
+                </g>
+                <g filter="url(#tbir)" opacity=".92">${nuage}</g>
+                <path d="M${maxx + 4} ${miny} L${ZOOM.x - 14} ${ZOOM.y - 14} M${maxx + 4} ${maxy} L${ZOOM.x - 14} ${ZOOM.y + ZOOM.h + 14}" stroke="#00F0FF" stroke-opacity=".5" stroke-dasharray="4 5" fill="none"/>
+                <rect x="${ZOOM.x - 14}" y="${ZOOM.y - 14}" width="${ZOOM.w + 28}" height="${ZOOM.h + 28}" fill="rgba(0,10,14,.7)" stroke="#00F0FF" stroke-opacity=".6"/>
+                <path d="M${ZOOM.x - 14} ${ZOOM.y - 14}h30M${ZOOM.x - 14} ${ZOOM.y - 14}v30M${ZOOM.x + ZOOM.w + 14} ${ZOOM.y + ZOOM.h + 14}h-30M${ZOOM.x + ZOOM.w + 14} ${ZOOM.y + ZOOM.h + 14}v-30" stroke="#00F0FF" stroke-width="3" fill="none"/>
+                <text x="${ZOOM.x}" y="${ZOOM.y - 26}" fill="#99a" font-size="12" letter-spacing="3">BAIE DE SOUTE · AGRANDIE</text>
+                ${grand}
+                ${vend ? `<g class="tb-bsvg" onclick="ouvrirVente()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')ouvrirVente()"><rect x="${ZOOM.x + ZOOM.w + 14 - 420}" y="${ZOOM.y + ZOOM.h + 46}" width="420" height="58" fill="rgba(255,215,0,.1)" stroke="#FFD700" stroke-width="1.5"/><text x="${ZOOM.x + ZOOM.w + 14 - 210}" y="${ZOOM.y + ZOOM.h + 72}" fill="#FFD700" font-size="17" letter-spacing="2" text-anchor="middle">▶ VENDRE CE QUE JE TRANSPORTE</text><text x="${ZOOM.x + ZOOM.w + 14 - 210}" y="${ZOOM.y + ZOOM.h + 93}" fill="#8b97a0" font-size="12" letter-spacing="1" text-anchor="middle">${vend} marchandise${vend > 1 ? "s" : ""} · trouver où les vendre</text></g>` : ""}
+                <text x="${ZOOM.x - 14}" y="${ZOOM.y + ZOOM.h + 78}" fill="#fff" font-size="${nomV.length > 30 ? 16 : nomV.length > 22 ? 20 : 26}" letter-spacing="2">${esc(nomV)}</text>
+                ${v.nom ? `<text x="${ZOOM.x - 14}" y="${ZOOM.y + ZOOM.h + 100}" fill="#8b97a0" font-size="14" letter-spacing="1">« ${esc(v.nom)} »</text>` : ""}
+            </svg>`;
+            return `<h2>CE QUE JE TRANSPORTE <em>${fmtN(total)} / ${fmtN(cap)} t · ${Math.round(total / cap * 100)} % plein</em></h2><div class="tb-scene" id="tb-scene">${svg}</div>`;
+        }
+        // survol : AUCUN « mouseout » (chaque caisse a une zone de survol qui couvre toute sa case) -> pas de clignotement entre deux caisses
+        function brancherScene(sc) {
+            const tip = document.getElementById("tb-tip"), leg = document.getElementById("tb-leg");
+            let courant = null;
+            const hl = idx => { sc.querySelectorAll(".tb-c").forEach(r => { r.classList.toggle("dim", idx !== null && r.dataset.l !== String(idx)); r.classList.toggle("hl", idx !== null && r.dataset.l === String(idx)); }); if (leg) leg.querySelectorAll("span[data-i]").forEach(s => s.classList.toggle("hl", idx !== null && s.dataset.i === String(idx))); };
+            const sur = e => {
+                const r = e.target.closest(".tb-c"), l = e.target.closest("#tb-leg span[data-i]"), idx = r ? r.dataset.l : l ? l.dataset.i : null;
+                if (idx === courant) return;
+                courant = idx; hl(idx);
+                if (r) { const it = SOUTE.items[Number(idx)] || {}; tip.innerHTML = `<b>${esc(it.n)}</b> · ${fmtN(it.q)} t${it.m ? "<br>cargaison de mission" : ""}${it.v ? "<br>volée" : ""}${it.paye ? "<br>prix moyen payé : " + fmtN(it.paye) + " cr/t" : ""}`; tip.style.display = "block"; }
+                else tip.style.display = "none";
+            };
+            const fin = () => { courant = null; hl(null); tip.style.display = "none"; };
+            sc.addEventListener("mouseover", sur); sc.addEventListener("mouseleave", fin);
+            sc.addEventListener("mousemove", e => { tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+            if (leg) { leg.addEventListener("mouseover", sur); leg.addEventListener("mouseleave", fin); }
         }
 
         // soute : le cadre est rempli de caisses (capacite totale du vaisseau) ; unite automatique (la plus petite parmi 1, 2, 5, 10, 20, 50 t qui garde au plus 200 caisses)
@@ -577,6 +693,14 @@
             const total = items.reduce((a, x) => a + (Number(x.q) || 0), 0);
             if (!cap) return `<h2>CE QUE JE TRANSPORTE</h2><div class="tb-vide">Capacité de soute non encore relevée : elle arrive au prochain changement de vaisseau ou de modules en jeu.</div>`;
             const U = [1, 2, 5, 10, 20, 50].find(u => cap / u <= 200) || 50, N = Math.ceil(cap / U);
+            const sil = silhouetteActive();
+            SOUTE.large = !!sil;
+            if (sil) {
+                SOUTE.items = items; SOUTE.U = U; SOUTE.N = N;
+                const leg2 = items.map((x, i) => `<span data-i="${i}" style="--cl:${COUL_MARCH[i % COUL_MARCH.length]}"><i></i>${esc(x.n)} · ${fmtN(x.q)} t${x.m ? " (mission)" : ""}</span>`).join("");
+                return souteDessus(sil, items, cap, U, N, total, vendables().length) + (items.length ? `<div class="tb-leg" id="tb-leg">${leg2}</div>` : `<div class="tb-sub">Soute vide.</div>`)
+                    + `<div class="tb-cap"><span>1 caisse = ${U} t · ${N} caisses = capacité du vaisseau</span><span>survolez une caisse ou la légende pour voir la marchandise</span></div>`;
+            }
             let COLS = 22;
             for (let c = 14, pire = 1e9; c <= 30; c++) { const perte = Math.ceil(N / c) * c - N, ecart = Math.abs(c - 22); if (perte < pire || (perte === pire && ecart < Math.abs(COLS - 22))) { pire = perte; COLS = c; } }
             const ROWS = Math.ceil(N / COLS);
@@ -595,9 +719,12 @@
             return `<h2>CE QUE JE TRANSPORTE <em>${fmtN(total)} / ${fmtN(cap)} t · ${Math.round(total / cap * 100)} % plein</em></h2>
                 <div class="tb-grille" id="tb-grille" style="grid-template-columns:repeat(${COLS},1fr)">${cases}</div>
                 ${items.length ? `<div class="tb-leg" id="tb-leg">${leg}</div>` : `<div class="tb-sub">Soute vide.</div>`}
-                <div class="tb-cap"><span>1 caisse = ${U} t · ${N} caisses = capacité du vaisseau</span><span>survolez une caisse pour voir la marchandise</span></div>`;
+                <div class="tb-cap"><span>1 caisse = ${U} t · ${N} caisses = capacité du vaisseau</span><span>survolez une caisse pour voir la marchandise</span>${vendables().length ? `<button type="button" class="tb-btn" onclick="ouvrirVente()">▶ VENDRE CE QUE JE TRANSPORTE</button>` : ""}</div>
+                ${window.innerWidth >= LARGE && !SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()] ? `<div class="tb-sub tb-bientotv">Vue holographique de votre vaisseau : pour l'instant, seul le <b>Panther Clipper Mk II</b> est modélisé. Les autres vaisseaux viendront plus tard.</div>` : ""}`;
         }
         function brancherSoute() {
+            const sc = document.getElementById("tb-scene");
+            if (sc) { brancherScene(sc); return; }
             const g = document.getElementById("tb-grille"), leg = document.getElementById("tb-leg");
             if (!g) return;
             const tip = document.getElementById("tb-tip");
@@ -876,7 +1003,7 @@
             const note = plan.complet ? `${plan.arrets.length} arrêt${plan.arrets.length > 1 ? "s" : ""} à faire · ${plan.total.d.toFixed(1)} al · ${plan.total.sauts} saut${plan.total.sauts > 1 ? "s" : ""} · ≈ ${duree(plan.total.min * 60)}` : "positions des systèmes en cours de chargement…";
             return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${legendeParcours()}${svg}</div>`;
         }
-        const legendeParcours = () => `<div class="tb-leg"><span style="--c:#FF4FD8"><i></i>vous êtes ici</span><span style="--c:#fff"><i></i>où aller</span><span style="--c:#00F0FF"><i></i>à faire</span><span style="--c:#FFB000"><i class="tr"></i>déjà passé, mission pas terminée</span><span style="--c:#6b747a"><i></i>terminé</span><span style="--c:#00FF66"><i></i>retour : rendre les missions</span></div>`;
+        const legendeParcours = () => `<div class="tb-lgp"><span style="--c:#FF4FD8"><i></i>vous êtes ici</span><span style="--c:#fff"><i></i>où aller</span><span style="--c:#00F0FF"><i></i>à faire</span><span style="--c:#FFB000"><i class="tr"></i>déjà passé, mission pas terminée</span><span style="--c:#6b747a"><i></i>terminé</span><span style="--c:#00FF66"><i></i>retour : rendre les missions</span></div>`;
         // missions d'un arret : colonnes repartagees pour ne laisser AUCUN vide (1 -> pleine largeur, 2, 3 ; 4 -> 2x2 ; la derniere carte s'etire sur la place restante)
         function grilleMissions(cartes) {
             const n = cartes.length, c = n <= 3 ? Math.max(n, 1) : n % 3 === 0 ? 3 : 2, reste = n % c;
@@ -1296,6 +1423,18 @@
             interrogerVente(jeton);
         }
         function declencherVente() { /* plus de recherche automatique (voir ci-dessus) */ }
+        // modale « vendre ce que je transporte » : le contenu est celui de venteHtml(), recalcule a chaque rendu tant qu'elle est ouverte (defilement conserve)
+        function majModale() {
+            const m = document.getElementById("tb-modale"), c = document.getElementById("tb-mcorps");
+            if (!m || !c) return;
+            const html = VENTE.ouverte ? venteHtml() : "";
+            if (!html) { VENTE.ouverte = false; m.classList.remove("on"); c.innerHTML = ""; return; }
+            const p = m.querySelector(".tb-mpanneau"), haut = p.scrollTop;
+            c.innerHTML = html; m.classList.add("on"); p.scrollTop = haut;
+        }
+        function ouvrirVente() { if (!vendables().length) return; if (typeof sonClic === "function") sonClic(); VENTE.ouverte = true; majModale(); }
+        function fermerVente() { VENTE.ouverte = false; majModale(); }
+        document.addEventListener("keydown", e => { if (e.key === "Escape" && VENTE.ouverte) fermerVente(); });
         async function interrogerVente(jeton) {
             if (jeton !== VENTE.jeton || !S) return;
             const items = vendables().filter(x => x.k).map(x => ({ k: cleSpansh(x.k), q: palierQ(Number(x.q)) }));
