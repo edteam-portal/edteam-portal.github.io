@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-modules-vaisseau', date: '2026-10-11T15:40:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : les modules de votre vaisseau',
+        texte: 'Dans l’onglet Missions, l’hologramme de votre vaisseau (Panther Clipper Mk II ou Lynx Highliner) montre maintenant tous vos modules. Sur les côtés, des traits relient les modules primordiaux, les points d’emport et les utilitaires à leur place dans la coque, avec leur niveau d’ingénierie (G1 à G5) ou « STOCK » s’ils ne sont pas ingénierés. Dans la coque, vos modules optionnels forment des compartiments proportionnels à la taille de chaque emplacement, regroupés par type (cabines, racks de soute…) avec un rendu de scanner infrarouge : vous voyez d’un coup d’œil ce que contient votre vaisseau, vos emplacements vides, et par exemple 3 cabines et pas de soute. Les passagers se promènent dans les cabines, les marchandises remplissent les racks. Survolez un compartiment pour son détail : module, places ou capacité, plan d’ingénierie, effet expérimental, ingénieur et modifications. Le même hologramme est dans l’onglet Commerce, à la place de la soute en vue séparée : un pilote qui ne fait que du commerce voit sa coque remplie de racks et de sa cargaison (survolez une caisse pour la marchandise), avec le bouton « Vendre ce que je transporte ». Chaque pilote voit son propre équipement. Les noms des modules sont ceux du jeu (en anglais). La disposition dans la coque est stylisée : le jeu ne donne pas la position des modules.',
+        important: false,
+        action: 'Relancez EDMC une fois : le plugin v2.18 se met à jour tout seul (nécessaire pour lire vos modules ; il corrige aussi le nombre de places des cabines Mk II du Lynx).'
+    },
+    {
         id: '2026-10-missions-au-sol', date: '2026-10-11T14:18:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : votre combinaison quand vous êtes à pied',
         texte: 'Quand vous descendez de votre vaisseau, l’onglet Missions affiche votre combinaison vue de dos (combinaison de vol, Maverick, Artemis ou Dominator) en hologramme, avec des traits qui partent vers chaque équipement : arme principale (et la deuxième pour la Dominator), arme secondaire, combinaison avec ses modifications, ceinture avec vos consommables, et sac à dos avec la liste de ce qu’il contient (données volées, composants, objets). Ça se met à jour quand vous ramassez ou utilisez quelque chose. Le jeu ne donne pas les outils équipés ni la capacité du sac : ils ne sont pas affichés. Sur un petit écran, vous avez les mêmes informations en listes.',
@@ -16,7 +23,7 @@ window.EDTEAM_NOUVEAUTES = [
         titre: 'Tableau de bord : vos passagers dans le vaisseau',
         texte: 'Quand vous avez une mission de passagers en cours, l’onglet Missions affiche maintenant votre vaisseau en hologramme à côté de la carte : les passagers se promènent dans la coque sous un balayage radar, avec une couleur par type (orange pour les touristes et hommes d’affaires, jaune pour les VIP et officiels, vert pour la sécurité et l’aide humanitaire, rouge pour les prisonniers, criminels et recherchés). Les personnages importants sont plus grands et entourés d’un halo. Une jauge indique les places occupées sur la capacité de vos cabines, et passe au rouge si vous avez plus de passagers que de places. La soute est à l’arrière, avec les marchandises à bord, de livraison par exemple. Pour une mission de sauvetage, le colis à récupérer apparaît en pointillés avec un « ? » dans la soute, et se remplit dès qu’il est à bord. Disponible pour le Panther Clipper Mk II et le Lynx Highliner (dont la soute s’affiche aussi en hologramme dans l’onglet Commerce), les autres vaisseaux viendront plus tard. La répartition dans la coque est stylisée : le jeu ne donne pas la position des modules.',
         important: false,
-        action: 'Relancez EDMC une fois : le plugin v2.17 se met à jour tout seul (nécessaire pour lire vos cabines et le type de chaque passager).'
+        action: 'Relancez EDMC une fois : le plugin v2.18 se met à jour tout seul (nécessaire pour lire vos modules, vos cabines et le type de chaque passager).'
     },
     {
         id: '2026-10-soute-vaisseau', date: '2026-10-11T00:37:00Z', type: 'NOUVEAU',

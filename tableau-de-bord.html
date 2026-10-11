@@ -19,6 +19,8 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="navigation.js?v=30"></script>
+    <script src="modules-data.js?v=1"></script>
+    <script src="modules-vaisseau.js?v=1"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -185,6 +187,9 @@
         .tb-modale.on { display:flex; }
         .tb-mpanneau { position:relative; width:min(1000px,100%); max-height:90vh; overflow:auto; }
         .tb-mpanneau .bloc { margin:0; background:linear-gradient(180deg,#0e0b02,#050403); } .tb-mpanneau .bloc > h2 { padding-right:44px; }
+        .tb-mpanneau.tb-mreg { width:min(1400px,95%); max-height:90vh; display:flex; flex-direction:column; padding:30px; background:rgba(10,5,0,.95); border:1px solid #00F0FF; box-shadow:0 0 40px rgba(0,240,255,.15); }
+        .tb-mpanneau.tb-mreg .tb-mx { top:15px; right:20px; width:auto; height:auto; background:none; border:0; color:#00F0FF; font-weight:bold; font-size:1.2em; } .tb-mpanneau.tb-mreg .tb-mx:hover { color:#fff; background:none; transform:scale(1.2); }
+        @media (max-width:900px) { .tb-mpanneau.tb-mreg { padding:20px; } .tb-mpanneau.tb-mreg [style*="grid-template-columns:165px"], .tb-mpanneau.tb-mreg [style*="grid-template-columns:minmax(0,1.3fr)"] { grid-template-columns:1fr 1fr !important; } }
         .tb-mx { position:absolute; top:12px; right:12px; z-index:2; background:#000; border:1px solid #FFD700; color:#FFD700; width:32px; height:32px; cursor:pointer; font-size:1em; } .tb-mx:hover { background:#FFD700; color:#000; }
         .tb-bientotv { color:#8b97a0; font-size:.82em; margin-top:10px; padding-top:8px; border-top:1px dashed #2a2f33; } .tb-bientotv b { color:#00F0FF; font-weight:normal; }
         .tb-scene { margin-top:4px; } .tb-svgv { width:100%; height:auto; display:block; } .tb-svgv text { paint-order:stroke; stroke:#04090c; stroke-width:3px; }
@@ -223,6 +228,13 @@
         .tbs-pouls { animation:tbsPouls 2s ease-in-out infinite; } @keyframes tbsPouls { 0%,100% { opacity:.4; } 50% { opacity:1; } }
         .tbs-listes { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; margin-top:6px; } .tbs-liste { border:1px solid var(--cl); background:rgba(3,8,12,.7); padding:6px 9px; font-size:.82em; line-height:1.5; } .tbs-liste b { display:block; color:var(--cl); letter-spacing:1.5px; font-size:.85em; margin-bottom:2px; }
         @media (prefers-reduced-motion:reduce) { .tbs-balai, .tbs-pouls { animation:none; } }
+        /* modules du vaisseau (modules-vaisseau.js) */
+        .tbm-p { animation:tbmErre var(--d) ease-in-out infinite; } @keyframes tbmErre { 0%,100% { transform:translate(var(--a0),var(--b0)); } 25% { transform:translate(var(--a1),var(--b1)); } 50% { transform:translate(var(--a2),var(--b2)); } 75% { transform:translate(var(--a3),var(--b3)); } }
+        .tbm-hit { cursor:help; } .tbm-hit:hover { fill-opacity:.13; stroke:#fff; stroke-opacity:.85; stroke-width:1.4; }
+        #tbm-tip { position:fixed; display:none; background:rgba(3,8,12,.97); border:1px solid #00F0FF; padding:8px 11px; font-size:12px; max-width:330px; z-index:9999; pointer-events:none; line-height:1.5; color:#cfd8dc; }
+        .tbm-bloc .tb-scene svg { max-height:calc(100vh - 250px); min-height:420px; }
+        @media (prefers-reduced-motion:reduce) { .tbm-p { animation:none; } }
+        .tbm-vente { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:10px; } .tbm-vente span { color:#8b97a0; font-size:.85em; }
         .tbp-bloc { margin-bottom:12px; } .tbp-duo .tbp-bloc { margin-bottom:0; position:sticky; top:8px; align-self:start; }
         .tbp-bloc .tb-scene svg { max-height:calc(100vh - 345px); min-height:340px; }
         .tbp-duo.tbs { grid-template-columns:minmax(0,.8fr) minmax(0,1.25fr); }
@@ -349,6 +361,26 @@
         .tb-flux .st { color:#fff; font-size:1.35em; margin:2px 0; overflow-wrap:anywhere; } .tb-flux .sy { color:#00F0FF; font-size:.95em; margin-bottom:8px; }
         .tb-flux .lg { display:flex; justify-content:space-between; gap:10px; font-size:1.05em; padding:3px 0; color:#cfd; } .tb-flux .lg b { color:#FFD700; font-weight:normal; } .tb-flux .lg small { font-size:.7em; color:#889; }
         .tb-flux .age { margin-top:6px; }
+        /* colonne etroite (feuille de route a cote de l'hologramme) : la mise en page suit la largeur de la colonne, pas celle de l'ecran */
+        .tb-etroit { container:tbe / inline-size; min-width:0; }
+        @container tbe (max-width:700px) {
+            .tb-kpi { grid-template-columns:1fr 1fr; }
+            .tb-kpi .k b { font-size:1.1em; }
+            .tb-arret, .tb-trajet { grid-template-columns:40px minmax(0,1fr); }
+            .tb-arret .num { width:30px; height:30px; }
+            .tb-arret .corps, .tb-arret.ouvert .corps { padding:10px 12px; }
+            .tb-arret.ouvert .lieu { font-size:1.2em; margin-right:8px; }
+            .tb-arret .corps.compact { grid-template-columns:minmax(0,1fr) minmax(0,1fr) 14px; padding:7px 10px; }
+            .tb-arret .corps.compact .lieu { grid-column:1; } .tb-arret .corps.compact .sys { grid-column:2; }
+            .tb-arret .corps.compact .chev { grid-column:3; grid-row:1; }
+            .tb-arret .corps.compact .res { grid-column:1 / -1; } .tb-arret .corps.compact .suite { grid-column:1 / -1; text-align:left; white-space:normal; }
+            .tb-arret .cols { grid-template-columns:1fr; }
+            .tb-flux { grid-template-columns:1fr; gap:6px; }
+            .tb-flux .lien svg { transform:rotate(90deg); height:30px; width:60px; margin:0 auto; }
+            .tb-flux .n { padding:10px 12px; } .tb-flux .st { font-size:1.15em; }
+            .lgr { grid-template-columns:22px minmax(0,1fr) auto; } .lgr .nom { font-size:1.15em; } .lgr .qt, .lgr .px, .lgr .gn { font-size:1.05em; }
+            .tb-arret .ln { grid-template-columns:18px minmax(0,1fr) auto; } .tb-arret .ln .nom { overflow-wrap:anywhere; }
+        }
         .tb-fin { border:1px dashed rgba(0,255,102,.5); padding:14px; text-align:center; color:#00FF66; letter-spacing:2px; font-size:1.05em; }
         @media (max-width:1000px) { .tb-flux { grid-template-columns:1fr; } .tb-flux .lien svg { transform:rotate(90deg); height:30px; width:60px; margin:0 auto; } .lgr { grid-template-columns:22px 1fr 1fr; } }
         /* missions */
@@ -468,6 +500,7 @@
             if (m > 0) return m + " min " + ("0" + s).slice(-2) + " s";
             return s + " s";
         }
+        const jjhm = iso => { const d = new Date(iso); return isNaN(d) ? "" : ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
         const heure = iso => { const d = new Date(iso); return isNaN(d) ? "" : ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
 
         // rangs du jeu (memes tables que le mobile)
@@ -595,10 +628,15 @@
                 <div class="bloc"><h2>TONNES VENDUES</h2><div class="tb-big">${fmtN(t.tonnes)} t</div><div class="tb-sub">${fmtM(t.ventes)} de ventes · ${fmtM(t.achats)} d'achats</div></div>`;
         }
         function panneauCommerce() {
+            // meme hologramme (modules du vaisseau) que l'onglet Missions : les racks de soute portent la cargaison (survol par marchandise) ; repli sur l'ancienne soute sans modules (plugin < 2.18) ou sans silhouette
+            const nv = vendables().length, pied = `<div class="tbm-vente">${nv ? `<button type="button" class="tb-btn" onclick="ouvrirVente()">▶ VENDRE CE QUE JE TRANSPORTE</button>` : ""}${boutonRegistre()}${nv ? `<span>${nv} marchandise${nv > 1 ? "s" : ""} · trouver où les vendre</span>` : ""}</div>`;
+            const v = S && S.vaisseau, mod = v && v.mods && v.mods.length && typeof modulesHtml === "function" ? modulesHtml(S.missions || [], { pied }) : "";
+            if (mod) return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
+                <div class="tbp-duo tbs"><div class="tb-etroit">${feuilleHtml()}</div>${mod}</div>`;
             return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
                 <div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>
                 ${feuilleHtml()}
-                <div style="margin-top:12px;">${registreHtml()}</div>`;
+                <div class="tbm-vente" style="margin-bottom:12px;">${boutonRegistre()}</div>`;
         }
 
         // ---------------------------------------------------------------
@@ -608,19 +646,31 @@
         // ---------------------------------------------------------------
         const SILHOUETTES = {
             panthermkii: {
+                nom: "Panther Clipper Mk II",
+                zmod: [116, 500], paires: true,
+                ref: [["LargeHardpoint1","arme",3],["LargeHardpoint2","arme",3],["MediumHardpoint1","arme",2],["MediumHardpoint2","arme",2],["MediumHardpoint3","arme",2],["MediumHardpoint4","arme",2],["SmallHardpoint1","arme",1],["SmallHardpoint2","arme",1],["SmallHardpoint3","arme",1],["SmallHardpoint4","arme",1],["TinyHardpoint1","util",0],["TinyHardpoint2","util",0],["TinyHardpoint3","util",0],["TinyHardpoint4","util",0],["TinyHardpoint5","util",0],["TinyHardpoint6","util",0],["Cargo01","opt",8],["Slot01_Size8","opt",8],["Cargo02","opt",7],["Slot02_Size7","opt",7],["Slot03_Size6","opt",6],["Slot04_Size6","opt",6],["Slot05_Size6","opt",6],["Slot06_Size5","opt",5],["Slot07_Size5","opt",5],["Slot08_Size4","opt",4],["Slot09_Size2","opt",2],["Slot10_Size1","opt",1],["PlanetaryApproachSuite","opt",1]],
                 img: "images/vaisseaux/panther-dessus.webp", W: 488, H: 541, axe: 244, arriere: 120, nez: 452,
                 coque: [[0, 116], [58, 116], [78, 150], [92, 205], [100, 240], [124, 276], [130, 318], [124, 352], [98, 388], [78, 432], [62, 470], [52, 504], [26, 526], [0, 530]],
                 moteurs: [[-120, 50], [-146, 50], [120, 50], [146, 50], [-150, 270], [-176, 270], [150, 270], [176, 270]],
                 formes: ["M244.0 116.0 L302.0 116.0 L322.0 150.0 L336.0 205.0 L344.0 240.0 L368.0 276.0 L374.0 318.0 L368.0 352.0 L342.0 388.0 L322.0 432.0 L306.0 470.0 L296.0 504.0 L270.0 526.0 L244.0 530.0 L244.0 530.0 L218.0 526.0 L192.0 504.0 L182.0 470.0 L166.0 432.0 L146.0 388.0 L120.0 352.0 L114.0 318.0 L120.0 276.0 L144.0 240.0 L152.0 205.0 L166.0 150.0 L186.0 116.0 L244.0 116.0 Z","M328.0 84.0 L350.0 84.0 L352.0 232.0 L336.0 232.0 Z","M152.0 232.0 L136.0 232.0 L138.0 84.0 L160.0 84.0 Z","M344.0 52.0 L362.0 42.0 L402.0 42.0 L408.0 60.0 L408.0 150.0 L394.0 186.0 L356.0 172.0 L344.0 120.0 Z","M144.0 120.0 L132.0 172.0 L94.0 186.0 L80.0 150.0 L80.0 60.0 L86.0 42.0 L126.0 42.0 L144.0 52.0 Z","M376.0 272.0 L390.0 262.0 L430.0 262.0 L432.0 300.0 L430.0 400.0 L416.0 414.0 L380.0 404.0 L374.0 340.0 Z","M114.0 340.0 L108.0 404.0 L72.0 414.0 L58.0 400.0 L56.0 300.0 L58.0 262.0 L98.0 262.0 L112.0 272.0 Z"]
             },
             mediumtransport01: {
+                nom: "Lynx Highliner",
                 img: "images/vaisseaux/lynx-dessus.webp", W: 315, H: 629, axe: 158, arriere: 112, nez: 590,
-                coque: [[0,112],[34,112],[40,135],[62,150],[88,165],[96,200],[100,240],[104,280],[104,320],[96,350],[84,385],[68,410],[56,440],[50,480],[46,520],[40,555],[30,585],[12,605],[0,610]],
+                coque: [[0,112],[34,112],[44,135],[70,150],[100,165],[116,200],[124,240],[128,280],[126,320],[116,350],[98,385],[74,410],[58,440],[50,480],[46,520],[40,555],[30,585],[12,605],[0,610]],
                 moteurs: [[-120,16],[120,16],[-64,36],[64,36]],
+                anc: { tiny: { TinyHardpoint1: [152,78], TinyHardpoint2: [97,428], TinyHardpoint3: [212,428], TinyHardpoint4: [205,260] }, hard: { LargeHardpoint1: [157,98], MediumHardpoint1: [96,288], MediumHardpoint2: [218,288], MediumHardpoint3: [84,348], MediumHardpoint4: [230,348] } },
+                ref: [["LargeHardpoint1","arme",4],["MediumHardpoint1","arme",3],["MediumHardpoint2","arme",3],["MediumHardpoint3","arme",3],["MediumHardpoint4","arme",3],["TinyHardpoint1","util",1],["TinyHardpoint2","util",1],["TinyHardpoint3","util",1],["TinyHardpoint4","util",1],["Slot01_Size6","opt",6],["Slot02_Size5","opt",5],["Slot03_Size4","opt",4],["Slot04_Size4","opt",4],["Slot05_Size3","opt",3],["Slot06_Size2","opt",2],["Slot07_Size1","opt",1],["Passenger01","opt",6],["Passenger02","opt",6],["Passenger03","opt",5]],
                 formes: ["M162.8 613.5 L130.2 606.1 L119.1 589.0 L119.1 577.9 L107.3 573.5 L105.8 560.2 L118.4 559.4 L120.6 498.8 L108.8 498.0 L107.3 509.1 L102.9 509.1 L100.6 501.7 L91.0 500.2 L94.0 410.7 L54.0 334.5 L48.8 331.5 L48.8 325.6 L14.8 262.7 L19.2 216.8 L11.1 207.9 L11.8 185.7 L14.8 173.9 L22.9 170.9 L21.5 139.1 L31.1 8.9 L53.3 10.4 L50.3 73.3 L51.8 151.7 L68.8 149.5 L69.6 134.7 L82.9 132.5 L88.1 31.8 L120.6 31.1 L125.8 106.6 L153.2 103.6 L193.1 106.6 L196.8 31.8 L224.2 31.1 L230.9 36.3 L236.8 133.2 L249.4 136.2 L247.9 150.2 L256.0 153.2 L256.8 174.6 L270.1 173.2 L265.7 11.1 L285.6 10.4 L288.6 13.3 L299.0 147.3 L296.7 172.4 L300.4 183.5 L306.4 187.2 L307.1 208.7 L299.7 217.6 L304.1 263.4 L270.8 327.1 L270.1 333.7 L266.4 334.5 L227.2 410.7 L231.6 498.8 L219.0 503.9 L218.3 497.3 L203.5 498.0 L203.5 521.0 L205.0 523.9 L211.6 523.9 L213.1 557.2 L217.6 559.4 L216.1 573.5 L205.0 577.2 L204.2 589.8 L186.5 589.8 L182.0 604.6 L172.4 612.0 L162.8 613.5 Z"]
             }
         };
         const LARGE = 1000;
+        // liste des vaisseaux modelises : se met a jour toute seule des qu'une entree de SILHOUETTES est ajoutee (champ nom)
+        function listeModelises() { const n = Object.values(SILHOUETTES).map(x => x.nom).filter(Boolean); return n.length > 1 ? n.slice(0, -1).map(x => `<b>${x}</b>`).join(", ") + " et <b>" + n[n.length - 1] + "</b>" : n.map(x => `<b>${x}</b>`).join(""); }
+        function noteVaisseaux() {
+            if (!S || (S.pied && S.pied.on) || window.innerWidth < LARGE || SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()]) return "";
+            return `<div class="tb-sub tb-bientotv" style="margin-bottom:12px;">Vue holographique de votre vaisseau : pour l'instant, seuls ${Object.keys(SILHOUETTES).length > 1 ? "les vaisseaux suivants sont modélisés : " : "le vaisseau suivant est modélisé : "}${listeModelises()}. Les autres vaisseaux viendront plus tard.</div>`;
+        }
         const silhouetteActive = () => { const v = S && S.vaisseau ? S.vaisseau : {}; return window.innerWidth >= LARGE ? (SILHOUETTES[String(v.modele || "").toLowerCase()] || null) : null; };
         let ecranLarge = window.innerWidth >= LARGE;
         window.addEventListener("resize", () => { const l = window.innerWidth >= LARGE; if (l !== ecranLarge) { ecranLarge = l; rendre(); } });
@@ -745,7 +795,7 @@
                 <div class="tb-grille" id="tb-grille" style="grid-template-columns:repeat(${COLS},1fr)">${cases}</div>
                 ${items.length ? `<div class="tb-leg" id="tb-leg">${leg}</div>` : `<div class="tb-sub">Soute vide.</div>`}
                 <div class="tb-cap"><span>1 caisse = ${U} t · ${N} caisses = capacité du vaisseau</span><span>survolez une caisse pour voir la marchandise</span>${vendables().length ? `<button type="button" class="tb-btn" onclick="ouvrirVente()">▶ VENDRE CE QUE JE TRANSPORTE</button>` : ""}</div>
-                ${window.innerWidth >= LARGE && !SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()] ? `<div class="tb-sub tb-bientotv">Vue holographique de votre vaisseau : pour l'instant, seuls le <b>Panther Clipper Mk II</b> et le <b>Lynx Highliner</b> sont modélisés. Les autres vaisseaux viendront plus tard.</div>` : ""}`;
+                ${noteVaisseaux()}`;
         }
         function brancherSoute() {
             const sc = document.getElementById("tb-scene");
@@ -771,16 +821,29 @@
                 leg.addEventListener("mouseleave", () => hl(null));
             }
         }
+        // registre : meme fenetre que « AGRANDIR » du journal de la Colonisation / du BGS (titre « > », lignes a bordure coloree, pastille de type)
+        const GRILLE_REG = "165px 170px minmax(0,1fr) 110px 120px 130px";
         function registreHtml() {
-            const reg = (S.registre || []).slice().reverse();
-            const lignes = reg.map(r => {
-                const achat = r.k === "A";
-                return `<tr><td>${heure(r.t)}</td><td class="${achat ? "tb-ach" : "tb-ven"}">${achat ? "ACHAT" : (r.nm ? "VENTE · MARCHÉ NOIR" : "VENTE")} · ${esc(r.n)}</td><td>${cp(r.s)}${r.y ? `<br><span class="tb-mut">${cp(r.y)}</span>` : ""}</td>
-                    <td class="r">${fmtN(r.q)} t</td><td class="r">${fmtN(r.p)}</td><td class="r ${r.b >= 0 ? "tb-up" : "tb-down"}">${fmtM(r.b, true)}</td></tr>`;
+            const reg = (S.registre || []).slice().reverse(), B = "#00F0FF", G = "#00FF66", O = "var(--ed-orange)";
+            const lignes = reg.map((r, i) => {
+                const achat = r.k === "A", col = achat ? B : (r.nm ? O : G), bg = i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent";
+                const lib = achat ? "ACHAT" : (r.nm ? "VENTE · MARCHÉ NOIR" : "VENTE"), lieu = esc(r.s || "") + (r.y ? ` <span style="color:#555;margin:0 4px;">//</span> <span style="color:#777;">${esc(r.y)}</span>` : "");
+                return `<div style="display:grid;grid-template-columns:${GRILLE_REG};gap:10px;align-items:center;padding:8px 14px;background:${bg};border-radius:3px;border-left:3px solid ${col};font-size:1em;transition:background .15s;" onmouseover="this.style.background='rgba(0,240,255,.08)'" onmouseout="this.style.background='${bg}'">
+                    <span style="color:${B};font-weight:bold;font-size:.95em;">[${jjhm(r.t)}]</span>
+                    <span style="white-space:nowrap;"><span style="border:1px solid ${col};color:${col};padding:2px 8px;border-radius:3px;font-size:.8em;font-weight:bold;letter-spacing:1px;display:inline-block;">${lib}</span></span>
+                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#bbb;"><span style="color:#fff;font-weight:bold;">${esc(r.n)}</span> <span style="color:#555;">&rarr;</span> ${lieu}</span>
+                    <span style="text-align:right;color:#ddd;white-space:nowrap;">${fmtN(r.q)} t</span>
+                    <span style="text-align:right;color:#ddd;white-space:nowrap;">${fmtN(r.p)} cr/t</span>
+                    <span style="text-align:right;color:${r.b >= 0 ? G : "var(--ed-red)"};font-weight:bold;font-size:1.05em;text-shadow:0 0 6px ${r.b >= 0 ? G : "#FF3333"}40;white-space:nowrap;">${fmtM(r.b, true)}</span></div>`;
             }).join("");
-            return `<div class="bloc"><h2>REGISTRE DE LA SESSION <em>les 30 dernières opérations · bénéfice d'une vente = prix de vente − prix moyen payé</em></h2>
-                ${reg.length ? `<table class="tb-table"><tr><th>HEURE</th><th>OPÉRATION</th><th>STATION</th><th class="r">QUANTITÉ</th><th class="r">PRIX / T</th><th class="r">RÉSULTAT</th></tr>${lignes}</table>` : `<div class="tb-vide">Aucun achat ni vente pour l'instant : le registre se remplit dès votre première opération.</div>`}</div>`;
+            const entetes = ["HORODATAGE", "TYPE", "DÉTAIL", "QUANTITÉ", "PRIX / T", "RÉSULTAT"].map((t, k) => `<span${k > 2 ? ' style="text-align:right;"' : ""}>${t}</span>`).join("");
+            return `<div style="border-bottom:1px dashed ${B};padding-bottom:15px;margin-bottom:20px;flex-shrink:0;"><span style="color:${B};font-weight:bold;letter-spacing:3px;font-size:1.3em;">&gt; REGISTRE DE LA SESSION</span></div>
+                <div style="flex-shrink:0;color:#777;font-size:.78em;line-height:1.5;margin-bottom:8px;">ⓘ Les 30 dernières opérations. Bénéfice d'une vente = prix de vente − prix moyen payé.</div>
+                <div style="overflow-y:auto;flex-grow:1;padding-right:10px;">${reg.length ? `<div style="display:grid;grid-template-columns:${GRILLE_REG};gap:10px;padding:8px 14px;color:#888;font-size:.85em;font-weight:bold;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.1);">${entetes}</div>
+                <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">${lignes}</div>` : `<div class="tb-vide">Aucun achat ni vente pour l'instant : le registre se remplit dès votre première opération.</div>`}</div>`;
         }
+        function boutonRegistre() { const n = (S.registre || []).length; return `<button type="button" class="tb-btn" onclick="ouvrirRegistre()">▤ REGISTRE DE LA SESSION${n ? " · " + n : ""}</button>`; }
+        function ouvrirRegistre() { if (typeof sonClic === "function") sonClic(); VENTE.vue = "registre"; VENTE.ouverte = true; majModale(); }
 
         // ---------------------------------------------------------------
         //  MISSIONS
@@ -813,10 +876,10 @@
                 memoireTrajet(act); ecrire(FAITS_CLE, JSON.stringify(MEMF));     // plus aucune mission : on repart d'un parcours vierge
                 const vide = `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>`;
                 const holo = S && S.pied && S.pied.on ? auSolHtml() : cabinesHtml(act);       // vaisseau ou a pied : l'hologramme reste affiche
-                return bandeau + (holo ? `<div class="tbp-duo${S && S.pied && S.pied.on ? " tbs" : ""}"><div>${vide}</div>${holo}</div>` : vide) + reputationHtml();
+                return bandeau + (holo ? `<div class="tbp-duo${S && S.pied && S.pied.on || holo.indexOf("tbm-bloc") >= 0 ? " tbs" : ""}"><div>${vide}</div>${holo}</div>` : vide) + noteVaisseaux() + boutonEffets();
             }
             const plan = planTrajet(act);
-            return bandeau + carteEtCabines(plan, act) + reputationHtml();
+            return bandeau + carteEtCabines(plan, act) + noteVaisseaux() + boutonEffets();
         }
         function carteMission(m, role) {
             const [ic, lib] = TYPES[m.type] || TYPES.autre;
@@ -1045,7 +1108,12 @@
         };
         const PAS_TYPE = { tourist: "ord", business: "ord", explorer: "ord", politician: "off", minorcelebrity: "off", celebrity: "off", security: "sec", aidworker: "sec", politicalprisoner: "sens", criminal: "sens", prisoner: "sens" };
         const famPassagers = m => m.rech ? "sens" : PAS_TYPE[String(m.ptype || "").toLowerCase().replace(/[^a-z]/g, "")] || (m.vip ? "off" : "ord");
+        // hologramme du vaisseau : modules (plugin 2.18, modules-vaisseau.js) ; repli sur l'ancien affichage (passagers et soute) tant que le plugin n'envoie pas les modules
         function cabinesHtml(act) {
+            const v = S && S.vaisseau;
+            return v && v.mods && v.mods.length && typeof modulesHtml === "function" ? modulesHtml(act) : cabinesSimpleHtml(act);
+        }
+        function cabinesSimpleHtml(act) {
             const sil = silhouetteActive();
             if (!sil) return "";
             // passagers par famille
@@ -1224,8 +1292,9 @@
         // (le parcours des missions passe sous la carte, dans la colonne de gauche : pas de vide a cote de l'hologramme)
         function carteEtCabines(plan, act) {
             const cb = S && S.pied && S.pied.on ? auSolHtml() : cabinesHtml(act), c = carteHtml(plan);
-            colMax = cb ? (S && S.pied && S.pied.on ? 1 : window.innerWidth >= 1400 ? 2 : 1) : 3; let pa; try { pa = parcoursHtml(plan, act); } finally { colMax = 3; }
-            return cb ? `<div class="tbp-duo${S && S.pied && S.pied.on ? " tbs" : ""}"><div>${c}${pa}</div>${cb}</div>` : c + pa;
+            const large = !!cb && (S && S.pied && S.pied.on || cb.indexOf("tbm-bloc") >= 0);
+            colMax = cb ? (large ? 1 : window.innerWidth >= 1400 ? 2 : 1) : 3; let pa; try { pa = parcoursHtml(plan, act); } finally { colMax = 3; }
+            return cb ? `<div class="tbp-duo${large ? " tbs" : ""}"><div>${c}${pa}</div>${cb}</div>` : c + pa;
         }
         const legendeParcours = () => `<div class="tb-lgp"><span style="--c:#FF4FD8"><i></i>vous êtes ici</span><span style="--c:#fff"><i></i>où aller</span><span style="--c:#00F0FF"><i></i>à faire</span><span style="--c:#FFB000"><i class="tr"></i>déjà passé, mission pas terminée</span><span style="--c:#6b747a"><i></i>terminé</span><span style="--c:#00FF66"><i></i>retour : rendre les missions</span></div>`;
         // missions d'un arret : colonnes repartagees pour ne laisser AUCUN vide (1 -> pleine largeur, 2, 3 ; 4 -> 2x2 ; la derniere carte s'etire sur la place restante)
@@ -1269,22 +1338,36 @@
         // jauge de « + » : une case par +, 10 cases au plus (au-dela, la jauge est pleine et le nombre exact est ecrit a cote)
         const pips = v => { const n = Math.min(Math.abs(v), 10), c = v >= 0 ? "ok" : "ko"; let h = ""; for (let i = 0; i < 10; i++) h += `<i class="${i < n ? "on " + c : ""}"></i>`; return `<span class="tb-pips">${h}</span>`; };
         const signe = v => (v >= 0 ? "+" : "−") + Math.abs(v);
-        function reputationHtml() {
-            const rep = S.rep || {}, noms = Object.keys(rep);
-            const note = `<div class="bloc-note">Le jeu n'indique pas votre <b>niveau</b> de réputation avec une faction : il donne seulement l'effet de chaque mission, de + (faible) à +++++ (très fort). Ici, ces + sont <b>additionnés</b> pour la session : une case = un +.</div>`;
-            if (!noms.length) return `<div class="bloc" style="margin-bottom:12px;"><h2>EFFET DES MISSIONS TERMINÉES <em>cette session, par faction</em></h2><div class="tb-vide">Aucune mission terminée pour l'instant : l'effet sur chaque faction s'affiche ici dès la première.</div>${note}</div>`;
-            const data = noms.map(f => {
+        // effet des missions terminees : meme fenetre que le journal (Colonisation / BGS) ; bouton sous le plateau de l'onglet Missions
+        const GRILLE_EFF = "minmax(0,1.3fr) 110px 200px 200px minmax(0,1.4fr)";
+        function donneesEffets() {
+            const rep = S.rep || {};
+            return Object.keys(rep).map(f => {
                 const r = rep[f] || {};
                 return { f, n: Number(r.nm) || 1, pr: r.pr != null ? Number(r.pr) : nbPlus(r.rep), pi: r.pi != null ? Number(r.pi) : nbPlus(r.infl), dr: String(r.rep || "—"), di: String(r.infl || "—") };
             }).sort((a, b) => b.pi - a.pi || b.pr - a.pr);
+        }
+        function boutonEffets() {
+            const n = donneesEffets().length;
+            return `<div class="tbm-vente" style="margin-bottom:12px;"><button type="button" class="tb-btn" ${n ? "" : "disabled"} onclick="ouvrirEffets()">▤ EFFET DES MISSIONS${n ? " · " + n + " faction" + (n > 1 ? "s" : "") : ""}</button><span>${n ? "réputation et influence gagnées cette session, par faction" : "aucune mission terminée pour l'instant"}</span></div>`;
+        }
+        function ouvrirEffets() { if (!donneesEffets().length) return; if (typeof sonClic === "function") sonClic(); VENTE.vue = "effets"; VENTE.ouverte = true; majModale(); }
+        function reputationHtml() {
+            const B = "#00F0FF", G = "#00FF66", data = donneesEffets();
+            if (!data.length) return "";
             const totPr = data.reduce((t, x) => t + x.pr, 0), totPi = data.reduce((t, x) => t + x.pi, 0), totN = data.reduce((t, x) => t + x.n, 0);
-            const cartes = data.map(x => `<div class="tb-fac"><div class="tete"><b>${cp(x.f)}</b><span class="n">${x.n} mission${x.n > 1 ? "s" : ""}</span></div>
-                <div class="lg"><span class="t">RÉPUTATION</span>${pips(x.pr)}<b class="${x.pr >= 0 ? "tb-up" : "tb-down"}">${signe(x.pr)}</b></div>
-                <div class="lg"><span class="t">INFLUENCE</span>${pips(x.pi)}<b class="${x.pi >= 0 ? "tb-up" : "tb-down"}">${signe(x.pi)}</b></div>
-                <div class="der">dernière mission : réputation <b>${esc(x.dr)}</b> · influence <b>${esc(x.di)}</b></div></div>`).join("");
-            return `<div class="bloc" style="margin-bottom:12px;"><h2>EFFET DES MISSIONS TERMINÉES <em>cette session, par faction</em></h2>
-                <div class="tb-facres"><span><b class="tb-up">${signe(totPr)}</b> réputation</span><span><b class="tb-up">${signe(totPi)}</b> influence</span><span><b>${data.length}</b> faction${data.length > 1 ? "s" : ""}</span><span><b>${totN}</b> mission${totN > 1 ? "s" : ""}</span></div>
-                <div class="tb-facs">${cartes}</div>${note}</div>`;
+            const cel = (pips_, v) => `<span style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;align-items:center;"><b style="text-align:left;color:${v >= 0 ? G : "var(--ed-red)"};text-shadow:0 0 6px ${v >= 0 ? G : "#FF3333"}40;">${signe(v)}</b>${pips(pips_)}</span>`;
+            const lignes = data.map((x, i) => { const bg = i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent";
+                return `<div style="display:grid;grid-template-columns:${GRILLE_EFF};gap:10px;align-items:center;padding:8px 14px;background:${bg};border-radius:3px;border-left:3px solid ${G};font-size:1em;transition:background .15s;" onmouseover="this.style.background='rgba(0,240,255,.08)'" onmouseout="this.style.background='${bg}'">
+                    <span style="color:#fff;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(x.f)}">${cp(x.f)}</span>
+                    <span style="color:#bbb;white-space:nowrap;">${x.n} mission${x.n > 1 ? "s" : ""}</span>${cel(x.pr, x.pr)}${cel(x.pi, x.pi)}
+                    <span style="color:#777;font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">réputation <b style="color:#aab;font-weight:normal;">${esc(x.dr)}</b> · influence <b style="color:#aab;font-weight:normal;">${esc(x.di)}</b></span></div>`; }).join("");
+            const entetes = ["FACTION", "MISSIONS", "RÉPUTATION", "INFLUENCE", "DERNIÈRE MISSION"].map(t => `<span>${t}</span>`).join("");
+            return `<div style="border-bottom:1px dashed ${B};padding-bottom:15px;margin-bottom:20px;flex-shrink:0;"><span style="color:${B};font-weight:bold;letter-spacing:3px;font-size:1.3em;">&gt; EFFET DES MISSIONS TERMINÉES</span><span style="color:#888;margin-left:14px;font-size:.85em;letter-spacing:1px;">cette session, par faction</span></div>
+                <div style="flex-shrink:0;display:flex;gap:22px;flex-wrap:wrap;margin-bottom:10px;color:#bbb;"><span><b style="color:${G};">${signe(totPr)}</b> réputation</span><span><b style="color:${G};">${signe(totPi)}</b> influence</span><span><b style="color:#fff;">${data.length}</b> faction${data.length > 1 ? "s" : ""}</span><span><b style="color:#fff;">${totN}</b> mission${totN > 1 ? "s" : ""}</span></div>
+                <div style="flex-shrink:0;color:#777;font-size:.78em;line-height:1.5;margin-bottom:8px;">ⓘ Le jeu n'indique pas votre <b>niveau</b> de réputation avec une faction : il donne seulement l'effet de chaque mission, de + (faible) à +++++ (très fort). Ici, ces + sont <b>additionnés</b> pour la session : une case = un +.</div>
+                <div style="overflow-y:auto;flex-grow:1;padding-right:10px;"><div style="display:grid;grid-template-columns:${GRILLE_EFF};gap:10px;padding:8px 14px;color:#888;font-size:.85em;font-weight:bold;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.1);">${entetes}</div>
+                <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">${lignes}</div></div>`;
         }
 
         // ---------------------------------------------------------------
@@ -1652,12 +1735,13 @@
         function majModale() {
             const m = document.getElementById("tb-modale"), c = document.getElementById("tb-mcorps");
             if (!m || !c) return;
-            const html = VENTE.ouverte ? venteHtml() : "";
+            const html = VENTE.ouverte ? (VENTE.vue === "registre" ? registreHtml() : VENTE.vue === "effets" ? reputationHtml() : venteHtml()) : "";
             if (!html) { VENTE.ouverte = false; m.classList.remove("on"); c.innerHTML = ""; return; }
             const p = m.querySelector(".tb-mpanneau"), haut = p.scrollTop;
             c.innerHTML = html; m.classList.add("on"); p.scrollTop = haut;
+            const jr = VENTE.vue === "registre" || VENTE.vue === "effets"; p.classList.toggle("tb-mreg", jr); m.querySelector(".tb-mx").textContent = jr ? "X" : "✕";
         }
-        function ouvrirVente() { if (!vendables().length) return; if (typeof sonClic === "function") sonClic(); VENTE.ouverte = true; majModale(); }
+        function ouvrirVente() { if (!vendables().length) return; if (typeof sonClic === "function") sonClic(); VENTE.vue = "vente"; VENTE.ouverte = true; majModale(); }
         function fermerVente() { VENTE.ouverte = false; majModale(); }
         document.addEventListener("keydown", e => { if (e.key === "Escape" && VENTE.ouverte) fermerVente(); });
         async function interrogerVente(jeton) {
