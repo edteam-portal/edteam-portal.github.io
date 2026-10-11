@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-missions-disposition', date: '2026-10-11T17:46:00Z', type: 'AMELIORE',
+        titre: 'Tableau de bord, Missions : liste compacte et carte en grand',
+        texte: 'Chaque mission tient maintenant sur une seule ligne (type, titre, récompense, échéance) ; un clic ouvre ses détails juste dessous. À droite, un bouton bascule entre la vue vaisseau et la vue carte : la carte des missions est bien plus grande et lisible, et une petite carte reste visible dans un coin du vaisseau (un clic l’agrandit). Le bouton de la carte clignote quand une mission arrive ou que le prochain arrêt change. Votre choix de vue est mémorisé.',
+        important: false
+    },
+    {
         id: '2026-10-initiatives-liste-factions', date: '2026-10-11T17:26:00Z', type: 'CORRIGE',
         titre: 'Initiatives : les factions du système s’affichent en boutons',
         texte: 'Quand vous saisissez un système pour lancer une initiative, les factions trouvées apparaissent sous le champ : un clic ou un toucher sur celle que vous visez suffit, sur PC comme sur mobile. Plus besoin de deviner où cliquer pour ouvrir la liste.',

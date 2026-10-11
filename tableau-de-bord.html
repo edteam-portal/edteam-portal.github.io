@@ -381,6 +381,34 @@
             .lgr { grid-template-columns:22px minmax(0,1fr) auto; } .lgr .nom { font-size:1.15em; } .lgr .qt, .lgr .px, .lgr .gn { font-size:1.05em; }
             .tb-arret .ln { grid-template-columns:18px minmax(0,1fr) auto; } .tb-arret .ln .nom { overflow-wrap:anywhere; }
         }
+        /* onglet Missions : liste compacte + panneau de droite (vaisseau / carte) */
+        .tbp-duo.tbmis { grid-template-columns:minmax(0,5fr) minmax(0,7fr); }
+        @media (max-width:1000px) { .tbp-duo.tbmis { grid-template-columns:1fr; } }
+        .tbp-droite { position:sticky; top:8px; align-self:start; min-width:0; } .tbp-droite .tbp-bloc, .tbp-droite .bloc { margin-bottom:0; position:static; }
+        .tbm-sw { display:flex; margin-bottom:10px; } .tbm-sw button { flex:1; font:inherit; letter-spacing:3px; padding:10px; background:transparent; border:1px solid #00F0FF; color:#00F0FF; cursor:pointer; } .tbm-sw button + button { border-left:0; }
+        .tbm-sw button:hover { background:rgba(0,240,255,.12); } .tbm-sw button.on { background:#00F0FF; color:#000; }
+        .tbm-sw button.clig { animation:tbClig 1.1s ease-in-out infinite; border-color:#FFD700; color:#FFD700; }
+        @keyframes tbClig { 0%,100% { box-shadow:0 0 0 rgba(255,215,0,0); opacity:.55; } 50% { box-shadow:0 0 14px rgba(255,215,0,.8); opacity:1; } }
+        .tbmm-wrap { position:relative; } .tbmm { position:absolute; right:16px; bottom:112px; width:210px; border:1px solid rgba(0,240,255,.6); background:rgba(2,10,14,.82); padding:6px; cursor:pointer; z-index:5; } .tbmm:hover { border-color:#FFD700; }
+        .tbmm span { display:block; text-align:right; color:#00F0FF; font-size:.7em; letter-spacing:2px; margin-top:2px; } .tbmm .tb-carte { height:auto; }
+        @media (prefers-reduced-motion:reduce) { .tbm-sw button.clig { animation:none; } }
+        .tb-mlst { display:flex; flex-direction:column; } .tb-ml { border-top:1px solid #1a1f23; border-left:3px solid var(--cl2,#00FF66); }
+        .tb-ml.ko { --cl2:#FF3333; } .tb-ml.wa { --cl2:#FFD700; } .tb-ml.ok { --cl2:#00FF66; } .tb-ml.ouvert { background:rgba(255,215,0,.04); }
+        .tb-ml .lg { display:grid; grid-template-columns:24px 96px minmax(0,1fr) auto 66px 14px; gap:10px; align-items:center; padding:6px 10px; cursor:pointer; font-size:.9em; color:#bbb; } .tb-ml .lg:hover { background:rgba(0,240,255,.07); }
+        .tb-ml .ty { border:1px solid #FFD700; color:#FFD700; padding:1px 6px; font-size:.72em; letter-spacing:1px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .tb-ml .ti { color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .tb-ml .ti .tb-role { margin-left:8px; }
+        .tb-ml .rec { color:#FFD700; white-space:nowrap; text-align:right; } .tb-ml .cd { color:#9ab; white-space:nowrap; text-align:right; } .tb-ml.ko .cd { color:#FF3333; } .tb-ml .ch { color:#667; }
+        .tb-ml .det { padding:8px 12px 10px 46px; border-top:1px dashed #333; font-size:.84em; color:#8a9; } .tb-ml .det .tb-cp { color:#8a9; }
+        .tb-ml .det .full { color:#b8c2c8; margin-bottom:6px; }
+        .tb-ml .det .r { display:grid; grid-template-columns:104px minmax(0,1fr); gap:10px; padding:2px 0; } .tb-ml .det .r > span { color:#778; font-size:.82em; letter-spacing:1px; padding-top:1px; } .tb-ml .det .r > div { overflow-wrap:anywhere; }
+        .tb-ml .det .pr { display:flex; flex-wrap:wrap; gap:4px 22px; margin-top:6px; padding-top:6px; border-top:1px solid #1a1f23; } .tb-ml .det .p { white-space:nowrap; } .tb-ml .det .p i { font-style:normal; color:#778; font-size:.82em; letter-spacing:1px; margin-right:4px; }
+        .tb-pa { padding:8px 10px; } .tb-pa .tete { margin-bottom:6px; } .tb-pa .nom { font-size:1.05em; } .tb-pa.prochain .nom, .tb-pa.ici .nom { font-size:1.2em; } .tb-pa .num { width:26px; height:26px; }
+        .tb-lien { position:relative; width:fit-content; max-width:100%; margin:20px auto; padding:5px 16px; border:1px solid rgba(0,240,255,.45); border-radius:14px; background:rgba(0,240,255,.03); font-size:.78em; letter-spacing:0; color:#6f7d86; }
+        .tb-lien::before, .tb-lien::after { content:""; position:absolute; left:50%; height:20px; border-left:2px dashed #00F0FF; } .tb-lien::before { bottom:100%; } .tb-lien::after { top:100%; }
+        .tb-lien b { font-size:1.15em; margin-right:8px; color:#00F0FF; font-weight:normal; } .tb-lien.pro { border-color:rgba(0,240,255,.7); color:#8a98a0; }
+        .tb-lien.fait { border-color:#444; background:none; color:#667; } .tb-lien.fait::before, .tb-lien.fait::after { border-left-color:#555; }
+        @media (max-width:700px) { .tb-ml .lg { grid-template-columns:22px minmax(0,1fr) auto 60px 12px; } .tb-ml .ty { display:none; } }
+        .tb-noteo { margin-top:10px; } .tb-noteo button { background:none; border:0; color:#778; font:inherit; font-size:.78em; letter-spacing:2px; cursor:pointer; padding:2px 0; } .tb-noteo button:hover { color:#00F0FF; }
         .tb-fin { border:1px dashed rgba(0,255,102,.5); padding:14px; text-align:center; color:#00FF66; letter-spacing:2px; font-size:1.05em; }
         @media (max-width:1000px) { .tb-flux { grid-template-columns:1fr; } .tb-flux .lien svg { transform:rotate(90deg); height:30px; width:60px; margin:0 auto; } .lgr { grid-template-columns:22px 1fr 1fr; } }
         /* missions */
@@ -881,25 +909,28 @@
             const plan = planTrajet(act);
             return bandeau + carteEtCabines(plan, act) + noteVaisseaux() + boutonEffets();
         }
-        function carteMission(m, role) {
+        // une mission = UNE ligne (type, titre, recompense, echeance) ; les details s'ouvrent dessous au clic (le premier arret a faire est ouvert d'office)
+        const MOUV = {};
+        function basculerMission(id, defOuvert) { const k = String(id); MOUV[k] = !(k in MOUV ? MOUV[k] : defOuvert); if (typeof sonClic === "function") sonClic(); rendre(); }
+        function carteMission(m, role, defOuvert) {
             const [ic, lib] = TYPES[m.type] || TYPES.autre;
-            const s = restant(m), u = urgence(s);
-            const total = m.exp && m.t ? Math.max(60, (new Date(m.exp).getTime() - new Date(m.t).getTime()) / 1000) : null;
-            const frac = s !== null && total ? Math.max(0, Math.min(1, s / total)) : 1;
-            const meta = [`<span>${esc(lib)}</span>`, m.rec != null ? `<span>récompense ${fmtM(m.rec)}</span>` : "", m.q ? `<span>${m.type === "courrier" ? m.q + " colis" : "soute : " + fmtN(m.q) + " t"}</span>` : "", m.pas ? `<span>${m.pas} passager${m.pas > 1 ? "s" : ""}</span>` : "",
-                m.don ? `<span>don : ${fmtM(m.don)}</span>` : "", m.rep ? `<span>réputation ${esc(m.rep)}</span>` : "", m.inf ? `<span>influence ${esc(m.inf)}</span>` : ""].join("");
-            // ligne de details : prise il y a ..., lieu de prise, recompense par heure restante, distance depuis ici
-            const det = [];
-            if (m.t) { const age = (Date.now() - new Date(m.t).getTime()) / 1000; if (age > 60) det.push(`prise il y a ${duree(age)}`); }
-            if (m.os) det.push(`prise à ${cp(m.os)}${m.ost ? " / " + cp(m.ost) : ""}`);
-            if (m.rec && s !== null && s >= 1800) det.push(`≈ ${fmtM(m.rec / (s / 3600))} par heure restante`);
+            const s = restant(m), u = urgence(s), id = String(m.id), ouvert = id in MOUV ? MOUV[id] : !!defOuvert;
+            const rang = (t, v) => v ? `<div class="r"><span>${t}</span><div>${v}</div></div>` : "";
+            const paire = (t, v) => v ? `<span class="p"><i>${t}</i> ${v}</span>` : "";
+            const lieu = role === "rendre" ? "à rendre à " + cp(m.os || "") + (m.ost ? " / " + cp(m.ost) : "") : m.sys ? cp(m.sys) + (m.st ? " / " + cp(m.st) : "") : "aucun trajet";
+            let prise = m.os ? cp(m.os) + (m.ost ? " / " + cp(m.ost) : "") : "";
+            if (m.t) { const age = (Date.now() - new Date(m.t).getTime()) / 1000; if (age > 60) prise = (prise ? prise + " · " : "") + "il y a " + duree(age); }
             const posIci = S.pos && S.pos.length === 3 ? S.pos : COORDS[cle(S.systeme)], posM = m.sys ? COORDS[cle(m.sys)] : null;
-            if (m.sys && cle(m.sys) === cle(S.systeme)) det.push("destination : ce système");
-            else if (posIci && posM) { const d = dist3(posIci, posM), sa = Math.max(1, Math.ceil(d / Math.max(8, sautUtilise()))); det.push(`à ${d.toFixed(1)} al d'ici · ${sa} saut${sa > 1 ? "s" : ""}`); }
-            const detHtml = det.length ? `<div class="dt">${det.map(x => `<span>${x}</span>`).join("")}</div>` : "";
-            return `<div class="tb-ms ${u}"><div class="ic">${ic}</div><div><div class="ti">${esc(m.nom || lib)}</div>
-                <div class="sb">${cp(m.faction || "")}${role === "rendre" ? ` · <span class="lx">${cp(m.os)}</span>${m.ost ? " / " + cp(m.ost) : ""}` : m.sys ? ` · <span class="lx">${cp(m.sys)}</span>${m.st ? " / " + cp(m.st) : ""}` : " · aucun trajet"}${role === "passe" ? ` · <span class="tb-role pas">DÉJÀ PASSÉ · À RENDRE À ${cp(m.os)}${m.ost ? " / " + cp(m.ost) : ""}</span>` : role === "rendre" ? ` · <span class="tb-role">À RENDRE ICI</span>` : role === "place" ? ` · <span class="tb-role">SUR PLACE, PUIS RENDRE</span>` : ""}</div><div class="mt">${meta}</div>${detHtml}</div>
-                <div class="tb-cd">${s === null ? "" : `<svg viewBox="0 0 44 44" width="52" height="52"><circle cx="22" cy="22" r="18" fill="none" stroke="#1d2226" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" stroke="${COUL_URG[u]}" stroke-width="5" stroke-dasharray="113.1" stroke-dashoffset="${(113.1 * (1 - frac)).toFixed(1)}" transform="rotate(-90 22 22)" data-ring="${esc(m.exp)}" data-t="${esc(m.t || "")}"/></svg><b data-cd="${esc(m.exp)}">${duree(s)}</b>`}</div></div>`;
+            let loin = "";
+            if (m.sys && cle(m.sys) === cle(S.systeme)) loin = "ce système";
+            else if (posIci && posM) { const d = dist3(posIci, posM), sa = Math.max(1, Math.ceil(d / Math.max(8, sautUtilise()))); loin = d.toFixed(1) + " al · " + sa + " saut" + (sa > 1 ? "s" : ""); }
+            const charge = m.pas ? m.pas + " passager" + (m.pas > 1 ? "s" : "") : m.q ? (m.type === "courrier" ? m.q + " colis" : "soute " + fmtN(m.q) + " t") : "";
+            const paires = [paire("DISTANCE", loin), paire("CHARGE", charge), paire("DON", m.don ? fmtM(m.don) : ""), paire("RÉPUTATION", m.rep ? esc(m.rep) : ""), paire("INFLUENCE", m.inf ? esc(m.inf) : ""), paire("RENDEMENT", m.rec && s !== null && s >= 1800 ? "≈ " + fmtM(m.rec / (s / 3600)) + " / h" : "")].join("");
+            const det = ouvert ? `<div class="det"><div class="full">${esc(m.nom || lib)}</div>${rang("FACTION", cp(m.faction || ""))}${rang("DESTINATION", lieu)}${rang("PRISE", prise)}${paires ? `<div class="pr">${paires}</div>` : ""}</div>` : "";
+            const tag = role === "passe" ? `<span class="tb-role pas">DÉJÀ PASSÉ</span>` : role === "rendre" ? `<span class="tb-role pas" style="color:#00FF66;border-color:#00FF66;">À RENDRE</span>` : "";
+            return `<div class="tb-ml ${u}${ouvert ? " ouvert" : ""}"><div class="lg" onclick="basculerMission('${esc(id)}', ${defOuvert ? "true" : "false"})" title="${ouvert ? "Replier" : "Voir"} les détails">
+                <span class="ic">${ic}</span><span class="ty">${esc(lib)}</span><span class="ti">${esc(m.nom || lib)}${tag}</span><span class="rec">${m.rec != null ? fmtM(m.rec) : ""}</span>
+                <span class="cd" ${m.exp ? `data-cd="${esc(m.exp)}"` : ""}>${s === null ? "" : duree(s)}</span><span class="ch">${ouvert ? "▾" : "▸"}</span></div>${det}</div>`;
         }
         // ---------------------------------------------------------------
         //  TRAJET DES MISSIONS : vraies distances entre systemes (coordonnees EDSM, comme bgs.html : appel du navigateur, garde en memoire locale)
@@ -1047,9 +1078,10 @@
             return { suite, iciIdx, ici0 };
         }
         // carte : vraie position des systemes (vue du dessus). Memes numeros et memes couleurs que la liste en dessous.
-        function carteHtml(plan) {
+        function carteHtml(plan, opt) {
             if (!plan.arrets.length && !plan.passes.length) return "";
-            const W = 900, H = 270, { suite, iciIdx } = suiteParcours(plan);
+            const mini = !!(opt && opt.mini), grande = !!(opt && opt.grande);
+            const W = 900, H = mini ? 340 : grande ? 560 : 270, { suite, iciIdx } = suiteParcours(plan);
             // un retour situe dans le systeme ou vous etes se confond avec « vous etes ici » : un seul rond (les fleches y arrivent et en repartent)
             const pts = suite, fantome = (x, i) => x.fin && i !== iciIdx && cle(x.sys) === cle(plan.depart.sys), retourIci = pts.some(fantome);
             const connus = pts.filter(p => p.pos);
@@ -1085,13 +1117,14 @@
                 svg += `<circle cx="${p.x}" cy="${p.y}" r="17" fill="${x.kind === "prochain" || x.kind === "ici" ? col : col + "22"}" stroke="${col}" stroke-width="2.5"${x.kind === "passe" ? ` stroke-dasharray="5 4"` : ""}/>`;
                 const sym = x.kind === "fait" ? "✔" : x.kind === "fin" ? "⚑" : x.kind === "ici" && !x.num ? "★" : String(x.num);
                 svg += `<text x="${p.x}" y="${p.y + 5}" fill="${x.kind === "prochain" || x.kind === "ici" ? "#000" : "#fff"}" font-size="14" text-anchor="middle" font-weight="bold">${sym}</text>`;
-                const nom = `<text x="${p.x}" y="${p.y + 38}" fill="${x.kind === "fait" ? "#8b97a0" : "#fff"}" font-size="13" text-anchor="${ancre}" data-copie="${esc(x.sys)}"><title>Cliquer pour copier : ${esc(x.sys)}</title>${esc(String(x.sys).toUpperCase().slice(0, 24))}</text>`;
+                const nom = `<text x="${p.x}" y="${p.y + 38}" fill="${x.kind === "fait" ? "#8b97a0" : "#fff"}" font-size="13" text-anchor="${ancre}" data-copie="${esc(x.sys)}"><title>Cliquer pour copier : ${esc(x.sys)}</title>${esc(String(x.sys).toUpperCase().slice(0, grande ? 34 : 24))}</text>`;
                 const eti = { fait: "terminé", passe: "déjà passé · mission en cours", ici: "VOUS ÊTES ICI", prochain: "PROCHAIN ARRÊT", venir: n + " mission" + (n > 1 ? "s" : ""), fin: "fin · à rendre" }[x.kind];
                 svg += nom + `<text x="${p.x}" y="${p.y + 54}" fill="${x.kind === "ici" || x.kind === "prochain" ? col : "#8b97a0"}" font-size="11" text-anchor="${ancre}"${x.kind === "ici" || x.kind === "prochain" ? ` font-weight="bold"` : ""}>${eti}${x.kind === "ici" && x.num ? " · " + n + " mission" + (n > 1 ? "s" : "") : ""}${x.kind === "ici" && retourIci ? " · retour ici ⚑" : ""}</text>`;
             });
             svg += `</svg>`;
+            if (mini) return svg.replace(/<text[\s\S]*?<\/text>/g, "").replace("class=\"tb-carte\"", "class=\"tb-carte mini\"");
             const note = plan.complet ? `${plan.arrets.length} arrêt${plan.arrets.length > 1 ? "s" : ""} à faire · ${plan.total.d.toFixed(1)} al · ${plan.total.sauts} saut${plan.total.sauts > 1 ? "s" : ""} · ≈ ${duree(plan.total.min * 60)}` : "positions des systèmes en cours de chargement…";
-            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${legendeParcours()}${svg}</div>`;
+            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${grande ? "" : legendeParcours()}${svg}</div>`;
         }
         // ---------------------------------------------------------------
         //  PASSAGERS ET SOUTE (onglet Missions) : quand une mission de passagers est en cours (ou un colis de sauvetage a recuperer) et que le vaisseau
@@ -1290,28 +1323,45 @@
         }
         // carte des missions ; avec des passagers a bord, elle se partage la ligne avec l'hologramme du vaisseau (ecrans larges)
         // (le parcours des missions passe sous la carte, dans la colonne de gauche : pas de vide a cote de l'hologramme)
+        const VUEMIS = { v: lire("edteam_tb_vuemis") === "carte" ? "carte" : "vaisseau", sig: "", clig: lire("edteam_tb_cartevue") !== "1" };
+        function basculerVueMis(x) {
+            VUEMIS.v = x === "carte" ? "carte" : "vaisseau"; ecrire("edteam_tb_vuemis", VUEMIS.v);
+            if (VUEMIS.v === "carte") { VUEMIS.clig = false; ecrire("edteam_tb_cartevue", "1"); }
+            if (typeof sonClic === "function") sonClic();
+            rendre();
+        }
         function carteEtCabines(plan, act) {
-            const cb = S && S.pied && S.pied.on ? auSolHtml() : cabinesHtml(act), c = carteHtml(plan);
-            const large = !!cb && (S && S.pied && S.pied.on || cb.indexOf("tbm-bloc") >= 0);
-            colMax = cb ? (large ? 1 : window.innerWidth >= 1400 ? 2 : 1) : 3; let pa; try { pa = parcoursHtml(plan, act); } finally { colMax = 3; }
-            return cb ? `<div class="tbp-duo${large ? " tbs" : ""}"><div>${c}${pa}</div>${cb}</div>` : c + pa;
+            const pied = !!(S && S.pied && S.pied.on), cb = pied ? auSolHtml() : cabinesHtml(act);
+            if (window.innerWidth < LARGE) { const c0 = carteHtml(plan), pa0 = parcoursHtml(plan, act); return cb ? `<div class="tbp-duo"><div>${c0}${pa0}</div>${cb}</div>` : c0 + pa0; }
+            const pa = parcoursHtml(plan, act), grande = carteHtml(plan, { grande: true });
+            // evenement (nouvelle mission, autre prochain arret) pendant qu'on regarde le vaisseau : le bouton « carte » clignote
+            const prochain = (plan.arrets[0] || {}).sys || "", sig = act.map(m => m.id).join(",") + "|" + prochain;
+            if (VUEMIS.sig && VUEMIS.sig !== sig && VUEMIS.v === "vaisseau") VUEMIS.clig = true;
+            VUEMIS.sig = sig;
+            let droite;
+            if (cb && grande) {
+                const carte = VUEMIS.v === "carte";
+                const sw = `<div class="tbm-sw"><button type="button" class="${carte ? "" : "on"}" onclick="basculerVueMis('vaisseau')">▣ VUE ${pied ? "À PIED" : "VAISSEAU"}</button><button type="button" class="${carte ? "on" : VUEMIS.clig ? "clig" : ""}" onclick="basculerVueMis('carte')">◎ VUE CARTE</button></div>`;
+                const mini = carteHtml(plan, { mini: true });
+                droite = sw + (carte ? grande : `<div class="tbmm-wrap">${cb}<div class="tbmm" onclick="basculerVueMis('carte')" title="Ouvrir la carte des missions">${mini}<span>CARTE ▸</span></div></div>`);
+            } else droite = cb || grande;
+            return droite ? `<div class="tbp-duo tbs tbmis"><div>${pa}</div><div class="tbp-droite">${droite}</div></div>` : pa;
         }
         const legendeParcours = () => `<div class="tb-lgp"><span style="--c:#FF4FD8"><i></i>vous êtes ici</span><span style="--c:#fff"><i></i>où aller</span><span style="--c:#00F0FF"><i></i>à faire</span><span style="--c:#FFB000"><i class="tr"></i>déjà passé, mission pas terminée</span><span style="--c:#6b747a"><i></i>terminé</span><span style="--c:#00FF66"><i></i>retour : rendre les missions</span></div>`;
         // missions d'un arret : colonnes repartagees pour ne laisser AUCUN vide (1 -> pleine largeur, 2, 3 ; 4 -> 2x2 ; la derniere carte s'etire sur la place restante)
         let colMax = 3;     // 2 (ou 1) quand l'hologramme partage la ligne : colonne plus etroite, cartes trop serrees sinon
-        function grilleMissions(cartes) {
-            const n = cartes.length, c = Math.max(1, Math.min(colMax, n <= 3 ? n : n % 3 === 0 ? 3 : 2)), reste = n % c;
-            return `<div class="ms" style="--c:${c}">${cartes.map((h, i) => i === n - 1 && reste ? `<div style="grid-column:span ${c - reste + 1}">${h}</div>` : h).join("")}</div>`;
-        }
+        function grilleMissions(cartes) { return `<div class="tb-mlst">${cartes.join("")}</div>`; }
         // parcours : une carte par arret, avec ses missions dedans. MEMES numeros et couleurs que la carte (suiteParcours) :
         // magenta = vous etes ici, blanc/cyan lumineux = ou aller, cyan = a faire, ambre = deja passe mais mission PAS terminee, gris = termine, vert = retour (rendre les missions)
+        const NOTE_ORDRE = { v: false };
+        function basculerNoteOrdre() { NOTE_ORDRE.v = !NOTE_ORDRE.v; if (typeof sonClic === "function") sonClic(); rendre(); }
         function parcoursHtml(plan, act) {
             const { suite, iciIdx, ici0 } = suiteParcours(plan), depart = plan.depart.sys;
             const trajet = a => a.d === null || a.d === undefined ? "distance inconnue" : a.d === 0 ? "même système" : `${a.d.toFixed(1)} al · ${a.sauts} saut${a.sauts > 1 ? "s" : ""} · ≈ ${duree(a.min * 60)}`;
             let h = `<div class="bloc cy" style="margin-bottom:12px;"><h2>PARCOURS ET MISSIONS <em>${plan.arrets.length ? "ordre le plus court en distance" + (plan.hasFin ? ", terminé là où rendre les missions" : "") : ""}</em></h2>${legendeParcours()}<div class="tb-parcours">`;
             suite.forEach((a, i) => {
                 const k = a.kind;
-                if (i > 0) h += k === "fait" || k === "passe" || i <= iciIdx ? `<div class="tb-lien fait"><b>↓</b></div>` : `<div class="tb-lien${k === "prochain" ? " pro" : ""}"><b>↓</b>${k === "prochain" ? "ALLER À " + esc(String(a.sys).toUpperCase()) + " : " : ""}${trajet(a)}</div>`;
+                if (i > 0) h += k === "fait" || k === "passe" || i <= iciIdx ? `<div class="tb-lien fait"><b>↓</b></div>` : `<div class="tb-lien${k === "prochain" ? " pro" : ""}"><b>↓</b>${trajet(a)}</div>`;
                 if (k === "ici" && !a.num) {
                     h += `<div class="tb-pa ici seul"><div class="tete"><span class="num">★</span><span class="nom">${depart ? cp(depart, String(depart).toUpperCase()) : "POSITION INCONNUE"}</span><span class="eti">VOUS ÊTES ICI${S.station ? " · " + cp(S.station) : ""} · AUCUNE MISSION À FAIRE ICI</span></div></div>`;
                     return;
@@ -1326,11 +1376,11 @@
                 const role = m => k === "passe" ? "passe" : a.fin && aRendre(m) && cle(m.os) === cle(a.sys) ? "rendre" : aRendre(m) ? "place" : "";
                 const badge = a.dejaPasse ? `<span class="tb-role pas">DÉJÀ PASSÉ ICI · MISSION PAS TERMINÉE</span>` : "";
                 h += `<div class="tb-pa ${k}${a.fin ? " fin" : ""}"><div class="tete"><span class="num">${a.fin ? "⚑" : a.num}</span><span class="nom">${cp(a.sys, String(a.sys).toUpperCase())}</span><span class="eti">${eti}${k === "ici" || k === "prochain" ? etiPlus : ""}</span>${badge}</div>
-                    ${grilleMissions(ms.map(m => carteMission(m, role(m))))}${(() => { const fl = a.faits && a.faits.length ? a.faits : a.lignes || []; return fl.length ? `<div class="fl">${fl.map(t => "✔ " + t).join("<br>")}</div>` : ""; })()}</div>`;
+                    ${grilleMissions(ms.map((m, j) => carteMission(m, role(m), j === 0 && (k === "prochain" || (k === "ici" && a.ms.length)))))}${(() => { const fl = a.faits && a.faits.length ? a.faits : a.lignes || []; return fl.length ? `<div class="fl">${fl.map(t => "✔ " + t).join("<br>")}</div>` : ""; })()}</div>`;
             });
             const sans = act.filter(m => !m.sys);
             if (sans.length) h += `<div class="tb-lien"><b>·</b></div><div class="tb-pa"><div class="tete"><span class="num">?</span><span class="nom">SANS DESTINATION</span><span class="eti">PAS DE TRAJET POSSIBLE</span></div>${grilleMissions(sans.map(m => carteMission(m)))}</div>`;
-            return h + `</div><div class="bloc-note">Ordre calculé sur les distances entre les systèmes (coordonnées EDSM), au départ de votre position${plan.hasFin ? ", avec retour au système où les missions à rendre ont été prises" : ""}. Les échéances sont sur chaque mission : à vous d'en tenir compte. Un arrêt n'est « terminé » (gris) que lorsque ses missions sont terminées ; si vous avez seulement quitté le lieu, il est marqué « déjà passé » et la mission reste en cours. Durées : estimations.</div></div>`;
+            return h + `</div><div class="tb-noteo"><button type="button" onclick="basculerNoteOrdre()">ⓘ COMMENT L'ORDRE EST CALCULÉ ${NOTE_ORDRE.v ? "▾" : "▸"}</button>${NOTE_ORDRE.v ? `<div class="bloc-note">Ordre calculé sur les distances entre les systèmes (coordonnées EDSM), au départ de votre position${plan.hasFin ? ", avec retour au système où les missions à rendre ont été prises" : ""}. Les échéances sont sur chaque mission : à vous d'en tenir compte. Un arrêt n'est « terminé » (gris) que lorsque ses missions sont terminées ; si vous avez seulement quitté le lieu, il est marqué « déjà passé » et la mission reste en cours. Durées : estimations.</div>` : ""}</div></div>`;
         }
         // reputation : le jeu ne donne PAS le niveau de reputation avec une faction, seulement l'EFFET de chaque mission terminee (+ = faible ... +++++ = tres fort)
         const FORCE = ["aucun effet", "faible", "moyen", "bon", "fort", "très fort"];
