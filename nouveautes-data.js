@@ -5,6 +5,20 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-missions-au-sol', date: '2026-10-11T14:18:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : votre combinaison quand vous êtes à pied',
+        texte: 'Quand vous descendez de votre vaisseau, l’onglet Missions affiche votre combinaison vue de dos (combinaison de vol, Maverick, Artemis ou Dominator) en hologramme, avec des traits qui partent vers chaque équipement : arme principale (et la deuxième pour la Dominator), arme secondaire, combinaison avec ses modifications, ceinture avec vos consommables, et sac à dos avec la liste de ce qu’il contient (données volées, composants, objets). Ça se met à jour quand vous ramassez ou utilisez quelque chose. Le jeu ne donne pas les outils équipés ni la capacité du sac : ils ne sont pas affichés. Sur un petit écran, vous avez les mêmes informations en listes.',
+        important: false,
+        action: 'Relancez EDMC une fois : le plugin v2.17 se met à jour tout seul (nécessaire pour suivre votre combinaison et votre sac à dos).'
+    },
+    {
+        id: '2026-10-missions-passagers', date: '2026-10-11T11:00:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : vos passagers dans le vaisseau',
+        texte: 'Quand vous avez une mission de passagers en cours, l’onglet Missions affiche maintenant votre vaisseau en hologramme à côté de la carte : les passagers se promènent dans la coque sous un balayage radar, avec une couleur par type (orange pour les touristes et hommes d’affaires, jaune pour les VIP et officiels, vert pour la sécurité et l’aide humanitaire, rouge pour les prisonniers, criminels et recherchés). Les personnages importants sont plus grands et entourés d’un halo. Une jauge indique les places occupées sur la capacité de vos cabines, et passe au rouge si vous avez plus de passagers que de places. La soute est à l’arrière, avec les marchandises à bord, de livraison par exemple. Pour une mission de sauvetage, le colis à récupérer apparaît en pointillés avec un « ? » dans la soute, et se remplit dès qu’il est à bord. Disponible pour le Panther Clipper Mk II et le Lynx Highliner (dont la soute s’affiche aussi en hologramme dans l’onglet Commerce), les autres vaisseaux viendront plus tard. La répartition dans la coque est stylisée : le jeu ne donne pas la position des modules.',
+        important: false,
+        action: 'Relancez EDMC une fois : le plugin v2.17 se met à jour tout seul (nécessaire pour lire vos cabines et le type de chaque passager).'
+    },
+    {
         id: '2026-10-soute-vaisseau', date: '2026-10-11T00:37:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : votre soute dans le vaisseau',
         texte: 'Dans l’onglet Commerce, la soute s’affiche maintenant dans une vue holographique de votre vaisseau : les caisses sont réparties dans la coque, comme vues par un capteur infrarouge, et la baie de soute est agrandie à côté avec de grosses caisses carrées. Survolez une caisse ou la légende pour voir la marchandise. Disponible pour le Panther Clipper Mk II ; les autres vaisseaux gardent la grille actuelle, en attendant leur dessin. La soute passe au-dessus de la feuille de route, et « Vendre ce que je transporte » s’ouvre maintenant dans une fenêtre, depuis un bouton de l’hologramme (plus de bloc en bas de page).',

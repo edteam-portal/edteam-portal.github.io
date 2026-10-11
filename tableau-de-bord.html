@@ -217,6 +217,25 @@
         .tb-st.fin:before { border-color:#00FF66; background:#00FF66; } .tb-st.dep:before { border-color:#8b97a0; }
         .tb-st b { color:#00F0FF; font-weight:normal; } .tb-st span { display:block; color:#8a9; font-size:.85em; margin-top:2px; line-height:1.5; }
         /* parcours : un arret = une carte avec ses missions */
+        /* missions de passagers : carte a gauche, cabines et soute du vaisseau en hologramme a droite */
+        .tbp-duo { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:12px; align-items:start; margin-bottom:12px; }
+        .tbs-balai { animation:tbsBal 5s linear infinite; } @keyframes tbsBal { from { transform:translateY(0); } to { transform:translateY(var(--h)); } }
+        .tbs-pouls { animation:tbsPouls 2s ease-in-out infinite; } @keyframes tbsPouls { 0%,100% { opacity:.4; } 50% { opacity:1; } }
+        .tbs-listes { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; margin-top:6px; } .tbs-liste { border:1px solid var(--cl); background:rgba(3,8,12,.7); padding:6px 9px; font-size:.82em; line-height:1.5; } .tbs-liste b { display:block; color:var(--cl); letter-spacing:1.5px; font-size:.85em; margin-bottom:2px; }
+        @media (prefers-reduced-motion:reduce) { .tbs-balai, .tbs-pouls { animation:none; } }
+        .tbp-bloc { margin-bottom:12px; } .tbp-duo .tbp-bloc { margin-bottom:0; position:sticky; top:8px; align-self:start; }
+        .tbp-bloc .tb-scene svg { max-height:calc(100vh - 345px); min-height:340px; }
+        .tbp-duo.tbs { grid-template-columns:minmax(0,.8fr) minmax(0,1.25fr); }
+        @media (max-width:1000px) { .tbp-duo, .tbp-duo.tbs { grid-template-columns:1fr; } }
+        .tbp-p { animation:tbpErre var(--d) ease-in-out infinite alternate; } .tbp-halo { animation:tbpPouls 1.8s ease-in-out infinite; } @keyframes tbpPouls { 0%,100% { opacity:.25; } 50% { opacity:.8; } }
+        .tbp-jauge { display:flex; align-items:center; gap:10px; margin:2px 0 6px; font-size:.85em; color:#aab; letter-spacing:1px; } .tbp-jauge .bar { flex:1; height:8px; background:rgba(255,255,255,.08); position:relative; } .tbp-jauge .bar i { position:absolute; left:0; top:0; bottom:0; background:#FF9A1F; } .tbp-jauge .bar i.pleine { background:#FF3B30; } .tbp-p .tbp-c { animation:tbpPing 4s linear infinite; animation-delay:var(--w); }
+        @keyframes tbpErre { from { transform:translate(var(--x0),var(--y0)); } to { transform:translate(var(--x1),var(--y1)); } }
+        @keyframes tbpPing { 0% { opacity:.75; } 6% { opacity:1; } 22% { opacity:.75; } 100% { opacity:.75; } }
+        .tbp-balai { animation:tbpBal 4s linear infinite; } @keyframes tbpBal { from { transform:translateY(0); } to { transform:translateY(var(--h)); } }
+        .tbp-pied { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:6px; } .tbp-pied .nom { color:#fff; letter-spacing:2px; } .tbp-pied .cap { color:#FF9A1F; letter-spacing:1px; }
+        .tbp-leg { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:.85em; color:#aab; margin-top:8px; }
+        .tbp-leg i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:-1px; background:var(--cl); } .tbp-leg i.sq { border-radius:1px; } .tbp-leg i.vide { background:none; border:1.5px dashed var(--cl); box-sizing:border-box; }
+        @media (prefers-reduced-motion:reduce) { .tbp-p, .tbp-p .tbp-c, .tbp-balai, .tbp-halo { animation:none; } }
         .tb-pa { border:1px solid #2c3338; border-left:4px solid #00F0FF; background:rgba(0,0,0,.4); padding:12px 14px; }
         .tb-pa .tete { display:flex; align-items:center; gap:6px 12px; flex-wrap:wrap; margin-bottom:10px; }
         .tb-pa .num { width:30px; height:30px; border-radius:50%; border:2px solid #00F0FF; color:#00F0FF; display:inline-flex; align-items:center; justify-content:center; font-size:.9em; flex:none; }
@@ -455,7 +474,7 @@
         const RANGS_COMMERCE = ["PENNILESS", "MOSTLY PENNILESS", "PEDDLER", "DEALER", "MERCHANT", "BROKER", "ENTREPRENEUR", "TYCOON", "ELITE", "ELITE I", "ELITE II", "ELITE III", "ELITE IV", "ELITE V"];
         // noms des vaisseaux (le journal donne le nom interne)
         const VAISSEAUX = { sidewinder: "Sidewinder", eagle: "Eagle", hauler: "Hauler", adder: "Adder", viper: "Viper Mk III", viper_mkiv: "Viper Mk IV", cobramkiii: "Cobra Mk III", cobramkiv: "Cobra Mk IV", cobramkv: "Cobra Mk V",
-            type6: "Type-6 Transporter", type7: "Type-7 Transporter", type9: "Type-9 Heavy", type9_military: "Type-10 Defender", type8: "Type-8 Transporter", asp: "Asp Explorer", asp_scout: "Asp Scout", python: "Python",
+            type6: "Type-6 Transporter", type7: "Type-7 Transporter", type9: "Type-9 Heavy", type9_military: "Type-10 Defender", type8: "Type-8 Transporter", mediumtransport01: "Lynx Highliner", asp: "Asp Explorer", asp_scout: "Asp Scout", python: "Python",
             python_nx: "Python Mk II", diamondback: "Diamondback Scout", diamondbackxl: "Diamondback Explorer", empire_courier: "Imperial Courier", empire_eagle: "Imperial Eagle", empire_trader: "Imperial Clipper",
             federation_dropship: "Federal Dropship", federation_dropship_mkii: "Federal Assault Ship", federation_gunship: "Federal Gunship", federation_corvette: "Federal Corvette", independant_trader: "Keelback",
             ferdelance: "Fer-de-Lance", mamba: "Mamba", krait_mkii: "Krait Mk II", krait_light: "Krait Phantom", anaconda: "Anaconda", cutter: "Imperial Cutter", belugaliner: "Beluga Liner", orca: "Orca",
@@ -593,6 +612,12 @@
                 coque: [[0, 116], [58, 116], [78, 150], [92, 205], [100, 240], [124, 276], [130, 318], [124, 352], [98, 388], [78, 432], [62, 470], [52, 504], [26, 526], [0, 530]],
                 moteurs: [[-120, 50], [-146, 50], [120, 50], [146, 50], [-150, 270], [-176, 270], [150, 270], [176, 270]],
                 formes: ["M244.0 116.0 L302.0 116.0 L322.0 150.0 L336.0 205.0 L344.0 240.0 L368.0 276.0 L374.0 318.0 L368.0 352.0 L342.0 388.0 L322.0 432.0 L306.0 470.0 L296.0 504.0 L270.0 526.0 L244.0 530.0 L244.0 530.0 L218.0 526.0 L192.0 504.0 L182.0 470.0 L166.0 432.0 L146.0 388.0 L120.0 352.0 L114.0 318.0 L120.0 276.0 L144.0 240.0 L152.0 205.0 L166.0 150.0 L186.0 116.0 L244.0 116.0 Z","M328.0 84.0 L350.0 84.0 L352.0 232.0 L336.0 232.0 Z","M152.0 232.0 L136.0 232.0 L138.0 84.0 L160.0 84.0 Z","M344.0 52.0 L362.0 42.0 L402.0 42.0 L408.0 60.0 L408.0 150.0 L394.0 186.0 L356.0 172.0 L344.0 120.0 Z","M144.0 120.0 L132.0 172.0 L94.0 186.0 L80.0 150.0 L80.0 60.0 L86.0 42.0 L126.0 42.0 L144.0 52.0 Z","M376.0 272.0 L390.0 262.0 L430.0 262.0 L432.0 300.0 L430.0 400.0 L416.0 414.0 L380.0 404.0 L374.0 340.0 Z","M114.0 340.0 L108.0 404.0 L72.0 414.0 L58.0 400.0 L56.0 300.0 L58.0 262.0 L98.0 262.0 L112.0 272.0 Z"]
+            },
+            mediumtransport01: {
+                img: "images/vaisseaux/lynx-dessus.webp", W: 315, H: 629, axe: 158, arriere: 112, nez: 590,
+                coque: [[0,112],[34,112],[40,135],[62,150],[88,165],[96,200],[100,240],[104,280],[104,320],[96,350],[84,385],[68,410],[56,440],[50,480],[46,520],[40,555],[30,585],[12,605],[0,610]],
+                moteurs: [[-120,16],[120,16],[-64,36],[64,36]],
+                formes: ["M162.8 613.5 L130.2 606.1 L119.1 589.0 L119.1 577.9 L107.3 573.5 L105.8 560.2 L118.4 559.4 L120.6 498.8 L108.8 498.0 L107.3 509.1 L102.9 509.1 L100.6 501.7 L91.0 500.2 L94.0 410.7 L54.0 334.5 L48.8 331.5 L48.8 325.6 L14.8 262.7 L19.2 216.8 L11.1 207.9 L11.8 185.7 L14.8 173.9 L22.9 170.9 L21.5 139.1 L31.1 8.9 L53.3 10.4 L50.3 73.3 L51.8 151.7 L68.8 149.5 L69.6 134.7 L82.9 132.5 L88.1 31.8 L120.6 31.1 L125.8 106.6 L153.2 103.6 L193.1 106.6 L196.8 31.8 L224.2 31.1 L230.9 36.3 L236.8 133.2 L249.4 136.2 L247.9 150.2 L256.0 153.2 L256.8 174.6 L270.1 173.2 L265.7 11.1 L285.6 10.4 L288.6 13.3 L299.0 147.3 L296.7 172.4 L300.4 183.5 L306.4 187.2 L307.1 208.7 L299.7 217.6 L304.1 263.4 L270.8 327.1 L270.1 333.7 L266.4 334.5 L227.2 410.7 L231.6 498.8 L219.0 503.9 L218.3 497.3 L203.5 498.0 L203.5 521.0 L205.0 523.9 L211.6 523.9 L213.1 557.2 L217.6 559.4 L216.1 573.5 L205.0 577.2 L204.2 589.8 L186.5 589.8 L182.0 604.6 L172.4 612.0 L162.8 613.5 Z"]
             }
         };
         const LARGE = 1000;
@@ -720,7 +745,7 @@
                 <div class="tb-grille" id="tb-grille" style="grid-template-columns:repeat(${COLS},1fr)">${cases}</div>
                 ${items.length ? `<div class="tb-leg" id="tb-leg">${leg}</div>` : `<div class="tb-sub">Soute vide.</div>`}
                 <div class="tb-cap"><span>1 caisse = ${U} t · ${N} caisses = capacité du vaisseau</span><span>survolez une caisse pour voir la marchandise</span>${vendables().length ? `<button type="button" class="tb-btn" onclick="ouvrirVente()">▶ VENDRE CE QUE JE TRANSPORTE</button>` : ""}</div>
-                ${window.innerWidth >= LARGE && !SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()] ? `<div class="tb-sub tb-bientotv">Vue holographique de votre vaisseau : pour l'instant, seul le <b>Panther Clipper Mk II</b> est modélisé. Les autres vaisseaux viendront plus tard.</div>` : ""}`;
+                ${window.innerWidth >= LARGE && !SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()] ? `<div class="tb-sub tb-bientotv">Vue holographique de votre vaisseau : pour l'instant, seuls le <b>Panther Clipper Mk II</b> et le <b>Lynx Highliner</b> sont modélisés. Les autres vaisseaux viendront plus tard.</div>` : ""}`;
         }
         function brancherSoute() {
             const sc = document.getElementById("tb-scene");
@@ -786,10 +811,12 @@
                 <div class="bloc cy"><h2>PROCHAINE ÉCHÉANCE</h2><div class="tb-big" ${prochaine ? `data-cd="${esc(prochaine.exp)}"` : ""}>${prochaine ? duree(restant(prochaine)) : "—"}</div><div class="tb-sub">${prochaine ? esc(prochaine.nom) : "aucune mission à échéance"}</div></div></div>`;
             if (!act.length) {
                 memoireTrajet(act); ecrire(FAITS_CLE, JSON.stringify(MEMF));     // plus aucune mission : on repart d'un parcours vierge
-                return bandeau + `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>` + reputationHtml();
+                const vide = `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>`;
+                const holo = S && S.pied && S.pied.on ? auSolHtml() : cabinesHtml(act);       // vaisseau ou a pied : l'hologramme reste affiche
+                return bandeau + (holo ? `<div class="tbp-duo${S && S.pied && S.pied.on ? " tbs" : ""}"><div>${vide}</div>${holo}</div>` : vide) + reputationHtml();
             }
             const plan = planTrajet(act);
-            return bandeau + carteHtml(plan) + parcoursHtml(plan, act) + reputationHtml();
+            return bandeau + carteEtCabines(plan, act) + reputationHtml();
         }
         function carteMission(m, role) {
             const [ic, lib] = TYPES[m.type] || TYPES.autre;
@@ -1003,10 +1030,208 @@
             const note = plan.complet ? `${plan.arrets.length} arrêt${plan.arrets.length > 1 ? "s" : ""} à faire · ${plan.total.d.toFixed(1)} al · ${plan.total.sauts} saut${plan.total.sauts > 1 ? "s" : ""} · ≈ ${duree(plan.total.min * 60)}` : "positions des systèmes en cours de chargement…";
             return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${legendeParcours()}${svg}</div>`;
         }
+        // ---------------------------------------------------------------
+        //  PASSAGERS ET SOUTE (onglet Missions) : quand une mission de passagers est en cours (ou un colis de sauvetage a recuperer) et que le vaisseau
+        //  a une silhouette (SILHOUETTES), la carte des missions passe a gauche et le vaisseau en hologramme a droite : les passagers se promenent dans
+        //  la moitie avant de la coque (une couleur par famille de passagers, les personnages importants en halo), la soute est a l'arriere.
+        //  La capacite (cabines lues dans l'equipement, plugin 2.16) est une jauge. La repartition dans la coque est stylisee.
+        // ---------------------------------------------------------------
+        // type de passager du journal -> famille
+        const PAS_FAM = {
+            ord: { c: "#FF9A1F", imp: 0, l: "touristes, affaires, explorateurs" },
+            off: { c: "#FFD54A", imp: 1, l: "VIP et officiels" },
+            sec: { c: "#3DDC97", imp: 0, l: "sécurité et aide humanitaire" },
+            sens: { c: "#FF3B30", imp: 2, l: "prisonniers, criminels, recherchés" }
+        };
+        const PAS_TYPE = { tourist: "ord", business: "ord", explorer: "ord", politician: "off", minorcelebrity: "off", celebrity: "off", security: "sec", aidworker: "sec", politicalprisoner: "sens", criminal: "sens", prisoner: "sens" };
+        const famPassagers = m => m.rech ? "sens" : PAS_TYPE[String(m.ptype || "").toLowerCase().replace(/[^a-z]/g, "")] || (m.vip ? "off" : "ord");
+        function cabinesHtml(act) {
+            const sil = silhouetteActive();
+            if (!sil) return "";
+            // passagers par famille
+            const nbF = {};
+            act.filter(m => m.type === "passagers" && Number(m.pas) > 0).forEach(m => { const f = famPassagers(m); nbF[f] = (nbF[f] || 0) + Number(m.pas); });
+            const nPax = Object.values(nbF).reduce((a, n) => a + n, 0);
+            // sauvetage : colis a recuperer (1 t l'unite), moins ce qui est deja en soute (meme nom de marchandise)
+            const so = S.soute || {}, items = (so.items || []).filter(x => (Number(x.q) || 0) > 0), capS = Number(so.cap) || 0, tonnes = items.reduce((a, x) => a + (Number(x.q) || 0), 0);
+            const nm = x => String(x || "").trim().toLowerCase(), besoin = {};
+            act.filter(m => m.type === "sauvetage" && Number(m.q) > 0 && m.march).forEach(m => { const k = nm(m.march); besoin[k] = besoin[k] || { n: m.march, q: 0 }; besoin[k].q += Number(m.q); });
+            const attente = Object.values(besoin).map(b => ({ n: b.n, q: Math.max(0, b.q - items.filter(x => nm(x.n) === nm(b.n)).reduce((a, x) => a + (Number(x.q) || 0), 0)) })).filter(b => b.q > 0);
+            // capacite en places (cabines lues par le plugin 2.16)
+            const capPax = ((S.vaisseau || {}).cab || []).filter(c => Array.isArray(c) && c[1] > 0).reduce((a, c) => a + c[1], 0);
+            // geometrie (memes reperes que la soute : image tournee de 180 degres, nez en haut)
+            const OX = 30, OY = 34, IW = sil.W, IH = sil.H, AXE = OX + IW - sil.axe, YTOP = OY + IH - sil.nez, YBOT = OY + IH - sil.arriere;
+            const demi = ys => { const yi = OY + IH - ys; for (let i = 0; i < sil.coque.length - 1; i++) { const a = sil.coque[i], b = sil.coque[i + 1], lo = Math.min(a[1], b[1]), hi = Math.max(a[1], b[1]); if (yi >= lo && yi <= hi && hi > lo) return (a[0] + (b[0] - a[0]) * (yi - a[1]) / (b[1] - a[1])) * 0.9; } return 0; };
+            const poly = sil.coque.map(([dx, y]) => [AXE + dx * 0.9, OY + IH - y]).concat(sil.coque.slice().reverse().map(([dx, y]) => [AXE - dx * 0.9, OY + IH - y]));
+            const pd = poly.map(p => p.join(" ")).join(" L");
+            const yCab = nPax ? YTOP + (YBOT - YTOP) * 0.5 : YTOP + 6;      // les passagers occupent la moitie avant ; sans passager, toute la coque est soute
+            let graine = 11; const alea = () => (graine = (graine * 16807) % 2147483647) / 2147483647;
+            // un passager qui se promene : trajet aller-retour entre deux points proches, rythme propre
+            const marcheur = (x, y, f) => {
+                const e = PAS_FAM[f], dx = (alea() * 2 - 1) * 11, dy = (alea() * 2 - 1) * 8;
+                const halo = e.imp ? `<circle class="tbp-halo" r="${e.imp === 2 ? 13 : 11}" cy="-1" fill="${e.c}" fill-opacity=".28" stroke="${e.c}" stroke-opacity=".9" stroke-width="1" style="animation-delay:${(alea() * 1.8).toFixed(2)}s"/>` : "";
+                return `<g class="tbp-p" style="--x0:${(-dx).toFixed(1)}px;--y0:${(-dy).toFixed(1)}px;--x1:${dx.toFixed(1)}px;--y1:${dy.toFixed(1)}px;--d:${(5 + alea() * 7).toFixed(1)}s;animation-delay:-${(alea() * 8).toFixed(1)}s"><g class="tbp-c" style="--w:${(((y - YTOP) / (YBOT - YTOP)) * 4).toFixed(2)}s" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${e.imp ? 1.15 : 0.95})" fill="${e.c}" filter="url(#tbpglow)">${halo}<circle cx="0" cy="-8" r="3.4"/><path d="M-5.5 -3.5 Q0 -6 5.5 -3.5 L5 5 L2 5 L1.2 11 L-1.2 11 L-2 5 L-5 5 Z"/>${f === "off" ? `<path d="M-3 -13 L-1.5 -16 L0 -13.5 L1.5 -16 L3 -13 Z" fill="#fff"/>` : ""}${f === "sens" ? `<path d="M-4 -1 H4 M-4 2 H4" stroke="#04090c" stroke-width="1"/>` : ""}</g></g>`;
+            };
+            let gens = "";
+            if (nPax) {
+                // places de depart : grille decalee dans la zone, puis nPax points repartis regulierement (la zone se resserre si elle est trop pleine)
+                let pas = 34, L = [];
+                for (; pas > 12; pas -= 1) {
+                    L = []; let r = 0;
+                    for (let y = yCab - 24; y > YTOP + 34; y -= pas * 0.95, r++) for (let x = AXE - 300 + (r % 2 ? pas / 2 : 0); x < AXE + 300; x += pas) if (pointDans(poly, x - 9, y - 9) && pointDans(poly, x + 9, y - 9) && pointDans(poly, x - 9, y + 9) && pointDans(poly, x + 9, y + 9) && Math.abs(x - AXE) < demi(y) * 0.8) L.push([x, y]);
+                    if (L.length >= nPax) break;
+                }
+                const pts = [], k = L.length / Math.max(nPax, 1); for (let i = 0; i < Math.min(nPax, L.length); i++) pts.push(L[Math.floor(i * k)]);
+                const liste = []; Object.keys(nbF).forEach(f => { for (let i = 0; i < nbF[f]; i++) liste.push(f); });
+                const ordre = liste.map((f, i) => ({ f, i })).sort((a, b) => PAS_FAM[a.f].imp - PAS_FAM[b.f].imp);       // les importants sont dessines en dernier (par-dessus)
+                const idx = pts.map((_, i) => i); for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(alea() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }     // melange deterministe
+                ordre.forEach((o, n) => { const p = pts[idx[n]]; if (p) gens += marcheur(p[0], p[1], o.f); });
+            }
+            // soute : marchandises a bord, depuis l'arriere, du centre vers les bords
+            const t = 30, cel = [];
+            for (let r = 0; ; r++) {
+                const y1 = YBOT - 6 - r * t, y0 = y1 - t; if (y0 < yCab + 14) break;
+                for (let c = -10; c < 10; c++) { const x0 = AXE + c * t, x1 = x0 + t; if ([[x0, y0], [x1, y0], [x0, y1], [x1, y1]].every(([a, b]) => pointDans(poly, a, b) && Math.abs(a - AXE) < demi(b) * 0.93)) cel.push({ r, x: x0, y: y0, d: Math.abs(x0 + t / 2 - AXE) }); }
+            }
+            cel.sort((a, b) => a.r - b.r || a.d - b.d);
+            const U = capS && cel.length ? capS / cel.length : 1, prop = [];
+            items.forEach((x, i) => { const k = Math.max(1, Math.round((Number(x.q) || 0) / U)); for (let j = 0; j < k && prop.length < cel.length; j++) prop.push(i); });
+            // une caisse fantome par marchandise a recuperer (ou plus si le tonnage est grand), couleur suivant les marchandises deja a bord
+            const fant = []; attente.forEach((b, k) => { const c = COUL_MARCH[(items.length + k) % COUL_MARCH.length], n = Math.max(1, Math.round(b.q / U)); for (let j = 0; j < n; j++) fant.push(c); });
+            let cases = "";
+            cel.forEach((q, i) => {
+                if (i < prop.length) { const cl = COUL_MARCH[prop[i] % COUL_MARCH.length], mis = !!items[prop[i]].m; cases += `<g><rect x="${q.x + 1}" y="${q.y + 1}" width="${t - 2}" height="${t - 2}" rx="1.5" fill="${cl}" fill-opacity=".5" stroke="${cl}" stroke-width="2" stroke-opacity="1"${mis ? ' stroke-dasharray="3 2"' : ""}/><path d="M${q.x + 4} ${q.y + 6}H${q.x + t - 4}M${q.x + 4} ${q.y + t / 2}H${q.x + t - 4}" stroke="#fff" stroke-opacity=".45"/></g>`; }
+                else if (i < prop.length + fant.length) { const cl = fant[i - prop.length]; cases += `<g><rect x="${q.x + 1}" y="${q.y + 1}" width="${t - 2}" height="${t - 2}" rx="1.5" fill="none" stroke="${cl}" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${q.x + t / 2}" y="${q.y + t / 2 + 6}" fill="${cl}" font-size="19" font-weight="bold" text-anchor="middle" stroke="#04090c" stroke-width="3" paint-order="stroke">?</text></g>`; }
+                else cases += `<rect x="${q.x + 1.5}" y="${q.y + 1.5}" width="${t - 3}" height="${t - 3}" rx="1.5" fill="none" stroke="rgba(0,240,255,.22)" stroke-dasharray="2 3"/>`;
+            });
+            const vbW = Math.round(IW * 0.86), vbH = Math.round(IH * 0.9), v = S && S.vaisseau ? S.vaisseau : {};
+            const svg = `<svg class="tb-svgv" viewBox="${Math.round(AXE - vbW / 2)} ${OY + 12} ${vbW} ${vbH}" role="img" aria-label="Passagers et soute de votre vaisseau">
+                <defs><filter id="tbpholo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0"/><feComponentTransfer><feFuncG type="gamma" amplitude="1.25" exponent="1.45" offset="0"/><feFuncB type="gamma" amplitude="1.25" exponent="1.45" offset="0"/></feComponentTransfer></filter>
+                    <filter id="tbplueur"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <filter id="tbpglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <pattern id="tbplignes" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1.4" fill="#000" opacity=".28"/></pattern>
+                    <linearGradient id="tbpbal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9A1F" stop-opacity="0"/><stop offset="1" stop-color="#FF9A1F" stop-opacity=".5"/></linearGradient>
+                    <clipPath id="tbpcq"><path d="M${pd} Z"/></clipPath>
+                    <radialGradient id="tbpsol"><stop offset="0" stop-color="#FF9A1F" stop-opacity=".45"/><stop offset="1" stop-color="#FF9A1F" stop-opacity="0"/></radialGradient></defs>
+                <ellipse cx="${OX + IW / 2}" cy="${OY + IH - 10}" rx="200" ry="12" fill="url(#tbpsol)" opacity=".75"/>
+                <g transform="translate(${OX} ${OY}) rotate(180 ${IW / 2} ${IH / 2})">
+                    <image href="${sil.img}" width="${IW}" height="${IH}" filter="url(#tbpholo)" opacity=".5"/>
+                    <rect width="${IW}" height="${IH}" fill="url(#tbplignes)"/>
+                    <g filter="url(#tbplueur)" stroke="#FF9A1F" stroke-width="2" fill="none" stroke-linejoin="round">${sil.formes.map(d => `<path d="${d}"/>`).join("")}</g>
+                </g>
+                <g clip-path="url(#tbpcq)">${nPax ? `<rect x="${AXE - 220}" y="${YTOP}" width="440" height="${yCab - YTOP}" fill="rgba(3,8,12,.55)"/>` : ""}<rect x="${AXE - 220}" y="${yCab + 5}" width="440" height="${YBOT - yCab}" fill="rgba(3,8,12,.78)"/>
+                    <g class="tbp-balai" style="--h:${YBOT - YTOP}px"><rect x="${AXE - 200}" y="${YTOP - 30}" width="400" height="30" fill="url(#tbpbal)"/><rect x="${AXE - 200}" y="${YTOP}" width="400" height="1.5" fill="#FFB44D"/></g></g>
+                ${nPax ? `<text x="${AXE - demi(YTOP + 30) + 6}" y="${YTOP + 22}" fill="#FFB44D" font-size="11.5" letter-spacing="1.5" stroke="#04090c" stroke-width="3" paint-order="stroke">PASSAGERS À BORD</text>` : ""}
+                <path d="M${AXE - demi(yCab)} ${yCab + 5}H${AXE + demi(yCab)}" stroke="#FF9A1F" stroke-opacity=".6" stroke-dasharray="5 4"/>
+                <text x="${AXE - demi(yCab) + 4}" y="${yCab + 19}" fill="#00F0FF" font-size="11.5" letter-spacing="1.5" stroke="#04090c" stroke-width="3" paint-order="stroke">▼ SOUTE · ${tonnes ? fmtN(tonnes) + " t À BORD" : "VIDE"}</text>
+                <g>${cases}</g>${gens}</svg>`;
+            const pleine = capPax > 0 && nPax > capPax, pct = capPax ? Math.min(100, Math.round(nPax / capPax * 100)) : 0;
+            const jauge = nPax || capPax ? `<div class="tbp-jauge"><span>PLACES</span>${capPax ? `<div class="bar"><i class="${pleine ? "pleine" : ""}" style="width:${pct}%"></i></div><b style="color:${pleine ? "#FF3B30" : "#FFB44D"}">${nPax}/${capPax}</b>` : `<b style="color:#FFB44D">${nPax}</b>`}</div>` : "";
+            const leg = Object.keys(PAS_FAM).filter(f => nbF[f]).map(f => `<span style="--cl:${PAS_FAM[f].c}"><i></i>${nbF[f]} ${PAS_FAM[f].l}</span>`).join("")
+                + attente.map((b, k) => `<span style="--cl:${COUL_MARCH[(items.length + k) % COUL_MARCH.length]}"><i class="sq vide"></i>${esc(b.n)} · ${fmtN(b.q)} t à récupérer (sauvetage)</span>`).join("")
+                + items.map((x, i) => `<span style="--cl:${COUL_MARCH[i % COUL_MARCH.length]}"><i class="sq"></i>${esc(x.n)} · ${fmtN(x.q)} t${x.m ? " (mission)" : ""}</span>`).join("");
+            const note = (nPax ? (capPax ? "Capacité lue dans l'équipement de votre vaisseau. " : "Cabines non relevées : relancez EDMC avec le plugin 2.16 pour voir la capacité. ") + "Les personnages importants (halo) sont les VIP, prisonniers et recherchés ; leur répartition dans la coque est stylisée. " : "") + (attente.length ? "« ? » = colis de sauvetage à récupérer." : "");
+            return `<div class="bloc holo tbp-bloc"><div class="holo-balayage"></div><h2>${nPax ? "PASSAGERS ET SOUTE" : "SOUTE"} <em>${nPax ? nPax + " passager" + (nPax > 1 ? "s" : "") + " · " : ""}${fmtN(tonnes)} t à bord${attente.length ? " · sauvetage à récupérer" : ""}</em></h2>
+                ${jauge}<div class="tb-scene">${svg}</div>
+                <div class="tbp-pied"><span class="nom">${esc(nomVaisseau(v.modele))}</span><span class="cap">${nPax ? nPax + (capPax ? "/" + capPax : "") + " PASSAGERS · " : ""}${fmtN(tonnes)} t</span></div>
+                <div class="tbp-leg">${leg}</div>
+                ${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - capPax} passager${nPax - capPax > 1 ? "s" : ""} de plus que de places.</div>` : ""}
+                <div class="tb-sub">${note}</div></div>`;
+        }
+        // ---------------------------------------------------------------
+        //  A PIED (onglet Missions) : quand le pilote est a pied (plugin 2.17 : S.pied), l'hologramme du vaisseau laisse la place a sa combinaison vue de dos,
+        //  avec des traits vers l'arme principale (et la 2e pour la Dominator), l'arme secondaire, le sac a dos (liste), la ceinture (consommables)
+        //  et la combinaison. Le jeu ne donne PAS les outils equipes ni la capacite du sac. Une capture par combinaison : points d'accroche en pixels de l'image.
+        // ---------------------------------------------------------------
+        const SOL_SUITS = {
+            utilitysuit: { nom: "Maverick", img: "images/combinaisons/maverick-dos.webp", W: 745, H: 1359, a: { sac: [300, 380], p1: [410, 200], s: [490, 720], cei: [330, 575], comb: [200, 930] } },
+            explorationsuit: { nom: "Artemis", img: "images/combinaisons/artemis-dos.webp", W: 759, H: 1282, a: { sac: [330, 360], p1: [470, 160], s: [520, 730], cei: [400, 560], comb: [260, 900] } },
+            flightsuit: { nom: "Combinaison de vol", img: "images/combinaisons/flightsuit-dos.webp", W: 757, H: 1278, a: { sac: [330, 320], s: [520, 720], cei: [340, 545], comb: [270, 850] } },
+            tacticalsuit: { nom: "Dominator", img: "images/combinaisons/dominator-dos.webp", W: 699, H: 1294, a: { sac: [270, 380], p1: [350, 200], p2: [165, 330], s: [480, 720], cei: [340, 560], comb: [250, 900] } }
+        };
+        const SOL_NOMS = { flightsuit: "Combinaison de vol", utilitysuit: "Maverick", explorationsuit: "Artemis", tacticalsuit: "Dominator" };
+        const SOL_MODS = { suit_backpackcapacity: "Capacité du sac à dos", suit_reducedtoolbatteryconsumption: "Batterie d'outil réduite", suit_quieterfootsteps: "Pas silencieux", suit_nightvision: "Vision nocturne",
+            suit_improvedjumpassist: "Aide au saut", suit_shieldregen: "Régénération du bouclier", suit_increasedsprintduration: "Sprint plus long", suit_increasedhealth: "Santé accrue", suit_meleedamage: "Dégâts de mêlée",
+            weapon_handling: "Maniement", weapon_clipsize: "Taille du chargeur", weapon_backpackreloading: "Rechargement depuis le sac", weapon_stability: "Stabilité", weapon_reloadspeed: "Vitesse de rechargement",
+            weapon_suppression_unpressurised: "Silencieux (sans pression)", weapon_suppression_pressurised: "Silencieux (sous pression)", weapon_magazinesize: "Taille du chargeur", weapon_damage: "Dégâts", weapon_scope: "Lunette" };
+        const solMod = k => SOL_MODS[k] || String(k).replace(/^(suit|weapon)_/, "").replace(/_/g, " ");
+        const SOL_CAT = { data: ["DONNÉES", "#00F0FF"], comp: ["COMPOSANTS", "#FFD54A"], items: ["OBJETS", "#B28DFF"], conso: ["CONSOMMABLES", "#3DDC97"] };
+        const solCoupe = (t, n) => { t = String(t || ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+        const SOL_LH = 15.5, SOL_BW = 246, SOL_VH = 700;
+        const solHaut = (n, sous) => 30 + (sous ? 16 : 0) + n * SOL_LH + 6;
+        function solBoite(b, y) {
+            const X = b.cote === "g" ? 8 : 832 - SOL_BW, h = solHaut(b.lignes.length, b.sous), bx = b.cote === "g" ? X + SOL_BW : X, my = y + 14, pivot = b.cote === "g" ? b.anc[0] - 38 : b.anc[0] + 38;
+            return `<polyline points="${b.anc[0]},${b.anc[1]} ${pivot},${my} ${bx},${my}" fill="none" stroke="${b.coul}" stroke-width="1.5" stroke-opacity=".95"/>
+                <circle cx="${b.anc[0]}" cy="${b.anc[1]}" r="9" fill="none" stroke="${b.coul}" stroke-opacity=".5"/><circle class="tbs-pouls" cx="${b.anc[0]}" cy="${b.anc[1]}" r="4.5" fill="${b.coul}"/>
+                <rect x="${X}" y="${y}" width="${SOL_BW}" height="${h}" fill="rgba(3,8,12,.88)" stroke="${b.coul}" stroke-opacity=".9"/>
+                <text x="${X + 8}" y="${y + 16}" fill="${b.coul}" font-size="12" letter-spacing="1.5">${b.titre}</text>
+                ${b.sous ? `<text x="${X + 8}" y="${y + 32}" fill="#fff" font-size="14.5">${esc(solCoupe(b.sous, 28))}</text>` : ""}
+                ${b.lignes.map((l, i) => `<text x="${X + 8}" y="${y + (b.sous ? 48 : 32) + i * SOL_LH}" fill="${l.c || "#9fb0b8"}" font-size="12.5">${esc(l.t)}</text>`).join("")}`;
+        }
+        // empile les boites d'un cote par ordre de hauteur d'ancre, sans chevauchement
+        function solEmpile(L) {
+            L.sort((a, b) => a.anc[1] - b.anc[1]); let fin = 8, out = "";
+            L.forEach(b => { const h = solHaut(b.lignes.length, b.sous); let y = Math.max(fin, b.anc[1] - h / 2); y = Math.min(y, SOL_VH - h - 6); y = Math.max(y, fin); out += solBoite(b, y); fin = y + h + 10; });
+            return out;
+        }
+        // lignes de texte (listes) a partir de l'etat a pied
+        function solListes(p) {
+            const sac = p.sac || {}, liste = k => (sac[k] || []).map(x => ({ t: `${x[1]} × ${solCoupe(x[0], 27)}`, c: SOL_CAT[k][1] }));
+            const sacL = []; ["data", "comp", "items"].forEach(k => { const L = liste(k); if (L.length) { sacL.push({ t: SOL_CAT[k][0], c: "#6f808a" }); sacL.push(...L); } });
+            const compte = ks => ks.reduce((a, k) => a + (sac[k] || []).reduce((b, x) => b + (Number(x[1]) || 0), 0), 0);
+            return { sacL, conL: liste("conso"), nSac: compte(["data", "comp", "items"]), total: compte(["data", "comp", "items", "conso"]) };
+        }
+        function solArme(w, anc, titre, cote) {
+            if (!w) return { cote, anc, titre, coul: "#566069", lignes: [{ t: "Aucune arme équipée" }] };
+            return { cote, anc, titre, coul: "#FF9A1F", sous: w.n, lignes: [{ t: "classe " + (w.c || "?"), c: "#cfd8dc" }].concat((w.m || []).map(m => ({ t: "· " + solMod(m) }))) };
+        }
+        function auSolHtml() {
+            const p = S && S.pied; if (!p || !p.on) return "";
+            const cle = String(p.suit || "").replace(/_class\d+$/, ""), grade = (String(p.suit || "").match(/class(\d+)$/) || [])[1], nom = SOL_NOMS[cle] || (p.suit ? solCoupe(p.suit, 24) : "Combinaison inconnue");
+            const { sacL, conL, nSac, total } = solListes(p), arm = p.armes || {}, lieu = S.station || S.systeme || "";
+            const titre = `<h2>À PIED <em>${esc(lieu)}${lieu ? " · " : ""}${esc(nom)}${grade ? " · grade " + grade : ""}${p.loadout ? " · équipement « " + esc(p.loadout) + " »" : ""} · ${total} objet${total > 1 ? "s" : ""} sur vous</em></h2>`;
+            const S0 = SOL_SUITS[cle];
+            const note = `<div class="tb-sub">Les outils équipés et la capacité du sac ne sont pas fournis par le jeu : ils ne sont pas affichés.</div>`;
+            if (!S0 || window.innerWidth < LARGE) {
+                // sans silhouette (combinaison de vol, autre modele) ou ecran etroit : simples listes
+                const bloc = (t, c, L) => `<div class="tbs-liste" style="--cl:${c}"><b>${t}</b>${L.length ? L.map(l => `<div style="color:${l.c || "#9fb0b8"}">${esc(l.t)}</div>`).join("") : `<div>Aucun</div>`}</div>`;
+                const armL = k => arm[k] ? [{ t: arm[k].n + " · classe " + (arm[k].c || "?"), c: "#fff" }].concat((arm[k].m || []).map(m => ({ t: "· " + solMod(m) }))) : [];
+                return `<div class="bloc holo tbp-bloc"><div class="holo-balayage"></div>${titre}<div class="tbs-listes">${bloc("ARME PRINCIPALE", "#FF9A1F", armL("p1"))}${arm.p2 ? bloc("ARME PRINCIPALE 2", "#FF9A1F", armL("p2")) : ""}${bloc("ARME SECONDAIRE", "#FF9A1F", armL("s"))}${bloc("SAC À DOS · " + nSac, "#00F0FF", sacL)}${bloc("CEINTURE · CONSOMMABLES", "#3DDC97", conL)}${bloc("COMBINAISON", "#00F0FF", (p.mods || []).map(m => ({ t: "· " + solMod(m) })))}</div>
+                    ${S0 ? "" : `<div class="tb-sub">Pas encore de silhouette pour cette combinaison : les armes et le sac s'affichent en listes.</div>`}${note}</div>`;
+            }
+            const K = 657 / S0.H, w = S0.W * K, OX = 420 - w / 2, OY = 20, P = ([x, y]) => [+(OX + x * K).toFixed(1), +(OY + y * K).toFixed(1)], A = {};
+            Object.keys(S0.a).forEach(k => { A[k] = P(S0.a[k]); });
+            const G = [{ cote: "g", anc: A.sac, titre: "SAC À DOS · " + nSac + " OBJET" + (nSac > 1 ? "S" : ""), coul: "#00F0FF", lignes: sacL.length ? sacL : [{ t: "Vide" }] },
+                { cote: "g", anc: A.cei, titre: "CEINTURE · CONSOMMABLES", coul: "#3DDC97", lignes: conL.length ? conL : [{ t: "Aucun" }] },
+                { cote: "g", anc: A.comb, titre: "COMBINAISON", coul: "#00F0FF", sous: nom + (grade ? " · grade " + grade : ""), lignes: (p.mods || []).map(m => ({ t: "· " + solMod(m) })) }];
+            const D = [solArme(arm.s, A.s, "ARME SECONDAIRE", "d")];
+            if (S0.a.p1) D.push(solArme(arm.p1, A.p1, "ARME PRINCIPALE" + (S0.a.p2 ? " 1" : ""), "d"));      // la combinaison de vol n'a pas d'arme principale
+            if (S0.a.p2) G.push(solArme(arm.p2, A.p2, "ARME PRINCIPALE 2", "g"));
+            const T = "0.25 0.38 0.52 0.66 0.78 0.35 0.08 0.05 0.05 0.05 0.06 0.1 0.2 0.35 0.5 0.65 0.78 0.88 0.95 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1";
+            const svg = `<svg class="tb-svgv" viewBox="0 0 840 ${SOL_VH}" role="img" aria-label="Équipement de votre combinaison"><defs>
+                <filter id="tbsholo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.25 0.55 0.2 0 0   0.25 0.55 0.2 0 0   0.25 0.55 0.2 0 0   0 0 0 1 0"/><feComponentTransfer><feFuncR type="linear" slope="0" intercept="0"/><feFuncG type="table" tableValues="${T}"/><feFuncB type="table" tableValues="${T}"/></feComponentTransfer></filter>
+                <radialGradient id="tbsfond" cx=".5" cy=".5" r=".62"><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>
+                <mask id="tbsfade"><rect x="${OX}" y="${OY}" width="${w}" height="657" fill="url(#tbsfond)"/></mask>
+                <pattern id="tbslignes" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1.4" fill="#000" opacity=".3"/></pattern>
+                <linearGradient id="tbsbal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00F0FF" stop-opacity="0"/><stop offset="1" stop-color="#00F0FF" stop-opacity=".35"/></linearGradient></defs>
+                <g mask="url(#tbsfade)"><image href="${S0.img}" x="${OX}" y="${OY}" width="${w}" height="657" filter="url(#tbsholo)"/>
+                    <rect x="${OX}" y="${OY}" width="${w}" height="657" fill="url(#tbslignes)"/>
+                    <g class="tbs-balai" style="--h:620px"><rect x="${OX}" y="${OY - 30}" width="${w}" height="30" fill="url(#tbsbal)"/><rect x="${OX}" y="${OY}" width="${w}" height="1.5" fill="#00F0FF" opacity=".8"/></g></g>
+                ${solEmpile(G)}${solEmpile(D)}</svg>`;
+            return `<div class="bloc holo tbp-bloc"><div class="holo-balayage"></div>${titre}<div class="tb-scene">${svg}</div>${note}</div>`;
+        }
+        // carte des missions ; avec des passagers a bord, elle se partage la ligne avec l'hologramme du vaisseau (ecrans larges)
+        // (le parcours des missions passe sous la carte, dans la colonne de gauche : pas de vide a cote de l'hologramme)
+        function carteEtCabines(plan, act) {
+            const cb = S && S.pied && S.pied.on ? auSolHtml() : cabinesHtml(act), c = carteHtml(plan);
+            colMax = cb ? (S && S.pied && S.pied.on ? 1 : window.innerWidth >= 1400 ? 2 : 1) : 3; let pa; try { pa = parcoursHtml(plan, act); } finally { colMax = 3; }
+            return cb ? `<div class="tbp-duo${S && S.pied && S.pied.on ? " tbs" : ""}"><div>${c}${pa}</div>${cb}</div>` : c + pa;
+        }
         const legendeParcours = () => `<div class="tb-lgp"><span style="--c:#FF4FD8"><i></i>vous êtes ici</span><span style="--c:#fff"><i></i>où aller</span><span style="--c:#00F0FF"><i></i>à faire</span><span style="--c:#FFB000"><i class="tr"></i>déjà passé, mission pas terminée</span><span style="--c:#6b747a"><i></i>terminé</span><span style="--c:#00FF66"><i></i>retour : rendre les missions</span></div>`;
         // missions d'un arret : colonnes repartagees pour ne laisser AUCUN vide (1 -> pleine largeur, 2, 3 ; 4 -> 2x2 ; la derniere carte s'etire sur la place restante)
+        let colMax = 3;     // 2 (ou 1) quand l'hologramme partage la ligne : colonne plus etroite, cartes trop serrees sinon
         function grilleMissions(cartes) {
-            const n = cartes.length, c = n <= 3 ? Math.max(n, 1) : n % 3 === 0 ? 3 : 2, reste = n % c;
+            const n = cartes.length, c = Math.max(1, Math.min(colMax, n <= 3 ? n : n % 3 === 0 ? 3 : 2)), reste = n % c;
             return `<div class="ms" style="--c:${c}">${cartes.map((h, i) => i === n - 1 && reste ? `<div style="grid-column:span ${c - reste + 1}">${h}</div>` : h).join("")}</div>`;
         }
         // parcours : une carte par arret, avec ses missions dedans. MEMES numeros et couleurs que la carte (suiteParcours) :
