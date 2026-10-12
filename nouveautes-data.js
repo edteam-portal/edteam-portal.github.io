@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-hologramme-zoom', date: '2026-10-12T17:22:00Z', type: 'AMELIORE',
+        titre: 'Tableau de bord : zoom sur le vaisseau en hologramme',
+        texte: 'Sur un petit écran, le vaisseau était difficile à lire en entier. Vous pouvez maintenant zoomer avec la molette de la souris ou les boutons + et −, puis faire glisser le vaisseau pour voir de près les soutes, les cabines et les modules. Le bouton ⟲ revient à la vue d’ensemble. Valable dans les onglets Missions et Commerce.',
+        important: false
+    },
+    {
         id: '2026-10-commerce-disposition', date: '2026-10-11T18:09:00Z', type: 'AMELIORE',
         titre: 'Tableau de bord, Commerce : une route plus lisible',
         texte: 'Les réglages de la tournée se replient en une ligne de résumé, les indicateurs tiennent sur une ligne, et un arrêt déplié montre simplement ce qu’il faut acheter et vendre (nom, quantité, prix, stock). Entre deux arrêts, une petite pastille donne la distance, la durée et le gain du trajet. La route est à gauche et le vaisseau reste visible à droite, comme dans l’onglet Missions. Troisième choix à côté de « Tournée de vaisseau » et « Porte-vaisseaux » : « Vendre mes soutes », qui cherche où vendre ce que vous transportez, directement dans la colonne de gauche (plus de fenêtre).',

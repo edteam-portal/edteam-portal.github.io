@@ -87,6 +87,44 @@
         document.addEventListener("mousemove", e => { const t = tip(); if (t.style.display === "block") { t.style.left = Math.min(e.clientX + 16, innerWidth - 350) + "px"; t.style.top = Math.min(e.clientY + 16, innerHeight - 60) + "px"; } });
     }
 
+    // ---- zoom (molette, boutons, glisser) : on modifie le viewBox du SVG ; l'etat survit aux rafraichissements (la zone est recreee a chaque affichage)
+    const Z = window.__tbmZoom = window.__tbmZoom || { k: 1, cx: 468, cy: null };
+    function vue(svg) {
+        const w0 = +svg.dataset.w, h0 = +svg.dataset.h; if (!w0 || !h0) return;
+        Z.k = Math.max(1, Math.min(4, Z.k));
+        const w = w0 / Z.k, h = h0 / Z.k; if (Z.cy == null) Z.cy = h0 / 2;
+        Z.cx = Math.max(w / 2, Math.min(w0 - w / 2, Z.cx)); Z.cy = Math.max(h / 2, Math.min(h0 - h / 2, Z.cy));
+        svg.setAttribute("viewBox", (Z.cx - w / 2).toFixed(1) + " " + (Z.cy - h / 2).toFixed(1) + " " + w.toFixed(1) + " " + h.toFixed(1));
+        const p = svg.parentNode, l = p && p.querySelector(".tbm-zl"); if (l) l.textContent = Math.round(Z.k * 100) + " %";
+        svg.style.cursor = Z.k > 1 ? "grab" : "";
+    }
+    function zoomer(svg, f, px, py) {   // px, py : point fixe (coordonnees du viewBox) ; par defaut le centre
+        const w0 = +svg.dataset.w, h0 = +svg.dataset.h; if (Z.cy == null) Z.cy = h0 / 2;
+        if (px == null) { px = Z.cx; py = Z.cy; }
+        const ancien = Z.k; Z.k = Math.max(1, Math.min(4, Z.k * f)); const r = ancien / Z.k;
+        Z.cx = px + (Z.cx - px) * r; Z.cy = py + (Z.cy - py) * r;
+        if (Z.k === 1) { Z.cx = w0 / 2; Z.cy = h0 / 2; }
+        vue(svg);
+    }
+    if (!window.__tbmZoomInit) {
+        window.__tbmZoomInit = true;
+        const pt = (svg, e) => { const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal, s = Math.min(r.width / vb.width, r.height / vb.height), ox = (r.width - vb.width * s) / 2, oy = (r.height - vb.height * s) / 2; return [vb.x + (e.clientX - r.left - ox) / s, vb.y + (e.clientY - r.top - oy) / s, s]; };
+        document.addEventListener("wheel", e => {
+            const svg = e.target.closest && e.target.closest("svg.tbm-zoomable"); if (!svg) return;
+            e.preventDefault(); const p = pt(svg, e); zoomer(svg, e.deltaY < 0 ? 1.2 : 1 / 1.2, p[0], p[1]);
+        }, { passive: false });
+        document.addEventListener("click", e => {
+            const b = e.target.closest && e.target.closest("[data-tbmz]"); if (!b) return;
+            const svg = b.closest(".tbm-bloc").querySelector("svg.tbm-zoomable"); if (!svg) return;
+            const a = b.dataset.tbmz; if (a === "reset") { Z.k = 1; Z.cx = +svg.dataset.w / 2; Z.cy = +svg.dataset.h / 2; vue(svg); } else zoomer(svg, a === "in" ? 1.3 : 1 / 1.3);
+        });
+        let drag = null;
+        document.addEventListener("pointerdown", e => { const svg = e.target.closest && e.target.closest("svg.tbm-zoomable"); if (!svg || Z.k <= 1 || e.button !== 0) return; drag = { svg, x: e.clientX, y: e.clientY, cx: Z.cx, cy: Z.cy }; svg.style.cursor = "grabbing"; });
+        document.addEventListener("pointermove", e => { if (!drag) return; const p = pt(drag.svg, e), s = p[2]; Z.cx = drag.cx - (e.clientX - drag.x) / s; Z.cy = drag.cy - (e.clientY - drag.y) / s; vue(drag.svg); });
+        const fin = () => { if (drag) { drag.svg.style.cursor = Z.k > 1 ? "grab" : ""; drag = null; } };
+        document.addEventListener("pointerup", fin); document.addEventListener("pointercancel", fin);
+    }
+
     // ------------------------------------------------------------------------------------------------
     window.modulesHtml = function (act, opts) {
         opts = opts || {};
@@ -202,7 +240,9 @@
         window.__tbmDet = dets;
         if (typeof SOUTE !== "undefined") { SOUTE.items = items; SOUTE.large = true; }
         const tr = `translate(${HX.toFixed(1)} ${HY}) scale(${SC.toFixed(3)})`, T = "0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0";
-        const svg = `<svg class="tb-svgv" viewBox="0 0 936 ${VH}" role="img" aria-label="Modules de votre vaisseau"><defs>
+        if (Z.cy == null || Z.k <= 1) { Z.cx = 468; Z.cy = VH / 2; }
+        Z.k = Math.max(1, Math.min(4, Z.k)); const zw = 936 / Z.k, zh = VH / Z.k; Z.cx = Math.max(zw / 2, Math.min(936 - zw / 2, Z.cx)); Z.cy = Math.max(zh / 2, Math.min(VH - zh / 2, Z.cy));
+        const svg = `<svg class="tb-svgv tbm-zoomable" data-w="936" data-h="${VH}" style="${Z.k > 1 ? "cursor:grab;" : ""}touch-action:none" viewBox="${(Z.cx - zw / 2).toFixed(1)} ${(Z.cy - zh / 2).toFixed(1)} ${zw.toFixed(1)} ${zh.toFixed(1)}" role="img" aria-label="Modules de votre vaisseau"><defs>
             <mask id="tbmL" maskUnits="userSpaceOnUse" x="0" y="0" width="936" height="${VH}"><rect width="936" height="${VH}" fill="#fff"/><g transform="${tr}">${trous}</g></mask>
             <radialGradient id="tbmA" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#FF9A1F" stop-opacity=".4"/><stop offset=".7" stop-color="#FF5A00" stop-opacity=".16"/><stop offset="1" stop-color="#FF3B00" stop-opacity=".05"/></radialGradient>
             <radialGradient id="tbmC" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#00F0FF" stop-opacity=".3"/><stop offset="1" stop-color="#0090FF" stop-opacity=".05"/></radialGradient>
@@ -225,8 +265,8 @@
         const legI = items.map((x, i) => `<span data-i="${i}" style="--cl:${COUL_MARCH[i % COUL_MARCH.length]}"><i></i>${E(x.n)} · ${fmtN(x.q)} t${x.m ? " (mission)" : ""}</span>`).join(""), leg = Object.keys(PAS_FAM).filter(f => nbF[f]).map(f => `<span style="--cl:${PAS_FAM[f].c}"><i></i>${nbF[f]} ${PAS_FAM[f].l}${PAS_FAM[f].imp ? " (cercle)" : ""}</span>`).join("")
             + attente.map((b, k) => `<span style="--cl:${COUL_MARCH[(items.length + k) % COUL_MARCH.length]}"><i class="sq vide"></i>${E(b.n)} · ${fmtN(b.q)} t à récupérer (sauvetage)</span>`).join("")
 
-        const v = S.vaisseau, note = (items.length && !celRack.length ? "Cargaison à bord sans rack de soute : " + fmtN(tonnes) + " t. " : "") + "Compartiments proportionnels à la taille de chaque emplacement ; disposition stylisée (le jeu ne donne pas la position des modules). Survolez un compartiment pour son détail." + (attente.length ? " « ? » = colis de sauvetage à récupérer." : "");
-        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>MODULES DU VAISSEAU <em>${E(nomVaisseau(v.modele))} · ${mods.filter(m => !m.vide).length} modules${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene">${svg}</div>
+        const v = S.vaisseau, note = (items.length && !celRack.length ? "Cargaison à bord sans rack de soute : " + fmtN(tonnes) + " t. " : "") + "Compartiments proportionnels à la taille de chaque emplacement ; disposition stylisée (le jeu ne donne pas la position des modules). Survolez un compartiment pour son détail. Molette ou boutons + / − pour zoomer, glisser pour se déplacer." + (attente.length ? " « ? » = colis de sauvetage à récupérer." : "");
+        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>MODULES DU VAISSEAU <em>${E(nomVaisseau(v.modele))} · ${mods.filter(m => !m.vide).length} modules${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}</div>
             <div class="tbp-leg">${leg}</div>${legI ? `<div class="tb-leg" id="tb-leg">${legI}</div>` : ""}${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - places} passager${nPax - places > 1 ? "s" : ""} de plus que de places.</div>` : ""}<div class="tb-sub">${note}</div>${opts.pied || ""}</div>`;
     };
 })();
