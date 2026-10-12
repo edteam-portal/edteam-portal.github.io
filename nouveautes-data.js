@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-page-escadron-refaite', date: '2026-10-12T17:56:15Z', type: 'AMELIORE',
+        titre: 'Page Escadron : chiffres, code d’invitation et renseignement réunis',
+        texte: 'En haut de la page Escadron, les chiffres clés de l’escadron tiennent sur une ligne, avec à leur droite le code d’invitation (visible des officiers et de l’Amiral). Le registre du renseignement s’ouvre maintenant depuis la carte « Renseignement » de cette page, et on y reste en le fermant. Pour l’Amiral, le réglage des initiatives des pilotes se replie en une ligne qui rappelle le mode choisi.',
+        important: false
+    },
+    {
         id: '2026-10-chiffres-page-escadron', date: '2026-10-12T19:20:00Z', type: 'AMELIORE',
         titre: 'Les chiffres de l’escadron passent sur la page Escadron',
         texte: 'Les cinq blocs de chiffres (effectif, renseignement, BGS, Powerplay, colonisation) ne sont plus en bas du QG : vous les trouvez en haut de la page Escadron, sur une seule ligne. Les cartes des pilotes y sont aussi un peu moins grandes, pour en voir davantage d’un coup d’œil.',
