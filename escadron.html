@@ -21,6 +21,7 @@
     <script src="navigation.js?v=31"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="vitrine-module.js?v=1"></script>
+    <script src="chiffres-cles.js?v=1"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -344,7 +345,7 @@
         .eff-puce { border: 1px solid #444; color: #999; padding: 3px 12px; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; border-radius: 12px; user-select: none; transition: 0.15s; }
         .eff-puce:hover { border-color: #888; color: #ccc; }
         .eff-puce.on { border-color: var(--ed-orange); color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); }
-        .eff-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; padding: 6px 14px 10px; align-items: stretch; }
+        .eff-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; padding: 6px 14px 10px; align-items: stretch; }
         .eff-carte { --c: #FF7100; padding: 0; display: flex; flex-direction: column; cursor: pointer; margin-bottom: 0; transition: transform 0.2s cubic-bezier(.2,.8,.3,1.2), filter 0.2s; }
         .eff-carte.amiral { --c: #FF3333; --bdc: rgba(255, 51, 51, .75); --teinte: rgba(255, 51, 51, .07); --lueur: rgba(255, 51, 51, .08); --accent: #FF3333; }
         .eff-carte.officier { --c: #00FF66; --bdc: rgba(0, 255, 102, .7); --teinte: rgba(0, 255, 102, .06); --lueur: rgba(0, 255, 102, .07); --accent: #00FF66; }
@@ -464,6 +465,11 @@
                     <button type="button" class="mode-ini-carte" data-mode="DESACTIVE" onclick="choisirModeInitiatives('DESACTIVE')"><b>DÉSACTIVÉ</b><span>Le bouton « Lancer une initiative » disparaît pour les pilotes. Vous et vos officiers pouvez toujours en lancer.</span></button>
                 </div>
                 <div class="bloc-note">Si vous n'ouvrez pas le site pendant 7 jours, vos pilotes retrouvent automatiquement le mode LIBRE. Votre choix est conservé et revient dès que vous rouvrez le site.</div>
+            </div>
+
+            <!-- CHIFFRES CLES DE L'ESCADRON (chiffres-cles.js) -->
+            <div id="qg-chiffres" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+                <div id="qg-chiffres-corps"><div style="color: #666; font-style: italic; padding: 14px;">&gt; CHARGEMENT...</div></div>
             </div>
 
             <div class="eff-tete">
@@ -1139,6 +1145,7 @@
                 
                 // Démarrage des effectifs
                 chargerEffectifsEscadron();
+                if (typeof chargerChiffresQG === 'function') chargerChiffresQG(profilCommandant);
                 chargerCodeInvitation(data);
                 chargerModeInitiatives(data);
 

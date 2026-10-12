@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-chiffres-page-escadron', date: '2026-10-12T19:20:00Z', type: 'AMELIORE',
+        titre: 'Les chiffres de l’escadron passent sur la page Escadron',
+        texte: 'Les cinq blocs de chiffres (effectif, renseignement, BGS, Powerplay, colonisation) ne sont plus en bas du QG : vous les trouvez en haut de la page Escadron, sur une seule ligne. Les cartes des pilotes y sont aussi un peu moins grandes, pour en voir davantage d’un coup d’œil.',
+        important: false
+    },
+    {
         id: '2026-10-entete-pilotes-actifs', date: '2026-10-12T18:40:00Z', type: 'AMELIORE',
         titre: 'En-tête plus léger, noms de commandants en entier',
         texte: 'Dans l’en-tête, un petit bloc indique simplement le nombre de pilotes actifs sur l’application (au moins une action sur les 30 derniers jours). Dans le journal BGS et le journal de la colonisation, les noms de commandants s’affichent en entier.',
