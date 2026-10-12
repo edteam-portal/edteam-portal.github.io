@@ -235,7 +235,7 @@
         };
         const solCoupeM = (t, n) => { t = String(t || ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
         const empile = (Lb, X, VH) => { Lb.sort((a, b) => a.anc[1] - b.anc[1]); let fin = 6; const o = { t: "", d: "", c: "" }; Lb.forEach(b => { let y = Math.max(fin, b.anc[1] - BH / 2); y = Math.min(y, VH - BH - 6); y = Math.max(y, fin); const r = boite(b, y, X); o.t += r.t; o.d += r.d; o.c += r.c; fin = y + BH + 5; }); o.fin = fin; return o; };
-        let VH = Math.round(H * SC) + 60; VH = Math.max(VH, empile(gauche, 6, 99999).fin + 4, empile(droite, 936 - 6 - BW, 99999).fin + 4);
+        let VH = Math.round(H * SC) + 60; VH = Math.max(VH, empile(gauche, 6, 99999).fin + 4, empile(droite, 936 - 6 - BW, 99999).fin + 4 + (opts.mini ? 135 : 0));     // mini-carte : place reservee sous les cartes de droite
         const GE = empile(gauche, 6, VH), DE = empile(droite, 936 - 6 - BW, VH);
         window.__tbmDet = dets;
         if (typeof SOUTE !== "undefined") { SOUTE.items = items; SOUTE.large = true; }
@@ -266,7 +266,7 @@
             + attente.map((b, k) => `<span style="--cl:${COUL_MARCH[(items.length + k) % COUL_MARCH.length]}"><i class="sq vide"></i>${E(b.n)} · ${fmtN(b.q)} t à récupérer (sauvetage)</span>`).join("")
 
         const v = S.vaisseau, note = (items.length && !celRack.length ? "Cargaison à bord sans rack de soute : " + fmtN(tonnes) + " t. " : "") + "Compartiments proportionnels à la taille de chaque emplacement ; disposition stylisée (le jeu ne donne pas la position des modules). Survolez un compartiment pour son détail. Molette ou boutons + / − pour zoomer, glisser pour se déplacer." + (attente.length ? " « ? » = colis de sauvetage à récupérer." : "");
-        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>MODULES DU VAISSEAU <em>${E(nomVaisseau(v.modele))} · ${mods.filter(m => !m.vide).length} modules${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}</div>
+        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>MODULES DU VAISSEAU <em>${E(nomVaisseau(v.modele))} · ${mods.filter(m => !m.vide).length} modules${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}${opts.mini || ""}</div>
             <div class="tbp-leg">${leg}</div>${legI ? `<div class="tb-leg" id="tb-leg">${legI}</div>` : ""}${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - places} passager${nPax - places > 1 ? "s" : ""} de plus que de places.</div>` : ""}<div class="tb-sub">${note}</div>${opts.pied || ""}</div>`;
     };
 })();

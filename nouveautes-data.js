@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-missions-deux-vues-mandalay', date: '2026-10-12T18:52:00Z', type: 'AMELIORE',
+        titre: 'Missions : toujours deux vues, et la Mandalay en hologramme',
+        texte: 'Dans l’onglet Missions, les boutons « Vue vaisseau » et « Vue carte » sont maintenant toujours là, même sans mission en cours : la carte montre alors votre position. La Mandalay rejoint les vaisseaux modélisés en hologramme. La petite carte ne recouvre plus les modules sur les vaisseaux larges.',
+        important: false
+    },
+    {
         id: '2026-10-hologrammes-nouveaux-vaisseaux', date: '2026-10-12T18:26:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : quatre nouveaux vaisseaux en hologramme',
         texte: 'L’hologramme des modules fonctionne maintenant aussi pour la Federal Corvette, l’Anaconda, le Caspian Explorer et le Type-8 Transporter, en plus du Lynx Highliner et du Panther Clipper Mk II. Vos modules, leur niveau d’ingénierie, vos cabines, vos passagers et votre soute y apparaissent comme sur les deux premiers. D’autres vaisseaux suivront.',
