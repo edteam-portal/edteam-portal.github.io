@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-entete-pilotes-actifs', date: '2026-10-12T18:40:00Z', type: 'AMELIORE',
+        titre: 'En-tête plus léger, noms de commandants en entier',
+        texte: 'Dans l’en-tête, un petit bloc indique simplement le nombre de pilotes actifs sur l’application (au moins une action sur les 30 derniers jours). Dans le journal BGS et le journal de la colonisation, les noms de commandants s’affichent en entier.',
+        important: false
+    },
+    {
         id: '2026-10-ecrans-14-pouces', date: '2026-10-12T18:10:00Z', type: 'CORRIGE',
         titre: 'Petits écrans : QG et journal BGS mieux ajustés',
         texte: 'Sur un écran de portable (14 pouces), les cinq blocs de chiffres de l’escadron au bas du QG tiennent maintenant sur une seule ligne, et dans le journal BGS la colonne « Théâtre d’opération » est plus large : le nom de la faction ne se coupe plus.',

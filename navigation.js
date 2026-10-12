@@ -140,26 +140,18 @@ function injecterArchitectureGlobale() {
             </div>
             <div style="display: flex; align-items: center; justify-content: flex-end; flex-grow: 1; padding-right: 5px; gap: 8px;">
                     <div id="header-inscriptions" onclick="ouvrirInscriptionsEnCours()"
-                        style="display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 4px 14px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
-                        title="Comptes créés mais pas encore finalisés au sas (visible du Directeur seulement)">
-                        <div class="stats-lib" style="color: #888; font-size: 0.75em; font-weight: bold;">INSCRIPTIONS EN COURS</div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span><span id="insc-nb" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">COMPTES</span></span>
-                            <span style="color:#333;">|</span>
-                            <span style="color:#666; font-size:0.7em;">PLUS ANCIEN : <span id="insc-ancien" style="color: #FF7100; font-size: 1.15em; font-weight: bold;">--</span></span>
-                        </div>
+                        style="display: none; align-items: center; gap: 6px; font-size: 0.8em; letter-spacing: 1px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
+                        title="Inscriptions en cours : comptes créés mais pas encore finalisés au sas (visible du Directeur seulement). Cliquez pour le détail.">
+                        <span id="insc-nb" style="color: #FF7100; font-size: 1.15em; font-weight: bold;">--</span>
+                        <span style="color:#888; font-size:0.7em; font-weight: bold;">INSCRIPTION<span id="insc-s">S</span> EN COURS</span>
                     </div>
                     <div id="stats-pilotes-box"
-                        style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 0.8em; letter-spacing: 1px; gap: 2px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 4px 14px; cursor: help; white-space: nowrap; box-sizing: border-box;"
-                        onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'EFFECTIFS DE LA FLOTTE<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Inscrits : tous les commandants approuves.<br>Actifs : au moins une action enregistree<br>durant les 30 derniers jours,<br>tous escadrons confondus.</span>', '#00FF66')"
+                        style="display: flex; align-items: center; gap: 6px; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 4px; padding: 6px 10px; cursor: help; white-space: nowrap; box-sizing: border-box;"
+                        onmouseenter="if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'PILOTES ACTIFS<br><span style=\\'color:#ccc; font-size:0.8em; font-weight:normal;\\'>Pilotes ayant au moins une action enregistree<br>durant les 30 derniers jours,<br>tous escadrons confondus.</span>', '#00FF66')"
                         onmouseleave="if(typeof hideHoloTooltip === 'function') hideHoloTooltip()"
                         onmousemove="if(typeof moveHoloTooltip === 'function') moveHoloTooltip(event)">
-                        <div class="stats-lib" style="color: #888; font-size: 0.75em; font-weight: bold;">FLOTTE</div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span><span id="stats-inscrits-val" style="color: #fff; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">INSCRITS</span></span>
-                            <span style="color:#333;">|</span>
-                            <span><span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span> <span style="color:#666; font-size:0.7em;">ACTIFS (30J)</span></span>
-                        </div>
+                        <span id="stats-actifs-val" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">--</span>
+                        <span style="color:#888; font-size:0.7em; font-weight: bold;">PILOTES ACTIFS</span>
                     </div>
             </div>
         </header>
@@ -681,7 +673,7 @@ window.actualiserBadgeAmiraute = async function() {
         if (!l) return;
         boite.style.display = 'flex';
         document.getElementById('insc-nb').innerText = l.length;
-        document.getElementById('insc-ancien').innerText = l.length ? duree(Date.now() - new Date(l[0].created_at).getTime()) : '—';
+        const sEl = document.getElementById('insc-s'); if (sEl) sEl.innerText = l.length > 1 ? 'S' : '';
     };
     window.ouvrirInscriptionsEnCours = async function () {
         if (typeof sonClic === 'function') sonClic();
