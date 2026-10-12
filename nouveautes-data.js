@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ecrans-14-pouces', date: '2026-10-12T18:10:00Z', type: 'CORRIGE',
+        titre: 'Petits écrans : QG et journal BGS mieux ajustés',
+        texte: 'Sur un écran de portable (14 pouces), les cinq blocs de chiffres de l’escadron au bas du QG tiennent maintenant sur une seule ligne, et dans le journal BGS la colonne « Théâtre d’opération » est plus large : le nom de la faction ne se coupe plus.',
+        important: false
+    },
+    {
         id: '2026-10-hologramme-zoom', date: '2026-10-12T17:22:00Z', type: 'AMELIORE',
         titre: 'Tableau de bord : zoom sur le vaisseau en hologramme',
         texte: 'Sur un petit écran, le vaisseau était difficile à lire en entier. Vous pouvez maintenant zoomer avec la molette de la souris ou les boutons + et −, puis faire glisser le vaisseau pour voir de près les soutes, les cabines et les modules. Le bouton ⟲ revient à la vue d’ensemble. Valable dans les onglets Missions et Commerce.',
