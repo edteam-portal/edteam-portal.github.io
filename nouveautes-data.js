@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-hologrammes-nouveaux-vaisseaux', date: '2026-10-12T18:26:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : quatre nouveaux vaisseaux en hologramme',
+        texte: 'L’hologramme des modules fonctionne maintenant aussi pour la Federal Corvette, l’Anaconda, le Caspian Explorer et le Type-8 Transporter, en plus du Lynx Highliner et du Panther Clipper Mk II. Vos modules, leur niveau d’ingénierie, vos cabines, vos passagers et votre soute y apparaissent comme sur les deux premiers. D’autres vaisseaux suivront.',
+        important: false
+    },
+    {
         id: '2026-10-page-escadron-refaite', date: '2026-10-12T17:56:15Z', type: 'AMELIORE',
         titre: 'Page Escadron : chiffres, code d’invitation et renseignement réunis',
         texte: 'En haut de la page Escadron, les chiffres clés de l’escadron tiennent sur une ligne, avec à leur droite le code d’invitation (visible des officiers et de l’Amiral). Le registre du renseignement s’ouvre maintenant depuis la carte « Renseignement » de cette page, et on y reste en le fermant. Pour l’Amiral, le réglage des initiatives des pilotes se replie en une ligne qui rappelle le mode choisi.',
