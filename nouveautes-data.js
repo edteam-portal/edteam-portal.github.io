@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-declarer-architecte', date: '2026-10-13T22:50:00Z', type: 'NOUVEAU',
+        titre: 'Colonisation : se déclarer architecte d’un système',
+        texte: 'Le jeu n’a pas toujours enregistré la revendication d’un système dans le journal : l’architecte restait alors « inconnu » et le système n’apparaissait pas à votre nom. Dans la fenêtre d’un système de la page Colonisation (PC et mobile), le bouton « Je suis l’architecte » vous permet de vous déclarer. Il n’existe que pour un système de votre escadron (ou de votre espace personnel) qui n’a pas encore d’architecte, il ne remplace jamais une revendication relevée par le jeu, et le bouton « Retirer » annule votre déclaration.',
+        important: false
+    },
+    {
         id: '2026-10-onglet-minage', date: '2026-10-13T16:38:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : l’onglet Minage (Rhino et vaisseau)',
         texte: 'Le tableau de bord a maintenant un onglet Minage (Rhino au sol ou vaisseau), en trois étapes qui suivent votre façon de jouer. 1 · Où se poser : les planètes du système où atterrir (nature, sol, gravité) avec les emplacements d’extraction une fois scannés ; en vaisseau, les anneaux. 2 · Quoi miner : cochez les matériaux affichés dans le jeu après le scan ; le tableau compare leur meilleur prix dans ce système (pour le Powerplay) et ailleurs, avec la valeur d’une soute pleine. 3 · Miner et transférer : rythme, durée, soute du Rhino et du vaisseau en hologramme, et une flèche qui s’anime pendant que le Rhino se remplit, plus vive à partir de 60 minerais pour penser au transfert. Une petite cascade de tintements retentit quand des minerais arrivent dans le Rhino (la page est mise à jour toutes les 30 à 60 secondes pendant le minage) et un petit air quand le transfert vers le vaisseau est terminé (le haut-parleur du site les coupe). Les étapes 1 et 2 se replient toutes seules dès que vous minez. Il faut le plugin SYS.EDTEAM 2.20 ; les prix viennent des relevés des joueurs (Spansh) et peuvent avoir quelques heures de retard.',

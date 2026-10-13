@@ -3661,7 +3661,7 @@
                     </summary>
                     <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px;">
                         <div style="font-size: 0.72em; color: #ccc; line-height: 1.6;">
-                            architecte : ${s.architecte ? `<span style="color: ${GOLD};">CMDR ${esc(String(s.architecte).toUpperCase())}</span>` : '<span style="color: #888;">inconnu</span>'}<br>
+                            architecte : ${s.architecte ? `<span style="color: ${GOLD};">CMDR ${esc(String(s.architecte).toUpperCase())}</span>` : '<span style="color: #888;">inconnu</span>'}${coloBoutonArchitecte(s)}<br>
                             contrôlé par : ${s.faction ? `<span style="color: ${BL};">${esc(s.faction)}</span>` : '<span style="color: #888;">faction inconnue</span>'}
                         </div>
                         ${chantiers}
@@ -3679,6 +3679,32 @@
             if (kpi.maj) html += `<div class="xmut" style="text-align: center; font-size: 0.62em;">dernier relevé de chantier : ${coloIlYa(kpi.maj)}</div>`;
             html += `<div style="color: #555; font-size: 0.6em; text-align: center; line-height: 1.5;">Tableau établi d'après ce que les plugins de l'escadron ont relevé : il peut être en retard ou incomplet par rapport au jeu. Types d'installations reconnus grâce à la feuille communautaire de <a href="https://forums.frontier.co.uk/threads/v3-of-the-colonization-construction-spreadsheet-is-now-available.635762/post-10831804" target="_blank" rel="noopener noreferrer" style="color: #6f8c95; text-decoration: underline dotted;">CMDR DaftMav</a> : merci à lui.</div>`;
             return bandeauArchi + html;
+        }
+
+        // Architecte inconnu : le pilote peut se declarer architecte (SQL 87), et retirer SA declaration (jamais une revendication relevee par le jeu).
+        function coloBoutonArchitecte(s) {
+            const moi = String((profilCommandant && profilCommandant.cmdr_nom) || '').trim().toUpperCase();
+            if (!moi || (typeof s.adresse !== 'number' && typeof s.adresse !== 'string')) return '';
+            const style = 'style="margin-left: 8px; background: transparent; border: 1px solid #FFC83D; color: #FFC83D; padding: 3px 9px; border-radius: 9px; font-family: inherit; font-size: 0.9em;"';
+            if (!s.architecte) {
+                return `<button ${style} onclick="coloDeclarerArchitecte('${s.adresse}', false)">JE SUIS L'ARCHITECTE</button>`;
+            }
+            if (!s.revendique_le && String(s.architecte).trim().toUpperCase() === moi) {
+                return `<button ${style} onclick="coloDeclarerArchitecte('${s.adresse}', true)">RETIRER</button>`;
+            }
+            return '';
+        }
+        async function coloDeclarerArchitecte(adresse, retirer) {
+            const msg = retirer ? "Retirer votre déclaration d'architecte pour ce système ?"
+                : "Vous déclarer architecte de ce système ?\n\nL'architecte est le pilote qui a revendiqué le système en jeu. Cette déclaration est visible de l'escadron ; vous pourrez la retirer.";
+            if (!confirm(msg)) return;
+            try {
+                const { data, error } = await supabaseApp.rpc('col_declarer_architecte', { p_adresse: Number(adresse), p_retirer: !!retirer });
+                if (error || !data || data.erreur) {
+                    alert(data && data.erreur === 'deja' ? "Ce système a déjà un architecte enregistré." : "La déclaration n'a pas pu être enregistrée. Réessayez plus tard.");
+                }
+                await chargerBatirMobile(true);
+            } catch (e) { console.error('Erreur déclaration architecte (mobile) :', e); }
         }
 
         let xBatirTs = 0;
@@ -4088,7 +4114,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=17', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=18', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

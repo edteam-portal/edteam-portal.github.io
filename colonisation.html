@@ -1306,7 +1306,7 @@
             const m = document.getElementById('modal-colo');
             m.innerHTML = `<div class="modal-content" style="max-width:1120px;width:95%;max-height:94vh;overflow-y:auto;background:rgba(10,5,0,.97);border:1px solid ${O};box-shadow:0 0 30px rgba(255,113,0,.2);padding:0;">
                 <div style="padding:16px 24px;border-bottom:1px solid rgba(255,113,0,.3);background:rgba(255,113,0,.05);display:flex;justify-content:space-between;align-items:center;">
-                    <div><div style="color:#888;font-size:.8em;letter-spacing:2px;">SYSTÈME COLONISÉ</div><div style="color:${O};font-size:1.6em;font-weight:bold;letter-spacing:2px;">${esc(s.nom.toUpperCase())}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">architecte : ${s.architecte ? `<span class="lien-archi" data-archi="${esc(s.architecte)}" onclick="document.getElementById('modal-colo').style.display='none'; ouvrirArchitecteParNom(this.dataset.archi)" title="Voir tous ses systèmes, ses installations et ses chantiers" style="color:${GOLD};font-weight:bold;border-bottom:1px dotted ${GOLD};cursor:pointer;">CMDR ${esc(s.architecte.toUpperCase())}</span>` :'<span title="Architecte non relevé : seule la revendication du système l\'enregistre (s\'amarrer ne le change pas). Il n\'est jamais déduit. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">inconnu</span>'}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">contrôlé par : ${s.faction ? `<span style="color:${B};font-weight:bold;">${esc(s.faction)}</span>` : '<span title="Faction non relevée : elle est lue quand un pilote de l\'escadron arrive dans le système avec le plugin à jour, puis consulte ou alimente une construction. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">faction inconnue</span>'}</div></div>
+                    <div><div style="color:#888;font-size:.8em;letter-spacing:2px;">SYSTÈME COLONISÉ</div><div style="color:${O};font-size:1.6em;font-weight:bold;letter-spacing:2px;">${esc(s.nom.toUpperCase())}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">architecte : ${s.architecte ? `<span class="lien-archi" data-archi="${esc(s.architecte)}" onclick="document.getElementById('modal-colo').style.display='none'; ouvrirArchitecteParNom(this.dataset.archi)" title="Voir tous ses systèmes, ses installations et ses chantiers" style="color:${GOLD};font-weight:bold;border-bottom:1px dotted ${GOLD};cursor:pointer;">CMDR ${esc(s.architecte.toUpperCase())}</span>` :'<span title="Architecte non relevé : seule la revendication du système l\'enregistre (s\'amarrer ne le change pas). Il n\'est jamais déduit. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">inconnu</span>'}${boutonArchitecte(s)}</div><div style="color:#ccc;font-size:1em;margin-top:2px;">contrôlé par : ${s.faction ? `<span style="color:${B};font-weight:bold;">${esc(s.faction)}</span>` : '<span title="Faction non relevée : elle est lue quand un pilote de l\'escadron arrive dans le système avec le plugin à jour, puis consulte ou alimente une construction. Voir l\'Aide, rubrique Colonisation." style="color:#888;border-bottom:1px dotted #888;cursor:help;">faction inconnue</span>'}</div></div>
                     <div style="text-align:right;margin-right:26px;display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><span style="color:#888;font-size:.9em;">${s.revendique_le ? 'revendiqué le <b style="color:#fff;font-weight:normal;">' + esc(jj(s.revendique_le)) + '</b>' : 'revendication non relevée'}</span><span style="display:flex;gap:6px;">${pastille(s.finies.length + ' TERMINÉE' + (s.finies.length > 1 ? 'S' : ''), G)}${pastille(s.chantiers.length + ' CHANTIER' + (s.chantiers.length > 1 ? 'S' : ''), s.chantiers.length ? O : '#777', s.chantiers.length > 0)}</span></div>
                     <div onclick="document.getElementById('modal-colo').style.display='none'" style="position:absolute;top:14px;right:20px;color:${O};cursor:pointer;font-weight:bold;">X</div>
                 </div>
@@ -1397,6 +1397,37 @@
                 }
             }
         };
+
+        // Architecte inconnu : le pilote peut se declarer architecte (SQL 87). Il peut retirer SA declaration, jamais une revendication relevee par le jeu.
+        function boutonArchitecte(s) {
+            const moi = String((window.profilCommandant && window.profilCommandant.cmdr_nom) || '');
+            if (!moi || typeof s.adresse !== 'number' && typeof s.adresse !== 'string') return '';
+            const style = `style="margin-left:10px;background:transparent;border:1px solid ${GOLD};color:${GOLD};padding:2px 10px;cursor:pointer;letter-spacing:1px;font-family:inherit;font-size:.8em;"`;
+            if (!s.architecte) {
+                return `<button ${style} onclick="declarerArchitecte('${s.adresse}', false)" title="Vous avez revendiqué ce système mais le jeu ne l'a pas enregistré : indiquez-le ici. Vous pourrez retirer cette déclaration.">JE SUIS L'ARCHITECTE</button>`;
+            }
+            if (!s.revendique_le && memeNom(s.architecte, moi)) {
+                return `<button ${style} onclick="declarerArchitecte('${s.adresse}', true)" title="Retirer votre déclaration d'architecte pour ce système">RETIRER</button>`;
+            }
+            return '';
+        }
+        async function declarerArchitecte(adresse, retirer) {
+            const msg = retirer ? "Retirer votre déclaration d'architecte pour ce système ?"
+                : "Vous déclarer architecte de ce système ?\n\nL'architecte est le pilote qui a revendiqué le système en jeu. Cette déclaration est visible de l'escadron ; vous pourrez la retirer.";
+            if (!confirm(msg)) return;
+            try {
+                const { data, error } = await supabaseApp.rpc('col_declarer_architecte', { p_adresse: Number(adresse), p_retirer: !!retirer });
+                if (error || !data || data.erreur) {
+                    const e = data && data.erreur;
+                    alert(e === 'deja' ? "Ce système a déjà un architecte enregistré." : "La déclaration n'a pas pu être enregistrée. Réessayez plus tard.");
+                    if (e === 'deja') await actualiserPage();
+                    return;
+                }
+                await actualiserPage();
+                const i = ((window.__colo && window.__colo.systemes) || []).findIndex(x => String(x.adresse) === String(adresse));
+                if (i >= 0) ouvrirSysteme(i, true);
+            } catch (e) { console.error('Erreur déclaration architecte :', e); }
+        }
 
         // Le pilote verse LUI-MEME son espace personnel a l'escadron (jamais automatique, operation unique).
         async function verserEspacePerso() {
