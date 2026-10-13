@@ -59,5 +59,58 @@
         const e = enPhase(res, categorie);
         return e ? '<span style="display:inline-block;font-size:.68em;letter-spacing:1px;padding:2px 8px;border:1px solid #FFD700;color:#FFD700;background:rgba(255,215,0,.08);border-radius:2px;white-space:nowrap;" title="La marchandise correspond à l\'état de la faction (relevé EDSM). Le classement des routes n\'en tient pas compte.">★ EN PHASE AVEC L\'ÉTAT · ' + E(e) + '</span>' : '';
     }
-    window.edteamEtats = { badges, bloc, etiquette, lecture, enPhase };
+    // CONSEILS SELON L'ETAT (information pure, jamais de calcul) : ce que disent les guides de la communaute sur l'effet des etats sur l'influence
+    // (Boom : commerce x2 ; Famine : combat sans effet, nourriture x2 ; Epidemie : combat sans effet, medicaments x2 ; troubles civils : primes x2 ; confinement : sans effet).
+    // Sources anciennes, non confirmees pour 2026 : toujours presentes comme « a verifier ». N'agit NI sur les jauges, NI sur les points de rang.
+    // Retourne { notes : [{ ton, titre, texte }], barres : { CLE_DE_BARRE : { ton : 'ok' | 'no', txt } } } ; cles de barre : MISSIONS, ECONOMIE, SECURITE, SCIENCE, MEURTRES, CONTREBANDE, ECHECS.
+    function conseils(typeOrdre, res) {
+        const out = { notes: [], barres: {} };
+        if (!res || !res.donnees) return out;
+        const actifs = liste(res.actifs).map(x => String(x).toLowerCase()), a = n => actifs.includes(n);
+        const hausse = typeOrdre === 'HAUSSE', baisse = typeOrdre === 'BAISSE';
+        const note = (ton, titre, texte) => out.notes.push({ ton, titre, texte });
+        if (a('lockdown')) note('neg', 'CONFINEMENT : LES ACTIONS N\'ONT AUCUN EFFET', 'Tant que l\'état dure, vos efforts sur cette faction ne font pas bouger l\'influence. Mieux vaut attendre sa fin, ou aider à l\'écourter en tuant des cibles hors-la-loi.');
+        if (a('boom') || a('technological boom')) {
+            if (hausse) { note('pos', 'BOOM : LE COMMERCE PÈSE DOUBLE', 'Ventes, livraisons et missions de transport sont les plus efficaces pour faire monter cette faction tant que l\'état dure.'); out.barres.ECONOMIE = { ton: 'ok', txt: '▲ BOOM · EFFET ×2' }; }
+            if (baisse) { note('neg', 'BOOM : LA CONTREBANDE PÈSE DOUBLE', 'Le marché noir fait baisser cette faction plus vite pendant l\'état. Les livraisons commerciales, elles, la renforcent : évitez-les.'); out.barres.CONTREBANDE = { ton: 'ok', txt: '▲ BOOM · EFFET ×2' }; }
+        }
+        if (a('bust') && hausse) { note('inf', 'RÉCESSION : LE COMMERCE PÈSE PEU', 'Pendant l\'état, le commerce fait peu monter l\'influence : préférez les missions et la sécurité.'); out.barres.ECONOMIE = { ton: 'no', txt: '▼ RÉCESSION · EFFET RÉDUIT', att: false }; }
+        if (a('civil unrest') && hausse) { note('pos', 'TROUBLES CIVILS : LES PRIMES COMPTENT DOUBLE', 'Les primes remises à cette faction pèsent double pendant l\'état.'); out.barres.SECURITE = { ton: 'ok', txt: '▲ TROUBLES · PRIMES ×2' }; }
+        [['famine', 'FAMINE', 'NOURRITURE', 'la nourriture', 'peut raccourcir la famine'], ['outbreak', 'ÉPIDÉMIE', 'MÉDICAMENTS', 'des médicaments', 'peut raccourcir l\'épidémie']].forEach(s => {
+            if (!a(s[0])) return;
+            if (hausse) {
+                note('inf', s[1] + ' : LE COMBAT N\'A PLUS D\'EFFET', 'Pendant l\'état, les actions de combat ne comptent pas pour l\'influence : les primes ne feront pas monter cette faction.');
+                note('pos', s[2] + ' : EFFET DOUBLE', 'Livrer ' + s[3] + ' compte double et ' + s[4] + '.');
+                out.barres.ECONOMIE = { ton: 'ok', txt: '▲ ' + s[1] + ' · ' + s[2] + ' ×2' };
+                out.barres.SECURITE = { ton: 'no', txt: '⊘ ' + s[1] + ' · SANS EFFET', att: true };
+            }
+            if (baisse) {
+                note('inf', s[1] + ' : LES MEURTRES N\'ONT PLUS D\'EFFET', 'Pendant l\'état, les actions de combat ne comptent pas pour l\'influence. Les meurtres de cette directive risquent d\'être sans résultat : privilégiez la contrebande.');
+                out.barres.MEURTRES = { ton: 'no', txt: '⊘ ' + s[1] + ' · SANS EFFET', att: true };
+            }
+        });
+        return out;
+    }
+    const TONS = { pos: ['#00FF66', '▲'], neg: ['#FF3333', '⚠'], inf: ['#00F0FF', '!'] };
+    // Bloc « Conseils selon l'etat » (vide s'il n'y a rien a dire)
+    function conseilsBloc(typeOrdre, res, classeTitre) {
+        const c = conseils(typeOrdre, res);
+        if (!c.notes.length) {
+            // un état est actif mais aucun conseil connu pour lui : on le dit (sinon on croirait que la fonction ne marche pas)
+            const noms = liste(res && res.donnees ? res.actifs : []).map(n => { const i = info(n); return i ? i[0] : null; }).filter(Boolean);
+            return noms.length ? '<div style="color:#666;font-size:.72em;line-height:1.5;margin-top:10px;">Conseils selon l\'état : aucun pour ' + E(noms.join(', ')) + ' (pas de règle connue pour cet état).</div>' : '';
+        }
+        return '<div class="' + (classeTitre || 'bgs-sec') + '" style="margin-top:14px;">CONSEILS SELON L\'ÉTAT</div>'
+            + c.notes.map(n => { const t = TONS[n.ton] || TONS.inf; return '<div style="border:1px solid ' + t[0] + '66;border-left:3px solid ' + t[0] + ';background:rgba(0,0,0,.35);padding:8px 11px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;">'
+                + '<span style="color:' + t[0] + ';line-height:1.3;">' + t[1] + '</span><div style="font-size:.8em;color:#ddd;line-height:1.45;"><b style="color:' + t[0] + ';letter-spacing:1px;">' + E(n.titre) + '</b><br>' + E(n.texte) + '</div></div>'; }).join('')
+            + '<div style="color:#666;font-size:.68em;line-height:1.5;">ⓘ D\'après les guides de la communauté, à vérifier : l\'effet réel peut avoir changé. Aucun effet sur vos jauges ni vos points.</div>';
+    }
+    // Etiquette d'une barre d'effort (a la droite de la 2e ligne) : verte = etat favorable, grise = sans effet ; null s'il n'y a rien
+    function etiquetteBarre(cle, barres) {
+        const b = barres && barres[cle];
+        if (!b) return null;
+        return b.ton === 'ok' ? { html: '<span style="font-size:.72em;letter-spacing:1px;padding:2px 9px;border:1px solid #00FF66;color:#00FF66;background:rgba(0,255,102,.1);white-space:nowrap;">' + E(b.txt) + '</span>', recommande: true }
+                              : { html: '<span style="font-size:.72em;letter-spacing:1px;padding:2px 9px;border:1px solid #666;color:#999;background:rgba(0,0,0,.35);white-space:nowrap;">' + E(b.txt) + '</span>', attenuee: !!b.att };
+    }
+    window.edteamEtats = { badges, bloc, etiquette, lecture, enPhase, conseils, conseilsBloc, etiquetteBarre };
 })();

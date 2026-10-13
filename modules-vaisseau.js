@@ -229,7 +229,7 @@
         const boite = (b, y, X) => {
             const bx = b.cote === "g" ? X + BW : X, my = y + BH / 2, pv = b.cote === "g" ? b.anc[0] - 30 : b.anc[0] + 30, vd = b.L.vide;
             return { t: `<polyline points="${b.anc[0]},${b.anc[1]} ${pv},${my} ${bx},${my}" fill="none" stroke="${b.coul}" stroke-width="1.4" stroke-opacity="${vd ? 0.45 : 0.9}"/>`,
-                d: `<circle cx="${b.anc[0]}" cy="${b.anc[1]}" r="8" fill="none" stroke="${b.coul}" stroke-opacity=".5"/><circle class="tbs-pouls" cx="${b.anc[0]}" cy="${b.anc[1]}" r="4" fill="${vd ? "#6b7680" : b.coul}"/>`,
+                d: `<circle cx="${b.anc[0]}" cy="${b.anc[1]}" r="2" fill="${vd ? "#6b7680" : "#9fb0b8"}" fill-opacity=".8"/>`,
                 c: `<rect x="${X}" y="${y}" width="${BW}" height="${BH}" fill="rgba(3,8,12,.9)" stroke="${vd ? "#6b7680" : b.coul}" stroke-opacity="${b.L.eng ? 0.95 : 0.5}"${vd ? ' stroke-dasharray="4 3"' : ""}/>`
                     + `<text x="${X + 7}" y="${y + 15}" fill="${vd ? "#8b97a0" : "#fff"}" font-size="11">${E(solCoupeM(b.L.nom, Math.floor((BW - 38) / 5.5)))}</text><text x="${X + BW - 7}" y="${y + 15}" text-anchor="end" fill="${b.L.eng ? b.coul : "#6f808a"}" font-size="11" font-weight="bold">${b.L.badge}</text>` };
         };

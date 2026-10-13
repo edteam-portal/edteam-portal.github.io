@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-bgs-detail-directive', date: '2026-10-13T17:00:00Z', type: 'NOUVEAU',
+        titre: 'Directives BGS : activité du système, conseils selon l’état et fenêtre repensée',
+        texte: 'Le détail d’une directive s’enrichit. Nouvelle zone « Activité du système » : trafic (vaisseaux) et morts relevés par EDSM, avec un niveau (calme, habituel, animé…) qui apparaît après quelques jours de relevés. L’heure du dernier tick est affichée en haut et chaque faction montre son humeur. Un bloc « Conseils selon l’état » dit ce que l’état de la faction change pour votre action (Boom : le commerce pèse double ; Famine ou Épidémie : le combat n’a plus d’effet ; Confinement : aucune action ne compte), avec une petite étiquette sur les barres d’effort concernées : ce sont des indications tirées des guides de la communauté, à vérifier, qui ne changent ni vos jauges ni vos points. La fenêtre passe en paysage (effort à gauche, résultat du jeu à droite) et toutes les barres d’effort sont sur deux lignes. Enfin, pour une directive de baisse, le vol de régulateurs et le piratage de données ne sont plus une jauge de la directive, car rien ne confirme qu’ils fassent baisser l’influence ; ils comptent toujours pour votre rang BGS.',
+        important: true
+    },
+    {
+        id: '2026-10-hologramme-points-discrets', date: '2026-10-13T13:55:00Z', type: 'AMELIORE',
+        titre: 'Hologramme des modules : points d’emplacement discrets',
+        texte: 'Les points qui marquent l’emplacement des modules sur l’hologramme sont désormais petits, gris et fixes (plus de couleur ni de clignotement). Les passagers et les caisses ressortent mieux quand la soute et les cabines sont pleines.',
+        important: false
+    },
+    {
         id: '2026-10-missions-deux-vues-mandalay', date: '2026-10-12T18:52:00Z', type: 'AMELIORE',
         titre: 'Missions : toujours deux vues, et la Mandalay en hologramme',
         texte: 'Dans l’onglet Missions, les boutons « Vue vaisseau » et « Vue carte » sont maintenant toujours là, même sans mission en cours : la carte montre alors votre position. La Mandalay rejoint les vaisseaux modélisés en hologramme. La petite carte ne recouvre plus les modules sur les vaisseaux larges.',

@@ -67,7 +67,6 @@
                      A('SCIENCE', 'Science (cartographie et exobiologie)', 'exploration', S('SCIENCE'), cap.SCIENCE, 'cr')]; break;
             case 'BAISSE':
                 l = [A('MEURTRES', 'Meurtres (vaisseaux et sol)', 'combat', S('MEURTRES'), cap.MEURTRES, 'n', 'victimes'),
-                     A('SABOTAGE', 'Sabotage au sol', 'combat', S('VOLS') + S('PIRATAGE'), cap.VOLS, 'n', 'actions'),
                      A('CONTREBANDE', 'Contrebande (marché noir)', 'marchand', S('CONTREBANDE'), cap.CONTREBANDE, 'cr')]; break;
             case 'GUERRE':
                 l = [A('CZ_VICTOIRES', 'Victoires en zone de conflit', 'combat', N('CZ_VICTOIRES'), cap.CZ_VICTOIRES || 5 * nb, 'n', 'victoires'),

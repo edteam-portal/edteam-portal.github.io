@@ -21,12 +21,12 @@
     <script src="revelations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
-    <script src="quoifaire.js?v=11"></script>
+    <script src="quoifaire.js?v=12"></script>
     <script src="qgsuivi.js?v=38"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=1"></script>
     <script src="medailles.js?v=9"></script>
-    <script src="etats-faction.js?v=1"></script>
+    <script src="etats-faction.js?v=3"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -1809,9 +1809,8 @@
                 somme = R(S('MISSIONS'), cap.MISSIONS) + R(S('ECONOMIE'), cap.ECONOMIE) + R(S('SECURITE'), cap.SECURITE) + R(S('SCIENCE'), cap.SCIENCE); div = 4;
                 pe = S('MISSIONS') + (S('ECONOMIE') + S('SECURITE') + S('SCIENCE')) / 2000000; pm = M('MISSIONS') + (M('ECONOMIE') + M('SECURITE') + M('SCIENCE')) / 2000000;
             } else if (o.type_ordre === 'BAISSE') {
-                const sab = S('VOLS') + S('PIRATAGE'), sabM = M('VOLS') + M('PIRATAGE');
-                somme = R(S('MEURTRES'), cap.MEURTRES) + R(sab, cap.VOLS) + R(S('CONTREBANDE'), cap.CONTREBANDE) + R(S('ECHECS'), cap.ECHECS); div = 4;
-                pe = S('MEURTRES') + sab + S('CONTREBANDE') / 2000000 + S('ECHECS'); pm = M('MEURTRES') + sabM + M('CONTREBANDE') / 2000000 + M('ECHECS');
+                somme = R(S('MEURTRES'), cap.MEURTRES) + R(S('CONTREBANDE'), cap.CONTREBANDE) + R(S('ECHECS'), cap.ECHECS); div = 3;   // regulateurs/donnees : rang BGS seulement
+                pe = S('MEURTRES') + S('CONTREBANDE') / 2000000 + S('ECHECS'); pm = M('MEURTRES') + M('CONTREBANDE') / 2000000 + M('ECHECS');
             } else if (o.type_ordre === 'GUERRE') {
                 const capB = cap.GUERRE_BONDS || cap.SECURITE, capM = cap.GUERRE_MISSIONS || cap.MISSIONS, capC = cap.CZ_VICTOIRES || (5 * nb);
                 const nbCz = Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0;
@@ -1854,7 +1853,7 @@
             return xCache('resultats', 300000, async () => {
                 const r = await supabaseApp.rpc('bgs_resultats');
                 if (r.error) { console.error('Erreur résultats BGS (mobile) :', r.error.message); return { dir: {}, sys: {} }; }
-                const out = { dir: {}, sys: (r.data && r.data.systemes) || {} };
+                const out = { dir: {}, sys: (r.data && r.data.systemes) || {}, act: (r.data && r.data.activite) || {}, tick: (r.data && r.data.tick) || null };
                 ((r.data && r.data.directives) || []).forEach(x => { out.dir[x.ordre_id] = x; });
                 return out;
             }, force);
@@ -1883,6 +1882,49 @@
             const v = res.variation;
             if (v === null || v === undefined || Math.abs(v) < 0.05) return 'fl';
             return (o.type_ordre === 'BAISSE' ? v < 0 : v > 0) ? 'up' : 'dn';
+        }
+        // SQL 85 : humeur des factions, activité du système (trafic, morts), heure du dernier tick
+        const X_HUMEUR = { Elated: ['Euphorique', '#2fe07a'], Happy: ['Heureux', '#2fe07a'], Discontented: ['Mécontent', '#FFB000'], Unhappy: ['Malheureux', '#ff7a45'], Despondent: ['Désespéré', '#ff4d4d'] };
+        const xHumeur = h => { const x = X_HUMEUR[h]; return x ? `<span style="color: ${x[1]}; white-space: nowrap;">● ${x[0]}</span>` : ''; };
+        function xTickTexte() {
+            const tk = (window.cacheResultatsBgs || {}).tick;
+            if (!tk) return '';
+            const d = new Date(tk * 1000), hh = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+            const min = Math.max(0, Math.round((Date.now() / 1000 - tk) / 60));
+            return 'dernier tick : ' + (min < 60 ? 'il y a ' + min + ' min' : 'il y a ' + Math.floor(min / 60) + ' h ' + String(min % 60).padStart(2, '0')) + ' (' + hh + ' UTC)';
+        }
+        function xTendance(c, col) {
+            const now = Date.now() / 1000, a = [], b = [];
+            (c || []).forEach(p => { const v = Number(p[col]); if (!isFinite(v) || p[col] === null) return; const age = (now - p[0]) / 86400; (age <= 7 ? a : age <= 14 ? b : []).push(v); });
+            if (a.length < 4 || b.length < 4) return null;
+            const m = x => x.reduce((s, v) => s + v, 0) / x.length, mb = m(b);
+            return mb > 0 ? Math.round((m(a) - mb) / mb * 100) : null;
+        }
+        function xNiveau(c, col, jour, genre) {
+            const v = (c || []).map(p => p[col]).filter(x => x !== null && x !== undefined).map(Number).sort((x, y) => x - y);
+            if (v.length < 6) return { txt: 'EN ATTENTE DE RELEVÉ DE COMPARAISON', coul: '#667' };
+            const med = v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
+            const r = med > 0 ? jour / med : (jour > 0 ? 9 : 0);
+            if (genre === 'morts') return jour === 0 ? { txt: 'AUCUN MORT', coul: '#2fe07a' } : r > 1.5 && jour >= 2 ? { txt: 'ÉLEVÉ', coul: '#ff4d4d' } : r > 1.15 ? { txt: 'AU-DESSUS DE L\'HABITUDE', coul: '#FFB000' } : { txt: 'HABITUEL', coul: '#9fb0b8' };
+            return r < 0.6 ? { txt: 'CALME', coul: '#6fa8ff' } : r > 1.4 ? { txt: 'ANIMÉ', coul: '#00F0FF' } : { txt: 'HABITUEL', coul: '#9fb0b8' };
+        }
+        function xActivite(a) {
+            if (!a) return '';
+            const carte = (titre, icone, jour, semaine, col, coul, unite, genre) => {
+                if (jour === null || jour === undefined) return '';
+                const tend = xTendance(a.c, col), n = xNiveau(a.c, col, Number(jour), genre);
+                const l2 = (semaine !== null && semaine !== undefined ? Number(semaine).toLocaleString('fr-FR') + ' sur 7 j' : '') + (tend !== null ? ' · ' + (tend > 0 ? '▲ +' : tend < 0 ? '▼ ' : '') + tend + ' %' : '');
+                return `<div style="border: 1px solid ${coul}55; border-left: 3px solid ${coul}; border-radius: 8px; background: linear-gradient(90deg, ${coul}14, rgba(0,0,0,.45)); padding: 9px 11px; min-width: 0;">
+                    <div style="color: ${coul}; letter-spacing: 2px; font-size: 0.68em; font-weight: bold;">${icone} ${titre}</div>
+                    <div style="margin-top: 3px;"><b style="font-size: 2.1em; line-height: 1; color: #fff; text-shadow: 0 0 12px ${coul};">${Number(jour).toLocaleString('fr-FR')}</b> <span style="color: #888; font-size: 0.68em;">${unite}</span></div>
+                    <div style="color: ${n.coul}; font-size: 0.62em; letter-spacing: 1px; margin-top: 4px;">${n.txt}</div>
+                    <div style="color: #888; font-size: 0.68em; min-height: 1.2em;">${l2}</div>${xSpark((a.c || []).filter(p => p[col] !== null).map(p => [p[0], p[col]]), coul)}</div>`;
+            };
+            const t1 = carte('TRAFIC', '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux / 24 h', 'trafic'), t2 = carte('MORTS', '☠', a.mj, a.ms, 2, '#ff4d4d', 'morts / 24 h', 'morts');
+            if (!t1 && !t2) return '';
+            return `<div class="mdet-sec" style="margin-top: 12px;">ACTIVITÉ DU SYSTÈME <span style="color: #777; letter-spacing: 0;">· relevé ${xAge(a.t)}</span></div>
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">${t1}${t2}</div>
+                <div style="color: #666; font-size: 0.64em; margin-top: 5px;">Le trafic ne compte que les joueurs dont l'outil envoie ses données à EDSM : c'est un minimum.</div>`;
         }
         function xSpark(courbe, couleur) {
             if (!courbe || courbe.length < 2) return '<div style="height: 30px;"></div>';
@@ -1916,7 +1958,7 @@
             const fC = v => cr.format(v) + ' CR', fN = v => Number(v).toLocaleString('fr-FR');
             let L = [];
             if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Commerce & Minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Cartographie)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
-            else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['🔋 SABOTAGE AU SOL', '#FF3333', M('VOLS') + M('PIRATAGE'), S('VOLS') + S('PIRATAGE'), cap.VOLS, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
+            else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
             else if (o.type_ordre === 'GUERRE') L = [['🏆 VICTOIRES EN CZ', '#FFD700', Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.nm) || 0, Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0, cap.CZ_VICTOIRES || (5 * nb), fN, ''], ['⚔️ OBLIGATIONS DE COMBAT (Bons)', '#FF7100', M('SECURITE'), S('SECURITE'), cap.GUERRE_BONDS || cap.SECURITE, fC, ''], ['🎯 MISSIONS MILITAIRES', '#FF3333', M('MISSIONS'), S('MISSIONS'), cap.GUERRE_MISSIONS || cap.MISSIONS, fN, ' CONTRATS']];
             else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF']];
             return L.map(([titre, c, moi, esc, plafond, f, u]) => {
@@ -2292,12 +2334,13 @@
                 } else {
                     corps += '<div class="xmut" style="padding: 18px 8px; text-align: center; border: 1px dashed #333; border-radius: 8px;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>';
                 }
-                if (donnees && window.edteamEtats) corps += `<div class="mdet-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div>` + window.edteamEtats.bloc(res);
+                if (donnees) corps += xActivite(((window.cacheResultatsBgs || {}).act || {})[String(ordre.systeme_cible || '').toUpperCase()]);
+                if (donnees && window.edteamEtats) corps += `<div class="mdet-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div>` + window.edteamEtats.bloc(res) + window.edteamEtats.conseilsBloc(ordre.type_ordre, res, 'mdet-sec');
                 if (voisines.length) {
                     corps += `<div class="mdet-sec" style="margin-top: 12px;">FACTIONS DU SYSTÈME</div>` + voisines.map(x => {
                         const moi = String(x.n || '').trim().toLowerCase() === f;
                         const etat = (x.a && x.a.length) ? x.a.join(', ') : (x.e || 'Aucun');
-                        return `<div style="display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid #222; font-size: 0.78em; ${moi ? 'color: var(--ed-orange);' : 'color: #ddd;'}"><span style="min-width: 0; overflow-wrap: anywhere;">${XESC(x.n)}${moi ? ' ★' : ''} <span style="color: #777; font-size: 0.85em;">${XESC(etat)}${x.p && x.p.length ? ' · en attente : ' + XESC(x.p.join(', ')) : ''}</span></span><b style="white-space: nowrap;">${xPct(x.i)} %</b></div>`;
+                        return `<div style="display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid #222; font-size: 0.78em; ${moi ? 'color: var(--ed-orange);' : 'color: #ddd;'}"><span style="min-width: 0; overflow-wrap: anywhere;">${XESC(x.n)}${moi ? ' ★' : ''} <span style="color: #777; font-size: 0.85em;">${XESC(etat)}${x.p && x.p.length ? ' · en attente : ' + XESC(x.p.join(', ')) : ''}</span>${xHumeur(x.h) ? '<br><span style="font-size: 0.85em;">' + xHumeur(x.h) + '</span>' : ''}</span><b style="white-space: nowrap;">${xPct(x.i)} %</b></div>`;
                     }).join('') + (masquees > 0 ? `<div style="color: #666; font-size: 0.68em; margin-top: 6px;">${masquees} faction${masquees > 1 ? 's' : ''} à 0 % masquée${masquees > 1 ? 's' : ''} (encore listée${masquees > 1 ? 's' : ''} par EDSM)</div>` : '');
                 }
                 const rsJ = (window.cacheResumeBgs || {})[ordre.id] || { types: {}, pilotes: [] };
@@ -2305,7 +2348,7 @@
                 const vousJ = Math.round(avJ.pct * avJ.part / 100);
                 // 1. L'EFFORT (le coeur de l'application) : bandeau, puis les jauges par type d'action
                 xEl('ordre-modal-effort').innerHTML = `
-                    <div style="color: #777; font-size: 0.7em; margin-bottom: 8px;">${ordre.origine === 'PILOTE' ? 'Initiative lancée' : 'Directive émise'} il y a ${jours} jour${jours > 1 ? 's' : ''}</div>
+                    <div style="color: #777; font-size: 0.7em; margin-bottom: 8px;">${ordre.origine === 'PILOTE' ? 'Initiative lancée' : 'Directive émise'} il y a ${jours} jour${jours > 1 ? 's' : ''}${xTickTexte() ? ` · <span style="color: #00F0FF;">${xTickTexte()}</span>` : ''}</div>
                     <div class="mdet-hero" style="border-color: ${couleur};">
                         <div class="r1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${avJ.pct} %</b></div>
                         <div class="r1"><span>MA PART</span><b style="color: ${couleur};">${avJ.part} %</b></div>

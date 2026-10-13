@@ -246,6 +246,12 @@
         @media (prefers-reduced-motion: reduce) { .bloc.prio-c { animation: none; } }
         .bgs-sec { color: var(--ed-blue); letter-spacing: 2px; font-size: 0.78em; margin: 0 0 6px; }
         @media (max-width: 800px) { .bgs-detail-grille { grid-template-columns: minmax(0, 1fr) !important; } }
+        /* fenêtre de détail d'une directive : paysage (effort à gauche, résultat du jeu à droite) ; une seule colonne sous 1000 px (tablette en portrait) */
+        .bgs-paysage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 18px; margin-top: 14px; align-items: start; }
+        .bgs-cadre { border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.28); padding: 12px 14px 14px; margin-bottom: 14px; min-width: 0; }
+        .bgs-cadre-t { color: var(--ed-blue); letter-spacing: 3px; font-size: 0.8em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .bgs-cadre-t small { color: #777; letter-spacing: 0; font-size: 0.9em; }
+        @media (max-width: 1000px) { .bgs-paysage { grid-template-columns: minmax(0, 1fr); } }
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000;
@@ -1082,7 +1088,7 @@
             if (!force && m && Date.now() - m.ts < 300000) return m.data;   // mémoire de 5 minutes (egress)
             const r = await supabaseApp.rpc('bgs_resultats');
             if (r.error) { console.error('Erreur résultats BGS :', r.error.message); return m ? m.data : { dir: {}, sys: {} }; }
-            const data = { dir: {}, sys: (r.data && r.data.systemes) || {} };
+            const data = { dir: {}, sys: (r.data && r.data.systemes) || {}, act: (r.data && r.data.activite) || {}, tick: (r.data && r.data.tick) || null };
             ((r.data && r.data.directives) || []).forEach(d => { data.dir[d.ordre_id] = d; });
             window.memoResultatsBgs = { ts: Date.now(), data };
             return data;
@@ -1108,6 +1114,55 @@
             if (h < 1) return 'il y a ' + Math.max(1, Math.round(h * 60)) + ' min';
             if (h < 48) return 'il y a ' + Math.round(h) + ' h';
             return 'il y a ' + Math.round(h / 24) + ' j';
+        }
+
+        // SQL 85 : humeur des factions, activité du système (trafic, morts), heure du dernier tick
+        const BGS_HUMEUR = { Elated: ['Euphorique', '#2fe07a'], Happy: ['Heureux', '#2fe07a'], Discontented: ['Mécontent', '#FFB000'], Unhappy: ['Malheureux', '#ff7a45'], Despondent: ['Désespéré', '#ff4d4d'] };
+        const bgsHumeur = h => { const x = BGS_HUMEUR[h]; return x ? `<span style="color: ${x[1]}; white-space: nowrap;">● ${x[0]}</span>` : ''; };
+        function bgsTickTexte() {
+            const tk = (window.cacheResultatsBgs || {}).tick;
+            if (!tk) return '';
+            const d = new Date(tk * 1000), hh = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+            const min = Math.max(0, Math.round((Date.now() / 1000 - tk) / 60));
+            return 'dernier tick : ' + (min < 60 ? 'il y a ' + min + ' min' : 'il y a ' + Math.floor(min / 60) + ' h ' + String(min % 60).padStart(2, '0')) + ' (' + hh + ' UTC)';
+        }
+        // tendance : moyenne des 7 derniers jours contre les 7 jours d'avant (au moins 4 relevés de chaque côté)
+        function bgsTendance(c, col) {
+            const now = Date.now() / 1000, a = [], b = [];
+            (c || []).forEach(p => { const v = Number(p[col]); if (!isFinite(v) || p[col] === null) return; const age = (now - p[0]) / 86400; (age <= 7 ? a : age <= 14 ? b : []).push(v); });
+            if (a.length < 4 || b.length < 4) return null;
+            const m = x => x.reduce((s, v) => s + v, 0) / x.length, mb = m(b);
+            return mb > 0 ? Math.round((m(a) - mb) / mb * 100) : null;
+        }
+        // niveau qualitatif : le chiffre du jour comparé à l'habitude du système (médiane des relevés des 14 derniers jours, au moins 6 relevés)
+        function bgsNiveau(c, col, jour, genre) {
+            const v = (c || []).map(p => p[col]).filter(x => x !== null && x !== undefined).map(Number).sort((x, y) => x - y);
+            if (v.length < 6) return { txt: 'EN ATTENTE DE RELEVÉ DE COMPARAISON', coul: '#667', max: null, med: null };
+            const med = v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2, max = Math.max(...v, jour);
+            const r = med > 0 ? jour / med : (jour > 0 ? 9 : 0);
+            if (genre === 'morts') return jour === 0 ? { txt: 'AUCUN MORT', coul: '#2fe07a', max, med } : r > 1.5 && jour >= 2 ? { txt: 'ÉLEVÉ', coul: '#ff4d4d', max, med } : r > 1.15 ? { txt: 'AU-DESSUS DE L\'HABITUDE', coul: '#FFB000', max, med } : { txt: 'HABITUEL', coul: '#9fb0b8', max, med };
+            return r < 0.6 ? { txt: 'CALME', coul: '#6fa8ff', max, med } : r > 1.4 ? { txt: 'ANIMÉ', coul: '#00F0FF', max, med } : { txt: 'HABITUEL', coul: '#9fb0b8', max, med };
+        }
+        function bgsActiviteHtml(a) {
+            if (!a) return '';
+            const carte = (titre, icone, jour, semaine, col, coul, unite, genre) => {
+                if (jour === null || jour === undefined) return '';
+                const tend = bgsTendance(a.c, col), n = bgsNiveau(a.c, col, Number(jour), genre);
+                const l2 = (semaine !== null && semaine !== undefined ? '<b style="color: #ccc; font-weight: normal;">' + Number(semaine).toLocaleString('fr-FR') + '</b> sur 7 jours' : '') + (tend !== null ? ' · tendance <b style="color: #ccc; font-weight: normal;">' + (tend > 0 ? '▲ +' : tend < 0 ? '▼ ' : '') + tend + ' %</b>' : '');
+                const jauge = n.max ? `<div style="position: relative; height: 6px; background: #1a1a1a; margin-top: 8px;"><i style="position: absolute; left: 0; top: 0; bottom: 0; width: ${Math.min(100, jour / n.max * 100)}%; background: ${coul}; box-shadow: 0 0 8px ${coul};"></i><i title="habitude du système" style="position: absolute; top: -3px; bottom: -3px; left: ${Math.min(100, n.med / n.max * 100)}%; width: 2px; background: #fff; opacity: .7;"></i></div><div style="display: flex; justify-content: space-between; color: #555; font-size: 0.68em; margin-top: 2px;"><span>0</span><span>repère blanc : habitude (médiane 14 j)</span><span>max ${n.max}</span></div>` : '';
+                return `<div style="border: 1px solid ${coul}55; border-left: 3px solid ${coul}; background: linear-gradient(90deg, ${coul}14, rgba(0,0,0,.45)); padding: 12px 16px; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="color: ${coul}; letter-spacing: 3px; font-size: 0.8em; font-weight: bold;">${icone} ${titre}</span><span style="color: ${n.coul}; border: 1px solid ${n.coul}; padding: 1px 8px; font-size: 0.7em; letter-spacing: 2px;">${n.txt}</span></div>
+                    <div style="display: flex; align-items: flex-end; gap: 14px; margin-top: 6px;">
+                        <div style="white-space: nowrap;"><b style="font-size: 2.8em; line-height: 1; color: #fff; text-shadow: 0 0 14px ${coul};">${Number(jour).toLocaleString('fr-FR')}</b><div style="color: #888; font-size: 0.78em;">${unite}</div></div>
+                        <div style="flex: 1; min-width: 80px; padding-bottom: 2px;">${bgsSpark((a.c || []).filter(p => p[col] !== null).map(p => [p[0], p[col]]), coul)}</div>
+                    </div>${jauge}<div style="color: #888; font-size: 0.78em; margin-top: 6px;">${l2}</div></div>`;
+            };
+            const vide = (titre, icone, coul, txt) => `<div style="border: 1px dashed #333; border-left: 3px solid ${coul}55; background: rgba(0,0,0,.3); padding: 12px 16px; min-width: 0;"><span style="color: ${coul}99; letter-spacing: 3px; font-size: 0.8em; font-weight: bold;">${icone} ${titre}</span><div style="color: #777; font-size: 0.8em; margin-top: 6px;">${txt}</div></div>`;
+            const t1 = carte('TRAFIC', '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux ces dernières 24 h', 'trafic') || vide('TRAFIC', '✈', '#00F0FF', 'Aucune donnée de trafic pour ce système chez EDSM.');
+            const t2 = carte('MORTS', '☠', a.mj, a.ms, 2, '#ff4d4d', 'morts ces dernières 24 h', 'morts') || vide('MORTS', '☠', '#ff4d4d', 'Aucun mort enregistré par EDSM dans ce système.');
+            return `<div class="bgs-cadre"><div class="bgs-cadre-t">ACTIVITÉ DU SYSTÈME <small>· relevé ${bgsAge(a.t)}</small></div>
+                <div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px;">${t1}${t2}</div>
+                <div style="color: #666; font-size: 0.72em; margin-top: 8px;">Le trafic ne compte que les joueurs dont l'outil envoie ses données à EDSM : c'est un minimum, pas le trafic réel.</div></div>`;
         }
 
         function bgsSpark(courbe, couleur) {
@@ -1254,7 +1309,7 @@
             const tableVoisines = voisines.length ? `<table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">${voisines.map(x => {
                 const moi = String(x.n || '').trim().toLowerCase() === f;
                 const etat = (x.a && x.a.length ? x.a.join(', ') : (x.e || 'Aucun'));
-                const att = x.p && x.p.length ? `<div style="color: #666; font-size: 0.85em;">en attente : ${escapeHtml(x.p.join(', '))}</div>` : '';
+                const hum = bgsHumeur(x.h), att = (hum || (x.p && x.p.length)) ? `<div style="color: #666; font-size: 0.85em;">${hum}${hum && x.p && x.p.length ? ' · ' : ''}${x.p && x.p.length ? 'en attente : ' + escapeHtml(x.p.join(', ')) : ''}</div>` : '';
                 return `<tr style="${moi ? 'color: var(--ed-orange);' : ''}"><td style="padding: 5px 4px; border-bottom: 1px solid #222;">${escapeHtml(x.n)}${moi ? ' ★' : ''}${att}</td><td style="padding: 5px 4px; border-bottom: 1px solid #222; color: #888; font-size: 0.9em;">${escapeHtml(etat)}</td><td style="padding: 5px 4px; border-bottom: 1px solid #222; text-align: right; font-weight: bold; white-space: nowrap;">${bgsPct(x.i)} %</td></tr>`;
             }).join('')}</table>${masquees > 0 ? `<div style="color: #666; font-size: 0.75em; margin-top: 6px;">${masquees} faction${masquees > 1 ? 's' : ''} à 0 % masquée${masquees > 1 ? 's' : ''} (encore listée${masquees > 1 ? 's' : ''} par EDSM)</div>` : ''}` : '<div style="color: #777; font-size: 0.85em; font-style: italic;">Aucune donnée du jeu pour ce système pour l\'instant.</div>';
 
@@ -1289,30 +1344,35 @@
                     <b style="color: #fff; letter-spacing: 2px; font-size: 1.15em;">${escapeHtml(String(ordre.faction_cible || '').toUpperCase())}</b>
                     <span style="color: #888;">· ${escapeHtml(String(ordre.systeme_cible || '').toUpperCase())}</span>
                 </div>
-                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}</div>
+                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}${bgsTickTexte() ? ` · <span style="color: #00F0FF;">${bgsTickTexte()}</span>` : ''}</div>
 
+                <div class="bgs-paysage">
+                <div class="bgs-col-effort">
                 <!-- 1. L'EFFORT : le cœur de l'application -->
-                <div class="bgs-hero" style="border-color: ${c};">
+                <div class="bgs-cadre"><div class="bgs-cadre-t">EFFORT</div>
+                <div class="bgs-hero" style="border-color: ${c}; margin-top: 0;">
                     <div class="h1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${meta.global} %</b></div>
                     <div class="h2"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b><small>de l'effort de l'escadron</small></div>
                     <div class="jgh"><i style="width: ${meta.global}%; opacity: 0.35; background: ${c};"></i><i style="width: ${meta.vous}%; background: ${c};"></i></div>
                 </div>
-                <div class="bgs-sec" style="margin-top: 14px; white-space: nowrap;">EFFORT PAR TYPE D'ACTION <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· cumul depuis la directive · vif : toi · atténué : escadron</span></div>
+                <div class="bgs-sec" style="margin-top: 14px;">EFFORT PAR TYPE D'ACTION <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· cumul depuis la directive · vif : toi · atténué : escadron</span></div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">${window.cacheJaugesBgs[ordre.id] || ''}</div>
                 ${dossier}
+                </div>
+                ${donnees ? bgsActiviteHtml(((window.cacheResultatsBgs || {}).act || {})[String(ordre.systeme_cible || '').toUpperCase()]) : ''}
+                </div>
 
                 <!-- 2. LE RÉSULTAT DU JEU -->
-                <div style="display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; margin-top: 20px; border-top: 1px dashed #333; padding-top: 16px;" class="bgs-detail-grille">
-                    <div>
-                        <div class="bgs-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS</div>
+                <div class="bgs-col-jeu">
+                    <div class="bgs-cadre"><div class="bgs-cadre-t">RÉSULTAT DU JEU <small>· influence sur 30 jours</small></div>
                         ${donnees ? bgsCourbeGrande(res.courbe, ordre.date_emission ? new Date(ordre.date_emission).getTime() / 1000 : null, cs) : '<div style="color: #777; font-size: 0.85em; padding: 30px 10px; text-align: center; border: 1px dashed #333;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>'}
                         ${stats}${conflit}
                     </div>
-                    <div>
-                        <div class="bgs-sec">FACTIONS DU SYSTÈME</div>
+                    <div class="bgs-cadre"><div class="bgs-cadre-t">FACTIONS ET ÉTATS</div>
                         ${tableVoisines}
-                        ${donnees ? `<div class="bgs-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div>${window.edteamEtats ? window.edteamEtats.bloc(res) : ''}` : ''}
+                        ${donnees ? `<div class="bgs-sec" style="margin-top: 16px;">ÉTATS DE LA FACTION</div>${window.edteamEtats ? window.edteamEtats.bloc(res) : ''}${window.edteamEtats ? window.edteamEtats.conseilsBloc(ordre.type_ordre, res, 'bgs-sec') : ''}` : ''}
                     </div>
+                </div>
                 </div>
                 <div style="color: #777; font-size: 0.75em; line-height: 1.5; margin-top: 14px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
             const m = document.getElementById('modal-ordre-resultat');
@@ -1547,14 +1607,22 @@
                 }
 
 
-                let styleTitre = "color: #fff; font-weight: bold; display: flex; align-items: center;";
+                let styleTitre = "color: #fff; font-weight: bold; display: flex; align-items: center; min-width: 0;";
 
+                // toujours sur DEUX lignes (quelle que soit la largeur des textes) : titre (et bouton d'action) en haut, chiffres dessous
+                // état de la faction : étiquette « effet ×2 » / « sans effet » (information pure, voir etats-faction.js) ; la clé de barre se déduit du titre
+                const cleBarre = /LOGISTIQUE \(Missions\)/.test(titre) ? 'MISSIONS' : /ÉCONOMIE/.test(titre) ? 'ECONOMIE' : /SÉCURITÉ \(Primes/.test(titre) ? 'SECURITE' : /SCIENCE/.test(titre) ? 'SCIENCE'
+                    : /MEURTRES/.test(titre) ? 'MEURTRES' : /CONTREBANDE/.test(titre) ? 'CONTREBANDE' : /ÉCHOUÉES/.test(titre) ? 'ECHECS' : '';
+                const etq = cleBarre && window.edteamEtats && window.__conseilsBarres ? window.edteamEtats.etiquetteBarre(cleBarre, window.__conseilsBarres) : null;
+                if (etq && etq.recommande) bgStyle += ' border-left: 3px solid #00FF66; box-shadow: inset 0 0 22px rgba(0,255,102,0.10);';
+                if (etq && etq.attenuee) bgStyle += ' opacity: 0.6;';
                 return `
-                <div style="${bgStyle} padding: 12px 15px; border-radius: 4px; width: 100%; box-sizing: border-box;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; flex-wrap: ${action ? 'nowrap' : 'wrap'}; gap: 8px;">
+                <div style="${bgStyle} padding: 10px 15px 11px; border-radius: 4px; width: 100%; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.85em;">
                         <span style="${styleTitre}">${titreHighlight}</span>
-                        <span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: ${action ? 'nowrap' : 'wrap'}; justify-content: flex-end;">${action}<span style="background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); font-size: ${action ? '0.8em' : '0.9em'}; white-space: nowrap;">${valeurTexte}</span></span>
+                        ${action ? `<span style="flex-shrink: 0;">${action}</span>` : ''}
                     </div>
+                    <div style="margin-top: 7px; font-size: 0.85em; display: flex; justify-content: space-between; align-items: center; gap: 10px;"><span style="display: inline-block; background: rgba(0,0,0,0.6); padding: 3px 9px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); white-space: nowrap; min-width: 0; overflow-x: auto;">${valeurTexte}</span>${etq ? etq.html : ''}</div>
                 </div>`;
             };
 
@@ -1696,6 +1764,7 @@
                         else if (ordre.type_ordre === 'ELECTION') { colorPrinc = '#00F0FF'; colorFond = 'rgba(0, 240, 255, 0.02)'; }
 
                         let sommeRatios = 0; let diviseur = 1; let htmlJauges = ''; window.__jc = [];
+                        window.__conseilsBarres = window.edteamEtats ? window.edteamEtats.conseils(ordre.type_ordre, (window.cacheResultatsBgs.dir || {})[ordre.id]).barres : {};
                         let poidsTotalEscadron = 0; let poidsTotalMoi = 0;
 
                         if (ordre.type_ordre === 'HAUSSE') {
@@ -1711,22 +1780,17 @@
                                 genererJaugeHTML('🔬 SCIENCE (Cartographie)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
 
                         } else if (ordre.type_ordre === 'BAISSE') {
-                            const valMoiSabotage = totauxMoiG['VOLS'] + totauxMoiG['PIRATAGE'];
-                            const valSquadSabotage = totauxG['VOLS'] + totauxG['PIRATAGE'];
-                            const capSabotage = capsTotal['VOLS'];
-                            const ratioSabotage = Math.min(100, (valSquadSabotage / capSabotage) * 100);
-                            const ratioSabotageVous = Math.min(100, (valMoiSabotage / capSabotage) * 100);
-
-                            sommeRatios = getRatio('MEURTRES') + ratioSabotage + getRatio('CONTREBANDE') + getRatio('ECHECS');
-                            diviseur = 4;
-                            poidsTotalEscadron = totauxG['MEURTRES'] + (totauxG['VOLS'] + totauxG['PIRATAGE']) + (totauxG['CONTREBANDE']/2000000) + totauxG['ECHECS'];
-                            poidsTotalMoi = totauxMoiG['MEURTRES'] + (totauxMoiG['VOLS'] + totauxMoiG['PIRATAGE']) + (totauxMoiG['CONTREBANDE']/2000000) + totauxMoiG['ECHECS'];
+                            // Régulateurs et données (VOLS, PIRATAGE) : aucune source ne confirme qu'ils baissent l'influence -> rang BGS seulement, hors jauges de la directive
+                            sommeRatios = getRatio('MEURTRES') + getRatio('CONTREBANDE') + getRatio('ECHECS');
+                            diviseur = 3;
+                            poidsTotalEscadron = totauxG['MEURTRES'] + (totauxG['CONTREBANDE']/2000000) + totauxG['ECHECS'];
+                            poidsTotalMoi = totauxMoiG['MEURTRES'] + (totauxMoiG['CONTREBANDE']/2000000) + totauxMoiG['ECHECS'];
 
                             htmlJauges =
                                 genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiG['MEURTRES']), formatNum(totauxG['MEURTRES']), formatNum(capsTotal['MEURTRES'])), 'var(--ed-red)', getRatio('MEURTRES'), getRatioVous('MEURTRES'), getRatio('MEURTRES') >= 100) +
-                                genererJaugeHTML('🔋 SABOTAGE AU SOL (Régulateurs & Données)', fmtDual(formatNum(valMoiSabotage), formatNum(valSquadSabotage), formatNum(capSabotage)), 'var(--ed-red)', ratioSabotage, ratioSabotageVous, ratioSabotage >= 100) +
                                 genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiG['CONTREBANDE']), formatCR(totauxG['CONTREBANDE']), formatCR(capsTotal['CONTREBANDE'])), 'var(--ed-red)', getRatio('CONTREBANDE'), getRatioVous('CONTREBANDE'), getRatio('CONTREBANDE') >= 100, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '') +
-                                genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiG['ECHECS']), formatNum(totauxG['ECHECS']), formatNum(capsTotal['ECHECS'])), 'var(--ed-red)', getRatio('ECHECS'), getRatioVous('ECHECS'), getRatio('ECHECS') >= 100);
+                                genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiG['ECHECS']), formatNum(totauxG['ECHECS']), formatNum(capsTotal['ECHECS'])), 'var(--ed-red)', getRatio('ECHECS'), getRatioVous('ECHECS'), getRatio('ECHECS') >= 100) +
+                                `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>`;
 
                         } else if (ordre.type_ordre === 'GUERRE') {
                             const capBonds = capsTotal['GUERRE_BONDS'] || capsTotal['SECURITE'];
@@ -2744,7 +2808,7 @@
 
     <!-- MODALE : RÉSULTAT DU JEU ET EFFORT D'UNE DIRECTIVE (PC) -->
     <div class="modal-overlay" id="modal-ordre-resultat" onclick="fermerModal('modal-ordre-resultat', event)" style="z-index: 5500;">
-        <div class="modal-content" style="max-width: 780px; width: 95%; max-height: 92vh; overflow-y: auto; background: rgba(10, 5, 0, 0.96); border: 1px solid var(--ed-blue);" onclick="event.stopPropagation()">
+        <div class="modal-content" style="max-width: 1240px; width: 96%; max-height: 92vh; overflow-y: auto; background: rgba(10, 5, 0, 0.96); border: 1px solid var(--ed-blue);" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="fermerModal('modal-ordre-resultat')">X</div>
             <div id="ordre-resultat-corps"></div>
         </div>
@@ -2825,7 +2889,7 @@
 
     <script src="medailles.js?v=9"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="etats-faction.js?v=1"></script>
+    <script src="etats-faction.js?v=3"></script>
     <script src="commerce.js?v=6"></script>
     <script src="footer.js?v=24"></script>
 </body>
