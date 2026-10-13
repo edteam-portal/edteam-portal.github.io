@@ -106,13 +106,14 @@
         .veille-titre { color: #9aa; letter-spacing: 2px; font-weight: bold; font-size: 0.85em; }
         .veille-titre small { color: #666; font-weight: normal; letter-spacing: 0.5px; margin-left: 8px; }
         .veille-liste { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-        .veille-tag { display: grid; grid-template-columns: auto minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 5px 9px; background: rgba(0, 0, 0, 0.35); border-left: 2px solid #4a4a4a; cursor: pointer; font-size: 0.8em; color: #aaa; transition: background 0.15s; }
+        .veille-tag { display: grid; grid-template-columns: auto minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 1.3fr) auto; gap: 10px; align-items: center; padding: 5px 9px; background: rgba(0, 0, 0, 0.35); border-left: 2px solid #4a4a4a; cursor: pointer; font-size: 0.8em; color: #aaa; transition: background 0.15s; }
         .veille-tag:hover { background: rgba(0, 240, 255, 0.07); }
         .veille-tag .vt { border: 1px solid; padding: 0 6px; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
         .veille-tag .vf { color: #fff; font-weight: bold; letter-spacing: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .veille-tag .vs { color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .veille-tag .vi { white-space: nowrap; text-align: right; } .veille-tag .vi b { color: #fff; }
-        @media (max-width: 700px) { .veille-tag { grid-template-columns: auto minmax(0, 1fr) auto; } .veille-tag .vs { display: none; } }
+        .veille-tag .ve { min-width: 0; max-height: 21px; overflow: hidden; }   /* états actifs de la faction (badges compacts) ; le survol donne la liste complète */
+        @media (max-width: 700px) { .veille-tag { grid-template-columns: auto minmax(0, 1fr) auto; } .veille-tag .vs, .veille-tag .ve { display: none; } }
         /* MISE EN PAGE : directives de l'Amiral PUIS initiatives des pilotes forment UNE SEULE suite de cartes, sur deux colonnes (les conteneurs sont « transparents »).
            Chaque rangee a des cadres de MEME HAUTEUR ; une carte restee seule en derniere rangee prend toute la largeur (classe .sp, posee par placerDuo) ; les directives en veille ferment la page (order). */
         #bgs-duo-ordres { align-items: stretch !important; gap: 10px 16px !important; }
@@ -1934,7 +1935,7 @@
                             const cs = BGS_SENS_COUL[bgsSens(o, res) || 'att'];
                             const infl = res && res.donnees ? `<b>${bgsPct(res.influence)} %</b>${res.variation !== null ? ` <span style="color: ${cs};">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '='} ${bgsPts(res.variation)}</span>` : ''}` : '<span style="color: #666;">—</span>';
                             const c = COL_TYPE[o.type_ordre] || '#aaa';
-                            return `<div class="veille-tag" onclick="ouvrirDetailResultat('${o.id}')" title="Aucun effort depuis 7 jours : directive en veille"><span class="vt" style="color: ${c}; border-color: ${c};">#${o.id} ${escapeHtml(o.type_ordre)}</span><span class="vf">${escapeHtml(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${escapeHtml(String(o.systeme_cible || '').toUpperCase())}</span><span class="vi">${infl}</span></div>`;
+                            return `<div class="veille-tag" onclick="ouvrirDetailResultat('${o.id}')" title="Aucun effort depuis 7 jours : directive en veille"><span class="vt" style="color: ${c}; border-color: ${c};">#${o.id} ${escapeHtml(o.type_ordre)}</span><span class="vf">${escapeHtml(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${escapeHtml(String(o.systeme_cible || '').toUpperCase())}</span><span class="ve">${window.edteamEtats ? window.edteamEtats.badges(res, true) : ''}</span><span class="vi">${infl}</span></div>`;
                         }).join('')}</div>`;
                         veilleBox.style.display = '';
                     }

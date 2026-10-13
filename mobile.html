@@ -2208,7 +2208,7 @@
                         const res = resultats.dir[o.id] || null;
                         const cs = X_SENS[xSensDirective(o, res) || 'att'], c = X_COUL_TYPE[o.type_ordre] || '#aaa';
                         const infl = res && res.donnees ? `<b style="color: #fff; font-weight: normal;">${xPct(res.influence)} %</b>${res.variation !== null ? ` <span style="color: ${cs};">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '='} ${xPts(res.variation)}</span>` : ''}` : '<span style="color: #666;">—</span>';
-                        return `<div class="vmob" onclick="ouvrirModalOrdre(${index}, '${c}')"><span class="xtag" style="color: ${c};">#${o.id} ${XESC(o.type_ordre)}</span><span class="vq"><span class="vf">${XESC(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${XESC(String(o.systeme_cible || '').toUpperCase())}</span></span><span class="vi">${infl}</span></div>`;
+                        return `<div class="vmob" onclick="ouvrirModalOrdre(${index}, '${c}')"><span class="xtag" style="color: ${c};">#${o.id} ${XESC(o.type_ordre)}</span><span class="vq"><span class="vf">${XESC(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${XESC(String(o.systeme_cible || '').toUpperCase())}</span>${window.edteamEtats && res && res.donnees && window.edteamEtats.badges(res, true) ? '<span style="display: block; margin-top: 3px;">' + window.edteamEtats.badges(res, true) + '</span>' : ''}</span><span class="vi">${infl}</span></div>`;
                     }).join('')}</div>`;
                 };
                 if (!d.ordres.some(o => o.origine !== 'PILOTE' && !veilleIds.has(String(o.id)))) {
