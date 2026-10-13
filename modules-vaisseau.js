@@ -144,7 +144,7 @@
         // ---- geometrie (repere « affichage » : nez en haut ; l'image enregistree est tournee de 180 degres, comme la soute)
         const W = sil.W, H = sil.H, AXE = W - sil.axe, zm = sil.zmod || [sil.arriere, sil.nez], YTOP = H - zm[1], YBOT = H - zm[0], Ltot = YBOT - YTOP;
         const demi = yd => { const ys = H - yd; for (let i = 0; i < sil.coque.length - 1; i++) { const a = sil.coque[i], b = sil.coque[i + 1], lo = Math.min(a[1], b[1]), hi = Math.max(a[1], b[1]); if (ys >= lo && ys <= hi && hi > lo) return (a[0] + (b[0] - a[0]) * (ys - a[1]) / (b[1] - a[1])) * 0.9; } return 0; };
-        const BW = W > 400 ? 190 : 226, SC = Math.min((936 - 2 * BW - 24) / W, 780 / H, 1.25), HX = 468 - AXE * SC, HY = 24, P = a => [+(HX + a[0] * SC).toFixed(1), +(HY + a[1] * SC).toFixed(1)];
+        const sans = opts.etiquettes === false, VWd = sans ? 600 : 936, BW = sans ? 0 : W > 400 ? 190 : 226, SC = Math.min((VWd - 2 * BW - 24) / W, sans ? 1.5 : 780 / H, sans ? 1.35 : 1.25), HX = VWd / 2 - AXE * SC, HY = 24, P = a => [+(HX + a[0] * SC).toFixed(1), +(HY + a[1] * SC).toFixed(1)];
         const fsL = +(10 / SC).toFixed(1), cw = fsL * 0.6, fsT = +(8.6 / SC).toFixed(1);
         const court = (t, w) => { const cap = Math.floor(w / cw); if (t.length <= cap) return t; return t.slice(0, Math.max(3, cap - 1)) + "…"; };
         let bandes = "", gens = "", hits = "", trous = "", dets = [], caisses = ""; const celRack = [];
@@ -225,6 +225,7 @@
         armes.forEach((m, i) => gauche.push({ cote: "g", anc: P(ancArme(m, i)), coul: "#FF9A1F", L: ligne(m) }));
         utils.forEach((m, i) => gauche.push({ cote: "g", anc: P(ancUtil(m, i)), coul: "#FFD54A", L: ligne(m) }));
         mods.filter(m => m.cat === "core").forEach(m => droite.push({ cote: "d", anc: P(ancCore(m)), coul: "#00F0FF", L: ligne(m) }));
+        if (opts.etiquettes === false) { gauche.length = 0; droite.length = 0; }   // tableau de bord : seuls les modules optionnels (compartiments) restent affiches
         const BH = 22;
         const boite = (b, y, X) => {
             const bx = b.cote === "g" ? X + BW : X, my = y + BH / 2, pv = b.cote === "g" ? b.anc[0] - 30 : b.anc[0] + 30, vd = b.L.vide;
@@ -235,15 +236,27 @@
         };
         const solCoupeM = (t, n) => { t = String(t || ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
         const empile = (Lb, X, VH) => { Lb.sort((a, b) => a.anc[1] - b.anc[1]); let fin = 6; const o = { t: "", d: "", c: "" }; Lb.forEach(b => { let y = Math.max(fin, b.anc[1] - BH / 2); y = Math.min(y, VH - BH - 6); y = Math.max(y, fin); const r = boite(b, y, X); o.t += r.t; o.d += r.d; o.c += r.c; fin = y + BH + 5; }); o.fin = fin; return o; };
-        let VH = Math.round(H * SC) + 60; VH = Math.max(VH, empile(gauche, 6, 99999).fin + 4, empile(droite, 936 - 6 - BW, 99999).fin + 4 + (opts.mini ? 135 : 0));     // mini-carte : place reservee sous les cartes de droite
-        const GE = empile(gauche, 6, VH), DE = empile(droite, 936 - 6 - BW, VH);
+        let VH = Math.round(H * SC) + 60 + (opts.valeur ? 126 : 0); VH = Math.max(VH, empile(gauche, 6, 99999).fin + 4, empile(droite, VWd - 6 - BW, 99999).fin + 4 + (opts.mini ? 135 : 0));     // mini-carte : place reservee sous les cartes de droite
+        const GE = empile(gauche, 6, VH), DE = empile(droite, VWd - 6 - BW, VH);
         window.__tbmDet = dets;
         if (typeof SOUTE !== "undefined") { SOUTE.items = items; SOUTE.large = true; }
         const tr = `translate(${HX.toFixed(1)} ${HY}) scale(${SC.toFixed(3)})`, T = "0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0";
-        if (Z.cy == null || Z.k <= 1) { Z.cx = 468; Z.cy = VH / 2; }
-        Z.k = Math.max(1, Math.min(4, Z.k)); const zw = 936 / Z.k, zh = VH / Z.k; Z.cx = Math.max(zw / 2, Math.min(936 - zw / 2, Z.cx)); Z.cy = Math.max(zh / 2, Math.min(VH - zh / 2, Z.cy));
-        const svg = `<svg class="tb-svgv tbm-zoomable" data-w="936" data-h="${VH}" style="${Z.k > 1 ? "cursor:grab;" : ""}touch-action:none" viewBox="${(Z.cx - zw / 2).toFixed(1)} ${(Z.cy - zh / 2).toFixed(1)} ${zw.toFixed(1)} ${zh.toFixed(1)}" role="img" aria-label="Modules de votre vaisseau"><defs>
-            <mask id="tbmL" maskUnits="userSpaceOnUse" x="0" y="0" width="936" height="${VH}"><rect width="936" height="${VH}" fill="#fff"/><g transform="${tr}">${trous}</g></mask>
+        if (Z.cy == null || Z.k <= 1) { Z.cx = VWd / 2; Z.cy = VH / 2; }
+        Z.k = Math.max(1, Math.min(4, Z.k)); const zw = VWd / Z.k, zh = VH / Z.k; Z.cx = Math.max(zw / 2, Math.min(VWd - zw / 2, Z.cx)); Z.cy = Math.max(zh / 2, Math.min(VH - zh / 2, Z.cy));
+        // encadre de valeur (option opts.valeur = { titre, txt, sub }) : fleche depuis le centre des racks de soute vers un cadre sous la coque
+        let valeurSvg = "";
+        if (opts.valeur && celRack.length) {
+            const cx = HX + celRack.reduce((t, q) => t + q.x + q.p / 2, 0) / celRack.length * SC, cy = HY + celRack.reduce((t, q) => t + q.y + q.p / 2, 0) / celRack.length * SC;
+            const bw = 400, bh = 112, bx = VWd / 2 - bw / 2, by = VH - bh - 8;
+            valeurSvg = `<g class="tbm-val"><defs><marker id="tbmval" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#FFD54A"/></marker></defs>
+                <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.2" fill="#FFD54A"/><line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${(VWd / 2).toFixed(1)}" y2="${by - 2}" stroke="#FFD54A" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#tbmval)"/>
+                <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(3,8,12,.92)" stroke="#FFD54A" stroke-width="1.4"/>
+                <text x="${VWd / 2}" y="${by + 28}" text-anchor="middle" fill="#FFD54A" font-size="19" letter-spacing="2" stroke="none">${E(opts.valeur.titre || "VALEUR ESTIMÉE")}</text>
+                <text x="${VWd / 2}" y="${by + 72}" text-anchor="middle" fill="#fff" font-size="48" font-weight="bold" stroke="none">${E(opts.valeur.txt || "—")}</text>
+                <text x="${VWd / 2}" y="${by + 98}" text-anchor="middle" fill="#8b97a0" font-size="16" stroke="none">${E(opts.valeur.sub || "")}</text></g>`;
+        }
+        const svg = `<svg class="tb-svgv tbm-zoomable" data-w="${VWd}" data-h="${VH}" style="${Z.k > 1 ? "cursor:grab;" : ""}touch-action:none" viewBox="${(Z.cx - zw / 2).toFixed(1)} ${(Z.cy - zh / 2).toFixed(1)} ${zw.toFixed(1)} ${zh.toFixed(1)}" role="img" aria-label="Modules de votre vaisseau"><defs>
+            <mask id="tbmL" maskUnits="userSpaceOnUse" x="0" y="0" width="${VWd}" height="${VH}"><rect width="${VWd}" height="${VH}" fill="#fff"/><g transform="${tr}">${trous}</g></mask>
             <radialGradient id="tbmA" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#FF9A1F" stop-opacity=".4"/><stop offset=".7" stop-color="#FF5A00" stop-opacity=".16"/><stop offset="1" stop-color="#FF3B00" stop-opacity=".05"/></radialGradient>
             <radialGradient id="tbmC" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#00F0FF" stop-opacity=".3"/><stop offset="1" stop-color="#0090FF" stop-opacity=".05"/></radialGradient>
             <radialGradient id="tbmV" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#B28DFF" stop-opacity=".3"/><stop offset="1" stop-color="#6040C0" stop-opacity=".05"/></radialGradient>
@@ -258,15 +271,15 @@
                 <g clip-path="url(#tbmq)"><g class="tbs-balai" style="--h:${Ltot}px"><rect x="${AXE - 160}" y="${YTOP - 24}" width="320" height="24" fill="url(#tbmb)"/><rect x="${AXE - 160}" y="${YTOP}" width="320" height="1.4" fill="#00F0FF" opacity=".8"/></g></g></g>
             <g mask="url(#tbmL)">${GE.t}${DE.t}</g>
             <g transform="${tr}"><g clip-path="url(#tbmq)">${bandes}${gens}${hits}${caisses}</g></g>
-            ${GE.d}${DE.d}${GE.c}${DE.c}</svg>`;
+            ${GE.d}${DE.d}${GE.c}${DE.c}${valeurSvg}</svg>`;
         // ---- jauge de places, synthese et legendes
         const pleine = places > 0 && nPax > places, pct = places ? Math.min(100, Math.round(nPax / places * 100)) : 0;
-        const jauge = nPax || places ? `<div class="tbp-jauge"><span>PLACES</span>${places ? `<div class="bar"><i class="${pleine ? "pleine" : ""}" style="width:${pct}%"></i></div><b style="color:${pleine ? "#FF3B30" : "#FFB44D"}">${nPax}/${places}</b>` : `<b style="color:#FFB44D">${nPax}</b>`}</div>` : "";
+        const jauge = opts.jauge ? `<div class="tbp-jauge"><span>${E(opts.jauge.titre)}</span><div class="bar"><i class="${opts.jauge.n > opts.jauge.cap ? "pleine" : ""}" style="width:${opts.jauge.cap ? Math.min(100, Math.round(opts.jauge.n / opts.jauge.cap * 100)) : 0}%"></i></div><b style="color:#FFB44D">${fmtN(opts.jauge.n)}/${fmtN(opts.jauge.cap)}${opts.jauge.unite || ""}</b></div>` : nPax || places ? `<div class="tbp-jauge"><span>PLACES</span>${places ? `<div class="bar"><i class="${pleine ? "pleine" : ""}" style="width:${pct}%"></i></div><b style="color:${pleine ? "#FF3B30" : "#FFB44D"}">${nPax}/${places}</b>` : `<b style="color:#FFB44D">${nPax}</b>`}</div>` : "";
         const legI = items.map((x, i) => `<span data-i="${i}" style="--cl:${COUL_MARCH[i % COUL_MARCH.length]}"><i></i>${E(x.n)} · ${fmtN(x.q)} t${x.m ? " (mission)" : ""}</span>`).join(""), leg = Object.keys(PAS_FAM).filter(f => nbF[f]).map(f => `<span style="--cl:${PAS_FAM[f].c}"><i></i>${nbF[f]} ${PAS_FAM[f].l}${PAS_FAM[f].imp ? " (cercle)" : ""}</span>`).join("")
             + attente.map((b, k) => `<span style="--cl:${COUL_MARCH[(items.length + k) % COUL_MARCH.length]}"><i class="sq vide"></i>${E(b.n)} · ${fmtN(b.q)} t à récupérer (sauvetage)</span>`).join("")
 
         const v = S.vaisseau, note = (items.length && !celRack.length ? "Cargaison à bord sans rack de soute : " + fmtN(tonnes) + " t. " : "") + "Compartiments proportionnels à la taille de chaque emplacement ; disposition stylisée (le jeu ne donne pas la position des modules). Survolez un compartiment pour son détail. Molette ou boutons + / − pour zoomer, glisser pour se déplacer." + (attente.length ? " « ? » = colis de sauvetage à récupérer." : "");
-        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>MODULES DU VAISSEAU <em>${E(nomVaisseau(v.modele))} · ${mods.filter(m => !m.vide).length} modules${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}${opts.mini || ""}</div>
-            <div class="tbp-leg">${leg}</div>${legI ? `<div class="tb-leg" id="tb-leg">${legI}</div>` : ""}${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - places} passager${nPax - places > 1 ? "s" : ""} de plus que de places.</div>` : ""}<div class="tb-sub">${note}</div>${opts.pied || ""}</div>`;
+        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>${E(opts.titre || "MODULES DU VAISSEAU")} <em>${E(nomVaisseau(v.modele))}${sans ? "" : " · " + mods.filter(m => !m.vide).length + " modules"}${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}${opts.mini || ""}</div>
+            <div class="tbp-leg">${leg}</div>${legI ? `<div class="tb-leg" id="tb-leg">${legI}</div>` : ""}${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - places} passager${nPax - places > 1 ? "s" : ""} de plus que de places.</div>` : ""}${opts.sansNote ? "" : `<div class="tb-sub">${note}</div>`}${opts.pied || ""}</div>`;
     };
 })();

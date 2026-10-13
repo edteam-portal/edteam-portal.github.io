@@ -41,6 +41,26 @@
             lien: 'tableau-de-bord.html',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'minage-2026-10',
+            couleur: '#FF9A1F',
+            etiquette: '★ NOUVEAU MODULE',
+            titre: 'LE MINAGE ENTRE DANS LE TABLEAU DE BORD',
+            sous: 'Rhino au sol ou vaisseau : choisissez, minez, transférez, vendez',
+            intro: 'Un nouvel onglet <b>Minage</b> accompagne vos sessions, <b>sans rien saisir</b> sauf les matériaux que le jeu vous affiche. Il vous dit où atterrir, ce qui rapporte le plus, et suit votre Rhino et votre soute <b>en hologramme</b>, avec une flèche qui s’anime quand il est temps de transférer.',
+            colonnes: 3,
+            etapes: [
+                { n: '1', t: 'OÙ SE POSER', d: 'Les planètes du système où atterrir (nature du sol, gravité) avec leurs emplacements d’extraction une fois scannés. En vaisseau : les anneaux et leurs points chauds.' },
+                { n: '2', t: 'QUOI MINER ?', d: 'Après le scan, cochez les matériaux affichés dans le jeu : le tableau compare leur prix dans ce système (pour le Powerplay) et ailleurs, avec la valeur d’une soute pleine.' },
+                { n: '3', t: 'MINER ET TRANSFÉRER', d: 'Rythme, durée, soute du Rhino et du vaisseau avec leur valeur estimée, tintements à chaque arrivage et petit air quand le transfert est terminé.' }
+            ],
+            avis: '<b>Plugin mis à jour (v2.20)</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b>. Les prix viennent des relevés des joueurs (Spansh) : ils peuvent avoir quelques heures de retard, vérifiez-les en jeu. Vos données ne sont visibles que de vous.',
+            cta: 'OUVRIR L’ONGLET MINAGE',
+            aide: 'Menu du haut : TABLEAU DE BORD, onglet MINAGE · à utiliser sur PC ou tablette',
+            lien: 'tableau-de-bord.html?mode=min',
+            escadron: false,
+            mobile: false
         }
     ];
 

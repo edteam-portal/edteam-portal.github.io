@@ -5,7 +5,14 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
-        id: '2026-10-bgs-detail-directive', date: '2026-10-13T17:00:00Z', type: 'NOUVEAU',
+        id: '2026-10-onglet-minage', date: '2026-10-13T16:38:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : l’onglet Minage (Rhino et vaisseau)',
+        texte: 'Le tableau de bord a maintenant un onglet Minage (Rhino au sol ou vaisseau), en trois étapes qui suivent votre façon de jouer. 1 · Où se poser : les planètes du système où atterrir (nature, sol, gravité) avec les emplacements d’extraction une fois scannés ; en vaisseau, les anneaux. 2 · Quoi miner : cochez les matériaux affichés dans le jeu après le scan ; le tableau compare leur meilleur prix dans ce système (pour le Powerplay) et ailleurs, avec la valeur d’une soute pleine. 3 · Miner et transférer : rythme, durée, soute du Rhino et du vaisseau en hologramme, et une flèche qui s’anime pendant que le Rhino se remplit, plus vive à partir de 60 minerais pour penser au transfert. Une petite cascade de tintements retentit quand des minerais arrivent dans le Rhino (la page est mise à jour toutes les 30 à 60 secondes pendant le minage) et un petit air quand le transfert vers le vaisseau est terminé (le haut-parleur du site les coupe). Les étapes 1 et 2 se replient toutes seules dès que vous minez. Il faut le plugin SYS.EDTEAM 2.20 ; les prix viennent des relevés des joueurs (Spansh) et peuvent avoir quelques heures de retard.',
+        important: true,
+        action: 'Mettez à jour le plugin SYS.EDTEAM (2.20) pour voir votre minage.'
+    },
+    {
+        id: '2026-10-bgs-detail-directive', date: '2026-10-13T14:48:00Z', type: 'NOUVEAU',
         titre: 'Directives BGS : activité du système, conseils selon l’état et fenêtre repensée',
         texte: 'Le détail d’une directive s’enrichit. Nouvelle zone « Activité du système » : trafic (vaisseaux) et morts relevés par EDSM, avec un niveau (calme, habituel, animé…) qui apparaît après quelques jours de relevés. L’heure du dernier tick est affichée en haut et chaque faction montre son humeur. Un bloc « Conseils selon l’état » dit ce que l’état de la faction change pour votre action (Boom : le commerce pèse double ; Famine ou Épidémie : le combat n’a plus d’effet ; Confinement : aucune action ne compte), avec une petite étiquette sur les barres d’effort concernées : ce sont des indications tirées des guides de la communauté, à vérifier, qui ne changent ni vos jauges ni vos points. La fenêtre passe en paysage (effort à gauche, résultat du jeu à droite) et toutes les barres d’effort sont sur deux lignes. Enfin, pour une directive de baisse, le vol de régulateurs et le piratage de données ne sont plus une jauge de la directive, car rien ne confirme qu’ils fassent baisser l’influence ; ils comptent toujours pour votre rang BGS.',
         important: true
