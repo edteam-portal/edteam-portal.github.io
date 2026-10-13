@@ -12,12 +12,12 @@
     // materiaux a cocher : [nom francais du jeu, nom Spansh]. La liste ne dit PAS ce qu'il y a sur une planete (le jeu ne le donne pas) : c'est le pilote qui coche ce qu'il voit apres le scan.
     const CAT = {
         rhino: [["MÉTAUX", [["Or", "Gold"], ["Argent", "Silver"], ["Platine", "Platinum"], ["Palladium", "Palladium"], ["Lithium", "Lithium"], ["Thorium", "Thorium"], ["Osmium", "Osmium"], ["Iridium", "Iridium"], ["Cobalt", "Cobalt"], ["Cuivre", "Copper"], ["Indium", "Indium"], ["Béryllium", "Beryllium"], ["Tantale", "Tantalum"], ["Gallium", "Gallium"], ["Lanthane", "Lanthanum"], ["Titane", "Titanium"], ["Aluminium", "Aluminium"], ["Bismuth", "Bismuth"]]],
-            ["MINÉRAUX ET GEMMES", [["Saphir", "Sapphire"], ["Rubis", "Ruby"], ["Diamant", "Diamond"], ["Olivine", "Olivine"], ["Magnésite", "Magnesite"], ["Quartz pyroxénite", "Quartz Pyroxenite"], ["Périclase dunite", "Periclase Dunite"], ["Thortveitite", "Thortveitite"], ["Bastnasite", "Bastnasite"]]],
-            ["GAZ", [["Hélium", "Helium"], ["Hélium-3", "Helium-3"], ["Deutérium", "Deuterium"]]]],
+            ["MINÉRAUX ET GEMMES", [["Saphir", "Sapphire"], ["Rubis", "Ruby"], ["Diamant", "Diamond"], ["Diamants basse température", "Low Temperature Diamonds"], ["Alexandrite", "Alexandrite"], ["Grandidiérite", "Grandidierite"], ["Monazite", "Monazite"], ["Rhodplumsite", "Rhodplumsite"], ["Serendibite", "Serendibite"], ["Olivine", "Olivine"], ["Magnésite", "Magnesite"], ["Quartz pyroxénite", "Quartz Pyroxenite"], ["Périclase dunite", "Periclase Dunite"], ["Thortveitite", "Thortveitite"], ["Bastnasite", "Bastnasite"]]],
+            ["GAZ", [["Hélium", "Helium"], ["Hélium-3", "Helium-3"], ["Deutérium", "Deuterium"], ["Tritium", "Tritium"]]]],
         vaisseau: [["MÉTAUX ET MINERAIS", [["Platine", "Platinum"], ["Osmium", "Osmium"], ["Or", "Gold"], ["Argent", "Silver"], ["Palladium", "Palladium"], ["Praséodyme", "Praseodymium"], ["Samarium", "Samarium"], ["Lanthane", "Lanthanum"], ["Bertrandite", "Bertrandite"], ["Indite", "Indite"], ["Gallite", "Gallite"], ["Lépidolite", "Lepidolite"], ["Uraninite", "Uraninite"], ["Cobalt", "Cobalt"], ["Rutile", "Rutile"], ["Cryolite", "Cryolite"], ["Coltan", "Coltan"], ["Bauxite", "Bauxite"]]],
             ["GEMMES", [["Painite", "Painite"], ["Opale du vide", "Void Opal"], ["Diamants basse température", "Low Temperature Diamonds"], ["Monazite", "Monazite"], ["Musgravite", "Musgravite"], ["Grandidiérite", "Grandidierite"], ["Bénitoïte", "Benitoite"], ["Serendibite", "Serendibite"], ["Alexandrite", "Alexandrite"], ["Rhodplumsite", "Rhodplumsite"], ["Bromellite", "Bromellite"]]]]
     };
-    const FR = {}; Object.keys(CAT).forEach(v => CAT[v].forEach(g => g[1].forEach(m => { FR[m[1].toLowerCase()] = m[0]; })));
+    const FR = {}; Object.keys(CAT).forEach(v => CAT[v].forEach(g => g[1].forEach(m => { FR[m[1].toLowerCase()] = m[1]; })));      // noms affiches en ANGLAIS (comme RhinoSpotter et les marches du jeu en anglais)
     const NATURE = { "high metal content world": "Monde riche en métaux", "metal-rich body": "Corps métallique", "rocky body": "Corps rocheux", "rocky ice world": "Monde rocheux et glacé", "icy body": "Corps glacé", "gas giant": "Géante gazeuse", "earth-like world": "Monde terrestre", "water world": "Monde aquatique" };
     const ANNEAU = { "metallic": "métallique", "metal rich": "riche en métaux", "icy": "glacé", "rocky": "rocheux" };
     const MIN = window.__MIN = { vue: null, sel: null, rayon: null, heures: null, lieu: "", rhino: [], custom: "",
@@ -28,7 +28,7 @@
     const norm = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
     const M = () => (S && S.minage) || null;
     const somme = o => Object.keys(o || {}).reduce((t, k) => t + (Number(o[k]) || 0), 0);
-    const nomMinerai = k => { const n = M() && M().noms && M().noms[k]; return n || FR[String(k).toLowerCase()] || (k ? k.charAt(0).toUpperCase() + k.slice(1) : ""); };
+    const nomMinerai = k => FR[String(k).toLowerCase()] || (k ? k.charAt(0).toUpperCase() + k.slice(1) : "");
     const nomFr = en => FR[String(en).toLowerCase()] || en;
     const age = iso => { const t = Date.parse(iso); if (!t) return ""; const h = (Date.now() - t) / 3600000; return h < 1 ? "il y a " + Math.max(1, Math.round(h * 60)) + " min" : h < 48 ? "il y a " + Math.round(h) + " h" : "il y a " + Math.round(h / 24) + " j"; };
     const ancien = iso => { const t = Date.parse(iso); return !t || Date.now() - t > 86400000; };          // releve de plus de 24 h (ou sans date) : prix a verifier en jeu
@@ -196,7 +196,7 @@
         const { apercu, rows } = lignes();
         const top = rows.find(r => r.best > 0);
         const resume = s.length ? s.map(x => esc(nomFr(x))).join(" · ") + (top ? ` — meilleur : <b style="color:#FFD54A">${esc(nomFr(top.en))}</b> ≈ ${fmtM(top.best)} la soute` : "") : "aucun matériau coché : cochez ceux affichés dans le jeu après le scan";
-        const pastilles = CAT[v].map(g => `<div class="tbn-g"><span class="tbn-gt">${g[0]}</span>${g[1].map(m => `<button type="button" class="tbn-p ${s.some(x => norm(x) === norm(m[1])) ? "on" : ""}" onclick="minageBasculer('${m[1]}')">${esc(m[0])}</button>`).join("")}</div>`).join("");
+        const pastilles = CAT[v].map(g => `<div class="tbn-g"><span class="tbn-gt">${g[0]}</span>${g[1].map(m => `<button type="button" class="tbn-p ${s.some(x => norm(x) === norm(m[1])) ? "on" : ""}" onclick="minageBasculer('${m[1]}')">${esc(m[1])}</button>`).join("")}</div>`).join("");
         const perso = s.filter(x => !FR[String(x).toLowerCase()]).map(x => `<button type="button" class="tbn-p on" onclick="minageBasculer('${esc(x).replace(/'/g, "")}')">${esc(x)} ✕</button>`).join("");
         const seg = (vals, cur, fn, lab) => `<span class="tb-seg">${vals.map(x => `<button type="button" class="${x === cur ? "on" : ""}" onclick="${fn}(${x})">${lab(x)}</button>`).join("")}</span>`;
         const perime = A.statut === "PRET" && A.sig !== sigAil();
