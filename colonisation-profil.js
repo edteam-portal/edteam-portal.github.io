@@ -1,0 +1,90 @@
+// PROFIL D'UN SYSTEME COLONISE (fenetre de detail d'un systeme) : totaux des indicateurs (developpement, technologie, securite, richesse, niveau de vie,
+// population, points de construction) additionnes sur les installations dont le TYPE est reconnu d'apres la recette du chantier (colonisation-types.js),
+// avec les effets par type de colonisation-effets.js (feuille communautaire DaftMav : ESTIMATIONS) et les pictogrammes de colonisation-visuels.js.
+// Depend de : window.EDTEAM_EFFETS, window.EDTEAM_ICONE, window.typeDepuisRecette. Aucune lecture de la base.
+(function () {
+  const ORDRE = [['NIVEAUX DU SYSTÈME', ['dev', 'tec', 'sec', 'ric', 'niv']], ['POPULATION', ['pi', 'pm']], ['POINTS DE CONSTRUCTION', ['t2', 't3']]];
+  const ICO = { dev: ['⚙', '#FFB44D'], tec: ['⌬', '#00F0FF'], sec: ['⛨', '#7fb0ff'], ric: ['◈', '#FFD700'], niv: ['♥', '#FF8fb0'], pi: ['☺', '#3DDC97'], pm: ['⌂', '#3DDC97'], t2: ['2', '#b8a0ff'], t3: ['3', '#b8a0ff'] };
+  const COURT = { dev: 'Dév.', tec: 'Tech.', sec: 'Séc.', ric: 'Rich.', niv: 'Vie', pi: 'Pop.', pm: 'Pop. max', t2: 'T2', t3: 'T3' };
+  const AIDE = { dev: 'Niveau de développement', tec: 'Niveau de technologie', sec: 'Niveau de sécurité', ric: 'Niveau de richesse', niv: 'Niveau de vie', pi: 'Augmentation initiale de la population', pm: 'Augmentation maximale de la population', t2: 'Points de construction T2', t3: 'Points de construction T3' };
+  const f = v => v > 0 ? '+' + v : String(v), cl = v => v > 0 ? 'pf-pos' : v < 0 ? 'pf-neg' : 'pf-zer';
+  const CSS = `
+.pf-seg{display:inline-flex}.pf-seg button{background:none;border:1px solid rgba(0,240,255,.45);color:#8fb7bf;font:inherit;font-size:.78em;letter-spacing:1px;padding:4px 12px;cursor:pointer}.pf-seg button+button{border-left:0}.pf-seg button.on{background:rgba(0,240,255,.16);color:#fff;border-color:#00F0FF}
+.pf-profil{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);border:1px solid rgba(0,240,255,.35);background:linear-gradient(180deg,rgba(0,40,50,.35),rgba(3,10,14,.6));clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.pf-band{grid-column:1/3;padding:12px 18px 6px;border-bottom:1px solid rgba(0,240,255,.2)}.pf-pg{padding:14px 18px 12px;border-right:1px solid rgba(0,240,255,.2)}.pf-pd{padding:14px 18px 12px}
+.pf-grp{color:#7fa5ae;font-size:10px;letter-spacing:3px;margin:10px 0 2px;display:flex;align-items:center;gap:8px}.pf-grp:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(0,240,255,.3),transparent)}.pf-grp.f{margin-top:0}
+.pf-ind{display:grid;grid-template-columns:22px 118px minmax(0,1fr) 74px;gap:8px;align-items:center;padding:4px 0}
+.pf-ic{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid}.pf-lb{color:#d8e6ea;font-size:.95em}
+.pf-jau{position:relative;height:16px;background:rgba(0,0,0,.45);border:1px solid #1f3a44;overflow:hidden}.pf-jau:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#6b8a94;z-index:3}
+.pf-jau .tk{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.07)}.pf-jau i{position:absolute;top:2px;bottom:2px;border-radius:1px}
+.pf-jau .ext{background:repeating-linear-gradient(135deg,rgba(255,255,255,.45) 0 3px,transparent 3px 6px)}.pf-jau .pre{opacity:.38;top:5px;bottom:5px;background:#fff}
+.pf-val{text-align:right;font-weight:bold;font-size:1.15em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pf-pos{color:#3DDC97}.pf-neg{color:#FF6B5E}.pf-zer{color:#8b97a0}
+.pf-tags{display:flex;gap:6px;flex-wrap:wrap}.pf-tags span{border:1px solid #456;padding:3px 10px;font-size:.8em;letter-spacing:1px;border-radius:2px;color:#cfe9dd}
+.pf-cartes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:2px;max-height:470px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+.pf-car{background:rgba(0,0,0,.45);border:1px solid #2c2c2c;border-left:3px solid #00FF66;padding:7px 10px;border-radius:3px}.pf-car.cha{border-left-color:#FF7100;opacity:.92}.pf-car.off{opacity:.28;filter:grayscale(.6)}
+.pf-cw{display:flex;gap:9px;align-items:flex-start}.pf-cb{flex:1;min-width:0}
+.pf-t{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1px 8px;align-items:baseline}.pf-t b{flex:1 1 130px;min-width:0;color:#fff;font-weight:normal;font-size:.95em;word-break:break-word}.pf-t span{font-size:.62em;letter-spacing:1.5px;white-space:nowrap}
+.pf-ty{color:#8fb7bf;font-size:.74em;letter-spacing:1px;margin:1px 0 4px}
+.pf-pil{display:flex;flex-wrap:wrap;gap:4px}.pf-pil span{font-size:.72em;padding:1px 6px;border:1px solid;border-radius:2px;white-space:nowrap}
+.pf-pil .p{color:#3DDC97;border-color:#3DDC9760;background:rgba(61,220,151,.07)}.pf-pil .m{color:#FF6B5E;border-color:#FF6B5E60;background:rgba(255,107,94,.07)}.pf-pil .u{color:#8b97a0;border-color:#4a5a62;border-style:dashed}
+.pf-bdr{display:flex;align-items:center;overflow-x:auto;padding:6px 0 2px}.pf-bd{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:78px}.pf-bd span{font-size:10px;color:#8fb7bf;max-width:84px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-lien{flex:1;min-width:14px;height:1px;background:linear-gradient(90deg,rgba(0,240,255,.15),rgba(0,240,255,.5),rgba(0,240,255,.15));margin-bottom:14px}
+.pf-fiab{display:flex;gap:14px;flex-wrap:wrap;font-size:.8em;color:#9fb0b8;margin-top:10px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.12)}.pf-fiab b{color:#fff;font-weight:normal}.pf-pt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.pf-pied{margin-top:8px;color:#8b97a0;font-size:.78em;line-height:1.5}
+@media (max-width:900px){.pf-profil{grid-template-columns:1fr}.pf-band{grid-column:1}.pf-pg{border-right:0;border-bottom:1px solid rgba(0,240,255,.2)}.pf-cartes{grid-template-columns:1fr}}`;
+  if (!document.getElementById('pf-css')) { const st = document.createElement('style'); st.id = 'pf-css'; st.textContent = CSS; document.head.appendChild(st); }
+
+  // o = { esc, nomStation(station), pct(chantier) -> %, mode : 'actuel' | 'prevu', onMode : nom de la fonction globale appelee par le selecteur }
+  window.coloProfilHtml = function (s, o) {
+    const E = window.EDTEAM_EFFETS, esc = o.esc; if (!E || !window.EDTEAM_ICONE) return '';
+    const mode = o.mode === 'prevu' ? 'prevu' : 'actuel';
+    const inst = (c, etat) => {
+      let t = typeof window.typeDepuisRecette === 'function' ? window.typeDepuisRecette(c.marchandises) : null;
+      // le journal du jeu donne le TYPE EXACT d'un port orbital (StationType) : il tranche entre Coriolis / base asteroide, et complete une recette absente
+      const PORTS = { Coriolis: 'Coriolis', AsteroidBase: 'Asteroid Base', Ocellus: 'Ocellus', Orbis: 'Orbis', Dodec: 'Dodecahedron' };
+      // sans recette relevee (station constatee a l'amarrage), le type de station du journal donne au moins la FAMILLE ; l'economie departage ensuite
+      const FAMILLES = { Outpost: ['Avant-poste orbital', ['Commercial', 'Industrial', 'Criminal', 'Civilian', 'Scientific', 'Military']], CraterOutpost: ['Port planétaire', ['Outpost Civilian', 'Outpost Industrial', 'Outpost Scientific']] };
+      if (!t && etat === 'fin' && FAMILLES[c.type]) t = { libelle: FAMILLES[c.type][0], famille: FAMILLES[c.type][0], precis: false, noms: FAMILLES[c.type][1], premier: false };
+      if (etat === 'fin' && PORTS[c.type]) t = { libelle: PORTS[c.type], famille: 'Port orbital', precis: true, noms: [PORTS[c.type]], premier: !!(t && t.premier) };
+      return { nom: /ColonisationShip/i.test(String(c.station || "")) ? "Premier site (navire de colonisation)" : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', etat, pct: etat === 'cha' ? o.pct(c) : 100,
+        lib: t ? (t.precis ? t.libelle : t.famille).toUpperCase() : 'TYPE NON RELEVÉ' };
+    };
+    const tout = (s.finies || []).map(c => inst(c, 'fin')).concat((s.chantiers || []).map(c => inst(c, 'cha')));
+    if (!tout.length) return '';
+    const actifs = tout.filter(i => mode === 'prevu' || i.etat === 'fin');
+    const P = E.profilSysteme(actifs), Pa = E.profilSysteme(tout.filter(i => i.etat === 'fin'));
+    const mx = Math.max(10, ...E.CLES.map(k => Math.max(Math.abs(P.indic[k].min), Math.abs(P.indic[k].max)))), ech = Math.ceil(mx / 5) * 5, w = v => Math.min(50, Math.abs(v) / ech * 50);
+    const jauge = k => {
+      const r = P.indic[k], base = Math.abs(r.min) <= Math.abs(r.max) ? r.min : r.max, far = base === r.min ? r.max : r.min, c = ICO[k][1];
+      let h = [-ech, -ech / 2, ech / 2, ech].map(t => `<span class="tk" style="left:${50 + t / ech * 50}%"></span>`).join('');
+      if (mode === 'prevu') { const a = Pa.indic[k].min; h += `<i class="pre" style="left:${a >= 0 ? 50 : 50 - w(a)}%;width:${w(a)}%"></i>`; }
+      h += `<i style="left:${base >= 0 ? 50 : 50 - w(base)}%;width:${w(base)}%;background:linear-gradient(${base >= 0 ? '90deg' : '270deg'},${base >= 0 ? '#1f8f63,#3DDC97' : '#a63f35,#FF6B5E'});box-shadow:0 0 8px ${base >= 0 ? '#3DDC9788' : '#FF6B5E88'}"></i>`;
+      if (base !== far) h += `<i class="ext" style="left:${far >= 0 ? 50 + (base >= 0 ? w(base) : 0) : 50 - w(far)}%;width:${w(far) - (Math.sign(base) === Math.sign(far) ? w(base) : 0)}%"></i>`;
+      return `<div class="pf-ind" title="${AIDE[k]}"><span class="pf-ic" style="color:${c};border-color:${c}66;background:${c}14">${ICO[k][0]}</span><span class="pf-lb">${E.LIBELLES[k]}</span><div class="pf-jau">${h}</div><span class="pf-val ${cl(r.min + r.max)}">${r.min === r.max ? f(r.min) : f(r.min) + ' à ' + f(r.max)}</span></div>`;
+    };
+    const pic = (i, c, px) => window.EDTEAM_ICONE(i.famille || 'Avant-poste orbital', c.length === 1 ? c[0].n : '', { eco: c.length === 1 ? c[0].eco : '', vide: i.etat === 'cha', taille: px });
+    const cand = i => i.noms.length ? E.candidats(i) : [];
+    const affine = i => i.noms.length && i.eco && E.candidats(i).length < E.candidats(Object.assign({}, i, { eco: '' })).length;
+    const bandeau = tout.map(i => `<div class="pf-bd" style="${mode === 'prevu' || i.etat === 'fin' ? '' : 'opacity:.25'}" title="${esc(i.nom)} · ${esc(i.lib)}">${pic(i, cand(i), 46)}<span>${esc(i.nom)}</span></div>`).join('<i class="pf-lien"></i>');
+    const cartes = tout.map(i => {
+      const c = cand(i); let pil = '';
+      if (!c.length) pil = `<span class="u">${i.noms.length ? 'pas dans la feuille' : 'type non relevé'}</span>`;
+      else E.CLES.forEach(k => { const v = c.map(r => r[k] + (i.premier ? (E.BONUS_PREMIER[k] || 0) : 0)), a = Math.min(...v), b = Math.max(...v); if (a || b) pil += `<span class="${(a + b) >= 0 ? 'p' : 'm'}">${COURT[k]} ${a === b ? f(a) : f(a) + '…' + f(b)}</span>`; });
+      const st = i.etat === 'fin' ? '<span style="color:#00FF66">✔ TERMINÉE</span>' : `<span style="color:#FF7100">EN CONSTRUCTION · ${i.pct} %</span>`;
+      const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Plusieurs types possibles pour cette recette : les effets sont donnés en fourchette.">≈</span>' : '';
+      const ind = affine(i) ? ` <span style="color:#7fe9ff;border-bottom:1px dotted #7fe9ff;cursor:help;font-size:.8em" title="Type affiné d'après l'économie de la station relevée à l'amarrage (indice : les liens de marché du système peuvent la modifier).">éco.</span>` : '';
+      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}</div><div class="pf-pil">${pil}</div></div></div></div>`;
+    }).join('');
+    const groupes = ORDRE.map(([t, ks]) => `<div class="pf-grp ${t === ORDRE[0][0] ? 'f' : ''}">${t}</div>${ks.map(jauge).join('')}`).join('');
+    const eco = Object.keys(P.eco).sort((a, b) => P.eco[b] - P.eco[a]).map(k => `<span>${esc(k)} × ${P.eco[k]}</span>`).join('') || '<span style="color:#777">—</span>';
+    const n = actifs.length, nul = P.surs + P.incertains === 0;
+    return `<div><div style="color:#00F0FF;letter-spacing:2px;font-size:1em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><span>&gt; PROFIL DU SYSTÈME <span style="color:#8b97a0;font-size:.8em;letter-spacing:0;">d'après ${n} installation${n > 1 ? 's' : ''} relevée${n > 1 ? 's' : ''}</span></span>
+        <span class="pf-seg"><button class="${mode === 'actuel' ? 'on' : ''}" onclick="${o.onMode}('actuel')">ACTUEL</button><button class="${mode === 'prevu' ? 'on' : ''}" onclick="${o.onMode}('prevu')">AVEC LES CHANTIERS</button></span></div>
+        <div class="pf-profil"><div class="pf-band"><div class="pf-grp f">VUE D'ENSEMBLE</div><div class="pf-bdr">${bandeau}</div></div>
+        <div class="pf-pg">${nul ? '<div style="color:#8b97a0;font-size:.85em;margin-bottom:8px;">Aucun type d\'installation reconnu pour l\'instant : le profil se remplit quand la liste des marchandises d\'un chantier est relevée.</div>' : ''}${groupes}<div class="pf-grp">ÉCONOMIES</div><div class="pf-tags">${eco}</div></div>
+        <div class="pf-pd"><div class="pf-grp f">EFFET DE CHAQUE INSTALLATION</div><div class="pf-cartes">${cartes}</div></div></div>
+        <div class="pf-fiab"><span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> de type incertain (fourchette hachurée)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille</span>${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}</div>
+        <div class="pf-pied">Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations que le plugin a vues sont comptées ; celles qui existaient déjà ne le sont pas. Le bonus du premier site (+1 développement, +1 population, +1 population max) a été observé une seule fois et reste à confirmer.</div></div>`;
+  };
+})();

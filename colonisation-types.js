@@ -64,8 +64,8 @@
     const classes = TYPES.map(t => ({ t, d: ecart(v, t.r) })).sort((a, b) => a.d - b.d);
     if (classes[0].d > 0.10) return null;
     const proches = classes.filter(c => c.d <= classes[0].d + 0.02);
-    if (proches.length === 1) return { libelle: proches[0].t.n, famille: proches[0].t.f, precis: proches[0].t.n.indexOf(' / ') < 0 };
+    if (proches.length === 1) return { libelle: proches[0].t.n, famille: proches[0].t.f, precis: proches[0].t.n.indexOf(' / ') < 0, noms: [proches[0].t.n], premier: !!proches[0].t.p };
     const fam = proches[0].t.f;
-    return proches.every(c => c.t.f === fam) ? { libelle: fam, famille: fam, precis: false } : null;
+    return proches.every(c => c.t.f === fam) ? { libelle: fam, famille: fam, precis: false, noms: proches.map(c => c.t.n), premier: proches.every(c => c.t.p) } : null;
   };
 })();

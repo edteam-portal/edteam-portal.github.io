@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-profil-systeme', date: '2026-10-14T20:02:03Z', type: 'NOUVEAU',
+        titre: 'Colonisation : le profil de chaque système',
+        texte: 'La fenêtre d’un système colonisé affiche maintenant son profil : développement, technologie, sécurité, richesse, niveau de vie, population et points de construction, additionnés d’après les installations, avec un pictogramme et les effets de chacune. Le sélecteur « Avec les chantiers » montre ce que donneraient les constructions en cours. Le type d’une installation se déduit de sa recette, du type de station du jeu et de son économie à l’amarrage ; quand il reste incertain, l’effet est donné en fourchette. Ce sont des estimations d’après la feuille communautaire de CMDR DaftMav. Il faut le plugin SYS.EDTEAM 2.27 (version mobile à venir).',
+        important: false
+    },
+    {
         id: '2026-10-equipage-pilote', date: '2026-10-14T18:37:20Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : votre co-pilote et votre chasseur dans l’hologramme',
         texte: 'Dans l’hologramme de votre vaisseau, vous apparaissez maintenant dans le cockpit avec votre nom de commandant, et votre co-pilote PNJ est dessiné à côté de vous avec son nom et son rang (Competent, Expert…). S’il part en chasseur, une petite icône sort du vaisseau ; s’il est mis en inactif dans le salon d’équipage, il disparaît de l’hologramme. Il faut le plugin SYS.EDTEAM 2.25 : au lancement du jeu, le rang est retrouvé dans vos anciens journaux.',
