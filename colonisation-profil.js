@@ -3,7 +3,7 @@
 // avec les effets par type de colonisation-effets.js (feuille communautaire DaftMav : ESTIMATIONS) et les pictogrammes de colonisation-visuels.js.
 // Depend de : window.EDTEAM_EFFETS, window.EDTEAM_ICONE, window.typeDepuisRecette. Aucune lecture de la base.
 (function () {
-  const ORDRE = [['NIVEAUX DU SYSTÈME', ['dev', 'tec', 'sec', 'ric', 'niv']], ['POPULATION', ['pi', 'pm']], ['POINTS DE CONSTRUCTION', ['t2', 't3']]];
+  const ORDRE = [['NIVEAUX DU SYSTÈME', ['dev', 'tec', 'sec', 'ric', 'niv']], ['POPULATION', ['pi', 'pm']]];
   const ICO = { dev: ['⚙', '#FFB44D'], tec: ['⌬', '#00F0FF'], sec: ['⛨', '#7fb0ff'], ric: ['◈', '#FFD700'], niv: ['♥', '#FF8fb0'], pi: ['☺', '#3DDC97'], pm: ['⌂', '#3DDC97'], t2: ['2', '#b8a0ff'], t3: ['3', '#b8a0ff'] };
   const COURT = { dev: 'Dév.', tec: 'Tech.', sec: 'Séc.', ric: 'Rich.', niv: 'Vie', pi: 'Pop.', pm: 'Pop. max', t2: 'T2', t3: 'T3' };
   const AIDE = { dev: 'Niveau de développement', tec: 'Niveau de technologie', sec: 'Niveau de sécurité', ric: 'Niveau de richesse', niv: 'Niveau de vie', pi: 'Augmentation initiale de la population', pm: 'Augmentation maximale de la population', t2: 'Points de construction T2', t3: 'Points de construction T3' };
@@ -48,7 +48,7 @@
       const FAMILLES = { Outpost: ['Avant-poste orbital', ['Commercial', 'Industrial', 'Criminal', 'Civilian', 'Scientific', 'Military']], CraterOutpost: ['Port planétaire', ['Outpost Civilian', 'Outpost Industrial', 'Outpost Scientific']] };
       if (!t && etat === 'fin' && FAMILLES[c.type]) t = { libelle: FAMILLES[c.type][0], famille: FAMILLES[c.type][0], precis: false, noms: FAMILLES[c.type][1], premier: false };
       if (etat === 'fin' && PORTS[c.type]) t = { libelle: PORTS[c.type], famille: 'Port orbital', precis: true, noms: [PORTS[c.type]], premier: !!(t && t.premier) };
-      return { nom: /ColonisationShip/i.test(String(c.station || "")) ? "Premier site (navire de colonisation)" : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', etat, pct: etat === 'cha' ? o.pct(c) : 100,
+      return { nom: /ColonisationShip/i.test(String(c.station || "")) ? "Premier site (navire de colonisation)" : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', ecoPart: (c.economies && c.economies[0] && Number(c.economies[0][1])) || 0, ecoSecond: (c.economies && c.economies[1] && Number(c.economies[1][1])) || 0, etat, pct: etat === 'cha' ? o.pct(c) : 100,
         lib: t ? (t.precis ? t.libelle : t.famille).toUpperCase() : 'TYPE NON RELEVÉ' };
     };
     const tout = (s.finies || []).map(c => inst(c, 'fin')).concat((s.chantiers || []).map(c => inst(c, 'cha')));
@@ -71,7 +71,8 @@
     const cartes = tout.map(i => {
       const c = cand(i); let pil = '';
       if (!c.length) pil = `<span class="u">${i.noms.length ? 'pas dans la feuille' : 'type non relevé'}</span>`;
-      else E.CLES.forEach(k => { const v = c.map(r => r[k] + (i.premier ? (E.BONUS_PREMIER[k] || 0) : 0)), a = Math.min(...v), b = Math.max(...v); if (a || b) pil += `<span class="${(a + b) >= 0 ? 'p' : 'm'}">${COURT[k]} ${a === b ? f(a) : f(a) + '…' + f(b)}</span>`; });
+      else if (c.length > 1) pil = '<span class="u">type incertain : effets non comptés</span>';
+      else E.CLES.filter(k => k !== 't2' && k !== 't3').forEach(k => { const v = c.map(r => r[k] + (i.premier ? (E.BONUS_PREMIER[k] || 0) : 0)), a = Math.min(...v), b = Math.max(...v); if (a || b) pil += `<span class="${(a + b) >= 0 ? 'p' : 'm'}">${COURT[k]} ${a === b ? f(a) : f(a) + '…' + f(b)}</span>`; });
       const st = i.etat === 'fin' ? '<span style="color:#00FF66">✔ TERMINÉE</span>' : `<span style="color:#FF7100">EN CONSTRUCTION · ${i.pct} %</span>`;
       const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Plusieurs types possibles pour cette recette : les effets sont donnés en fourchette.">≈</span>' : '';
       const ind = affine(i) ? ` <span style="color:#7fe9ff;border-bottom:1px dotted #7fe9ff;cursor:help;font-size:.8em" title="Type affiné d'après l'économie de la station relevée à l'amarrage (indice : les liens de marché du système peuvent la modifier).">éco.</span>` : '';
@@ -85,7 +86,7 @@
         <div class="pf-profil"><div class="pf-band"><div class="pf-grp f">VUE D'ENSEMBLE</div><div class="pf-bdr">${bandeau}</div></div>
         <div class="pf-pg">${nul ? '<div style="color:#8b97a0;font-size:.85em;margin-bottom:8px;">Aucun type d\'installation reconnu pour l\'instant : le profil se remplit quand la liste des marchandises d\'un chantier est relevée.</div>' : ''}${groupes}<div class="pf-grp">ÉCONOMIES</div><div class="pf-tags">${eco}</div></div>
         <div class="pf-pd"><div class="pf-grp f">EFFET DE CHAQUE INSTALLATION</div><div class="pf-cartes">${cartes}</div></div></div>
-        <div class="pf-fiab"><span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> de type incertain (fourchette hachurée)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille</span>${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}</div>
-        <div class="pf-pied">Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations que le plugin a vues sont comptées ; celles qui existaient déjà ne le sont pas. Le bonus du premier site (+1 développement, +1 population, +1 population max) a été observé une seule fois et reste à confirmer.</div></div>`;
+        <div class="pf-fiab"><span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> de type incertain (non comptées)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille (non comptées)</span>${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}</div>
+        <div class="pf-pied">Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations dont le <b>type est sûr</b> sont additionnées : une installation de type incertain n'ajoute rien (on ne devine pas). Seules les installations vues par le plugin sont comptées ; celles qui existaient déjà ne le sont pas. Les points de construction ne sont pas affichés : leur coût dépend de ce qui a été construit avant. Le premier site (port principal) peut recevoir des effets calculés différemment par le jeu.</div></div>`;
   };
 })();

@@ -58,12 +58,18 @@
     ["Hub de surface","Refinery",-1,1,-1,3,5,-2,7,"","Refinery",0,0],
     ["Hub de surface","High Tech",-1,1,-2,10,-2,0,0,"Hightech","Hightech",0,0],
     ["Hub de surface","Industrial",-1,1,0,3,5,-4,2,"Industrial","Industrial",0,0]];
+  // AFFINAGE PAR L'ECONOMIE : DESACTIVE (14/10). L'economie d'une station est un melange influence par les installations voisines (ex. : un port planetaire a 4,2 d'agriculture
+  // dans un systeme de 14 colonies agricoles) : elle peut donner un FAUX type. A reactiver (true) quand les seuils auront ete mesures sur des stations dont le vrai type est connu :
+  //   SEUIL_PART_MAX = proportion dominante maximale acceptee ; SEUIL_RATIO = rapport minimal entre la 1re et la 2e economie.
+  const AFFINER_PAR_ECONOMIE = false, SEUIL_PART_MAX = 1.2, SEUIL_RATIO = 1.25;
   const ECO_JEU = { Industrial: 'Industrial', HighTech: 'Hightech', Military: 'Military', Colony: 'Colony', Agri: 'Agricultural', Extraction: 'Extraction', Refinery: 'Refinery', Tourism: 'Tourism' };
   const CLES = ['t2', 't3', 'sec', 'tec', 'ric', 'niv', 'dev', 'pi', 'pm'];
   const LIBELLES = { dev: 'Développement', tec: 'Technologie', sec: 'Sécurité', ric: 'Richesse', niv: 'Niveau de vie', pi: 'Population initiale', pm: 'Population max', t2: 'Points T2', t3: 'Points T3' };
   const ROWS = LIGNES.map(r => ({ f: r[0], n: r[1], t2: r[2], t3: r[3], sec: r[4], tec: r[5], ric: r[6], niv: r[7], dev: r[8], eco: r[9], inf: r[10], pi: r[11], pm: r[12] }));
   // Bonus du PREMIER site (revendication du systeme) : observe une seule fois (avant-poste industriel : +1 dev., +1 pop., +1 pop. max). A CONFIRMER.
-  const BONUS_PREMIER = { dev: 1, pi: 1, pm: 1 };
+  // (14/10) NEUTRALISE : deux ports principaux releves en jeu donnent des ecarts differents (Vess Platform : +1 dev., +1 pop., +1 pop. max ; Tshang City : +1 pop., +1 pop. max, +1 niveau de vie) ;
+  // la regle n'est pas comprise, donc elle n'est pas appliquee. Les effets du port principal sont donc comptes comme ceux d'une installation ordinaire.
+  const BONUS_PREMIER = {};
   // installation = { noms : [noms de type possibles], famille, premier } -> lignes candidates de la table (une seule = type sur ; plusieurs = incertain ; aucune = inconnu, ex. Dodecahedron)
   function candidats(inst) {
     const noms = [].concat(inst.noms || []).map(x => String(x).split(' / ')).reduce((a, b) => a.concat(b), []);
@@ -71,7 +77,8 @@
     // INDICE : l'economie observee de la station (journal, a l'amarrage) departage des types a recette identique. Ce n'est pas une certitude (les liens de marche
     // du systeme modifient l'economie) : si aucun candidat ne correspond, on garde tous les candidats.
     const eco = ECO_JEU[inst.eco];
-    if (c.length > 1 && eco) { const f = c.filter(r => r.eco === eco); if (f.length) return f; }
+    const fiable = AFFINER_PAR_ECONOMIE && (inst.ecoPart || 0) > 0 && inst.ecoPart <= SEUIL_PART_MAX && (!inst.ecoSecond || inst.ecoPart / inst.ecoSecond >= SEUIL_RATIO);
+    if (c.length > 1 && eco && fiable) { const f = c.filter(r => r.eco === eco); if (f.length) return f; }
     return c;
   }
   // Profil d'un systeme : pour chaque indicateur, le total sur (min, max) ; max = min quand tous les types sont surs.
@@ -81,13 +88,12 @@
     installations.forEach(inst => {
       const c = candidats(inst);
       if (!c.length) { inconnus++; lignes.push({ inst, c, etat: 'inconnu' }); return; }
-      c.length === 1 ? surs++ : incertains++;
-      CLES.forEach(k => {
-        const v = c.map(r => r[k] + (inst.premier ? (BONUS_PREMIER[k] || 0) : 0));
-        P[k].min += Math.min.apply(null, v); P[k].max += Math.max.apply(null, v);
-      });
-      if (c.length === 1 && c[0].eco) eco[c[0].eco] = (eco[c[0].eco] || 0) + 1;
-      lignes.push({ inst, c, etat: c.length === 1 ? 'sur' : 'incertain' });
+      // REGLE (14/10) : on ne deduit jamais ce qui n'est pas sur. Une installation de type incertain est signalee mais n'ajoute RIEN aux totaux (pas de fourchette).
+      if (c.length > 1) { incertains++; lignes.push({ inst, c, etat: 'incertain' }); return; }
+      surs++;
+      CLES.forEach(k => { const v = c[0][k] + (inst.premier ? (BONUS_PREMIER[k] || 0) : 0); P[k].min += v; P[k].max += v; });
+      if (c[0].eco) eco[c[0].eco] = (eco[c[0].eco] || 0) + 1;
+      lignes.push({ inst, c, etat: 'sur' });
     });
     return { indic: P, lignes, surs, incertains, inconnus, eco };
   }
