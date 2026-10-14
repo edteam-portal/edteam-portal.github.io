@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-hologramme-unifie-ambiances', date: '2026-10-14T18:20:00Z', type: 'AMELIORE',
+        titre: 'Tableau de bord : un hologramme unique, des zooms et des ambiances sonores',
+        texte: 'L’hologramme de votre vaisseau est maintenant le même dans Commerce, Missions et Minage, à la même taille. Un bouton « MODULES » déplie la liste des modules avec leur niveau d’ingénierie, et survoler une ligne allume le module dans la coque. À droite du vaisseau, un zoom montre la composition de vos passagers et de vos caisses (le Rhino a le sien dans Minage). Vous apparaissez dans le cockpit avec votre nom de commandant. Enfin, des ambiances sonores accompagnent la soute (ouvriers qui rangent des caisses) et les passagers (brouhaha et annonces de bord) : elles démarrent après un clic sur la page et se coupent avec le bouton « ♪ AMBIANCE » ou le haut-parleur du pied de page.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-declarer-architecte', date: '2026-10-13T22:50:00Z', type: 'NOUVEAU',
         titre: 'Colonisation : se déclarer architecte d’un système',
         texte: 'Le jeu n’a pas toujours enregistré la revendication d’un système dans le journal : l’architecte restait alors « inconnu » et le système n’apparaissait pas à votre nom. Dans la fenêtre d’un système de la page Colonisation (PC et mobile), le bouton « Je suis l’architecte » vous permet de vous déclarer. Il n’existe que pour un système de votre escadron (ou de votre espace personnel) qui n’a pas encore d’architecte, il ne remplace jamais une revendication relevée par le jeu, et le bouton « Retirer » annule votre déclaration.',

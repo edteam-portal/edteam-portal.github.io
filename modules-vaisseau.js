@@ -1,6 +1,7 @@
 // =====================================================================================================
 //  HOLOGRAMME DES MODULES DU VAISSEAU (tableau de bord, onglet Missions) — plugin 2.18 (S.vaisseau.mods)
-//  Coque au centre ; modules primordiaux (a droite), points d'emport et utilitaires (a gauche) : une ligne avec traits (niveau d'ingenierie G1-G5 ou STOCK) ;
+//  Meme rendu compact partout (Missions, Commerce, Minage) : coque seule ; la liste des modules (niveau d'ingenierie G1-G5 ou STOCK, plan, ingenieur) se deplie avec le bouton MODULES
+//  et le survol d'une ligne allume le module dans la coque (anneau pour les modules hors compartiments) ;
 //  modules OPTIONNELS = compartiments dans la coque, proportionnels a la taille de l'emplacement (rendu « scanner infrarouge », decoupes par la coque),
 //  types regroupes (divers au nez, cabines, racks de soute a l'arriere), petits modules par paires sur les flancs ; passagers qui se baladent dans les cabines,
 //  caisses dans les racks ; infobulle (detail + ingenierie) au survol d'un compartiment. Noms de modules en anglais (donnees Coriolis : modules-data.js).
@@ -87,6 +88,152 @@
         document.addEventListener("mousemove", e => { const t = tip(); if (t.style.display === "block") { t.style.left = Math.min(e.clientX + 16, innerWidth - 350) + "px"; t.style.top = Math.min(e.clientY + 16, innerHeight - 60) + "px"; } });
     }
 
+    // bouton MODULES (replie / deplie, memorise) et survol : une ligne de la liste (ou un compartiment) allume le module correspondant
+    if (!window.__tbmLgInit) {
+        window.__tbmLgInit = true;
+        document.addEventListener("click", e => {
+            const b = e.target.closest && e.target.closest("[data-tbmlg]"); if (!b) return;
+            const bloc = b.closest(".tbm-bloc"), lg = bloc && bloc.querySelector(".tbm-lg"); if (!lg) return;
+            const ouvre = lg.hidden; lg.hidden = !ouvre; b.classList.toggle("on", ouvre); b.textContent = "MODULES " + (ouvre ? "▴" : "▾");
+            try { localStorage.setItem("tbm_liste", ouvre ? "1" : "0"); } catch (x) {}
+        });
+        let cur = null;
+        const eteint = () => { if (cur) { cur.bloc.querySelectorAll(".tbm-on").forEach(el => el.classList.remove("tbm-on")); cur = null; } };
+        document.addEventListener("mouseover", e => {
+            const h = e.target.closest && e.target.closest(".tbm-r, .tbm-hit"), bloc = h && h.closest(".tbm-bloc"), s = h && h.dataset.s;
+            if (!bloc || !s) { eteint(); return; }
+            if (cur && cur.bloc === bloc && cur.s === s) return;
+            eteint(); cur = { bloc, s };
+            bloc.querySelectorAll("[data-s]").forEach(el => { if (el.dataset.s === s) el.classList.add("tbm-on"); });
+        });
+    }
+
+    // ---- AMBIANCE SONORE : ouvriers d'un depot quand il y a des caisses, brouhaha et rires de cabine quand il y a des passagers
+    // Tout est synthetise (WebAudio) : aucun fichier, aucune requete. Passe par la sortie generale (son.js) : le haut-parleur du pied de page la coupe aussi.
+    // Ne demarre qu'apres un clic sur la page (regle des navigateurs), s'arrete si l'onglet est cache ou si l'hologramme n'est plus affiche.
+    const AMB = window.__tbmAmb = window.__tbmAmb || { ctx: null, c: false, p: 0, geste: false, timer: null, out: null };
+    const ambActive = () => { try { return localStorage.getItem("tbm_ambiance") !== "0"; } catch (e) { return true; } };
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    function ambEnv(g, t, a, d, pk) { g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(pk, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
+    function ambBruit() { const c = AMB.ctx; if (!AMB.buf) { const b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; AMB.buf = b; } const n = c.createBufferSource(); n.buffer = AMB.buf; n.loop = true; return n; }
+    function ambPan(c, dest) { const g = c.createGain(); let nd = g; if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = rnd(-0.8, 0.8); g.connect(p); nd = p; } nd.connect(dest); return g; }
+    function ambClang() { const c = AMB.ctx, t = c.currentTime + 0.02, f0 = rnd(380, 1300), g = ambPan(c, AMB.out); ambEnv(g, t, 0.003, rnd(0.25, 0.7), rnd(0.03, 0.07)); [1, 2.76, 5.4, 8.9].forEach((m, i) => { const o = c.createOscillator(), gi = c.createGain(); o.type = "sine"; o.frequency.value = f0 * m * (1 + rnd(-0.01, 0.01)); gi.gain.value = 1 / (i + 1); o.connect(gi); gi.connect(g); o.start(t); o.stop(t + 1); }); }
+    function ambCoup() { const c = AMB.ctx, t = c.currentTime + 0.02, g = ambPan(c, AMB.out), n = ambBruit(), lp = c.createBiquadFilter(), o = c.createOscillator(); lp.type = "lowpass"; lp.frequency.value = rnd(200, 600); ambEnv(g, t, 0.004, 0.12, rnd(0.06, 0.1)); n.connect(lp); lp.connect(g); n.start(t); n.stop(t + 0.2); o.frequency.setValueAtTime(rnd(110, 160), t); o.frequency.exponentialRampToValueAtTime(45, t + 0.15); o.connect(g); o.start(t); o.stop(t + 0.2); }
+    function ambBip() { const c = AMB.ctx, t = c.currentTime + 0.02, g = ambPan(c, AMB.out); g.gain.setValueAtTime(0.0001, t); for (let i = 0; i < 4; i++) { g.gain.setValueAtTime(0.03, t + i * 0.28); g.gain.setValueAtTime(0.0001, t + i * 0.28 + 0.14); } const o = c.createOscillator(); o.type = "square"; o.frequency.value = 1000; o.connect(g); o.start(t); o.stop(t + 1.2); }
+    const VOY = [[800, 1200], [500, 1800], [300, 2300], [500, 900], [320, 800]];
+    function ambVoix(g, t, f0, fo, dur, pk) { const c = AMB.ctx, o = c.createOscillator(), a = c.createBiquadFilter(), b = c.createBiquadFilter(), ga = c.createGain(), gb = c.createGain(); o.type = "sawtooth"; o.frequency.setValueAtTime(f0, t); o.frequency.linearRampToValueAtTime(f0 * rnd(0.88, 1.12), t + dur); a.type = b.type = "bandpass"; a.frequency.value = fo[0]; b.frequency.value = fo[1]; a.Q.value = b.Q.value = 7; ga.gain.value = 1; gb.gain.value = 0.6; o.connect(a); o.connect(b); a.connect(ga); b.connect(gb); const e = c.createGain(); ga.connect(e); gb.connect(e); ambEnv(e, t, 0.02, dur, pk); e.connect(g); o.start(t); o.stop(t + dur + 0.1); }
+    function ambPhrase() { const c = AMB.ctx, g = ambPan(c, AMB.out), f0 = Math.random() < 0.5 ? rnd(105, 145) : rnd(190, 260); let t = c.currentTime + 0.02; for (let i = 0, n = 3 + Math.floor(Math.random() * 5); i < n; i++) { const d = rnd(0.08, 0.17); ambVoix(g, t, f0 * rnd(0.9, 1.15), VOY[Math.floor(Math.random() * VOY.length)], d, rnd(0.02, 0.04)); t += d + rnd(0.03, 0.09); } }
+    function ambRire() { const c = AMB.ctx, g = ambPan(c, AMB.out), f0 = rnd(230, 330); let t = c.currentTime + 0.02; for (let i = 0, n = 4 + Math.floor(Math.random() * 4); i < n; i++) { ambVoix(g, t, f0 * (1 - i * 0.04), VOY[0], 0.09, 0.05 * (1 - i * 0.1)); t += 0.14 + rnd(0, 0.03); } }
+    // vraies ambiances enregistrees (fichiers du dossier sons/, lus en BOUCLE sans coupure) ; a defaut de fichier, repli sur la synthese ci-dessus
+    const AMB_FICHIERS = { depot: "sons/ambiance-depot", cabine: "sons/ambiance-cabine", combat: "sons/ambiance-combat" };
+    const AMB_NIVEAU = { depot: 0.45, cabine: 0.7, combat: 0.8, annonce: 0.5 };
+    // dosage quand plusieurs ambiances jouent : les passagers passent devant, les caisses restent en fond
+    const ambNiv = k => AMB_NIVEAU[k] * (k === "depot" && AMB.p > 0 ? 0.45 : k === "cabine" && AMB.c ? 1.15 : 1);
+    const AMB_COUPE = { cabine: 300 };   // filtre passe-haut (Hz) : retire le grondement de fond (moteur) des enregistrements de cabine
+    function ambCharge(k) {
+        const L = AMB.fich = AMB.fich || {}; if (k in L) return;
+        L[k] = null;   // chargement en cours
+        const essai = ext => fetch(AMB_FICHIERS[k] + "." + ext).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); });
+        essai("ogg").catch(() => essai("mp3")).then(ab => new Promise((ok, ko) => AMB.ctx.decodeAudioData(ab, ok, ko))).then(buf => { L[k] = buf; ambSync(); }).catch(() => { L[k] = false; });
+    }
+    // annonces de la cabine (sons/annonce-1 ... annonce-6, voix de synthese claires) : une au hasard toutes les 50 a 110 s par-dessus la boucle
+    function ambChargeAnnonces() {
+        if (AMB.ann) return; AMB.ann = [];
+        for (let i = 1; i <= 6; i++) {
+            const essai = ext => fetch("sons/annonce-" + i + "." + ext).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); });
+            essai("ogg").catch(() => essai("mp3")).then(ab => new Promise((ok, ko) => AMB.ctx.decodeAudioData(ab, ok, ko))).then(b => { AMB.ann.push(b); }).catch(() => {});
+        }
+    }
+    function ambAnnonce() {
+        if (!AMB.ann || !AMB.ann.length || AMB.p <= 0 || AMB.k) return;
+        const maintenant = Date.now(); if (!AMB.annT) AMB.annT = maintenant + rnd(12, 25) * 1000;
+        if (maintenant < AMB.annT) return;
+        const c = AMB.ctx, b = AMB.ann[Math.floor(Math.random() * AMB.ann.length)], src = c.createBufferSource(), g = c.createGain();
+        src.buffer = b; g.gain.value = AMB_NIVEAU.annonce;
+        // effet « interphone de vaisseau » : bande telephonique, legere saturation, souffle de fond, claquements de debut et de fin
+        const hp = c.createBiquadFilter(), lp = c.createBiquadFilter(), ws = c.createWaveShaper(), cv = new Float32Array(257); hp.type = "highpass"; hp.frequency.value = 380; lp.type = "lowpass"; lp.frequency.value = 3300; hp.Q.value = 0.9;
+        for (let i = 0; i < 257; i++) { const x = i / 128 - 1; cv[i] = Math.tanh(x * 2.2) / Math.tanh(2.2); } ws.curve = cv;
+        // un peu de salle (reverbe) et un son plus lointain : l'annonce vient du plafond, elle ne parle pas dans la tete
+        if (!AMB.ir) { const n = Math.floor(c.sampleRate * 1.4), ir = c.createBuffer(2, n, c.sampleRate); for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); } AMB.ir = ir; }
+        const cv2 = c.createConvolver(), sec = c.createGain(), hum = c.createGain(); cv2.buffer = AMB.ir; sec.gain.value = 0.7; hum.gain.value = 0.55;
+        lp.frequency.value = 2900;
+        src.connect(hp); hp.connect(ws); ws.connect(lp); lp.connect(sec); sec.connect(g); lp.connect(cv2); cv2.connect(hum); hum.connect(g); g.connect(AMB.out);
+        const t0 = c.currentTime + 0.12, d = b.duration;
+        const bruit = (t, dur, f, pk) => { const n = ambBruit(), bp = c.createBiquadFilter(), e = c.createGain(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = 0.8; n.connect(bp); bp.connect(e); e.connect(AMB.out); e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(pk, t + 0.008); e.gain.setValueAtTime(pk, t + Math.max(dur - 0.02, 0.01)); e.gain.exponentialRampToValueAtTime(0.0001, t + dur); n.start(t); n.stop(t + dur + 0.05); };
+        bruit(t0 - 0.1, 0.07, 2200, 0.04);               // clic d'ouverture du micro
+        bruit(t0 - 0.03, d + 0.1, 3800, 0.008);          // souffle de la ligne pendant l'annonce
+        bruit(t0 + d + 0.05, 0.09, 1800, 0.035);          // clic de fermeture
+        src.start(t0);
+        AMB.annT = maintenant + b.duration * 1000 + rnd(50, 110) * 1000;
+    }
+    // une boucle par ambiance : demarre quand il y a des caisses / des passagers, fondu a l'arret
+    function ambBoucle(k, veut) {
+        const B = AMB.bou = AMB.bou || {}, c = AMB.ctx, buf = AMB.fich && AMB.fich[k];
+        if (!buf) return false;
+        let l = B[k];
+        if (veut && !l) { const src = c.createBufferSource(), g = c.createGain(); src.buffer = buf; src.loop = true; g.gain.value = 0; if (AMB_COUPE[k]) { const hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = AMB_COUPE[k]; src.connect(hp); hp.connect(g); } else src.connect(g); g.connect(AMB.out); src.start(0, Math.random() * buf.duration); l = B[k] = { src, g }; }
+        if (l) {
+            l.g.gain.setTargetAtTime(veut ? ambNiv(k) : 0, c.currentTime, 0.8);
+            clearTimeout(l.arret);
+            if (!veut) l.arret = setTimeout(() => { if (B[k] === l) { try { l.src.stop(); } catch (e) {} delete B[k]; } }, 4000);
+        }
+        return true;
+    }
+    function ambLit() { try { return AMB.geste && ambActive() && !document.hidden && document.querySelector(".tbm-bloc") && (AMB.c || AMB.p > 0 || AMB.k); } catch (e) { return false; } }
+    function ambStop() {
+        if (AMB.timer) { clearInterval(AMB.timer); AMB.timer = null; }
+        if (AMB.ctx) { const t = AMB.ctx.currentTime; if (AMB.hum) { AMB.hum.gain.setTargetAtTime(0, t, 0.2); AMB.mur.gain.setTargetAtTime(0, t, 0.2); } ambBoucle("depot", false); ambBoucle("cabine", false); ambBoucle("combat", false); }
+    }
+    function ambTick() {
+        if (!ambLit()) { ambStop(); return; }
+        const t = AMB.ctx.currentTime, k = !!AMB.k, rD = ambBoucle("depot", !!AMB.c && !k), rC = ambBoucle("cabine", AMB.p > 0 && !k), rK = ambBoucle("combat", k);
+        if (rD || k) AMB.hum.gain.setTargetAtTime(0, t, 0.3); else AMB.hum.gain.setTargetAtTime(AMB.c ? 0.012 : 0, t, 0.3);
+        if (rC || k) AMB.mur.gain.setTargetAtTime(0, t, 0.3); else AMB.mur.gain.setTargetAtTime(AMB.p > 0 ? rnd(0.006, 0.014) * Math.min(2, 0.6 + Math.sqrt(AMB.p) / 4) : 0, t, 0.35);
+        ambAnnonce();
+        if (AMB.c && !rD && !k) { if (Math.random() < 0.35) ambClang(); if (Math.random() < 0.35) ambCoup(); if (Math.random() < 0.04) ambBip(); }
+        if (AMB.p > 0 && !rC && !k) { if (Math.random() < Math.min(0.55, 0.12 + 0.035 * Math.sqrt(AMB.p))) ambPhrase(); if (Math.random() < 0.03 + 0.004 * Math.min(AMB.p, 20)) ambRire(); }
+    }
+    function ambSync() {
+        if (!ambLit()) { ambStop(); return; }
+        if (!AMB.ctx) { try { AMB.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; } }
+        const c = AMB.ctx; if (c.state === "suspended") c.resume();
+        if (!AMB.out) {
+            AMB.out = c.createGain(); AMB.out.gain.value = 0.8; AMB.out.connect(c.destination);
+            const h = c.createOscillator(), hl = c.createBiquadFilter(); AMB.hum = c.createGain(); AMB.hum.gain.value = 0; h.type = "sawtooth"; h.frequency.value = 52; hl.type = "lowpass"; hl.frequency.value = 170; h.connect(hl); hl.connect(AMB.hum); AMB.hum.connect(AMB.out); h.start();
+            const n = ambBruit(), bp = c.createBiquadFilter(); AMB.mur = c.createGain(); AMB.mur.gain.value = 0; bp.type = "bandpass"; bp.frequency.value = 600; bp.Q.value = 0.7; n.connect(bp); bp.connect(AMB.mur); AMB.mur.connect(AMB.out); n.start();
+        }
+        if (AMB.k) ambCharge("combat"); else { if (AMB.c) ambCharge("depot"); if (AMB.p > 0) { ambCharge("cabine"); ambChargeAnnonces(); } }
+        if (!AMB.timer) { AMB.timer = setInterval(ambTick, 450); ambTick(); }
+    }
+    function ambMaj(caisses, passagers, combat) { AMB.c = !!caisses; AMB.p = passagers || 0; AMB.k = !!combat; ambSync(); }
+    if (!window.__tbmAmbInit) {
+        window.__tbmAmbInit = true;
+        const geste = () => { AMB.geste = true; ambSync(); };
+        document.addEventListener("pointerdown", geste, { once: true }); document.addEventListener("keydown", geste, { once: true });
+        document.addEventListener("visibilitychange", ambSync);
+        document.addEventListener("click", e => {
+            const b = e.target.closest && e.target.closest("[data-tbmamb]"); if (!b) return;
+            const on = !ambActive(); try { localStorage.setItem("tbm_ambiance", on ? "1" : "0"); } catch (x) {}
+            document.querySelectorAll("[data-tbmamb]").forEach(x => { x.classList.toggle("on", on); x.textContent = "♪ AMBIANCE " + (on ? "ON" : "OFF"); });
+            AMB.geste = true; ambSync();
+        });
+    }
+
+    // ---- ajustement de la largeur de la vue : si la scene est plus large que la vue (limitee en hauteur), la vue s'elargit et le panneau de zoom prend la place libre
+    window.__tbmAjuste = function () {
+        const d = window.__tbmDerniers; if (!d || !d.zoomOn) return;
+        const svg = document.querySelector(".tbm-bloc svg.tbm-zoomable"), sc = svg && svg.parentNode; if (!svg) return;
+        const cw = sc.clientWidth, hp = svg.getBoundingClientRect().height, h0 = +svg.dataset.h, w0 = +svg.dataset.w; if (!cw || !hp || !h0) return;
+        const need = Math.min(1800, Math.round(cw * h0 / hp));
+        if (need <= w0 + 24 || w0 >= d.cap - 2) return;
+        (window.__tbmVwK = window.__tbmVwK || {})[d.opts.titre || ""] = need;
+        svg.outerHTML = window.modulesHtml(d.act, Object.assign({}, d.opts, { vw: need, _svgSeul: true }));
+    };
+    if (!window.__tbmResizeInit) {
+        window.__tbmResizeInit = true; let tm;
+        window.addEventListener("resize", () => { clearTimeout(tm); tm = setTimeout(() => { const d = window.__tbmDerniers, svg = document.querySelector(".tbm-bloc svg.tbm-zoomable"); if (!d || !d.zoomOn || !svg) return; window.__tbmVwK = {}; svg.outerHTML = window.modulesHtml(d.act, Object.assign({}, d.opts, { vw: 0, _svgSeul: true })); setTimeout(window.__tbmAjuste, 80); }, 250); });
+    }
+
     // ---- zoom (molette, boutons, glisser) : on modifie le viewBox du SVG ; l'etat survit aux rafraichissements (la zone est recreee a chaque affichage)
     const Z = window.__tbmZoom = window.__tbmZoom || { k: 1, cx: 468, cy: null };
     function vue(svg) {
@@ -144,15 +291,16 @@
         // ---- geometrie (repere « affichage » : nez en haut ; l'image enregistree est tournee de 180 degres, comme la soute)
         const W = sil.W, H = sil.H, AXE = W - sil.axe, zm = sil.zmod || [sil.arriere, sil.nez], YTOP = H - zm[1], YBOT = H - zm[0], Ltot = YBOT - YTOP;
         const demi = yd => { const ys = H - yd; for (let i = 0; i < sil.coque.length - 1; i++) { const a = sil.coque[i], b = sil.coque[i + 1], lo = Math.min(a[1], b[1]), hi = Math.max(a[1], b[1]); if (ys >= lo && ys <= hi && hi > lo) return (a[0] + (b[0] - a[0]) * (ys - a[1]) / (b[1] - a[1])) * 0.9; } return 0; };
-        const sans = opts.etiquettes === false, VWd = sans ? 600 : 936, BW = sans ? 0 : W > 400 ? 190 : 226, SC = Math.min((VWd - 2 * BW - 24) / W, sans ? 1.5 : 780 / H, sans ? 1.35 : 1.25), HX = VWd / 2 - AXE * SC, HY = 24, P = a => [+(HX + a[0] * SC).toFixed(1), +(HY + a[1] * SC).toFixed(1)];
+        const SHW = 600, zoomOn = !opts.sansZoom && (nPax > 0 || items.length > 0 || attente.length > 0), SC = Math.min((SHW - 24) / W, 1.35), hb = (() => { let a = 1e9, b = -1e9; sil.formes.forEach(d => (String(d).match(/-?\d+(\.\d+)?/g) || []).forEach((v, i) => { if (i % 2 === 0) { a = Math.min(a, +v); b = Math.max(b, +v); } })); return a < b ? [a, b] : [0, W]; })(), hullW = Math.round((hb[1] - hb[0]) * SC), GAP = 84, vwReq = opts.vw || (window.__tbmVwK || {})[opts.titre || ""] || 0, VWd = zoomOn ? Math.min(2400, Math.max(SHW, hullW + GAP + 440 + 50, vwReq)) : SHW, PWd = Math.min(620, VWd - hullW - GAP - 50), off = Math.round((VWd - hullW - GAP - PWd) / 2), PX = off + hullW + GAP, HX = zoomOn ? off - (W - hb[1]) * SC : SHW / 2 - AXE * SC, HY = 24, P = a => [+(HX + a[0] * SC).toFixed(1), +(HY + a[1] * SC).toFixed(1)];
         const fsL = +(10 / SC).toFixed(1), cw = fsL * 0.6, fsT = +(8.6 / SC).toFixed(1);
         const court = (t, w) => { const cap = Math.floor(w / cw); if (t.length <= cap) return t; return t.slice(0, Math.max(3, cap - 1)) + "…"; };
-        let bandes = "", gens = "", hits = "", trous = "", dets = [], caisses = ""; const celRack = [];
+        let bandes = "", gens = "", hits = "", dets = [], caisses = ""; const cabB = { x1: -1e9, y0: 1e9, y1: -1e9 }, rackB = { x1: -1e9, y0: 1e9, y1: -1e9 }; const celRack = [];
         // ---- un compartiment
         const bande = (m, x0, y, w, h) => {
             let nAb = 0; const cab = m.places > 0, rack = m.rack, vide = m.vide, coul = vide ? "#6b7680" : cab ? "#FF9A1F" : rack ? "#00F0FF" : "#B28DFF";
+            { const bb = vide ? null : m.places > 0 ? cabB : m.rack ? rackB : null; if (bb) { bb.x1 = Math.max(bb.x1, x0 + w); bb.y0 = Math.min(bb.y0, y); bb.y1 = Math.max(bb.y1, y + h); } }
             const lab = vide ? (w < 56 ? "∅" : "EMPTY · size " + m.taille) : w < 56 ? (cab ? "×" + m.places : ini(m.nom)) : court(m.nom + (cab ? " · " + m.places : ""), w - 6);
-            bandes += `<rect x="${x0.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${vide ? "rgba(4,9,12,.28)" : cab ? "url(#tbmA)" : rack ? "url(#tbmC)" : "url(#tbmV)"}" filter="url(#tbmf)" stroke="${coul}" stroke-width="1.2" stroke-opacity="${vide ? 0.55 : 0.95}"${vide ? ' stroke-dasharray="4 3"' : ""}/>`
+            bandes += `<rect data-s="${m.slot}" x="${x0.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${vide ? "rgba(4,9,12,.28)" : cab ? "url(#tbmA)" : rack ? "url(#tbmC)" : "url(#tbmV)"}" filter="url(#tbmf)" stroke="${coul}" stroke-width="1.2" stroke-opacity="${vide ? 0.55 : 0.95}"${vide ? ' stroke-dasharray="4 3"' : ""}/>`
                 + `<text x="${(x0 + 4).toFixed(1)}" y="${(y + fsL * 1.05).toFixed(1)}" fill="${vide ? "#8b97a0" : cab ? "#FFB44D" : rack ? "#7fe9ff" : "#cdb6ff"}" font-size="${fsL}" stroke="#04090c" stroke-width="2.2" paint-order="stroke">${E(lab)}</text>`;
             if (window.__TBM_TEST) window.__TBM_TEST.push({ slot: m.slot, x0, y, w, h, lab, vide, cw });
             if (cab) {
@@ -166,8 +314,7 @@
             }
             if (rack) { const p = 11, cols = Math.max(1, Math.floor((w - 6) / p)), rows = Math.max(1, Math.floor((h - 13) / p)); for (let q = 0; q < cols * rows; q++) celRack.push({ x: x0 + 3 + (q % cols) * p + (w - 6 - cols * p) / 2, y: y + 12 + Math.floor(q / cols) * p, p: p - 1.5 }); }
             if (!vide) gens += `<text x="${(x0 + w - 3).toFixed(1)}" y="${(y + h - 3).toFixed(1)}" text-anchor="end" fill="${m.eng ? "#FFD54A" : "#9fb0b8"}" font-size="${fsT}" font-weight="bold" stroke="#04090c" stroke-width="2.2" paint-order="stroke">${m.eng ? "G" + m.eng.niv : "STOCK"}</text>`;
-            trous += `<rect x="${x0.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#000"/>`;
-            hits += `<rect class="tbm-hit" data-d="${dets.length}" x="${x0.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="#fff" fill-opacity="0"/>`;
+            hits += `<rect class="tbm-hit" data-s="${m.slot}" data-d="${dets.length}" x="${x0.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="#fff" fill-opacity="0"/>`;
             dets.push(detail(m, nAb, E));
         };
         // ---- lignes : types regroupes (divers au nez, cabines, racks a l'arriere), gros d'abord ; petits modules par PAIRES sur les flancs la ou la coque est large
@@ -220,43 +367,87 @@
         const armes = mods.filter(m => m.cat === "arme").sort((a, b) => b.taille - a.taille || a.slot.localeCompare(b.slot)), utils = mods.filter(m => m.cat === "util").sort((a, b) => a.slot.localeCompare(b.slot));
         const ancArme = (m, i) => { if (A.hard && A.hard[m.slot]) return A.hard[m.slot]; const y = Y(0.12 + 0.5 * i / Math.max(armes.length - 1, 1)); return [AXE + (i % 2 ? 1 : -1) * demi(y) * 0.8, y]; };
         const ancUtil = (m, i) => { if (A.tiny && A.tiny[m.slot]) return A.tiny[m.slot]; const y = Y(0.3 + 0.5 * i / Math.max(utils.length - 1, 1)); return [AXE + (i % 2 ? 1 : -1) * demi(y) * 0.6, y]; };
-        const ligne = m => m.vide ? { nom: etiqSlot(m.slot) + " · empty", badge: "", eng: false, vide: true } : { nom: m.nom, badge: m.eng ? "G" + m.eng.niv : "STOCK", eng: !!m.eng };
-        const gauche = [], droite = [];
-        armes.forEach((m, i) => gauche.push({ cote: "g", anc: P(ancArme(m, i)), coul: "#FF9A1F", L: ligne(m) }));
-        utils.forEach((m, i) => gauche.push({ cote: "g", anc: P(ancUtil(m, i)), coul: "#FFD54A", L: ligne(m) }));
-        mods.filter(m => m.cat === "core").forEach(m => droite.push({ cote: "d", anc: P(ancCore(m)), coul: "#00F0FF", L: ligne(m) }));
-        if (opts.etiquettes === false) { gauche.length = 0; droite.length = 0; }   // tableau de bord : seuls les modules optionnels (compartiments) restent affiches
-        const BH = 22;
-        const boite = (b, y, X) => {
-            const bx = b.cote === "g" ? X + BW : X, my = y + BH / 2, pv = b.cote === "g" ? b.anc[0] - 30 : b.anc[0] + 30, vd = b.L.vide;
-            return { t: `<polyline points="${b.anc[0]},${b.anc[1]} ${pv},${my} ${bx},${my}" fill="none" stroke="${b.coul}" stroke-width="1.4" stroke-opacity="${vd ? 0.45 : 0.9}"/>`,
-                d: `<circle cx="${b.anc[0]}" cy="${b.anc[1]}" r="2" fill="${vd ? "#6b7680" : "#9fb0b8"}" fill-opacity=".8"/>`,
-                c: `<rect x="${X}" y="${y}" width="${BW}" height="${BH}" fill="rgba(3,8,12,.9)" stroke="${vd ? "#6b7680" : b.coul}" stroke-opacity="${b.L.eng ? 0.95 : 0.5}"${vd ? ' stroke-dasharray="4 3"' : ""}/>`
-                    + `<text x="${X + 7}" y="${y + 15}" fill="${vd ? "#8b97a0" : "#fff"}" font-size="11">${E(solCoupeM(b.L.nom, Math.floor((BW - 38) / 5.5)))}</text><text x="${X + BW - 7}" y="${y + 15}" text-anchor="end" fill="${b.L.eng ? b.coul : "#6f808a"}" font-size="11" font-weight="bold">${b.L.badge}</text>` };
-        };
-        const solCoupeM = (t, n) => { t = String(t || ""); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
-        const empile = (Lb, X, VH) => { Lb.sort((a, b) => a.anc[1] - b.anc[1]); let fin = 6; const o = { t: "", d: "", c: "" }; Lb.forEach(b => { let y = Math.max(fin, b.anc[1] - BH / 2); y = Math.min(y, VH - BH - 6); y = Math.max(y, fin); const r = boite(b, y, X); o.t += r.t; o.d += r.d; o.c += r.c; fin = y + BH + 5; }); o.fin = fin; return o; };
-        let VH = Math.round(H * SC) + 60 + (opts.valeur ? 126 : 0); VH = Math.max(VH, empile(gauche, 6, 99999).fin + 4, empile(droite, VWd - 6 - BW, 99999).fin + 4 + (opts.mini ? 135 : 0));     // mini-carte : place reservee sous les cartes de droite
-        const GE = empile(gauche, 6, VH), DE = empile(droite, VWd - 6 - BW, VH);
+        // anneaux de survol (modules hors compartiments) : caches tant que la ligne correspondante de la liste n'est pas survolee
+        const mk = [];
+        armes.forEach((m, i) => mk.push([m.slot, P(ancArme(m, i)), "#FF9A1F"]));
+        utils.forEach((m, i) => mk.push([m.slot, P(ancUtil(m, i)), "#FFD54A"]));
+        mods.filter(m => m.cat === "core").forEach(m => mk.push([m.slot, P(ancCore(m)), "#00F0FF"]));
+        const marqueurs = mk.map(q => `<g class="tbm-mk" data-s="${q[0]}"><circle cx="${q[1][0]}" cy="${q[1][1]}" r="15" fill="${q[2]}" fill-opacity=".15" stroke="${q[2]}" stroke-width="2"/><circle cx="${q[1][0]}" cy="${q[1][1]}" r="4" fill="#fff"/></g>`).join("");
+        const VH = Math.round(H * SC) + 40 + (opts.valeur ? 126 : 0);
+        // ---- zoom a droite de la coque : composition (passagers par famille, caisses de la soute), relie aux cabines et aux racks par des pointilles
+        let zoomSvg = "";
+        if (zoomOn) {
+            const y0 = 46, y1 = VH - 14 - (opts.mini ? 130 : 0), fam = Object.keys(PAS_FAM).filter(f => nbF[f]);
+            const aSoute = items.length > 0 || attente.length > 0, avail = y1 - y0, TT = 26;
+            let hp = 0, hs = 0;
+            if (nPax && aSoute) { hp = Math.round((avail - 2 * TT - 8) * 0.42); hs = avail - 2 * TT - 8 - hp; } else if (nPax) hp = avail - TT; else hs = avail - TT;
+            const cadre = (y, h, titre) => `<text x="${PX}" y="${y - 9}" fill="#99a" font-size="12" letter-spacing="3">${E(titre)}</text><rect x="${PX}" y="${y}" width="${PWd}" height="${h}" fill="rgba(0,10,14,.7)" stroke="#00F0FF" stroke-opacity=".6"/><path d="M${PX} ${y}h22M${PX} ${y}v22M${PX + PWd} ${y + h}h-22M${PX + PWd} ${y + h}v-22" stroke="#00F0FF" stroke-width="2.5" fill="none"/>`;
+            const lien = (b, y, h) => b.x1 > -1e8 ? `<path d="M${(HX + b.x1 * SC + 3).toFixed(1)} ${(HY + b.y0 * SC).toFixed(1)}L${PX} ${y}M${(HX + b.x1 * SC + 3).toFixed(1)} ${(HY + b.y1 * SC).toFixed(1)}L${PX} ${y + h}" stroke="#00F0FF" stroke-opacity=".5" stroke-dasharray="4 5" fill="none"/>` : "";
+            let yc = y0 + TT;
+            if (nPax) {
+                zoomSvg += lien(cabB, yc, hp) + cadre(yc, hp, "PASSAGERS · " + nPax);
+                const need = e => { const cell = 24 * e, cols = Math.max(1, Math.floor((PWd - 16) / cell)); return fam.reduce((t, f) => t + 15 + Math.ceil(nbF[f] / cols) * cell + 4, 0); };
+                let e = 1.5; while (e > 0.4 && need(e) > hp - 12) e -= 0.05;
+                const cell = 24 * e, cols = Math.max(1, Math.floor((PWd - 16) / cell)); let yy = yc + 8;
+                fam.forEach(f => {
+                    const c = PAS_FAM[f].c, imp = PAS_FAM[f].imp > 0;
+                    zoomSvg += `<text x="${PX + 8}" y="${yy + 10}" fill="${c}" font-size="10.5">${E(nbF[f] + " " + PAS_FAM[f].l)}</text>`; yy += 15;
+                    for (let i = 0; i < nbF[f]; i++) {
+                        const px = PX + 8 + (i % cols) * cell + cell / 2, py = yy + Math.floor(i / cols) * cell + cell * 0.55;
+                        zoomSvg += `<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) scale(${e.toFixed(2)})" fill="${c}"><circle cx="0" cy="-8" r="3.4"/><path d="M-5.5 -3.5 Q0 -6 5.5 -3.5 L5 5 L2 5 L1.2 11 L-1.2 11 L-2 5 L-5 5 Z"/>${imp ? `<circle r="11" cy="-1" fill="${c}" fill-opacity=".25" stroke="${c}" stroke-opacity=".8"/>` : ""}</g>`;
+                    }
+                    yy += Math.ceil(nbF[f] / cols) * cell + 4;
+                });
+                yc += hp + TT + 8;
+            }
+            if (aSoute) {
+                const tAtt = attente.reduce((t, b) => t + b.q, 0), cT = Math.max(capT, tonnes + tAtt, 1), U2 = [1, 2, 5, 10, 20, 50, 100, 200].find(u => cT / u <= 200) || 200, N2 = Math.max(1, Math.ceil(cT / U2));
+                zoomSvg += lien(rackB, yc, hs) + cadre(yc, hs, "SOUTE · 1 CASE = " + U2 + " t");
+                const prop2 = []; items.forEach((x, i) => { const k = Math.max(1, Math.round((Number(x.q) || 0) / U2)); for (let j = 0; j < k && prop2.length < N2; j++) prop2.push(i); });
+                const fant2 = []; attente.forEach((b, k) => { const n = Math.max(1, Math.round(b.q / U2)); for (let j = 0; j < n; j++) fant2.push(COUL_MARCH[(items.length + k) % COUL_MARCH.length]); });
+                const iw = PWd - 16, ih = hs - 16; let best = null;
+                for (let cols = 3; cols <= 40; cols++) { const rows = Math.ceil(N2 / cols), c = Math.min(iw / cols, ih / rows); if (!best || c > best.c + 0.01) best = { cols, rows, c }; }
+                const ox = PX + 8 + (iw - best.c * best.cols) / 2, oy = yc + 8 + (ih - best.c * best.rows) / 2, c = best.c, r1 = n => n.toFixed(1);
+                for (let i = 0; i < N2; i++) {
+                    const x = ox + (i % best.cols) * c, y = oy + (best.rows - 1 - Math.floor(i / best.cols)) * c;
+                    if (i < prop2.length) {
+                        const k = prop2[i], cl = COUL_MARCH[k % COUL_MARCH.length], mis = !!items[k].m;
+                        zoomSvg += `<g class="tb-c" data-l="${k}" style="color:${cl}"><rect x="${r1(x)}" y="${r1(y)}" width="${r1(c)}" height="${r1(c)}" fill="rgba(0,0,0,0)"/><rect x="${r1(x + 1.5)}" y="${r1(y + 1.5)}" width="${r1(c - 3)}" height="${r1(c - 3)}" fill="${cl}" fill-opacity=".45" stroke="${cl}" stroke-width="1.4"${mis ? ' stroke-dasharray="4 3"' : ""}/><path d="M${r1(x + 4)} ${r1(y + c / 2)}H${r1(x + c - 4)}" stroke="${cl}" stroke-opacity=".5"/></g>`;
+                    } else if (i < prop2.length + fant2.length) {
+                        const cl = fant2[i - prop2.length];
+                        zoomSvg += `<rect x="${r1(x + 1.5)}" y="${r1(y + 1.5)}" width="${r1(c - 3)}" height="${r1(c - 3)}" fill="none" stroke="${cl}" stroke-width="1.3" stroke-dasharray="4 3"/><text x="${r1(x + c / 2)}" y="${r1(y + c / 2 + 4)}" fill="${cl}" font-size="12" font-weight="bold" text-anchor="middle">?</text>`;
+                    } else zoomSvg += `<rect x="${r1(x + 1.5)}" y="${r1(y + 1.5)}" width="${r1(c - 3)}" height="${r1(c - 3)}" fill="rgba(0,240,255,.03)" stroke="rgba(0,240,255,.25)" stroke-dasharray="3 3"/>`;
+                }
+            }
+        }
+        // ---- le commandant dans le cockpit (trait + nom) et son equipage a cote (S.equipage = [{ n, r }], envoye par le plugin)
+        const fig = (x, y, sc, c) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sc})" fill="${c}"><circle cx="0" cy="-8" r="3.4"/><path d="M-5.5 -3.5 Q0 -6 5.5 -3.5 L5 5 L2 5 L1.2 11 L-1.2 11 L-2 5 L-5 5 Z"/></g>`;
+        const pc = window.profilCommandant, nomCmdr = pc && pc.cmdr_nom ? "CMDR " + pc.cmdr_nom : "COMMANDANT", eq = (Array.isArray(S.equipage) ? S.equipage : []).slice(0, 4), pil = P(sil.cockpit || [AXE, YTOP + 0.06 * Ltot]);
+        let equipSvg = `<g class="tbm-pilote"><circle class="tbs-pouls" cx="${pil[0]}" cy="${pil[1]}" r="12" fill="#00F0FF" fill-opacity=".15" stroke="#00F0FF" stroke-opacity=".9"/>${fig(pil[0], pil[1] + 1, 0.9, "#00F0FF")}`
+            + `<path d="M${pil[0] - 13} ${pil[1]}H${pil[0] - 44}" stroke="#00F0FF" stroke-width="1.4" fill="none"/><text x="${pil[0] - 48}" y="${pil[1] + 4}" text-anchor="end" fill="#00F0FF" font-size="12" letter-spacing="1">${E(nomCmdr)}</text>`;
+        eq.forEach((m, i) => { const x = pil[0] + 24 * (i + 1); equipSvg += `<circle cx="${x}" cy="${pil[1]}" r="10" fill="#3DDC97" fill-opacity=".15" stroke="#3DDC97" stroke-opacity=".8"/>${fig(x, pil[1] + 1, 0.75, "#3DDC97")}<text x="${pil[0] - 48}" y="${pil[1] + 4 + 14 * (i + 1)}" text-anchor="end" fill="#3DDC97" font-size="10.5">${E((m.n || "Équipage") + (m.r ? " · " + m.r : ""))}</text>`; });
+        equipSvg += "</g>";
         window.__tbmDet = dets;
+        const combat = act.some(m => m.type === "massacre" || m.type === "assassinat");
+        ambMaj(items.length > 0, nPax, combat);
         if (typeof SOUTE !== "undefined") { SOUTE.items = items; SOUTE.large = true; }
         const tr = `translate(${HX.toFixed(1)} ${HY}) scale(${SC.toFixed(3)})`, T = "0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0";
         if (Z.cy == null || Z.k <= 1) { Z.cx = VWd / 2; Z.cy = VH / 2; }
         Z.k = Math.max(1, Math.min(4, Z.k)); const zw = VWd / Z.k, zh = VH / Z.k; Z.cx = Math.max(zw / 2, Math.min(VWd - zw / 2, Z.cx)); Z.cy = Math.max(zh / 2, Math.min(VH - zh / 2, Z.cy));
         // encadre de valeur (option opts.valeur = { titre, txt, sub }) : fleche depuis le centre des racks de soute vers un cadre sous la coque
         let valeurSvg = "";
+        const vcx = zoomOn ? Math.max(6 + 200, Math.min(HX + AXE * SC, PX - 10 - 200)) : SHW / 2;   // encadre de valeur centre sous la coque (calee a gauche quand le zoom est affiche)
         if (opts.valeur && celRack.length) {
             const cx = HX + celRack.reduce((t, q) => t + q.x + q.p / 2, 0) / celRack.length * SC, cy = HY + celRack.reduce((t, q) => t + q.y + q.p / 2, 0) / celRack.length * SC;
-            const bw = 400, bh = 112, bx = VWd / 2 - bw / 2, by = VH - bh - 8;
+            const bw = 400, bh = 112, bx = vcx - bw / 2, by = VH - bh - 8;
             valeurSvg = `<g class="tbm-val"><defs><marker id="tbmval" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#FFD54A"/></marker></defs>
-                <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.2" fill="#FFD54A"/><line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${(VWd / 2).toFixed(1)}" y2="${by - 2}" stroke="#FFD54A" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#tbmval)"/>
+                <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.2" fill="#FFD54A"/><line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${(vcx).toFixed(1)}" y2="${by - 2}" stroke="#FFD54A" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#tbmval)"/>
                 <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(3,8,12,.92)" stroke="#FFD54A" stroke-width="1.4"/>
-                <text x="${VWd / 2}" y="${by + 28}" text-anchor="middle" fill="#FFD54A" font-size="19" letter-spacing="2" stroke="none">${E(opts.valeur.titre || "VALEUR ESTIMÉE")}</text>
-                <text x="${VWd / 2}" y="${by + 72}" text-anchor="middle" fill="#fff" font-size="48" font-weight="bold" stroke="none">${E(opts.valeur.txt || "—")}</text>
-                <text x="${VWd / 2}" y="${by + 98}" text-anchor="middle" fill="#8b97a0" font-size="16" stroke="none">${E(opts.valeur.sub || "")}</text></g>`;
+                <text x="${vcx}" y="${by + 28}" text-anchor="middle" fill="#FFD54A" font-size="19" letter-spacing="2" stroke="none">${E(opts.valeur.titre || "VALEUR ESTIMÉE")}</text>
+                <text x="${vcx}" y="${by + 72}" text-anchor="middle" fill="#fff" font-size="48" font-weight="bold" stroke="none">${E(opts.valeur.txt || "—")}</text>
+                <text x="${vcx}" y="${by + 98}" text-anchor="middle" fill="#8b97a0" font-size="16" stroke="none">${E(opts.valeur.sub || "")}</text></g>`;
         }
         const svg = `<svg class="tb-svgv tbm-zoomable" data-w="${VWd}" data-h="${VH}" style="${Z.k > 1 ? "cursor:grab;" : ""}touch-action:none" viewBox="${(Z.cx - zw / 2).toFixed(1)} ${(Z.cy - zh / 2).toFixed(1)} ${zw.toFixed(1)} ${zh.toFixed(1)}" role="img" aria-label="Modules de votre vaisseau"><defs>
-            <mask id="tbmL" maskUnits="userSpaceOnUse" x="0" y="0" width="${VWd}" height="${VH}"><rect width="${VWd}" height="${VH}" fill="#fff"/><g transform="${tr}">${trous}</g></mask>
             <radialGradient id="tbmA" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#FF9A1F" stop-opacity=".4"/><stop offset=".7" stop-color="#FF5A00" stop-opacity=".16"/><stop offset="1" stop-color="#FF3B00" stop-opacity=".05"/></radialGradient>
             <radialGradient id="tbmC" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#00F0FF" stop-opacity=".3"/><stop offset="1" stop-color="#0090FF" stop-opacity=".05"/></radialGradient>
             <radialGradient id="tbmV" cx=".5" cy=".5" r=".8"><stop offset="0" stop-color="#B28DFF" stop-opacity=".3"/><stop offset="1" stop-color="#6040C0" stop-opacity=".05"/></radialGradient>
@@ -269,17 +460,29 @@
             <g transform="${tr}"><g transform="rotate(180 ${W / 2} ${H / 2})"><image href="${sil.img}" width="${W}" height="${H}" filter="url(#tbmh)" opacity=".5"/><rect width="${W}" height="${H}" fill="url(#tbmg)"/>
                 <g filter="url(#tbml)" stroke="#00F0FF" stroke-width="1.6" fill="none" stroke-linejoin="round">${sil.formes.map(d => `<path d="${d}"/>`).join("")}</g></g>
                 <g clip-path="url(#tbmq)"><g class="tbs-balai" style="--h:${Ltot}px"><rect x="${AXE - 160}" y="${YTOP - 24}" width="320" height="24" fill="url(#tbmb)"/><rect x="${AXE - 160}" y="${YTOP}" width="320" height="1.4" fill="#00F0FF" opacity=".8"/></g></g></g>
-            <g mask="url(#tbmL)">${GE.t}${DE.t}</g>
             <g transform="${tr}"><g clip-path="url(#tbmq)">${bandes}${gens}${hits}${caisses}</g></g>
-            ${GE.d}${DE.d}${GE.c}${DE.c}${valeurSvg}</svg>`;
+            ${marqueurs}${zoomSvg}${equipSvg}${valeurSvg}</svg>`;
+        if (opts._svgSeul) return svg;
+        window.__tbmDerniers = { act, opts, zoomOn, cap: 1e9 };
+        clearTimeout(window.__tbmT); window.__tbmT = setTimeout(() => window.__tbmAjuste && window.__tbmAjuste(), 80);
         // ---- jauge de places, synthese et legendes
         const pleine = places > 0 && nPax > places, pct = places ? Math.min(100, Math.round(nPax / places * 100)) : 0;
         const jauge = opts.jauge ? `<div class="tbp-jauge"><span>${E(opts.jauge.titre)}</span><div class="bar"><i class="${opts.jauge.n > opts.jauge.cap ? "pleine" : ""}" style="width:${opts.jauge.cap ? Math.min(100, Math.round(opts.jauge.n / opts.jauge.cap * 100)) : 0}%"></i></div><b style="color:#FFB44D">${fmtN(opts.jauge.n)}/${fmtN(opts.jauge.cap)}${opts.jauge.unite || ""}</b></div>` : nPax || places ? `<div class="tbp-jauge"><span>PLACES</span>${places ? `<div class="bar"><i class="${pleine ? "pleine" : ""}" style="width:${pct}%"></i></div><b style="color:${pleine ? "#FF3B30" : "#FFB44D"}">${nPax}/${places}</b>` : `<b style="color:#FFB44D">${nPax}</b>`}</div>` : "";
         const legI = items.map((x, i) => `<span data-i="${i}" style="--cl:${COUL_MARCH[i % COUL_MARCH.length]}"><i></i>${E(x.n)} · ${fmtN(x.q)} t${x.m ? " (mission)" : ""}</span>`).join(""), leg = Object.keys(PAS_FAM).filter(f => nbF[f]).map(f => `<span style="--cl:${PAS_FAM[f].c}"><i></i>${nbF[f]} ${PAS_FAM[f].l}${PAS_FAM[f].imp ? " (cercle)" : ""}</span>`).join("")
             + attente.map((b, k) => `<span style="--cl:${COUL_MARCH[(items.length + k) % COUL_MARCH.length]}"><i class="sq vide"></i>${E(b.n)} · ${fmtN(b.q)} t à récupérer (sauvetage)</span>`).join("")
 
-        const v = S.vaisseau, note = (items.length && !celRack.length ? "Cargaison à bord sans rack de soute : " + fmtN(tonnes) + " t. " : "") + "Compartiments proportionnels à la taille de chaque emplacement ; disposition stylisée (le jeu ne donne pas la position des modules). Survolez un compartiment pour son détail. Molette ou boutons + / − pour zoomer, glisser pour se déplacer." + (attente.length ? " « ? » = colis de sauvetage à récupérer." : "");
-        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>${E(opts.titre || "MODULES DU VAISSEAU")} <em>${E(nomVaisseau(v.modele))}${sans ? "" : " · " + mods.filter(m => !m.vide).length + " modules"}${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}${opts.mini || ""}</div>
-            <div class="tbp-leg">${leg}</div>${legI ? `<div class="tb-leg" id="tb-leg">${legI}</div>` : ""}${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - places} passager${nPax - places > 1 ? "s" : ""} de plus que de places.</div>` : ""}${opts.sansNote ? "" : `<div class="tb-sub">${note}</div>`}${opts.pied || ""}</div>`;
+        // ---- liste des modules et de leur ingenierie (repliee par defaut ; le survol d'une ligne allume le module dans la coque)
+        const GRP = [["core", "PRIMORDIAUX"], ["arme", "POINTS D'EMPORT"], ["util", "UTILITAIRES"], ["opt", "OPTIONNELS"]];
+        const rang = m => CORE.indexOf(m.slot);
+        const ligneL = m => {
+            const g = m.vide ? "—" : m.eng ? "G" + m.eng.niv : "STOCK", det = m.eng ? [m.eng.bp, m.eng.exp].filter(Boolean).map(E).join(" · ") + (m.eng.par ? (m.eng.bp || m.eng.exp ? " · " : "") + "<u>" + E(m.eng.par) + "</u>" : "") : "";
+            const nom = m.vide ? etiqSlot(m.slot) + " · empty" : m.nom + (m.places ? " · " + m.places + " seats" : "") + (m.on ? "" : " · OFF");
+            return `<div class="tbm-r${m.vide ? " vide" : ""}" data-s="${m.slot}"><b>${E(nom)}</b><span class="g${m.eng ? "" : " s"}">${g}</span>${det ? "<small>" + det + "</small>" : ""}</div>`;
+        };
+        const ouvert = (() => { try { return localStorage.getItem("tbm_liste") === "1"; } catch (e) { return false; } })();
+        const listeHtml = GRP.map(([c, t]) => { const L = mods.filter(m => m.cat === c).sort((a, b) => c === "core" ? rang(a) - rang(b) : b.taille - a.taille || a.slot.localeCompare(b.slot)); return L.length ? `<div class="tbm-gt">${t}</div>` + L.map(ligneL).join("") : ""; }).join("");
+        const v = S.vaisseau, note = (items.length && !celRack.length ? "Cargaison à bord sans rack de soute : " + fmtN(tonnes) + " t. " : "") + (attente.length ? "« ? » = colis de sauvetage à récupérer." : "");
+        return `<div class="bloc holo tbp-bloc tbm-bloc"><div class="holo-balayage"></div><h2>${E(opts.titre || "MODULES DU VAISSEAU")} <em>${E(nomVaisseau(v.modele))} · ${mods.filter(m => !m.vide).length} modules${nPax ? " · " + nPax + " passager" + (nPax > 1 ? "s" : "") : ""}${tonnes ? " · " + fmtN(tonnes) + " t à bord" : ""}</em><span class="tbm-btns">${nPax || items.length || act.some(m => m.type === "massacre" || m.type === "assassinat") ? `<button type="button" class="tbm-tg${ambActive() ? " on" : ""}" data-tbmamb title="Ambiance sonore : ouvriers du dépôt, passagers (le haut-parleur du pied de page coupe tout)">♪ AMBIANCE ${ambActive() ? "ON" : "OFF"}</button>` : ""}<button type="button" class="tbm-tg${ouvert ? " on" : ""}" data-tbmlg title="Afficher les modules et leur ingénierie">MODULES ${ouvert ? "▴" : "▾"}</button></span></h2>${jauge}<div class="tb-scene" id="tb-scene" style="position:relative"><div class="tbm-zb"><button type="button" data-tbmz="out" title="Dézoomer">−</button><span class="tbm-zl">${Math.round(Z.k * 100)} %</span><button type="button" data-tbmz="in" title="Zoomer">+</button><button type="button" data-tbmz="reset" title="Vue d'ensemble">⟲</button></div>${svg}${opts.mini || ""}</div>
+            <div class="tbp-leg">${leg}</div>${legI ? `<div class="tb-leg" id="tb-leg">${legI}</div>` : ""}${pleine ? `<div class="tb-sub" style="color:#FF3B30;">⚠ ${nPax - places} passager${nPax - places > 1 ? "s" : ""} de plus que de places.</div>` : ""}${note ? `<div class="tb-sub">${note}</div>` : ""}<div class="tbm-lg"${ouvert ? "" : " hidden"}>${listeHtml}</div>${opts.pied || ""}</div>`;
     };
 })();

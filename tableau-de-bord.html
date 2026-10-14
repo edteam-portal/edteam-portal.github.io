@@ -20,8 +20,8 @@
     <script src="photos.js?v=2"></script>
     <script src="navigation.js?v=31"></script>
     <script src="modules-data.js?v=1"></script>
-    <script src="modules-vaisseau.js?v=8"></script>
-    <script src="minage.js?v=12"></script>
+    <script src="modules-vaisseau.js?v=9"></script>
+    <script src="minage.js?v=13"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -241,6 +241,17 @@
         .tbm-vente { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:10px; } .tbm-vente span { color:#8b97a0; font-size:.85em; }
         .tbp-bloc { margin-bottom:12px; } .tbp-duo .tbp-bloc { margin-bottom:0; position:sticky; top:8px; align-self:start; }
         .tbp-bloc .tb-scene > svg { max-height:calc(100vh - 345px); min-height:340px; }
+        /* hologramme unique : meme taille partout (celle de l'onglet Minage), liste des modules repliable, survol = module allume */
+        .tbm-bloc.tbp-bloc .tb-scene > svg { max-height:470px; min-height:0; margin:0 auto; } .tbm-bloc .tb-scene .tbmm { width:150px; }
+        .tbm-btns { margin-left:auto; display:inline-flex; gap:6px; } .tbm-tg { background:none; border:1px solid rgba(0,240,255,.5); color:#00F0FF; font:inherit; font-size:11px; letter-spacing:1px; padding:3px 9px; cursor:pointer; } .tbm-tg:hover, .tbm-tg.on { background:rgba(0,240,255,.15); }
+        .tbm-lg { margin-top:10px; border-top:1px solid rgba(0,240,255,.25); padding-top:6px; } .tbm-lg[hidden] { display:none; }
+        .tbm-gt { color:#8b97a0; font-size:10px; letter-spacing:2px; margin:8px 0 2px; }
+        .tbm-r { display:grid; grid-template-columns:1fr auto; gap:0 10px; padding:3px 4px; border-bottom:1px solid rgba(255,255,255,.05); cursor:default; } .tbm-r:hover, .tbm-r.tbm-on { background:rgba(0,240,255,.12); }
+        .tbm-r b { color:#fff; font-weight:normal; } .tbm-r.vide b { color:#6b7680; } .tbm-r .g { color:#FFD54A; font-weight:bold; text-align:right; } .tbm-r .g.s { color:#6f808a; font-weight:normal; }
+        .tbm-r small { grid-column:1/3; color:#8b97a0; font-size:11px; } .tbm-r small u { text-decoration:none; color:#FFB44D; }
+        .tbm-mk { opacity:0; pointer-events:none; } .tbm-mk.tbm-on { opacity:1; animation:tbmMk 1s ease-in-out infinite; } @keyframes tbmMk { 0%,100% { transform-box:fill-box; transform-origin:center; transform:scale(1); } 50% { transform-box:fill-box; transform-origin:center; transform:scale(1.25); } }
+        rect.tbm-on { stroke:#fff !important; stroke-width:2.6 !important; stroke-opacity:1 !important; } .tbm-hit.tbm-on { fill-opacity:.22 !important; }
+        @media (prefers-reduced-motion:reduce) { .tbm-mk.tbm-on { animation:none; } }
         .tbp-duo.tbs { grid-template-columns:minmax(0,.8fr) minmax(0,1.25fr); }
         @media (max-width:1000px) { .tbp-duo, .tbp-duo.tbs { grid-template-columns:1fr; } }
         .tbp-p { animation:tbpErre var(--d) ease-in-out infinite alternate; } .tbp-halo { animation:tbpPouls 1.8s ease-in-out infinite; } @keyframes tbpPouls { 0%,100% { opacity:.25; } 50% { opacity:.8; } }

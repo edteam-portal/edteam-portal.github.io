@@ -229,12 +229,13 @@
             <div class="bloc"><h2>VALEUR ESTIMÉE</h2><div class="tb-big">${connu ? "≈ " + fmtM(val) : "—"}</div><div class="tb-sub">${connu ? "aux meilleurs prix de ce système" : "prix du système non relevés"}</div></div></div>`;
     }
 
+    const DY = 46;   // abaissement de l'encadre de valeur (et du zoom) : l'ensemble est centre en hauteur sur le Rhino
     // encadre « valeur estimee » a droite de la benne, relie par une fleche aux caisses
     function boiteValeur(b, VW, vr) {
-        const bw = 240, bh = 84, bx = VW - bw - 6, by = b.y + b.h / 2 - bh / 2, x0 = b.x + b.w + 4, y0 = b.y + b.h / 2;
+        const bw = 240, bh = 84, bx = VW - bw - 6, by = b.y + b.h / 2 - bh / 2 + DY, x0 = b.x + b.w + 4, y0 = b.y + b.h / 2;
         const txt = vr && vr.val > 0 ? "≈ " + fmtM(vr.val) : "—", sub = !vr ? "" : vr.val > 0 ? (vr.sans ? vr.sans + " t sans prix" : "aux prix du système") : "prix du système non relevés";
         return `<defs><marker id="tbnval" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#FFD54A"/></marker></defs>
-            <circle cx="${x0 - 4}" cy="${y0}" r="3.2" fill="#FFD54A"/><line x1="${x0 - 4}" y1="${y0}" x2="${bx - 2}" y2="${y0}" stroke="#FFD54A" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#tbnval)"/>
+            <circle cx="${x0 - 4}" cy="${y0}" r="3.2" fill="#FFD54A"/><line x1="${x0 - 4}" y1="${y0}" x2="${bx - 2}" y2="${by + bh / 2}" stroke="#FFD54A" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#tbnval)"/>
             <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(3,8,12,.92)" stroke="#FFD54A" stroke-width="1.4"/>
             <text x="${bx + bw / 2}" y="${by + 21}" text-anchor="middle" fill="#FFD54A" font-size="14" letter-spacing="2">VALEUR ESTIMÉE</text>
             <text x="${bx + bw / 2}" y="${by + 54}" text-anchor="middle" fill="#fff" font-size="32" font-weight="bold">${esc(txt)}</text>
@@ -250,13 +251,26 @@
             const r = Math.floor(i / C), c = i % C, ry = R - 1 - r, k = liste[i], cl = k ? coul[norm(k)] : null;
             cases += `<rect class="tbn-c" data-i="${i}" x="${(b.x + c * cw + 0.8).toFixed(1)}" y="${(b.y + ry * ch + 0.8).toFixed(1)}" width="${(cw - 1.6).toFixed(1)}" height="${(ch - 1.6).toFixed(1)}" fill="${cl || "none"}" fill-opacity="${cl ? 0.75 : 0}" stroke="${cl || "#1c6a78"}" stroke-opacity="${cl ? 1 : 0.4}" stroke-width="1"/>`;
         }
+        // zoom des caisses en haut a droite (comme celui du vaisseau) : toute la capacite en grosses cases, relie a la benne par des pointilles ; seulement quand il y a du minerai
+        let zoom = "";
+        if (liste.length) {
+            const ZX = VW - 6 - 232, ZY = 28 + DY, ZWd = 232, ZHd = Math.round(b.y + b.h / 2 - 42 + DY - 18 - ZY), iw = ZWd - 16, ih = ZHd - 16; let best = null;
+            for (let cols = 3; cols <= 14; cols++) { const rows = Math.ceil(capacite / cols), c = Math.min(iw / cols, ih / rows); if (!best || c > best.c + 0.01) best = { cols, rows, c }; }
+            const c = best.c, ox = ZX + 8 + (iw - c * best.cols) / 2, oy = ZY + 8 + (ih - c * best.rows) / 2; let zc = "";
+            for (let i = 0; i < capacite; i++) {
+                const x = ox + (i % best.cols) * c, y = oy + (best.rows - 1 - Math.floor(i / best.cols)) * c, k = liste[i], cl = k ? coul[norm(k)] : null;
+                zc += `<rect class="tbn-c" data-i="${i}" x="${(x + 1.5).toFixed(1)}" y="${(y + 1.5).toFixed(1)}" width="${(c - 3).toFixed(1)}" height="${(c - 3).toFixed(1)}" fill="${cl || "none"}" fill-opacity="${cl ? 0.75 : 0}" stroke="${cl || "#1c6a78"}" stroke-opacity="${cl ? 1 : 0.4}" stroke-width="1"/>`;
+            }
+            const bx2 = (b.x + b.w + 4).toFixed(1);
+            zoom = `<path d="M${bx2} ${b.y.toFixed(1)}L${ZX} ${ZY}M${bx2} ${b.y.toFixed(1)}L${ZX} ${ZY + ZHd}" stroke="#00F0FF" stroke-opacity=".5" stroke-dasharray="4 5" fill="none"/><text x="${ZX}" y="${ZY - 9}" fill="#99a" font-size="11" letter-spacing="3">SOUTE · 1 CASE = 1 t</text><rect x="${ZX}" y="${ZY}" width="${ZWd}" height="${ZHd}" fill="rgba(0,10,14,.7)" stroke="#00F0FF" stroke-opacity=".6"/><path d="M${ZX} ${ZY}h20M${ZX} ${ZY}v20M${ZX + ZWd} ${ZY + ZHd}h-20M${ZX + ZWd} ${ZY + ZHd}v-20" stroke="#00F0FF" stroke-width="2.5" fill="none"/>${zc}`;
+        }
         return `<svg viewBox="0 0 ${VW} ${VH.toFixed(0)}" class="tbn-svg" id="tbn-scene" role="img" aria-label="Soute du Rhino">
             <defs><filter id="tbnh" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0  0.28 0.55 0.1 0 0  0.36 0.72 0.14 0 0  0 0 0 1 0"/><feComponentTransfer><feFuncG type="gamma" amplitude="1.25" exponent="1.45" offset="0"/><feFuncB type="gamma" amplitude="1.25" exponent="1.45" offset="0"/></feComponentTransfer></filter>
             <filter id="tbnl"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <pattern id="tbns" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1.4" fill="#000" opacity=".28"/></pattern></defs>
             <g filter="url(#tbnl)"><image href="${IMG}" x="${X0.toFixed(1)}" y="${Y0}" width="${(IW * K).toFixed(1)}" height="${(IH * K).toFixed(1)}" filter="url(#tbnh)"/></g>
             <rect x="${X0.toFixed(1)}" y="${Y0}" width="${(IW * K).toFixed(1)}" height="${(IH * K).toFixed(1)}" fill="url(#tbns)" opacity=".45"/>
-            <rect x="${(b.x - 3).toFixed(1)}" y="${(b.y - 3).toFixed(1)}" width="${(b.w + 6).toFixed(1)}" height="${(b.h + 6).toFixed(1)}" fill="rgba(0,20,28,.55)" stroke="#00F0FF" stroke-opacity=".85"/>${cases}${boiteValeur(b, VW, vr)}</svg>`;
+            <rect x="${(b.x - 3).toFixed(1)}" y="${(b.y - 3).toFixed(1)}" width="${(b.w + 6).toFixed(1)}" height="${(b.h + 6).toFixed(1)}" fill="rgba(0,20,28,.55)" stroke="#00F0FF" stroke-opacity=".85"/>${cases}${boiteValeur(b, VW, vr)}${zoom}</svg>`;
     }
     function cadreRhino() {
         const m = M(), det = (m && m.rhino && m.rhino.det) || {}, capR = (m && m.rhino && m.rhino.cap) || CAP_DEF, total = Math.min(somme(det), capR), pct = Math.round(total / capR * 100);
@@ -288,7 +302,7 @@
     }
     function cadreVaisseau() {
         const so = (S && S.soute) || {}, items = (so.items || []).filter(x => (Number(x.q) || 0) > 0), tonnes = items.reduce((a, x) => a + (Number(x.q) || 0), 0), capV = Number(so.cap) || 0;
-        const html = typeof modulesHtml === "function" ? modulesHtml([], { etiquettes: false, titre: "MON VAISSEAU", jauge: { titre: "SOUTE", n: tonnes, cap: capV, unite: " t" }, sansNote: true, valeur: valeurSoute(items) }) : "";
+        const html = typeof modulesHtml === "function" ? modulesHtml((S && S.missions) || [], { titre: "MON VAISSEAU", jauge: { titre: "SOUTE", n: tonnes, cap: capV, unite: " t" }, sansNote: true, valeur: valeurSoute(items) }) : "";
         return html || `<div class="bloc holo tbn-cadre"><div class="holo-balayage"></div>${typeof souteHtml === "function" ? souteHtml() : ""}</div>`;
     }
     // ---- fleche de transit : fixe et discrete tant que le Rhino est vide ; defile des la 1re tonne ; plus vive a partir de SEUIL ; vive a fond quand il est plein
@@ -319,7 +333,7 @@
         .tbn-in{background:#0b1418;border:1px solid #1f3a44;color:#ddd;font:inherit;font-size:.85em;padding:4px 8px;width:190px}.tbn-ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:12px}
         .tbn-hs{display:inline-block;border:1px solid #1f4f5a;color:#8fd;font-size:.85em;padding:1px 8px;margin:0 5px 3px 0;white-space:nowrap}.tbn-hs.on{background:#00F0FF;color:#001015;font-weight:bold}
         .tbn-sol{display:inline-flex;width:100px;height:10px;background:#0b1418;border:1px solid #1f3a44;vertical-align:middle;margin-right:8px}.tbn-sol i{display:block;height:100%}
-        .tbn-duo{display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);gap:8px;margin-bottom:12px;align-items:stretch}.tbn-duo.deux{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+        .tbn-duo{display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1.4fr);gap:8px;margin-bottom:12px;align-items:stretch}.tbn-duo.deux{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px}
         .tbn-col{min-width:0;display:flex;flex-direction:column}.tbn-col>.bloc,.tbn-cadre{flex:1;margin-bottom:0!important;box-sizing:border-box;display:flex;flex-direction:column}
         .tbn-col .tbm-bloc>svg,.tbn-col .tbm-bloc .tb-scene>svg{max-height:470px;min-height:0;margin:auto}.tbn-col .tbm-bloc .tb-scene{flex:0 1 auto;margin:auto 0}
         .tbn-svg{width:100%;flex:0 1 auto;max-height:470px;margin:auto;display:block}.tbn-c{cursor:pointer}.tbn-c:hover{stroke-width:2.4;fill-opacity:1;filter:drop-shadow(0 0 5px #fff)}
