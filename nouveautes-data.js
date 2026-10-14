@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-refonte-fenetre', date: '2026-10-14T22:45:16Z', type: 'NOUVEAU',
+        titre: 'Colonisation : la fenêtre d’un système refaite avec la carte du système',
+        texte: 'La fenêtre d’un système colonisé est refaite en quatre onglets : vue d’ensemble, profil, installations et chantiers. La vue d’ensemble montre la carte du système comme dans le jeu (l’étoile, les planètes et les stations sous leur corps, avec l’avancement des chantiers), les indicateurs en un coup d’œil et le résumé des chantiers. Les explications de méthode sont repliées. Les corps et stations de la carte viennent d’EDSM : un système jamais scanné peut avoir une carte incomplète.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-sans-architecte', date: '2026-10-14T22:14:35Z', type: 'AMELIORE',
         titre: 'Colonisation : déclarer les systèmes sans architecte',
         texte: 'Quand le jeu n’a pas enregistré la revendication d’un système, son architecte reste inconnu et ses chantiers ne lui sont pas rattachés. La page Colonisation affiche maintenant un bandeau « Systèmes sans architecte (à déclarer) », avec une liste filtrable, et une fenêtre à l’arrivée tant qu’il en reste : si vous êtes l’architecte de l’un d’eux, cliquez sur « Je suis l’architecte ». Les confirmations de cette page ont aussi été refaites au style du site.',

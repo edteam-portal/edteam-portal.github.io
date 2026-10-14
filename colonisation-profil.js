@@ -74,9 +74,10 @@
     document.body.appendChild(m);
   };
 
-  // o = { esc, nomStation(station), pct(chantier) -> %, mode : 'actuel' | 'prevu', onMode : nom de la fonction globale appelee par le selecteur }
-  window.coloProfilHtml = function (s, o) {
-    const E = window.EDTEAM_EFFETS, esc = o.esc; if (!E || !window.EDTEAM_ICONE) return '';
+  // o = { esc, nomStation(station), pct(chantier) -> %, mode : 'actuel' | 'prevu', onMode, estArchitecte, declarer }
+  // pieces(s, o) : donnees et morceaux d'affichage du profil (reutilises par la fenetre d'un systeme : colonisation-modale.js) ; null s'il n'y a aucune installation
+  function pieces(s, o) {
+    const E = window.EDTEAM_EFFETS, esc = o.esc; if (!E || !window.EDTEAM_ICONE) return null;
     const mode = o.mode === 'prevu' ? 'prevu' : 'actuel';
     const inst = (c, etat) => {
       let t = typeof window.typeDepuisRecette === 'function' ? window.typeDepuisRecette(c.marchandises) : null;
@@ -87,11 +88,11 @@
       if (!t && etat === 'fin' && FAMILLES[c.type]) t = { libelle: FAMILLES[c.type][0], famille: FAMILLES[c.type][0], precis: false, noms: FAMILLES[c.type][1], premier: false };
       if (etat === 'fin' && PORTS[c.type]) t = { libelle: PORTS[c.type], famille: 'Port orbital', precis: true, noms: [PORTS[c.type]], premier: !!(t && t.premier) };
       if (c.declare && /\|/.test(String(c.declare))) { const d = String(c.declare).split('|'); t = { libelle: d[1], famille: d[0], precis: true, noms: [d[1]], premier: false, declare: true }; }
-      return { mid: String(c.market_id || ''), declare: !!(t && t.declare), nom: /ColonisationShip/i.test(String(c.station || "")) ? "Premier site (navire de colonisation)" : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier) || /ColonisationShip/i.test(String(c.station || '')), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', ecoPart: (c.economies && c.economies[0] && Number(c.economies[0][1])) || 0, ecoSecond: (c.economies && c.economies[1] && Number(c.economies[1][1])) || 0, etat, pct: etat === 'cha' ? o.pct(c) : 100,
+      return { mid: String(c.market_id || ''), declare: !!(t && t.declare), nom: /ColonisationShip/i.test(String(c.station || '')) ? 'Premier site (navire de colonisation)' : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier) || /ColonisationShip/i.test(String(c.station || '')), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', ecoPart: (c.economies && c.economies[0] && Number(c.economies[0][1])) || 0, ecoSecond: (c.economies && c.economies[1] && Number(c.economies[1][1])) || 0, etat, pct: etat === 'cha' ? o.pct(c) : 100,
         lib: t ? (t.precis ? t.libelle : t.famille).toUpperCase() : 'TYPE NON RELEVÉ' };
     };
     const tout = (s.finies || []).map(c => inst(c, 'fin')).concat((s.chantiers || []).map(c => inst(c, 'cha')));
-    if (!tout.length) return '';
+    if (!tout.length) return null;
     const actifs = tout.filter(i => mode === 'prevu' || i.etat === 'fin');
     const P = E.profilSysteme(actifs), Pa = E.profilSysteme(tout.filter(i => i.etat === 'fin'));
     const mx = Math.max(10, ...E.CLES.map(k => Math.max(Math.abs(P.indic[k].min), Math.abs(P.indic[k].max)))), ech = Math.ceil(mx / 5) * 5, w = v => Math.min(50, Math.abs(v) / ech * 50);
@@ -103,37 +104,48 @@
       if (base !== far) h += `<i class="ext" style="left:${far >= 0 ? 50 + (base >= 0 ? w(base) : 0) : 50 - w(far)}%;width:${w(far) - (Math.sign(base) === Math.sign(far) ? w(base) : 0)}%"></i>`;
       return `<div class="pf-ind" title="${AIDE[k]}"><span class="pf-ic" style="color:${c};border-color:${c}66;background:${c}14">${ICO[k][0]}</span><span class="pf-lb">${E.LIBELLES[k]}</span><div class="pf-jau">${h}</div><span class="pf-val ${cl(r.min + r.max)}">${r.min === r.max ? f(r.min) : f(r.min) + ' à ' + f(r.max)}</span></div>`;
     };
-    const pic = (i, c, px) => window.EDTEAM_ICONE(i.famille || 'Avant-poste orbital', c.length === 1 ? c[0].n : '', { eco: c.length === 1 ? c[0].eco : '', vide: i.etat === 'cha', taille: px });
     const cand = i => i.noms.length ? E.candidats(i) : [];
+    const pic = (i, c, px) => window.EDTEAM_ICONE(i.famille || 'Avant-poste orbital', c.length === 1 ? c[0].n : '', { eco: c.length === 1 ? c[0].eco : '', vide: i.etat === 'cha', taille: px });
     const affine = i => i.noms.length && i.eco && E.candidats(i).length < E.candidats(Object.assign({}, i, { eco: '' })).length;
+    // pastilles d'effets d'une installation (valeurs du panneau du jeu, sans poids)
+    const pills = (i, c) => {
+      let pil = '';
+      if (!c.length) pil = `<span class="u">${i.noms.length ? 'pas dans la feuille' : 'type non relevé'}</span>`;
+      else if (c.length === 1) E.CLES.filter(k => k !== 't2' && k !== 't3').forEach(k => { const v = c[0][k]; if (v) pil += `<span class="${v >= 0 ? 'p' : 'm'}">${COURT[k]} ${f(v)}</span>`; });
+      return pil;
+    };
+    // bouton de declaration du type (architecte uniquement) : declarer, ou retirer une declaration
+    const ctlDe = (i, c) => {
+      if (!(o.estArchitecte && i.mid && o.declarer)) return '';
+      if (i.declare) return `<button type="button" class="pf-btn" onclick="${o.declarer}('${i.mid}','')" title="Retirer le type que vous avez déclaré">RETIRER LE TYPE DÉCLARÉ</button>`;
+      if (c.length === 1) return '';
+      (window.__pfChoix = window.__pfChoix || {})[i.mid] = { nom: i.nom, choix: c.length > 1 ? c : E.ROWS, declarer: o.declarer, esc };
+      return `<button type="button" class="pf-sel" onclick="coloChoixType('${i.mid}')" title="Vous êtes l'architecte : comparez avec le jeu puis déclarez le type (visible de l'escadron, retirable)">DÉCLARER LE TYPE…</button>`;
+    };
     const bandeau = tout.map(i => `<div class="pf-bd" style="${mode === 'prevu' || i.etat === 'fin' ? '' : 'opacity:.25'}" title="${esc(i.nom)} · ${esc(i.lib)}">${pic(i, cand(i), 46)}<span>${esc(i.nom)}</span></div>`).join('<i class="pf-lien"></i>');
     const cartes = tout.map(i => {
-      const c = cand(i); let pil = '';
-      if (!c.length) pil = `<span class="u">${i.noms.length ? 'pas dans la feuille' : 'type non relevé'}</span>`;
-      else if (c.length > 1) pil = '';
-      else E.CLES.filter(k => k !== 't2' && k !== 't3').forEach(k => { const v = c.map(r => r[k] + 0), a = Math.min(...v), b = Math.max(...v); if (a || b) pil += `<span class="${(a + b) >= 0 ? 'p' : 'm'}">${COURT[k]} ${a === b ? f(a) : f(a) + '…' + f(b)}</span>`; });
+      const c = cand(i), pil = pills(i, c), ctl = ctlDe(i, c);
       const st = i.etat === 'fin' ? '<span style="color:#00FF66">✔ TERMINÉE</span>' : `<span style="color:#FF7100">EN CONSTRUCTION · ${i.pct} %</span>`;
       const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Type à déclarer par l\'architecte du système">≈</span>' : '';
       const ind = affine(i) ? ` <span style="color:#7fe9ff;border-bottom:1px dotted #7fe9ff;cursor:help;font-size:.8em" title="Type affiné d'après l'économie de la station relevée à l'amarrage (indice : les liens de marché du système peuvent la modifier).">éco.</span>` : '';
-      let ctl = '';
-      if (o.estArchitecte && i.mid && o.declarer) {
-        if (i.declare) ctl = `<button type="button" class="pf-btn" onclick="${o.declarer}('${i.mid}','')" title="Retirer le type que vous avez déclaré">RETIRER LE TYPE DÉCLARÉ</button>`;
-        else if (c.length !== 1) {
-          (window.__pfChoix = window.__pfChoix || {})[i.mid] = { nom: i.nom, choix: c.length > 1 ? c : E.ROWS, declarer: o.declarer, esc };
-          ctl = `<button type="button" class="pf-sel" onclick="coloChoixType('${i.mid}')" title="Vous êtes l\'architecte : comparez avec le jeu puis déclarez le type (visible de l\'escadron, retirable)">DÉCLARER LE TYPE…</button>`;
-        }
-      }
       return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${c.length > 1 ? 'dec' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}${i.declare ? ' · DÉCLARÉ PAR L\'ARCHITECTE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles : l'architecte du système peut déclarer le bon">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div>${ctl}</div></div></div>`;
     }).join('');
     const groupes = ORDRE.map(([t, ks]) => `<div class="pf-grp ${t === ORDRE[0][0] ? 'f' : ''}">${t}</div>${ks.map(jauge).join('')}`).join('');
     const eco = Object.keys(P.eco).sort((a, b) => P.eco[b] - P.eco[a]).map(k => `<span>${esc(k)} × ${P.eco[k]}</span>`).join('') || '<span style="color:#777">—</span>';
     const n = actifs.length, nul = P.surs + P.incertains === 0;
+    const fiab = `<span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> en orange : à déclarer par l'architecte (non comptées)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille (non comptées)</span>${P.surs > 0 && P.premiers === 0 ? '<span style="color:#FFB44D" title="Le port initial pèse +40 % (technologie +20 %) dans le calcul du jeu ; ici toutes les installations sont comptées comme des installations suivantes.">⚠ port initial non identifié : total sous-estimé</span>' : ''}${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}`;
+    const note = `Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations dont le <b>type est connu</b> sont additionnées ; une installation en <b>orange</b> n'ajoute rien tant que l'architecte n'a pas déclaré son type (on ne devine pas). Les totaux appliquent les poids officiels de la mise à jour 4.2.2.0 : le port initial compte +40 % (technologie +20 %), les installations suivantes -10 % (développement, sécurité), -20 % (niveau de vie), -25 % (technologie, richesse) ; la population n'est pas pondérée. Les valeurs de chaque installation sont celles du panneau du jeu, sans poids. Elles sont corrigées d'après le jeu pour les avant-postes industriel, civil et militaire. Seules les installations vues par le plugin sont comptées ; celles qui existaient déjà ne le sont pas. Les points de construction ne sont pas affichés : leur coût dépend de ce qui a été construit avant.`;
+    return { E, esc, o, mode, tout, actifs, P, Pa, jauge, groupes, eco, cartes, bandeau, pic, cand, pills, ctlDe, affine, n, nul, fiab, note };
+  }
+  window.coloProfilPieces = pieces;
+  window.coloProfilHtml = function (s, o) {
+    const p = pieces(s, o); if (!p) return '';
+    const { mode, n, bandeau, nul, groupes, eco, cartes, fiab, note } = p;
     return `<div><div style="color:#00F0FF;letter-spacing:2px;font-size:1em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><span>&gt; PROFIL DU SYSTÈME <span style="color:#8b97a0;font-size:.8em;letter-spacing:0;">d'après ${n} installation${n > 1 ? 's' : ''} relevée${n > 1 ? 's' : ''}</span></span>
         <span class="pf-seg"><button class="${mode === 'actuel' ? 'on' : ''}" onclick="${o.onMode}('actuel')">ACTUEL</button><button class="${mode === 'prevu' ? 'on' : ''}" onclick="${o.onMode}('prevu')">AVEC LES CHANTIERS</button></span></div>
         <div class="pf-profil"><div class="pf-band"><div class="pf-grp f">VUE D'ENSEMBLE</div><div class="pf-bdr">${bandeau}</div></div>
         <div class="pf-pg">${nul ? '<div style="color:#8b97a0;font-size:.85em;margin-bottom:8px;">Aucun type d\'installation reconnu pour l\'instant : le profil se remplit quand la liste des marchandises d\'un chantier est relevée.</div>' : ''}${groupes}<div class="pf-grp">ÉCONOMIES</div><div class="pf-tags">${eco}</div></div>
         <div class="pf-pd"><div class="pf-grp f">EFFET DE CHAQUE INSTALLATION</div><div class="pf-cartes">${cartes}</div></div></div>
-        <div class="pf-fiab"><span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> en orange : à déclarer par l'architecte (non comptées)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille (non comptées)</span>${P.surs > 0 && P.premiers === 0 ? '<span style="color:#FFB44D" title="Le port initial pèse +40 % (technologie +20 %) dans le calcul du jeu ; ici toutes les installations sont comptées comme des installations suivantes.">⚠ port initial non identifié : total sous-estimé</span>' : ''}${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}</div>
-        <div class="pf-pied">Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations dont le <b>type est connu</b> sont additionnées ; une installation en <b>orange</b> n'ajoute rien tant que l'architecte n'a pas déclaré son type (on ne devine pas). Les totaux appliquent les poids officiels de la mise à jour 4.2.2.0 : le port initial compte +40 % (technologie +20 %), les installations suivantes -10 % (développement, sécurité), -20 % (niveau de vie), -25 % (technologie, richesse) ; la population n'est pas pondérée. Les valeurs de chaque installation sont celles du panneau du jeu, sans poids. Elles sont corrigées d'après le jeu pour les avant-postes industriel, civil et militaire. Seules les installations vues par le plugin sont comptées ; celles qui existaient déjà ne le sont pas. Les points de construction ne sont pas affichés : leur coût dépend de ce qui a été construit avant. </div></div>`;
+        <div class="pf-fiab">${fiab}</div><div class="pf-pied">${note}</div></div>`;
   };
 })();

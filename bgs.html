@@ -136,6 +136,10 @@
         .ini-bandeau .avs { display: inline-flex; padding-left: 6px; }
         .ini-bandeau .avs .ph { margin-left: -6px; box-shadow: 0 0 0 2px #0a0a0a; }
         .ini-bandeau .exp { color: #888; }
+        .dir-avs { display: inline-flex; align-items: center; vertical-align: middle; margin-left: 10px; }
+        .dir-avs .ph { margin-left: -7px; box-shadow: 0 0 0 2px #0a0a0a; }
+        .dir-avs > :first-child { margin-left: 0; }
+        .dir-avs .plus { margin-left: -7px; box-shadow: 0 0 0 2px #0a0a0a; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #1a1a1a; border: 1px solid #555; color: #ccc; font-size: 0.62em; font-weight: bold; letter-spacing: 0; cursor: help; }
         .ini-bandeau .acts { display: inline-flex; gap: 6px; margin-left: auto; }
         .ini-btn { background: transparent; border: 1px solid #FF4FD8; color: #FF4FD8; padding: 3px 9px; font-family: inherit; font-size: 0.82em; font-weight: bold; letter-spacing: 1px; cursor: pointer; border-radius: 2px; }
         .ini-btn:hover { background: #FF4FD8; color: #000; }
@@ -208,6 +212,7 @@
         .bgs-carte.large .eff .nums { font-size: 0.7em; }
         .bgs-carte.large .eff .nums b { font-size: 2.1em; }
         .bgs-carte .eff .esc b { color: #fff; }
+        .bgs-carte .eff .esc { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 7px; }
         .bgs-carte .eff .toi b { color: var(--ed-orange); }
         .bgs-carte .eff .jg { position: relative; height: 9px; background: #222; margin-top: 5px; }
         .bgs-carte .eff .jg i { position: absolute; left: 0; top: 0; bottom: 0; }
@@ -1175,12 +1180,22 @@
             return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width: 100%; height: 34px; display: block;"><polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${couleur}" stroke-width="2"/><polyline points="${dernier[0]},${dernier[1]} ${dernier[0]},${dernier[1]}" fill="none" stroke="${couleur}" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
         }
 
+        // avatars des pilotes qui participent a une directive (ceux qui ont le plus donne d'abord), a cote du pourcentage d'effort de l'escadron
+        function bgsAvatars(pilotes, max, taille) {
+            const P = window.EDTEAMPhotos, L = (pilotes || []).filter(x => x && (x.nom || x.u));
+            if (!P || !L.length) return '';
+            const vus = L.slice(0, max), reste = L.slice(max);
+            return '<span class="dir-avs" title="' + escapeHtml(L.length + ' pilote' + (L.length > 1 ? 's' : '') + ' participe' + (L.length > 1 ? 'nt' : '')) + '">'
+                + vus.map(x => P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille })).join('')
+                + (reste.length ? '<span class="plus" style="width:' + taille + 'px;height:' + taille + 'px" title="' + escapeHtml(reste.map(x => x.nom || '?').join(', ')) + '">+' + reste.length + '</span>' : '') + '</span>';
+        }
+
         // panneau EFFORT (le cœur de l'application) : effort de l'escadron et part du pilote en gros, jauge à deux tons ; en carte large, une barre par type d'action
         function bgsEffortPanel(meta, avecTypes) {
             const mini = avecTypes ? (meta.mini || []) : [];
             return `<div class="eff">
                 <div class="lab">EFFORT</div>
-                <div class="nums"><span class="esc">ESCADRON <b>${meta.global} %</b></span><span class="toi">TA PART <b>${meta.part} %</b></span></div>
+                <div class="nums"><span class="esc">ESCADRON <b>${meta.global} %</b>${bgsAvatars(meta.pilotes, 3, 26)}</span><span class="toi">TA PART <b>${meta.part} %</b></span></div>
                 <div class="jg"><i style="width: ${meta.global}%; opacity: 0.35; background: ${meta.couleur};"></i><i style="width: ${meta.vous}%; background: ${meta.couleur};"></i></div>
                 ${mini.length ? `<div class="types">${mini.map(x => `<div class="t"><span>${escapeHtml(x.t.replace(/^[^A-Za-zÀ-ÿ]+/, ''))}</span><div class="jg2"><i style="width: ${x.g}%; background: ${x.c}; opacity: 0.35;"></i><i style="width: ${x.v}%; background: ${x.c};"></i></div></div>`).join('')}</div>` : ''}
             </div>`;
@@ -1352,8 +1367,8 @@
                 <!-- 1. L'EFFORT : le cœur de l'application -->
                 <div class="bgs-cadre"><div class="bgs-cadre-t">EFFORT</div>
                 <div class="bgs-hero" style="border-color: ${c}; margin-top: 0;">
-                    <div class="h1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${meta.global} %</b></div>
-                    <div class="h2"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b><small>de l'effort de l'escadron</small></div>
+                    <div class="h1"><span>EFFORT DE L'ESCADRON</span><span style="display:inline-flex;align-items:center;gap:10px;align-self:center"><b style="color: #fff;white-space:nowrap;">${meta.global} %</b>${bgsAvatars(meta.pilotes, 6, 40)}</span></div>
+                    <div class="h2"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b></div>
                     <div class="jgh"><i style="width: ${meta.global}%; opacity: 0.35; background: ${c};"></i><i style="width: ${meta.vous}%; background: ${c};"></i></div>
                 </div>
                 <div class="bgs-sec" style="margin-top: 14px;">EFFORT PAR TYPE D'ACTION <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· cumul depuis la directive · vif : toi · atténué : escadron</span></div>
@@ -1843,9 +1858,9 @@
 
                         window.cacheJaugesBgs[ordre.id] = htmlJauges;
                         const miniJauges = (window.__jc || []).slice(); window.__jc = null;
-                        window.cacheMetaBgs[ordre.id] = { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc };
+                        window.cacheMetaBgs[ordre.id] = { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, pilotes: rs.pilotes || [] };
 
-                        htmlAccordionsFactions += bgsCarteHTML(ordre, res, sens, { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, poids: poidsTotalEscadron, mini: miniJauges, large: estInit || factionsDuSysteme.length === 1,
+                        htmlAccordionsFactions += bgsCarteHTML(ordre, res, sens, { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, pilotes: rs.pilotes || [], poids: poidsTotalEscadron, mini: miniJauges, large: estInit || factionsDuSysteme.length === 1,
                             init: estInit ? { info: infosInit[ordre.id], pilotes: rs.pilotes || [], nb: rs.nb_participants || 0 } : null });
                     }
 

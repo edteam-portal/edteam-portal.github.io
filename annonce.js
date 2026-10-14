@@ -61,6 +61,27 @@
             lien: 'tableau-de-bord.html?mode=min',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'colonisation-2026-10',
+            couleur: '#FF7100',
+            etiquette: '★ REFONTE COMPLÈTE',
+            titre: 'LA COLONISATION FAIT PEAU NEUVE',
+            sous: 'Carte du système, profil chiffré, déclaration des architectes',
+            intro: 'Chaque système colonisé a maintenant <b>sa fiche complète</b> : la carte du système comme dans le jeu, ce que valent ses installations, ses chantiers et son architecte. <b>Rien à saisir</b> : tout vient de ce que votre plugin relève.',
+            colonnes: 2,
+            etapes: [
+                { n: '1', t: 'LA CARTE DU SYSTÈME', d: 'L’étoile, les planètes et les stations accrochées sous leur corps, comme sur la carte du jeu, avec l’avancement de chaque chantier en cours.' },
+                { n: '2', t: 'LE PROFIL DU SYSTÈME', d: 'Développement, technologie, sécurité, richesse, niveau de vie, population : le total estimé du système et l’effet de chaque installation, avec les poids officiels de la mise à jour 4.2.2.0.' },
+                { n: '3', t: 'DÉCLARER SON SYSTÈME', d: 'Le jeu n’enregistre pas toujours la revendication d’un système. Une liste des systèmes sans architecte vous permet de vous déclarer, et de préciser le type d’une installation en le comparant avec le jeu.' },
+                { n: '4', t: 'UNE FENÊTRE PLUS CLAIRE', d: 'Quatre onglets par système (vue d’ensemble, profil, installations, chantiers), des confirmations au style du site, et le détail des chantiers toujours à portée.' }
+            ],
+            avis: '<b>Plugin SYS.EDTEAM 2.27</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b>. Les totaux sont des <b>estimations</b> d’après la feuille communautaire de CMDR DaftMav : seules les installations dont le type est connu sont comptées, les autres sont à déclarer par l’architecte.',
+            cta: 'OUVRIR LA COLONISATION',
+            aide: 'Menu du haut : COLONISATION · à utiliser sur PC (la version mobile arrive)',
+            lien: 'colonisation.html',
+            escadron: false,
+            mobile: false
         }
     ];
 
