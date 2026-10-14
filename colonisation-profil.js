@@ -26,6 +26,7 @@
 .pf-cw{display:flex;gap:9px;align-items:flex-start}.pf-cb{flex:1;min-width:0}
 .pf-t{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1px 8px;align-items:baseline}.pf-t b{flex:1 1 130px;min-width:0;color:#fff;font-weight:normal;font-size:.95em;word-break:break-word}.pf-t span{font-size:.62em;letter-spacing:1.5px;white-space:nowrap}
 .pf-ty{color:#8fb7bf;font-size:.74em;letter-spacing:1px;margin:1px 0 4px}
+.pf-poss{color:#FFB44D;font-size:.7em;line-height:1.35;margin:-1px 0 4px}
 .pf-pil{display:flex;flex-wrap:wrap;gap:4px}.pf-pil span{font-size:.72em;padding:1px 6px;border:1px solid;border-radius:2px;white-space:nowrap}
 .pf-pil .p{color:#3DDC97;border-color:#3DDC9760;background:rgba(61,220,151,.07)}.pf-pil .m{color:#FF6B5E;border-color:#FF6B5E60;background:rgba(255,107,94,.07)}.pf-pil .u{color:#8b97a0;border-color:#4a5a62;border-style:dashed}
 .pf-bdr{display:flex;align-items:center;overflow-x:auto;padding:6px 0 2px}.pf-bd{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:78px}.pf-bd span{font-size:10px;color:#8fb7bf;max-width:84px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -74,7 +75,7 @@
       const st = i.etat === 'fin' ? '<span style="color:#00FF66">✔ TERMINÉE</span>' : `<span style="color:#FF7100">EN CONSTRUCTION · ${i.pct} %</span>`;
       const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Plusieurs types possibles pour cette recette : les effets sont donnés en fourchette.">≈</span>' : '';
       const ind = affine(i) ? ` <span style="color:#7fe9ff;border-bottom:1px dotted #7fe9ff;cursor:help;font-size:.8em" title="Type affiné d'après l'économie de la station relevée à l'amarrage (indice : les liens de marché du système peuvent la modifier).">éco.</span>` : '';
-      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}</div><div class="pf-pil">${pil}</div></div></div></div>`;
+      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles pour cette installation, d'après sa recette et son économie">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div></div></div></div>`;
     }).join('');
     const groupes = ORDRE.map(([t, ks]) => `<div class="pf-grp ${t === ORDRE[0][0] ? 'f' : ''}">${t}</div>${ks.map(jauge).join('')}`).join('');
     const eco = Object.keys(P.eco).sort((a, b) => P.eco[b] - P.eco[a]).map(k => `<span>${esc(k)} × ${P.eco[k]}</span>`).join('') || '<span style="color:#777">—</span>';
