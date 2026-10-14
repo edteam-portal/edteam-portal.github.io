@@ -27,6 +27,8 @@
 .pf-t{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1px 8px;align-items:baseline}.pf-t b{flex:1 1 130px;min-width:0;color:#fff;font-weight:normal;font-size:.95em;word-break:break-word}.pf-t span{font-size:.62em;letter-spacing:1.5px;white-space:nowrap}
 .pf-ty{color:#8fb7bf;font-size:.74em;letter-spacing:1px;margin:1px 0 4px}
 .pf-poss{color:#FFB44D;font-size:.7em;line-height:1.35;margin:-1px 0 4px}
+.pf-sel{background:#0b1418;border:1px solid #FFB44D;color:#FFB44D;font:inherit;font-size:.74em;padding:3px 4px;max-width:100%;margin-top:5px;cursor:pointer}
+.pf-btn{background:none;border:1px solid #6b7680;color:#9fb0b8;font:inherit;font-size:.7em;letter-spacing:1px;padding:2px 8px;margin-top:5px;cursor:pointer}.pf-btn:hover{border-color:#fff;color:#fff}
 .pf-pil{display:flex;flex-wrap:wrap;gap:4px}.pf-pil span{font-size:.72em;padding:1px 6px;border:1px solid;border-radius:2px;white-space:nowrap}
 .pf-pil .p{color:#3DDC97;border-color:#3DDC9760;background:rgba(61,220,151,.07)}.pf-pil .m{color:#FF6B5E;border-color:#FF6B5E60;background:rgba(255,107,94,.07)}.pf-pil .u{color:#8b97a0;border-color:#4a5a62;border-style:dashed}
 .pf-bdr{display:flex;align-items:center;overflow-x:auto;padding:6px 0 2px}.pf-bd{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:78px}.pf-bd span{font-size:10px;color:#8fb7bf;max-width:84px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -48,7 +50,8 @@
       const FAMILLES = { Outpost: ['Avant-poste orbital', ['Commercial', 'Industrial', 'Criminal', 'Civilian', 'Scientific', 'Military']], CraterOutpost: ['Port planétaire', ['Outpost Civilian', 'Outpost Industrial', 'Outpost Scientific']] };
       if (!t && etat === 'fin' && FAMILLES[c.type]) t = { libelle: FAMILLES[c.type][0], famille: FAMILLES[c.type][0], precis: false, noms: FAMILLES[c.type][1], premier: false };
       if (etat === 'fin' && PORTS[c.type]) t = { libelle: PORTS[c.type], famille: 'Port orbital', precis: true, noms: [PORTS[c.type]], premier: !!(t && t.premier) };
-      return { nom: /ColonisationShip/i.test(String(c.station || "")) ? "Premier site (navire de colonisation)" : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', ecoPart: (c.economies && c.economies[0] && Number(c.economies[0][1])) || 0, ecoSecond: (c.economies && c.economies[1] && Number(c.economies[1][1])) || 0, etat, pct: etat === 'cha' ? o.pct(c) : 100,
+      if (c.declare && /\|/.test(String(c.declare))) { const d = String(c.declare).split('|'); t = { libelle: d[1], famille: d[0], precis: true, noms: [d[1]], premier: false, declare: true }; }
+      return { mid: String(c.market_id || ''), declare: !!(t && t.declare), nom: /ColonisationShip/i.test(String(c.station || "")) ? "Premier site (navire de colonisation)" : o.nomStation(c.station), noms: t ? t.noms : [], famille: t ? t.famille : '', premier: !!(t && t.premier), eco: (c.economies && c.economies[0] && c.economies[0][0]) || '', ecoPart: (c.economies && c.economies[0] && Number(c.economies[0][1])) || 0, ecoSecond: (c.economies && c.economies[1] && Number(c.economies[1][1])) || 0, etat, pct: etat === 'cha' ? o.pct(c) : 100,
         lib: t ? (t.precis ? t.libelle : t.famille).toUpperCase() : 'TYPE NON RELEVÉ' };
     };
     const tout = (s.finies || []).map(c => inst(c, 'fin')).concat((s.chantiers || []).map(c => inst(c, 'cha')));
@@ -76,7 +79,16 @@
       const st = i.etat === 'fin' ? '<span style="color:#00FF66">✔ TERMINÉE</span>' : `<span style="color:#FF7100">EN CONSTRUCTION · ${i.pct} %</span>`;
       const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Plusieurs types possibles pour cette recette : les effets sont donnés en fourchette.">≈</span>' : '';
       const ind = affine(i) ? ` <span style="color:#7fe9ff;border-bottom:1px dotted #7fe9ff;cursor:help;font-size:.8em" title="Type affiné d'après l'économie de la station relevée à l'amarrage (indice : les liens de marché du système peuvent la modifier).">éco.</span>` : '';
-      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles pour cette installation, d'après sa recette et son économie">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div></div></div></div>`;
+      let ctl = '';
+      if (o.estArchitecte && i.mid && o.declarer) {
+        if (i.declare) ctl = `<button type="button" class="pf-btn" onclick="${o.declarer}('${i.mid}','')" title="Retirer le type que vous avez déclaré">RETIRER LE TYPE DÉCLARÉ</button>`;
+        else if (c.length !== 1) {
+          const choix = c.length > 1 ? c : E.ROWS, famille = [...new Set(choix.map(r => r.f))];
+          const opts = famille.map(f => `<optgroup label="${esc(f)}">${choix.filter(r => r.f === f).map(r => `<option value="${esc(r.f)}|${esc(r.n)}">${esc(r.n)}</option>`).join('')}</optgroup>`).join('');
+          ctl = `<select class="pf-sel" onchange="${o.declarer}('${i.mid}', this.value)" title="Vous êtes l'architecte : si vous connaissez le type de cette installation, déclarez-le (visible de l'escadron, retirable)"><option value="">Déclarer le type…</option>${opts}</select>`;
+        }
+      }
+      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}${i.declare ? ' · DÉCLARÉ PAR L\'ARCHITECTE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles pour cette installation, d'après sa recette et son économie">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div>${ctl}</div></div></div>`;
     }).join('');
     const groupes = ORDRE.map(([t, ks]) => `<div class="pf-grp ${t === ORDRE[0][0] ? 'f' : ''}">${t}</div>${ks.map(jauge).join('')}`).join('');
     const eco = Object.keys(P.eco).sort((a, b) => P.eco[b] - P.eco[a]).map(k => `<span>${esc(k)} × ${P.eco[k]}</span>`).join('') || '<span style="color:#777">—</span>';

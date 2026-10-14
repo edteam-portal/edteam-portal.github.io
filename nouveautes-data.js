@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-colonisation-profil-systeme', date: '2026-10-14T20:02:03Z', type: 'NOUVEAU',
         titre: 'Colonisation : le profil de chaque système',
-        texte: 'La fenêtre d’un système colonisé affiche maintenant son profil : développement, technologie, sécurité, richesse, niveau de vie, population et points de construction, additionnés d’après les installations, avec un pictogramme et les effets de chacune. Le sélecteur « Avec les chantiers » montre ce que donneraient les constructions en cours. Seules les installations dont le type est sûr (reconnu d’après la recette du chantier ou le type de station du jeu) sont additionnées : une installation de type incertain est signalée mais n’ajoute rien, le site ne devine pas. Ce sont des estimations d’après la feuille communautaire de CMDR DaftMav. Il faut le plugin SYS.EDTEAM 2.27 (version mobile à venir).',
+        texte: 'La fenêtre d’un système colonisé affiche maintenant son profil : développement, technologie, sécurité, richesse, niveau de vie, population et points de construction, additionnés d’après les installations, avec un pictogramme et les effets de chacune. Le sélecteur « Avec les chantiers » montre ce que donneraient les constructions en cours. Seules les installations dont le type est sûr (reconnu d’après la recette du chantier ou le type de station du jeu) sont additionnées : une installation de type incertain est signalée mais n’ajoute rien, le site ne devine pas ; l’architecte du système peut en déclarer le type pour qu’elle compte. Ce sont des estimations d’après la feuille communautaire de CMDR DaftMav. Il faut le plugin SYS.EDTEAM 2.27 (version mobile à venir).',
         important: false
     },
     {
