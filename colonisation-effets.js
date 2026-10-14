@@ -73,8 +73,10 @@
   const OBSERVE = { 'Avant-poste orbital|Industrial': { dev: 3, pi: 1, pm: 1 }, 'Avant-poste orbital|Civilian': { niv: 2, pi: 1, pm: 1 }, 'Avant-poste orbital|Military': { pi: 1, pm: 1 } };
   // HUBS DE SURFACE : le journal des modifications de la feuille indique +1 population initiale et +1 population max (cellules vides dans la table).
   ROWS.forEach(r => { const o = OBSERVE[r.f + '|' + r.n]; if (o) { Object.assign(r, o); r.obs = true; } if (r.f === 'Hub de surface') { r.pi = 1; r.pm = 1; } });
-  // PORTS : le jeu applique un bonus au premier port et un malus aux suivants, que la feuille ne sait pas chiffrer : on le signale, on ne le calcule pas.
-  const estPort = r => r.f === 'Port orbital' || (r.f === 'Port planétaire' && r.n === 'Port');
+  // POIDS OFFICIELS (notes de mise a jour 4.2.2.0 « Dodec », retroactifs) : l'effet d'une installation sur le SYSTEME est pondere. Le port INITIAL (premier site) pese davantage :
+  // developpement +40 %, securite +40 %, niveau de vie +40 %, technologie +20 %, richesse +40 % ; les installations SUIVANTES pesent moins : developpement -10 %, securite -10 %,
+  // niveau de vie -20 %, technologie -25 %, richesse -25 %. La population n'est pas ponderee. Les valeurs affichees par installation (panneau du jeu) ne sont PAS ponderees.
+  const POIDS = { p: { dev: 1.4, sec: 1.4, niv: 1.4, tec: 1.2, ric: 1.4 }, s: { dev: 0.9, sec: 0.9, niv: 0.8, tec: 0.75, ric: 0.75 } };
   // Bonus du PREMIER site (revendication du systeme) : observe une seule fois (avant-poste industriel : +1 dev., +1 pop., +1 pop. max). A CONFIRMER.
   // (14/10) NEUTRALISE : deux ports principaux releves en jeu donnent des ecarts differents (Vess Platform : +1 dev., +1 pop., +1 pop. max ; Tshang City : +1 pop., +1 pop. max, +1 niveau de vie) ;
   // la regle n'est pas comprise, donc elle n'est pas appliquee. Les effets du port principal sont donc comptes comme ceux d'une installation ordinaire.
@@ -93,19 +95,20 @@
   // Profil d'un systeme : pour chaque indicateur, le total sur (min, max) ; max = min quand tous les types sont surs.
   function profilSysteme(installations) {
     const P = {}; CLES.forEach(k => { P[k] = { min: 0, max: 0 }; });
-    const lignes = []; let surs = 0, incertains = 0, inconnus = 0, ports = 0; const eco = {};
+    const lignes = []; let surs = 0, incertains = 0, inconnus = 0, premiers = 0; const eco = {};
     installations.forEach(inst => {
       const c = candidats(inst);
       if (!c.length) { inconnus++; lignes.push({ inst, c, etat: 'inconnu' }); return; }
       // REGLE (14/10) : on ne deduit jamais ce qui n'est pas sur. Une installation de type incertain est signalee mais n'ajoute RIEN aux totaux (pas de fourchette).
       if (c.length > 1) { incertains++; lignes.push({ inst, c, etat: 'incertain' }); return; }
-      surs++; if (estPort(c[0])) ports++;
-      CLES.forEach(k => { const v = c[0][k] + (inst.premier ? (BONUS_PREMIER[k] || 0) : 0); P[k].min += v; P[k].max += v; });
+      surs++; if (inst.premier) premiers++;
+      CLES.forEach(k => { const v = c[0][k] * ((POIDS[inst.premier ? 'p' : 's'][k]) || 1); P[k].min += v; P[k].max += v; });
       if (c[0].eco) eco[c[0].eco] = (eco[c[0].eco] || 0) + 1;
       lignes.push({ inst, c, etat: 'sur' });
     });
-    return { indic: P, lignes, surs, incertains, inconnus, eco, ports };
+    CLES.forEach(k => { P[k].min = Math.round(P[k].min * 10) / 10; P[k].max = P[k].min; });
+    return { indic: P, lignes, surs, incertains, inconnus, eco, premiers };
   }
-  window.EDTEAM_EFFETS = { ECO_JEU, CLES, LIBELLES, ROWS, BONUS_PREMIER, candidats, profilSysteme };
+  window.EDTEAM_EFFETS = { ECO_JEU, CLES, LIBELLES, ROWS, POIDS, candidats, profilSysteme };
 
 })();
