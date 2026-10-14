@@ -22,7 +22,7 @@
 .pf-pos{color:#3DDC97}.pf-neg{color:#FF6B5E}.pf-zer{color:#8b97a0}
 .pf-tags{display:flex;gap:6px;flex-wrap:wrap}.pf-tags span{border:1px solid #456;padding:3px 10px;font-size:.8em;letter-spacing:1px;border-radius:2px;color:#cfe9dd}
 .pf-cartes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:2px;max-height:470px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
-.pf-car{background:rgba(0,0,0,.45);border:1px solid #2c2c2c;border-left:3px solid #00FF66;padding:7px 10px;border-radius:3px}.pf-car.cha{border-left-color:#FF7100;opacity:.92}.pf-car.off{opacity:.28;filter:grayscale(.6)}
+.pf-car{background:rgba(0,0,0,.45);border:1px solid #2c2c2c;border-left:3px solid #00FF66;padding:7px 10px;border-radius:3px}.pf-car.cha{border-left-color:#FF7100;opacity:.92}.pf-car.dec{border-left-color:#FFB44D;background:rgba(255,180,77,.06)}.pf-car.off{opacity:.28;filter:grayscale(.6)}
 .pf-cw{display:flex;gap:9px;align-items:flex-start}.pf-cb{flex:1;min-width:0}
 .pf-t{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1px 8px;align-items:baseline}.pf-t b{flex:1 1 130px;min-width:0;color:#fff;font-weight:normal;font-size:.95em;word-break:break-word}.pf-t span{font-size:.62em;letter-spacing:1.5px;white-space:nowrap}
 .pf-ty{color:#8fb7bf;font-size:.74em;letter-spacing:1px;margin:1px 0 4px}
@@ -74,10 +74,10 @@
     const cartes = tout.map(i => {
       const c = cand(i); let pil = '';
       if (!c.length) pil = `<span class="u">${i.noms.length ? 'pas dans la feuille' : 'type non relevé'}</span>`;
-      else if (c.length > 1) pil = '<span class="u">type incertain : effets non comptés</span>';
+      else if (c.length > 1) pil = '';
       else E.CLES.filter(k => k !== 't2' && k !== 't3').forEach(k => { const v = c.map(r => r[k] + (i.premier ? (E.BONUS_PREMIER[k] || 0) : 0)), a = Math.min(...v), b = Math.max(...v); if (a || b) pil += `<span class="${(a + b) >= 0 ? 'p' : 'm'}">${COURT[k]} ${a === b ? f(a) : f(a) + '…' + f(b)}</span>`; });
       const st = i.etat === 'fin' ? '<span style="color:#00FF66">✔ TERMINÉE</span>' : `<span style="color:#FF7100">EN CONSTRUCTION · ${i.pct} %</span>`;
-      const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Plusieurs types possibles pour cette recette : les effets sont donnés en fourchette.">≈</span>' : '';
+      const inc = c.length > 1 ? ' <span style="color:#FFB44D;border-bottom:1px dotted #FFB44D;cursor:help" title="Type à déclarer par l\'architecte du système">≈</span>' : '';
       const ind = affine(i) ? ` <span style="color:#7fe9ff;border-bottom:1px dotted #7fe9ff;cursor:help;font-size:.8em" title="Type affiné d'après l'économie de la station relevée à l'amarrage (indice : les liens de marché du système peuvent la modifier).">éco.</span>` : '';
       let ctl = '';
       if (o.estArchitecte && i.mid && o.declarer) {
@@ -88,7 +88,7 @@
           ctl = `<select class="pf-sel" onchange="${o.declarer}('${i.mid}', this.value)" title="Vous êtes l'architecte : si vous connaissez le type de cette installation, déclarez-le (visible de l'escadron, retirable)"><option value="">Déclarer le type…</option>${opts}</select>`;
         }
       }
-      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}${i.declare ? ' · DÉCLARÉ PAR L\'ARCHITECTE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles pour cette installation, d'après sa recette et son économie">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div>${ctl}</div></div></div>`;
+      return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${c.length > 1 ? 'dec' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}${i.declare ? ' · DÉCLARÉ PAR L\'ARCHITECTE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles : l'architecte du système peut déclarer le bon">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div>${ctl}</div></div></div>`;
     }).join('');
     const groupes = ORDRE.map(([t, ks]) => `<div class="pf-grp ${t === ORDRE[0][0] ? 'f' : ''}">${t}</div>${ks.map(jauge).join('')}`).join('');
     const eco = Object.keys(P.eco).sort((a, b) => P.eco[b] - P.eco[a]).map(k => `<span>${esc(k)} × ${P.eco[k]}</span>`).join('') || '<span style="color:#777">—</span>';
@@ -98,7 +98,7 @@
         <div class="pf-profil"><div class="pf-band"><div class="pf-grp f">VUE D'ENSEMBLE</div><div class="pf-bdr">${bandeau}</div></div>
         <div class="pf-pg">${nul ? '<div style="color:#8b97a0;font-size:.85em;margin-bottom:8px;">Aucun type d\'installation reconnu pour l\'instant : le profil se remplit quand la liste des marchandises d\'un chantier est relevée.</div>' : ''}${groupes}<div class="pf-grp">ÉCONOMIES</div><div class="pf-tags">${eco}</div></div>
         <div class="pf-pd"><div class="pf-grp f">EFFET DE CHAQUE INSTALLATION</div><div class="pf-cartes">${cartes}</div></div></div>
-        <div class="pf-fiab"><span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> de type incertain (non comptées)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille (non comptées)</span>${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}</div>
-        <div class="pf-pied">Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations dont le <b>type est sûr</b> sont additionnées : une installation de type incertain n'ajoute rien (on ne devine pas). Seules les installations vues par le plugin sont comptées ; celles qui existaient déjà ne le sont pas. Les points de construction ne sont pas affichés : leur coût dépend de ce qui a été construit avant. Le premier site (port principal) peut recevoir des effets calculés différemment par le jeu.</div></div>`;
+        <div class="pf-fiab"><span><i class="pf-pt" style="background:#3DDC97"></i><b>${P.surs}</b> de type sûr</span><span><i class="pf-pt" style="background:#FFB44D"></i><b>${P.incertains}</b> en orange : à déclarer par l'architecte (non comptées)</span><span><i class="pf-pt" style="background:#6b7680"></i><b>${P.inconnus}</b> sans type ou hors feuille (non comptées)</span>${mode === 'prevu' ? '<span><i class="pf-pt" style="background:#fff;opacity:.5"></i>trait clair = valeur actuelle</span>' : ''}</div>
+        <div class="pf-pied">Estimations d'après la feuille communautaire de CMDR DaftMav : le jeu n'affiche pas de total de système pour les vérifier. Seules les installations dont le <b>type est connu</b> sont additionnées ; une installation en <b>orange</b> n'ajoute rien tant que l'architecte n'a pas déclaré son type (on ne devine pas). Seules les installations vues par le plugin sont comptées ; celles qui existaient déjà ne le sont pas. Les points de construction ne sont pas affichés : leur coût dépend de ce qui a été construit avant. Le premier site (port principal) peut recevoir des effets calculés différemment par le jeu.</div></div>`;
   };
 })();
