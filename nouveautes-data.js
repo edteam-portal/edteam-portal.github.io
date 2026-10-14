@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-sans-architecte', date: '2026-10-14T22:14:35Z', type: 'AMELIORE',
+        titre: 'Colonisation : déclarer les systèmes sans architecte',
+        texte: 'Quand le jeu n’a pas enregistré la revendication d’un système, son architecte reste inconnu et ses chantiers ne lui sont pas rattachés. La page Colonisation affiche maintenant un bandeau « Systèmes sans architecte (à déclarer) », avec une liste filtrable, et une fenêtre à l’arrivée tant qu’il en reste : si vous êtes l’architecte de l’un d’eux, cliquez sur « Je suis l’architecte ». Les confirmations de cette page ont aussi été refaites au style du site.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-profil-systeme', date: '2026-10-14T20:02:03Z', type: 'NOUVEAU',
         titre: 'Colonisation : le profil de chaque système',
         texte: 'La fenêtre d’un système colonisé affiche maintenant son profil : développement, technologie, sécurité, richesse, niveau de vie, population et points de construction, additionnés d’après les installations, avec un pictogramme et les effets de chacune. Le sélecteur « Avec les chantiers » montre ce que donneraient les constructions en cours. Seules les installations dont le type est connu (reconnu d’après la recette du chantier ou le type de station du jeu) sont additionnées : une installation en orange n’ajoute rien, le site ne devine pas ; l’architecte du système peut en déclarer le type pour qu’elle compte. Ce sont des estimations d’après la feuille communautaire de CMDR DaftMav. Il faut le plugin SYS.EDTEAM 2.27 (version mobile à venir).',

@@ -19,6 +19,8 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="navigation.js?v=31"></script>
+    <script src="dialogue.js?v=1"></script>
+    <script src="colonisation-architectes.js?v=2"></script>
     <script src="colonisation-types.js?v=2"></script>
     <script src="colonisation-effets.js?v=7"></script>
     <script src="colonisation-visuels.js?v=1"></script>
@@ -1211,6 +1213,7 @@
                         <span onclick="actualiserPage()" style="color:${B};font-size:.65em;letter-spacing:1px;margin-left:10px;cursor:pointer;border-bottom:1px dashed ${B};">ACTUALISER</span></h3>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;">${selecteurPilote}${pilule('SYSTÈMES', fmt(kpi.systemes), B)}${pilule('TERMINÉES', fmt(kpi.construites), G)}${pilule('CHANTIERS', fmt(kpi.chantiers), O)}${nomFiltre ? '' : pilule('LIVRÉES CE CYCLE', fmt(kpi.tonnes_cycle) + ' t', GOLD)}</div>
                 </div>
+                ${typeof window.coloBanniereArchi === 'function' ? window.coloBanniereArchi() : ''}
                 <div style="color:#8a8a8a;font-size:.8em;line-height:1.5;margin:-4px 0 12px;">ⓘ Tableau établi d'après ce que ${data.perso ? 'votre plugin a relevé' : "les plugins de l'escadron ont relevé"} (chantiers consultés, livraisons, revendications). Il peut être en retard ou incomplet par rapport à l'état réel du jeu : un chantier n'apparaît qu'après avoir été consulté ou alimenté par un pilote dont le plugin est à jour.</div>
                 ${data.perso_a_verser ? `<div style="background:rgba(255,215,0,.07);border:1px solid ${GOLD};border-radius:4px;padding:12px 16px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
                     <div style="color:#ddd;font-size:.9em;line-height:1.6;"><span style="color:${GOLD};letter-spacing:2px;font-weight:bold;">ESPACE PERSONNEL</span><br>Avant de rejoindre l'escadron, vous aviez relevé ${fmt(data.perso_a_verser.systemes)} système${data.perso_a_verser.systemes > 1 ? 's' : ''}, ${fmt(data.perso_a_verser.chantiers)} chantier${data.perso_a_verser.chantiers > 1 ? 's' : ''} et ${fmt(data.perso_a_verser.livraisons)} livraison${data.perso_a_verser.livraisons > 1 ? 's' : ''}. Seul vous les voyez pour l'instant ; ils ne sont pas affichés ici.</div>
@@ -1266,6 +1269,7 @@
             rendreCarte();   // applique le zoom et le centre conservés (et le libellé du zoom)
             JR.q = ''; JR.type = ''; JR.pilote = ''; JR.pilotesOk = false;
             chargerJournalBloc(!!window.__jrForce); window.__jrForce = false;
+            if (typeof window.coloMajListeArchi === 'function') { window.coloMajListeArchi(); window.coloAccueilArchi(); }
         }
 
         // ---------------------------------------------------------------
@@ -1275,14 +1279,15 @@
         window.coloDeclarerType = async function (mid, val) {
             const reouvrir = async () => { const i = ((window.__colo && window.__colo.systemes) || []).findIndex(x => x.nom === window.__coloOuvert); if (i >= 0) ouvrirSysteme(i, true); };
             const d = val ? String(val).split('|') : null;
-            const msg = d ? "Déclarer cette installation comme « " + d[1] + " » ?\n\nCette déclaration est visible de l'escadron et sert à calculer le profil du système ; vous pourrez la retirer."
-                : "Retirer le type déclaré pour cette installation ?";
-            if (!confirm(msg)) { await reouvrir(); return; }
+            const ok = await window.edConfirmer(d
+                ? { titre: 'DÉCLARER LE TYPE', texte: 'Déclarer cette installation comme <b>' + esc(d[1]) + '</b> ?', detail: "Cette déclaration est visible de l'escadron et sert à calculer le profil du système. Vous pourrez la retirer.", ok: 'DÉCLARER' }
+                : { titre: 'RETIRER LA DÉCLARATION', texte: 'Retirer le type déclaré pour cette installation ?', detail: 'Elle redeviendra à déclarer et ne comptera plus dans le profil du système.', ok: 'RETIRER' });
+            if (!ok) { await reouvrir(); return; }
             try {
                 const { data, error } = await supabaseApp.rpc('col_declarer_type', { p_market_id: Number(mid), p_famille: d ? d[0] : null, p_type: d ? d[1] : null });
                 if (error || !data || data.erreur) {
                     const e = data && data.erreur;
-                    alert(e === 'pas_architecte' ? "Seul l'architecte du système peut déclarer le type d'une installation." : "La déclaration n'a pas pu être enregistrée. Réessayez plus tard.");
+                    await window.edInfo({ titre: 'DÉCLARATION IMPOSSIBLE', texte: e === 'pas_architecte' ? "Seul l'architecte du système peut déclarer le type d'une installation." : "La déclaration n'a pas pu être enregistrée.", detail: e === 'pas_architecte' ? '' : 'Réessayez plus tard.', ton: 'rouge' });
                     await reouvrir(); return;
                 }
                 await actualiserPage();
@@ -1450,30 +1455,31 @@
             }
             return '';
         }
-        async function declarerArchitecte(adresse, retirer) {
-            const msg = retirer ? "Retirer votre déclaration d'architecte pour ce système ?"
-                : "Vous déclarer architecte de ce système ?\n\nL'architecte est le pilote qui a revendiqué le système en jeu. Cette déclaration est visible de l'escadron ; vous pourrez la retirer.";
-            if (!confirm(msg)) return;
+        async function declarerArchitecte(adresse, retirer, silencieux) {
+            const ok = await window.edConfirmer(retirer
+                ? { titre: 'RETIRER LA DÉCLARATION', texte: "Retirer votre déclaration d'architecte pour ce système ?", detail: "Le système n'aura plus d'architecte enregistré.", ok: 'RETIRER' }
+                : { titre: "SE DÉCLARER ARCHITECTE", texte: 'Vous déclarer <b>architecte</b> de ce système ?', detail: "L'architecte est le pilote qui a revendiqué le système en jeu. Cette déclaration est visible de l'escadron ; vous pourrez la retirer.", ok: 'JE SUIS L\'ARCHITECTE' });
+            if (!ok) return false;
             try {
                 const { data, error } = await supabaseApp.rpc('col_declarer_architecte', { p_adresse: Number(adresse), p_retirer: !!retirer });
                 if (error || !data || data.erreur) {
                     const e = data && data.erreur;
-                    alert(e === 'deja' ? "Ce système a déjà un architecte enregistré." : "La déclaration n'a pas pu être enregistrée. Réessayez plus tard.");
+                    await window.edInfo({ titre: 'DÉCLARATION IMPOSSIBLE', texte: e === 'deja' ? 'Ce système a déjà un architecte enregistré.' : "La déclaration n'a pas pu être enregistrée.", detail: e === 'deja' ? '' : 'Réessayez plus tard.', ton: 'rouge' });
                     if (e === 'deja') await actualiserPage();
-                    return;
+                    return false;
                 }
                 await actualiserPage();
-                const i = ((window.__colo && window.__colo.systemes) || []).findIndex(x => String(x.adresse) === String(adresse));
-                if (i >= 0) ouvrirSysteme(i, true);
-            } catch (e) { console.error('Erreur déclaration architecte :', e); }
+                if (!silencieux) { const i = ((window.__colo && window.__colo.systemes) || []).findIndex(x => String(x.adresse) === String(adresse)); if (i >= 0) ouvrirSysteme(i, true); }
+                return true;
+            } catch (e) { console.error('Erreur déclaration architecte :', e); return false; }
         }
 
         // Le pilote verse LUI-MEME son espace personnel a l'escadron (jamais automatique, operation unique).
         async function verserEspacePerso() {
-            if (!confirm("Verser vos systèmes, chantiers et livraisons personnels à l'escadron ?\n\nTous les membres de l'escadron les verront (avec votre nom pour les livraisons et la revendication). Cette action est définitive.")) return;
+            if (!(await window.edConfirmer({ titre: 'VERSER VOTRE ESPACE PERSONNEL', texte: "Verser vos systèmes, chantiers et livraisons personnels à <b>l'escadron</b> ?", detail: "Tous les membres de l'escadron les verront, avec votre nom pour les livraisons et la revendication. <b style=\"color:#FF6B5E;font-weight:bold\">Cette action est définitive.</b>", ok: 'VERSER', ton: 'rouge' }))) return;
             try {
                 const { data, error } = await supabaseApp.rpc('col_verser_espace_perso');
-                if (error || !data || data.erreur) { alert("Le versement n'a pas pu être effectué. Réessayez plus tard."); return; }
+                if (error || !data || data.erreur) { await window.edInfo({ titre: 'VERSEMENT IMPOSSIBLE', texte: "Le versement n'a pas pu être effectué.", detail: 'Réessayez plus tard.', ton: 'rouge' }); return; }
                 await actualiserPage();
             } catch (e) { console.error('Erreur versement colonisation :', e); }
         }
