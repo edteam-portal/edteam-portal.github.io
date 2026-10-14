@@ -35,8 +35,44 @@
 .pf-lien{flex:1;min-width:14px;height:1px;background:linear-gradient(90deg,rgba(0,240,255,.15),rgba(0,240,255,.5),rgba(0,240,255,.15));margin-bottom:14px}
 .pf-fiab{display:flex;gap:14px;flex-wrap:wrap;font-size:.8em;color:#9fb0b8;margin-top:10px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.12)}.pf-fiab b{color:#fff;font-weight:normal}.pf-pt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
 .pf-pied{margin-top:8px;color:#8b97a0;font-size:.78em;line-height:1.5}
+#pf-choix{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px}
+.pf-cm{background:rgba(10,5,0,.98);border:1px solid #FF7100;box-shadow:0 0 30px rgba(255,113,0,.25);width:min(1100px,100%);max-height:92vh;overflow-y:auto}
+.pf-cm-h{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,113,0,.3);background:rgba(255,113,0,.05)}.pf-cm-h small{color:#888;letter-spacing:2px;font-size:.75em;display:block}.pf-cm-n{color:#FF7100;font-size:1.35em;font-weight:bold;letter-spacing:2px}
+.pf-cm-a{padding:12px 20px;color:#c9d6db;font-size:.88em;line-height:1.5;border-bottom:1px dashed #2a2a2a}.pf-cm-a b{color:#fff;font-weight:normal;border-bottom:1px dotted #FFB44D}
+.pf-cm-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;padding:14px 20px 20px}
+.pf-cc{background:rgba(0,0,0,.5);border:1px solid #2c3a40;border-left:3px solid #00F0FF;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
+.pf-cc-t{display:flex;gap:10px;align-items:center;margin-bottom:3px}.pf-cc-t b{color:#fff;font-weight:normal;font-size:1.02em}.pf-cc-t small{display:block;color:#7fa5ae;font-size:.7em;letter-spacing:1px}
+.pf-cl{display:grid;grid-template-columns:minmax(0,1fr) auto 30px;gap:8px;align-items:center;font-size:.8em;color:#d8e6ea}.pf-cl b{text-align:right}
+.pf-chv{display:inline-flex;align-items:center;font-size:12px;line-height:1;font-weight:bold}.pf-chv i{font-style:normal;color:#35424b;width:6px;text-align:center}.pf-chv i.p{color:#1E90FF}.pf-chv i.n{color:#FF3B30}.pf-chv u{width:6px}
+.pf-ok{margin-top:6px;background:rgba(0,240,255,.1);border:1px solid #00F0FF;color:#00F0FF;font:inherit;font-size:.8em;letter-spacing:1px;padding:5px 8px;cursor:pointer}.pf-ok:hover{background:rgba(0,240,255,.25);color:#fff}
 @media (max-width:900px){.pf-profil{grid-template-columns:1fr}.pf-band{grid-column:1}.pf-pg{border-right:0;border-bottom:1px solid rgba(0,240,255,.2)}.pf-cartes{grid-template-columns:1fr}}`;
   if (!document.getElementById('pf-css')) { const st = document.createElement('style'); st.id = 'pf-css'; st.textContent = CSS; document.head.appendChild(st); }
+
+
+  // ---- AIDE A LA DECLARATION : fenetre de comparaison (l'architecte compare avec le panneau « Effets de l'installation » du jeu, puis choisit)
+  const EFFETS_JEU = [['dev', 'Développement'], ['pi', 'Population initiale'], ['pm', 'Population max'], ['tec', 'Technologie'], ['sec', 'Sécurité'], ['niv', 'Niveau de vie'], ['ric', 'Richesse']];   // ordre d'affichage du jeu
+  const chevrons = v => {
+    const g = [0, 0, 0, 0], d = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    if (v < 0) for (let k = 0; k < -v && k < 4; k++) g[3 - k] = 1; else for (let k = 0; k < v && k < 9; k++) d[k] = 1;
+    return '<span class="pf-chv">' + g.map(x => `<i class="${x ? 'n' : ''}">‹</i>`).join('') + '<u></u>' + d.map(x => `<i class="${x ? 'p' : ''}">›</i>`).join('') + '</span>';
+  };
+  window.coloChoixType = function (mid) {
+    const c = (window.__pfChoix || {})[mid]; if (!c) return;
+    const esc = c.esc, E = window.EDTEAM_EFFETS;
+    const carte = r => {
+      const lignes = EFFETS_JEU.filter(([k]) => r[k]).map(([k, lb]) => `<div class="pf-cl"><span>${lb}</span>${chevrons(r[k])}<b class="${r[k] > 0 ? 'pf-pos' : 'pf-neg'}">${f(r[k])}</b></div>`).join('') || '<div class="pf-cl"><span style="color:#8b97a0">aucun effet de ce type</span></div>';
+      return `<div class="pf-cc"><div class="pf-cc-t">${window.EDTEAM_ICONE(r.f, r.n, { eco: r.eco, taille: 38 })}<div><b>${esc(r.n)}</b><small>${esc(r.f)}</small></div></div>${lignes}<button type="button" class="pf-ok" onclick="document.getElementById('pf-choix').remove();${c.declarer}('${mid}','${esc(r.f)}|${esc(r.n)}')">C'EST CELUI-CI</button></div>`;
+    };
+    const fam = [...new Set(c.choix.map(r => r.f))];
+    const corps = fam.map(F => (fam.length > 1 ? `<div class="pf-grp f" style="grid-column:1/-1">${esc(F.toUpperCase())}</div>` : '') + c.choix.filter(r => r.f === F).map(carte).join('')).join('');
+    const old = document.getElementById('pf-choix'); if (old) old.remove();
+    const m = document.createElement('div'); m.id = 'pf-choix';
+    m.onclick = ev => { if (ev.target === m) m.remove(); };
+    m.innerHTML = `<div class="pf-cm"><div class="pf-cm-h"><div><small>DÉCLARER LE TYPE</small><div class="pf-cm-n">${esc(c.nom)}</div></div><span onclick="document.getElementById('pf-choix').remove()" style="cursor:pointer;color:#FF7100;font-weight:bold">X</span></div>
+      <div class="pf-cm-a">Dans le jeu : ouvrez la carte de colonisation, cliquez sur cette installation et regardez le panneau <b>« Effets de l'installation »</b>. Comparez <b>quelles lignes sont présentes, et si elles montent (bleu) ou baissent (rouge)</b> avec les cartes ci-dessous, puis choisissez. Les lignes de population peuvent s'ajouter dans le jeu : ne les prenez pas en compte.</div>
+      <div class="pf-cm-g">${corps}</div></div>`;
+    document.body.appendChild(m);
+  };
 
   // o = { esc, nomStation(station), pct(chantier) -> %, mode : 'actuel' | 'prevu', onMode : nom de la fonction globale appelee par le selecteur }
   window.coloProfilHtml = function (s, o) {
@@ -83,9 +119,8 @@
       if (o.estArchitecte && i.mid && o.declarer) {
         if (i.declare) ctl = `<button type="button" class="pf-btn" onclick="${o.declarer}('${i.mid}','')" title="Retirer le type que vous avez déclaré">RETIRER LE TYPE DÉCLARÉ</button>`;
         else if (c.length !== 1) {
-          const choix = c.length > 1 ? c : E.ROWS, famille = [...new Set(choix.map(r => r.f))];
-          const opts = famille.map(f => `<optgroup label="${esc(f)}">${choix.filter(r => r.f === f).map(r => `<option value="${esc(r.f)}|${esc(r.n)}">${esc(r.n)}</option>`).join('')}</optgroup>`).join('');
-          ctl = `<select class="pf-sel" onchange="${o.declarer}('${i.mid}', this.value)" title="Vous êtes l'architecte : si vous connaissez le type de cette installation, déclarez-le (visible de l'escadron, retirable)"><option value="">Déclarer le type…</option>${opts}</select>`;
+          (window.__pfChoix = window.__pfChoix || {})[i.mid] = { nom: i.nom, choix: c.length > 1 ? c : E.ROWS, declarer: o.declarer, esc };
+          ctl = `<button type="button" class="pf-sel" onclick="coloChoixType('${i.mid}')" title="Vous êtes l\'architecte : comparez avec le jeu puis déclarez le type (visible de l\'escadron, retirable)">DÉCLARER LE TYPE…</button>`;
         }
       }
       return `<div class="pf-car ${i.etat === 'cha' ? 'cha' : ''} ${c.length > 1 ? 'dec' : ''} ${mode === 'prevu' || i.etat === 'fin' ? '' : 'off'}"><div class="pf-cw">${pic(i, c, 44)}<div class="pf-cb"><div class="pf-t"><b>${esc(i.nom)}${inc}${ind}</b>${st}</div><div class="pf-ty">${esc(i.lib)}${i.premier ? ' · PREMIER SITE' : ''}${i.declare ? ' · DÉCLARÉ PAR L\'ARCHITECTE' : ''}</div>${c.length > 1 ? `<div class="pf-poss" title="Types possibles : l'architecte du système peut déclarer le bon">≈ ${esc(c.slice(0, 4).map(r => r.n).join(' · '))}${c.length > 4 ? ' · +' + (c.length - 4) : ''}</div>` : ''}<div class="pf-pil">${pil}</div>${ctl}</div></div></div>`;
