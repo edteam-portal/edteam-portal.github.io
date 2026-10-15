@@ -313,7 +313,7 @@
         .tb-invite { border:1px dashed #3a3a2a; padding:20px 22px; color:#aaa; line-height:1.6; }
         .tb-invite b { display:block; color:#fff; font-weight:normal; font-size:1.05em; margin-bottom:4px; } .tb-invite span { display:block; font-size:.9em; }
         .tb-attente { display:flex; align-items:center; gap:16px; padding:22px; border:1px solid rgba(255,215,0,.4); background:rgba(255,215,0,.05); }
-        .tb-attente b { display:block; color:#FFD700; font-weight:normal; letter-spacing:1px; } .tb-attente span { color:#9a9; font-size:.85em; }
+        .tb-attente b { display:block; color:#FFD700; font-weight:normal; letter-spacing:1px; } .tb-attente div span { display:block; color:#9a9; font-size:.85em; margin-top:2px; }
         .tb-spin { flex:0 0 auto; width:22px; height:22px; border:3px solid #FFD700; border-top-color:transparent; border-radius:50%; animation:tbTourne .9s linear infinite; }
         @keyframes tbTourne { to { transform:rotate(360deg); } }
         .tb-vx { color:#e8a35a; } .tb-ok { color:#8a9; }
@@ -1627,11 +1627,13 @@
             let corps = "";
             if (enCours) {
                 const att = TOURNEE.t0 ? (Date.now() - new Date(TOURNEE.t0).getTime()) / 1000 : 0;
-                corps = `<div class="tb-attente"><span class="tb-spin"></span><div><b>Calcul en cours chez Spansh · ${duree(att)}</b><span>environ une minute · vous pouvez continuer à jouer ou recharger la page, la tournée s'affiche toute seule</span>${att > 90 ? `<span class="tb-vx">Spansh est occupé : votre recherche attend son tour dans leur file d'attente (jusqu'à 5 minutes).</span>` : ""}</div></div>`;
+                corps = `<div class="tb-attente"><span class="tb-spin"></span><div><b>Calcul en cours chez Spansh · ${duree(att)}</b><span>environ deux minutes · vous pouvez continuer à jouer ou recharger la page, la tournée s'affiche toute seule</span>${att > 90 ? `<span class="tb-vx">Spansh est occupé : votre recherche attend son tour dans leur file d'attente (jusqu'à 5 minutes).</span>` : ""}</div></div>`;
             }
             else if (TOURNEE.statut === "ERREUR") corps = `<div class="tb-banner">${esc(TOURNEE.message)}</div>`;
             if (!enCours && aTournee) corps += tourneeResultat();
-            if (!enCours && !aTournee && TOURNEE.statut !== "ERREUR") {
+            const vide = !enCours && !aTournee && TOURNEE.statut === "PRET" && !!TOURNEE.donnees;     // calcul termine mais aucune tournee trouvee
+            if (vide) { const d0 = (TOURNEE.donnees.depart || {}).station; corps = `<div class="tb-banner">Aucune tournée trouvée depuis ${d0 ? cp(d0) : "ce départ"} avec ces réglages. Essayez des relevés plus anciens (3 j ou 7 j), une portée de saut plus grande, ou amarrez-vous à une station : le départ est alors celle où vous êtes.</div>`; }
+            if (!enCours && !aTournee && !vide && TOURNEE.statut !== "ERREUR") {
                 corps = (ok ? "" : `<div class="tb-banner">En attente de votre position et de la capacité de votre soute (jeu lancé, plugin à jour).</div>`) + noteRepliee("tournee", "UNE TOURNÉE D'ENVIRON UNE HEURE, DEPUIS VOTRE POSITION", `<div class="bloc-note">Le tableau de bord cherche, chez Spansh, la suite d'achats et de ventes la plus rentable pour votre soute (${fmtN(so.cap)} t) : quoi acheter, combien, où, puis où vendre, avec le gain estimé.</div>`);
             }
             const ouvR = REGLOUV.set ? REGLOUV.v : !aTournee, sa = sautUtilise(), hTxt = REGL.heures === 24 ? "1 j" : REGL.heures === 72 ? "3 j" : "7 j";
