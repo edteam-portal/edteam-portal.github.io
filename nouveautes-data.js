@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-fin-ambiance-depot', date: '2026-10-15T20:48:11Z', type: 'AMELIORE',
+        titre: 'Tableau de bord : l’ambiance en boucle du dépôt est supprimée',
+        texte: 'Les ouvriers et les chariots qui tournaient en boucle quand vous transportiez des caisses étaient trop présents : cette ambiance n’existe plus. Les sons ponctuels de chargement et de déchargement restent, ainsi que l’ambiance de cabine quand vous avez des passagers.',
+        important: false
+    },
+    {
         id: '2026-10-plugin-2-29-colonisation', date: '2026-10-15T20:45:50Z', type: 'AMELIORE',
         titre: 'Colonisation : vos livraisons apparaissent dans la minute',
         texte: 'Avant, la fenêtre d’un système colonisé pouvait mettre plusieurs minutes à montrer ce que vous veniez de livrer. Le plugin envoie maintenant vos livraisons environ vingt secondes après la dernière marchandise déposée : plusieurs marchandises livrées à la suite partent ensemble, et la progression du chantier se met à jour toute seule dans la fenêtre ouverte.',

@@ -315,7 +315,9 @@
         if (AMB.k) ambCharge("combat"); else { if (AMB.c) ambCharge("depot"); if (AMB.p > 0) { ambCharge("cabine"); ambChargeAnnonces(); } }
         if (!AMB.timer) { AMB.timer = setInterval(ambTick, 450); ambTick(); }
     }
-    function ambMaj(caisses, passagers, combat) { AMB.c = !!caisses; AMB.p = passagers || 0; AMB.k = !!combat; ambSync(); }
+    // Ambiance de DEPOT en boucle (ouvriers, chariots) : desactivee a la demande du proprietaire (trop presente). Les sons ponctuels de chargement / dechargement restent. Pour la remettre : AMB_DEPOT = true.
+    const AMB_DEPOT = false;
+    function ambMaj(caisses, passagers, combat) { AMB.c = AMB_DEPOT && !!caisses; AMB.p = passagers || 0; AMB.k = !!combat; ambSync(); }
     if (!window.__tbmAmbInit) {
         window.__tbmAmbInit = true;
         const geste = () => { AMB.geste = true; ambIndice(false); ambSync(); };
