@@ -5,7 +5,7 @@
 //  modules OPTIONNELS = compartiments dans la coque, proportionnels a la taille de l'emplacement (rendu « scanner infrarouge », decoupes par la coque),
 //  types regroupes (divers au nez, cabines, racks de soute a l'arriere), petits modules par paires sur les flancs ; passagers qui se baladent dans les cabines,
 //  caisses dans les racks ; infobulle (detail + ingenierie) au survol d'un compartiment. Noms de modules en anglais (donnees Coriolis : modules-data.js).
-//  Depend des variables de la page : S, SILHOUETTES, silhouetteActive, esc, fmtN, COUL_MARCH, nomVaisseau, PAS_FAM, famPassagers (resolues a l'appel).
+//  Depend des variables de la page : S, SILHOUETTES, silhouetteActive, esc, fmtN, COUL_MARCH, nomVaisseau, PAS_FAM, famPassagers, estPassagers (resolues a l'appel).
 //  Les positions des modules dans la coque sont STYLISEES : le jeu ne les donne pas.
 // =====================================================================================================
 (function () {
@@ -278,7 +278,7 @@
         const sil = silhouetteActive(); if (!sil || !S || !S.vaisseau || !(S.vaisseau.mods || []).length) return "";
         const E = esc, mods = preparer(S.vaisseau, sil), opt = mods.filter(m => m.cat === "opt");
         // ---- passagers (famille par type), cargaison et colis de sauvetage
-        const nbF = {}; act.filter(m => m.type === "passagers" && Number(m.pas) > 0).forEach(m => { const f = famPassagers(m); nbF[f] = (nbF[f] || 0) + Number(m.pas); });
+        const nbF = {}; act.filter(estPassagers).forEach(m => { const f = famPassagers(m); nbF[f] = (nbF[f] || 0) + Number(m.pas); });
         const so = S.soute || {}, items = (so.items || []).filter(x => (Number(x.q) || 0) > 0), tonnes = items.reduce((a, x) => a + (Number(x.q) || 0), 0);
         const nm = x => String(x || "").trim().toLowerCase(), besoin = {};
         act.filter(m => m.type === "sauvetage" && Number(m.q) > 0 && m.march).forEach(m => { const k = nm(m.march); besoin[k] = besoin[k] || { n: m.march, q: 0 }; besoin[k].q += Number(m.q); });

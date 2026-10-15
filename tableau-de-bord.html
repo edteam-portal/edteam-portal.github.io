@@ -20,7 +20,7 @@
     <script src="photos.js?v=2"></script>
     <script src="navigation.js?v=31"></script>
     <script src="modules-data.js?v=1"></script>
-    <script src="modules-vaisseau.js?v=10"></script>
+    <script src="modules-vaisseau.js?v=11"></script>
     <script src="minage.js?v=13"></script>
 
     <style>
@@ -993,12 +993,12 @@
             const s = restant(m), u = urgence(s), id = String(m.id), ouvert = id in MOUV ? MOUV[id] : !!defOuvert;
             const rang = (t, v) => v ? `<div class="r"><span>${t}</span><div>${v}</div></div>` : "";
             const paire = (t, v) => v ? `<span class="p"><i>${t}</i> ${v}</span>` : "";
-            const lieu = role === "rendre" ? "à rendre à " + cp(m.os || "") + (m.ost ? " / " + cp(m.ost) : "") : m.sys ? cp(m.sys) + (m.st ? " / " + cp(m.st) : "") : "aucun trajet";
+            const lieu = role === "rendre" ? "à rendre à " + cp(m.os || "") + (m.ost ? " / " + cp(m.ost) : "") : m.sys ? sysListe(m.sys).map(x => cp(x)).join(" · ") + (m.st ? " / " + cp(m.st) : "") : "aucun trajet";
             let prise = m.os ? cp(m.os) + (m.ost ? " / " + cp(m.ost) : "") : "";
             if (m.t) { const age = (Date.now() - new Date(m.t).getTime()) / 1000; if (age > 60) prise = (prise ? prise + " · " : "") + "il y a " + duree(age); }
-            const posIci = S.pos && S.pos.length === 3 ? S.pos : COORDS[cle(S.systeme)], posM = m.sys ? COORDS[cle(m.sys)] : null;
+            const posIci = S.pos && S.pos.length === 3 ? S.pos : COORDS[cle(S.systeme)], dests = sysListe(m.sys), posM = dests.length === 1 ? COORDS[cle(dests[0])] : null;     // plusieurs destinations : pas de distance unique
             let loin = "";
-            if (m.sys && cle(m.sys) === cle(S.systeme)) loin = "ce système";
+            if (dests.some(x => cle(x) === cle(S.systeme))) loin = "ce système";
             else if (posIci && posM) { const d = dist3(posIci, posM), sa = Math.max(1, Math.ceil(d / Math.max(8, sautUtilise()))); loin = d.toFixed(1) + " al · " + sa + " saut" + (sa > 1 ? "s" : ""); }
             const charge = m.pas ? m.pas + " passager" + (m.pas > 1 ? "s" : "") : m.q ? (m.type === "courrier" ? m.q + " colis" : "soute " + fmtN(m.q) + " t") : "";
             const paires = [paire("DISTANCE", loin), paire("CHARGE", charge), paire("DON", m.don ? fmtM(m.don) : ""), paire("RÉPUTATION", m.rep ? esc(m.rep) : ""), paire("INFLUENCE", m.inf ? esc(m.inf) : ""), paire("RENDEMENT", m.rec && s !== null && s >= 1800 ? "≈ " + fmtM(m.rec / (s / 3600)) + " / h" : "")].join("");
@@ -1049,15 +1049,17 @@
             }
             return MEMF;
         }
+        // mission touristique a plusieurs destinations : le jeu ecrit « Arexack$MISSIONUTIL_MULTIPLE_FINAL_SEPARATOR;Gui Xian » (separateur interieur : $MISSIONUTIL_MULTIPLE_INNER_SEPARATOR;)
+        const sysListe = s => String(s || "").split(/\$MISSIONUTIL_MULTIPLE_(?:FINAL|INNER)_SEPARATOR;/i).map(x => x.trim()).filter(Boolean);
         function groupes(act) {
             const ordre = [], par = {};
             act.forEach(m => {
-                const sys = m.sys || "";
-                if (!sys) return;
-                if (aRendre(m) && MEMF && MEMF.sortis[cle(sys)] && cle(sys) !== cle(m.os)) return;     // lieu de la mission deja visite puis quitte : reste seulement a rendre
-                if (!par[sys]) { par[sys] = { sys, ms: [], exp: m.exp || "9999" }; ordre.push(par[sys]); }
-                par[sys].ms.push(m);
-                if (m.exp && m.exp < par[sys].exp) par[sys].exp = m.exp;
+                sysListe(m.sys).forEach(sys => {     // un arret par systeme : la meme mission figure a chacun
+                    if (aRendre(m) && MEMF && MEMF.sortis[cle(sys)] && cle(sys) !== cle(m.os)) return;     // lieu de la mission deja visite puis quitte : reste seulement a rendre
+                    if (!par[sys]) { par[sys] = { sys, ms: [], exp: m.exp || "9999" }; ordre.push(par[sys]); }
+                    par[sys].ms.push(m);
+                    if (m.exp && m.exp < par[sys].exp) par[sys].exp = m.exp;
+                });
             });
             return ordre;
         }
@@ -1217,6 +1219,8 @@
         };
         const PAS_TYPE = { tourist: "ord", business: "ord", explorer: "ord", politician: "off", minorcelebrity: "off", celebrity: "off", security: "sec", aidworker: "sec", politicalprisoner: "sens", criminal: "sens", prisoner: "sens" };
         const famPassagers = m => m.rech ? "sens" : PAS_TYPE[String(m.ptype || "").toLowerCase().replace(/[^a-z]/g, "")] || (m.vip ? "off" : "ord");
+        // mission avec des passagers a bord : transport classique, mais aussi tourisme (« Sightseeing », classee Exploration par le jeu)
+        const estPassagers = m => Number(m.pas) > 0 && (m.type === "passagers" || m.type === "exploration");
         // hologramme du vaisseau : modules (plugin 2.18, modules-vaisseau.js) ; repli sur l'ancien affichage (passagers et soute) tant que le plugin n'envoie pas les modules
         function cabinesHtml(act, opts) {
             const v = S && S.vaisseau;
@@ -1227,7 +1231,7 @@
             if (!sil) return "";
             // passagers par famille
             const nbF = {};
-            act.filter(m => m.type === "passagers" && Number(m.pas) > 0).forEach(m => { const f = famPassagers(m); nbF[f] = (nbF[f] || 0) + Number(m.pas); });
+            act.filter(estPassagers).forEach(m => { const f = famPassagers(m); nbF[f] = (nbF[f] || 0) + Number(m.pas); });
             const nPax = Object.values(nbF).reduce((a, n) => a + n, 0);
             // sauvetage : colis a recuperer (1 t l'unite), moins ce qui est deja en soute (meme nom de marchandise)
             const so = S.soute || {}, items = (so.items || []).filter(x => (Number(x.q) || 0) > 0), capS = Number(so.cap) || 0, tonnes = items.reduce((a, x) => a + (Number(x.q) || 0), 0);

@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-missions-tourisme', date: '2026-10-15T17:25:49Z', type: 'CORRIGE',
+        titre: 'Missions de tourisme : destinations multiples et passagers à bord',
+        texte: 'Les missions de tourisme qui demandent de visiter plusieurs systèmes affichaient un nom illisible du genre « AREXACK$MISSIONUTIL_MULTIPLE… ». Chaque système est maintenant un arrêt du parcours et de la carte. Les passagers touristes sont aussi comptés dans l’hologramme du vaisseau : les places occupées et l’ambiance sonore de la cabine fonctionnent de nouveau quand vous n’avez que des missions de tourisme.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-refonte-fenetre', date: '2026-10-14T22:45:16Z', type: 'NOUVEAU',
         titre: 'Colonisation : la fenêtre d’un système refaite avec la carte du système',
         texte: 'La fenêtre d’un système colonisé est refaite en quatre onglets : vue d’ensemble, profil, installations et chantiers. La vue d’ensemble montre la carte du système comme dans le jeu (l’étoile, les planètes et les stations sous leur corps, avec l’avancement des chantiers), les indicateurs en un coup d’œil et le résumé des chantiers. Les explications de méthode sont repliées. Les corps et stations de la carte viennent d’EDSM : un système jamais scanné peut avoir une carte incomplète.',
