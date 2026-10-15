@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-plugin-2-29-colonisation', date: '2026-10-15T20:45:50Z', type: 'AMELIORE',
+        titre: 'Colonisation : vos livraisons apparaissent dans la minute',
+        texte: 'Avant, la fenêtre d’un système colonisé pouvait mettre plusieurs minutes à montrer ce que vous veniez de livrer. Le plugin envoie maintenant vos livraisons environ vingt secondes après la dernière marchandise déposée : plusieurs marchandises livrées à la suite partent ensemble, et la progression du chantier se met à jour toute seule dans la fenêtre ouverte.',
+        important: true,
+        action: 'Relancez EDMC une fois : le plugin v2.29 se met à jour tout seul.'
+    },
+    {
         id: '2026-10-sons-evenements-vaisseau', date: '2026-10-15T20:04:10Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : des sons pour l’embarquement, le débarquement et la soute',
         texte: 'Quand vous prenez une mission de passagers ou de tourisme, vous entendez le signal d’arrivée du quai, les portes qui s’ouvrent, les passagers qui embarquent et une annonce de bienvenue. Quand vous la rendez, c’est l’annonce d’au revoir. Le chargement de marchandises (la soute passe à 1 tonne ou plus) et le déchargement (vente, livraison, soute vidée à quai) ont aussi leur son. Ces sons se jouent une fois, par-dessus les ambiances de cabine et de dépôt, et suivent le bouton « ♪ AMBIANCE » ainsi que le haut-parleur du pied de page. Le bouton devient rouge quand l’ambiance est coupée. Le navigateur n’autorise le son qu’après un clic sur la page : un petit encadré orange vous prévient si un son a été bloqué.',
