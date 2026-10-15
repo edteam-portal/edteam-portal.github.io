@@ -114,6 +114,19 @@
     const AMB = window.__tbmAmb = window.__tbmAmb || { ctx: null, c: false, p: 0, geste: false, timer: null, out: null };
     const ambActive = () => { try { return localStorage.getItem("tbm_ambiance") !== "0"; } catch (e) { return true; } };
     const rnd = (a, b) => a + Math.random() * (b - a);
+    // les navigateurs interdisent tout son avant un premier clic (ou une touche) dans la page : un petit indice previent quand un son est BLOQUE pour cette raison
+    function ambIndice(afficher) {
+        try {
+            let el = document.getElementById("tbm-indice");
+            if (!afficher) { if (el) el.remove(); return; }
+            if (el || Date.now() - (AMB.indiceT || 0) < 45000) return;      // deja visible, ou montre il y a moins de 45 s
+            AMB.indiceT = Date.now();
+            el = document.createElement("div"); el.id = "tbm-indice"; el.textContent = "🔇 Sons en attente · cliquez une fois sur la page pour les activer";
+            el.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:9999;max-width:320px;padding:9px 14px;background:rgba(3,8,12,.95);border:1px solid #FF9A1F;color:#FFB44D;font:12px/1.4 inherit;letter-spacing:1px;cursor:pointer;box-shadow:0 0 14px rgba(255,154,31,.35)";
+            el.onclick = () => el.remove();
+            document.body.appendChild(el); setTimeout(() => { if (el.parentNode) el.remove(); }, 15000);
+        } catch (e) { /* un indice ne doit jamais gener la page */ }
+    }
     function ambEnv(g, t, a, d, pk) { g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(pk, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
     function ambBruit() { const c = AMB.ctx; if (!AMB.buf) { const b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; AMB.buf = b; } const n = c.createBufferSource(); n.buffer = AMB.buf; n.loop = true; return n; }
     function ambPan(c, dest) { const g = c.createGain(); let nd = g; if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = rnd(-0.8, 0.8); g.connect(p); nd = p; } nd.connect(dest); return g; }
@@ -144,12 +157,10 @@
             essai("ogg").catch(() => essai("mp3")).then(ab => new Promise((ok, ko) => AMB.ctx.decodeAudioData(ab, ok, ko))).then(b => { AMB.ann.push(b); }).catch(() => {});
         }
     }
-    function ambAnnonce() {
-        if (!AMB.ann || !AMB.ann.length || AMB.p <= 0 || AMB.k) return;
-        const maintenant = Date.now(); if (!AMB.annT) AMB.annT = maintenant + rnd(12, 25) * 1000;
-        if (maintenant < AMB.annT) return;
-        const c = AMB.ctx, b = AMB.ann[Math.floor(Math.random() * AMB.ann.length)], src = c.createBufferSource(), g = c.createGain();
-        src.buffer = b; g.gain.value = AMB_NIVEAU.annonce;
+    // une annonce passee par l'« interphone de vaisseau » (utilisee par les annonces de cabine ET par les annonces d'embarquement / de debarquement) : t0 = instant de depart, dest = sortie
+    function ambAnnonceJoue(c, b, t0, niveau, dest, fondu) {
+        const src = c.createBufferSource(), g = c.createGain();
+        src.buffer = b; g.gain.value = niveau;
         // effet « interphone de vaisseau » : bande telephonique, legere saturation, souffle de fond, claquements de debut et de fin
         const hp = c.createBiquadFilter(), lp = c.createBiquadFilter(), ws = c.createWaveShaper(), cv = new Float32Array(257); hp.type = "highpass"; hp.frequency.value = 380; lp.type = "lowpass"; lp.frequency.value = 3300; hp.Q.value = 0.9;
         for (let i = 0; i < 257; i++) { const x = i / 128 - 1; cv[i] = Math.tanh(x * 2.2) / Math.tanh(2.2); } ws.curve = cv;
@@ -157,15 +168,113 @@
         if (!AMB.ir) { const n = Math.floor(c.sampleRate * 1.4), ir = c.createBuffer(2, n, c.sampleRate); for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); } AMB.ir = ir; }
         const cv2 = c.createConvolver(), sec = c.createGain(), hum = c.createGain(); cv2.buffer = AMB.ir; sec.gain.value = 0.7; hum.gain.value = 0.55;
         lp.frequency.value = 2900;
-        src.connect(hp); hp.connect(ws); ws.connect(lp); lp.connect(sec); sec.connect(g); lp.connect(cv2); cv2.connect(hum); hum.connect(g); g.connect(AMB.out);
-        const t0 = c.currentTime + 0.12, d = b.duration;
-        const bruit = (t, dur, f, pk) => { const n = ambBruit(), bp = c.createBiquadFilter(), e = c.createGain(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = 0.8; n.connect(bp); bp.connect(e); e.connect(AMB.out); e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(pk, t + 0.008); e.gain.setValueAtTime(pk, t + Math.max(dur - 0.02, 0.01)); e.gain.exponentialRampToValueAtTime(0.0001, t + dur); n.start(t); n.stop(t + dur + 0.05); };
+        src.connect(hp); hp.connect(ws); ws.connect(lp); lp.connect(sec); sec.connect(g); lp.connect(cv2); cv2.connect(hum); hum.connect(g); g.connect(dest);
+        const d = b.duration;
+        const bruit = (t, dur, f, pk) => { const n = ambBruit(), bp = c.createBiquadFilter(), e = c.createGain(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = 0.8; n.connect(bp); bp.connect(e); e.connect(dest); e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(pk, t + 0.008); e.gain.setValueAtTime(pk, t + Math.max(dur - 0.02, 0.01)); e.gain.exponentialRampToValueAtTime(0.0001, t + dur); n.start(t); n.stop(t + dur + 0.05); };
         bruit(t0 - 0.1, 0.07, 2200, 0.04);               // clic d'ouverture du micro
         bruit(t0 - 0.03, d + 0.1, 3800, 0.008);          // souffle de la ligne pendant l'annonce
-        bruit(t0 + d + 0.05, 0.09, 1800, 0.035);          // clic de fermeture
+        if (fondu) { g.gain.setValueAtTime(niveau, t0 + Math.max(d - fondu, 0)); g.gain.linearRampToValueAtTime(0.0001, t0 + d + 0.25); }     // fin douce (annonces d'embarquement), sans clic de fermeture
+        else bruit(t0 + d + 0.05, 0.09, 1800, 0.035);          // clic de fermeture
         src.start(t0);
-        AMB.annT = maintenant + b.duration * 1000 + rnd(50, 110) * 1000;
+        return b.duration;
     }
+    function ambAnnonce() {
+        if (!AMB.ann || !AMB.ann.length || AMB.p <= 0 || AMB.k) return;
+        const maintenant = Date.now(); if (!AMB.annT) AMB.annT = maintenant + rnd(12, 25) * 1000;
+        if (maintenant < AMB.annT) return;
+        const c = AMB.ctx, b = AMB.ann[Math.floor(Math.random() * AMB.ann.length)];
+        const d = ambAnnonceJoue(c, b, c.currentTime + 0.12, AMB_NIVEAU.annonce, AMB.out);
+        AMB.annFin = c.currentTime + 0.12 + d;     // instant (horloge audio) ou cette annonce de la boucle se termine
+        AMB.annT = maintenant + d * 1000 + rnd(50, 110) * 1000;
+    }
+    // ---- SONS D'EVENEMENTS, joues UNE fois : embarquement / debarquement de passagers (mission de transport ou de tourisme), chargement / dechargement de la soute.
+    // Fichiers du dossier sons/ (un fichier absent est simplement ignore). Detectes en comparant deux etats successifs de la session : rien n'est joue a l'ouverture de la page.
+    // Embarquement ET debarquement : signal de quai, portes, pas, puis une annonce au hasard (voix-bienvenue-N a l'embarquement, voix-aurevoir-N au debarquement).
+    const EVT = { p: {}, out: null, der: {}, prev: null, vus: new Set(), log: window.tbmSonsLog = window.tbmSonsLog || [] };     // vus = missions deja annoncees (jamais deux fois la meme) ; log = trace des declenchements
+    // facteurs RELATIFS : 1 = meme volume que la boucle de reference (cabine pour le signal, les portes et les pas ; annonces de cabine pour les voix ; depot pour les caisses)
+    const EVT_NIVEAU = window.tbmNiveaux = window.tbmNiveaux || { signal: 1, portes: 0.8, pas: 0.5, voix: 1, soute: 1 };     // reglable a chaud dans la console : tbmNiveaux.signal = 0.7
+    function evtCtx() {
+        if (!AMB.geste && ambActive() && !document.hidden) ambIndice(true);     // son bloque faute de clic : on previent
+        if (!AMB.geste || !ambActive() || document.hidden) return null;     // meme regles que l'ambiance : apres un clic, onglet visible, bouton ON
+        if (!AMB.ctx) { try { AMB.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+        const c = AMB.ctx; if (c.state === "suspended") c.resume();
+        if (!EVT.out) { EVT.out = c.createGain(); EVT.out.gain.value = 0.8; EVT.out.connect(c.destination); }
+        return c;
+    }
+    function evtCharge(nom, c) {
+        if (!(nom in EVT.p)) {
+            const essai = ext => fetch("sons/" + nom + "." + ext).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); });
+            EVT.p[nom] = essai("mp3").catch(() => essai("ogg")).then(ab => new Promise((ok, ko) => c.decodeAudioData(ab, ok, ko))).catch(() => null);
+        }
+        return EVT.p[nom];
+    }
+    function evtVoix(prefixe, c) { return Promise.all([1, 2, 3, 4].map(i => evtCharge(prefixe + "-" + i, c))).then(L => L.filter(Boolean)); }
+    // volume « actif » d'un son (moyenne quadratique des parties non silencieuses) : sert a ramener chaque fichier au meme volume percu que la boucle de reference
+    function rmsActif(buf) {
+        if (buf._rms) return buf._rms;
+        const d = buf.getChannelData(0); let somme = 0, n = 0;
+        for (let i = 0; i < d.length; i++) { const x = d[i]; if (x > 0.01 || x < -0.01) { somme += x * x; n++; } }
+        return buf._rms = n ? Math.sqrt(somme / n) : 0.1;
+    }
+    // niveau a appliquer a 'buf' pour qu'il sonne aussi fort que 'ref' lu au niveau 'cible' ; sans reference chargee, on garde le niveau brut
+    function evtNiveau(buf, ref, cible, facteur) {
+        if (!buf || !ref) return cible * facteur;
+        return Math.max(0.05, Math.min(2.5, cible * facteur * rmsActif(ref) / rmsActif(buf)));
+    }
+    function evtDoux(c, buf, t, niveau, fin) {     // joue le son en entier, debut et fin en fondu ; renvoie sa duree
+        const src = c.createBufferSource(), g = c.createGain(), d = buf.duration, f = Math.max(0.1, Math.min(fin, d - 0.4));
+        src.buffer = buf; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(niveau, t + 0.15);
+        const courbe = new Float32Array(48); for (let i = 0; i < 48; i++) courbe[i] = Math.max(0.0001, niveau * (0.5 + 0.5 * Math.cos(Math.PI * i / 47)));     // decroissance douce, sans coupure audible
+        g.gain.setValueCurveAtTime(courbe, t + d - f, f);
+        src.connect(g); g.connect(EVT.out); src.start(t); return d;
+    }
+    function evtJouer(type, force) {
+        const maintenant = Date.now(), soute = type === "chargement" || type === "dechargement";
+        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : 15000)) return;     // pas deux fois de suite
+        const c = evtCtx(); if (!c) return;
+        EVT.der[type] = maintenant;
+        if (soute) {
+            Promise.all([evtCharge(type, c), evtCharge("ambiance-depot", c)]).then(([b, ref]) => { if (b) evtDoux(c, b, c.currentTime + 0.1, evtNiveau(b, ref, AMB_NIVEAU.depot, EVT_NIVEAU.soute), 3.5); });
+            return;
+        }
+        const voix = type === "embarquement" ? "voix-bienvenue" : "voix-aurevoir";
+        AMB.annT = Math.max(AMB.annT || 0, maintenant + 40000);     // l'annonce de la boucle de cabine ne se declenche pas pendant la sequence (affine plus bas, quand la duree de l'annonce est connue)
+        Promise.all([evtCharge("embarquement-signal", c), evtCharge("embarquement-portes", c), evtCharge("embarquement-pas", c), evtVoix(voix, c), evtCharge("ambiance-cabine", c), evtCharge("annonce-1", c)]).then(([sg, po, pa, vx, refC, refA]) => {
+            const nv = (b, f) => evtNiveau(b, refC, AMB_NIVEAU.cabine, f);
+            const t0 = c.currentTime + 0.1; let tPortes = t0, tPas;
+            if (sg) { evtDoux(c, sg, t0, nv(sg, EVT_NIVEAU.signal), 1.8); tPortes = t0 + Math.max(sg.duration - 1.0, 1.2); }     // les portes s'ouvrent quand le signal se termine
+            if (po) { evtDoux(c, po, tPortes, nv(po, EVT_NIVEAU.portes), 1.8); tPas = tPortes + Math.min(po.duration * 0.5, 2.5); } else tPas = tPortes;     // les gens avancent pendant l'ouverture
+            if (pa) evtDoux(c, pa, tPas, nv(pa, EVT_NIVEAU.pas), 5);
+            if (vx.length) {
+                const v = vx[Math.floor(Math.random() * vx.length)], tVoix = Math.max(tPas + 1.5, (AMB.annFin || 0) + 0.6);     // jamais par-dessus une annonce de la boucle deja en train de parler
+                ambAnnonceJoue(c, v, tVoix, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7);
+                AMB.annT = Math.max(AMB.annT || 0, Date.now() + (tVoix - c.currentTime + v.duration + 20) * 1000);     // la boucle reprend ses annonces 20 s apres la fin de celle-ci
+            }
+        });
+    }
+    window.tbmSonEvenement = evtJouer;     // essai a la main depuis la console : tbmSonEvenement("embarquement", true)
+    // appelee a chaque nouvel etat de la session (S) : embarquement = une mission avec passagers vient d'etre PRISE ; debarquement = une mission avec passagers vient d'etre TERMINEE ;
+    // chargement = la soute passe de 0 a 1 t ou plus, dechargement = elle perd au moins 1 t, les deux seulement a quai (en vol, minage ou largage ne sonnent pas)
+    window.tbmSonsMissions = function (S) {
+        try {
+            const act = (S && S.missions) || [], fin = (S && S.terminees) || [];
+            const pax = new Set(act.filter(estPassagers).map(m => String(m.id)));
+            const tonnes = ((S && S.soute && S.soute.items) || []).reduce((a, x) => a + (Number(x.q) || 0), 0);
+            const termines = new Set(fin.map(x => String(x.id)));
+            const prev = EVT.prev; EVT.prev = { pax, tonnes, termines };
+            if (!prev) return;     // premiere lecture : on memorise seulement
+            const recent = ts => { const t = Date.parse(ts); return !isNaN(t) && Date.now() - t < 240000; };     // une mission retrouvee dans d'anciens journaux n'est pas une nouvelle prise
+            const trace = (type, raison) => { const l = { t: new Date().toISOString(), type, raison }; EVT.log.push(l); if (EVT.log.length > 50) EVT.log.shift(); try { console.info("[sons]", type, raison); } catch (e) {} };
+            const prises = act.filter(m => estPassagers(m) && !prev.pax.has(String(m.id)) && recent(m.t) && !EVT.vus.has("e" + m.id));
+            if (prises.length) { prises.forEach(m => EVT.vus.add("e" + m.id)); trace("embarquement", "mission " + prises.map(m => m.id).join(",")); evtJouer("embarquement"); }
+            const rendues = fin.filter(x => !prev.termines.has(String(x.id)) && prev.pax.has(String(x.id)) && recent(x.t) && !EVT.vus.has("d" + x.id));
+            if (rendues.length) { rendues.forEach(x => EVT.vus.add("d" + x.id)); trace("debarquement", "mission " + rendues.map(x => x.id).join(",")); evtJouer("debarquement"); }
+            if (S && S.amarre) {
+                if (prev.tonnes < 1 && tonnes >= 1) { trace("chargement", "soute " + prev.tonnes + " -> " + tonnes + " t"); evtJouer("chargement"); }
+                else if (prev.tonnes - tonnes >= 1) { trace("dechargement", "soute " + prev.tonnes + " -> " + tonnes + " t"); evtJouer("dechargement"); }
+            }
+        } catch (e) { /* le son ne doit jamais gener la page */ }
+    };
     // une boucle par ambiance : demarre quand il y a des caisses / des passagers, fondu a l'arret
     function ambBoucle(k, veut) {
         const B = AMB.bou = AMB.bou || {}, c = AMB.ctx, buf = AMB.fich && AMB.fich[k];
@@ -194,6 +303,7 @@
         if (AMB.p > 0 && !rC && !k) { if (Math.random() < Math.min(0.55, 0.12 + 0.035 * Math.sqrt(AMB.p))) ambPhrase(); if (Math.random() < 0.03 + 0.004 * Math.min(AMB.p, 20)) ambRire(); }
     }
     function ambSync() {
+        try { if (!AMB.geste && ambActive() && !document.hidden && document.querySelector(".tbm-bloc") && (AMB.c || AMB.p > 0 || AMB.k)) ambIndice(true); } catch (e) {}
         if (!ambLit()) { ambStop(); return; }
         if (!AMB.ctx) { try { AMB.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; } }
         const c = AMB.ctx; if (c.state === "suspended") c.resume();
@@ -208,7 +318,7 @@
     function ambMaj(caisses, passagers, combat) { AMB.c = !!caisses; AMB.p = passagers || 0; AMB.k = !!combat; ambSync(); }
     if (!window.__tbmAmbInit) {
         window.__tbmAmbInit = true;
-        const geste = () => { AMB.geste = true; ambSync(); };
+        const geste = () => { AMB.geste = true; ambIndice(false); ambSync(); };
         document.addEventListener("pointerdown", geste, { once: true }); document.addEventListener("keydown", geste, { once: true });
         document.addEventListener("visibilitychange", ambSync);
         document.addEventListener("click", e => {

@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-sons-evenements-vaisseau', date: '2026-10-15T20:04:10Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : des sons pour l’embarquement, le débarquement et la soute',
+        texte: 'Quand vous prenez une mission de passagers ou de tourisme, vous entendez le signal d’arrivée du quai, les portes qui s’ouvrent, les passagers qui embarquent et une annonce de bienvenue. Quand vous la rendez, c’est l’annonce d’au revoir. Le chargement de marchandises (la soute passe à 1 tonne ou plus) et le déchargement (vente, livraison, soute vidée à quai) ont aussi leur son. Ces sons se jouent une fois, par-dessus les ambiances de cabine et de dépôt, et suivent le bouton « ♪ AMBIANCE » ainsi que le haut-parleur du pied de page. Le bouton devient rouge quand l’ambiance est coupée. Le navigateur n’autorise le son qu’après un clic sur la page : un petit encadré orange vous prévient si un son a été bloqué.',
+        important: false
+    },
+    {
         id: '2026-10-plugin-2-28-missions', date: '2026-10-15T17:58:34Z', type: 'CORRIGE',
         titre: 'Missions en cours : elles ne perdent plus leurs détails quand vous relancez le jeu',
         texte: 'Quand vous quittiez puis relanciez le jeu avec des missions en cours (surtout celles qui durent plusieurs heures), elles revenaient sur le tableau de bord sans titre, sans destination ni récompense, classées « sans destination ». Le plugin retrouve maintenant ces détails dans vos journaux des 14 derniers jours : titre, destination, récompense, passagers, échéance réelle et point de prise.',
