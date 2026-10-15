@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-plugin-2-28-missions', date: '2026-10-15T17:58:34Z', type: 'CORRIGE',
+        titre: 'Missions en cours : elles ne perdent plus leurs détails quand vous relancez le jeu',
+        texte: 'Quand vous quittiez puis relanciez le jeu avec des missions en cours (surtout celles qui durent plusieurs heures), elles revenaient sur le tableau de bord sans titre, sans destination ni récompense, classées « sans destination ». Le plugin retrouve maintenant ces détails dans vos journaux des 14 derniers jours : titre, destination, récompense, passagers, échéance réelle et point de prise.',
+        important: true,
+        action: 'Relancez EDMC une fois : le plugin v2.28 se met à jour tout seul.'
+    },
+    {
         id: '2026-10-ambiance-off-visible', date: '2026-10-15T17:41:05Z', type: 'AMELIORE',
         titre: 'Ambiance sonore : le bouton OFF bien visible',
         texte: 'Sur l’hologramme du vaisseau, le bouton « ♪ AMBIANCE » devient rouge et pulse doucement quand l’ambiance est coupée, pour qu’on ne cherche plus pourquoi on n’entend rien. Un clic dessus la réactive. Rappel : ce réglage est mémorisé par navigateur.',
