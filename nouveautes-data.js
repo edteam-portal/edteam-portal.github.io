@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ambiance-off-visible', date: '2026-10-15T17:41:05Z', type: 'AMELIORE',
+        titre: 'Ambiance sonore : le bouton OFF bien visible',
+        texte: 'Sur l’hologramme du vaisseau, le bouton « ♪ AMBIANCE » devient rouge et pulse doucement quand l’ambiance est coupée, pour qu’on ne cherche plus pourquoi on n’entend rien. Un clic dessus la réactive. Rappel : ce réglage est mémorisé par navigateur.',
+        important: false
+    },
+    {
         id: '2026-10-missions-tourisme', date: '2026-10-15T17:25:49Z', type: 'CORRIGE',
         titre: 'Missions de tourisme : destinations multiples et passagers à bord',
         texte: 'Les missions de tourisme qui demandent de visiter plusieurs systèmes affichaient un nom illisible du genre « AREXACK$MISSIONUTIL_MULTIPLE… ». Chaque système est maintenant un arrêt du parcours et de la carte. Les passagers touristes sont aussi comptés dans l’hologramme du vaisseau : les places occupées et l’ambiance sonore de la cabine fonctionnent de nouveau quand vous n’avez que des missions de tourisme.',
