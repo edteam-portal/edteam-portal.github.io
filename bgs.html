@@ -18,8 +18,12 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=31"></script>
+    <script src="navigation.js?v=33"></script>
     <script src="initiatives-mode.js?v=1"></script>
+    <script src="accueil-pp.js?v=11"></script>
+    <script src="campagnes.js?v=8"></script>
+    <script src="campagnes-pp.js?v=5"></script>
+    <script src="campagnes-col.js?v=6"></script>
     <script src="vitrine-module.js?v=1"></script>
 
     <style>
@@ -310,11 +314,11 @@
             /* =========================================
            SALLE DE COMMANDEMENT (fenêtre de l'Amiral)
            ========================================= */
-        .cmd-fenetre { max-width: 1240px; width: 95%; height: min(86vh, 840px); display: flex; flex-direction: column; padding: 0 !important; background: rgba(10, 5, 0, 0.97); border: 1px solid #FF3333; box-shadow: 0 0 40px rgba(255, 51, 51, 0.18); }
+        .cmd-fenetre { max-width: 960px; width: 95%; height: min(88vh, 860px); display: flex; flex-direction: column; padding: 0 !important; background: rgba(10, 5, 0, 0.97); border: 1px solid #FF3333; box-shadow: 0 0 40px rgba(255, 51, 51, 0.18); }
         .cmd-entete { padding: 20px 28px 14px; border-bottom: 1px solid rgba(255, 51, 51, 0.5); flex-shrink: 0; }
         .cmd-titre { color: #FF3333; font-weight: bold; font-size: 1.25em; letter-spacing: 3px; }
         .cmd-sous { color: #888; font-size: 0.82em; margin-top: 5px; letter-spacing: 0.5px; }
-        .cmd-corps { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); flex: 1; min-height: 0; }
+        .cmd-corps { display: grid; grid-template-columns: minmax(0, 1fr); flex: 1; min-height: 0; }
         .cmd-col { overflow-y: auto; padding: 20px 28px; min-height: 0; }
         .cmd-col + .cmd-col { border-left: 1px dashed rgba(255, 51, 51, 0.3); background: rgba(255, 255, 255, 0.012); }
         .cmd-col-titre { color: var(--ed-orange); font-weight: bold; letter-spacing: 2px; font-size: 0.9em; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
@@ -387,26 +391,23 @@
                 
                 <!-- TITRE DE LA PAGE -->
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 15px; margin-bottom: 8px; gap: 12px; flex-wrap: wrap;">
-                    <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">&gt; BGS <span style="color: #777; font-size: 0.75em; letter-spacing: 1px; margin-left: 10px;">ENGAGEMENT, SPÉCIALISTES ET DIRECTIVES DE L'AMIRAL</span></h3>
+                    <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">&gt; CAMPAGNES, INITIATIVES ET ENGAGEMENT</h3>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button id="btn-journal-bgs" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirJournalBGS(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ JOURNAL DES EXPLOITS ]</button>
+                        <button id="btn-nouvelle-campagne" style="display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="edteamCampagnes.ouvrir(null)" onmouseenter="if(typeof sonHover === 'function') sonHover()">[ + NOUVELLE CAMPAGNE ]</button>
                         <button id="btn-initiative" style="display: none; background: rgba(255, 79, 216, 0.1); border: 1px solid #FF4FD8; color: #FF4FD8; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirInitiative(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF4FD8'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 79, 216, 0.1)'; this.style.color='#FF4FD8';" title="Lancez un objectif BGS pour inviter l'escadron à vous rejoindre">[ + LANCER UNE INITIATIVE ]</button>
-                        <button id="btn-amiral" style="display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirSalleCommandement(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF3333'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 51, 51, 0.1)'; this.style.color='#FF3333';">
-                        [ COMMANDEMENT ]
-                    </button>
+
                     </div>
                 </div>
 
-                <!-- ACCUEIL : mon engagement (gauche) ; Pilier de la semaine + l'escadron cette semaine (droite) (rempli par chargerAccueilBGS) -->
-                <div id="bgs-accueil-haut" class="acc-grille"><div class="bloc cy" style="padding: 24px; color: #666; font-style: italic;">&gt; CHARGEMENT DE VOTRE ENGAGEMENT...</div></div>
-
-                <!-- MUR DES SPÉCIALISTES : huit titres, au cumul total (calculés par le serveur, script SQL 37) -->
-                <div id="bgs-titres-acc" class="bloc" style="display: none; padding: 16px 20px;"></div>
+                <!-- CAMPAGNES (campagnes.js) : le seul endroit des directives ; les initiatives des pilotes suivent, hors campagne -->
+                <div id="bgs-campagnes"></div>
 
                 <!-- UNE SEULE SUITE DE CARTES (deux colonnes, une sous 1100 px) : directives de l'Amiral, puis initiatives des pilotes ; ni titres ni colonnes propres -->
                 <!-- MODE DES INITIATIVES (script SQL 70) : information du mode en vigueur et propositions a valider (rempli par rafraichirModeIni) -->
                 <div id="bgs-mode-ini" style="display: none;"></div>
                 <div id="bgs-propositions" style="display: none;"></div>
+                <div id="bgs-ini-titre"></div>
                 <div id="bgs-duo-ordres" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start;">
                 <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
                 <!-- LE SOUS-CONTENEUR POUR LES JAUGES -->
@@ -421,14 +422,22 @@
                 <div id="bgs-conteneur-initiatives" style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start;"></div>
                 </div>
                 </div>
+                <!-- ACCUEIL : mon engagement (gauche) ; Pilier de la semaine + l'escadron cette semaine (droite) (rempli par chargerAccueilBGS) -->
+                <div id="bgs-accueil-haut" class="acc-grille"><div class="bloc cy" style="padding: 24px; color: #666; font-style: italic;">&gt; CHARGEMENT DE VOTRE ENGAGEMENT...</div></div>
+
+                <!-- MUR DES SPÉCIALISTES : huit titres, au cumul total (calculés par le serveur, script SQL 37) -->
+                <div id="bgs-titres-acc" class="bloc" style="display: none; padding: 16px 20px;"></div>
+
                 <!-- COMMENT ÇA MARCHE (replié par défaut) -->
                 <div id="bgs-comment" class="bloc" style="padding: 14px 20px;">
-                    <details open>
+                    <details>
                         <summary style="color: var(--ed-blue); letter-spacing: 2px; cursor: pointer;">&gt; COMMENT ÇA MARCHE</summary>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 12px;">
-                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">1 · AGIS POUR TA FACTION</b>Missions, combat, commerce, exploration, colonisation : tout ce qui sert ta faction d'escadron est relevé par le plugin, sans rien saisir.</div>
-                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">2 · CHAQUE ACTION RAPPORTE</b>Chaque action rapporte des points de carrière (voir la colonne RANG BGS du journal). Les échecs ne rapportent rien, sauf sous une directive de baisse.</div>
-                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">3 · TON RANG MONTE</b>Tes points cumulés font monter ton rang, de 1 à 100. L'Amiral peut demander un focus : il rapporte en plus une distinction.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">1 · LES CAMPAGNES</b>L'Amiral lance des campagnes (attaque, défense, maintien ou conquête). Chacune réunit les missions de l'escadron ; les plus critiques sont en haut. Un clic sur une ligne ouvre la fenêtre de la mission.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">2 · LES INITIATIVES</b>Selon le réglage de l'Amiral, tout pilote peut lancer ou proposer une initiative : un objectif de plus, toujours hors campagne. L'Amiral peut la transformer en directive dans une campagne.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">3 · RIEN À SAISIR</b>Missions, combat, commerce, exploration, colonisation : tout ce qui sert ta faction d'escadron est relevé par le plugin, que tu suives une campagne ou non.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">4 · CHAQUE ACTION RAPPORTE</b>Chaque action rapporte des points de carrière (voir la colonne RANG BGS du journal). Les échecs ne rapportent rien, sauf sous une directive de baisse.</div>
+                            <div style="border: 1px dashed #3a3a3a; padding: 10px 12px; border-radius: 3px; font-size: 0.85em; line-height: 1.5; color: #bbb;"><b style="display: block; color: var(--ed-orange); letter-spacing: 1px; margin-bottom: 3px;">5 · TON RANG MONTE</b>Tes points cumulés font monter ton rang, de 1 à 100. Terminer une mission d'une campagne rapporte en plus une distinction.</div>
                         </div>
                     </details>
                 </div>
@@ -445,18 +454,36 @@
             <div class="modal-close" onclick="fermerModal('modal-commandement')">X</div>
 
             <div class="cmd-entete">
-                <div class="cmd-titre">&gt; SALLE DE COMMANDEMENT</div>
-                <div class="cmd-sous">Un système, une ou plusieurs factions cibles, et pour chacune un type de mission.</div>
+                <div class="cmd-titre">&gt; NOUVELLE MISSION</div>
+                <div class="cmd-sous">Ajoutez une mission à une campagne : directive BGS, mission Powerplay ou de colonisation.</div>
             </div>
 
             <div class="cmd-corps">
 
                 <!-- COLONNE GAUCHE : NOUVEAU THÉÂTRE D'OPÉRATION -->
                 <div class="cmd-col">
-                    <div class="cmd-col-titre">NOUVELLE CAMPAGNE</div>
+                    <div class="cmd-col-titre">MISSION À AJOUTER</div>
 
                     <div class="cmd-etape">
-                        <div class="cmd-etape-titre"><span class="cmd-num">1</span>SYSTÈME CIBLE</div>
+                        <div class="cmd-etape-titre"><span class="cmd-num">1</span>CAMPAGNE
+                            <button type="button" class="cmd-btn vert" id="cmd-btn-nouvelle-camp" style="margin-left: auto; display: none;" onclick="edteamCampagnes.ouvrir(null)" onmouseenter="if(typeof sonHover==='function') sonHover()">+ NOUVELLE CAMPAGNE</button>
+                        </div>
+                        <select id="cmd-campagne" class="search-input cmd-champ"></select>
+                        <div class="cmd-aide" id="cmd-campagne-aide">La campagne donne sa priorité à la directive. Seul l'Amiral crée une campagne.</div>
+                    </div>
+
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">2</span>TYPE DE MISSION</div>
+                        <div class="cmd-pills">
+                            <button type="button" class="cmd-pill actif" id="cmd-dom-BGS" style="--pc: #FF7100;" onclick="edteamCampagnesPP.choisirDomaine('BGS')">BGS · INFLUENCE D'UNE FACTION</button>
+                            <button type="button" class="cmd-pill" id="cmd-dom-PP" style="--pc: #8A7CFF;" onclick="edteamCampagnesPP.choisirDomaine('PP')">POWERPLAY · MÉRITES D'UN SYSTÈME</button>
+                            <button type="button" class="cmd-pill" id="cmd-dom-COL" style="--pc: #FFD700;" onclick="edteamCampagnesPP.choisirDomaine('COL')">COLONISATION · CHANTIERS OU SYSTÈME</button>
+                        </div>
+                    </div>
+
+                    <div id="cmd-bloc-bgs">
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">3</span>SYSTÈME CIBLE</div>
                         <div style="display: flex; gap: 10px;">
                             <div style="flex: 2;">
                                 <input type="search" id="cmd-system" class="search-input cmd-champ" placeholder="Ex : ATHENA"
@@ -478,34 +505,57 @@
                     <datalist id="liste-factions-api"></datalist>
 
                     <div class="cmd-etape">
-                        <div class="cmd-etape-titre"><span class="cmd-num">2</span>BRIEFING STRATÉGIQUE <em>facultatif</em></div>
-                        <textarea id="cmd-briefing" class="search-input cmd-champ" placeholder="Consignes globales pour le système, contexte de la campagne…"
-                                  autocomplete="off" data-lpignore="true" style="height: 74px; resize: vertical;"></textarea>
-                    </div>
-
-                    <div class="cmd-etape">
                         <div class="cmd-etape-titre">
-                            <span class="cmd-num">3</span>DIRECTIVES PAR FACTION
+                            <span class="cmd-num">4</span>DIRECTIVES PAR FACTION
                             <button type="button" class="cmd-btn vert" style="margin-left: auto;" onclick="ajouterLigneDirective()" onmouseenter="if(typeof sonHover==='function') sonHover()">+ AJOUTER UNE FACTION</button>
                         </div>
                         <div id="cmd-directives-container" style="display: flex; flex-direction: column; gap: 10px;">
                             <!-- Les lignes de factions s'injectent ici dynamiquement -->
                         </div>
                     </div>
-                </div>
+                    </div>
 
-                <!-- COLONNE DROITE : DIRECTIVES EN COURS -->
-                <div class="cmd-col">
-                    <div class="cmd-col-titre">DIRECTIVES EN COURS <span id="cmd-compteur" class="cmd-compteur">0</span></div>
-                    <div id="liste-ordres-actifs" style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="color: #666; font-style: italic;">Recherche des directives en cours...</div>
+                    <div id="cmd-bloc-pp" style="display: none;">
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">3</span>SYSTÈME CIBLE</div>
+                        <input type="search" id="cmd-pp-systeme" class="search-input cmd-champ" placeholder="Ex : AMATERASU" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" style="text-transform: uppercase;">
+                        <div class="cmd-aide">Les mérites gagnés par les pilotes dans ce système (relevés par le plugin) comptent pour la mission.</div>
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">4</span>ACTION POWERPLAY</div>
+                        <div class="cmd-pills" id="cmd-pp-types"></div>
+                        <div class="cmd-aide">Renforcement : un système de votre puissance · Sape : un système d'une puissance rivale · Acquisition : un système sans puissance.</div>
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">5</span>CONSIGNE <em>facultatif</em></div>
+                        <textarea id="cmd-pp-briefing" class="search-input cmd-champ" maxlength="400" placeholder="Pourquoi ce système, que faut-il faire…" autocomplete="off" data-lpignore="true" style="height: 64px; resize: vertical;"></textarea>
+                    </div>
+                    </div>
+
+                    <div id="cmd-bloc-col" style="display: none;">
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">3</span>TYPE DE COLONISATION</div>
+                        <div class="cmd-pills" id="cmd-col-types"></div>
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">4</span>SYSTÈME</div>
+                        <input type="search" id="cmd-col-systeme" class="search-input cmd-champ" placeholder="Ex : COL 285 SECTOR AV-U B4-0" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" style="text-transform: uppercase;" onblur="edteamCampagnesCOL.chargerChantiers('cmd')" onchange="edteamCampagnesCOL.chargerChantiers('cmd')">
+                        <div id="cmd-col-bloc-chantiers">
+                            <div class="cmd-aide">Cochez les chantiers à terminer (ceux que le plugin a relevés et qui ne sont pas encore livrés).</div>
+                            <div id="cmd-col-liste"></div>
+                        </div>
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">5</span>CONSIGNE <em>facultatif</em></div>
+                        <textarea id="cmd-col-briefing" class="search-input cmd-champ" maxlength="400" placeholder="Pourquoi ce chantier, que faut-il livrer en priorité…" autocomplete="off" data-lpignore="true" style="height: 64px; resize: vertical;"></textarea>
+                    </div>
                     </div>
                 </div>
 
             </div>
 
             <div class="cmd-pied">
-                <button id="btn-transmettre" onclick="transmettreOrdre()" onmouseenter="if(typeof sonHover === 'function') sonHover()">TRANSMETTRE LA CAMPAGNE</button>
+                <button id="btn-transmettre" onclick="transmettreOrdre()" onmouseenter="if(typeof sonHover === 'function') sonHover()">TRANSMETTRE LES DIRECTIVES</button>
             </div>
         </div>
     </div>
@@ -519,6 +569,40 @@
                 <div class="cmd-sous" id="ini-sous">Un objectif pour l'escadron : vos camarades le voient, vous rejoignent, et chacun est reconnu pour son effort.</div>
             </div>
             <div class="cmd-col">
+                <div class="cmd-etape">
+                    <div class="cmd-etape-titre"><span class="cmd-num">◆</span>DOMAINE</div>
+                    <div class="cmd-pills">
+                        <button type="button" class="cmd-pill actif" id="ini-dom-BGS" style="--pc: #FF7100;" onclick="edteamCampagnesPP.choisirDomaineIni('BGS')">BGS · INFLUENCE D'UNE FACTION</button>
+                        <button type="button" class="cmd-pill" id="ini-dom-PP" style="--pc: #8A7CFF;" onclick="edteamCampagnesPP.choisirDomaineIni('PP')">POWERPLAY · MÉRITES D'UN SYSTÈME</button>
+                        <button type="button" class="cmd-pill" id="ini-dom-COL" style="--pc: #FFD700;" onclick="edteamCampagnesPP.choisirDomaineIni('COL')">COLONISATION · CHANTIERS OU SYSTÈME</button>
+                    </div>
+                </div>
+                <div id="ini-bloc-col" style="display: none;">
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">1</span>TYPE DE COLONISATION</div>
+                        <div class="cmd-pills" id="ini-col-types"></div>
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">2</span>SYSTÈME</div>
+                        <input type="search" id="ini-col-systeme" class="search-input cmd-champ" placeholder="Système, ex : COL 285 SECTOR AV-U B4-0" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" style="text-transform: uppercase;" onblur="edteamCampagnesCOL.chargerChantiers('ini')" onchange="edteamCampagnesCOL.chargerChantiers('ini')">
+                        <div id="ini-col-bloc-chantiers">
+                            <div class="cmd-aide">Cochez les chantiers à terminer (ceux que le plugin a relevés et qui ne sont pas encore livrés).</div>
+                            <div id="ini-col-liste"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="ini-bloc-pp" style="display: none;">
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">1</span>SYSTÈME</div>
+                        <input type="search" id="ini-pp-systeme" class="search-input cmd-champ" placeholder="Système, ex : AMATERASU" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" style="text-transform: uppercase;">
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">2</span>ACTION POWERPLAY</div>
+                        <div class="cmd-pills" id="ini-pp-types"></div>
+                        <div class="cmd-aide">Renforcement : un système de votre puissance · Sape : un système d'une puissance rivale · Acquisition : un système sans puissance.</div>
+                    </div>
+                </div>
+                <div id="ini-bloc-bgs">
                 <div class="cmd-etape">
                     <div class="cmd-etape-titre"><span class="cmd-num">1</span>SYSTÈME ET FACTION</div>
                     <input type="search" id="ini-systeme" class="search-input cmd-champ" placeholder="Système, ex : ATHENA"
@@ -541,6 +625,7 @@
                     </div>
                     <div class="cmd-aide">Une guerre ne peut pas viser la faction de votre propre escadron.</div>
                 </div>
+                </div>
                 <div class="cmd-etape">
                     <div class="cmd-etape-titre"><span class="cmd-num">3</span>MESSAGE <em>facultatif · 200 signes</em></div>
                     <textarea id="ini-message" class="search-input cmd-champ" maxlength="200" placeholder="Pourquoi cet objectif ? Un mot pour motiver l'escadron…" autocomplete="off" data-lpignore="true" style="height: 64px; resize: vertical;"></textarea>
@@ -562,6 +647,7 @@
         let journalMemo = { ts: 0 };
         let journalEtat = { lignes: [], fin: true };   // actions déjà chargées (100 par page, 500 au plus)
         let memoireStations = [];                      // stations de colonisation terminées (affichées dans le journal avec les actions)
+        let memoirePP = [];                            // efforts Powerplay (merites) de l'escadron, affiches dans le journal avec les actions (script SQL 96)
         let memoirePaliers = [];                       // paliers de tonnes livrées (colonisation) franchis par les pilotes, annoncés dans le journal
         // Filtre « spécialité » : types d'action qui font progresser chaque titre du mur des spécialistes (même correspondance que le calcul serveur des titres)
         const TYPES_SPECIALITE = {
@@ -640,8 +726,7 @@
             }
 
             const pillsType = CMD_TYPES.map(([v, t]) => `<button type="button" class="cmd-pill${v === typeOrdre ? ' actif' : ''}" style="--pc: ${CMD_COULEURS[v]};" onclick="cmdChoisir(this, 'ordre', '${v}')">${t}</button>`).join('');
-            const pillsPrio = CMD_PRIOS.map(([v, t, c]) => `<button type="button" class="cmd-pill${v === '3' ? ' actif' : ''}" style="--pc: ${c};" onclick="cmdChoisir(this, 'prio', '${v}')">${t}</button>`).join('');
-
+            
             const div = document.createElement('div');
             div.id = rowId;
             div.className = 'cmd-carte-faction';
@@ -653,14 +738,11 @@
                 </div>
                 <div class="cmd-ligne-bas">
                     <div class="cmd-pills" title="Type de mission pour cette faction">${pillsType}</div>
-                    <div class="cmd-pills" title="Priorité">${pillsPrio}</div>
                 </div>
                 <select class="cmd-ordre-select" style="display: none;">
                     ${CMD_TYPES.map(([v]) => `<option value="${v}" ${v === typeOrdre ? 'selected' : ''}>${v}</option>`).join('')}
                 </select>
-                <select class="cmd-priorite-select" style="display: none;">
-                    <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
-                </select>`;
+`;
             conteneur.appendChild(div);
         };
 
@@ -740,10 +822,10 @@
                 const apiKeyDisplay = document.getElementById('api-key-display');
                 if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;
                 
-                // (Spécifique BGS) Bouton Commandement (Amiral + Officier)
-                if (data.est_amiral || data.est_officier) {
-                    const btnAmiral = document.getElementById('btn-amiral');
-                    if (btnAmiral) btnAmiral.style.display = 'block';
+                // (Spécifique BGS) « Nouvelle campagne » : l'Amiral seul (et le Directeur, pour les tests)
+                if (data.est_amiral || data.est_directeur) {
+                    const btnCamp = document.getElementById('btn-nouvelle-campagne');
+                    if (btnCamp) btnCamp.style.display = '';
                 }
                 // initiatives : ouvertes a tout pilote approuve d'un vrai escadron
                 if (data.escadron_id && String(data.escadron_id).trim() !== '' && String(data.escadron_id).trim().toUpperCase() !== 'INDEPENDANT') {
@@ -796,21 +878,22 @@
         function texteDirective(d) { return libelleTypeOrdre(d.type_ordre) + ' pour ' + String(d.faction_cible || '').toUpperCase(); }
 
         async function transmettreOrdre() {
+            if (window.edteamCampagnesPP && window.edteamCampagnesPP.domaine() === 'PP') return window.edteamCampagnesPP.transmettre();
+            if (window.edteamCampagnesPP && window.edteamCampagnesPP.domaine() === 'COL') return window.edteamCampagnesCOL.transmettre();
             if (typeof sonClic === 'function') sonClic();
             const btn = document.getElementById('btn-transmettre');
             const sys = document.getElementById('cmd-system').value.trim().toUpperCase();
             const pop = parseInt(document.getElementById('cmd-population').value || '0', 10);
-            const brief = document.getElementById('cmd-briefing').value.trim();
+            const campagneId = parseInt((document.getElementById('cmd-campagne') || {}).value || '0', 10) || 0;
+            const campagne = (window.cacheCampagnes || []).find(c => Number(c.id) === campagneId);
 
             const factionSelects = document.querySelectorAll('.cmd-faction-select');
             const ordreSelects = document.querySelectorAll('.cmd-ordre-select');
-            const prioriteSelects = document.querySelectorAll('.cmd-priorite-select'); // <- NOUVEAU
 
             const directivesAEnvoyer = [];
             factionSelects.forEach((fSelect, idx) => {
                 const facName = fSelect.value.trim();
                 const ordType = ordreSelects[idx]?.value || 'HAUSSE';
-                const prioVal = parseInt(prioriteSelects[idx]?.value || '3', 10); // <- NOUVEAU
 
                 if (facName) {
                     directivesAEnvoyer.push({
@@ -819,16 +902,16 @@
                         population: pop,
                         faction_cible: facName,
                         type_ordre: ordType,
-                        priorite: prioVal, // <- NOUVEAU
-                        briefing_amiral: brief || null,
+                        campagne_id: campagneId,
                         auteur_id: profilCommandant.user_id
                     });
                 }
             });
 
+            if (!campagneId) { btn.innerText = "ERREUR : CHOISISSEZ UNE CAMPAGNE"; setTimeout(() => btn.innerText = "TRANSMETTRE LES DIRECTIVES", 2000); return; }
             if (!sys || pop === 0 || directivesAEnvoyer.length === 0) { 
                 btn.innerText = "ERREUR : SYSTÈME ET AU MOINS 1 FACTION REQUIS"; 
-                setTimeout(() => btn.innerText = "TRANSMETTRE LA CAMPAGNE", 2000); 
+                setTimeout(() => btn.innerText = "TRANSMETTRE LES DIRECTIVES", 2000); 
                 return; 
             }
             
@@ -840,7 +923,7 @@
                 if (error) throw error;
                 
                 // NOUVEAU : Envoi au journal
-                const detailsNouvelle = 'Système ' + sys + ' : ' + directivesAEnvoyer.map(d => texteDirective(d) + ' (priorité ' + libellePriorite(d.priorite) + ')').join(' · ') + '.';
+                const detailsNouvelle = 'Système ' + sys + ' : ' + directivesAEnvoyer.map(d => texteDirective(d)).join(' · ') + (campagne ? ' (campagne « ' + campagne.nom + ' »)' : '') + '.';
                 window.enregistrerJournalActivite('NOUVELLE MISSION BGS', detailsNouvelle, 'var(--ed-orange)');
                 
                 if (typeof sonSucces === 'function') sonSucces();
@@ -852,14 +935,13 @@
                     chargerOrdresAmiraute(); 
                     afficherOrdresBGS();
                     fermerModal('modal-commandement'); 
-                    btn.innerText = "TRANSMETTRE LA CAMPAGNE"; 
+                    btn.innerText = "TRANSMETTRE LES DIRECTIVES"; 
                     btn.style.color = "#FF3333"; 
                     btn.style.borderColor = "#FF3333";
                     btn.style.pointerEvents = "auto";
                     
                     document.getElementById('cmd-system').value = "";
                     document.getElementById('cmd-population').value = "";
-                    document.getElementById('cmd-briefing').value = "";
                     document.getElementById('cmd-directives-container').innerHTML = "";
                     ajouterLigneDirective();
                 }, 1500);
@@ -867,20 +949,37 @@
             } catch(e) {
                 console.error(e);
                 btn.innerText = "ÉCHEC DE TRANSMISSION";
-                setTimeout(() => { btn.innerText = "TRANSMETTRE LA CAMPAGNE"; btn.style.pointerEvents = "auto"; }, 2000);
+                setTimeout(() => { btn.innerText = "TRANSMETTRE LES DIRECTIVES"; btn.style.pointerEvents = "auto"; }, 2000);
             }
         }
 
-        window.ouvrirSalleCommandement = function(event) {
+        window.ouvrirSalleCommandement = async function(event, campagneId) {
             if (typeof sonClic === 'function') sonClic();
             ouvrirModal('modal-commandement', event);
             chargerOrdresAmiraute();
+            chargerChoixCampagne(campagneId);
+            if (window.edteamCampagnesPP) window.edteamCampagnesPP.choisirDomaine(window.edteamCampagnesPP.domaine());
             
             const conteneur = document.getElementById('cmd-directives-container');
             if (conteneur && conteneur.children.length === 0) {
                 ajouterLigneDirective();
             }
         };
+
+        // liste deroulante des campagnes actives (salle de commandement)
+        async function chargerChoixCampagne(preselection) {
+            const sel = document.getElementById('cmd-campagne'); if (!sel) return;
+            const camps = await window.edteamCampagnes.lire();
+            window.cacheCampagnes = camps;
+            const garde = preselection || sel.value;
+            sel.innerHTML = camps.length
+                ? '<option value="">-- Choisir une campagne --</option>' + camps.map(c => '<option value="' + c.id + '">' + escapeHtml(window.edteamCampagnes.LIB[c.type_campagne] + ' · ' + c.nom + ' (priorité ' + window.edteamCampagnes.PRIO[c.priorite][0].toLowerCase() + ')') + '</option>').join('')
+                : '<option value="">Aucune campagne active</option>';
+            if (garde && camps.some(c => String(c.id) === String(garde))) sel.value = String(garde);
+            const btnN = document.getElementById('cmd-btn-nouvelle-camp'); if (btnN) btnN.style.display = (profilCommandant && (profilCommandant.est_amiral || profilCommandant.est_directeur)) ? '' : 'none';
+            const aide = document.getElementById('cmd-campagne-aide');
+            if (aide) aide.textContent = camps.length ? 'La campagne donne sa priorité à la directive. Seul l\'Amiral crée une campagne.' : (btnN && btnN.style.display === '' ? 'Aucune campagne active : créez-en une avec « + NOUVELLE CAMPAGNE ».' : 'Aucune campagne active : l\'Amiral doit en créer une avant d\'ajouter des directives.');
+        }
 
         async function chargerOrdresAmiraute() {
             const container = document.getElementById('liste-ordres-actifs');
@@ -897,41 +996,25 @@
                 if (error) throw error;
 
                 if (compteur) compteur.innerText = (data || []).length;
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<div style="color: #777; font-style: italic; padding: 22px; border: 1px dashed #3a3a3a; text-align: center; line-height: 1.6;">Aucune directive active pour le moment.<br><span style="font-size: 0.85em;">Lancez une campagne avec le formulaire de gauche.</span></div>';
+                const camps = (await window.edteamCampagnes.lire()).slice().sort((a, b) => (a.priorite - b.priorite) || String(a.nom).localeCompare(String(b.nom)));
+                window.cacheCampagnes = camps;
+                const PPX = window.edteamCampagnesPP, COLX = window.edteamCampagnesCOL; await Promise.all([PPX ? PPX.lire() : null, COLX ? COLX.lire() : null]); if (compteur) compteur.innerText = (data || []).length + ((PPX && PPX.vue() && PPX.vue().missions) || []).length + ((window.cacheCOL && window.cacheCOL.missions) || []).length;
+                const amiral = !!(profilCommandant.est_amiral || profilCommandant.est_directeur);
+                if (!camps.length && (!data || data.length === 0)) {
+                    container.innerHTML = '<div style="color: #777; font-style: italic; padding: 22px; border: 1px dashed #3a3a3a; text-align: center; line-height: 1.6;">Aucune campagne ni directive pour le moment.<br><span style="font-size: 0.85em;">' + (amiral ? 'Créez une campagne, puis ajoutez-y des directives avec le formulaire de gauche.' : 'L\'Amiral doit d\'abord créer une campagne.') + '</span></div>';
                     return;
                 }
 
-                const groupes = {};
-                data.forEach(o => {
-                    const s = o.systeme_cible.toUpperCase();
-                    if (!groupes[s]) groupes[s] = [];
-                    groupes[s].push(o);
-                });
-
                 const LIBELLES = { HAUSSE: 'AUGMENTER', BAISSE: 'RÉDUIRE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' };
-                let html = '';
-                for (const [sys, liste] of Object.entries(groupes)) {
-                    const sysSafe = sys.replace(/'/g, "\\'");
-                    html += `
-                    <div class="cmd-systeme">
-                        <div class="cmd-systeme-tete">
-                            <span class="cmd-systeme-nom">SYSTÈME : ${escapeHtml(sys)}<small>${liste.length} faction${liste.length > 1 ? 's' : ''}</small></span>
-                            <button class="cmd-btn rouge" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="cloturerSystemeEntier('${sysSafe}')">CLÔTURER LE SYSTÈME</button>
-                        </div>
-                        <div style="padding: 4px 0 6px;">`;
-
-                    liste.forEach(ordre => {
-                        const couleur = CMD_COULEURS[ordre.type_ordre] || '#FF3333';
-                        const prio = ordre.priorite || 3;
-                        const tagPrio = prio === 1 ? '<span class="cmd-tag" style="color: #FF3333;">⚠ CRITIQUE</span>' : (prio === 2 ? '<span class="cmd-tag" style="color: #FF7100;">⚡ HAUTE</span>' : '');
-                        html += `
+                const ligneOrdre = ordre => {
+                    const couleur = CMD_COULEURS[ordre.type_ordre] || '#FF3333';
+                    return `
                         <div class="cmd-ordre" style="--oc: ${couleur};">
                             <div style="min-width: 0;">
                                 <div class="cmd-ordre-nom">${escapeHtml(ordre.faction_cible)}</div>
                                 <div class="cmd-ordre-tags">
                                     <span class="cmd-tag" style="color: ${couleur};">${LIBELLES[ordre.type_ordre] || escapeHtml(ordre.type_ordre)}</span>
-                                    ${tagPrio}
+                                    <span class="cmd-tag" style="color: #888;">${escapeHtml(String(ordre.systeme_cible || '').toUpperCase())}</span>
                                     ${ordre.origine === 'PILOTE' ? '<span class="cmd-tag" style="color: #FF4FD8;">★ INITIATIVE</span>' : ''}
                                 </div>
                             </div>
@@ -941,10 +1024,29 @@
                                 <button class="cmd-btn rouge" onmouseenter="if(typeof sonHover==='function') sonHover()" onclick="supprimerOrdre('${ordre.id}')">SUPPR.</button>
                             </div>
                         </div>`;
-                    });
-
-                    html += `</div></div>`;
-                }
+                };
+                const E = window.edteamCampagnes;
+                let html = '';
+                camps.forEach(c => {
+                    const liste = (data || []).filter(o => o.origine !== 'PILOTE' && String(o.campagne_id) === String(c.id));
+                    const col = E.COUL[c.type_campagne] || '#aaa';
+                    const lignesPP = PPX ? PPX.lignesCommandement(c.id) : '';
+                    const lignesCol = COLX ? COLX.lignesCommandement(c.id) : '';
+                    const nbPP = (lignesPP ? (lignesPP.match(/cmd-ordre"/g) || []).length : 0) + (lignesCol ? (lignesCol.match(/cmd-ordre"/g) || []).length : 0);
+                    html += `
+                    <div class="cmd-systeme" style="border-color: ${col}66;">
+                        <div class="cmd-systeme-tete">
+                            <span class="cmd-systeme-nom" style="color: ${col};">${escapeHtml(E.LIB[c.type_campagne] || '')} · ${escapeHtml(c.nom)}<small>${liste.length + nbPP} mission${liste.length + nbPP > 1 ? 's' : ''} · priorité ${E.PRIO[c.priorite][0].toLowerCase()}</small></span>
+                            ${amiral ? `<span style="display: flex; gap: 6px;"><button class="cmd-btn cy" onclick="edteamCampagnes.ouvrir(${c.id})">ÉDITER</button><button class="cmd-btn rouge" onclick="edteamCampagnes.cloturer(${c.id})">CLÔTURER LA CAMPAGNE</button></span>` : ''}
+                        </div>
+                        <div style="padding: 4px 0 6px;">${(liste.length || nbPP) ? liste.map(ligneOrdre).join('') + lignesPP + lignesCol : '<div style="color: #777; font-style: italic; padding: 8px 4px; font-size: 0.85em;">Aucune mission dans cette campagne.</div>'}</div>
+                    </div>`;
+                });
+                const orphelines = (data || []).filter(o => o.origine !== 'PILOTE' && !camps.some(c => String(c.id) === String(o.campagne_id)));
+                if (orphelines.length) html += `<div class="cmd-systeme"><div class="cmd-systeme-tete"><span class="cmd-systeme-nom">SANS CAMPAGNE<small>${orphelines.length}</small></span></div><div style="padding: 4px 0 6px;">${orphelines.map(ligneOrdre).join('')}</div></div>`;
+                const inis = (data || []).filter(o => o.origine === 'PILOTE');
+                const inisPP = (PPX ? PPX.lignesCommandement('initiatives') : '') + (COLX ? COLX.lignesCommandement('initiatives') : '');
+                if (inis.length || inisPP) html += `<div class="cmd-systeme" style="border-color: #FF4FD866;"><div class="cmd-systeme-tete"><span class="cmd-systeme-nom" style="color: #FF4FD8;">INITIATIVES DES PILOTES<small>hors campagne</small></span></div><div style="padding: 4px 0 6px;">${inis.map(ligneOrdre).join('')}${inisPP}</div></div>`;
                 container.innerHTML = html;
             } catch (e) {
                 console.error(e);
@@ -1196,8 +1298,8 @@
             return `<div class="eff">
                 <div class="lab">EFFORT</div>
                 <div class="nums"><span class="esc">ESCADRON <b>${meta.global} %</b>${bgsAvatars(meta.pilotes, 3, 26)}</span><span class="toi">TA PART <b>${meta.part} %</b></span></div>
-                <div class="jg"><i style="width: ${meta.global}%; opacity: 0.35; background: ${meta.couleur};"></i><i style="width: ${meta.vous}%; background: ${meta.couleur};"></i></div>
-                ${mini.length ? `<div class="types">${mini.map(x => `<div class="t"><span>${escapeHtml(x.t.replace(/^[^A-Za-zÀ-ÿ]+/, ''))}</span><div class="jg2"><i style="width: ${x.g}%; background: ${x.c}; opacity: 0.35;"></i><i style="width: ${x.v}%; background: ${x.c};"></i></div></div>`).join('')}</div>` : ''}
+                <div class="jg"><i style="width: ${meta.global}%; opacity: 0.5; background: ${meta.couleur};"></i><i style="width: ${meta.vous}%; background: ${meta.couleur}; box-shadow: 0 0 9px ${meta.couleur}, 0 0 2px ${meta.couleur}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
+                ${mini.length ? `<div class="types">${mini.map(x => `<div class="t"><span>${escapeHtml(x.t.replace(/^[^A-Za-zÀ-ÿ]+/, ''))}</span><div class="jg2"><i style="width: ${x.g}%; background: ${x.c}; opacity: 0.5;"></i><i style="width: ${x.v}%; background: ${x.c}; box-shadow: 0 0 9px ${x.c}, 0 0 2px ${x.c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div></div>`).join('')}</div>` : ''}
             </div>`;
         }
 
@@ -1293,9 +1395,9 @@
             const meta = window.cacheMetaBgs[ordre.id] || { couleur: '#00F0FF', global: 0, part: 0, vous: 0 };
             const sens = bgsSens(ordre, res);
             const cs = BGS_SENS_COUL[sens || 'att'];
-            const cType = meta.couleur;                       // couleur du type (vert hausse, rouge baisse...) : gardee pour l'etiquette du type
+            const cType = '#FF7100';                       // couleur du type (vert hausse, rouge baisse...) : gardee pour l'etiquette du type
             const estIni = ordre.origine === 'PILOTE';
-            const c = estIni ? '#FF4FD8' : cType;               // une initiative a toute sa fenetre en rose, hausse ou baisse
+            const c = '#FF7100';               // une initiative a toute sa fenetre en rose, hausse ou baisse
             const infoIni = estIni ? (((window.cacheInfosInit || {})[ordre.id]) || {}) : null;
             const donnees = !!(res && res.donnees);
             const jours = Math.max(1, Math.ceil((Date.now() - new Date(ordre.date_emission || ordre.created_at).getTime()) / 86400000));
@@ -1369,7 +1471,7 @@
                 <div class="bgs-hero" style="border-color: ${c}; margin-top: 0;">
                     <div class="h1"><span>EFFORT DE L'ESCADRON</span><span style="display:inline-flex;align-items:center;gap:10px;align-self:center"><b style="color: #fff;white-space:nowrap;">${meta.global} %</b>${bgsAvatars(meta.pilotes, 6, 40)}</span></div>
                     <div class="h2"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b></div>
-                    <div class="jgh"><i style="width: ${meta.global}%; opacity: 0.35; background: ${c};"></i><i style="width: ${meta.vous}%; background: ${c};"></i></div>
+                    <div class="jgh"><i style="width: ${meta.global}%; opacity: 0.5; background: ${c};"></i><i style="width: ${meta.vous}%; background: ${c}; box-shadow: 0 0 9px ${c}, 0 0 2px ${c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
                 </div>
                 <div class="bgs-sec" style="margin-top: 14px;">EFFORT PAR TYPE D'ACTION <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· cumul depuis la directive · vif : toi · atténué : escadron</span></div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">${window.cacheJaugesBgs[ordre.id] || ''}</div>
@@ -1413,6 +1515,7 @@
             el.addEventListener('mouseleave', () => { if (typeof hideHoloTooltip === 'function') hideHoloTooltip(); });
         }
         window.addEventListener('edteam-photos', () => { if (typeof chargerAccueilBGS === 'function' && profilCommandant) chargerAccueilBGS(true); });
+        function accSemClassique() { try { return localStorage.getItem('edteam_accueil_classique') === '1'; } catch (e) { return false; } }
         async function chargerAccueilBGS(force) {
             const haut = document.getElementById('bgs-accueil-haut');
             if (!haut || !profilCommandant) return;
@@ -1420,17 +1523,21 @@
             accueilMemo.ts = Date.now();
             const f1 = n => (Math.round((Number(n) || 0) * 10) / 10).toLocaleString('fr-FR');
             const f0 = n => Math.floor(Number(n) || 0).toLocaleString('fr-FR');
-            let moi = null, sem = null, titres = null;
+            let moi = null, sem = null, titres = null, accSem = null;
             try {
-                const [rProfil, rSem, rTitres] = await Promise.all([
-                    supabaseApp.from('profils').select('rang_bgs, points_bgs, palmares_bgs').eq('user_id', profilCommandant.user_id).single(),
+                const [rProfil, rSem, rTitres, rAcc] = await Promise.all([
+                    supabaseApp.from('profils').select('rang_bgs, points_bgs, palmares_bgs, puissance_nom, puissance_rang, puissance_merites_cycle, puissance_merites_total').eq('user_id', profilCommandant.user_id).single(),
                     supabaseApp.rpc('bgs_semaine_escadron'),
                     window.chargerTitresSpecialistes(profilCommandant.escadron_id, force),
+                    (window.edteamAccueil && window.edteamAccueil.actif()) ? supabaseApp.rpc('accueil_semaine') : null,
                     window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false) : null
                 ]);
+                accSem = (rAcc && !rAcc.error && rAcc.data && rAcc.data.escadron && rAcc.data.bgs && rAcc.data.pp) ? rAcc.data : null;   // absent tant que le script SQL 101 n'est pas lancé : on garde la bande BGS seule
                 titres = rTitres;
                 moi = rProfil.data || null;
                 sem = (!rSem.error && rSem.data && rSem.data.escadron) ? rSem.data : null;   // absent tant que le script SQL 34 n'est pas lancé : le bloc est simplement masqué
+                // repli SANS le script SQL 101 : la nouvelle bande se construit avec ce qu'on a déjà (points BGS de la semaine, ma puissance) ; le classement n'a alors que le BGS
+                if (!accSem && sem && moi && window.edteamAccueil && window.edteamAccueil.actif()) accSem = { escadron: sem.escadron, bgs: { points: sem.points, actifs: sem.actifs, membres: sem.membres, mes_points: sem.mes_points, mes_points_24h: sem.mes_points_24h }, pp: { puissance: moi.puissance_nom || null, rang: moi.puissance_rang || 0, mes_merites: moi.puissance_merites_cycle || 0, merites_total: moi.puissance_merites_total || 0, total: 0, actifs: 0, membres: 0 }, pilotes: (sem.top || []).map(t => ({ u: null, nom: t.nom, bgs: t.points, pp: 0 })) };
             } catch (e) { console.error('Erreur accueil BGS :', e); }
 
             // 0. MUR DES SPÉCIALISTES (masqué tant que le script SQL 37 n'est pas lancé)
@@ -1452,6 +1559,7 @@
                 <div class="bloc cy" style="padding: 18px 20px; display: flex; flex-direction: column;">
                     <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
                         <h4 style="margin: 0; color: var(--ed-blue); letter-spacing: 2px;">&gt; MON ENGAGEMENT POUR ${nomEsc} <span id="bgs-aide-engagement" style="cursor: help; display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 19px; border: 1px solid rgba(255,113,0,0.7); border-radius: 50%; color: var(--ed-orange); font-size: 0.7em; margin-left: 6px; vertical-align: middle; letter-spacing: 0;">?</span></h4>
+                        ${(window.edteamAccueil && accSemClassique()) ? '<a href="#" onclick="return window.edteamAccueil.basculer(false);" style="color:#777; font-size:.78em; text-decoration:underline;">essayer la nouvelle bande BGS + Powerplay</a>' : ''}
                     </div>
                     <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin: auto 0;">
                         <div style="display: inline-flex; flex-direction: column; align-items: center; border: 2px solid var(--ed-orange); color: var(--ed-orange); padding: 6px 16px; border-radius: 4px; line-height: 1.1; box-shadow: 0 0 12px rgba(255,113,0,0.3);">
@@ -1513,6 +1621,12 @@
                     </div>
                     <div id="bgs-progression-acc" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;"></div>
                 </div>`;
+            if (accSem && window.edteamAccueil) {
+                try {
+                    await window.edteamAccueil.rendre(haut, { acc: accSem, rang, pts, max, pct, nomEsc: String(profilCommandant.escadron_id || 'TON ESCADRON'), profil: profilCommandant });
+                    return;
+                } catch (e) { console.error('Bande accueil BGS+PP :', e); }
+            }
             haut.style.gridTemplateColumns = sem ? 'minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr)' : 'minmax(0, 1fr) minmax(0, 1fr)';
             haut.innerHTML = blocEngagement + blocProgression + blocEscadron;
             attacherInfoBulle('bgs-aide-engagement', '<b>TA PRIORITÉ</b><br>Agir pour ta faction d\'escadron. <b style="color: #fff;">Chaque action compte</b> (missions, combat, commerce, exploration, colonisation), <b style="color: #fff;">avec ou sans mission de l\'Amiral</b>, et fait monter ton rang.');
@@ -1614,7 +1728,7 @@
                 // plutot qu'une fine barre separee : plus visible au milieu des cadres et badges.
                 // Zone vive (forte opacite) = votre contribution, zone attenuee = le reste de l'escadron,
                 // au-dela de ${widthTotal}% : fond neutre (ce qu'il reste a accomplir).
-                let bgStyle = `background: linear-gradient(to right, ${couleurBarre}4d 0%, ${couleurBarre}4d ${widthVous}%, ${couleurBarre}22 ${widthVous}%, ${couleurBarre}22 ${widthTotal}%, rgba(0,0,0,0.5) ${widthTotal}%, rgba(0,0,0,0.5) 100%); border: 1px solid rgba(255,255,255,0.05); transition: background 0.5s ease-out;`;
+                let bgStyle = `background: linear-gradient(to right, ${couleurBarre}99 0%, ${couleurBarre}99 ${Math.max(0, widthVous - 0.6)}%, ${widthVous > 0 ? couleurBarre : couleurBarre + '99'} ${Math.max(0, widthVous - 0.6)}%, ${widthVous > 0 ? couleurBarre : couleurBarre + '99'} ${widthVous}%, ${couleurBarre}44 ${widthVous}%, ${couleurBarre}44 ${widthTotal}%, rgba(0,0,0,0.5) ${widthTotal}%, rgba(0,0,0,0.5) 100%); border: 1px solid rgba(255,255,255,0.05); transition: background 0.5s ease-out;`;
                 let titreHighlight = titre;
 
                 if (alerteTexte !== '') {
@@ -1938,36 +2052,23 @@
                 container.innerHTML = colonnes.filter(c => c.length).map(c => `<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">${c.join('')}</div>`).join('');
                 };
 
-                // l'encadre des directives en veille (type, faction, systeme, influence) ; on calcule quand meme leurs jauges pour que le detail s'ouvre normalement
+                // Les directives (actives et en veille) vivent dans les CAMPAGNES : leurs jauges sont calculees dans un conteneur detache (caches pour la fenetre de detail), puis les campagnes sont dessinees
                 const veilleBox = document.getElementById('bgs-veille');
-                if (ordresVeille.length) rendreOrdres(ordresVeille, document.createElement('div'), false);
-                if (veilleBox) {
-                    if (!ordresVeille.length) { veilleBox.style.display = 'none'; veilleBox.innerHTML = ''; }
-                    else {
-                        const COL_TYPE = { HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' };
-                        veilleBox.innerHTML = `<div class="veille-titre">DIRECTIVES EN VEILLE <small>aucun effort depuis 7 jours · l'influence reste suivie · cliquez pour le détail</small></div><div class="veille-liste">${ordresVeille.map(o => {
-                            const res = resultats.dir[o.id] || null;
-                            const cs = BGS_SENS_COUL[bgsSens(o, res) || 'att'];
-                            const infl = res && res.donnees ? `<b>${bgsPct(res.influence)} %</b>${res.variation !== null ? ` <span style="color: ${cs};">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '='} ${bgsPts(res.variation)}</span>` : ''}` : '<span style="color: #666;">—</span>';
-                            const c = COL_TYPE[o.type_ordre] || '#aaa';
-                            return `<div class="veille-tag" onclick="ouvrirDetailResultat('${o.id}')" title="Aucun effort depuis 7 jours : directive en veille"><span class="vt" style="color: ${c}; border-color: ${c};">#${o.id} ${escapeHtml(o.type_ordre)}</span><span class="vf">${escapeHtml(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${escapeHtml(String(o.systeme_cible || '').toUpperCase())}</span><span class="ve">${window.edteamEtats ? window.edteamEtats.badges(res, true) : ''}</span><span class="vi">${infl}</span></div>`;
-                        }).join('')}</div>`;
-                        veilleBox.style.display = '';
-                    }
-                }
-                if (ordresAmiral.length === 0 && ordresInit.length > 0) {
-                    container.innerHTML = '';   // seules des initiatives sont en cours : pas de message « aucune directive »
-                } else if (ordresAmiral.length === 0 && ordresVeille.length) {
-                    container.style.gridTemplateColumns = 'minmax(0, 1fr)';
-                    container.innerHTML = '<div class="data-row bloc" style="text-align: center; color: #9aa; padding: 18px; line-height: 1.6;">Aucune directive active en ce moment : celles qui restent sont en veille, ci-dessous.</div>';
-                } else if (ordresAmiral.length === 0) {
-                    container.style.gridTemplateColumns = 'minmax(0, 1fr)';
-                    container.innerHTML = '<div class="data-row bloc" style="grid-column: 1 / -1; text-align: center; color: #9aa; padding: 28px; line-height: 1.7;">Aucun focus demandé par l\'Amiral pour le moment.<br><b style="color: var(--ed-orange);">Continue d\'agir pour ta faction : tout compte pour ton rang BGS.</b><br><span style="font-size: 0.85em; color: #777;">Quand l\'Amiral demandera un focus, il apparaîtra ici avec la distinction à gagner.</span></div>';
-                } else rendreOrdres(ordresAmiral, container, false);
+                if (veilleBox) { veilleBox.style.display = 'none'; veilleBox.innerHTML = ''; }
+                container.innerHTML = '';
+                const ordresDirectives = ordresData.filter(o => o.origine !== 'PILOTE');
+                if (ordresDirectives.length) rendreOrdres(ordresDirectives, document.createElement('div'), false);
+                const [campagnes] = await Promise.all([window.edteamCampagnes.lire(), window.edteamCampagnesPP ? window.edteamCampagnesPP.lire() : null, window.edteamCampagnesCOL ? window.edteamCampagnesCOL.lire() : null, window.EDTEAMPhotos ? window.EDTEAMPhotos.charger(false).catch(() => null) : null]);
+                window.cacheCampagnes = campagnes;
+                window.edteamCampagnes.rendre({ campagnes, ordres: ordresDirectives, veilleIds, resume, meta: window.cacheMetaBgs });
+                const titreIni = document.getElementById('bgs-ini-titre');
+                if (titreIni) titreIni.innerHTML = (ordresInit.length || (window.edteamCampagnesPP && window.edteamCampagnesPP.nbInitiatives()) || (window.edteamCampagnesCOL && window.edteamCampagnesCOL.nbInitiatives())) ? '<div class="camp-titre" style="color: #FF4FD8; border-bottom-color: rgba(255,79,216,.4);">&gt; INITIATIVES DES PILOTES <small>toujours hors campagne · lancées par les pilotes de l\'escadron</small></div>' : '';
                 if (containerInit) {
                     if (ordresInit.length === 0) {
                         containerInit.innerHTML = '';   // aucune initiative : aucun bloc
                     } else rendreOrdres(ordresInit, containerInit, true);
+                    if (window.edteamCampagnesPP) containerInit.insertAdjacentHTML('beforeend', window.edteamCampagnesPP.cartesInitiatives());
+                    if (window.edteamCampagnesCOL) containerInit.insertAdjacentHTML('beforeend', window.edteamCampagnesCOL.cartesInitiatives());
                 }
                 window.placerDuo();
                 if (typeof appliquerModeIni === 'function') appliquerModeIni();   // les boutons « lancer » viennent d'etre redessines
@@ -2075,7 +2176,7 @@
         function rendrePropositionsIni(liste) {
             const zone = document.getElementById('bgs-propositions'); if (!zone) return;
             const moi = profilCommandant || {};
-            const typeLigne = q => '<b style="color:' + ({ HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' }[q.type] || '#FF3333') + ';">' + escapeHtml(String(q.type)) + '</b> · <b style="color:#fff;">' + escapeHtml(String(q.faction || '').toUpperCase()) + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>';
+            const typeLigne = q => q.domaine === 'COL' ? '<b style="color:#FFD700;">COLONISATION</b> · <b style="color:#fff;">' + (q.type_col === 'CHANTIERS' ? 'CHANTIERS' + (q.nb_chantiers ? ' (' + q.nb_chantiers + ')' : '') : 'COLONISER LE SYSTÈME') + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>' : q.domaine === 'PP' ? '<b style="color:#8A7CFF;">POWERPLAY</b> · <b style="color:#fff;">' + escapeHtml(({ RENFORCEMENT: 'RENFORCEMENT', SAPE: 'SAPE', ACQUISITION: 'ACQUISITION' })[q.type_pp] || String(q.type_pp || '')) + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>' : '<b style="color:' + ({ HAUSSE: '#00FF66', BAISSE: '#FF3333', GUERRE: '#FF7100', ELECTION: '#00F0FF' }[q.type] || '#FF3333') + ';">' + escapeHtml(String(q.type)) + '</b> · <b style="color:#fff;">' + escapeHtml(String(q.faction || '').toUpperCase()) + '</b> · système <b style="color:#fff;">' + escapeHtml(String(q.systeme || '').toUpperCase()) + '</b>';
             const age = q => { const h = Math.floor((Date.now() - new Date(q.cree_le).getTime()) / 3600000); return h < 1 ? 'il y a moins d\'une heure' : 'il y a ' + h + ' h'; };
             const msg = q => q.message ? '<div style="color:#aaa; font-size:0.8em; margin-top:5px; font-style:italic;">« ' + escapeHtml(String(q.message)) + ' »</div>' : '';
             const enTete = (titre, nb) => '<div style="color:#FF4FD8; letter-spacing:2px; font-weight:bold;">&gt; ' + titre + (nb ? ' <span class="prop-etat" style="color:#ffc400; border-color:#ffc400; margin-left:8px;">' + nb + '</span>' : '') + '</div>';
@@ -2141,6 +2242,7 @@
             ouvrirModal('modal-initiative', event);
             choisirTypeInitiative('HAUSSE');
             appliquerTextesModalIni();
+            if (window.edteamCampagnesPP) window.edteamCampagnesPP.preparerFenetreIni();
         };
         window.choisirTypeInitiative = function(t) {
             initiativeType = t;
@@ -2171,6 +2273,8 @@
         };
         window.lancerInitiative = async function() {
             if (typeof sonClic === 'function') sonClic();
+            if (window.edteamCampagnesPP && window.edteamCampagnesPP.domaineIni() === 'PP') return window.edteamCampagnesPP.lancerIni(iniPropose());
+            if (window.edteamCampagnesPP && window.edteamCampagnesPP.domaineIni() === 'COL') return window.edteamCampagnesCOL.lancerIni(iniPropose());
             const btn = document.getElementById('btn-lancer-initiative');
             const sys = document.getElementById('ini-systeme').value.trim();
             const fac = document.getElementById('ini-faction').value.trim();
@@ -2209,9 +2313,9 @@
             afficherOrdresBGS();
         };
         window.adopterInitiative = async function(id) {
-            const ok = await demanderConfirmation('TRANSFORMER EN DIRECTIVE ?', 'L\'initiative devient une directive officielle de l\'escadron (priorité normale) : l\'annonce figure dans le journal de l\'escadron. Vous pourrez ensuite modifier sa priorité comme pour toute directive.', '#FF4FD8');
-            if (!ok) return;
-            const { error } = await supabaseApp.rpc('adopter_initiative', { p_id: Number(id), p_priorite: 3 });
+            const campagne = await window.edteamCampagnes.choisirCampagne('TRANSFORMER EN DIRECTIVE : QUELLE CAMPAGNE ?', 'L\'initiative devient une directive officielle de la campagne choisie (elle en prend la priorité) ; l\'annonce figure dans le journal de l\'escadron.');
+            if (!campagne) return;
+            const { error } = await supabaseApp.rpc('adopter_initiative', { p_id: Number(id), p_campagne_id: Number(campagne) });
             if (error) { console.error(error); alert(error.message || 'Échec de la transformation.'); return; }
             afficherOrdresBGS();
         };
@@ -2311,7 +2415,7 @@
         }
         let monRangBgsMemo = { ts: 0, d: null };
         async function bandeauRangBgs() {
-            return '<div style="padding: 8px 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8a8a8a; font-size: 0.78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ⓘ <b style="color: var(--ed-orange);">RANG BGS</b> : les points de carrière que rapporte chaque action (les échecs : 0, sauf sous une directive de baisse : 1). Cumulés, ils font monter votre rang.</div>';
+            return '<div style="padding: 8px 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8a8a8a; font-size: 0.78em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ⓘ <b style="color: var(--ed-orange);">RANG BGS</b> : les points de carrière que rapporte chaque action (les échecs : 0, sauf sous une directive de baisse : 1). Cumulés, ils font monter votre rang. Les lignes Powerplay affichent des mérites et des CP estimés (mérites ÷ 4).</div>';
         }
         function pointsInvestissement(type, valeur, echecBaisse) {
             const v = Math.abs(Number(valeur) || 0);
@@ -2335,7 +2439,7 @@
             try {
                 // 1. TÉLÉCHARGEMENT SÉCURISÉ ET OPTIMISÉ (EGRESS PROTÉGÉ)
                 const resOrdres = suite ? { data: memoireOrdresArchives } : await supabaseApp.from('ordres_bgs')
-                    .select('id, systeme_cible, faction_cible, type_ordre, statut, priorite')
+                    .select('id, systeme_cible, faction_cible, type_ordre, statut, priorite, campagne_id')
                     .eq('escadron_id', profilCommandant.escadron_id || 'ISS');
                 const ordres = resOrdres.data || [];
 
@@ -2360,6 +2464,11 @@
                 } else if (filtreOrdre === 'LIBRE') {
                     // Cible spécifiquement les actions sans ordre (soutien libre & chantiers de colonisation) ; la période est filtrée plus bas, sans plafond de 30 jours
                     queryEfforts = queryEfforts.is('ordre_id', null);
+                } else if (/^P\d+$/.test(filtreOrdre)) {
+                    queryEfforts = queryEfforts.eq('ordre_id', 'none');   // une mission Powerplay precise : aucune ligne BGS
+                } else if (/^C\d+$/.test(filtreOrdre)) {
+                    const idsCampagne = ordres.filter(o => String(o.campagne_id) === filtreOrdre.slice(1)).map(o => String(o.id));
+                    queryEfforts = idsCampagne.length ? queryEfforts.in('ordre_id', idsCampagne) : queryEfforts.eq('ordre_id', 'none');
                 } else if (filtreOrdre !== 'ALL') {
                     queryEfforts = queryEfforts.eq('ordre_id', filtreOrdre);
                 }
@@ -2385,6 +2494,9 @@
                 const resPaliers = suite ? null : await supabaseApp.rpc('colonisation_paliers', { p_jours: 30 }).then(r => r, () => ({ data: null }));
                 if (!suite) memoirePaliers = (resPaliers && Array.isArray(resPaliers.data) ? resPaliers.data : [])
                     .filter(l => l && l.t).map(l => ({ type_action: 'PALIER', date_action: l.t, cmdr: l.cmdr, palier: l.palier, total: l.total }));
+                // Efforts Powerplay de l'escadron (300 derniers, une fois) : fonction serveur pp_journal (script SQL 96)
+                const resPP = suite ? null : await supabaseApp.rpc('pp_journal', { p_limite: 300 }).then(r => r, () => ({ data: null }));
+                if (!suite) memoirePP = (resPP && Array.isArray(resPP.data) ? resPP.data : []).filter(l => l && l.date_action).map(l => Object.assign({ type_action: 'PP' }, l));
                 const [resEfforts, resProfils] = await Promise.all([
                     queryEfforts,
                     suite ? Promise.resolve({ data: null }) : supabaseApp.from('profils_publics')
@@ -2430,6 +2542,18 @@
                     };
                     groupe('DIRECTIVES EN COURS', ordres.filter(o => o.statut === 'ACTIF').sort((a, b) => b.id - a.id));
                     groupe('DIRECTIVES CLÔTURÉES (40 DERNIÈRES)', ordres.filter(o => o.statut !== 'ACTIF').sort((a, b) => b.id - a.id).slice(0, 40));
+                }
+
+                if (selectOrdre && !suite && !selectOrdre.dataset.ppPret && (window.cacheCampagnes || []).length + ((window.cachePP && window.cachePP.missions) || []).length) {
+                    selectOrdre.dataset.ppPret = '1';
+                    const grp = (titre, liste) => {
+                        if (!liste.length) return;
+                        const g = document.createElement('optgroup'); g.label = titre;
+                        liste.forEach(([v, t]) => { const opt = document.createElement('option'); opt.value = v; opt.textContent = t; g.appendChild(opt); });
+                        selectOrdre.appendChild(g);
+                    };
+                    grp('CAMPAGNES EN COURS', (window.cacheCampagnes || []).map(c => ['C' + c.id, String(c.nom).toUpperCase()]));
+                    grp('MISSIONS POWERPLAY EN COURS', ((window.cachePP && window.cachePP.missions) || []).map(m => ['P' + m.id, '#P' + m.id + ' · ' + String(m.systeme || '').toUpperCase() + ' (' + m.type_pp + ')']));
                 }
 
                 // 3. FILTRAGE TEMPOREL, OPÉRATIONNEL ET PILOTE
@@ -2496,7 +2620,24 @@
                 const monNomJournal = String(profilCommandant.cmdr_nom || '').toUpperCase();
                 const nomPiloteFiltre = filtrePilote === 'ALL' ? '' : (filtrePilote === 'ME' ? monNomJournal : String(dicoPilotes[filtrePilote] || '').toUpperCase());
                 const paliersVisibles = (!['ALL', 'LIBRE'].includes(filtreOrdre) || !['ALL', 'BAT'].includes(filtreSpec)) ? [] : memoirePaliers.filter(p => enPeriodeJournal(p) && new Date(p.date_action).getTime() >= limiteBasseJournal && (!nomPiloteFiltre || String(p.cmdr || '').toUpperCase() === nomPiloteFiltre));
-                const lastActions = [...effortsFiltres, ...stationsVisibles, ...paliersVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 600);
+                const actifsPP = new Set(((window.cachePP && window.cachePP.missions) || []).map(m => String(m.id)));
+                const ppVisibles = memoirePP.filter(l => {
+                    const t = new Date(l.date_action).getTime();
+                    if (isNaN(t) || t < limiteBasseJournal || !enPeriodeJournal(l)) return false;
+                    if (filtrePilote !== 'ALL' && String(l.user_id) !== String(filtrePilote === 'ME' ? profilCommandant.user_id : filtrePilote)) return false;
+                    if (!(filtreSpec === 'ALL' || /^PP/.test(filtreSpec))) return false;
+                    if (filtreSpec === 'PPREN' && l.type_pp !== 'RENFORCEMENT') return false;
+                    if (filtreSpec === 'PPSAP' && l.type_pp !== 'SAPE') return false;
+                    if (filtreSpec === 'PPACQ' && l.type_pp !== 'ACQUISITION') return false;
+                    const lie = l.mission_pp_id != null;
+                    if (filtreOrdre === 'ACTIF') return lie && actifsPP.has(String(l.mission_pp_id));
+                    if (filtreOrdre === 'CLOS') return lie && !actifsPP.has(String(l.mission_pp_id));
+                    if (filtreOrdre === 'LIBRE') return !lie;
+                    if (/^P\d+$/.test(filtreOrdre)) return String(l.mission_pp_id) === filtreOrdre.slice(1);
+                    if (/^C\d+$/.test(filtreOrdre)) return String(l.campagne_id) === filtreOrdre.slice(1);
+                    return filtreOrdre === 'ALL';
+                });
+                const lastActions = [...effortsFiltres, ...stationsVisibles, ...paliersVisibles, ...ppVisibles].sort((a, b) => new Date(b.date_action) - new Date(a.date_action)).slice(0, 600);
                 
                 if (conteneurFeed) {
                     if (lastActions.length === 0) {
@@ -2515,7 +2656,7 @@
                             <span>THÉÂTRE D'OPÉRATION</span>
                             <span style="text-align: right;">RÉSULTAT</span>
                             <span style="text-align: right;">VECTEUR</span>
-                            <span style="text-align: right; color: var(--ed-orange);" title="Points de carrière que l'action rapporte : ils font monter votre rang BGS">RANG BGS</span>
+                            <span style="text-align: right; color: var(--ed-orange);" title="BGS : points de carrière que l'action rapporte (ils font monter votre rang BGS) · Powerplay : CP estimés (mérites ÷ 4)">RANG BGS · CP</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">`;
 
@@ -2545,6 +2686,27 @@
                             }
 
                             // Palier de tonnes livrées franchi par un pilote (colonisation) : une ligne du journal, couleur du titre « Bâtisseur »
+                            if (a.type_action === 'PP') {
+                                const cpp = '#8A7CFF';
+                                const bgW = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+                                const nomW = escapeHtml(String(a.cmdr || 'INCONNU').toUpperCase());
+                                const abr = { RENFORCEMENT: 'RENFORC.', SAPE: 'SAPE', ACQUISITION: 'ACQUIS.' }[a.type_pp] || '';
+                                const lie = a.mission_pp_id != null;
+                                const tagW = lie ? '#P' + a.mission_pp_id + ' | ' + abr : (abr ? 'LIBRE | ' + abr : 'HORS MISSION');
+                                const colW = { RENFORCEMENT: '#00FF66', SAPE: '#FF3333', ACQUISITION: '#EDEDED' }[a.type_pp] || cpp;
+                                const origW = { PRIMES: 'PRIMES', COMBAT: 'COMBAT', MISSIONS: 'MISSIONS', LIVRAISONS: 'LIVRAISONS', COMMERCE: 'COMMERCE', EXPLORATION: 'EXPLORATION', SAUVETAGE: 'SAUVETAGE', COMMUNAUTE: 'COMMUNAUTÉ', AUTRE: 'AUTRE' }[a.origine_action] || 'AUTRE';
+                                feedHtml += `
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 95px 95px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgW}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cpp};" onmouseover="this.style.background='rgba(138, 124, 255, 0.10)';" onmouseout="this.style.background='${bgW}';">
+                                <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
+                                <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${nomW}">CMDR ${nomW}</span>
+                                <div style="white-space: nowrap;"><span style="border: 1px solid ${cpp}; color: ${cpp}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;" title="${lie ? 'Mission Powerplay #' + a.mission_pp_id : 'Soutien libre : aucune mission ne correspond à ce système et à ce type'}">${tagW}</span></div>
+                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;"><span style="color: ${cpp}; font-weight: bold;">${escapeHtml(String(a.systeme || '').toUpperCase())}</span><span style="color: #555; margin: 0 6px;">//</span><span style="color: #aaa;">POWERPLAY</span></div>
+                                <span style="text-align: right; white-space: nowrap; color: ${colW}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colW}40;">+${new Intl.NumberFormat('fr-FR').format(a.merites)} MÉRITES</span>
+                                <span style="text-align: right; color: ${cpp}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${origW} ]</span>
+                                <span style="text-align: right; white-space: nowrap; color: ${cpp}; font-size: 0.95em; font-weight: bold;" title="CP estimés = mérites ÷ 4 (estimation)">≈ ${new Intl.NumberFormat('fr-FR').format(Math.round(a.merites / 4))} CP</span>
+                            </div>`;
+                                return;
+                            }
                             if (a.type_action === 'PALIER') {
                                 const cp = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
                                 const bgP = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
@@ -2706,7 +2868,6 @@
                 ordreEditionOrigine = data;
                 document.getElementById('edit-ordre-id').innerText = `#${id} (${data.faction_cible})`;
                 document.getElementById('edit-ordre-type').value = data.type_ordre || 'HAUSSE';
-                document.getElementById('edit-ordre-priorite').value = data.priorite || 3;
                 document.getElementById('edit-ordre-briefing').value = data.briefing_amiral || '';
                 
                 document.getElementById('modal-edition-ordre').style.display = 'flex';
@@ -2724,7 +2885,6 @@
             try {
                 const payload = {
                     type_ordre: document.getElementById('edit-ordre-type').value,
-                    priorite: parseInt(document.getElementById('edit-ordre-priorite').value, 10),
                     briefing_amiral: document.getElementById('edit-ordre-briefing').value.trim()
                 };
 
@@ -2735,7 +2895,6 @@
                 const o = ordreEditionOrigine || {};
                 const changements = [];
                 if (o.type_ordre && o.type_ordre !== payload.type_ordre) changements.push('type ' + libelleTypeOrdre(o.type_ordre) + ' → ' + libelleTypeOrdre(payload.type_ordre));
-                if (o.priorite && Number(o.priorite) !== payload.priorite) changements.push('priorité ' + libellePriorite(o.priorite) + ' → ' + libellePriorite(payload.priorite));
                 if ((o.briefing_amiral || '') !== payload.briefing_amiral) changements.push('briefing mis à jour');
                 const detailsModif = 'Système ' + String(o.systeme_cible || '?').toUpperCase() + ' · ' + String(o.faction_cible || '').toUpperCase() + ' : ' + (changements.length ? changements.join(', ') : 'paramètres confirmés') + '.';
                 window.enregistrerJournalActivite('DIRECTIVE MODIFIÉE', detailsModif, 'var(--ed-blue)');
@@ -2801,16 +2960,6 @@
                     </select>
                 </div>
 
-                <!-- Priorité -->
-                <div>
-                    <label style="color: #00F0FF; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">PRIORITÉ TACTIQUE :</label>
-                    <select id="edit-ordre-priorite" class="search-input" style="width: 100%; border-color: #00F0FF; font-weight: bold;">
-                        <option value="1" style="color: #FF3333;">🔥 CRITIQUE (Priorité Absolue)</option>
-                        <option value="2" style="color: #FF7100;">⚡ HAUTE</option>
-                        <option value="3" style="color: #00FF66;">✅ NORMALE</option>
-                    </select>
-                </div>
-
                 <!-- Briefing -->
                 <div>
                     <label style="color: #00F0FF; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 5px;">BRIEFING SPÉCIFIQUE :</label>
@@ -2842,8 +2991,8 @@
             <div class="barre-filtres-journal">
                 <select id="filtre-pilote" class="tactical-filter"><option value="ALL" selected>[ TOUT L'ESCADRON ]</option><option value="ME">> MON DOSSIER PERSONNEL</option></select>
                 <select id="filtre-periode" class="tactical-filter"><option value="ALL">TOUT L'HISTORIQUE</option><option value="TICK_HEBDO" selected>DEPUIS LE DERNIER CYCLE (JEUDI)</option><option value="7J">7 DERNIERS JOURS</option><option value="30J">30 DERNIERS JOURS</option></select>
-                <select id="filtre-ordre" class="tactical-filter" title="Directive"><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option><option value="ACTIF">[ DIRECTIVES EN COURS ]</option><option value="CLOS">[ DIRECTIVES CLÔTURÉES ]</option><option value="LIBRE">[ ACTIONS LIBRES ]</option></select>
-                <select id="filtre-specialite" class="tactical-filter" title="Spécialité (titres du mur des spécialistes)"><option value="ALL" selected>[ TOUTES LES SPÉCIALITÉS ]</option><option value="SEC">FER DE LANCE · SÉCURITÉ</option><option value="LOG">MAÎTRE LOGISTICIEN · MISSIONS</option><option value="ECO">LE MAGNAT · ÉCONOMIE</option><option value="BAT">LE BÂTISSEUR · COLONISATION</option><option value="SCI">EXPERT SCIENTIFIQUE · SCIENCE</option><option value="EXE">L'EXÉCUTEUR · OP. NOIRES</option><option value="GUE">SEIGNEUR DE GUERRE · CONFLITS</option><option value="ECH">MISSIONS ÉCHOUÉES</option></select>
+                <select id="filtre-ordre" class="tactical-filter" title="Directive"><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option><option value="ACTIF">[ MISSIONS EN COURS ]</option><option value="CLOS">[ MISSIONS CLÔTURÉES ]</option><option value="LIBRE">[ SOUTIEN LIBRE ]</option></select>
+                <select id="filtre-specialite" class="tactical-filter" title="Spécialité (titres du mur des spécialistes)"><option value="ALL" selected>[ TOUTES LES SPÉCIALITÉS ]</option><option value="SEC">FER DE LANCE · SÉCURITÉ</option><option value="LOG">MAÎTRE LOGISTICIEN · MISSIONS</option><option value="ECO">LE MAGNAT · ÉCONOMIE</option><option value="BAT">LE BÂTISSEUR · COLONISATION</option><option value="SCI">EXPERT SCIENTIFIQUE · SCIENCE</option><option value="EXE">L'EXÉCUTEUR · OP. NOIRES</option><option value="GUE">SEIGNEUR DE GUERRE · CONFLITS</option><option value="ECH">MISSIONS ÉCHOUÉES</option><optgroup label="POWERPLAY"><option value="PPALL">TOUT LE POWERPLAY</option><option value="PPREN">RENFORCEMENT</option><option value="PPSAP">SAPE</option><option value="PPACQ">ACQUISITION</option></optgroup></select>
                 <input id="filtre-recherche" class="tactical-filter" type="search" placeholder="Système, faction, pilote…" autocomplete="off" style="cursor: text;">
             </div>
             <div id="modal-exploit-feed-content" style="overflow-y: auto; flex-grow: 1; padding-right: 10px;">
@@ -2907,6 +3056,6 @@
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=3"></script>
     <script src="commerce.js?v=6"></script>
-    <script src="footer.js?v=25"></script>
+    <script src="footer.js?v=26"></script>
 </body>
 </html>

@@ -56,7 +56,7 @@ function injecterArchitectureGlobale() {
                 <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7" stroke-dasharray="1.6 1.6"></polyline></svg>
                 <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; text-align: center;">0</span>
             </div>
-            <span class="nav-text">BGS</span>
+            <span class="nav-text">ENGAGEMENT</span>
         </a>
         <a href="colonisation.html" id="nav-link-colonisation" class="nav-link ${page === 'colonisation.html' ? 'active' : ''}" style="display: flex;" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="16" r="5.5"></circle><ellipse cx="11" cy="16" rx="9.5" ry="2.6" transform="rotate(-18 11 16)"></ellipse><line x1="11" y1="10.5" x2="11" y2="3"></line><path d="M11 3l8 2.5-8 2.5"></path></svg></div>
@@ -602,8 +602,12 @@ window.retirerPhotoCompte = async function() {
     } finally { window.majBlocPhotoCompte(); }
 };
 
+// un glisser pour selectionner du texte (copier le systeme, la faction...) qui se termine hors de la fenetre ne doit pas la fermer : on ne ferme que si le bouton a ete enfonce sur le fond
+window.__mdFond = null;
+document.addEventListener('mousedown', function (ev) { window.__mdFond = ev.target; }, true);
 window.fermerModal = function(id, e) { 
     if (e && e.target !== document.getElementById(id)) return; 
+    if (e && e.type === 'click' && window.__mdFond && window.__mdFond !== e.target) return; 
     if (typeof sonClic === 'function') sonClic(); 
     const modal = document.getElementById(id);
     if (modal) modal.style.display = 'none'; 

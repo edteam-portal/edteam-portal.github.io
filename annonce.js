@@ -103,6 +103,25 @@
             lien: 'tableau-de-bord.html?mode=exp',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'campagnes-2026-10',
+            couleur: '#FF3333',
+            etiquette: '★ MISE À JOUR MAJEURE',
+            titre: 'LES CAMPAGNES DE L’AMIRAL',
+            sous: 'BGS, Powerplay et colonisation, réunis dans une seule vue',
+            intro: 'La page BGS change : l’Amiral lance des <b>campagnes</b>, et chacune réunit les missions de l’escadron. <b>Un coup d’œil suffit</b> pour savoir quoi faire, de la plus critique à la plus calme.',
+            colonnes: 2,
+            etapes: [
+                { n: '1', t: 'UNE LIGNE PAR MISSION', d: 'Influence d’une faction, mérites Powerplay d’un système, chantiers ou colonisation d’un système : chaque mission a sa ligne et sa barre de progression. Un clic ouvre le détail.' },
+                { n: '2', t: 'LE POWERPLAY RELEVÉ POUR VOUS', d: 'Vos mérites sont rattachés au système où vous étiez, et l’état du système vient des journaux des pilotes de l’escadron : rien à saisir.' },
+                { n: '3', t: 'LA COLONISATION AUSSI', d: 'Terminer des chantiers, ou coloniser un système étape par étape : l’avancement se met à jour avec vos livraisons.' },
+                { n: '4', t: 'VOS INITIATIVES CONTINUENT', d: 'Lancez aussi des initiatives Powerplay ou de colonisation. Elles restent à part, et l’Amiral peut les transformer en missions de campagne.' }
+            ],
+            avis: '<b>Plugin SYS.EDTEAM 2.32</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b>. Il faut avoir rejoint une puissance pour participer aux missions Powerplay ; les <b>CP sont une estimation</b> (mérites ÷ 4).',
+            cta: 'DÉCOUVRIR LES CAMPAGNES',
+            aide: 'Page BGS',
+            lien: 'bgs.html'
         }
     ];
 

@@ -17,9 +17,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=3"></script>
     <script src="photos.js?v=2"></script>
-    <script src="annonce.js?v=6"></script>
+    <script src="annonce.js?v=7"></script>
     <script src="revelations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
+    <script src="campagnes-mobile.js?v=2"></script>
     <script src="anecdotes.js?v=3"></script>
     <script src="quoifaire.js?v=12"></script>
     <script src="qgsuivi.js?v=38"></script>
@@ -1844,7 +1845,10 @@
                     (Array.isArray(ri.data) ? ri.data : []).forEach(i => { infos[i.ordre_id] = i; });
                     try { if (window.EDTEAMPhotos) await window.EDTEAMPhotos.charger(false); } catch (e) { /* sans photos : initiales */ }
                 }
-                return { ordres: ordres || [], resume, infos, veille };
+                // campagnes actives (script SQL 95) : les directives y sont rangees
+                const rc = await supabaseApp.from('campagnes').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('statut', 'ACTIVE');
+                const campagnes = rc.error ? [] : (rc.data || []);
+                return { ordres: ordres || [], resume, infos, veille, campagnes };
             }, force);
         }
 
@@ -1978,8 +1982,8 @@
             const vous = Math.round(av.pct * av.part / 100);
             return `<div class="eff"><div class="lab">EFFORT</div>
                 <div class="nums"><span>ESCADRON <b style="color: #fff;">${av.pct} %</b></span><span>MA PART <b style="color: var(--ed-orange);">${av.part} %</b></span></div>
-                <div class="jg"><i style="width: ${av.pct}%; opacity: 0.35; background: ${c};"></i><i style="width: ${vous}%; background: ${c};"></i></div>
-                ${mini && mini.length ? `<div class="types">${mini.map(x => `<div class="t"><span>${XESC(x.titre.replace(/\s*\(.*\)\s*$/, '').replace(/^[^A-Za-zÀ-ÿ]+/, ''))}</span><div class="jg2"><i style="width: ${x.tot}%; background: ${x.c}; opacity: 0.35;"></i><i style="width: ${x.vous}%; background: ${x.c};"></i></div></div>`).join('')}</div>` : ''}
+                <div class="jg"><i style="width: ${av.pct}%; opacity: 0.5; background: ${c};"></i><i style="width: ${vous}%; background: ${c}; box-shadow: 0 0 9px ${c}, 0 0 2px ${c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
+                ${mini && mini.length ? `<div class="types">${mini.map(x => `<div class="t"><span>${XESC(x.titre.replace(/\s*\(.*\)\s*$/, '').replace(/^[^A-Za-zÀ-ÿ]+/, ''))}</span><div class="jg2"><i style="width: ${x.tot}%; background: ${x.c}; opacity: 0.5;"></i><i style="width: ${x.vous}%; background: ${x.c}; box-shadow: 0 0 9px ${x.c}, 0 0 2px ${x.c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div></div>`).join('')}</div>` : ''}
             </div>`;
         }
 
@@ -2170,8 +2174,14 @@
             chargerDirectivesMobile(true);
         };
         window.xAdopterInitiative = async function (id) {
-            if (!confirm('Transformer cette initiative en directive ? Elle devient une directive officielle de l\'escadron (priorité normale).')) return;
-            const { error } = await supabaseApp.rpc('adopter_initiative', { p_id: Number(id), p_priorite: 3 });
+            const d = await xLireDirectives(false);
+            const camps = (d.campagnes || []).slice().sort((a, b) => (a.priorite - b.priorite) || String(a.nom).localeCompare(String(b.nom)));
+            if (!camps.length) { alert('Aucune campagne active : l\'Amiral doit en créer une avant de transformer une initiative en directive.'); return; }
+            const liste = camps.map((c, i) => (i + 1) + ' · ' + c.nom).join('\n');
+            const rep = prompt('Dans quelle campagne ?\n' + liste + '\n\nTapez le numéro :');
+            const n = parseInt(rep || '0', 10);
+            if (!n || n < 1 || n > camps.length) return;
+            const { error } = await supabaseApp.rpc('adopter_initiative', { p_id: Number(id), p_campagne_id: Number(camps[n - 1].id) });
             if (error) { alert(error.message || 'Échec de la transformation.'); return; }
             chargerDirectivesMobile(true);
         };
@@ -2182,6 +2192,8 @@
             xRafraichirModeIni(false);   // mode des initiatives et propositions a valider (script SQL 70), sans attendre
             try {
                 const d = await xLireDirectives(force);
+                window.cacheCampagnesMob = d.campagnes || [];
+                const MOB = window.edteamCampagnesMob; if (MOB) await MOB.lire(force);
                 const resume = {};
                 d.resume.forEach(r => { resume[r.ordre_id] = r; });
                 window.cacheOrdresBgs = d.ordres;
@@ -2198,6 +2210,7 @@
                         const jours = Math.max(1, Math.ceil((Date.now() - new Date(o.date_emission || o.created_at || Date.now()).getTime()) / 86400000));
                         return `<div class="xc init"><div class="xrow" style="flex-wrap: wrap; gap: 6px;"><span class="xk" style="color: #FF4FD8; overflow-wrap: anywhere;">${XESC(String(o.systeme_cible || 'SECTEUR').toUpperCase())}</span><span class="xmut">· depuis ${jours} j</span><span class="xsp"></span><span class="itag">★ INITIATIVE</span></div>${xBandeauInitiative(o, rs, d.infos[o.id])}<div class="mdc-grille" style="grid-template-columns: 1fr;">${xCarteDirective(o, index, resultats.dir[o.id] || null, xSensDirective(o, resultats.dir[o.id] || null), xAvancementOrdre(o, rs), true, rs)}</div></div>`;
                     }).join('') : '';
+                    if (MOB) contInit.insertAdjacentHTML('beforeend', MOB.initiatives());
                 }
                 const veilleIds = new Set(d.veille || []);
                 // encadre des directives en veille (type, faction, systeme, influence) : replie pour laisser la place aux directives vivantes
@@ -2211,26 +2224,33 @@
                         return `<div class="vmob" onclick="ouvrirModalOrdre(${index}, '${c}')"><span class="xtag" style="color: ${c};">#${o.id} ${XESC(o.type_ordre)}</span><span class="vq"><span class="vf">${XESC(String(o.faction_cible || '').toUpperCase())}</span><span class="vs">${XESC(String(o.systeme_cible || '').toUpperCase())}</span>${window.edteamEtats && res && res.donnees && window.edteamEtats.badges(res, true) ? '<span style="display: block; margin-top: 3px;">' + window.edteamEtats.badges(res, true) + '</span>' : ''}</span><span class="vi">${infl}</span></div>`;
                     }).join('')}</div>`;
                 };
-                if (!d.ordres.some(o => o.origine !== 'PILOTE' && !veilleIds.has(String(o.id)))) {
+                if (!d.ordres.some(o => o.origine !== 'PILOTE' && !veilleIds.has(String(o.id))) && !(MOB && MOB.total())) {
                     cont.innerHTML = (d.ordres.some(o => veilleIds.has(String(o.id)))
                         ? `<div class="xc" style="text-align: center; line-height: 1.7; padding: 16px; color: #aab;">Aucune directive active en ce moment : celles qui restent sont en veille, ci-dessous.</div>`
                         : `<div class="xc" style="text-align: center; line-height: 1.7; padding: 22px 16px; color: #aab;">Aucun focus demandé par l'Amiral pour le moment.<br><b style="color: var(--ed-orange); font-weight: normal;">Continuez d'agir pour votre faction : tout compte pour votre rang BGS.</b></div>`) + boiteVeille();
                     return;
                 }
-                const groupes = [];   // un bloc par systeme, dans l'ordre de priorite deja trie par la requete
+                // un bloc par CAMPAGNE (de la plus critique a la plus calme) ; les directives sans campagne connue (avant le script SQL 95) vont dans une campagne « technique »
+                const COUL_CAMP = { ATTAQUE: '#FF3333', DEFENSE: '#00F0FF', MAINTIEN: '#00FF66', CONQUETE: '#EDEDED' };
+                const LIB_CAMP = { ATTAQUE: 'ATTAQUE', DEFENSE: 'DÉFENSE', MAINTIEN: 'MAINTIEN', CONQUETE: 'CONQUÊTE' };
+                const vivantes = d.ordres.filter(o => o.origine !== 'PILOTE' && !veilleIds.has(String(o.id)));
+                const camps = (d.campagnes || []).slice();
+                const orphelines = vivantes.filter(o => !camps.some(c => String(c.id) === String(o.campagne_id)));
+                if (orphelines.length) camps.push({ id: 'sans', nom: 'DIRECTIVES EN COURS', type_campagne: 'MAINTIEN', priorite: Math.min(...orphelines.map(o => o.priorite || 3)) });
+                camps.sort((a, b) => (a.priorite - b.priorite) || String(a.nom).localeCompare(String(b.nom)));
+                const groupes = camps.map(c => ({ c, items: [] }));
                 d.ordres.forEach((o, index) => {
                     if (o.origine === 'PILOTE' || veilleIds.has(String(o.id))) return;
-                    const sys = (o.systeme_cible || 'SECTEUR').toUpperCase();
-                    let g = groupes.find(x => x.sys === sys);
-                    if (!g) { g = { sys, items: [] }; groupes.push(g); }
-                    g.items.push({ o, index });
+                    const g = groupes.find(x => String(x.c.id) === String(o.campagne_id)) || groupes.find(x => x.c.id === 'sans');
+                    if (g) g.items.push({ o, index });
                 });
-                const blocs = groupes.map(g => {
-                    const plusAncien = Math.min(...g.items.map(x => new Date(x.o.date_emission || x.o.created_at || Date.now()).getTime()));
-                    const jours = Math.max(1, Math.ceil((Date.now() - plusAncien) / 86400000));
-                    const prio = Math.min(...g.items.map(x => x.o.priorite || 3));
+                const blocs = groupes.filter(g => g.items.length || (MOB && MOB.nb(g.c.id))).map(g => {
+                    const c = g.c, col = COUL_CAMP[c.type_campagne] || '#aaa';
+                    const prio = c.priorite || 3;
                     const prioCle = prio === 1 ? 'c' : prio === 2 ? 'h' : 'n';
                     const badgePrio = `<span class="pa ${prioCle}">${prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE'}</span>`;
+                    const avs = g.items.map(({ o }) => xAvancementOrdre(o, resume[o.id] || { nb_participants: 0, types: {}, pilotes: [] }).pct);
+                    const moy = avs.length ? Math.round(avs.reduce((t, v) => t + v, 0) / avs.length) : 0;
                     const cartes = g.items.map(({ o, index }) => {
                         const rs = resume[o.id] || { nb_participants: 0, types: {}, pilotes: [] };
                         const av = xAvancementOrdre(o, rs);
@@ -2238,7 +2258,7 @@
                         const sens = xSensDirective(o, res);
                         return xCarteDirective(o, index, res, sens, av, g.items.length === 1, rs);
                     }).join('');
-                    return `<div class="xc prio-${prioCle}"><div class="xrow" style="flex-wrap: wrap; gap: 6px;"><span class="xk" style="color: var(--ed-orange); overflow-wrap: anywhere;">${XESC(g.sys)}</span><span class="xmut">· depuis ${jours} j</span><span class="xsp"></span>${badgePrio}</div><div class="mdc-grille">${cartes}</div></div>`;
+                    return `<div class="xc prio-${prioCle}" style="border-color: ${col}66;"><div class="xrow" style="flex-wrap: wrap; gap: 6px;"><span class="xtag" style="color: ${col}; border-color: ${col};">${LIB_CAMP[c.type_campagne] || ''}</span><span class="xk" style="color: #fff; overflow-wrap: anywhere;">${XESC(c.nom)}</span><span class="xsp"></span>${badgePrio}</div><div class="xmut" style="font-size: 0.7em; margin: 4px 0 8px;">Avancement de la campagne : <b style="color: ${col}; font-weight: normal;">${moy} %</b>${c.echeance ? ' · jusqu\'au ' + XESC(String(c.echeance).split('-').reverse().slice(0, 2).join('/')) : ''}</div><div class="mdc-grille">${cartes}</div>${MOB ? MOB.lignes(c.id) : ''}</div>`;
                 });
                 cont.innerHTML = blocs.join('') + boiteVeille();
             } catch (e) {
@@ -2352,7 +2372,7 @@
                     <div class="mdet-hero" style="border-color: ${couleur};">
                         <div class="r1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${avJ.pct} %</b></div>
                         <div class="r1"><span>MA PART</span><b style="color: ${couleur};">${avJ.part} %</b></div>
-                        <div class="jgh"><i style="width: ${avJ.pct}%; opacity: 0.35; background: ${couleur};"></i><i style="width: ${vousJ}%; background: ${couleur};"></i></div>
+                        <div class="jgh"><i style="width: ${avJ.pct}%; opacity: 0.5; background: ${couleur};"></i><i style="width: ${vousJ}%; background: ${couleur}; box-shadow: 0 0 9px ${couleur}, 0 0 2px ${couleur}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
                     </div>
                     <div class="mdet-sec" style="margin-top: 12px;">EFFORT PAR TYPE D'ACTION</div>
                     <div style="display: flex; flex-direction: column; gap: 5px;">${xJaugesOrdre(ordre, rsJ)}</div>`;
@@ -4114,7 +4134,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=30', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=31', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

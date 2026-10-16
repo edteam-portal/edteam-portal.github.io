@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-campagnes', date: '2026-10-16T20:00:33Z', type: 'NOUVEAU',
+        titre: 'BGS : les campagnes, avec le Powerplay et la colonisation',
+        texte: 'La page BGS s’organise autour de campagnes lancées par l’Amiral : attaque, défense, maintien ou conquête, de la plus critique à la plus calme. Chaque campagne réunit ses missions sur une seule ligne chacune : influence d’une faction (BGS), mérites Powerplay d’un système (renforcement, sape, acquisition) et colonisation (terminer des chantiers ou coloniser un système). Un clic ouvre la fenêtre de la mission : effort de l’escadron, votre part, et l’état du jeu. Les initiatives des pilotes restent à part, et peuvent maintenant aussi être Powerplay ou de colonisation. Le journal des exploits mélange tout, avec de nouveaux filtres. Les mérites Powerplay sont rattachés au système où vous étiez ; les CP sont une estimation (mérites ÷ 4). Il faut avoir rejoint une puissance pour participer aux missions Powerplay. Le bouton du menu s’appelle désormais « Engagement » : il garde votre progression BGS et Powerplay sur 8 semaines, et le podium de l’escadron (clic pour le classement complet de la semaine).',
+        important: true,
+        action: 'Relancez EDMC une fois : le plugin v2.32 se met à jour tout seul.'
+    },
+    {
         id: '2026-10-onglet-exploration', date: '2026-10-16T12:40:03Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : l’onglet Exploration, avec l’exobiologie',
         texte: 'Un nouvel onglet suit votre exploration en direct : la carte du système avec ses corps (un clic ouvre la fiche : valeur du scan, de la carte DSS, signaux biologiques), votre feuille de route de cibles, et la valeur de ce que vous n’avez pas encore vendu, cartographie et exobiologie séparées. Chaque échantillon d’exobiologie a sa carte : espèce, couleur de la variante, trois fioles qui se remplissent à chaque prélèvement, valeur. « Ce que j’ai découvert » ouvre le journal de vos scans. « Où vendre » trouve les stations les plus proches et montre celles qui rachètent vos scans et vos échantillons. Aussi dans le tableau de bord : une vue carte dans Commerce (le trajet de votre tournée, comme dans Missions) et des bandeaux de chiffres plus compacts en haut de chaque onglet.',
