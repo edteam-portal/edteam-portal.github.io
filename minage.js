@@ -222,11 +222,7 @@
         const detail = Object.keys(tot).sort((a, b) => tot[b] - tot[a]).map(k => nomMinerai(k).toLowerCase() + " " + fmtN(tot[k])).join(" · ");
         let val = 0, connu = 0;
         Object.keys(tot).forEach(k => { const b = ici(k); if (b) { val += tot[k] * b.prix; connu += tot[k]; } });
-        return `<div class="tb-grid4">
-            <div class="bloc vert"><h2>MINERAIS RAFFINÉS <em>session en cours</em></h2><div class="tb-big ${n ? "tb-up" : ""}">${fmtN(n)}</div><div class="tb-jauge"><i style="width:${n ? 100 : 0}%"></i></div><div class="tb-sub">${detail ? esc(detail) : "rien raffiné pour l'instant"}</div></div>
-            <div class="bloc or"><h2>RYTHME</h2><div class="tb-big">${rythme == null ? "—" : fmtN(rythme) + " /h"}</div><div class="tb-sub">${rythme == null ? "il faut quelques minutes de minage" : "minerais par heure" + (actif ? "" : " (session terminée)")}</div></div>
-            <div class="bloc cy"><h2>DURÉE</h2><div class="tb-big">${sec ? duree(sec) : "—"}</div><div class="tb-sub">${v === "rhino" ? "depuis le premier minerai du Rhino" : "depuis le premier minerai raffiné"}</div></div>
-            <div class="bloc"><h2>VALEUR ESTIMÉE</h2><div class="tb-big">${connu ? "≈ " + fmtM(val) : "—"}</div><div class="tb-sub">${connu ? "aux meilleurs prix de ce système" : "prix du système non relevés"}</div></div></div>`;
+        return `<div class="tbx-strip">${tbChip("#00FF66", "MINERAIS RAFFINÉS · SESSION", `<span style="color:${n ? "#00FF66" : "#fff"}">${fmtN(n)}</span>`, detail ? esc(detail) : "rien raffiné pour l'instant", detail)}${tbChip("#FFD700", "RYTHME", rythme == null ? "—" : fmtN(rythme) + " /h", rythme == null ? "il faut quelques minutes de minage" : "minerais par heure" + (actif ? "" : " (session terminée)"))}${tbChip("#00F0FF", "DURÉE", sec ? duree(sec) : "—", v === "rhino" ? "depuis le premier minerai du Rhino" : "depuis le premier minerai raffiné")}${tbChip("#9fb0b8", "VALEUR ESTIMÉE", connu ? "≈ " + fmtM(val) : "—", connu ? "aux meilleurs prix de ce système" : "prix du système non relevés")}</div>`;
     }
 
     const DY = 46;   // abaissement de l'encadre de valeur (et du zoom) : l'ensemble est centre en hauteur sur le Rhino
@@ -388,9 +384,8 @@
         const duo = rhino
             ? `<div class="tbn-duo"><div class="tbn-col">${cadreRhino()}</div>${fleche()}<div class="tbn-col">${cadreVaisseau()}</div></div>`
             : `<div class="tbn-duo deux"><div class="tbn-col">${cadreProspecteur()}</div><div class="tbn-col">${cadreVaisseau()}</div></div>`;
-        const sans = !M() ? `<div class="bloc-note" style="margin-bottom:12px;">Aucun minage lu pour l'instant. Si vous minez déjà, mettez à jour le plugin SYS.EDTEAM (version 2.20 ou plus récente) et relancez EDMC : le minage apparaît ici tout seul.</div>` : "";
         if (!document.getElementById("tbn-css")) document.head.insertAdjacentHTML("beforeend", CSS);
-        return selecteur(v) + sans + etape1(v) + etape2(v) + `<div class="tbn-bande"><span class="tbn-n">3</span>MINER ET TRANSFÉRER<em>suivi de session, soute du ${rhino ? "Rhino et du " : ""}vaisseau</em></div>` + chiffres(v) + duo + bilan(v);
+        return chiffres(v) + selecteur(v) + etape1(v) + etape2(v) + `<div class="tbn-bande"><span class="tbn-n">3</span>MINER ET TRANSFÉRER<em>suivi de session, soute du ${rhino ? "Rhino et du " : ""}vaisseau</em></div>` + duo + bilan(v);
     };
     // survol des caisses du Rhino (infobulle commune de la page) ; appele apres chaque affichage
     window.minageApres = function () {

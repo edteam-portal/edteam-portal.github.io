@@ -82,6 +82,27 @@
             lien: 'colonisation.html',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'exploration-2026-10',
+            couleur: '#B388FF',
+            etiquette: '★ NOUVEAU MODULE',
+            titre: 'L’EXPLORATION ET L’EXOBIOLOGIE ENTRENT DANS LE TABLEAU DE BORD',
+            sous: 'Scannez, cartographiez, prélevez : tout est suivi en direct',
+            intro: 'Un nouvel onglet <b>Exploration</b> accompagne vos sorties <b>sans rien saisir</b> : il montre le système, ce que valent ses corps, vos échantillons d’exobiologie en cours, et <b>où tout vendre</b>.',
+            colonnes: 2,
+            etapes: [
+                { n: '1', t: 'LA CARTE DU SYSTÈME', d: 'Les corps que vous avez scannés et ceux que d’autres pilotes ont déjà relevés, classés par intérêt. Un clic ouvre la fiche : valeur du scan, de la carte DSS, signaux biologiques.' },
+                { n: '2', t: 'MA FEUILLE DE ROUTE', d: 'Ajoutez les corps qui vous intéressent : ils s’alignent dans l’ordre à suivre. Une fois scanné ou cartographié, un corps se grise avec une coche et la cible suivante s’allume.' },
+                { n: '3', t: 'MES ÉCHANTILLONS', d: 'Une carte par espèce : couleur de la variante, trois fioles qui se remplissent à chaque prélèvement, valeur estimée. Les espèces en cours d’abord, puis celles à vendre.' },
+                { n: '4', t: 'OÙ VENDRE ?', d: 'Un tableau des stations proches qui rachètent vos scans et vos échantillons d’exobiologie : repérez d’un coup d’œil celles qui prennent les deux, et la plus proche.' }
+            ],
+            avis: '<b>Plugin SYS.EDTEAM 2.31</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b>. Les valeurs sont des <b>estimations</b> d’après la formule de la communauté (le jeu paie en général davantage) et <b>les données non vendues sont perdues si votre vaisseau est détruit</b>. Les prix de vente des stations viennent des relevés des joueurs (Spansh).',
+            cta: 'OUVRIR L’ONGLET EXPLORATION',
+            aide: 'Menu du haut : TABLEAU DE BORD, onglet EXPLORATION · à utiliser sur PC ou tablette',
+            lien: 'tableau-de-bord.html?mode=exp',
+            escadron: false,
+            mobile: false
         }
     ];
 

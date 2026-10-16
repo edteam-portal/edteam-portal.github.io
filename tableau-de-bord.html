@@ -21,7 +21,9 @@
     <script src="navigation.js?v=31"></script>
     <script src="modules-data.js?v=1"></script>
     <script src="modules-vaisseau.js?v=19"></script>
-    <script src="minage.js?v=13"></script>
+    <script src="minage.js?v=15"></script>
+    <script src="exobio-valeurs.js?v=1"></script>
+    <script src="exploration.js?v=52"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -166,6 +168,16 @@
         .tb-banner { border:1px solid rgba(232,163,90,.55); background:rgba(232,163,90,.08); color:#e8a35a; padding:9px 14px; margin-bottom:12px; font-size:.9em; line-height:1.5; }
         .tb-grid4 { display:grid; grid-template-columns:1.6fr repeat(3,1fr); gap:12px; margin-bottom:12px; }
         .tb-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+        /* bandeau fin de pastilles (Exploration, Commerce, Missions, Minage) : discret, une ligne de chiffres au lieu de grandes cartes */
+        .tbx-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+        .tbx-chip { border:1px solid #2c3338; border-left:3px solid var(--c); padding:6px 10px 7px; background:rgba(0,0,0,.42); min-width:0; }
+        .tbx-chip small { display:block; font-size:.6em; letter-spacing:2px; color:#8b97a0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .tbx-chip b { display:block; font-size:1.3em; font-weight:normal; color:#fff; letter-spacing:1px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .tbx-chip b em { font-style:normal; font-size:.55em; color:#8a9; letter-spacing:2px; }
+        .tbx-chip > span { display:block; font-size:.72em; color:#8a9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+        .tbx-chip .bar { display:block; height:4px; background:rgba(255,255,255,.08); margin:3px 0 2px; }
+        .tbx-chip .bar i { display:block; height:100%; background:#00FF66; box-shadow:0 0 6px #00FF66; }
+        @media (max-width:1100px) { .tbx-strip { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media (max-width:1100px) { .tb-grid4 { grid-template-columns:1fr 1fr; } .tb-grid2 { grid-template-columns:1fr; } }
         .tb-big { font-size:1.9em; color:#fff; text-shadow:0 0 14px currentColor; line-height:1.1; white-space:nowrap; }
         .tb-up { color:#00FF66; } .tb-down { color:#FF3333; } .tb-cy { color:#00F0FF; } .tb-gold { color:#FFD700; } .tb-mut { color:#777; }
@@ -523,8 +535,8 @@
         let profilCommandant = null, uid = null;
         let S = null;                 // etat de la session (champ etat de session_live) ; null = aucune session recue
         let MAJ = null;               // maj_le du serveur (ISO)
-        let MODE = ["mis", "min"].indexOf(lire("edteam_tb_mode")) >= 0 ? lire("edteam_tb_mode") : "com";
-        try { const pm = new URLSearchParams(location.search).get("mode"); if (pm === "min" || pm === "mis" || pm === "com") { MODE = pm; ecrire("edteam_tb_mode", pm); } } catch (e) { /* le mode memorise reste valable */ }
+        let MODE = ["mis", "min", "exp"].indexOf(lire("edteam_tb_mode")) >= 0 ? lire("edteam_tb_mode") : "com";
+        try { const pm = new URLSearchParams(location.search).get("mode"); if (pm === "min" || pm === "mis" || pm === "com" || pm === "exp") { MODE = pm; ecrire("edteam_tb_mode", pm); } } catch (e) { /* le mode memorise reste valable */ }
         let canal = null, rtOk = false, derniereLecture = 0;
 
         function lire(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -636,12 +648,13 @@
                     <div class="tb-vide">Lancez Elite Dangerous avec EDMC et le plugin SYS.EDTEAM <b>2.9</b> (ou plus récent) : votre session apparaît ici toute seule, en direct, sans rien faire.<br>
                     <span class="tb-mut">Si le plugin est déjà à jour et que rien n'arrive, redémarrez EDMC puis changez de système en jeu.</span></div></div>`;
             } else {
-                h = entete() + onglets() + alertes() + (MODE === "mis" ? panneauMissions() : MODE === "min" && typeof minageHtml === "function" ? minageHtml() : panneauCommerce());
+                h = entete() + onglets() + alertes() + (MODE === "mis" ? panneauMissions() : MODE === "min" && typeof minageHtml === "function" ? minageHtml() : MODE === "exp" && typeof explorationHtml === "function" ? explorationHtml() : panneauCommerce());
             }
-            zone.innerHTML = h + `<div class="bloc-note" style="margin-top:14px;">ⓘ Source : le journal du jeu, lu par le plugin. Rien à saisir : ce tableau se remplit tout seul. Strictement personnel : personne d'autre ne voit votre session.</div>`;
+            zone.innerHTML = h;
             zone.scrollTop = haut;
             brancherSoute();
             if (MODE === "min" && typeof minageApres === "function") minageApres();
+            if (MODE === "exp" && typeof explorationApres === "function") explorationApres();
             majModale();
             tic();
             declencherVente();
@@ -664,7 +677,7 @@
         function onglets() {
             const t = (c, ic, nom) => `<button class="tb-tab${MODE === c ? " on" : ""}" onclick="changerMode('${c}')">${ic} ${nom}</button>`;
             const g = (ic, nom) => `<button class="tb-tab off" title="À venir" disabled>${ic} ${nom}</button>`;
-            return `<div class="tb-tabs">${t("com", "💰", "COMMERCE")}${t("mis", "📜", "MISSIONS")}${t("min", "⛏", "MINAGE")}${g("⚔", "COMBAT")}${g("🔭", "EXPLORATION")}${g("🧬", "EXOBIOLOGIE")}</div>`;
+            return `<div class="tb-tabs">${t("com", "💰", "COMMERCE")}${t("mis", "📜", "MISSIONS")}${t("min", "⛏", "MINAGE")}${t("exp", "🔭", "EXPLORATION")}${g("⚔", "COMBAT")}</div>`;
         }
         function alertes() {
             let h = "";
@@ -675,22 +688,22 @@
         // ---------------------------------------------------------------
         //  COMMERCE
         // ---------------------------------------------------------------
+        function tbChip(couleur, label, valeur, sous, tip, attrsB) {
+            return `<div class="tbx-chip" style="--c:${couleur}"${tip ? ` title="${esc(tip)}"` : ""}><small>${label}</small><b ${attrsB || ""}>${valeur}</b><span>${sous}</span></div>`;
+        }
         function bandeauRang() {
             const r = S.rang || {}, p = S.prog || {};
             const n = r.Trade;
-            if (n == null) return `<div class="bloc"><h2>RANG COMMERCE <em>relevé à la connexion</em></h2><div class="tb-vide" style="padding:12px;">Rang non encore relevé : il arrive à la prochaine connexion au jeu.</div></div>`;
+            if (n == null) return tbChip("#00FF66", "RANG COMMERCE", "—", "rang relevé à la prochaine connexion au jeu", "");
             const nom = RANGS_COMMERCE[n] || ("RANG " + n), max = n >= RANGS_COMMERCE.length - 1, pr = Math.max(0, Math.min(100, Number(p.Trade) || 0));
-            return `<div class="bloc vert"><h2>RANG COMMERCE <em>valeur exacte relevée par le jeu</em></h2>
-                <div class="tb-big tb-up">${esc(nom)}</div>
-                <div class="tb-jauge"><i style="width:${max ? 100 : pr}%"></i></div>
-                <div class="tb-sub">${max ? "RANG MAXIMUM ATTEINT" : pr + " % vers le rang suivant"} · le jeu ne met à jour la progression qu'à la connexion ou à la promotion</div></div>`;
+            return `<div class="tbx-chip" style="--c:#00FF66" title="Valeur exacte relevée par le jeu : la progression n'est mise à jour qu'à la connexion ou à la promotion"><small>RANG COMMERCE</small><b style="color:#00FF66">${esc(nom)}</b><i class="bar"><i style="width:${max ? 100 : pr}%"></i></i><span>${max ? "rang maximum atteint" : pr + " % vers le rang suivant"}</span></div>`;
         }
         function cartes() {
             const t = S.tot || {};
             const benef = Number(t.benef) || 0;
-            return `<div class="bloc or"><h2>BÉNÉFICE SESSION</h2><div class="tb-big ${benef >= 0 ? "tb-up" : "tb-down"}">${fmtM(benef, true)}</div><div class="tb-sub">${fmtN(t.nb)} opération${(t.nb || 0) > 1 ? "s" : ""}</div></div>
-                <div class="bloc cy"><h2>TEMPS DE JEU</h2><div class="tb-big" id="tb-duree">${S.debut ? duree((Date.now() - new Date(S.debut).getTime()) / 1000) : "—"}</div><div class="tb-sub">depuis le lancement du jeu</div></div>
-                <div class="bloc"><h2>TONNES VENDUES</h2><div class="tb-big">${fmtN(t.tonnes)} t</div><div class="tb-sub">${fmtM(t.ventes)} de ventes · ${fmtM(t.achats)} d'achats</div></div>`;
+            return tbChip("#FFD700", "BÉNÉFICE SESSION", `<span style="color:${benef >= 0 ? "#00FF66" : "#FF3B30"}">${fmtM(benef, true)}</span>`, `${fmtN(t.nb)} opération${(t.nb || 0) > 1 ? "s" : ""}`)
+                + tbChip("#00F0FF", "TEMPS DE JEU", S.debut ? duree((Date.now() - new Date(S.debut).getTime()) / 1000) : "—", "depuis le lancement du jeu", "", 'id="tb-duree"')
+                + tbChip("#9fb0b8", "TONNES VENDUES", `${fmtN(t.tonnes)} t`, `${fmtM(t.ventes)} de ventes · ${fmtM(t.achats)} d'achats`);
         }
         // ---------------------------------------------------------------
         //  CARTE DU COMMERCE : memes deux vues que l'onglet Missions (VUE VAISSEAU / VUE CARTE). La carte montre le trajet de la tournee (ou de la route de porte-vaisseaux)
@@ -813,10 +826,10 @@
                     const mn = carteCommerceHtml({ mini: true }), petite = mn ? `<div class="tbmm" onclick="basculerVueCom('carte')" title="Ouvrir la carte du trajet">${mn}<span>CARTE ▸</span></div>` : "";
                     droite = sw + (carte ? grande : modulesHtml(S.missions || [], petite ? { pied, mini: petite } : { pied }));
                 } else droite = modulesHtml(S.missions || [], { pied });
-                return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
+                return `<div class="tbx-strip">${bandeauRang()}${cartes()}</div>
                 <div class="tbp-duo tbs tbmis"><div class="tb-etroit">${feuilleHtml()}</div><div class="tbp-droite">${droite}</div></div>`;
             }
-            return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
+            return `<div class="tbx-strip">${bandeauRang()}${cartes()}</div>
                 <div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>
                 ${feuilleHtml()}
                 <div class="tbm-vente" style="margin-bottom:12px;">${boutonRegistre()}</div>`;
@@ -1092,11 +1105,8 @@
             const encaisser = act.reduce((a, m) => a + (Number(m.rec) || 0), 0), connues = act.filter(m => m.rec != null).length;
             const prochaine = act.find(m => m.exp);
             const encaisse = fin.reduce((a, m) => a + (Number(m.rec) || 0), 0);
-            const bandeau = `<div class="tb-grid4" style="grid-template-columns:repeat(4,1fr);">
-                <div class="bloc"><h2>MISSIONS EN COURS</h2><div class="tb-big">${act.length}</div></div>
-                <div class="bloc vert"><h2>TERMINÉES · SESSION</h2><div class="tb-big tb-up">${fin.length}</div><div class="tb-sub">${fmtM(encaisse)} encaissés</div></div>
-                <div class="bloc or"><h2>À ENCAISSER</h2><div class="tb-big tb-gold">${encaisser ? "≈ " + fmtM(encaisser) : "—"}</div><div class="tb-sub">${connues} mission${connues > 1 ? "s" : ""} avec récompense connue</div></div>
-                <div class="bloc cy"><h2>PROCHAINE ÉCHÉANCE</h2><div class="tb-big" ${prochaine ? `data-cd="${esc(prochaine.exp)}"` : ""}>${prochaine ? duree(restant(prochaine)) : "—"}</div><div class="tb-sub">${prochaine ? esc(prochaine.nom) : "aucune mission à échéance"}</div></div></div>`;
+            EFFETS_DANS_CADRE = false;
+            const bandeau = `<div class="tbx-strip">${tbChip("#00F0FF", "MISSIONS EN COURS", String(act.length), act.length ? "à faire ou à rendre" : "aucune pour l'instant")}${tbChip("#00FF66", "TERMINÉES · SESSION", `<span style="color:#00FF66">${fin.length}</span>`, `${fmtM(encaisse)} encaissés`)}${tbChip("#FFD700", "À ENCAISSER", `<span style="color:#FFD700">${encaisser ? "≈ " + fmtM(encaisser) : "—"}</span>`, `${connues} mission${connues > 1 ? "s" : ""} avec récompense connue`)}${tbChip("#00F0FF", "PROCHAINE ÉCHÉANCE", prochaine ? duree(restant(prochaine)) : "—", prochaine ? esc(prochaine.nom) : "aucune mission à échéance", "", prochaine ? `data-cd="${esc(prochaine.exp)}"` : "")}</div>`;
             if (!act.length) {
                 memoireTrajet(act); ecrire(FAITS_CLE, JSON.stringify(MEMF));     // plus aucune mission : on repart d'un parcours vierge
                 const vide = `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>`;
@@ -1324,7 +1334,7 @@
             svg += `</svg>`;
             if (mini) return svg.replace(/<text[\s\S]*?<\/text>/g, "").replace("class=\"tb-carte\"", "class=\"tb-carte mini\"");
             const note = !plan.arrets.length && !plan.passes.length ? "aucune mission en cours · votre position" : plan.complet ? `${plan.arrets.length} arrêt${plan.arrets.length > 1 ? "s" : ""} à faire · ${plan.total.d.toFixed(1)} al · ${plan.total.sauts} saut${plan.total.sauts > 1 ? "s" : ""} · ≈ ${duree(plan.total.min * 60)}` : "positions des systèmes en cours de chargement…";
-            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${grande ? "" : legendeParcours()}${svg}</div>`;
+            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DES MISSIONS <em>${note}</em></h2>${grande ? "" : legendeParcours()}${svg}${grande ? piedEffets() : ""}</div>`;      // grande carte : le bouton « effet des missions » est dans le cadre
         }
         // ---------------------------------------------------------------
         //  PASSAGERS ET SOUTE (onglet Missions) : quand une mission de passagers est en cours (ou un colis de sauvetage a recuperer) et que le vaisseau
@@ -1346,7 +1356,7 @@
         // hologramme du vaisseau : modules (plugin 2.18, modules-vaisseau.js) ; repli sur l'ancien affichage (passagers et soute) tant que le plugin n'envoie pas les modules
         function cabinesHtml(act, opts) {
             const v = S && S.vaisseau;
-            return v && v.mods && v.mods.length && typeof modulesHtml === "function" ? modulesHtml(act, opts) : cabinesSimpleHtml(act);
+            return v && v.mods && v.mods.length && typeof modulesHtml === "function" ? modulesHtml(act, Object.assign({ pied: piedEffets() }, opts)) : cabinesSimpleHtml(act);      // le bouton « effet des missions » est dans le cadre de l'hologramme, sous les marchandises (comme le registre dans Commerce)
         }
         function cabinesSimpleHtml(act) {
             const sil = silhouetteActive();
@@ -1605,9 +1615,17 @@
                 return { f, n: Number(r.nm) || 1, pr: r.pr != null ? Number(r.pr) : nbPlus(r.rep), pi: r.pi != null ? Number(r.pi) : nbPlus(r.infl), dr: String(r.rep || "—"), di: String(r.infl || "—") };
             }).sort((a, b) => b.pi - a.pi || b.pr - a.pr);
         }
-        function boutonEffets() {
+        // le bouton « effet des missions » vit dans le cadre de l'hologramme ou de la grande carte quand l'un d'eux est affiche ; sinon il reste en bas de page
+        let EFFETS_DANS_CADRE = false;
+        function piedEffets() {
+            EFFETS_DANS_CADRE = true;
             const n = donneesEffets().length;
-            return `<div class="tbm-vente" style="margin-bottom:12px;"><button type="button" class="tb-btn" ${n ? "" : "disabled"} onclick="ouvrirEffets()">▤ EFFET DES MISSIONS${n ? " · " + n + " faction" + (n > 1 ? "s" : "") : ""}</button><span>${n ? "réputation et influence gagnées cette session, par faction" : "aucune mission terminée pour l'instant"}</span></div>`;
+            return `<div class="tbm-vente"><button type="button" class="tb-btn" ${n ? "" : "disabled"} onclick="ouvrirEffets()">▤ EFFET DES MISSIONS${n ? " · " + n + " faction" + (n > 1 ? "s" : "") : ""}</button>${n ? "" : "<span>aucune mission terminée pour l'instant</span>"}</div>`;
+        }
+        function boutonEffets() {
+            if (EFFETS_DANS_CADRE) return "";
+            const n = donneesEffets().length;
+            return `<div class="tbm-vente" style="margin-bottom:12px;"><button type="button" class="tb-btn" ${n ? "" : "disabled"} onclick="ouvrirEffets()">▤ EFFET DES MISSIONS${n ? " · " + n + " faction" + (n > 1 ? "s" : "") : ""}</button>${n ? "" : "<span>aucune mission terminée pour l'instant</span>"}</div>`;
         }
         function ouvrirEffets() { if (!donneesEffets().length) return; if (typeof sonClic === "function") sonClic(); VENTE.vue = "effets"; VENTE.ouverte = true; majModale(); }
         function reputationHtml() {
@@ -1997,11 +2015,11 @@
         function majModale() {
             const m = document.getElementById("tb-modale"), c = document.getElementById("tb-mcorps");
             if (!m || !c) return;
-            const html = VENTE.ouverte ? (VENTE.vue === "registre" ? registreHtml() : VENTE.vue === "effets" ? reputationHtml() : venteHtml()) : "";
+            const html = VENTE.ouverte ? (VENTE.vue === "registre" ? registreHtml() : VENTE.vue === "effets" ? reputationHtml() : VENTE.vue === "explo" ? (typeof explorationModaleHtml === "function" ? explorationModaleHtml() : "") : venteHtml()) : "";
             if (!html) { VENTE.ouverte = false; m.classList.remove("on"); c.innerHTML = ""; return; }
             const p = m.querySelector(".tb-mpanneau"), haut = p.scrollTop;
             c.innerHTML = html; m.classList.add("on"); p.scrollTop = haut;
-            const jr = VENTE.vue === "registre" || VENTE.vue === "effets"; p.classList.toggle("tb-mreg", jr); m.querySelector(".tb-mx").textContent = jr ? "X" : "✕";
+            const jr = VENTE.vue === "registre" || VENTE.vue === "effets" || VENTE.vue === "explo"; p.classList.toggle("tb-mreg", jr); m.querySelector(".tb-mx").textContent = jr ? "X" : "✕";
         }
         function ouvrirVente() { if (!vendables().length) return; if (typeof sonClic === "function") sonClic(); VENTE.vue = "vente"; VENTE.ouverte = true; majModale(); }
         function fermerVente() { VENTE.ouverte = false; majModale(); }

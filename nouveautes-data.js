@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-onglet-exploration', date: '2026-10-16T12:40:03Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : l’onglet Exploration, avec l’exobiologie',
+        texte: 'Un nouvel onglet suit votre exploration en direct : la carte du système avec ses corps (un clic ouvre la fiche : valeur du scan, de la carte DSS, signaux biologiques), votre feuille de route de cibles, et la valeur de ce que vous n’avez pas encore vendu, cartographie et exobiologie séparées. Chaque échantillon d’exobiologie a sa carte : espèce, couleur de la variante, trois fioles qui se remplissent à chaque prélèvement, valeur. « Ce que j’ai découvert » ouvre le journal de vos scans. « Où vendre » trouve les stations les plus proches et montre celles qui rachètent vos scans et vos échantillons. Aussi dans le tableau de bord : une vue carte dans Commerce (le trajet de votre tournée, comme dans Missions) et des bandeaux de chiffres plus compacts en haut de chaque onglet.',
+        important: true,
+        action: 'Relancez EDMC une fois : le plugin v2.31 se met à jour tout seul.'
+    },
+    {
         id: '2026-10-fin-ambiance-depot', date: '2026-10-15T20:48:11Z', type: 'AMELIORE',
         titre: 'Tableau de bord : l’ambiance en boucle du dépôt est supprimée',
         texte: 'Les ouvriers et les chariots qui tournaient en boucle quand vous transportiez des caisses étaient trop présents : cette ambiance n’existe plus. Les sons ponctuels de chargement et de déchargement restent, ainsi que l’ambiance de cabine quand vous avez des passagers.',
