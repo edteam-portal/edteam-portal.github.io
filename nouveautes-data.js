@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-mobile-engagement', date: '2026-10-16T22:11:50Z', type: 'AMELIORE',
+        titre: 'Mobile : campagnes et onglet Engagement refaits',
+        texte: 'Sur mobile, les campagnes ont le même langage que sur PC : le type de la campagne en gros, une ligne par mission dont le fond est la barre de progression (votre part en lueur néon), les guerres et élections mises en avant avec leur score, les objectifs de CP des missions Powerplay, et un toucher pour replier une campagne. L’onglet BGS devient Engagement : vos mérites Powerplay à côté de vos points BGS, le podium de l’escadron cette semaine et, d’un toucher, le classement complet. La page de présentation du site est aussi refaite avec de nouveaux visuels.',
+        important: false
+    },
+    {
         id: '2026-10-plafond-glisser', date: '2026-10-16T21:47:12Z', type: 'NOUVEAU',
         titre: 'Campagnes : plafond de CP et glisser-déposer',
         texte: 'L’Amiral et les officiers peuvent fixer un plafond de CP à une mission Powerplay : la barre de la mission se remplit alors jusqu’à cet objectif (CP estimés = mérites ÷ 4) et affiche « objectif atteint ». L’Amiral peut aussi réorganiser ses campagnes d’un glisser-déposer : une mission se glisse dans une autre campagne, et une campagne se glisse plus haut ou plus bas (elle prend la priorité de sa nouvelle place). Dans le journal, les colonnes Vecteur et Rang BGS · CP ne se coupent plus sur deux lignes.',

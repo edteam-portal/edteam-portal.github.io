@@ -20,7 +20,8 @@
     <script src="annonce.js?v=7"></script>
     <script src="revelations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
-    <script src="campagnes-mobile.js?v=2"></script>
+    <script src="campagnes-mobile.js?v=4"></script>
+    <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
     <script src="quoifaire.js?v=12"></script>
     <script src="qgsuivi.js?v=38"></script>
@@ -728,8 +729,8 @@
             <!-- ========================================== -->
             <div id="tab-bgs" style="display: none; flex-direction: column; gap: 12px;">
                 <div class="xseg" id="x-bgs-seg">
-                    <button class="on" data-v="dir" onclick="bgsVue('dir')">DIRECTIVES</button>
-                    <button data-v="eff" onclick="bgsVue('eff')">MON EFFORT</button>
+                    <button class="on" data-v="dir" onclick="bgsVue('dir')">CAMPAGNES</button>
+                    <button data-v="eff" onclick="bgsVue('eff')">ENGAGEMENT</button>
                     <button data-v="exp" onclick="bgsVue('exp')">EXPLOITS<i class="pt" id="x-exp-pt"></i></button>
                 </div>
 
@@ -817,7 +818,7 @@
             </button>
             <button id="nav-btn-bgs" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('bgs')">
                 <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7"></polyline></svg>
-                <span>BGS</span>
+                <span>ENGAGEMENT</span>
             </button>
             <button id="nav-btn-batir" class="nav-tab-btn" onclick="switchMobileTab('batir')">
                 <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11M10 21v-6h4v6"></path></svg>
@@ -2236,13 +2237,17 @@
                 const camps = (d.campagnes || []).slice();
                 const orphelines = vivantes.filter(o => !camps.some(c => String(c.id) === String(o.campagne_id)));
                 if (orphelines.length) camps.push({ id: 'sans', nom: 'DIRECTIVES EN COURS', type_campagne: 'MAINTIEN', priorite: Math.min(...orphelines.map(o => o.priorite || 3)) });
-                camps.sort((a, b) => (a.priorite - b.priorite) || String(a.nom).localeCompare(String(b.nom)));
+                camps.sort((a, b) => (a.priorite - b.priorite) || ((a.position || 0) - (b.position || 0)) || String(a.nom).localeCompare(String(b.nom)));
                 const groupes = camps.map(c => ({ c, items: [] }));
                 d.ordres.forEach((o, index) => {
                     if (o.origine === 'PILOTE' || veilleIds.has(String(o.id))) return;
                     const g = groupes.find(x => String(x.c.id) === String(o.campagne_id)) || groupes.find(x => x.c.id === 'sans');
                     if (g) g.items.push({ o, index });
                 });
+                if (MOB && MOB.rendreCampagnes) {   // rendu v3 : une ligne par mission, la barre en fond (voir campagnes-mobile.js)
+                    cont.innerHTML = MOB.rendreCampagnes({ groupes, resume, resultats, avanc: xAvancementOrdre, sens: xSensDirective, SENS: X_SENS, pct: xPct, pts: xPts }) + boiteVeille();
+                    return;
+                }
                 const blocs = groupes.filter(g => g.items.length || (MOB && MOB.nb(g.c.id))).map(g => {
                     const c = g.c, col = COUL_CAMP[c.type_campagne] || '#aaa';
                     const prio = c.priorite || 3;
@@ -2389,9 +2394,10 @@
             if (!zone || !profilCommandant) return;
             if (!zone.innerHTML) zone.innerHTML = '<div class="xmut" style="text-align: center; padding: 30px;">Consultation de votre dossier...</div>';
             try {
-                const [prog, sem] = await Promise.all([
+                const [prog, sem, extra] = await Promise.all([
                     xCache('prog8', 120000, async () => { const r = await supabaseApp.rpc('progression_bgs_hebdo', { p_cycles: 8 }); if (r.error) throw r.error; return r.data || []; }, force),
-                    xCache('sem', 120000, async () => { const r = await supabaseApp.rpc('bgs_semaine_escadron'); if (r.error) throw r.error; return r.data; }, force).catch(() => null)
+                    xCache('sem', 120000, async () => { const r = await supabaseApp.rpc('bgs_semaine_escadron'); if (r.error) throw r.error; return r.data; }, force).catch(() => null),
+                    window.edteamEngagementMob ? window.edteamEngagementMob.blocs(profilCommandant, force).catch(() => null) : null   // Powerplay + podium de l'escadron (engagement-mobile.js)
                 ]);
                 const parSemaine = {};
                 prog.forEach(l => { parSemaine[l.semaine] = Number(l.points) || 0; });
@@ -2431,6 +2437,7 @@
                         <div class="xmini"><div class="xk">Cette semaine</div><div class="v" style="color: var(--ed-green);">+${XF1(sem.mes_points)} pts</div></div>
                         <div class="xmini"><div class="xk">24 dernières heures</div><div class="v" style="color: var(--ed-green);">+${XF1(sem.mes_points_24h)} pts</div></div>
                     </div>` : ''}
+                    ${extra ? extra.pp + extra.podium : ''}
                     <div class="xc click" onclick="ouvrirSalleBgsMobile()">
                         <div class="xrow"><span class="xk">Ma carrière BGS</span><span class="xsp"></span><span class="xpill" style="color: var(--ed-orange);">RANG ${pr.rang}</span></div>
                         <div class="xrow" style="margin-top: 9px;"><span class="xmut">${XF0(pr.points)} pts</span><span class="xsp"></span><span class="xmut">${pr.max === null ? 'rang maximal' : 'rang ' + (pr.rang + 1) + ' dans ' + XF0(pr.reste) + ' pts'}</span></div>
