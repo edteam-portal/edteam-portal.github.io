@@ -113,5 +113,57 @@
     if (total && connus < total) s += `<text x="${W - 12}" y="20" text-anchor="end" font-size="11.5" fill="#FFB44D" stroke="#050403" stroke-width="2.4" paint-order="stroke">carte incomplète : ${connus} corps sur ${total} connus</text>`;
     return s + '</svg>';
   }
-  window.EDTEAM_CARTE_SYS = { charger, svg, norm };
+  // ZOOM de la carte (apres svg()) : boutons + / − / 1:1 / tout voir, glisser pour deplacer, molette (sur la carte) ou double-clic pour zoomer. Le zoom change la fenetre de lecture (viewBox) :
+  // le dessin reste net, aucune donnee supplementaire. L'echelle « 1:1 » ramene les textes a leur taille reelle (lisible), « tout voir » revient a la vue d'ensemble.
+  function activerZoom(zone) {
+    const svgEl = zone && zone.querySelector('svg.cs-svg'); if (!svgEl || zone.querySelector('.cs-vue')) return;
+    if (!document.getElementById('cs-zoom-css')) {
+      const st = document.createElement('style'); st.id = 'cs-zoom-css';
+      st.textContent = '.cs-vue{position:relative;overflow:hidden;touch-action:none;user-select:none}.cs-vue.pan{cursor:grab}.cs-vue.pan.drag{cursor:grabbing}.cs-vue svg{width:100%;height:100%;display:block}'
+        + '.cs-zb{display:flex;gap:4px;justify-content:flex-end;margin-bottom:6px}.cs-zb button{min-width:28px;height:28px;padding:0 6px;border:1px solid #00F0FF;background:rgba(0,0,0,.72);color:#00F0FF;font:inherit;font-size:.78em;cursor:pointer}.cs-zb button:hover{background:rgba(0,240,255,.22)}'
+        + '.cs-ind{margin-top:6px;color:#FFB44D;font-size:.72em;letter-spacing:1px}.cs-ind.cache{display:none}';
+      document.head.appendChild(st);
+    }
+    const vb = (svgEl.getAttribute('viewBox') || '0 0 760 300').split(/\s+/).map(Number), W = vb[2], H = vb[3];
+    const vue = document.createElement('div'); vue.className = 'cs-vue';
+    svgEl.parentNode.insertBefore(vue, svgEl); vue.appendChild(svgEl);
+    svgEl.removeAttribute('style'); svgEl.setAttribute('preserveAspectRatio', 'xMinYMin meet');
+    vue.insertAdjacentHTML('beforebegin', '<div class="cs-zb"><button type="button" data-z="+" title="Zoom avant" aria-label="Zoom avant">+</button><button type="button" data-z="-" title="Zoom arrière" aria-label="Zoom arrière">−</button><button type="button" data-z="1" title="Taille réelle : textes lisibles" aria-label="Taille réelle">1:1</button><button type="button" data-z="0" title="Tout voir" aria-label="Tout voir">⤢</button></div>');
+    const ind = document.createElement('div'); ind.className = 'cs-ind'; ind.textContent = 'La carte est réduite : zoomez (molette sur la carte, boutons ou double-clic) pour lire les noms, puis glissez pour vous déplacer.'; vue.parentNode.insertBefore(ind, vue.nextSibling);
+    // sc = echelle en pixels par unite du dessin (1 = taille reelle, textes lisibles) ; la fenetre grandit en hauteur avec le zoom pour montrer les stations sous l'axe
+    let cw = vue.clientWidth || 1, scFit = cw / W, sc = scFit, vx = 0, vy = 0, hVue = Math.round(H * scFit);
+    const scMax = () => Math.max(2.2, scFit * 3);
+    const hauteur = x => Math.max(Math.round(H * scFit), Math.min(Math.round(H * x), 520));
+    function appliquer() {
+      cw = vue.clientWidth || 1; scFit = cw / W;
+      sc = Math.max(scFit, Math.min(scMax(), sc)); hVue = hauteur(sc); vue.style.height = hVue + 'px';
+      const vw = cw / sc, vh = hVue / sc;
+      vx = Math.max(0, Math.min(W - vw, vx)); vy = Math.max(0, Math.min(H - vh, vy));
+      svgEl.setAttribute('viewBox', vx.toFixed(1) + ' ' + vy.toFixed(1) + ' ' + vw.toFixed(1) + ' ' + vh.toFixed(1));
+      vue.classList.toggle('pan', sc > scFit * 1.001);
+      ind.classList.toggle('cache', !(scFit < 0.8 && sc < 0.75));
+    }
+    function zoomer(f, mx, my) {            // mx, my : point vise en pixels dans la fenetre (centre par defaut) ; ce point reste sous le curseur
+      const cx = mx == null ? cw / 2 : mx, cy = my == null ? hVue / 2 : my, wx = vx + cx / sc, wy = vy + cy / sc;
+      sc = Math.max(scFit, Math.min(scMax(), sc * f)); const h2 = hauteur(sc);
+      vx = wx - cx / sc; vy = wy - Math.min(cy, h2) / sc; appliquer();
+    }
+    vue.previousElementSibling.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return; const z = b.getAttribute('data-z');
+      if (z === '+') zoomer(1.6); else if (z === '-') zoomer(1 / 1.6);
+      else if (z === '0') { sc = scFit; vx = 0; vy = 0; appliquer(); }
+      else { const ancre = vx + cw / sc / 2; sc = Math.max(1, scFit); vx = ancre - cw / sc / 2; vy = 0; appliquer(); }
+    });
+    vue.addEventListener('wheel', e => { if (e.deltaY > 0 && sc <= scFit * 1.001) return;      // deja a la vue d'ensemble : la molette fait defiler la fenetre comme d'habitude
+      e.preventDefault(); const r = vue.getBoundingClientRect(); zoomer(e.deltaY < 0 ? 1.25 : 1 / 1.25, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    vue.addEventListener('dblclick', e => { if (e.target.closest('.cs-zb')) return; const r = vue.getBoundingClientRect(); zoomer(1.8, e.clientX - r.left, e.clientY - r.top); });
+    let drag = null;
+    vue.addEventListener('pointerdown', e => { if (sc <= scFit * 1.001 || e.button !== 0 || e.target.closest('.cs-zb')) return; drag = { x: e.clientX, y: e.clientY, vx, vy }; vue.classList.add('drag'); try { vue.setPointerCapture(e.pointerId); } catch (x) { /* rien */ } });
+    vue.addEventListener('pointermove', e => { if (!drag) return; vx = drag.vx - (e.clientX - drag.x) / sc; vy = drag.vy - (e.clientY - drag.y) / sc; appliquer(); });
+    const fin = () => { drag = null; vue.classList.remove('drag'); };
+    vue.addEventListener('pointerup', fin); vue.addEventListener('pointercancel', fin);
+    if (window.ResizeObserver) new ResizeObserver(() => { if (vue.clientWidth !== cw) { const rapport = sc / scFit; cw = vue.clientWidth || 1; scFit = cw / W; sc = scFit * rapport; appliquer(); } }).observe(vue);
+    appliquer();
+  }
+  window.EDTEAM_CARTE_SYS = { charger, svg, norm, activerZoom };
 })();

@@ -101,5 +101,6 @@
     const E = window.EDTEAM_EFFETS;
     const items = (p ? p.tout : []).map(i => { const c = p.cand(i); return { nom: i.nom, famille: i.famille, nomType: c.length === 1 ? c[0].n : '', eco: c.length === 1 ? c[0].eco : '', etat: i.etat, pct: i.pct, lib: i.lib }; });
     z.innerHTML = window.EDTEAM_CARTE_SYS.svg({ corps: data.corps, stations: data.stations, total: data.total, items, esc: o.esc });
+    if (window.EDTEAM_CARTE_SYS.activerZoom) window.EDTEAM_CARTE_SYS.activerZoom(z);
   };
 })();
