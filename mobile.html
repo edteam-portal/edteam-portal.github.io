@@ -1383,12 +1383,11 @@
         }
 
         function xEstMembre() { const p = profilCommandant; return !!(p && p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT'); }
-        // meme regle que le menu BGS du PC : membre d'un escadron, sauf recrue (rang de jeu 4) sans grade
+        // meme regle que le menu BGS du PC : membre d'un escadron, les recrues aussi
         function xAccesBgs() {
             const p = profilCommandant;
             if (!xEstMembre()) return false;
-            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-            return !(rangJeu === 4 && !p.est_amiral && !p.est_officier);
+            return true;
         }
 
         const X_ONGLETS = ['qg', 'bgs', 'batir', 'escadron', 'quoifaire'];

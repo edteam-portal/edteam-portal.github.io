@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-recrues-acces', date: '2026-10-16T20:50:08Z', type: 'AMELIORE',
+        titre: 'Les recrues accèdent à tout le site, et le journal est moins chargé',
+        texte: 'Les recrues d’un escadron peuvent maintenant ouvrir toutes les pages, y compris Engagement (BGS, Powerplay) et Escadron. Leur fiche indique RECRUE jusqu’à ce que l’Amiral les passe PILOTE dans le jeu. Dans le journal des exploits, les petits gains de mérites en rafale (par exemple 11 mérites à chaque vaisseau croisé dans un système) sont réunis en une seule ligne avec le total et le nombre de gains (×5).',
+        important: false
+    },
+    {
         id: '2026-10-campagnes', date: '2026-10-16T20:00:33Z', type: 'NOUVEAU',
         titre: 'BGS : les campagnes, avec le Powerplay et la colonisation',
         texte: 'La page BGS s’organise autour de campagnes lancées par l’Amiral : attaque, défense, maintien ou conquête, de la plus critique à la plus calme. Chaque campagne réunit ses missions sur une seule ligne chacune : influence d’une faction (BGS), mérites Powerplay d’un système (renforcement, sape, acquisition) et colonisation (terminer des chantiers ou coloniser un système). Un clic ouvre la fenêtre de la mission : effort de l’escadron, votre part, et l’état du jeu. Les initiatives des pilotes restent à part, et peuvent maintenant aussi être Powerplay ou de colonisation. Le journal des exploits mélange tout, avec de nouveaux filtres. Les mérites Powerplay sont rattachés au système où vous étiez ; les CP sont une estimation (mérites ÷ 4). Il faut avoir rejoint une puissance pour participer aux missions Powerplay. Le bouton du menu s’appelle désormais « Engagement » : il garde votre progression BGS et Powerplay sur 8 semaines, et le podium de l’escadron (clic pour le classement complet de la semaine).',

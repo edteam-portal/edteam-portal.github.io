@@ -42,7 +42,7 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="anecdotes.js?v=3"></script>
-    <script src="navigation.js?v=33"></script>
+    <script src="navigation.js?v=34"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -1505,13 +1505,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
                     
                     if (navBgs) {
-                        if (rangJeu === 4 && !data.est_amiral && !data.est_officier) {
-                            navBgs.style.display = 'none';
-                            localStorage.setItem('edteam_acces_bgs', 'false');
-                        } else {
-                            navBgs.style.display = 'flex';
-                            localStorage.setItem('edteam_acces_bgs', 'true');
-                        }
+                        navBgs.style.display = 'flex';
+                        localStorage.setItem('edteam_acces_bgs', 'true');
                     }
                 } else {
                     localStorage.setItem('edteam_acces_bgs', 'false');

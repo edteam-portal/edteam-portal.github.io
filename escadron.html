@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=33"></script>
+    <script src="navigation.js?v=34"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="vitrine-module.js?v=1"></script>
     <script src="chiffres-cles.js?v=3"></script>
@@ -752,7 +752,7 @@
                 let badges = '';
                 if (!p.est_amiral) {
                     // Rang en jeu 4 = Recrue : pas d'acces aux pages d'escadron tant qu'un officier ne l'a pas passe Pilote en jeu
-                    if (Number(p.rang_escadron_jeu) === 4 && !p.est_officier) badges += '<span class="eff-badge" title="Recrue en jeu : pas d\'accès aux pages d\'escadron. Un officier doit la passer PILOTE dans le jeu." style="color: #FFC800;">RECRUE</span>';
+                    if (Number(p.rang_escadron_jeu) === 4 && !p.est_officier) badges += '<span class="eff-badge" title="Recrue en jeu, jusqu\'à ce que l\'Amiral la passe PILOTE dans le jeu." style="color: #FFC800;">RECRUE</span>';
                     if (p.est_officier) badges += '<span class="eff-badge" style="color: #00FF66;">OFFICIER BGS</span>';
                 }
                 const nom = p.cmdr_nom ? escapeHtml(p.cmdr_nom.toUpperCase()) : '<span style="color: #888; font-size: 0.8em;">[ EN ATTENTE EDMC ]</span>';
@@ -1163,13 +1163,6 @@
                 return;
             }
 
-            // SÉCURITÉ ANTI-RECRUE
-            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-            if (rangJeu === 4 && (!data || (!data.est_amiral && !data.est_officier))) {
-                window.location.href = 'index.html'; 
-                return; 
-            }
-            
             if (data && data.est_approuve) {
                 profilCommandant = data;
                 window.profilCommandant = data;

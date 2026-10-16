@@ -314,7 +314,7 @@ window.actualiserHeader = function(profilData) {
             if (!independant) {
                 let rangJeu = 3; try { rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3'); } catch (e) {}
                 if (profilData.est_amiral) g += pastille('AMIRAL', '#FF3333', 'COMMANDANT SUPRÊME<br>Gère les effectifs, accrédite les officiers et publie les ordres BGS.');
-                else if (rangJeu === 4) g += pastille('RECRUE', '#cccccc', 'RECRUE<br>Accès limité : le panneau tactique BGS est verrouillé.');
+                else if (rangJeu === 4) g += pastille('RECRUE', '#cccccc', 'RECRUE<br>Jusqu’à ce que l’Amiral te passe PILOTE dans le jeu.');
                 else g += pastille('PILOTE', '#FF7100', 'MEMBRE ACTIF<br>Accès aux opérations de l’escadron.');
                 if (!profilData.est_amiral && profilData.est_officier) g += pastille('OFFICIER BGS', '#00FF66', 'GESTION TACTIQUE BGS<br>Autorisé à publier les ordres de l’Amiral.');
             }
@@ -379,7 +379,7 @@ window.actualiserHeader = function(profilData) {
             // BGS : membres d'escadron ayant acces au BGS (meme regle que le menu)
             let rangJeu = 3; try { rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3'); } catch (e) {}
             const esc = String(memo.escadron_id || '').trim();
-            const accesBgs = !!esc && esc.toUpperCase() !== 'INDEPENDANT' && !(rangJeu === 4 && !memo.est_amiral && !memo.est_officier);
+            const accesBgs = !!esc && esc.toUpperCase() !== 'INDEPENDANT';
             if (accesBgs && memo.rang_bgs !== undefined) {
                 const rg = Math.min(100, Math.max(1, parseInt(memo.rang_bgs) || 1)), pts = Number(memo.points_bgs) || 0;
                 const min = seuil(rg), max = rg >= 100 ? null : seuil(rg + 1);

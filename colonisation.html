@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=33"></script>
+    <script src="navigation.js?v=34"></script>
     <script src="dialogue.js?v=1"></script>
     <script src="colonisation-architectes.js?v=2"></script>
     <script src="colonisation-types.js?v=2"></script>
@@ -1470,8 +1470,6 @@
 
             const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
             if (!data) { window.location.href = 'index.html'; return; }
-            const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-            if (rangJeu === 4 && (!data || (!data.est_amiral && !data.est_officier))) { window.location.href = 'index.html'; return; }
 
             if (data && data.est_approuve) {
                 profilCommandant = data;
@@ -1484,7 +1482,7 @@
                 // BGS dans le menu : membres d'escadron uniquement (un pilote sans escadron le voit grise, avec un cadenas, via actualiserHeader)
                 const navBgs = document.getElementById('nav-bgs-factions');
                 const escCol = String(data.escadron_id || '').trim();
-                const membre = !!escCol && escCol.toUpperCase() !== 'INDEPENDANT' && !(rangJeu === 4 && !data.est_amiral && !data.est_officier);
+                const membre = !!escCol && escCol.toUpperCase() !== 'INDEPENDANT';
                 if (navBgs && membre) navBgs.style.display = 'flex';
                 if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
                 const apiKeyDisplay = document.getElementById('api-key-display');

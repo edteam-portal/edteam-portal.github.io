@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=3"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=33"></script>
+    <script src="navigation.js?v=34"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
     <script src="campagnes.js?v=8"></script>
@@ -778,11 +778,6 @@
                 return;
             }
 
-            if (rangJeu === 4 && (!data || (!data.est_amiral && !data.est_officier))) {
-                window.location.href = 'index.html';
-                return;
-            }
-
             if (data && data.est_approuve) {
                 profilCommandant = data;
                 window.profilCommandant = data;
@@ -1516,6 +1511,25 @@
         }
         window.addEventListener('edteam-photos', () => { if (typeof chargerAccueilBGS === 'function' && profilCommandant) chargerAccueilBGS(true); });
         function accSemClassique() { try { return localStorage.getItem('edteam_accueil_classique') === '1'; } catch (e) { return false; } }
+        // Journal : les petits gains de mérites en rafale (par exemple 11 mérites par vaisseau croisé) ne font plus une ligne chacun :
+        // les gains successifs d'un même pilote, dans le même système, de même type et de même origine, séparés de moins de 20 minutes, sont réunis en une ligne (total + nombre de gains)
+        function regrouperMeritesPP(lignes) {
+            const trie = lignes.slice().sort((a, b) => new Date(b.date_action) - new Date(a.date_action));
+            const ouvert = {}, out = [];
+            trie.forEach(l => {
+                const cle = [l.user_id, l.systeme, l.type_pp, l.origine_action, l.mission_pp_id].join('|');
+                const g = ouvert[cle];
+                const t = new Date(l.date_action).getTime();
+                if (g && g.tPlusAncien - t <= 20 * 60000) {
+                    g.merites = (Number(g.merites) || 0) + (Number(l.merites) || 0);
+                    g.n = (g.n || 1) + 1; g.tPlusAncien = t;
+                } else {
+                    const nv = Object.assign({}, l, { n: 1, tPlusAncien: t });
+                    ouvert[cle] = nv; out.push(nv);
+                }
+            });
+            return out;
+        }
         async function chargerAccueilBGS(force) {
             const haut = document.getElementById('bgs-accueil-haut');
             if (!haut || !profilCommandant) return;
@@ -2496,7 +2510,7 @@
                     .filter(l => l && l.t).map(l => ({ type_action: 'PALIER', date_action: l.t, cmdr: l.cmdr, palier: l.palier, total: l.total }));
                 // Efforts Powerplay de l'escadron (300 derniers, une fois) : fonction serveur pp_journal (script SQL 96)
                 const resPP = suite ? null : await supabaseApp.rpc('pp_journal', { p_limite: 300 }).then(r => r, () => ({ data: null }));
-                if (!suite) memoirePP = (resPP && Array.isArray(resPP.data) ? resPP.data : []).filter(l => l && l.date_action).map(l => Object.assign({ type_action: 'PP' }, l));
+                if (!suite) memoirePP = regrouperMeritesPP((resPP && Array.isArray(resPP.data) ? resPP.data : []).filter(l => l && l.date_action).map(l => Object.assign({ type_action: 'PP' }, l)));
                 const [resEfforts, resProfils] = await Promise.all([
                     queryEfforts,
                     suite ? Promise.resolve({ data: null }) : supabaseApp.from('profils_publics')
@@ -2701,7 +2715,7 @@
                                 <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${nomW}">CMDR ${nomW}</span>
                                 <div style="white-space: nowrap;"><span style="border: 1px solid ${cpp}; color: ${cpp}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;" title="${lie ? 'Mission Powerplay #' + a.mission_pp_id : 'Soutien libre : aucune mission ne correspond à ce système et à ce type'}">${tagW}</span></div>
                                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;"><span style="color: ${cpp}; font-weight: bold;">${escapeHtml(String(a.systeme || '').toUpperCase())}</span><span style="color: #555; margin: 0 6px;">//</span><span style="color: #aaa;">POWERPLAY</span></div>
-                                <span style="text-align: right; white-space: nowrap; color: ${colW}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colW}40;">+${new Intl.NumberFormat('fr-FR').format(a.merites)} MÉRITES</span>
+                                <span style="text-align: right; white-space: nowrap; color: ${colW}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colW}40;">+${new Intl.NumberFormat('fr-FR').format(a.merites)} MÉRITES${a.n > 1 ? ' <span style="color: #888; font-size: 0.8em;" title="' + a.n + ' gains successifs réunis sur une ligne">×' + a.n + '</span>' : ''}</span>
                                 <span style="text-align: right; color: ${cpp}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">[ ${origW} ]</span>
                                 <span style="text-align: right; white-space: nowrap; color: ${cpp}; font-size: 0.95em; font-weight: bold;" title="CP estimés = mérites ÷ 4 (estimation)">≈ ${new Intl.NumberFormat('fr-FR').format(Math.round(a.merites / 4))} CP</span>
                             </div>`;
