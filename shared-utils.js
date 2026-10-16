@@ -10,6 +10,18 @@ function escapeHtml(str) {
 
 // Cache de session courte duree (par onglet, pas partage entre pilotes) pour eviter de
 // refaire un select('*') sur 'profils' a chaque navigation entre pages de l'app.
+// Un membre approuve d'un escadron (recrue comprise) a toujours acces aux pages Escadron et BGS : on remet les drapeaux du menu a jour a chaque lecture du profil
+// (ils pouvaient rester a « false » depuis l'epoque ou les recrues etaient bloquees, et cachaient le menu tant qu'on ne repassait pas par l'accueil)
+function synchroniserAccesEscadron(data) {
+    try {
+        const esc = data && String(data.escadron_id || '').trim();
+        if (!data || !data.est_approuve || !esc || esc.toUpperCase() === 'INDEPENDANT') return;
+        localStorage.setItem('edteam_acces_escadron', 'true');
+        localStorage.setItem('edteam_acces_bgs', 'true');
+        ['nav-link-escadron', 'nav-bgs-factions'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'flex'; });
+    } catch (e) { /* stockage indisponible : le menu garde son etat */ }
+}
+
 function chargerProfilAvecCache(supabaseApp, userId, ttlMs = 30000) {
     const cacheKey = 'edteam_profil_cache_' + userId;
     try {
@@ -17,6 +29,7 @@ function chargerProfilAvecCache(supabaseApp, userId, ttlMs = 30000) {
         if (raw) {
             const parsed = JSON.parse(raw);
             if (Date.now() - parsed.ts < ttlMs) {
+                synchroniserAccesEscadron(parsed.data);
                 return Promise.resolve({ data: parsed.data, error: null });
             }
         }
@@ -28,6 +41,7 @@ function chargerProfilAvecCache(supabaseApp, userId, ttlMs = 30000) {
 
     return supabaseApp.from('profils').select(COLONNES_PROFIL).eq('user_id', userId).single().then(res => {
         if (res.data) {
+            synchroniserAccesEscadron(res.data);
             try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: res.data })); } catch (e) {}
         }
         return res;
