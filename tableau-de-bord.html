@@ -692,12 +692,130 @@
                 <div class="bloc cy"><h2>TEMPS DE JEU</h2><div class="tb-big" id="tb-duree">${S.debut ? duree((Date.now() - new Date(S.debut).getTime()) / 1000) : "—"}</div><div class="tb-sub">depuis le lancement du jeu</div></div>
                 <div class="bloc"><h2>TONNES VENDUES</h2><div class="tb-big">${fmtN(t.tonnes)} t</div><div class="tb-sub">${fmtM(t.ventes)} de ventes · ${fmtM(t.achats)} d'achats</div></div>`;
         }
+        // ---------------------------------------------------------------
+        //  CARTE DU COMMERCE : memes deux vues que l'onglet Missions (VUE VAISSEAU / VUE CARTE). La carte montre le trajet de la tournee (ou de la route de porte-vaisseaux)
+        //  entre les systemes (coordonnees EDSM) ; un systeme visite plusieurs fois n'a qu'un seul rond, avec tous ses numeros d'arret.
+        // ---------------------------------------------------------------
+        const VUECOM = { v: lire("edteam_tb_vuecom") === "carte" ? "carte" : "vaisseau", sig: "", clig: lire("edteam_tb_cartevuecom") !== "1" };
+        function basculerVueCom(x) {
+            VUECOM.v = x === "carte" ? "carte" : "vaisseau"; ecrire("edteam_tb_vuecom", VUECOM.v);
+            if (VUECOM.v === "carte") { VUECOM.clig = false; ecrire("edteam_tb_cartevuecom", "1"); }
+            if (typeof sonClic === "function") sonClic();
+            rendre();
+        }
+        // trajet a dessiner : { noeuds: [{ sys, nums, libs, kind }], aretes: [{ a, b, etat, txt }], suiv, note, sig } ; null = rien a tracer
+        function routeCommerce() {
+            const noeuds = [], idx = {};
+            const noeud = (sys, num, lib) => {
+                const k = cle(sys); if (!k) return -1;
+                if (!(k in idx)) { idx[k] = noeuds.length; noeuds.push({ sys, nums: [], libs: [], kind: "fait" }); }
+                const n = noeuds[idx[k]]; n.nums.push(num); n.libs.push(lib || ""); return idx[k];
+            };
+            const aretes = [];
+            let note = "", sig = "", suiv = -1;
+            if (MODE_ROUTE.v === "fc" && FC.donnees && (FC.donnees.routes || []).length) {
+                const d = FC.donnees, b = d.routes.slice().sort((x, y) => (Number(y.benefice) || 0) - (Number(x.benefice) || 0))[0], a = b.achat || {}, v = b.vente || {};
+                const i0 = noeud(String(d.depart || fcSysteme()), 1, "porte-vaisseaux"), i1 = noeud(a.systeme, 2, a.station), i2 = noeud(v.systeme, 3, v.station);
+                if (i1 < 0 || i2 < 0) return null;
+                if (i0 >= 0) { noeuds[i0].kind = "venir"; if (i0 !== i1) aretes.push({ a: i0, b: i1, etat: "pro", txt: a.distance > 0 ? a.distance + " al" : "" }); }
+                noeuds[i1].kind = "venir"; noeuds[i2].kind = "venir";
+                if (i1 !== i2) aretes.push({ a: i1, b: i2, etat: "venir", txt: v.distance + " al · " + fmtM(b.benefice, true) });
+                suiv = i0 >= 0 && i0 !== i1 ? i1 : i2;
+                note = "route de porte-vaisseaux · " + fmtM(b.benefice, true);
+                sig = "fc|" + [d.depart, a.station, v.station].join(">");
+            } else if (TOURNEE.donnees && (TOURNEE.donnees.etapes || []).length) {
+                const d = TOURNEE.donnees, et = d.etapes, p = progressionTournee(d), n = p.stations.length, cr = p.fini ? n : p.courant;
+                const ids = p.stations.map((s, i) => noeud(s.lieu.systeme, i + 1, s.lieu.station));
+                if (ids.some(x => x < 0)) return null;
+                ids.forEach((id, i) => { const nd = noeuds[id], etat = i < cr ? "fait" : i === cr ? "cours" : "venir"; if (etat === "cours" || (etat === "venir" && nd.kind !== "cours") || (etat === "fait" && nd.kind === "fait")) nd.kind = etat; });
+                for (let i = 0; i < n - 1; i++) {
+                    if (ids[i] === ids[i + 1]) continue;
+                    const e = et[i] || {};
+                    aretes.push({ a: ids[i], b: ids[i + 1], etat: i + 1 <= cr ? "fait" : i === cr ? "pro" : "venir", txt: (e.saut != null ? e.saut + " al" : "") + (e.benefice ? " · " + fmtM(e.benefice, true) : "") });
+                }
+                suiv = cr < n ? ids[cr] : -1;
+                const gain = Number(d.gain) || 0;
+                note = p.fini ? "tournée terminée" : `arrêt ${cr + 1} sur ${n}` + (gain ? " · gain " + fmtM(gain, true) : "");
+                sig = "t|" + (TOURNEE.calcule || TOURNEE.t0 || "") + "|" + cr;
+            } else return null;
+            return { noeuds, aretes, suiv, note, sig };
+        }
+        function carteCommerceHtml(opt) {
+            const r = routeCommerce() || { noeuds: [], aretes: [], suiv: -1, note: "aucun trajet à tracer · votre position", sig: "" };     // sans trajet : votre position seule, comme la carte des missions
+            if (!r.noeuds.length && !S.systeme) return "";
+            const mini = !!(opt && opt.mini), grande = !!(opt && opt.grande), W = 900, H = mini ? 340 : grande ? 560 : 300;
+            const { noeuds, aretes } = r, depart = S.systeme || "";
+            demandeCoords(noeuds.map(x => x.sys).concat(depart ? [depart] : []));
+            // votre position : sur un arret si vous y etes, sinon un point en plus relie a l'arret en cours
+            let iciIdx = noeuds.findIndex(x => cle(x.sys) === cle(depart));
+            const posIci = S.pos && S.pos.length === 3 ? S.pos : COORDS[cle(depart)] || null;
+            const tous = noeuds.map(x => ({ ...x, pos: COORDS[cle(x.sys)] || null }));
+            const ar = aretes.slice();
+            if (iciIdx < 0 && depart) { tous.push({ sys: depart, nums: [], libs: [S.station || ""], kind: "ici", pos: posIci }); iciIdx = tous.length - 1; if (r.suiv >= 0) ar.push({ a: iciIdx, b: r.suiv, etat: "pro", txt: "" }); }
+            const connus = tous.filter(p => p.pos);
+            let place = null;
+            if (connus.length >= 2) {
+                const xs = connus.map(p => p.pos[0]), zs = connus.map(p => p.pos[2]);
+                if (Math.max(...xs) - Math.min(...xs) > 0.5 || Math.max(...zs) - Math.min(...zs) > 0.5) {
+                    const mx = Math.min(...xs), Mx = Math.max(...xs), mz = Math.min(...zs), Mz = Math.max(...zs), sx = Math.max(Mx - mx, 1), sz = Math.max(Mz - mz, 1);
+                    let kx = (W - 260) / sx, kz = (H - 150) / sz; const kmin = Math.min(kx, kz); kx = Math.min(kx, kmin * 3.5); kz = Math.min(kz, kmin * 3.5);
+                    const ox = (W - sx * kx) / 2, oz = (H - 80 - sz * kz) / 2;
+                    place = p => p.pos ? { x: ox + (p.pos[0] - mx) * kx, y: 40 + oz + (p.pos[2] - mz) * kz } : null;
+                }
+            }
+            const xy = tous.map((p, i) => (place && place(p)) || (tous.length === 1 ? { x: W / 2, y: grande ? 210 : 130 } : { x: 110 + i * ((W - 220) / Math.max(1, tous.length - 1)), y: 130 }));
+            const COUL = { fait: "#6b747a", ici: "#FF4FD8", cours: "#fff", venir: "#00F0FF" };
+            let svg = `<svg class="tb-carte" viewBox="0 0 ${W} ${H}"><defs><marker id="tbcf" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00F0FF"/></marker><marker id="tbcg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#6b747a"/></marker><marker id="tbcw" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#fff"/></marker></defs>`;
+            ar.forEach(e => {
+                const a = xy[e.a], b = xy[e.b], len = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / len, uy = (b.y - a.y) / len;
+                if (len < 30) return;
+                const l = `x1="${a.x + ux * 22}" y1="${a.y + uy * 22}" x2="${b.x - ux * 25}" y2="${b.y - uy * 25}"`;
+                svg += e.etat === "fait" ? `<line ${l} stroke="#6b747a" stroke-width="2" marker-end="url(#tbcg)"/>`
+                    : `<line ${l} stroke="${e.etat === "pro" ? "#fff" : "#00F0FF"}" stroke-width="${e.etat === "pro" ? 3.5 : 2.5}" stroke-dasharray="8 6" marker-end="url(#${e.etat === "pro" ? "tbcw" : "tbcf"})"/>`;
+                if (e.txt) svg += `<text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 8}" fill="#8b97a0" font-size="12" text-anchor="middle">${esc(e.txt)}</text>`;
+            });
+            tous.forEach((x, i) => {
+                const p = xy[i], kind = x.kind, col = COUL[kind], ancre = p.x < 90 ? "start" : p.x > W - 90 ? "end" : "middle", ici = i === iciIdx, num = x.nums.length ? x.nums.join("·") : "★";
+                if (ici) svg += `<circle cx="${p.x}" cy="${p.y}" r="22" fill="none" stroke="#FF4FD8" stroke-width="2"><animate attributeName="r" values="20;30;20" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.9;0;0.9" dur="2.2s" repeatCount="indefinite"/></circle>`;
+                if (kind === "cours") svg += `<circle cx="${p.x}" cy="${p.y}" r="24" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 4"/>`;
+                svg += `<circle cx="${p.x}" cy="${p.y}" r="17" fill="${kind === "cours" || kind === "ici" ? col : col + "22"}" stroke="${ici && kind !== "ici" ? "#FF4FD8" : col}" stroke-width="2.5"/>`;
+                svg += `<text x="${p.x}" y="${p.y + 5}" fill="${kind === "cours" || kind === "ici" ? "#000" : "#fff"}" font-size="${num.length > 4 ? 10 : 14}" text-anchor="middle" font-weight="bold">${kind === "fait" && x.nums.length === 1 ? "✔" : esc(num)}</text>`;
+                const lib = kind === "ici" ? String(x.libs[0] || "") : x.nums.length > 1 ? x.nums.length + " arrêts" : String(x.libs[0] || "");
+                const eti = (ici ? "VOUS ÊTES ICI" : "") + (kind === "cours" ? (ici ? " · " : "") + "PROCHAIN ARRÊT" : "");
+                svg += `<text x="${p.x}" y="${p.y + 38}" fill="${kind === "fait" ? "#8b97a0" : "#fff"}" font-size="13" text-anchor="${ancre}" data-copie="${esc(x.sys)}"><title>Cliquer pour copier : ${esc(x.sys)}</title>${esc(String(x.sys).toUpperCase().slice(0, grande ? 34 : 24))}</text>`
+                    + `<text x="${p.x}" y="${p.y + 54}" fill="#8b97a0" font-size="11" text-anchor="${ancre}">${esc(lib.slice(0, 34))}</text>`
+                    + (eti ? `<text x="${p.x}" y="${p.y + 69}" fill="${ici ? "#FF4FD8" : "#fff"}" font-size="11" font-weight="bold" text-anchor="${ancre}">${eti}</text>` : "");
+            });
+            svg += `</svg>`;
+            if (mini) return svg.replace(/<text[\s\S]*?<\/text>/g, "").replace("class=\"tb-carte\"", "class=\"tb-carte mini\"");
+            const leg = `<div class="tb-lgp"><span style="--c:#FF4FD8"><i></i>vous êtes ici</span><span style="--c:#fff"><i></i>où aller</span><span style="--c:#00F0FF"><i></i>à venir</span><span style="--c:#6b747a"><i></i>fait</span></div>`;
+            const pied = grande ? `<div class="tbm-vente">${boutonRegistre()}</div>` : "";
+            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DU COMMERCE <em>${esc(r.note)}${place || !r.noeuds.length ? "" : " · positions des systèmes en cours de chargement…"}</em></h2>${grande ? "" : leg}${svg}${pied}</div>`;
+        }
+        // carte sans trajet : on dit pourquoi elle est vide
+        function carteVideHtml() {
+            return `<div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div><h2>CARTE DU COMMERCE <em>aucun trajet à tracer</em></h2><div class="tb-vide">Calculez une tournée de vaisseau (ou une route de porte-vaisseaux) : le trajet entre les stations s'affichera ici, avec votre position et l'arrêt en cours.</div><div class="tbm-vente">${boutonRegistre()}</div></div>`;
+        }
         function panneauCommerce() {
             // meme hologramme (modules du vaisseau) que l'onglet Missions : les racks de soute portent la cargaison (survol par marchandise) ; repli sur l'ancienne soute sans modules (plugin < 2.18) ou sans silhouette
             const nv = vendables().length, pied = `<div class="tbm-vente">${boutonRegistre()}</div>`;
-            const v = S && S.vaisseau, mod = v && v.mods && v.mods.length && typeof modulesHtml === "function" ? modulesHtml(S.missions || [], { pied }) : "";
-            if (mod) return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
-                <div class="tbp-duo tbs tbmis"><div class="tb-etroit">${feuilleHtml()}</div><div class="tbp-droite">${mod}</div></div>`;
+            const v = S && S.vaisseau, aMod = !!(v && v.mods && v.mods.length && typeof modulesHtml === "function");
+            if (aMod) {
+                // deux vues comme l'onglet Missions : vaisseau (mini-carte dans la scene) ou carte du trajet ; sans trajet a tracer, le vaisseau seul
+                const large = window.innerWidth >= LARGE, rc = large ? routeCommerce() : null, grande = large ? (carteCommerceHtml({ grande: true }) || carteVideHtml()) : "";
+                let droite;
+                if (large) {
+                    const sigC = rc ? rc.sig : "";
+                    if (VUECOM.sig && VUECOM.sig !== sigC && VUECOM.v === "vaisseau") VUECOM.clig = true;     // nouveau trajet ou arret suivant pendant qu'on regarde le vaisseau : le bouton « carte » clignote
+                    VUECOM.sig = sigC;
+                    const carte = VUECOM.v === "carte";
+                    const sw = `<div class="tbm-sw"><button type="button" class="${carte ? "" : "on"}" onclick="basculerVueCom('vaisseau')">▣ VUE VAISSEAU</button><button type="button" class="${carte ? "on" : VUECOM.clig ? "clig" : ""}" onclick="basculerVueCom('carte')">◎ VUE CARTE</button></div>`;
+                    const mn = carteCommerceHtml({ mini: true }), petite = mn ? `<div class="tbmm" onclick="basculerVueCom('carte')" title="Ouvrir la carte du trajet">${mn}<span>CARTE ▸</span></div>` : "";
+                    droite = sw + (carte ? grande : modulesHtml(S.missions || [], petite ? { pied, mini: petite } : { pied }));
+                } else droite = modulesHtml(S.missions || [], { pied });
+                return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
+                <div class="tbp-duo tbs tbmis"><div class="tb-etroit">${feuilleHtml()}</div><div class="tbp-droite">${droite}</div></div>`;
+            }
             return `<div class="tb-grid4">${bandeauRang()}${cartes()}</div>
                 <div class="bloc holo" style="margin-bottom:12px;"><div class="holo-balayage"></div>${souteHtml()}</div>
                 ${feuilleHtml()}
