@@ -40,6 +40,10 @@
             '.camp-ligne.conflit { padding-top:12px; padding-bottom:12px; box-shadow:inset 4px 0 0 var(--k), inset 0 0 26px color-mix(in srgb, var(--k) 38%, transparent); outline:1px solid color-mix(in srgb, var(--k) 70%, transparent); outline-offset:-1px; }',
             '.camp-score { font-size:1.7em; font-weight:bold; letter-spacing:2px; color:var(--k); text-shadow:0 0 12px var(--k); line-height:1; }',
             '.camp-type { font-size:1.5em; font-weight:bold; letter-spacing:4px; text-shadow:0 0 12px currentColor; line-height:1; }',
+            '.camp-ligne[draggable=true] { cursor:grab; } .camp-tete[draggable=true] { cursor:grab; }',
+            '.camp-grip { color:#666; font-size:1.1em; letter-spacing:-3px; user-select:none; padding:0 2px; } .camp-tete:hover .camp-grip { color:#ddd; }',
+            '.camp-carte { position:relative; } .camp-carte.glisse { opacity:.45; } .camp-carte.depot { outline:2px dashed #fff; outline-offset:-3px; background:rgba(255,255,255,.04); }',
+            '.camp-trait { position:absolute; left:0; right:0; height:4px; background:#fff; box-shadow:0 0 12px #fff; z-index:20; pointer-events:none; } .camp-ligne.glisse { opacity:.35; }',
             '.camp-ligne.veille { opacity:.55; }',
             '.camp-ligne.gris { opacity:.4; filter:grayscale(1); cursor:not-allowed; }',
             '.camp-ligne .txt { display:flex; align-items:center; gap:12px; min-width:0; }',
@@ -99,7 +103,8 @@
         var attr = m.gris ? ' title="' + esc(m.titre || '') + '"' : ' onclick="' + m.clic + '" onmouseenter="if(typeof sonHover===\'function\') sonHover()"';
         var actions = estCommandement() && m.domaine ? '<span class="camp-ics">' + ic('Modifier la mission', '✎', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'edit\',' + m.id + ')')
             + ic('Clôturer la mission', '📦', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'close\',' + m.id + ')') + ic('Supprimer la mission', '🗑', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'delete\',' + m.id + ')', true) + '</span>' : '<span></span>';
-        return '<div class="camp-ligne' + (m.conflit ? ' conflit' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + attr + ' style="background:' + fond(m.couleur, m.pct) + '; --c:' + m.couleur + ';' + (m.conflit ? ' --k:' + m.conflit + ';' : '') + '">' + neon(m.couleur, m.pct, m.vous)
+        var glisser = estAmiral() && m.domaine && !m.gris ? ' draggable="true" data-mdom="' + m.domaine + '" data-mid="' + m.id + '"' : '';
+        return '<div class="camp-ligne' + (m.conflit ? ' conflit' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + fond(m.couleur, m.pct) + '; --c:' + m.couleur + ';' + (m.conflit ? ' --k:' + m.conflit + ';' : '') + '">' + neon(m.couleur, m.pct, m.vous)
             + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span>' + pctTxt(m.couleur, m.pct, m.legendeTitre) + (m.avatars || '') + '</div>'
             + '<div class="camp-info">' + (m.info || '') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
     }
@@ -153,7 +158,7 @@
         // filet de securite (avant le script SQL 95, ou donnee anormale) : des directives sans campagne connue s'affichent quand meme, dans une campagne « technique »
         var orphelines = (opts.ordres || []).filter(function (o) { return !camps.some(function (c) { return String(c.id) === String(o.campagne_id); }); });
         if (orphelines.length) camps.push({ id: 'sans', nom: 'DIRECTIVES EN COURS', type_campagne: 'MAINTIEN', priorite: Math.min.apply(null, orphelines.map(function (o) { return o.priorite || 3; })), synthetique: true });
-        camps.sort(function (a, b) { return (a.priorite - b.priorite) || String(a.nom).localeCompare(String(b.nom)); });
+        camps.sort(function (a, b) { return (a.priorite - b.priorite) || ((a.position || 0) - (b.position || 0)) || String(a.nom).localeCompare(String(b.nom)); });
         var amiral = estAmiral(), cmd = estCommandement();
         var titre = '';
         if (!camps.length) {
@@ -181,12 +186,76 @@
             var actions = c.synthetique ? '' : '<span class="camp-ics">' + (cmd ? ic('Ajouter une mission à cette campagne', '＋', 'edteamCampagnes.ajouter(' + c.id + ')') : '')
                 + (amiral ? ic('Modifier la campagne', '✎', 'edteamCampagnes.ouvrir(' + c.id + ')') + ic('Clôturer la campagne et ses missions', '📦', 'edteamCampagnes.cloturer(' + c.id + ')') + ic('Supprimer la campagne (seulement si elle est vide)', '🗑', 'edteamCampagnes.supprimer(' + c.id + ')', true) : '') + '</span>';
             return '<div class="bloc camp-carte' + (repliees.indexOf(String(c.id)) >= 0 ? ' repliee' : '') + '" id="camp-' + c.id + '" style="--bdc:' + col + 'bf; --accent:' + col + '; --teinte:' + col + '12; --lueur:' + col + '14; border:1px solid ' + col + '99; box-shadow: inset 4px 0 0 ' + col + ', 0 0 18px ' + col + '18;">'
-                + '<div class="camp-tete" onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + fond(col, av) + '; --c:' + col + ';">' + neon(col, av, vAv) + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, av, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
+                + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + fond(col, av) + '; --c:' + col + ';">' + neon(col, av, vAv) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, av, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
                 + (info ? '<span style="color:#888; font-size:.78em;">' + info + '</span>' : '') + pastille('PRIORITÉ ' + pr[0], pr[1])
                 + (actions ? '<span class="camp-actions">' + actions + '</span>' : '') + '</div>'
                 + '<div class="camp-lignes">' + (lignes.length ? lignes.map(ligne).join('') : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
                 + '</div>';
         }).join('') + '</div>';
+        brancherGlisser(zone);
+    }
+
+    // ===== GLISSER-DEPOSER (Amiral) : une mission d'une campagne a l'autre ; une campagne a une autre place =====
+    var glisse = null;
+    function nettoyerGlisse() {
+        glisse = null;
+        document.querySelectorAll('.camp-carte.depot, .camp-carte.glisse, .camp-ligne.glisse').forEach(function (e) { e.classList.remove('depot', 'glisse'); });
+        document.querySelectorAll('.camp-trait').forEach(function (e) { e.remove(); });
+    }
+    function brancherGlisser(zone) {
+        if (zone.dataset.glisser) return;
+        zone.dataset.glisser = '1';
+        zone.addEventListener('dragstart', function (ev) {
+            if (!estAmiral()) return;
+            var l = ev.target.closest && ev.target.closest('.camp-ligne[data-mid]');
+            var t = ev.target.closest && ev.target.closest('.camp-tete[data-cid]');
+            var carte = ev.target.closest && ev.target.closest('.camp-carte');
+            if (l) { glisse = { type: 'M', dom: l.dataset.mdom, id: l.dataset.mid, de: carte ? carte.id.replace('camp-', '') : null }; l.classList.add('glisse'); }
+            else if (t) { glisse = { type: 'C', id: t.dataset.cid }; if (carte) carte.classList.add('glisse'); }
+            else return;
+            try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', JSON.stringify(glisse)); } catch (e) { /* navigateur sans dataTransfer */ }
+        });
+        zone.addEventListener('dragover', function (ev) {
+            if (!glisse) return;
+            var carte = ev.target.closest && ev.target.closest('.camp-carte'); if (!carte) return;
+            var cid = carte.id.replace('camp-', '');
+            document.querySelectorAll('.camp-carte.depot').forEach(function (e) { if (e !== carte) e.classList.remove('depot'); });
+            document.querySelectorAll('.camp-trait').forEach(function (e) { e.remove(); });
+            if (glisse.type === 'M') {
+                if (cid === 'sans' || String(cid) === String(glisse.de)) return;
+                ev.preventDefault(); carte.classList.add('depot');
+            } else {
+                if (cid === 'sans' || String(cid) === String(glisse.id)) return;
+                ev.preventDefault();
+                var r = carte.getBoundingClientRect(), avant = ev.clientY < r.top + r.height / 2;
+                var tr = document.createElement('div'); tr.className = 'camp-trait'; tr.style[avant ? 'top' : 'bottom'] = '0'; carte.appendChild(tr);
+                carte.dataset.pos = avant ? 'avant' : 'apres';
+            }
+        });
+        zone.addEventListener('drop', async function (ev) {
+            if (!glisse) return;
+            var carte = ev.target.closest && ev.target.closest('.camp-carte'); if (!carte) { nettoyerGlisse(); return; }
+            ev.preventDefault();
+            var cible = carte.id.replace('camp-', ''), g = glisse, avant = carte.dataset.pos === 'avant';
+            nettoyerGlisse();
+            if (cible === 'sans') return;
+            if (g.type === 'M') {
+                if (String(cible) === String(g.de)) return;
+                var r1 = await db().rpc('deplacer_mission', { p_domaine: g.dom, p_id: Number(g.id), p_campagne_id: Number(cible) });
+                if (r1.error) { console.error(r1.error); alert(r1.error.message || 'Déplacement impossible (le script SQL 102 est-il lancé ?).'); return; }
+                if (typeof sonSucces === 'function') sonSucces();
+            } else {
+                if (String(cible) === String(g.id)) return;
+                var cartes = Array.prototype.map.call(document.querySelectorAll('#bgs-campagnes .camp-carte'), function (e) { return e.id.replace('camp-', ''); }).filter(function (x) { return x !== 'sans' && String(x) !== String(g.id); });
+                var i = cartes.indexOf(String(cible)); if (i < 0) return;
+                var apres = avant ? (i > 0 ? cartes[i - 1] : null) : cartes[i];
+                var r2 = await db().rpc('deplacer_campagne', { p_id: Number(g.id), p_apres_id: apres == null ? null : Number(apres) });
+                if (r2.error) { console.error(r2.error); alert(r2.error.message || 'Déplacement impossible (le script SQL 102 est-il lancé ?).'); return; }
+                if (typeof sonSucces === 'function') sonSucces();
+            }
+            await window.edteamCampagnes.rafraichir();
+        });
+        zone.addEventListener('dragend', nettoyerGlisse);
     }
 
     // ===== FENETRE DE CREATION / EDITION D'UNE CAMPAGNE (Amiral) =====
@@ -218,6 +287,7 @@
             + '<div class="cmd-entete"><div class="cmd-titre" id="edm-titre">&gt; MODIFIER LA MISSION</div><div class="cmd-sous" id="edm-sous"></div></div>'
             + '<div class="cmd-col"><div class="cmd-etape" id="edm-bloc-type"><div class="cmd-etape-titre">TYPE</div><div class="cmd-pills" id="edm-types"></div></div>'
             + '<div class="cmd-etape"><div class="cmd-etape-titre">CONSIGNE <em>facultatif</em></div><textarea id="edm-briefing" class="search-input cmd-champ" maxlength="400" autocomplete="off" style="height:84px; resize:vertical;"></textarea></div>'
+            + '<div class="cmd-etape" id="edm-bloc-plafond" style="display:none;"><div class="cmd-etape-titre">PLAFOND DE CP <em>facultatif</em></div><input type="number" id="edm-plafond" class="search-input cmd-champ" min="1" max="10000000" step="1" placeholder="Ex : 2000" autocomplete="off" style="max-width:220px;"><div class="cmd-aide">Objectif en CP estimés (mérites ÷ 4) : la barre de la mission se remplit jusqu\'à ce plafond. Vide : pas de plafond.</div></div>'
             + '<div class="cmd-aide" id="edm-erreur" style="color:#FF3333;"></div></div>'
             + '<div class="cmd-pied"><button id="btn-edm-ok" onclick="edteamCampagnes.enregistrerEdition()">ENREGISTRER</button></div></div></div>';
         while (d.firstChild) document.body.appendChild(d.firstChild);
@@ -329,6 +399,8 @@
             document.getElementById('edm-sous').textContent = opts.sous || '';
             document.getElementById('edm-bloc-type').style.display = opts.types ? '' : 'none';
             document.getElementById('edm-briefing').value = opts.briefing || '';
+            document.getElementById('edm-bloc-plafond').style.display = opts.plafondActif ? '' : 'none';
+            document.getElementById('edm-plafond').value = opts.plafondActif && opts.plafond ? opts.plafond : '';
             document.getElementById('edm-erreur').textContent = '';
             dessinerEdition();
             if (typeof ouvrirModal === 'function') ouvrirModal('modal-edition-mission'); else document.getElementById('modal-edition-mission').style.display = 'flex';
@@ -338,7 +410,8 @@
             if (!edition) return;
             var btn = document.getElementById('btn-edm-ok'), err = document.getElementById('edm-erreur');
             btn.style.pointerEvents = 'none';
-            var msg = await edition.enregistrer(editionType, document.getElementById('edm-briefing').value.trim());
+            var pf = null; if (edition.plafondActif) { var vp = document.getElementById('edm-plafond').value.trim(); pf = vp === '' ? null : Math.round(Number(vp)); if (pf !== null && (!(pf >= 1) || pf > 10000000)) { btn.style.pointerEvents = 'auto'; err.textContent = 'Le plafond doit être compris entre 1 et 10 000 000 (ou vide).'; return; } }
+            var msg = await edition.enregistrer(editionType, document.getElementById('edm-briefing').value.trim(), pf);
             btn.style.pointerEvents = 'auto';
             if (msg) { err.textContent = msg; return; }
             if (typeof sonSucces === 'function') sonSucces();

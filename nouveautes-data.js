@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-plafond-glisser', date: '2026-10-16T21:47:12Z', type: 'NOUVEAU',
+        titre: 'Campagnes : plafond de CP et glisser-déposer',
+        texte: 'L’Amiral et les officiers peuvent fixer un plafond de CP à une mission Powerplay : la barre de la mission se remplit alors jusqu’à cet objectif (CP estimés = mérites ÷ 4) et affiche « objectif atteint ». L’Amiral peut aussi réorganiser ses campagnes d’un glisser-déposer : une mission se glisse dans une autre campagne, et une campagne se glisse plus haut ou plus bas (elle prend la priorité de sa nouvelle place). Dans le journal, les colonnes Vecteur et Rang BGS · CP ne se coupent plus sur deux lignes.',
+        important: false
+    },
+    {
         id: '2026-10-recrues-acces', date: '2026-10-16T20:50:08Z', type: 'AMELIORE',
         titre: 'Les recrues accèdent à tout le site, et le journal est moins chargé',
         texte: 'Les recrues d’un escadron peuvent maintenant ouvrir toutes les pages, y compris Engagement (BGS, Powerplay) et Escadron. Leur fiche indique RECRUE jusqu’à ce que l’Amiral les passe PILOTE dans le jeu. Dans le journal des exploits, les petits gains de mérites en rafale (par exemple 11 mérites à chaque vaisseau croisé dans un système) sont réunis en une seule ligne avec le total et le nombre de gains (×5).',

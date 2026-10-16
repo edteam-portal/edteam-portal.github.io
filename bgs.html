@@ -21,8 +21,8 @@
     <script src="navigation.js?v=34"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=8"></script>
-    <script src="campagnes-pp.js?v=5"></script>
+    <script src="campagnes.js?v=9"></script>
+    <script src="campagnes-pp.js?v=6"></script>
     <script src="campagnes-col.js?v=6"></script>
     <script src="vitrine-module.js?v=1"></script>
 
@@ -239,6 +239,7 @@
         .bgs-hero small { color: #777; font-size: 0.78em; }
         .bgs-hero .jgh { grid-column: 1 / -1; position: relative; height: 12px; background: #222; margin-top: 4px; }
         .bgs-hero .jgh i { position: absolute; left: 0; top: 0; bottom: 0; }
+        .exploit-row > :nth-last-child(-n+2) { white-space: nowrap; }
         @media (max-width: 800px) { .bgs-carte.large { flex-direction: column; } .bgs-carte.large .g1 { flex: none; } .bgs-carte .eff .types .t { grid-template-columns: 90px minmax(0, 1fr); } }
         .bgs-dossier { margin-top: 12px; border: 1px solid; background: rgba(0,0,0,0.35); }
         .bgs-dossier .tete { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; font-size: 0.9em; flex-wrap: wrap; }
@@ -529,6 +530,11 @@
                     <div class="cmd-etape">
                         <div class="cmd-etape-titre"><span class="cmd-num">5</span>CONSIGNE <em>facultatif</em></div>
                         <textarea id="cmd-pp-briefing" class="search-input cmd-champ" maxlength="400" placeholder="Pourquoi ce système, que faut-il faire…" autocomplete="off" data-lpignore="true" style="height: 64px; resize: vertical;"></textarea>
+                    </div>
+                    <div class="cmd-etape">
+                        <div class="cmd-etape-titre"><span class="cmd-num">6</span>PLAFOND DE CP <em>facultatif</em></div>
+                        <input type="number" id="cmd-pp-plafond" class="search-input cmd-champ" min="1" max="10000000" step="1" placeholder="Ex : 2000" autocomplete="off" data-lpignore="true" style="max-width: 220px;">
+                        <div class="cmd-aide">L'objectif de la mission, en CP estimés (mérites ÷ 4). La barre de la mission se remplit jusqu'à ce plafond ; sans plafond, elle suit la progression du contrôle du système.</div>
                     </div>
                     </div>
 
@@ -2663,14 +2669,14 @@
                         const bandeauRang = await bandeauRangBgs();
                         const bandeauSuite = journalEtat.fin ? '' : `<div style="padding: 7px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8a8a8a; font-size: 0.78em;">ⓘ Les ${journalEtat.lignes.length} actions les plus récentes de la période sont affichées, il en reste à charger : <span style="color: var(--ed-blue); cursor: pointer; text-decoration: underline;" onclick="chargerRegistreTactique(true)">charger la suite</span> (les stations et paliers plus anciens apparaîtront avec elles).</div>`;
                         let feedHtml = bandeauRang + bandeauSuite + `
-                        <div style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 95px 95px; gap: 10px; padding: 8px 14px; color: #888; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
+                        <div style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; padding: 8px 14px; color: #888; font-size: 0.85em; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase;">
                             <span>HORODATAGE</span>
                             <span>COMMANDANT</span>
                             <span>ORDRE</span>
                             <span>THÉÂTRE D'OPÉRATION</span>
-                            <span style="text-align: right;">RÉSULTAT</span>
-                            <span style="text-align: right;">VECTEUR</span>
-                            <span style="text-align: right; color: var(--ed-orange);" title="BGS : points de carrière que l'action rapporte (ils font monter votre rang BGS) · Powerplay : CP estimés (mérites ÷ 4)">RANG BGS · CP</span>
+                            <span style="text-align: right; white-space: nowrap;">RÉSULTAT</span>
+                            <span style="text-align: right; white-space: nowrap;">VECTEUR</span>
+                            <span style="text-align: right; white-space: nowrap; color: var(--ed-orange);" title="BGS : points de carrière que l'action rapporte (ils font monter votre rang BGS) · Powerplay : CP estimés (mérites ÷ 4)">RANG BGS · CP</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">`;
 
@@ -2687,7 +2693,7 @@
                                 const cb = window.specialiteAction ? window.specialiteAction('COLONISATION').couleur : '#FFD700';
                                 const bgS = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                                 feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 95px 95px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgS}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cb};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgS}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgS}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cb};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgS}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #888; font-weight: bold; white-space: nowrap;">ESCADRON</span>
                                 <div style="white-space: nowrap;"><span style="border: 1px solid ${cb}; color: ${cb}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">COLONISATION</span></div>
@@ -2710,7 +2716,7 @@
                                 const colW = { RENFORCEMENT: '#00FF66', SAPE: '#FF3333', ACQUISITION: '#EDEDED' }[a.type_pp] || cpp;
                                 const origW = { PRIMES: 'PRIMES', COMBAT: 'COMBAT', MISSIONS: 'MISSIONS', LIVRAISONS: 'LIVRAISONS', COMMERCE: 'COMMERCE', EXPLORATION: 'EXPLORATION', SAUVETAGE: 'SAUVETAGE', COMMUNAUTE: 'COMMUNAUTÉ', AUTRE: 'AUTRE' }[a.origine_action] || 'AUTRE';
                                 feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 95px 95px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgW}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cpp};" onmouseover="this.style.background='rgba(138, 124, 255, 0.10)';" onmouseout="this.style.background='${bgW}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgW}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cpp};" onmouseover="this.style.background='rgba(138, 124, 255, 0.10)';" onmouseout="this.style.background='${bgW}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${nomW}">CMDR ${nomW}</span>
                                 <div style="white-space: nowrap;"><span style="border: 1px solid ${cpp}; color: ${cpp}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;" title="${lie ? 'Mission Powerplay #' + a.mission_pp_id : 'Soutien libre : aucune mission ne correspond à ce système et à ce type'}">${tagW}</span></div>
@@ -2727,7 +2733,7 @@
                                 const nomP = escapeHtml(String(a.cmdr || 'INCONNU').toUpperCase());
                                 const tP = new Intl.NumberFormat('fr-FR').format(a.palier) + ' T' + (a.palier % 50000 === 0 ? ' ★' : '');   // une étoile tous les 50 000 t
                                 feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 95px 95px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgP}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cp};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgP}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgP}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cp};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgP}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${nomP}">CMDR ${nomP}</span>
                                 <div style="white-space: nowrap;"><span style="border: 1px solid ${cp}; color: ${cp}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">COLONISATION</span></div>
@@ -2794,7 +2800,7 @@
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                             
                             feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 95px 95px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgLigne}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
+                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgLigne}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
                                 <span style="color: #fff; font-weight: bold; font-size: 1em; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
                                 <div style="white-space: nowrap;">

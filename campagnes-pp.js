@@ -30,6 +30,18 @@
     function trouver(id) { return ((vue && vue.missions) || []).filter(function (m) { return String(m.id) === String(id); })[0] || null; }
     function nomCampagne(id) { var c = (window.cacheCampagnes || []).filter(function (x) { return String(x.id) === String(id); })[0]; return c ? c.nom : null; }
 
+    // Plafond de CP fixe par le commandement : la barre = CP estimes de la mission / plafond (sinon : progression du controle observee)
+    function plafonne(m, o) {
+        var pl = Number(m.plafond_cp) || 0;
+        if (!(pl > 0) || o.gris) return o;
+        var fait = cp(m.merites_total), mien = cp(m.merites_moi);
+        o.pct = Math.min(100, Math.round(100 * fait / pl));
+        o.vous = Math.min(o.pct, Math.round(100 * mien / pl));
+        o.legendeTitre = 'Objectif de ' + fmt(pl) + ' CP fixé par le commandement : ≈ ' + fmt(fait) + ' CP réalisés par l\'escadron (mérites ÷ 4, estimation). La lueur néon à gauche : votre part.';
+        o.info = '<span class="inf" title="CP estimés réalisés / plafond fixé par le commandement">≈ ' + fmt(fait) + ' / ' + fmt(pl) + ' CP</span>' + (fait >= pl ? '<span style="color:#2fe07a;">objectif atteint</span>' : '') + (o.info || '');
+        return o;
+    }
+
     var API = {
         // une lecture, partagee par toute la page (un seul appel serveur)
         lire: async function () {
@@ -47,10 +59,10 @@
         lignes: function (campagneId) {
             return ((vue && vue.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(campagneId); }).map(function (m) {
                 var t = TYPE[m.type_pp] || [m.type_pp, '#aaa'], pc = pctControle(m), gris = !aPuissance();
-                return { tag: 'PP #' + m.id + ' - ' + t[0].toUpperCase(), domaine: 'PP', id: m.id, couleur: PPC, gris: gris, pct: pc, vous: null, avatars: gris ? '' : (window.edteamCampagnes ? window.edteamCampagnes.avatars((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : ''),
+                return plafonne(m, { tag: 'PP #' + m.id + ' - ' + t[0].toUpperCase(), domaine: 'PP', id: m.id, couleur: PPC, gris: gris, pct: pc, vous: null, avatars: gris ? '' : (window.edteamCampagnes ? window.edteamCampagnes.avatars((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : ''),
                     legendeTitre: 'Progression du contrôle du système, observée par un pilote de l\'escadron (le jeu ne donne pas d\'objectif : ce n\'est pas un effort)', clic: 'edteamCampagnesPP.ouvrir(' + m.id + ')', titre: 'Rejoignez une puissance (Powerplay) pour participer à cette mission',
                     info: gris ? '' : (m.etat ? '<span class="inf">' + esc(m.etat.controlling || 'sans puissance') + '</span>' + (m.etat.etat ? '<span>' + (ETAT[m.etat.etat] || esc(m.etat.etat)) + '</span>' : '') : '<span style="color:#888;">pas encore observé</span>') + '<span style="color:#aaa;" title="Mérites de l\'escadron sur ce système">' + fmt(m.merites_total) + ' mérites</span>',
-                    texte: '<b>' + esc(String(m.systeme).toUpperCase()) + '</b>' };
+                    texte: '<b>' + esc(String(m.systeme).toUpperCase()) + '</b>' });
             });
         },
 
@@ -121,6 +133,7 @@
             var peutCloturer = estCmd() || (estIni && String(m.auteur_id) === String(moi().user_id));
             var boutons = (peutCloturer ? '<button class="ini-btn gris" onclick="edteamCampagnesPP.cloturer(' + m.id + ', ' + (estIni && !estCmd()) + ')">' + (estIni ? (estCmd() ? 'RETIRER L\'INITIATIVE' : 'CLÔTURER MON INITIATIVE') : 'CLÔTURER LA MISSION') + '</button>' : '')
                 + (estIni && estCmd() ? '<button class="ini-btn" onclick="edteamCampagnesPP.adopter(' + m.id + ')">TRANSFORMER EN MISSION DE CAMPAGNE</button>' : '');
+            var pl = Number(m.plafond_cp) || 0, cpFait = cp(total), pctObj = pl > 0 ? Math.min(100, Math.round(100 * cpFait / pl)) : 100, myObj = pl > 0 ? Math.min(pctObj, Math.round(100 * cp(mien) / pl)) : part;
             var html = '<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-right:30px;">' + pastille('POWERPLAY', PPC) + ' ' + pastille(t[0].toUpperCase(), t[1])
                 + (estIni ? ' <span style="color:#FF4FD8; border:1px solid #FF4FD8; background:rgba(255,79,216,.1); padding:1px 8px; font-size:.8em; font-weight:bold; letter-spacing:2px;">★ INITIATIVE</span>' : '')
                 + ' <b style="color:#fff; letter-spacing:2px; font-size:1.15em;">' + esc(String(m.systeme).toUpperCase()) + '</b>' + (etat && etat.controlling ? '<span style="color:#888;">· ' + esc(etat.controlling.toUpperCase()) + (etat.etat ? ' · ' + (ETAT[etat.etat] || esc(etat.etat)).toUpperCase() : '') + '</span>' : '') + '</div>'
@@ -128,7 +141,8 @@
                 + (m.briefing ? ' · « ' + esc(m.briefing) + ' »' : '') + '</div>'
                 + '<div class="bgs-paysage"><div class="bgs-col-effort"><div class="bgs-cadre"><div class="bgs-cadre-t">EFFORT</div>'
                 + '<div class="bgs-hero" style="border-color:' + c + '; margin-top:0;"><div class="h1"><span>MÉRITES DE L\'ESCADRON</span><b style="color:#fff;">' + fmt(total) + ' · ≈ ' + fmt(cp(total)) + ' CP</b></div><div class="h2"><span>TA PART</span><b style="color:' + c + ';">' + part + ' %</b></div>'
-                + '<div class="jgh"><i style="width: 100%; opacity: 0.5; background: ' + c + ';"></i><i style="width: ' + part + '%; background: ' + c + '; box-shadow: 0 0 9px ' + c + ', 0 0 2px ' + c + ', inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div></div>'
+                + '<div class="jgh"><i style="width: ' + pctObj + '%; opacity: 0.5; background: ' + c + ';"></i><i style="width: ' + myObj + '%; background: ' + c + '; box-shadow: 0 0 9px ' + c + ', 0 0 2px ' + c + ', inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div></div>'
+                + (pl > 0 ? '<div style="margin-top:8px; font-size:.88em; color:#bbb;">OBJECTIF FIXÉ PAR LE COMMANDEMENT : <b style="color:#fff;">' + fmt(pl) + ' CP</b> · réalisé ≈ <b style="color:' + c + ';">' + fmt(cpFait) + ' CP</b> (' + pctObj + ' %)' + (cpFait >= pl ? ' · <b style="color:#2fe07a;">objectif atteint</b>' : '') + '<div style="color:#777; font-size:.85em; margin-top:2px;">Les mérites continuent d\'être enregistrés au-delà. CP = mérites ÷ 4 (estimation).</div></div>' : '')
                 + '<div style="color:#999; font-size:.8em; margin-top:8px;">Depuis le dernier relevé (jeudi 07:00 UTC) : <b style="color:#fff;">' + fmt(m.merites_cycle) + ' mérites</b> · ≈ ' + fmt(cp(m.merites_cycle)) + ' CP</div>'
                 + '<div class="bgs-sec" style="margin-top:14px;">MÉRITES PAR ORIGINE <span style="color:#777; letter-spacing:0;">· « non identifiée » : gains que le jeu ne rattache à aucune action</span></div><div style="display:flex; flex-direction:column; gap:7px;">' + lignesOrig + '</div>'
                 + '<div class="bgs-dossier" style="border-color:' + c + '55; margin-top:14px;"><div class="tete" onclick="bgsToggleDossier(this)"><span style="color:' + c + '; letter-spacing:2px; font-weight:bold;">PARTICIPANTS</span><span style="color:#888; font-size:.85em;">' + (m.nb_pilotes || 0) + ' pilote' + (m.nb_pilotes > 1 ? 's' : '') + ' · tu pèses ' + part + ' %</span><span class="fl" style="color:' + c + ';">▼</span></div><div class="corps" style="display:none;">' + pil + '</div></div>'
@@ -147,8 +161,8 @@
         // modifier une mission Powerplay (commandement) : type et consigne
         editer: function (id) {
             var m = trouver(id); if (!m) return;
-            window.edteamCampagnes.ouvrirEditionMission({ titre: 'MODIFIER LA MISSION POWERPLAY · ' + String(m.systeme).toUpperCase(), sous: 'Le système ne change pas : pour un autre système, créez une nouvelle mission.', types: TYPE, type: m.type_pp, briefing: m.briefing,
-                enregistrer: async function (type, briefing) { var r = await db().rpc('modifier_mission_pp', { p_id: Number(id), p_type: type, p_briefing: briefing || null }); return r.error ? (r.error.message || 'Échec.') : null; } });
+            window.edteamCampagnes.ouvrirEditionMission({ titre: 'MODIFIER LA MISSION POWERPLAY · ' + String(m.systeme).toUpperCase(), sous: 'Le système ne change pas : pour un autre système, créez une nouvelle mission.', types: TYPE, type: m.type_pp, briefing: m.briefing, plafondActif: true, plafond: m.plafond_cp,
+                enregistrer: async function (type, briefing, plafond) { var args = { p_id: Number(id), p_type: type, p_briefing: briefing || null }; if (plafond != null || m.plafond_cp != null) args.p_plafond_cp = plafond; var r = await db().rpc('modifier_mission_pp', args); return r.error ? (r.error.message || 'Échec.') : null; } });
         },
         // supprimer une mission Powerplay (commandement) : les merites deja releves restent en soutien libre
         supprimer: async function (id) {
@@ -206,17 +220,20 @@
             var camp = parseInt((document.getElementById('cmd-campagne') || {}).value || '0', 10) || 0;
             var sys = (document.getElementById('cmd-pp-systeme') || {}).value || '';
             var brief = ((document.getElementById('cmd-pp-briefing') || {}).value || '').trim();
+            var plafondTxt = ((document.getElementById('cmd-pp-plafond') || {}).value || '').trim(), plafond = plafondTxt === '' ? null : Math.round(Number(plafondTxt));
             var libelle = 'TRANSMETTRE LA MISSION POWERPLAY';
             if (!camp) { btn.innerText = 'ERREUR : CHOISISSEZ UNE CAMPAGNE'; setTimeout(function () { btn.innerText = libelle; }, 2000); return; }
             if (sys.trim().length < 2) { btn.innerText = 'ERREUR : SYSTÈME REQUIS'; setTimeout(function () { btn.innerText = libelle; }, 2000); return; }
+            if (plafond !== null && (!(plafond >= 1) || plafond > 10000000)) { btn.innerText = 'ERREUR : PLAFOND DE 1 À 10 000 000'; setTimeout(function () { btn.innerText = libelle; }, 2400); return; }
             btn.innerText = 'TRANSMISSION…'; btn.style.pointerEvents = 'none';
-            var r = await db().rpc('creer_mission_pp', { p_campagne_id: camp, p_systeme: sys.trim().toUpperCase(), p_type: typeCmd, p_briefing: brief || null });
+            var argsC = { p_campagne_id: camp, p_systeme: sys.trim().toUpperCase(), p_type: typeCmd, p_briefing: brief || null }; if (plafond !== null) argsC.p_plafond_cp = plafond;
+            var r = await db().rpc('creer_mission_pp', argsC);
             btn.style.pointerEvents = 'auto';
             if (r.error) { console.error(r.error); var msg = String(r.error.message || 'Refusé.'); btn.innerText = msg.length > 60 ? 'REFUSÉ : VOIR LA CONSOLE' : 'REFUSÉ : ' + msg.toUpperCase(); setTimeout(function () { btn.innerText = libelle; }, 3200); return; }
             if (typeof sonSucces === 'function') sonSucces();
             btn.innerText = 'MISSION DÉPLOYÉE';
             setTimeout(function () {
-                document.getElementById('cmd-pp-systeme').value = ''; document.getElementById('cmd-pp-briefing').value = '';
+                document.getElementById('cmd-pp-systeme').value = ''; document.getElementById('cmd-pp-briefing').value = ''; var pfe = document.getElementById('cmd-pp-plafond'); if (pfe) pfe.value = '';
                 btn.innerText = libelle;
                 if (typeof fermerModal === 'function') fermerModal('modal-commandement');
                 window.edteamCampagnes.rafraichir();
