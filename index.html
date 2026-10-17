@@ -46,7 +46,10 @@
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
-        if (window.innerWidth < 768) {
+        // sauf choix « Version ordinateur » fait depuis les reglages du mobile (tablettes etroites)
+        var versionPc = false;
+        try { versionPc = localStorage.getItem("edteam_version_pc") === "1"; } catch (e) {}
+        if (window.innerWidth < 768 && !versionPc) {
             window.location.replace("mobile.html");
         }
     </script>

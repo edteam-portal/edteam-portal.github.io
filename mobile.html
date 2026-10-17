@@ -1107,6 +1107,7 @@
             <div class="xc click xlink" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')"><span class="e">🎧</span><span style="font-size: 0.85em;">Rejoindre le Discord</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc xlink" style="cursor: default;"><span class="e">🔊</span><span style="font-size: 0.85em;">Sons de l'application</span><span class="chev"><button type="button" data-son-toggle class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; padding: 8px 14px; display: flex; align-items: center; justify-content: center; border-radius: 10px;"></button></span></div>
             <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; if (window.EdAnalytics) EdAnalytics.reouvrir()"><span class="e">🍪</span><span style="font-size: 0.85em;">Mesure d'audience (cookies)</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
+            <div class="xc click xlink" onclick="versionOrdinateur()"><span class="e">💻</span><span style="font-size: 0.85em;">Version ordinateur<br><span class="xmut" style="font-size: 0.8em;">pour tablette ou grand écran</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <button class="m-btn" style="background: transparent; border-color: #555; color: #999; font-size: 0.8em; padding: 13px; border-radius: 13px; margin-top: 4px;" onclick="deconnexionMobile()">DÉCONNEXION</button>
         </div>
     </div>
@@ -1357,6 +1358,12 @@
         window.addEventListener('edteam-photos', () => { if (typeof xChargerSemaine === 'function' && profilCommandant) { try { xChargerSemaine(false); } catch (e) {} } });
         window.addEventListener('edteam-photos', () => { if (typeof escRendre === 'function' && typeof ESC !== 'undefined' && ESC.liste && ESC.liste.length) { try { escRendre(); } catch (e) {} } });
 
+        // Version ordinateur : le QG (index.html) renvoie les ecrans de moins de 768 px ici ; ce choix, memorise dans le navigateur, l'en empeche. Arriver ici le retire (on veut alors le mobile).
+        try { localStorage.removeItem("edteam_version_pc"); } catch (e) {}
+        function versionOrdinateur() {
+            try { localStorage.setItem("edteam_version_pc", "1"); } catch (e) {}
+            window.location.href = "index.html";
+        }
         async function deconnexionMobile() {
             await supabaseApp.auth.signOut();
             location.reload();
