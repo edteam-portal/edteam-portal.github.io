@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-interception-bug', date: '2026-10-17T19:43:00Z', type: 'CORRIGE',
+        titre: 'Tableau de bord : interception avec des passagers sans annonce',
+        texte: 'Certaines interceptions par un PNJ ne déclenchaient pas l’annonce du pilote ni les cris des passagers pendant le mini-jeu, car le jeu n’envoie pas toujours de message de début. Le plugin détecte désormais l’interception directement dans l’état du vaisseau : l’annonce et les cris partent à chaque interception avec des passagers à bord, que l’interdicteur soit un PNJ ou un joueur.',
+        important: false, action: 'Redémarrez EDMC (plugin 2.37)'
+    },
+    {
         id: '2026-10-son-vente-marche', date: '2026-10-17T17:32:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : annonce à la vente au marché',
         texte: 'Quand vous vendez des marchandises au marché d’une station, avec ou sans mission, une annonce appelle le responsable du marché au hangar (en anglais). Quelques secondes plus tard, le responsable de la soute du vaisseau vous annonce à l’interphone que tout est vendu, avec de temps en temps une petite blague. Un seul son par vente groupée.',

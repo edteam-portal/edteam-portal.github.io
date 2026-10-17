@@ -243,7 +243,7 @@
     }
     function evtJouer(type, force) {
         const maintenant = Date.now(), soute = type === "chargement" || type === "dechargement";
-        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : type === "applaudissements" || type === "vente" ? 60000 : 15000)) return;     // pas deux fois de suite
+        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : type === "applaudissements" || type === "vente" || type === "interception" ? 60000 : 15000)) return;     // pas deux fois de suite
         const c = evtCtx(); if (!c) return;
         EVT.der[type] = maintenant;
         if (type === "interception") {     // debut de l'interception (mini-jeu) : annonce du pilote en anglais (voix-interception-N), cris des passagers en dessous
