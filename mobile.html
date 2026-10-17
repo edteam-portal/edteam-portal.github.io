@@ -517,6 +517,8 @@
         .modal-overlay > .card { width: 100% !important; max-width: 560px !important; max-height: 90vh !important; border-radius: 26px 26px 0 0 !important; border-bottom: 0 !important; padding-bottom: env(safe-area-inset-bottom); animation: xMonte 0.26s ease-out; background: linear-gradient(180deg, #17100a, #0b0806) !important; margin: 0 auto; }
         .modal-overlay > .card::before { content: ""; display: block; width: 42px; height: 4px; border-radius: 3px; background: #4a3f34; margin: 9px auto 2px; flex: none; }
         #modal-budget-livre > .card { max-height: 94vh !important; }
+        #modal-reglages > .card { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }     /* la feuille des reglages defile quand elle depasse l'ecran */
+        #modal-reglages > .card > * { flex: none; }
 
         #x-chiffres > summary::-webkit-details-marker { display: none; }
 
