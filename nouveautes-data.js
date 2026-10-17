@@ -7,8 +7,8 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-annonce-saut', date: '2026-10-17T11:35:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : annonce aux passagers au saut hyperespace',
-        texte: 'Quand vous lancez un saut vers un autre système avec une mission de passagers ou de tourisme en cours, une annonce de cabine prévient les passagers de s’accrocher (et leur rappelle les sacs à leur disposition), avec une alarme légère en fond. Trois annonces en anglais, tirées au hasard. Elle passe avant toutes les autres : l’annonce de cabine en cours est coupée. Les annonces d’embarquement et de débarquement passent elles aussi avant celles de la cabine en vol, et les sons d’embarquement et de débarquement partent désormais dès que la mission est prise ou rendue, sans attendre.',
-        important: true, action: 'Redémarrez EDMC (plugin 2.33)'
+        texte: 'Dès que vous lancez la charge du FSD pour un saut vers un autre système, avec une mission de passagers ou de tourisme en cours, une annonce de cabine prévient les passagers de s’accrocher (et leur rappelle les sacs à leur disposition), avec une alarme légère en fond. Trois annonces en anglais, tirées au hasard. Elle passe avant toutes les autres : l’annonce de cabine en cours est coupée. Les annonces d’embarquement et de débarquement passent elles aussi avant celles de la cabine en vol, et les sons d’embarquement et de débarquement partent désormais dès que la mission est prise ou rendue, sans attendre.',
+        important: true, action: 'Redémarrez EDMC (plugin 2.34)'
     },
     {
         id: '2026-10-mobile-engagement', date: '2026-10-16T22:11:50Z', type: 'AMELIORE',
