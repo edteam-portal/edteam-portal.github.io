@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-son-vente-marche', date: '2026-10-17T17:32:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : annonce à la vente au marché',
+        texte: 'Quand vous vendez des marchandises au marché d’une station, avec ou sans mission, une annonce appelle le responsable du marché au hangar (en anglais). Quelques secondes plus tard, le responsable de la soute du vaisseau vous annonce à l’interphone que tout est vendu, avec de temps en temps une petite blague. Un seul son par vente groupée.',
+        important: false, action: 'Redémarrez EDMC (plugin 2.36)'
+    },
+    {
         id: '2026-10-sons-interception', date: '2026-10-17T17:07:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : interception avec des passagers à bord',
         texte: 'Quand un PNJ vous intercepte en supercruise avec une mission de passagers ou de tourisme en cours, une annonce du pilote (en anglais) demande aux passagers de rester calmes pendant le mini-jeu, avec leurs cris en fond. Si vous vous échappez, un soupir de soulagement puis une annonce vous confirme que l’on est en sécurité et que l’on peut de nouveau circuler dans le vaisseau. Les interceptions par un joueur ne déclenchent que le son de fin.',

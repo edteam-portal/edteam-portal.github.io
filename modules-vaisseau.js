@@ -243,7 +243,7 @@
     }
     function evtJouer(type, force) {
         const maintenant = Date.now(), soute = type === "chargement" || type === "dechargement";
-        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : type === "applaudissements" ? 60000 : 15000)) return;     // pas deux fois de suite
+        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : type === "applaudissements" || type === "vente" ? 60000 : 15000)) return;     // pas deux fois de suite
         const c = evtCtx(); if (!c) return;
         EVT.der[type] = maintenant;
         if (type === "interception") {     // debut de l'interception (mini-jeu) : annonce du pilote en anglais (voix-interception-N), cris des passagers en dessous
@@ -258,6 +258,17 @@
                     AMB.annFin = t0 + 0.3 + v.duration;
                     AMB.annT = Math.max(AMB.annT, Date.now() + (v.duration + 25) * 1000);
                 }
+            });
+            return;
+        }
+        if (type === "vente") {     // vente au marche de la station : appel du responsable du marche (voix-marche-N), puis le responsable de la soute a l'interphone (voix-vendu-N, ou voix-vendu-blague-N une fois sur quatre)
+            Promise.all([evtVoix("voix-marche", c), evtVoix("voix-vendu", c), evtVoix("voix-vendu-blague", c), evtCharge("annonce-1", c)]).then(([mq, vd, bl, refA]) => {
+                const niv = v => evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), choix = L => L[Math.floor(Math.random() * L.length)];
+                let t = c.currentTime + 0.4;
+                if (mq.length) { const m = choix(mq), reste = annoncesCoupe(c, 2); t = Math.max(t, reste + 0.5); ambAnnonceJoue(c, m, t, niv(m), EVT.out, 0.7, 2); t += m.duration + rnd(3, 5); }
+                const L = bl.length && (!vd.length || Math.random() < 0.25) ? bl : vd;
+                if (L.length) { const v = choix(L); ambAnnonceJoue(c, v, t, niv(v), EVT.out, 0.7, 2); t += v.duration; }
+                AMB.annT = Math.max(AMB.annT || 0, Date.now() + (t - c.currentTime + 20) * 1000);
             });
             return;
         }
@@ -376,6 +387,9 @@
             const pax = new Set(act.filter(estPassagers).map(m => String(m.id)));
             const tonnes = ((S && S.soute && S.soute.items) || []).reduce((a, x) => a + (Number(x.q) || 0), 0);
             const termines = new Set(fin.map(x => String(x.id)));
+            // ventes au marche : lignes 'V' du registre pas encore vues (a la premiere lecture, on memorise seulement)
+            const reg = (S && S.registre) || [], clefReg = x => x.t + "|" + x.n + "|" + x.q, vus = EVT.regVus = EVT.regVus || new Set();
+            const ventes = reg.filter(x => x && x.k === "V" && !vus.has(clefReg(x))); reg.forEach(x => { if (x) vus.add(clefReg(x)); });
             const prev = EVT.prev; EVT.prev = { pax, tonnes, termines, amarre: !!(S && S.amarre) };
             const sautT = (S && S.saut && S.saut.t) || "", sautVu = EVT.sautVu; EVT.sautVu = sautT;
             if (!prev) return;     // premiere lecture : on memorise seulement
@@ -390,11 +404,12 @@
             // marchandises transferees VERS le vaisseau (soute du Rhino : on est pose, pas amarre) : meme son de chargement que l'ajout a quai (le delai de 45 s evite le doublon)
             const chT = (S && S.chargement && S.chargement.t) || "", chVu = EVT.chargVu; EVT.chargVu = chT;
             if (chT && chT !== chVu) { const age = Date.now() - Date.parse(chT); if (age > -20000 && age < 60000) { EVT.log.push({ t: new Date().toISOString(), type: "chargement", raison: "transfert " + (S.chargement.n || "") + " t" }); evtJouer("chargement"); } }
+            const trace = (type, raison) => { const l = { t: new Date().toISOString(), type, raison }; EVT.log.push(l); if (EVT.log.length > 50) EVT.log.shift(); try { console.info("[sons]", type, raison); } catch (e) {} };
+            if (ventes.some(x => { const a = Date.now() - Date.parse(x.t); return a > -20000 && a < 120000; })) { trace("vente", ventes.length + " ligne(s) de vente"); evtJouer("vente"); }
             // balise de tourisme scannee avec des passagers a bord : appareils photo + annonce d'arrivee
             const toT = (S && S.tourisme && S.tourisme.t) || "", toVu = EVT.tourVu; EVT.tourVu = toT;
             if (toT && toT !== toVu) { const age = Date.now() - Date.parse(toT); if (age > -20000 && age < 60000) { EVT.log.push({ t: new Date().toISOString(), type: "balise", raison: S.tourisme.sys || "" }); evtJouer("balise"); } }
             const recent = ts => { const t = Date.parse(ts); return !isNaN(t) && Date.now() - t < 240000; };     // une mission retrouvee dans d'anciens journaux n'est pas une nouvelle prise
-            const trace = (type, raison) => { const l = { t: new Date().toISOString(), type, raison }; EVT.log.push(l); if (EVT.log.length > 50) EVT.log.shift(); try { console.info("[sons]", type, raison); } catch (e) {} };
             const prises = act.filter(m => estPassagers(m) && !prev.pax.has(String(m.id)) && recent(m.t) && !EVT.vus.has("e" + m.id));
             if (prises.length) { prises.forEach(m => EVT.vus.add("e" + m.id)); trace("embarquement", "mission " + prises.map(m => m.id).join(",")); evtJouer("embarquement"); }
             const rendues = fin.filter(x => !prev.termines.has(String(x.id)) && prev.pax.has(String(x.id)) && recent(x.t) && !EVT.vus.has("d" + x.id));
