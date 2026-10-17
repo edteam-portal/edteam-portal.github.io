@@ -158,8 +158,21 @@
         }
     }
     // une annonce passee par l'« interphone de vaisseau » (utilisee par les annonces de cabine ET par les annonces d'embarquement / de debarquement) : t0 = instant de depart, dest = sortie
-    function ambAnnonceJoue(c, b, t0, niveau, dest, fondu) {
-        const src = c.createBufferSource(), g = c.createGain();
+    // annonces en cours ou programmees, avec PRIORITE : 1 = annonce de la cabine en vol, 2 = embarquement / debarquement, 3 = saut hyperespace. Une annonce coupe (fondu tres court) toutes celles de priorite
+    // INFERIEURE ; chaque annonce a son propre « bus » pour pouvoir etre coupee d'un bloc. annoncesCoupe renvoie l'instant (horloge audio) ou se termine la derniere annonce restante.
+    const ANN_ACTIVES = [];
+    function annoncesCoupe(c, prio) {
+        const t = c.currentTime; let reste = 0;
+        ANN_ACTIVES.splice(0).forEach(a => {
+            if (a.fin < t) return;
+            if (a.prio >= prio) { ANN_ACTIVES.push(a); reste = Math.max(reste, a.fin); return; }
+            try { a.bus.gain.cancelScheduledValues(t); a.bus.gain.setValueAtTime(a.bus.gain.value, t); a.bus.gain.linearRampToValueAtTime(0, t + 0.12); a.src.stop(t + 0.2); } catch (e) {}
+        });
+        return reste;
+    }
+    function ambAnnonceJoue(c, b, t0, niveau, destSortie, fondu, prio) {
+        const bus = c.createGain(), dest = bus; bus.connect(destSortie); ANN_ACTIVES.push({ bus, src: null, fin: t0 + b.duration + 0.5, prio: prio || 1 });
+        const src = c.createBufferSource(), g = c.createGain(); ANN_ACTIVES[ANN_ACTIVES.length - 1].src = src;
         src.buffer = b; g.gain.value = niveau;
         // effet « interphone de vaisseau » : bande telephonique, legere saturation, souffle de fond, claquements de debut et de fin
         const hp = c.createBiquadFilter(), lp = c.createBiquadFilter(), ws = c.createWaveShaper(), cv = new Float32Array(257); hp.type = "highpass"; hp.frequency.value = 380; lp.type = "lowpass"; lp.frequency.value = 3300; hp.Q.value = 0.9;
@@ -246,12 +259,52 @@
             if (po) { evtDoux(c, po, tPortes, nv(po, EVT_NIVEAU.portes), 1.8); tPas = tPortes + Math.min(po.duration * 0.5, 2.5); } else tPas = tPortes;     // les gens avancent pendant l'ouverture
             if (pa) evtDoux(c, pa, tPas, nv(pa, EVT_NIVEAU.pas), 5);
             if (vx.length) {
-                const v = vx[Math.floor(Math.random() * vx.length)], tVoix = Math.max(tPas + 1.5, (AMB.annFin || 0) + 0.6);     // jamais par-dessus une annonce de la boucle deja en train de parler
-                ambAnnonceJoue(c, v, tVoix, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7);
+                const reste = annoncesCoupe(c, 2);     // prioritaire sur les annonces de la cabine en vol (coupees) ; une annonce de saut hyperespace en cours, elle, passe avant : on attend sa fin
+                AMB.annFin = reste;
+                const v = vx[Math.floor(Math.random() * vx.length)], tVoix = Math.max(tPas + 1.5, reste + 0.6);
+                ambAnnonceJoue(c, v, tVoix, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7, 2);
                 AMB.annT = Math.max(AMB.annT || 0, Date.now() + (tVoix - c.currentTime + v.duration + 20) * 1000);     // la boucle reprend ses annonces 20 s apres la fin de celle-ci
             }
         });
     }
+    // ---- ANNONCE DE SAUT HYPERESPACE (missions de passagers / tourisme seulement) : l'interphone previent les passagers pendant les ~18 s du saut, avec une alarme legere en fond.
+    // Fichiers optionnels : sons/voix-saut-1 ... 4 (annonce) et sons/saut-alarme (boucle). Sans voix enregistree : voix du navigateur (francais) ; sans alarme : alarme synthetisee.
+    EVT_NIVEAU.alarme = EVT_NIVEAU.alarme || 0.22;     // reglable : tbmNiveaux.alarme = 0.15
+    const SAUT_TEXTE = "Mesdames et messieurs, le vaisseau va entrer en saut hyperespace. Veuillez vous accrocher. Si vous avez envie de vomir, des sacs sont à votre disposition devant vous.";
+    function evtSaut(force) {
+        const maintenant = Date.now();
+        if (!force && EVT.der.saut && maintenant - EVT.der.saut < 25000) return;
+        const c = evtCtx(); if (!c) return;
+        EVT.der.saut = maintenant;
+        annoncesCoupe(c, 3);     // PRIORITAIRE : toute annonce en cours (cabine, embarquement, debarquement) est coupee
+        try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+        AMB.annFin = 0;
+        AMB.annT = Math.max(AMB.annT || 0, maintenant + 40000);     // pas d'annonce de la boucle de cabine pendant celle-ci
+        Promise.all([evtVoix("voix-saut", c), evtCharge("saut-alarme", c), evtCharge("ambiance-cabine", c), evtCharge("annonce-1", c)]).then(([vx, al, refC, refA]) => {
+            const t0 = c.currentTime + 0.1; let duree = 12;
+            if (vx.length) {
+                const v = vx[Math.floor(Math.random() * vx.length)], tVoix = t0 + 0.3;     // immediat : aucune attente derriere une autre annonce
+                ambAnnonceJoue(c, v, tVoix, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7, 3);
+                duree = tVoix - t0 + v.duration; AMB.annFin = tVoix + v.duration;
+            } else if (window.speechSynthesis) {
+                try { const u = new SpeechSynthesisUtterance(SAUT_TEXTE); u.lang = "fr-FR"; u.rate = 0.95; u.volume = 0.85; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); duree = 14; } catch (e) {}
+            }
+            AMB.annT = Math.max(AMB.annT || 0, Date.now() + (duree + 20) * 1000);
+            // alarme legere sous toute l'annonce : fondu a l'entree et a la sortie
+            const fin = t0 + duree + 0.8, g = c.createGain(); g.connect(EVT.out);
+            const niveau = al ? evtNiveau(al, refC, AMB_NIVEAU.cabine, EVT_NIVEAU.alarme) : 0.045 * (EVT_NIVEAU.alarme / 0.22);
+            g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(niveau, t0 + 0.6); g.gain.setValueAtTime(niveau, fin - 1.2); g.gain.linearRampToValueAtTime(0.0001, fin);
+            if (al) { const s = c.createBufferSource(); s.buffer = al; s.loop = true; s.connect(g); s.start(t0); s.stop(fin + 0.1); }
+            else {     // pulsation douce (deux notes alternees, 0,9 s), sans bord dur
+                const o = c.createOscillator(), m = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
+                o.type = "sine"; o.frequency.setValueAtTime(520, t0);
+                for (let t = t0; t < fin; t += 1.8) { o.frequency.setValueAtTime(520, t); o.frequency.setValueAtTime(390, t + 0.9); }
+                m.gain.value = 0.5; lfo.frequency.value = 1.1; lfo.type = "sine"; lg.gain.value = 0.5; lfo.connect(lg); lg.connect(m.gain);
+                o.connect(m); m.connect(g); o.start(t0); lfo.start(t0); o.stop(fin + 0.1); lfo.stop(fin + 0.1);
+            }
+        });
+    }
+    window.tbmSonSaut = evtSaut;     // essai a la main depuis la console : tbmSonSaut(true)
     window.tbmSonEvenement = evtJouer;     // essai a la main depuis la console : tbmSonEvenement("embarquement", true)
     // appelee a chaque nouvel etat de la session (S) : embarquement = une mission avec passagers vient d'etre PRISE ; debarquement = une mission avec passagers vient d'etre TERMINEE ;
     // chargement = la soute passe de 0 a 1 t ou plus, dechargement = elle perd au moins 1 t, les deux seulement a quai (en vol, minage ou largage ne sonnent pas)
@@ -262,7 +315,10 @@
             const tonnes = ((S && S.soute && S.soute.items) || []).reduce((a, x) => a + (Number(x.q) || 0), 0);
             const termines = new Set(fin.map(x => String(x.id)));
             const prev = EVT.prev; EVT.prev = { pax, tonnes, termines };
+            const sautT = (S && S.saut && S.saut.t) || "", sautVu = EVT.sautVu; EVT.sautVu = sautT;
             if (!prev) return;     // premiere lecture : on memorise seulement
+            // saut hyperespace en cours avec des passagers a bord (le plugin ne renseigne 'saut' que dans ce cas) : nouvel horodatage ET recent (tolerance si l'horloge de la page differe un peu)
+            if (sautT && sautT !== sautVu && pax.size) { const age = Date.now() - Date.parse(sautT); if (age > -20000 && age < 40000) { EVT.log.push({ t: new Date().toISOString(), type: "saut", raison: S.saut.sys || "" }); evtSaut(); } }
             const recent = ts => { const t = Date.parse(ts); return !isNaN(t) && Date.now() - t < 240000; };     // une mission retrouvee dans d'anciens journaux n'est pas une nouvelle prise
             const trace = (type, raison) => { const l = { t: new Date().toISOString(), type, raison }; EVT.log.push(l); if (EVT.log.length > 50) EVT.log.shift(); try { console.info("[sons]", type, raison); } catch (e) {} };
             const prises = act.filter(m => estPassagers(m) && !prev.pax.has(String(m.id)) && recent(m.t) && !EVT.vus.has("e" + m.id));

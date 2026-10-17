@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-annonce-saut', date: '2026-10-17T11:35:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : annonce aux passagers au saut hyperespace',
+        texte: 'Quand vous lancez un saut vers un autre système avec une mission de passagers ou de tourisme en cours, une annonce de cabine prévient les passagers de s’accrocher (et leur rappelle les sacs à leur disposition), avec une alarme légère en fond. Trois annonces en anglais, tirées au hasard. Elle passe avant toutes les autres : l’annonce de cabine en cours est coupée. Les annonces d’embarquement et de débarquement passent elles aussi avant celles de la cabine en vol, et les sons d’embarquement et de débarquement partent désormais dès que la mission est prise ou rendue, sans attendre.',
+        important: true, action: 'Redémarrez EDMC (plugin 2.33)'
+    },
+    {
         id: '2026-10-mobile-engagement', date: '2026-10-16T22:11:50Z', type: 'AMELIORE',
         titre: 'Mobile : campagnes et onglet Engagement refaits',
         texte: 'Sur mobile, les campagnes ont le même langage que sur PC : le type de la campagne en gros, une ligne par mission dont le fond est la barre de progression (votre part en lueur néon), les guerres et élections mises en avant avec leur score, les objectifs de CP des missions Powerplay, et un toucher pour replier une campagne. L’onglet BGS devient Engagement : vos mérites Powerplay à côté de vos points BGS, le podium de l’escadron cette semaine et, d’un toucher, le classement complet. La page de présentation du site est aussi refaite avec de nouveaux visuels.',
