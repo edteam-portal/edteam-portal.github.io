@@ -346,8 +346,10 @@
     const SAUT_TEXTE = "Mesdames et messieurs, le vaisseau va entrer en saut hyperespace. Veuillez vous accrocher. Si vous avez envie de vomir, des sacs sont à votre disposition devant vous.";
     function evtSaut(force) {
         const maintenant = Date.now();
-        if (!force && EVT.der.saut && maintenant - EVT.der.saut < 25000) return;
-        const c = evtCtx(); if (!c) return;
+        const ignore = raison => { EVT.log.push({ t: new Date().toISOString(), type: "saut-ignore", raison }); try { console.info("[sons] saut ignore :", raison); } catch (e) {} };
+        if (!force && EVT.der.saut && maintenant - EVT.der.saut < 25000) { ignore("moins de 25 s apres la precedente"); return; }
+        const c = evtCtx(); if (!c) { ignore("son indisponible (pas de clic sur la page, ambiance coupee ou onglet masque)"); return; }
+        if (c.state !== "running") ignore("contexte audio " + c.state + " (reprise demandee)");
         EVT.der.saut = maintenant;
         annoncesCoupe(c, 3);     // PRIORITAIRE : toute annonce en cours (cabine, embarquement, debarquement) est coupee
         try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
@@ -394,7 +396,11 @@
             const sautT = (S && S.saut && S.saut.t) || "", sautVu = EVT.sautVu; EVT.sautVu = sautT;
             if (!prev) return;     // premiere lecture : on memorise seulement
             // saut hyperespace en cours avec des passagers a bord (le plugin ne renseigne 'saut' que dans ce cas) : nouvel horodatage ET recent (tolerance si l'horloge de la page differe un peu)
-            if (sautT && sautT !== sautVu && pax.size) { const age = Date.now() - Date.parse(sautT); if (age > -20000 && age < 40000) { EVT.log.push({ t: new Date().toISOString(), type: "saut", raison: S.saut.sys || "" }); evtSaut(); } }
+            if (sautT && sautT !== sautVu) {
+                const age = Date.now() - Date.parse(sautT);
+                if (pax.size && age > -20000 && age < 40000) { EVT.log.push({ t: new Date().toISOString(), type: "saut", raison: S.saut.sys || "" }); evtSaut(); }
+                else EVT.log.push({ t: new Date().toISOString(), type: "saut-ignore", raison: pax.size ? "etat recu trop ancien ou horloge decalee (age " + Math.round(age / 1000) + " s)" : "aucune mission de passagers dans l'etat recu" });
+            }
             // interception en supercruise avec des passagers a bord : 'debut' (mini-jeu) = annonce + cris ; 'echappe' = soulagement ; 'capture' = rien de plus (les cris ont deja sonne au debut)
             const itT = (S && S.interception && S.interception.t) || "", itVu = EVT.interVu; EVT.interVu = itT;
             if (itT && itT !== itVu) {
