@@ -205,7 +205,7 @@
     // Embarquement ET debarquement : signal de quai, portes, pas, puis une annonce au hasard (voix-bienvenue-N a l'embarquement, voix-aurevoir-N au debarquement).
     const EVT = { p: {}, out: null, der: {}, prev: null, vus: new Set(), log: window.tbmSonsLog = window.tbmSonsLog || [] };     // vus = missions deja annoncees (jamais deux fois la meme) ; log = trace des declenchements
     // facteurs RELATIFS : 1 = meme volume que la boucle de reference (cabine pour le signal, les portes et les pas ; annonces de cabine pour les voix ; depot pour les caisses)
-    const EVT_NIVEAU = window.tbmNiveaux = window.tbmNiveaux || { signal: 1, portes: 0.8, pas: 0.5, voix: 1, soute: 1 };     // reglable a chaud dans la console : tbmNiveaux.signal = 0.7
+    const EVT_NIVEAU = window.tbmNiveaux = window.tbmNiveaux || { signal: 1, portes: 0.8, pas: 0.5, voix: 1, soute: 1, applaudissements: 1, cris: 1.2, echappe: 1, photos: 1.3 };     // reglable a chaud dans la console : tbmNiveaux.signal = 0.7
     function evtCtx() {
         if (!AMB.geste && ambActive() && !document.hidden) ambIndice(true);     // son bloque faute de clic : on previent
         if (!AMB.geste || !ambActive() || document.hidden) return null;     // meme regles que l'ambiance : apres un clic, onglet visible, bouton ON
@@ -243,11 +243,73 @@
     }
     function evtJouer(type, force) {
         const maintenant = Date.now(), soute = type === "chargement" || type === "dechargement";
-        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : 15000)) return;     // pas deux fois de suite
+        if (!force && EVT.der[type] && maintenant - EVT.der[type] < (soute ? 45000 : type === "applaudissements" ? 60000 : 15000)) return;     // pas deux fois de suite
         const c = evtCtx(); if (!c) return;
         EVT.der[type] = maintenant;
+        if (type === "interception") {     // debut de l'interception (mini-jeu) : annonce du pilote en anglais (voix-interception-N), cris des passagers en dessous
+            annoncesCoupe(c, 3);     // prioritaire sur toute annonce en cours
+            AMB.annT = Math.max(AMB.annT || 0, maintenant + 60000);
+            Promise.all([evtVoix("voix-interception", c), evtCharge("interception-capture-1", c), evtCharge("ambiance-cabine", c), evtCharge("annonce-1", c)]).then(([vx, cr, refC, refA]) => {
+                const t0 = c.currentTime + 0.2;
+                if (cr) evtDoux(c, cr, t0, evtNiveau(cr, refC, AMB_NIVEAU.cabine, EVT_NIVEAU.cris), 2.5);
+                if (vx.length) {
+                    const v = vx[Math.floor(Math.random() * vx.length)];
+                    ambAnnonceJoue(c, v, t0 + 0.3, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7, 3);
+                    AMB.annFin = t0 + 0.3 + v.duration;
+                    AMB.annT = Math.max(AMB.annT, Date.now() + (v.duration + 25) * 1000);
+                }
+            });
+            return;
+        }
+        if (type === "balise") {     // balise de tourisme scannee : appareils photo et passagers excites (balise-photos-N, plus forts que l'ambiance de vol), puis annonce d'arrivee (voix-balise-N)
+            annoncesCoupe(c, 3);
+            AMB.annT = Math.max(AMB.annT || 0, maintenant + 60000);
+            Promise.all([evtVoix("balise-photos", c), evtVoix("voix-balise", c), evtCharge("ambiance-cabine", c), evtCharge("annonce-1", c)]).then(([ph, vx, refC, refA]) => {
+                const t0 = c.currentTime + 0.2;
+                if (ph.length) { const b = ph[Math.floor(Math.random() * ph.length)]; evtDoux(c, b, t0, evtNiveau(b, refC, AMB_NIVEAU.cabine, EVT_NIVEAU.photos), 3); }
+                if (vx.length) {
+                    const v = vx[Math.floor(Math.random() * vx.length)], tv = t0 + 1.5;
+                    ambAnnonceJoue(c, v, tv, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7, 3);
+                    AMB.annFin = tv + v.duration;
+                    AMB.annT = Math.max(AMB.annT || 0, Date.now() + (tv - c.currentTime + v.duration + 25) * 1000);
+                }
+            });
+            return;
+        }
+        if (type === "echappe") {     // interception reussie : soulagement des passagers
+            annoncesCoupe(c, 3);     // l'annonce du debut (si elle dure encore) laisse la place a celle-ci
+            AMB.annT = Math.max(AMB.annT || 0, maintenant + 60000);
+            Promise.all([evtCharge("interception-echappe-1", c), evtVoix("voix-securite", c), evtCharge("ambiance-cabine", c), evtCharge("annonce-1", c)]).then(([b, vx, refC, refA]) => {
+                const t0 = c.currentTime + 0.2;
+                if (b) evtDoux(c, b, t0, evtNiveau(b, refC, AMB_NIVEAU.cabine, EVT_NIVEAU.echappe), 2.5);
+                if (vx.length) {     // annonce « nous sommes en securite, vous pouvez circuler » (voix-securite-N), apres le soulagement
+                    const v = vx[Math.floor(Math.random() * vx.length)], tv = t0 + (b ? Math.min(b.duration * 0.5, 2.5) : 0.3);
+                    ambAnnonceJoue(c, v, tv, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7, 3);
+                    AMB.annFin = tv + v.duration;
+                    AMB.annT = Math.max(AMB.annT, Date.now() + (tv - c.currentTime + v.duration + 25) * 1000);
+                }
+            });
+            return;
+        }
+        if (type === "applaudissements") {     // le vaisseau vient de se poser avec des passagers a bord : un des deux enregistrements au hasard
+            Promise.all([evtCharge("applaudissements-1", c), evtCharge("applaudissements-2", c), evtCharge("ambiance-cabine", c)]).then(([a1, a2, ref]) => {
+                const L = [a1, a2].filter(Boolean); if (!L.length) return;
+                const b = L[Math.floor(Math.random() * L.length)];
+                evtDoux(c, b, c.currentTime + 0.3, evtNiveau(b, ref, AMB_NIVEAU.cabine, EVT_NIVEAU.applaudissements), 2.5);
+            });
+            return;
+        }
         if (soute) {
-            Promise.all([evtCharge(type, c), evtCharge("ambiance-depot", c)]).then(([b, ref]) => { if (b) evtDoux(c, b, c.currentTime + 0.1, evtNiveau(b, ref, AMB_NIVEAU.depot, EVT_NIVEAU.soute), 3.5); });
+            Promise.all([evtCharge(type, c), evtCharge("ambiance-depot", c), type === "chargement" ? evtVoix("voix-soute", c) : [], evtCharge("annonce-1", c)]).then(([b, ref, vx, refA]) => {
+                const t0 = c.currentTime + 0.1;
+                if (b) evtDoux(c, b, t0, evtNiveau(b, ref, AMB_NIVEAU.depot, EVT_NIVEAU.soute), 3.5);
+                // le vieux veteran de la soute (voix-soute-N, en anglais) : « c'est charge, commandant » + une blague, une fois sur deux, quand les caisses sont rangees
+                if (vx.length && (force || Math.random() < 0.5)) {
+                    const v = vx[Math.floor(Math.random() * vx.length)], reste = annoncesCoupe(c, 2), tv = Math.max(t0 + (b ? Math.max(b.duration - 2, 1.5) : 0.5), reste + 0.6);
+                    ambAnnonceJoue(c, v, tv, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.voix), EVT.out, 0.7, 2);
+                    AMB.annT = Math.max(AMB.annT || 0, Date.now() + (tv - c.currentTime + v.duration + 20) * 1000);
+                }
+            });
             return;
         }
         const voix = type === "embarquement" ? "voix-bienvenue" : "voix-aurevoir";
@@ -314,19 +376,33 @@
             const pax = new Set(act.filter(estPassagers).map(m => String(m.id)));
             const tonnes = ((S && S.soute && S.soute.items) || []).reduce((a, x) => a + (Number(x.q) || 0), 0);
             const termines = new Set(fin.map(x => String(x.id)));
-            const prev = EVT.prev; EVT.prev = { pax, tonnes, termines };
+            const prev = EVT.prev; EVT.prev = { pax, tonnes, termines, amarre: !!(S && S.amarre) };
             const sautT = (S && S.saut && S.saut.t) || "", sautVu = EVT.sautVu; EVT.sautVu = sautT;
             if (!prev) return;     // premiere lecture : on memorise seulement
             // saut hyperespace en cours avec des passagers a bord (le plugin ne renseigne 'saut' que dans ce cas) : nouvel horodatage ET recent (tolerance si l'horloge de la page differe un peu)
             if (sautT && sautT !== sautVu && pax.size) { const age = Date.now() - Date.parse(sautT); if (age > -20000 && age < 40000) { EVT.log.push({ t: new Date().toISOString(), type: "saut", raison: S.saut.sys || "" }); evtSaut(); } }
+            // interception en supercruise avec des passagers a bord : 'debut' (mini-jeu) = annonce + cris ; 'echappe' = soulagement ; 'capture' = rien de plus (les cris ont deja sonne au debut)
+            const itT = (S && S.interception && S.interception.t) || "", itVu = EVT.interVu; EVT.interVu = itT;
+            if (itT && itT !== itVu) {
+                const age = Date.now() - Date.parse(itT), e = S.interception.e;
+                if (age > -20000 && age < 60000 && (e === "debut" || e === "echappe")) { EVT.log.push({ t: new Date().toISOString(), type: "interception-" + e, raison: itT }); evtJouer(e === "debut" ? "interception" : "echappe"); }
+            }
+            // marchandises transferees VERS le vaisseau (soute du Rhino : on est pose, pas amarre) : meme son de chargement que l'ajout a quai (le delai de 45 s evite le doublon)
+            const chT = (S && S.chargement && S.chargement.t) || "", chVu = EVT.chargVu; EVT.chargVu = chT;
+            if (chT && chT !== chVu) { const age = Date.now() - Date.parse(chT); if (age > -20000 && age < 60000) { EVT.log.push({ t: new Date().toISOString(), type: "chargement", raison: "transfert " + (S.chargement.n || "") + " t" }); evtJouer("chargement"); } }
+            // balise de tourisme scannee avec des passagers a bord : appareils photo + annonce d'arrivee
+            const toT = (S && S.tourisme && S.tourisme.t) || "", toVu = EVT.tourVu; EVT.tourVu = toT;
+            if (toT && toT !== toVu) { const age = Date.now() - Date.parse(toT); if (age > -20000 && age < 60000) { EVT.log.push({ t: new Date().toISOString(), type: "balise", raison: S.tourisme.sys || "" }); evtJouer("balise"); } }
             const recent = ts => { const t = Date.parse(ts); return !isNaN(t) && Date.now() - t < 240000; };     // une mission retrouvee dans d'anciens journaux n'est pas une nouvelle prise
             const trace = (type, raison) => { const l = { t: new Date().toISOString(), type, raison }; EVT.log.push(l); if (EVT.log.length > 50) EVT.log.shift(); try { console.info("[sons]", type, raison); } catch (e) {} };
             const prises = act.filter(m => estPassagers(m) && !prev.pax.has(String(m.id)) && recent(m.t) && !EVT.vus.has("e" + m.id));
             if (prises.length) { prises.forEach(m => EVT.vus.add("e" + m.id)); trace("embarquement", "mission " + prises.map(m => m.id).join(",")); evtJouer("embarquement"); }
             const rendues = fin.filter(x => !prev.termines.has(String(x.id)) && prev.pax.has(String(x.id)) && recent(x.t) && !EVT.vus.has("d" + x.id));
             if (rendues.length) { rendues.forEach(x => EVT.vus.add("d" + x.id)); trace("debarquement", "mission " + rendues.map(x => x.id).join(",")); evtJouer("debarquement"); }
+            // applaudissements : le vaisseau vient de s'amarrer a un pad avec une mission de passagers / tourisme a bord (ou rendue a cet instant)
+            if (S && S.amarre && !prev.amarre && (prev.pax.size || pax.size)) { trace("applaudissements", "amarrage avec passagers"); evtJouer("applaudissements"); }
             if (S && S.amarre) {
-                if (prev.tonnes < 1 && tonnes >= 1) { trace("chargement", "soute " + prev.tonnes + " -> " + tonnes + " t"); evtJouer("chargement"); }
+                if (tonnes - prev.tonnes >= 1) { trace("chargement", "soute " + prev.tonnes + " -> " + tonnes + " t"); evtJouer("chargement"); }
                 else if (prev.tonnes - tonnes >= 1) { trace("dechargement", "soute " + prev.tonnes + " -> " + tonnes + " t"); evtJouer("dechargement"); }
             }
         } catch (e) { /* le son ne doit jamais gener la page */ }

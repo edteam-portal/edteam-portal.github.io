@@ -5,6 +5,24 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-sons-interception', date: '2026-10-17T17:07:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : interception avec des passagers à bord',
+        texte: 'Quand un PNJ vous intercepte en supercruise avec une mission de passagers ou de tourisme en cours, une annonce du pilote (en anglais) demande aux passagers de rester calmes pendant le mini-jeu, avec leurs cris en fond. Si vous vous échappez, un soupir de soulagement puis une annonce vous confirme que l’on est en sécurité et que l’on peut de nouveau circuler dans le vaisseau. Les interceptions par un joueur ne déclenchent que le son de fin.',
+        important: false, action: 'Redémarrez EDMC (plugin 2.35)'
+    },
+    {
+        id: '2026-10-sons-balise-tourisme', date: '2026-10-17T17:06:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : balise de tourisme scannée',
+        texte: 'Quand vous scannez une balise de tourisme avec des passagers à bord, les appareils photo crépitent et les passagers, tout excités, parlent plus fort que durant le vol. Une annonce de cabine (en anglais) indique que vous êtes arrivés à destination et invite les passagers à observer le site.',
+        important: false, action: 'Redémarrez EDMC (plugin 2.35)'
+    },
+    {
+        id: '2026-10-sons-applaudissements-chargement', date: '2026-10-17T17:05:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : applaudissements à l’amarrage et chargement de la soute',
+        texte: 'Quand vous vous amarrez avec des passagers à bord, ils applaudissent. Le son de chargement, refait avec des dockers qui rangent leurs caisses dans une soute immense, se joue désormais à chaque ajout d’au moins 1 tonne à quai, et aussi quand vous transférez la soute du VRS dans le vaisseau. Parfois, un vieux vétéran de la soute vous lance un « c’est chargé, commandant » suivi d’une blague (en anglais). Rien ne sonne pendant le minage.',
+        important: false
+    },
+    {
         id: '2026-10-annonce-saut', date: '2026-10-17T11:35:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : annonce aux passagers au saut hyperespace',
         texte: 'Dès que vous lancez la charge du FSD pour un saut vers un autre système, avec une mission de passagers ou de tourisme en cours, une annonce de cabine prévient les passagers de s’accrocher (et leur rappelle les sacs à leur disposition), avec une alarme légère en fond. Trois annonces en anglais, tirées au hasard. Elle passe avant toutes les autres : l’annonce de cabine en cours est coupée. Les annonces d’embarquement et de débarquement passent elles aussi avant celles de la cabine en vol, et les sons d’embarquement et de débarquement partent désormais dès que la mission est prise ou rendue, sans attendre.',
