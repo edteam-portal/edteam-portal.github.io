@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-mobile-allege', date: '2026-10-18T20:45:00Z', type: 'AMELIORE',
+        titre: 'Mobile : plus léger, journal des exploits complet',
+        texte: 'Le compagnon mobile est allégé : les blocs « L’escadron en chiffres » et « Rangs de pilote » de l’accueil, la carrière BGS de l’onglet Engagement et l’onglet Quoi faire ont disparu. Les nouveautés passent dans un bouton ✨ de l’en-tête, avec une pastille quand il y en a du non lu. Le réglage des initiatives est maintenant en bas de l’onglet Campagnes. Le journal des exploits reprend celui du PC : lignes Powerplay (mérites et CP estimés), actions des directives clôturées, faction du lieu, et filtres par période, pilote et spécialité.',
+        important: false
+    },
+    {
         id: '2026-10-onglet-combat', date: '2026-10-18T18:37:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : le nouvel onglet Combat',
         texte: 'Un onglet Combat s’ouvre tout seul quand un combat commence. À gauche, votre vaisseau ou votre combinaison à pied, avec son armement et l’état de vos boucliers. À droite, la cible verrouillée en hologramme, dont les informations se déchiffrent pendant le scan, avec une menace estimée et les derniers vaisseaux verrouillés. Le cadre est rouge pour un hostile, vert pour un allié et bleu quand le camp n’est pas connu, pour ne pas tirer sur un allié sans le voir. En dessous : le tableau de chasse (bons de guerre ou primes, vaisseau éliminé, palier), la session de combat et, au sol, un buste d’opérateur par ennemi éliminé. Des sons accompagnent le verrouillage et un capitaine commente les éliminations, avec un interrupteur pour les couper. Le dernier rapport est gardé séparément en vaisseau et à pied. Le plugin n’envoie plus le ciblage des joueurs : la fenêtre COVAS et le registre tactique ont été retirés.',
