@@ -102,12 +102,13 @@
         return '<span class="camp-avs"><span class="dir-avs">' + liste.slice(0, 7).map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 28 }); }).join('') + '</span></span>';
     }
     function ligne(m) {
-        var attr = m.gris ? ' title="' + esc(m.titre || '') + '"' : ' onclick="' + m.clic + '" onmouseenter="if(typeof sonHover===\'function\') sonHover()"';
+        // pas de pourcentage par mission : la barre de fond parle d'elle-meme ; son explication passe en infobulle de la ligne
+        var attr = m.gris ? ' title="' + esc(m.titre || '') + '"' : ' onclick="' + m.clic + '" onmouseenter="if(typeof sonHover===\'function\') sonHover()"' + (m.legendeTitre ? ' title="' + esc(m.legendeTitre) + '"' : '');
         var actions = estCommandement() && m.domaine ? '<span class="camp-ics">' + ic('Modifier la mission', '✎', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'edit\',' + m.id + ')')
             + ic('Clôturer la mission', '📦', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'close\',' + m.id + ')') + ic('Supprimer la mission', '🗑', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'delete\',' + m.id + ')', true) + '</span>' : '<span></span>';
         var glisser = estAmiral() && m.domaine && !m.gris ? ' draggable="true" data-mdom="' + m.domaine + '" data-mid="' + m.id + '"' : '';
         return '<div class="camp-ligne' + (m.conflit ? ' conflit' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + fond(m.couleur, m.pct) + '; --c:' + m.couleur + ';' + (m.conflit ? ' --k:' + m.conflit + ';' : '') + '">' + neon(m.couleur, m.pct, m.vous)
-            + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span>' + pctTxt(m.couleur, m.pct, m.legendeTitre) + (m.avatars || '') + '</div>'
+            + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span>' + (m.avatars || '') + '</div>'
             + '<div class="camp-info">' + (m.info || '') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
     }
 
