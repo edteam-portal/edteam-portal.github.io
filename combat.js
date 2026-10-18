@@ -518,13 +518,13 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-stats .r:before{background:var(--rg)}.cb-stats .j:before{background:var(--jn)}.cb-stats .v:before{background:var(--vt)}.cb-stats .c:before{background:var(--cy)}
 .cb-rowA{display:grid;grid-template-columns:clamp(300px,34%,520px) minmax(0,1fr);gap:12px;margin-bottom:12px;align-items:stretch}
 .cb-rowB{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:12px;align-items:stretch}
-.cb-moi{display:flex;flex-direction:column}.cb-moi:not(.pied) .cb-hol svg{display:block;margin:0 auto;width:100%;max-height:clamp(250px,calc(100vh - 500px),440px)}      /* hologramme du pilote : proportionnel a la hauteur de la fenetre (tablette, petit portable) */.cb-moi.pied .cb-hol{min-height:470px}.cb-moi.pied .cb-hol svg{max-height:560px}
-.cb-equip{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin:10px 0 6px;border-top:1px dashed var(--ln);padding-top:9px}.cb-equip>div{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center;font-size:12px;color:#e6f4f0;min-width:0}.cb-equip b{width:20px;height:20px;border-radius:50%;border:1px solid var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:normal;font-size:11px;box-shadow:0 0 6px color-mix(in srgb,var(--c) 60%,transparent)}.cb-equip small{display:block;color:var(--gr);font-size:10px;letter-spacing:2px}.cb-equip span{min-width:0}.cb-hol{position:relative;flex:1;min-height:340px;display:flex;justify-content:center;align-items:center}.cb-hol svg{width:100%;height:100%;max-height:440px}
+.cb-moi{display:flex;flex-direction:column}.cb-moi:not(.pied) .cb-hol svg{display:block;margin:0 auto;width:100%;max-height:clamp(200px,calc(var(--cmb-h, 100vh) - 430px),440px)}      /* hologramme du pilote : proportionnel a la hauteur de la fenetre (tablette, petit portable) */.cb-moi.pied .cb-hol{min-height:clamp(300px,calc(var(--cmb-h, 100vh) - 400px),470px)}.cb-moi.pied .cb-hol svg{max-height:clamp(300px,calc(var(--cmb-h, 100vh) - 400px),560px)}
+.cb-equip{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin:10px 0 6px;border-top:1px dashed var(--ln);padding-top:9px}.cb-equip>div{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center;font-size:12px;color:#e6f4f0;min-width:0}.cb-equip b{width:20px;height:20px;border-radius:50%;border:1px solid var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:normal;font-size:11px;box-shadow:0 0 6px color-mix(in srgb,var(--c) 60%,transparent)}.cb-equip small{display:block;color:var(--gr);font-size:10px;letter-spacing:2px}.cb-equip span{min-width:0}.cb-hol{position:relative;flex:1;min-height:clamp(200px,calc(var(--cmb-h, 100vh) - 430px),340px);display:flex;justify-content:center;align-items:center}.cb-hol svg{width:100%;height:100%;max-height:440px}
 .cb-barre{display:grid;grid-template-columns:78px 1fr 62px;gap:8px;align-items:center;margin:6px 0;font-size:12px}.cb-barre span{color:var(--gr);letter-spacing:2px;font-size:11px}.cb-barre .j{height:9px;background:rgba(255,255,255,.08);position:relative}.cb-barre .j i{position:absolute;left:0;top:0;bottom:0;transition:width .4s}.cb-barre b{font-weight:normal;color:#fff;text-align:right}
 .cb-armes{margin-top:8px;border-top:1px dashed var(--ln);padding-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:1px 12px}.cb-armes h3{grid-column:1/3;margin:0 0 4px;font-size:11px;letter-spacing:2px;color:var(--or);font-weight:normal}.cb-armes h3 em{color:var(--gr);font-style:normal;margin-left:6px;font-size:10px}
 .cb-arm{display:grid;grid-template-columns:18px 1fr;gap:6px;font-size:11px;color:#cfd;align-items:center}.cb-arm b{color:var(--or);font-weight:normal;border:1px solid var(--or);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
 .cb-etat{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cb-etat span{border:1px solid;padding:2px 8px;font-size:11px;letter-spacing:2px}.cb-etat .r{color:var(--rg)}.cb-etat .c{color:var(--cy)}.cb-etat .j{color:var(--jn)}.cb-etat .g{color:var(--gr)}
-.cb-cible{min-height:560px;flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(255,59,48,.13),transparent 55%),repeating-linear-gradient(90deg,rgba(255,59,48,.045) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,59,48,.045) 0 1px,transparent 1px 38px)}
+.cb-cible{min-height:min(560px,calc(var(--cmb-h, 100vh) - 220px));flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(255,59,48,.13),transparent 55%),repeating-linear-gradient(90deg,rgba(255,59,48,.045) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,59,48,.045) 0 1px,transparent 1px 38px)}
 .cb-cible.pvp{background:radial-gradient(circle at 50% 46%,rgba(255,215,0,.12),transparent 55%),repeating-linear-gradient(90deg,rgba(255,215,0,.04) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,215,0,.04) 0 1px,transparent 1px 38px)}
 .cb-scene{position:absolute;width:760px;height:540px;left:50%;top:50%;margin:-270px 0 0 -380px;transform-origin:center center}      /* centree meme quand le cadre est plus etroit que 760 px (tablette) : le centre de la scene reste au centre du cadre */
 .cb-scene .fond{position:absolute;inset:0;width:100%;height:100%}.cb-scene .th2{position:absolute;left:210px;top:56px;width:340px;height:420px}.cb-scene .th2 svg{width:100%;height:100%}
@@ -547,6 +547,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-l.mort:after{content:"";position:absolute;left:8px;top:8px;width:44px;height:34px;background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--rg) calc(50% - 1.5px),var(--rg) calc(50% + 1.5px),transparent calc(50% + 1.5px)),linear-gradient(to top left,transparent calc(50% - 1.5px),var(--rg) calc(50% - 1.5px),var(--rg) calc(50% + 1.5px),transparent calc(50% + 1.5px));filter:drop-shadow(0 0 4px var(--rg))}
 .cb-l.mort .v small{color:var(--rg)}.cb-l.verrou{border-color:var(--rg);background:linear-gradient(90deg,rgba(255,59,48,.16),rgba(0,0,0,.2));box-shadow:0 0 14px rgba(255,59,48,.25)}.cb-l.verrou .v small{color:var(--rg)}.cb-l.vu{opacity:.85}
 .cb-vide{color:var(--gr);font-size:12px;padding:6px 0}
+@media (max-height:700px) and (min-width:1001px){.cb-moi:not(.pied) .cb-armes{display:none}}      /* petit ecran en hauteur : la liste de l'armement (visible au survol d'un point d'emport sur l'hologramme) cede la place pour que les 2 hologrammes tiennent */
 .cb-vus .v{cursor:pointer;transition:filter .15s}.cb-vus .v:hover{filter:brightness(1.3)}.cb-vus .v:focus{outline:1px solid #fff;outline-offset:1px}
 #cmb-modale{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);font-family:'Share Tech Mono',Consolas,monospace}
 #cmb-modale .p{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;padding:22px 24px 20px;background:linear-gradient(180deg,color-mix(in srgb,var(--m) 12%,#050202),#050202);border:1px solid var(--m);box-shadow:0 0 40px color-mix(in srgb,var(--m) 35%,transparent);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px))}
@@ -650,7 +651,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-ti{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;margin:0 0 8px;position:relative}.cb-ti i{width:26px;height:26px;border-radius:50%;border:1px solid var(--c);background:#04090c;color:var(--c);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;box-shadow:0 0 10px color-mix(in srgb,var(--c) 55%,transparent);position:relative;z-index:1}
 .cb-ti .c time{display:block;color:var(--gr);font-size:11px;letter-spacing:1px}.cb-ti .c time span{margin-left:8px;color:#5d6870}.cb-ti .c b{font-weight:normal;color:#e6f4f0;font-size:13px}.cb-chasse .pied{color:var(--gr);font-size:12px;margin-top:6px;line-height:1.55}
 .cb-log{font-size:13px;line-height:1.75}.cb-log div{display:grid;grid-template-columns:56px 20px 1fr;gap:6px;border-top:1px dashed var(--ln);padding:2px 0}.cb-log div:first-child{border-top:0}.cb-log time{color:var(--gr)}
-.cb-vict{position:relative;min-height:560px;flex:1;overflow:hidden;background:radial-gradient(circle at 50% 50%,rgba(255,59,48,.12),transparent 62%),repeating-linear-gradient(90deg,rgba(255,59,48,.04) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,59,48,.04) 0 1px,transparent 1px 38px)}
+.cb-vict{position:relative;min-height:clamp(380px,calc(var(--cmb-h, 100vh) - 150px),560px);flex:1;overflow:hidden;background:radial-gradient(circle at 50% 50%,rgba(255,59,48,.12),transparent 62%),repeating-linear-gradient(90deg,rgba(255,59,48,.04) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,59,48,.04) 0 1px,transparent 1px 38px)}
 .cb-vict .gv{position:absolute;left:14px;right:14px;top:46px;bottom:14px;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center}
 .cb-vict .leg{position:absolute;right:14px;top:12px;font-size:11px;letter-spacing:2px;color:var(--gr);text-align:right}.cb-vict .leg i{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px}
 .cb-v1{position:relative;text-align:center;line-height:1.1}.cb-v1 svg{display:block;margin:0 auto}.cb-v1 small{display:block;color:var(--gr);font-size:10px;margin-top:2px;white-space:nowrap}.cb-v1 b{display:block;font-weight:normal;color:var(--jn);font-size:11px;white-space:nowrap}.cb-v1 .etoile{position:absolute;right:12%;top:0;color:#B28DFF;text-shadow:0 0 8px #B28DFF}
@@ -680,11 +681,16 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
         if (el.__h !== html) { el.innerHTML = html; el.__h = html; }
         return el;
     }
+    // hauteur reellement visible pour les blocs (la zone de defilement, sous l'en-tete du site) : variable CSS --cmb-h
+    function hauteurs() { const z = document.getElementById("display-area"), c = document.getElementById("cmb"); if (!c) return window.innerHeight; const h = (z && z.clientHeight) || window.innerHeight; c.style.setProperty("--cmb-h", h + "px"); return h; }
     function echelle() {
         const sc = document.getElementById("cmb-scene"), ci = document.getElementById("cmb-cible"); if (!sc || !ci) return;
-        const k = Math.min(1, (ci.clientWidth || 760) / 760);
+        const hz = hauteurs();
+        // largeur ET hauteur : la rangee des hologrammes (titre ~50 + scene + pied ~45 + ligne des vaisseaux verrouilles 144) doit tenir dans la fenetre
+        const vus = document.getElementById("cmb-vus"), reste = (vus ? vus.offsetHeight : 144) + 50 + 45 + 16, kh = (hz - reste) / 540;
+        const k = Math.min(1, (ci.clientWidth || 760) / 760, Math.max(0.42, kh));
         sc.style.transform = k < 1 ? `scale(${k})` : "";
-        ci.style.minHeight = k < 1 ? Math.round(560 * k + 20) + "px" : "";
+        ci.style.minHeight = k < 1 ? Math.round(540 * k + 24) + "px" : "";
     }
 
     // un onglet sans combat n'est pas vide : l'hologramme du pilote (vaisseau ou combinaison, selon CE QU'IL FAIT MAINTENANT), « en attente » et le recapitulatif du dernier combat
@@ -767,6 +773,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
         let k = 0; const id = setInterval(() => { k++; const n = Math.ceil(fin.length * k / DECODE_PAS); el.textContent = fin.slice(0, n) + alea(Math.max(0, fin.length - n)); if (k >= DECODE_PAS) { clearInterval(id); el.textContent = fin; } }, DECODE_MS);
     }
     function majCombat() {
+        hauteurs();
         if (!document.getElementById("cmb")) return;
         { const m0 = CB.etat; if (m0 && m0.sys) { const k = String(m0.sys).trim().toLowerCase(), mm = CB.mem[k] = CB.mem[k] || {}; if (m0.soutien) mm.s = m0.soutien; if (m0.ennemi) mm.e = m0.ennemi; } }
         const e = effectif(), p = posture(e), veille = !p.actif, pOn = p.pOn, pied = p.droitePied, ev = veille ? Object.assign({}, e, { cible: null, vus: [] }) : e;
