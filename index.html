@@ -42,7 +42,7 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="anecdotes.js?v=3"></script>
-    <script src="navigation.js?v=34"></script>
+    <script src="navigation.js?v=35"></script>
 
     <script>
     // Seuls les petits écrans (téléphones) sont redirigés
@@ -919,9 +919,8 @@
                 const currentWeekId = d.getUTCFullYear() + "-W" + Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1))) / 86400000) + 1)/7);
 
                 // 1. On télécharge toutes les données de la semaine en une seule fois
-                const [resParams, resTactique, resEfforts, resProfils] = await Promise.all([
+                const [resParams, resEfforts, resProfils] = await Promise.all([
                     supabaseApp.from('parametres_app').select('user_id, telemetrie_usage'),
-                    supabaseApp.from('registre_tactique').select('id, escadron_id').gte('created_at', dateLimite),
                     supabaseApp.from('efforts_bgs').select('user_id, type_action, valeur').gte('date_action', dateLimite),
                     supabaseApp.from('profils_publics').select('user_id, cmdr_nom, escadron_id') 
                 ]);
@@ -955,7 +954,6 @@
 
                     const paramsEscadron = (resParams.data || []).filter(p => idsPilotes.includes(p.user_id));
                     const effortsEscadron = (resEfforts.data || []).filter(e => idsPilotes.includes(e.user_id));
-                    const tactiqueEscadron = (resTactique.data || []).filter(t => t.escadron_id === tagActuel);
 
                     // Traitement mathématique
                     let connexionsHebdo = 0;
@@ -964,7 +962,6 @@
                         if (p.telemetrie_usage && p.telemetrie_usage.derniere_visite_web && new Date(p.telemetrie_usage.derniere_visite_web).getTime() >= limiteTs) connexionsHebdo++;
                     });
 
-                    const signalementsHebdo = tactiqueEscadron.length;
                     let totalInf = 0, totalCr = 0, totalMeurtres = 0, totalVols = 0, totalPiratages = 0, totalEchecs = 0;
                     let palmares = {}; 
 
@@ -1001,9 +998,8 @@
                     // Demande spécifique pour cet escadron (Le nom est remplacé par le Tag)
                     const prompt = `Tu es le Rédacteur en Chef de Galnet News. Rédige un article épique et immersif (HTML fluide avec <p>, <strong> et un <h3>) résumant l'activité tactique de l'escadron [${tagActuel}].
 
-[ RÉSEAU & RENSEIGNEMENT ]
+[ RÉSEAU ]
 - Pilotes actifs sur le terminal : ${connexionsHebdo}
-- Nouveaux signalements tactiques : ${signalementsHebdo}
 
 [ BILAN BGS ET JOURNAL DES EXPLOITS ]
 - Influence poussée : ${totalInf} INF
@@ -1790,11 +1786,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 processLatest('QG_ACTIVE_SHIP_ID', item => { paramUpdates.id_vaisseau_actif = item.station_name; paramModifie = true; });
 
                 // D. Ciblage Tactique
-                processLatest('TARGETED_CMDR', item => { 
-                    if (typeof window.traiterCiblageTactique === 'function') {
-                        window.traiterCiblageTactique(item.station_name);
-                    }
-                });
+                processLatest('TARGETED_CMDR', () => {});     // retire : purge seulement (anciens plugins)
 
                 // E. Modules 
                 const moduleItems = radarData.filter(d => d.target_commodity && d.target_commodity.startsWith('QG_MODULES_'));
@@ -3024,7 +3016,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
-    <script src="annonce.js?v=8"></script>
+    <script src="annonce.js?v=9"></script>
     <script src="footer.js?v=26"></script>
 </body>
 </html>

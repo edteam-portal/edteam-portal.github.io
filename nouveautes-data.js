@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-onglet-combat', date: '2026-10-18T18:37:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : le nouvel onglet Combat',
+        texte: 'Un onglet Combat s’ouvre tout seul quand un combat commence. À gauche, votre vaisseau ou votre combinaison à pied, avec son armement et l’état de vos boucliers. À droite, la cible verrouillée en hologramme, dont les informations se déchiffrent pendant le scan, avec une menace estimée et les derniers vaisseaux verrouillés. Le cadre est rouge pour un hostile, vert pour un allié et bleu quand le camp n’est pas connu, pour ne pas tirer sur un allié sans le voir. En dessous : le tableau de chasse (bons de guerre ou primes, vaisseau éliminé, palier), la session de combat et, au sol, un buste d’opérateur par ennemi éliminé. Des sons accompagnent le verrouillage et un capitaine commente les éliminations, avec un interrupteur pour les couper. Le dernier rapport est gardé séparément en vaisseau et à pied. Le plugin n’envoie plus le ciblage des joueurs : la fenêtre COVAS et le registre tactique ont été retirés.',
+        important: true, action: 'Redémarrez EDMC (plugin 2.38)'
+    },
+    {
+        id: '2026-10-retrait-covas-registre', date: '2026-10-18T14:37:00Z', type: 'AMELIORE',
+        titre: 'Retrait de l’alerte de ciblage COVAS et du registre tactique',
+        texte: 'La fenêtre qui s’ouvrait en plein écran quand vous verrouilliez un joueur, et le registre tactique qui la nourrissait (signalements K.O.S., suspects, alliés VIP), sont retirés : plus personne ne les utilisait. La carte « Renseignement » disparaît aussi des chiffres clés de l’escadron. Rien d’autre ne change, et le plugin n’envoie plus le ciblage des joueurs.',
+        important: false
+    },
+    {
         id: '2026-10-commerce-pv-carte', date: '2026-10-18T12:52:00Z', type: 'CORRIGE',
         titre: 'Commerce : tournée depuis un porte-vaisseaux, et carte pour les vaisseaux sans hologramme',
         texte: 'La feuille de route ne trouvait aucune tournée quand vous étiez amarré à un porte-vaisseaux, car la recherche ne sait pas partir d’un porte-vaisseaux. Elle part maintenant de la station la plus proche. D’autre part, si votre vaisseau n’a pas encore d’hologramme, l’onglet Commerce affiche directement la carte du trajet à côté de la feuille de route, sans bouton de bascule.',

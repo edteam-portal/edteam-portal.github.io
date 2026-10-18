@@ -18,12 +18,13 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=34"></script>
+    <script src="navigation.js?v=35"></script>
     <script src="modules-data.js?v=1"></script>
-    <script src="modules-vaisseau.js?v=19"></script>
+    <script src="modules-vaisseau.js?v=24"></script>
     <script src="minage.js?v=15"></script>
     <script src="exobio-valeurs.js?v=1"></script>
     <script src="exploration.js?v=52"></script>
+    <script src="combat.js?v=37"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -165,6 +166,7 @@
         .tb-tab:hover { opacity:.95; background:rgba(255,113,0,.1); }
         .tb-tab.on { opacity:1; background:var(--ed-orange); color:#000; font-weight:bold; }
         .tb-tab.off { opacity:.35; border-style:dashed; cursor:not-allowed; }
+        .tb-cmb-p { color:#FF3B30; font-style:normal; margin-left:7px; animation:tbCmbP 1.3s infinite; } .tb-tab.on .tb-cmb-p { color:#7a0f08; } @keyframes tbCmbP { 50% { opacity:.25; } }
         .tb-banner { border:1px solid rgba(232,163,90,.55); background:rgba(232,163,90,.08); color:#e8a35a; padding:9px 14px; margin-bottom:12px; font-size:.9em; line-height:1.5; }
         .tb-grid4 { display:grid; grid-template-columns:1.6fr repeat(3,1fr); gap:12px; margin-bottom:12px; }
         .tb-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
@@ -535,8 +537,8 @@
         let profilCommandant = null, uid = null;
         let S = null;                 // etat de la session (champ etat de session_live) ; null = aucune session recue
         let MAJ = null;               // maj_le du serveur (ISO)
-        let MODE = ["mis", "min", "exp"].indexOf(lire("edteam_tb_mode")) >= 0 ? lire("edteam_tb_mode") : "com";
-        try { const pm = new URLSearchParams(location.search).get("mode"); if (pm === "min" || pm === "mis" || pm === "com" || pm === "exp") { MODE = pm; ecrire("edteam_tb_mode", pm); } } catch (e) { /* le mode memorise reste valable */ }
+        let MODE = ["mis", "min", "exp", "cmb"].indexOf(lire("edteam_tb_mode")) >= 0 ? lire("edteam_tb_mode") : "com";
+        try { const pm = new URLSearchParams(location.search).get("mode"); if (pm === "min" || pm === "mis" || pm === "com" || pm === "exp" || pm === "cmb") { MODE = pm; ecrire("edteam_tb_mode", pm); } } catch (e) { /* le mode memorise reste valable */ }
         let canal = null, rtOk = false, derniereLecture = 0;
 
         function lire(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -648,13 +650,14 @@
                     <div class="tb-vide">Lancez Elite Dangerous avec EDMC et le plugin SYS.EDTEAM <b>2.9</b> (ou plus récent) : votre session apparaît ici toute seule, en direct, sans rien faire.<br>
                     <span class="tb-mut">Si le plugin est déjà à jour et que rien n'arrive, redémarrez EDMC puis changez de système en jeu.</span></div></div>`;
             } else {
-                h = entete() + onglets() + alertes() + (MODE === "mis" ? panneauMissions() : MODE === "min" && typeof minageHtml === "function" ? minageHtml() : MODE === "exp" && typeof explorationHtml === "function" ? explorationHtml() : panneauCommerce());
+                h = entete() + onglets() + alertes() + (MODE === "mis" ? panneauMissions() : MODE === "min" && typeof minageHtml === "function" ? minageHtml() : MODE === "exp" && typeof explorationHtml === "function" ? explorationHtml() : MODE === "cmb" && typeof combatHtml === "function" ? combatHtml() : panneauCommerce());
             }
             zone.innerHTML = h;
             zone.scrollTop = haut;
             brancherSoute();
             if (MODE === "min" && typeof minageApres === "function") minageApres();
             if (MODE === "exp" && typeof explorationApres === "function") explorationApres();
+            if (MODE === "cmb" && typeof combatApres === "function") combatApres();
             majModale();
             tic();
             declencherVente();
@@ -677,7 +680,7 @@
         function onglets() {
             const t = (c, ic, nom) => `<button class="tb-tab${MODE === c ? " on" : ""}" onclick="changerMode('${c}')">${ic} ${nom}</button>`;
             const g = (ic, nom) => `<button class="tb-tab off" title="À venir" disabled>${ic} ${nom}</button>`;
-            return `<div class="tb-tabs">${t("com", "💰", "COMMERCE")}${t("mis", "📜", "MISSIONS")}${t("min", "⛏", "MINAGE")}${t("exp", "🔭", "EXPLORATION")}${g("⚔", "COMBAT")}</div>`;
+            return `<div class="tb-tabs">${t("com", "💰", "COMMERCE")}${t("mis", "📜", "MISSIONS")}${t("min", "⛏", "MINAGE")}${t("exp", "🔭", "EXPLORATION")}${t("cmb", "⚔", "COMBAT" + `<i class="tb-cmb-p" id="tb-cmb-pastille" style="display:${typeof combatActif === "function" && combatActif() ? "inline" : "none"}">●</i>`)}</div>`;
         }
         function alertes() {
             let h = "";
@@ -2230,6 +2233,7 @@
                 if (typeof window.demarrerSystemLoop === "function") window.demarrerSystemLoop();
                 await relire();
                 ecouter();
+                if (typeof combatDemarrer === "function") combatDemarrer();     // onglet Combat (script SQL 103, plugin 2.38) : lecture + temps reel, bascule au debut d'un combat
             } else {
                 await supabaseApp.auth.signOut();
                 window.location.href = "index.html";

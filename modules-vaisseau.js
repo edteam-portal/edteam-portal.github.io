@@ -81,6 +81,7 @@
 
     // infobulle : un seul ecouteur pour toute la page (la zone est recreee a chaque affichage)
     window.__tbmDet = [];
+    window.tbmNomModule = nomModule;     // nom anglais d'un module (identifiant du journal -> libelle) : sert aussi a l'onglet Combat (armement)
     function tip() { let t = document.getElementById("tbm-tip"); if (!t) { t = document.createElement("div"); t.id = "tbm-tip"; document.body.appendChild(t); } return t; }
     if (!window.__tbmInit) {
         window.__tbmInit = true;
@@ -381,6 +382,64 @@
     }
     window.tbmSonSaut = evtSaut;     // essai a la main depuis la console : tbmSonSaut(true)
     window.tbmSonEvenement = evtJouer;     // essai a la main depuis la console : tbmSonEvenement("embarquement", true)
+    // ---- SONS DU COMBAT (onglet Combat) : fichiers sons/combat-decryptage, combat-dechiffre, combat-acquisition, voix-elimination-1..N (un fichier absent est ignore).
+    // Memes regles que l'ambiance (clic dans la page, onglet visible, bouton ♪ ON) + interrupteur propre au combat (localStorage edteam_cmb_sons). Essai : tbmSonCombat("acquisition"), tbmSonCombat("elimination", { premiere: true })
+    const CMBS = { boucle: null, jeton: 0, der: {}, voixFin: 0, voixDer: 0, derniere: -1 };
+    window.__tbmCmbs = CMBS;     // etat des sons du combat (diagnostic)
+    EVT_NIVEAU.cdecr = EVT_NIVEAU.cdecr || 0.55; EVT_NIVEAU.cdech = EVT_NIVEAU.cdech || 0.8; EVT_NIVEAU.cacq = EVT_NIVEAU.cacq || 0.55; EVT_NIVEAU.cacqDuree = EVT_NIVEAU.cacqDuree || 0.8; EVT_NIVEAU.cvoix = EVT_NIVEAU.cvoix || 1;
+    const CMB_VOIX_PROBA = 0.5, CMB_VOIX_DELAI = 10000;     // une elimination sur deux, 10 s mini entre deux voix
+    const cmbSonOn = () => { try { return localStorage.getItem("edteam_cmb_sons") !== "0"; } catch (e) { return true; } };
+    const cmbTrace = type => { try { EVT.log.push({ t: new Date().toISOString(), type: "combat-" + type }); } catch (e) {} };
+    function cmbArret(fondu) {
+        const b = CMBS.boucle; CMBS.boucle = null; CMBS.jeton++;
+        if (!b) return;
+        try { const t = b.c.currentTime; b.g.gain.cancelScheduledValues(t); b.g.gain.setValueAtTime(b.g.gain.value, t); b.g.gain.linearRampToValueAtTime(0.0001, t + (fondu || 0.2)); b.src.stop(t + (fondu || 0.2) + 0.05); } catch (e) {}
+        clearTimeout(b.garde);
+    }
+    window.tbmSonCombat = function (type, opt) {
+        try {
+            const arret = opt === false; opt = opt || {};     // (opt = false : arret du decryptage)
+            if (type === "decryptage" && arret) { const d = CMBS.dec; CMBS.dec = null; if (d) { try { const t = d.c.currentTime; d.g.gain.cancelScheduledValues(t); d.g.gain.setValueAtTime(d.g.gain.value, t); d.g.gain.linearRampToValueAtTime(0.0001, t + 0.18); d.src.stop(t + 0.22); } catch (e) {} } return; }
+            if (!cmbSonOn()) { if (CMBS.boucle) cmbArret(0.1); return; }
+            const maintenant = Date.now(), c = evtCtx(); if (!c) return;
+            if (type === "prechauffe") { ["combat-decryptage", "combat-dechiffre", "combat-acquisition", "ambiance-cabine", "annonce-1"].forEach(n => evtCharge(n, c)); for (let i = 1; i <= 16; i++) evtCharge("voix-elimination-" + i, c); return; }
+            if (type === "decryptage" || type === "dechiffre" || type === "acquisition") {     // une seule fois par evenement (decryptage : par revelation de champs ; dechiffre : a la fin de la revelation)
+                if (type === "decryptage" && CMBS.dec) return;     // brouillage deja accompagne
+                if (CMBS.der[type] && maintenant - CMBS.der[type] < (type === "decryptage" ? 1500 : type === "dechiffre" ? 1000 : 1200)) return;
+                CMBS.der[type] = maintenant;
+                const nom = "combat-" + type;
+                Promise.all([evtCharge(nom, c), evtCharge("ambiance-cabine", c)]).then(([buf, refC]) => {
+                    if (!buf) return;
+                    const src = c.createBufferSource(), g = c.createGain();
+                    src.buffer = buf; g.gain.value = evtNiveau(buf, refC, AMB_NIVEAU.cabine, type === "decryptage" ? EVT_NIVEAU.cdecr : type === "dechiffre" ? EVT_NIVEAU.cdech : EVT_NIVEAU.cacq);
+                    src.connect(g); g.connect(EVT.out); const t = c.currentTime + 0.02; src.start(t); cmbTrace(type);
+                    if (type === "decryptage") {     // le son dure autant que le brouillage : boucle du fichier, coupee par window.tbmSonCombat("decryptage", false), 10 s au plus
+                        src.loop = true; CMBS.dec = { c, src, g }; src.onended = () => { if (CMBS.dec && CMBS.dec.src === src) CMBS.dec = null; };
+                        setTimeout(() => { if (CMBS.dec && CMBS.dec.src === src) window.tbmSonCombat("decryptage", false); }, 10000);
+                    }
+                    if (type === "acquisition") {     // discret : court, fondu de sortie (le fichier entier ne joue pas)
+                        const d = Math.min(buf.duration, EVT_NIVEAU.cacqDuree), v = g.gain.value; g.gain.setValueAtTime(v, t + Math.max(0, d - 0.3)); g.gain.linearRampToValueAtTime(0.0001, t + d); src.stop(t + d + 0.05);
+                    }
+                });
+                return;
+            }
+            if (type === "elimination") {     // voix du capitaine : une elimination sur deux (toujours la premiere de la session), 10 s mini, jamais deux fois la meme, jamais par-dessus une autre voix
+                if (!opt.force) {
+                    if (maintenant - CMBS.voixDer < CMB_VOIX_DELAI || c.currentTime < CMBS.voixFin) return;
+                    if (!opt.premiere && Math.random() >= CMB_VOIX_PROBA) return;
+                }
+                CMBS.voixDer = maintenant;
+                const L = []; for (let i = 1; i <= 16; i++) L.push(evtCharge("voix-elimination-" + i, c));
+                Promise.all([Promise.all(L), evtCharge("annonce-1", c)]).then(([vx, refA]) => {
+                    const dispo = vx.map((b, i) => b ? i : -1).filter(i => i >= 0); if (!dispo.length) return;
+                    let ch = dispo[Math.floor(Math.random() * dispo.length)]; if (dispo.length > 1 && ch === CMBS.derniere) ch = dispo[(dispo.indexOf(ch) + 1) % dispo.length];
+                    CMBS.derniere = ch; const v = vx[ch], t0 = c.currentTime + 0.15;
+                    ambAnnonceJoue(c, v, t0, evtNiveau(v, refA, AMB_NIVEAU.annonce, EVT_NIVEAU.cvoix), EVT.out, 0.5, 2);
+                    CMBS.voixFin = t0 + v.duration + 0.3; AMB.annT = Math.max(AMB.annT || 0, Date.now() + (v.duration + 8) * 1000); cmbTrace("voix-" + (ch + 1));
+                });
+            }
+        } catch (e) { /* un son ne doit jamais gener le combat */ }
+    };
     // appelee a chaque nouvel etat de la session (S) : embarquement = une mission avec passagers vient d'etre PRISE ; debarquement = une mission avec passagers vient d'etre TERMINEE ;
     // chargement = la soute passe de 0 a 1 t ou plus, dechargement = elle perd au moins 1 t, les deux seulement a quai (en vol, minage ou largage ne sonnent pas)
     window.tbmSonsMissions = function (S) {

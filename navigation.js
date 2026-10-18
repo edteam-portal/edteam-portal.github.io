@@ -236,27 +236,11 @@ function injecterArchitectureGlobale() {
         document.body.insertAdjacentHTML('beforeend', modalesGlobalesHTML);
     }
 
-    // --- INJECTION GLOBALE DU SYSTÈME COVAS & CIBLAGE TACTIQUE ---
-        const covasHTML = `
-        <style>
-            #tactical-overlay {
-                position: fixed; top: 50%; left: 50%; width: 480px; background: rgba(10, 0, 0, 0.95);
-                border: 2px solid #FF3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4); border-radius: 4px;
-                padding: 25px; font-family: 'Share Tech Mono', monospace; z-index: 10500;
-                backdrop-filter: blur(5px); pointer-events: none;
-                transform: translate(-50%, -50%) scale(0.9); opacity: 0; visibility: hidden;
-                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-            #tactical-overlay.deploye { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
-        </style>
-        <div id="tactical-overlay"><div id="tactical-contenu"></div></div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', covasHTML);
-
+    // --- COVAS : reveil par temps reel et compteur de presence (la fenetre de ciblage tactique a ete retiree) ---
         // Chargement asynchrone du script d'interception COVAS
         if (!document.querySelector('script[src*="covas.js"]')) {
             const covasScript = document.createElement('script');
-            covasScript.src = 'covas.js?v=3';
+            covasScript.src = 'covas.js?v=4';
             document.body.appendChild(covasScript);
         }
 }
@@ -1059,24 +1043,8 @@ window.demarrerSystemLoop = async function systemLoop() {
         processLatest('FC_BALANCE', () => {});
         processLatest('CMDR_NAME', item => { profilUpdates.cmdr_nom = item.station_name; profilModifie = true; });
 
-        // Interception du ciblage tactique (COVAS / HUD)
-        processLatest('TARGETED_CMDR', item => {
-            const payloadBrut = item.station_name;
-            if (payloadBrut !== window.lastTargetedCmdr) {
-                window.lastTargetedCmdr = payloadBrut;
-                if (payloadBrut === "LOST") {
-                    const overlay = document.getElementById('tactical-overlay');
-                    if (overlay) overlay.classList.remove('deploye');
-                } else {
-                    try {
-                        const cibleData = JSON.parse(payloadBrut);
-                        if (typeof verifierCibleTactique === 'function') verifierCibleTactique(cibleData.nom, cibleData.tag);
-                    } catch (e) {
-                        if (typeof verifierCibleTactique === 'function') verifierCibleTactique(payloadBrut, "");
-                    }
-                }
-            }
-        });
+        // Ciblage tactique : retire. On purge seulement les trames des anciens plugins (v2.37 et avant).
+        processLatest('TARGETED_CMDR', () => {});
 
         // Purge des étiquettes d'états secondaires
         const junkTags = ['PARAM_UPDATE', 'QG_RANK_COMBAT', 'QG_RANK_TRADE', 'QG_RANK_EXPLOR', 'QG_RANK_FEDERA', 'QG_RANK_EMPIRE', 'QG_RANK_EXOBIO', 'QG_PROG_COMBAT', 'QG_PROG_TRADE', 'QG_PROG_EXPLOR', 'QG_PROG_FEDERA', 'QG_PROG_EMPIRE', 'QG_PROG_EXOBIO', 'QG_WEALTH', 'QG_SHIPS_VALUE', 'QG_REBUY', 'QG_POWERPLAY', 'QG_FLEET', 'QG_CARRIER_STATS', 'QG_ACTIVE_SHIP_ID', 'QG_SQUADRON_FACTION'];

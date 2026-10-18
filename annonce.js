@@ -140,6 +140,27 @@
             lien: 'tableau-de-bord.html?mode=mis',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'combat-2026-10',
+            couleur: '#FF3B30',
+            etiquette: '★ NOUVEAU MODULE',
+            titre: 'LE COMBAT ENTRE DANS LE TABLEAU DE BORD',
+            sous: 'Vos cibles, vos éliminations et un capitaine à bord',
+            intro: 'Un nouvel onglet <b>Combat</b> s’ouvre tout seul quand un combat commence, <b>sans rien saisir</b>. Il montre ce que vous verrouillez, ce que vous éliminez, et vous prévient <b>avant de tirer sur un allié</b>.',
+            colonnes: 2,
+            etapes: [
+                { n: '1', t: 'LA CIBLE VERROUILLÉE', d: 'Son hologramme, son pilote, sa faction et son rang se déchiffrent à l’écran pendant le scan, avec une menace estimée et les derniers vaisseaux verrouillés autour de vous.' },
+                { n: '2', t: 'ROUGE, VERT OU BLEU', d: 'Tout le cadre devient rouge pour un hostile, vert pour un allié (même pouvoir Powerplay, réputation amie, faction soutenue) et bleu quand le camp n’est pas connu. Prudence sur le vert et le bleu.' },
+                { n: '3', t: 'LE TABLEAU DE CHASSE', d: 'Chaque ennemi éliminé avec son vaisseau, sa prime ou son bon de guerre et son palier. Au sol, un buste d’opérateur par ennemi, et les bons de guerre répartis par palier.' },
+                { n: '4', t: 'UN CAPITAINE À BORD', d: 'Des sons accompagnent le verrouillage et le déchiffrage, et un capitaine commente les éliminations avec humour. Tout se coupe d’un clic avec l’interrupteur de l’onglet.' }
+            ],
+            avis: '<b>Plugin SYS.EDTEAM 2.38</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b>. Le camp d’une cible, la menace et les vaisseaux « ≈ » sont des <b>estimations</b> : le jeu ne signale ni vos tirs ni qui vous attaque.',
+            cta: 'OUVRIR L’ONGLET COMBAT',
+            aide: 'Menu du haut : TABLEAU DE BORD, onglet COMBAT · à utiliser sur PC ou tablette',
+            lien: 'tableau-de-bord.html?mode=cmb',
+            escadron: false,
+            mobile: false
         }
     ];
 
