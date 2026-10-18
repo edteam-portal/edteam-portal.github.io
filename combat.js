@@ -333,9 +333,10 @@
         if (/lawless|hors-la-loi/i.test(l)) return "r";
         return "b";
     }
+    const VUS_MAX = 3;      // vaisseaux verrouilles recemment affiches (cartes + contacts du radar) : 3 pour des etiquettes lisibles
     function contacts(e) {
         const c = e.cible;
-        return (e.vus || []).filter(v => !(c && v.s === c.s && v.p === c.p)).slice(-6).reverse().map(v => Object.assign({}, v, { ton: camp(v, e) }));
+        return (e.vus || []).filter(v => !(c && v.s === c.s && v.p === c.p)).slice(-VUS_MAX).reverse().map(v => Object.assign({}, v, { ton: camp(v, e) }));
     }
     // vaisseaux verrouillés récemment (sous la cible) : un hologramme par vaisseau, hors la cible en cours
     function vusHtml(e) {
@@ -522,7 +523,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-etat{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cb-etat span{border:1px solid;padding:2px 8px;font-size:11px;letter-spacing:2px}.cb-etat .r{color:var(--rg)}.cb-etat .c{color:var(--cy)}.cb-etat .j{color:var(--jn)}.cb-etat .g{color:var(--gr)}
 .cb-cible{min-height:560px;flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(255,59,48,.13),transparent 55%),repeating-linear-gradient(90deg,rgba(255,59,48,.045) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,59,48,.045) 0 1px,transparent 1px 38px)}
 .cb-cible.pvp{background:radial-gradient(circle at 50% 46%,rgba(255,215,0,.12),transparent 55%),repeating-linear-gradient(90deg,rgba(255,215,0,.04) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,215,0,.04) 0 1px,transparent 1px 38px)}
-.cb-scene{position:relative;width:760px;height:540px;margin:0 auto;transform-origin:top center}
+.cb-scene{position:absolute;width:760px;height:540px;left:50%;top:50%;margin:-270px 0 0 -380px;transform-origin:center center}      /* centree meme quand le cadre est plus etroit que 760 px (tablette) : le centre de la scene reste au centre du cadre */
 .cb-scene .fond{position:absolute;inset:0;width:100%;height:100%}.cb-scene .th2{position:absolute;left:210px;top:56px;width:340px;height:420px}.cb-scene .th2 svg{width:100%;height:100%}
 .cb-bx{position:absolute;font-size:12px;line-height:1.45;background:rgba(2,6,8,.78);border:1px solid rgba(255,59,48,.55);padding:6px 10px;min-width:170px;max-width:300px}.cb-bx small{display:block;color:var(--gr);font-size:10px;letter-spacing:2px}.cb-bx small.s{letter-spacing:1px;margin-top:3px}
 .cb-bx b{font-weight:normal;color:#fff;font-size:15px;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere;line-height:1.25;display:block}.cb-bx.long b{font-size:13px;letter-spacing:.5px}.cb-bx.cy{border-color:rgba(0,240,255,.5)}.cb-bx.jn{border-color:rgba(255,215,0,.55)}.cb-bx.jn b{color:var(--jn)}.cb-bx.pvp{border-color:rgba(255,215,0,.6)}
@@ -586,11 +587,11 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb .cb-chasse .liste,.cb .cb-3 .liste{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 10px;max-height:228px;overflow-y:auto;padding-right:6px;align-content:start;scrollbar-width:thin;scrollbar-color:rgba(255,59,48,.55) rgba(255,255,255,.04)}
 .cb .cb-chasse .liste::-webkit-scrollbar,.cb .cb-3 .liste::-webkit-scrollbar{width:7px}.cb .cb-chasse .liste::-webkit-scrollbar-track,.cb .cb-3 .liste::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}.cb .cb-chasse .liste::-webkit-scrollbar-thumb,.cb .cb-3 .liste::-webkit-scrollbar-thumb{background:rgba(255,59,48,.55);border-radius:3px}
 .cb-k{grid-template-columns:78px minmax(0,1fr) auto;gap:9px;padding:6px 9px 6px 6px;margin-bottom:8px}.cb-k .th{width:78px;height:64px}.cb-k .n{font-size:14px}.cb-k .n small{font-size:11px}.cb-k .v b{font-size:16px}.cb-k .pl{font-size:9px;letter-spacing:1px;padding:0 5px;white-space:nowrap}
-.cb-vus .g{display:flex;flex-wrap:nowrap;gap:8px}.cb-vus .v{flex:1 1 0;min-width:0;max-width:270px;grid-template-columns:minmax(0,42%) minmax(0,1fr);column-gap:8px;padding:6px 8px}
+.cb-vus .g{display:flex;flex-wrap:nowrap;gap:8px}.cb-vus .v{flex:1 1 0;min-width:0;max-width:430px;grid-template-columns:minmax(0,44%) minmax(0,1fr);column-gap:12px;padding:8px 12px}
 .cb-vus .v .h{width:100%;height:auto;aspect-ratio:5/4}.cb-vus .v .x{min-width:0;overflow:hidden}.cb-vus .v b,.cb-vus .v small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.cb-vus .t .lg{float:right;letter-spacing:1px;text-transform:uppercase;font-size:10px}.cb-vus .t .lg i{display:inline-block;width:9px;height:9px;margin:0 4px 0 12px;border-radius:50%;vertical-align:middle}.cb-vus .lg .lr{background:#FF3B30}.cb-vus .lg .lv{background:#00FF66}.cb-vus .lg .lb{background:#3D8BFF}
 .cb-vus .v.tv{border-color:rgba(0,255,102,.45);background:linear-gradient(90deg,rgba(0,255,102,.1),rgba(0,0,0,.3))}.cb-vus .v.tv .h{border-color:rgba(0,255,102,.35);background:radial-gradient(circle at 50% 50%,rgba(0,255,102,.14),rgba(0,0,0,.45))}.cb-vus .v.tv small.rg{color:#7dffb0}
 .cb-vus .v.tb{border-color:rgba(61,139,255,.5);background:linear-gradient(90deg,rgba(61,139,255,.1),rgba(0,0,0,.3))}.cb-vus .v.tb .h{border-color:rgba(61,139,255,.4);background:radial-gradient(circle at 50% 50%,rgba(61,139,255,.16),rgba(0,0,0,.45))}.cb-vus .v.tb small.rg{color:#8db8ff}
-.cb-vus .v b{font-size:clamp(10px,1vw,14px)}.cb-vus .v small{font-size:clamp(9px,.85vw,12px)}
+.cb-vus .v b{font-size:clamp(13px,1.15vw,18px);letter-spacing:1px}.cb-vus .v small{font-size:clamp(11px,.95vw,14px)}.cb-vus .v small.rg{font-size:clamp(11px,.9vw,13px)}
 .cb-bx .att{color:var(--rg);font-size:13px;letter-spacing:2px}.cb-bx .att:after{content:none}
 .cb-men .seg{display:flex;gap:4px;margin:5px 0 3px;justify-content:flex-end}.cb-men .seg i{display:block;width:34px;height:7px;background:rgba(255,255,255,.1)}
 .cb-stamp{position:absolute;left:226px;top:408px;z-index:3;transform:rotate(-13deg);border:3px solid #FF3B30;color:#FF3B30;padding:2px 16px 3px;text-align:center;background:rgba(40,0,0,.5);box-shadow:0 0 18px rgba(255,59,48,.55),inset 0 0 12px rgba(255,59,48,.25);animation:cbStamp .55s cubic-bezier(.2,1.4,.4,1) both;pointer-events:none}
