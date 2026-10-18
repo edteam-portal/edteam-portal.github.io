@@ -1249,10 +1249,9 @@
             chargerQGMobile();
             if (window.edteamIniMode) window.edteamIniMode.presence(profilCommandant);   // presence de l'Amiral (script SQL 70), au plus un appel par 6 h
             initNouveautesMobile();
-            chargerGazetteListMobile();
             if (window.QGSuivi) QGSuivi.monterMobile('m-suivi');
-            verifierNouvellesNotesMobile();
-            verifierNouvellesLivraisonsMobile();
+            // pastilles (gazette, notes, livraisons, exploits) : lues apres l'accueil, pas en meme temps que lui
+            xApres(chargerGazetteListMobile, 1800); xApres(verifierNouvellesNotesMobile, 2300); xApres(verifierNouvellesLivraisonsMobile, 2800);
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
             // Annonce d'une grande nouvelle fonction (une seule fois par pilote et par appareil) : annonce.js
             if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { mobile: true, aller: () => { switchMobileTab('bgs'); bgsVue('dir'); } });
@@ -1337,6 +1336,13 @@
         const XESC = s => escapeHtml(String(s == null ? '' : s));
         const XCOMPACT = n => { n = Number(n) || 0; if (n >= 1e9) return (n / 1e9).toFixed(2).replace('.', ',') + ' Md'; if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.', ',') + ' M'; return XF0(n); };
         const xEl = id => document.getElementById(id);
+        // lance fn apres un delai ; si l'onglet du navigateur est cache, attend qu'il redevienne visible (pas de lecture pour rien)
+        function xApres(fn, ms) {
+            setTimeout(function lancer() {
+                if (document.hidden) { document.addEventListener('visibilitychange', function une() { if (!document.hidden) { document.removeEventListener('visibilitychange', une); fn(); } }); return; }
+                fn();
+            }, ms);
+        }
         const xTxt = (id, t) => { const e = xEl(id); if (e) e.innerText = t; };
 
         // memoire de session par pilote
@@ -1471,7 +1477,7 @@
                 console.error('SYS.EDTEAM MOBILE : Erreur de rendu de l\'accueil ->', error);
             }
             chargerAccueilMobile(true);
-            if (xAccesBgs()) verifierNouveauxExploitsMobile();
+            if (xAccesBgs()) xApres(verifierNouveauxExploitsMobile, 3300);
         }
 
         // ==========================================
@@ -3914,7 +3920,8 @@
 
         // Non lues = plus récentes que la dernière lecture ; sans lecture mémorisée : celles des 14 derniers jours
         function nouveautesNonLues() {
-            const liste = Array.isArray(window.EDTEAM_NOUVEAUTES) ? window.EDTEAM_NOUVEAUTES : [];
+            const liste = Array.isArray(window.EDTEAM_NOUVEAUTES) ? window.EDTEAM_NOUVEAUTES
+                : (Array.isArray(window.EDTEAM_NOUVEAUTES_DATES) ? window.EDTEAM_NOUVEAUTES_DATES.map(d => ({ date: d })) : []);
             let vu = null;
             try { vu = localStorage.getItem(CLE_NOUV_VU); } catch (e) {}
             const seuil = vu || new Date(Date.now() - 14 * 86400000).toISOString();
@@ -3923,8 +3930,7 @@
 
         function majCarteNouveautesMobile() {
             const carte = document.getElementById('m-carte-nouveautes');
-            const liste = Array.isArray(window.EDTEAM_NOUVEAUTES) ? window.EDTEAM_NOUVEAUTES.slice().sort((a, b) => a.date < b.date ? 1 : -1) : [];
-            if (!carte || !liste.length) return;
+            if (!carte || !(Array.isArray(window.EDTEAM_NOUVEAUTES) || Array.isArray(window.EDTEAM_NOUVEAUTES_DATES))) return;
             carte.style.display = 'grid';
             const n = nouveautesNonLues().length;
             const point = document.getElementById('m-nouv-point');
@@ -3937,7 +3943,7 @@
 
         function initNouveautesMobile() {
             window.edteamMajPointNouveautes = majCarteNouveautesMobile; // appelé par nouveautes.js quand tout est lu
-            chargerScriptMobile('nouveautes-data.js?h=' + Math.floor(Date.now() / 3600000), majCarteNouveautesMobile);
+            chargerScriptMobile('nouveautes-dates.js?h=' + Math.floor(Date.now() / 3600000), majCarteNouveautesMobile);
         }
 
         function ouvrirAideMobile() {
@@ -3950,8 +3956,9 @@
         function ouvrirNouveautesMobile() {
             sonClic();
             suivreEvenementMobile('ouvrir_nouveautes');
-            if (window.edteamNouveautes) { window.edteamNouveautes.ouvrir(); return; }
-            chargerScriptMobile('nouveautes.js?v=2', () => { if (window.edteamNouveautes) window.edteamNouveautes.ouvrir(); });
+            const ouvrir = () => { if (window.edteamNouveautes) window.edteamNouveautes.ouvrir(); };
+            const avecDonnees = cb => Array.isArray(window.EDTEAM_NOUVEAUTES) ? cb() : chargerScriptMobile('nouveautes-data.js?h=' + Math.floor(Date.now() / 3600000), cb);
+            avecDonnees(() => { if (window.edteamNouveautes) ouvrir(); else chargerScriptMobile('nouveautes.js?v=2', ouvrir); });
         }
 
         // ==========================================
