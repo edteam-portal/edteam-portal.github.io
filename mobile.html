@@ -342,6 +342,38 @@
         .xrow { display: flex; align-items: center; gap: 10px; }
         .xsp { flex: 1; min-width: 0; }
         .xpill { font-size: 0.62em; letter-spacing: 1.4px; padding: 3px 8px; border-radius: 20px; border: 1px solid currentColor; white-space: nowrap; }
+        /* Batir : chantiers lisibles a distance */
+        .bt-hero { display: grid; grid-template-columns: 1.1fr 1.5fr 1fr; gap: 8px; }
+        .bt-hero > div { background: var(--x-card); border: 1px solid var(--x-line); border-radius: 14px; padding: 12px 8px; text-align: center; }
+        .bt-hero b { display: block; font-family: 'Rajdhani', sans-serif; font-size: 2.1em; line-height: 1; }
+        .bt-hero span { display: block; font-size: 0.58em; letter-spacing: 1.6px; color: var(--x-mut); margin-top: 6px; }
+        .bt-ap { display: flex; flex-direction: column; gap: 12px; }
+        .bt-ap .l { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+        .bt-ap .n { font-size: 1.02em; color: #fff; overflow-wrap: anywhere; }
+        .bt-ap .t { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.7em; color: var(--x-gold); text-shadow: 0 0 14px rgba(255,200,61,0.35); white-space: nowrap; }
+        .bt-ap .bar { height: 7px; margin-top: 6px; border-radius: 6px; background: rgba(255,255,255,0.07); overflow: hidden; }
+        .bt-ap .bar i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #a97d17, var(--x-gold)); }
+        .bt-plus > summary { list-style: none; cursor: pointer; margin-top: 12px; font-size: 0.68em; color: var(--x-mut); text-align: center; letter-spacing: 1px; }
+        .bt-plus > summary::-webkit-details-marker { display: none; }
+        .bt-cc { border-radius: 6px 18px 18px 6px; padding: 13px 14px 12px; border: 1px solid var(--x-line); border-left: 4px solid var(--col); background: var(--x-card); }
+        .bt-cc .sys { font-size: 0.6em; letter-spacing: 2px; color: var(--x-mut); }
+        .bt-cc .nom { font-size: 0.95em; color: #fff; margin-top: 3px; overflow-wrap: anywhere; }
+        .bt-cc .ligne { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; gap: 8px; }
+        .bt-cc .pct { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 3.1em; line-height: 0.9; color: var(--col); text-shadow: 0 0 18px var(--col); }
+        .bt-cc .pct small { font-size: 0.42em; }
+        .bt-cc .reste { text-align: right; }
+        .bt-cc .reste b { display: block; font-family: 'Rajdhani', sans-serif; font-size: 1.55em; color: #fff; line-height: 1; }
+        .bt-cc .reste span { font-size: 0.62em; color: var(--x-mut); }
+        .bt-cc .bar { margin-top: 10px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.07); overflow: hidden; }
+        .bt-cc .bar i { display: block; height: 100%; border-radius: 6px; background: var(--col); box-shadow: 0 0 10px var(--col); }
+        .bt-cc.clic { cursor: pointer; }
+        .bt-cc .voir { margin-top: 10px; font-size: 0.66em; color: var(--x-mut); letter-spacing: 1px; display: flex; justify-content: space-between; }
+        .bt-cc .manque { margin-top: 8px; border-top: 1px solid var(--x-line); padding-top: 8px; display: none; }
+        .bt-cc.ouvert .manque { display: block; }
+        .bt-cc .manque div { display: flex; justify-content: space-between; gap: 8px; font-size: 0.74em; color: #ccc; padding: 3px 0; }
+        .bt-cc .manque b { color: var(--x-gold); font-weight: normal; white-space: nowrap; }
+        .bt-cc.vieux { opacity: 0.62; }
+        .bt-cc .vieux-note { font-size: 0.6em; color: var(--ed-orange); margin-top: 7px; }
         .xbar { height: 6px; border-radius: 4px; background: rgba(255,255,255,0.07); overflow: hidden; }
         .xbar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--ed-orange), #ffb04d); box-shadow: 0 0 10px rgba(255,113,0,0.6); }
         .xbar.b i { background: linear-gradient(90deg, #0098a3, var(--ed-blue)); box-shadow: 0 0 10px rgba(0,240,255,0.5); }
@@ -3430,72 +3462,52 @@
                 return `<div class="xc" style="text-align: center; line-height: 1.7; padding: 26px 16px; color: #ccc;">Aucun système colonisé relevé pour l'instant.<br><span class="xmut">Un système apparaît quand le plugin (version 2.5 ou plus) de l'escadron, ou le vôtre si vous n'avez pas d'escadron, a relevé une revendication ou un chantier.</span></div>`;
             }
 
-            let html = `<div class="xkg" style="grid-template-columns: repeat(4, 1fr);">
-                <div><b style="color: ${OR};">${kpi.systemes || 0}</b><span>SYSTÈMES</span></div>
+            // chantiers de tous les systemes, a plat : sans relevé récent en dernier, puis les plus avances d'abord
+            const tous = [];
+            systemes.forEach(s => (s.chantiers || []).forEach(c => tous.push({ c, s, k: coloCalculerChantier(c) })));
+            tous.sort((x, y) => (x.k.sansReleve - y.k.sansReleve) || (y.k.pct - x.k.pct));
+            const resteTotal = tous.reduce((t, x) => t + x.k.reste, 0);
+
+            let html = `<div class="bt-hero">
+                <div><b style="color: ${BL};">${kpi.chantiers || tous.length}</b><span>CHANTIERS</span></div>
+                <div><b style="color: ${GOLD};">${fmt(resteTotal)} t</b><span>RESTE À LIVRER</span></div>
                 <div><b style="color: ${VE};">${kpi.construites || 0}</b><span>TERMINÉES</span></div>
-                <div><b style="color: ${BL};">${kpi.chantiers || 0}</b><span>CHANTIERS</span></div>
-                <div><b style="color: ${GOLD};">${fmt(kpi.tonnes_cycle || 0)} t</b><span>CYCLE</span></div>
             </div>`;
 
-            // 1) A apporter en priorite (le plus utile en jeu)
+            // 1) A apporter en priorite : les 3 plus gros manques, barre proportionnelle au plus gros (le reste est replie)
             const prio = (d.priorites || []).slice(0, 5);
             if (prio.length) {
+                const maxP = Math.max.apply(null, prio.map(p => +p.reste || 0)) || 1;
+                const ligneP = p => `<div><div class="l"><span class="n">${esc(p.nom)}</span><span class="t">${fmt(p.reste)} t</span></div><div class="bar"><i style="width: ${Math.max(3, Math.round(100 * (+p.reste || 0) / maxP))}%;"></i></div></div>`;
                 html += `<div class="xh2">À APPORTER EN PRIORITÉ</div>
-                ${coloNoteMaj(d)}
-                <div class="xc xlist" style="padding: 4px 14px;">${prio.map(p => `<div><span class="ic">⛏</span><span style="overflow-wrap: anywhere;">${esc(p.nom)}</span><span class="q" style="color: ${GOLD};">${fmt(p.reste)} t</span></div>`).join('')}</div>`;
+                <div class="xc"><div class="bt-ap">${prio.slice(0, 3).map(ligneP).join('')}</div>${prio.length > 3 ? `<details class="bt-plus"><summary>+ ${prio.length - 3} AUTRE${prio.length - 3 > 1 ? 'S' : ''} MATÉRIAU${prio.length - 3 > 1 ? 'X' : ''} ›</summary><div class="bt-ap" style="margin-top: 12px;">${prio.slice(3).map(ligneP).join('')}</div></details>` : ''}</div>`;
             }
 
-            // 2) Un bloc par systeme
-            html += `<div class="xh2">SYSTÈMES (${systemes.length})</div>`;
-            const ouvertParDefaut = systemes.length <= 2;
-            systemes.forEach(s => {
-                const chantiers = (s.chantiers || []).map(c => {
-                    const k = coloCalculerChantier(c);
-                    const manque = k.lignes.filter(l => l.reste > 0).slice(0, 3).map(l => `<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 0.72em; color: #ccc; padding-top: 4px;"><span style="overflow-wrap: anywhere;">${esc(l.nom)}</span><span style="color: ${GOLD}; flex-shrink: 0;">${fmt(l.reste)} t</span></div>`).join('');
-                    const col = couleur(k.pct);
-                    return `<div class="xc b" style="background: rgba(0,0,0,0.3); padding: 12px;">
-                        <div style="font-size: 0.88em; color: #fff; overflow-wrap: anywhere;">${esc(coloNomStation(c.station))}</div>
-                        <div style="font-size: 0.62em; margin-top: 3px; color: #8fb7bf; letter-spacing: 0.5px;">EN CONSTRUCTION${coloTypeInstallation(c.type, false) ? ' · ' + esc(coloTypeInstallation(c.type, false)) : ''}${typeRecette(c, '#8fb7bf')}</div>
-                        <div class="xrow" style="margin-top: 11px; align-items: flex-end;">
-                            <div class="xbig" style="font-size: 2.4em; color: ${col}; text-shadow: 0 0 18px ${col};">${k.pct}<span style="font-size: 0.5em;">%</span></div>
-                            <div class="xsp"></div>
-                            <div style="text-align: right;">${k.reste > 0 ? `<div class="xmut">reste</div><div class="xbig" style="font-size: 1.2em;">${fmt(k.reste)} t</div><div class="xmut" style="font-size: 0.62em;">${esc(k.eta)}</div>` : '<div class="xmut">liste non relevée</div>'}</div>
-                        </div>
-                        <div class="xbar" style="margin-top: 9px; height: 8px;"><i style="width: ${Math.min(100, k.pct)}%; background: ${col}; box-shadow: 0 0 10px ${col};"></i></div>
-                        ${manque ? `<div style="margin-top: 9px;">${manque}</div>` : ""}
-                        ${k.sansReleve ? `<div class="xmut" style="color: var(--ed-orange); font-size: 0.62em; margin-top: 7px;">sans relevé récent (${coloIlYa(c.maj_le)})</div>` : ''}
+            // 2) Les chantiers en cours, a plat (ce qui manque : replie, au toucher)
+            if (tous.length) {
+                html += `<div class="xh2">CHANTIERS EN COURS</div><div style="display: flex; flex-direction: column; gap: 12px;">${tous.map(({ c, s, k }) => {
+                    const col = k.sansReleve ? OR : couleur(k.pct);
+                    const manque = k.lignes.filter(l => l.reste > 0).slice(0, 3);
+                    const type = coloTypeInstallation(c.type, false);
+                    return `<div class="bt-cc${manque.length ? ' clic' : ''}${k.sansReleve ? ' vieux' : ''}" style="--col: ${col};"${manque.length ? ' onclick="this.classList.toggle(\'ouvert\')"' : ''}>
+                        <div class="sys">${esc(coloCourtSysteme(s.nom).toUpperCase())}${type ? ' · ' + esc(type.toUpperCase()) : ''}${typeRecette(c, '#8fb7bf')}</div>
+                        <div class="nom">${esc(coloNomStation(c.station))}</div>
+                        <div class="ligne"><div class="pct">${k.pct}<small>%</small></div><div class="reste">${k.reste > 0 ? `<b>${fmt(k.reste)} t</b><span>reste · ${esc(k.eta)}</span>` : '<b>—</b><span>liste non relevée</span>'}</div></div>
+                        <div class="bar"><i style="width: ${Math.min(100, k.pct)}%;"></i></div>
+                        ${manque.length ? `<div class="manque">${manque.map(l => `<div><span>${esc(l.nom)}</span><b>${fmt(l.reste)} t</b></div>`).join('')}</div><div class="voir"><span>CE QUI MANQUE</span><span>▾</span></div>` : ''}
+                        ${k.sansReleve ? `<div class="vieux-note">sans relevé récent (${coloIlYa(c.maj_le)})</div>` : ''}
                     </div>`;
-                }).join('');
-                const finies = (s.finies || []).map(c => `<span style="border: 1px solid rgba(0,255,102,0.35); background: rgba(0,255,102,0.05); color: var(--ed-green); font-size: 0.7em; padding: 4px 9px; border-radius: 9px;">✔ ${esc(coloNomStation(c.station))}${coloTypeInstallation(c.type, true) ? ' <span style="color: #9fd;">· ' + esc(coloTypeInstallation(c.type, true)) + '</span>' : ''}${typeRecette(c, '#9fd')}</span>`).join('');
-                const pcts = (s.chantiers || []).map(c => coloCalculerChantier(c).pct);
-                const meilleur = pcts.length ? Math.max.apply(null, pcts) : null;
-                const resume = `<span style="color: ${VE};">${(s.finies || []).length} terminée${(s.finies || []).length > 1 ? 's' : ''}</span> · <span style="color: ${OR};">${(s.chantiers || []).length} chantier${(s.chantiers || []).length > 1 ? 's' : ''}</span>${meilleur !== null ? ' · <span style="color: ' + couleur(meilleur) + ';">' + meilleur + ' % max</span>' : ''}`;
-                html += `<details ${ouvertParDefaut ? 'open' : ''} class="xc o" style="padding: 0;">
-                    <summary style="cursor: pointer; padding: 13px 14px; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                        <div style="min-width: 0;">
-                            <div class="xbig" style="font-size: 1.15em; letter-spacing: 1px; color: #fff; overflow-wrap: anywhere;">${esc(coloCourtSysteme(s.nom).toUpperCase())}</div>
-                            <div style="font-size: 0.68em; margin-top: 4px;">${resume}</div>
-                        </div>
-                        <span style="color: ${OR}; font-weight: bold; flex-shrink: 0;">▾</span>
-                    </summary>
-                    <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px;">
-                        <div style="font-size: 0.72em; color: #ccc; line-height: 1.6;">
-                            architecte : ${s.architecte ? `<span style="color: ${GOLD};">CMDR ${esc(String(s.architecte).toUpperCase())}</span>` : '<span style="color: #888;">inconnu</span>'}${coloBoutonArchitecte(s)}<br>
-                            contrôlé par : ${s.faction ? `<span style="color: ${BL};">${esc(s.faction)}</span>` : '<span style="color: #888;">faction inconnue</span>'}
-                        </div>
-                        ${chantiers}
-                        <div><div class="xk" style="color: ${VE}; margin-bottom: 7px;">Terminées (${(s.finies || []).length})</div><div style="display: flex; gap: 6px; flex-wrap: wrap;">${finies || '<span class="xmut">rien de terminé pour l\'instant</span>'}</div></div>
-                    </div>
-                </details>`;
-            });
+                }).join('')}</div>`;
+            }
 
+            // les systemes (stations terminees) se consultent sur la version PC ; les architectes restent en haut de l'onglet
             const archi = d.architectes || [];
             const bandeauArchi = archi.length ? `<details class="xc" style="padding: 0;">
                 <summary style="cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px;"><span class="xk" style="color: var(--ed-orange);">Architectes</span><span class="xpill" style="color: ${GOLD};">${archi.length}</span><span class="xsp"></span><span class="xmut" style="font-size: 1.1em;">▾</span></summary>
                 <div style="padding: 0 14px 8px;">${archi.map((a, i) => `<div class="xrow" style="padding: 7px 0; font-size: 0.78em; border-top: 1px solid var(--x-line);"><span style="color: ${i === 0 ? GOLD : '#ccc'};">#${i + 1} CMDR ${esc(String(a.cmdr).toUpperCase())}</span><span class="xsp"></span><span class="xmut">${a.systemes} sys. · ${a.stations} stat.</span></div>`).join('')}</div>
             </details>` : '';
 
-            if (kpi.maj) html += `<div class="xmut" style="text-align: center; font-size: 0.62em;">dernier relevé de chantier : ${coloIlYa(kpi.maj)}</div>`;
+            if (kpi.maj) html += `<div class="xmut" style="text-align: center; font-size: 0.62em;">dernier relevé de chantier : ${coloIlYa(kpi.maj)} · ${fmt(kpi.tonnes_cycle || 0)} t livrées ce cycle</div>`;
             html += `<div style="color: #555; font-size: 0.6em; text-align: center; line-height: 1.5;">Tableau établi d'après ce que les plugins de l'escadron ont relevé : il peut être en retard ou incomplet par rapport au jeu. Types d'installations reconnus grâce à la feuille communautaire de <a href="https://forums.frontier.co.uk/threads/v3-of-the-colonization-construction-spreadsheet-is-now-available.635762/post-10831804" target="_blank" rel="noopener noreferrer" style="color: #6f8c95; text-decoration: underline dotted;">CMDR DaftMav</a> : merci à lui.</div>`;
             return bandeauArchi + html;
         }

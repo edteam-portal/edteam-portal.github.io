@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-mobile-allege', date: '2026-10-18T20:45:00Z', type: 'AMELIORE',
         titre: 'Mobile : plus léger, journal des exploits complet',
-        texte: 'Le compagnon mobile est allégé : les blocs « L’escadron en chiffres » et « Rangs de pilote » de l’accueil, la carrière BGS de l’onglet Engagement et l’onglet Quoi faire ont disparu. Les nouveautés passent dans un bouton ✨ de l’en-tête, avec une pastille quand il y en a du non lu. Le réglage des initiatives est maintenant en bas de l’onglet Campagnes. Le journal des exploits reprend celui du PC : lignes Powerplay (mérites et CP estimés), actions des directives clôturées, faction du lieu, et filtres par période, pilote et spécialité.',
+        texte: 'Le compagnon mobile est allégé : les blocs « L’escadron en chiffres » et « Rangs de pilote » de l’accueil, la carrière BGS de l’onglet Engagement et l’onglet Quoi faire ont disparu. Les nouveautés passent dans un bouton ✨ de l’en-tête, avec une pastille quand il y en a du non lu. Le réglage des initiatives est maintenant en bas de l’onglet Campagnes. Le journal des exploits reprend celui du PC : lignes Powerplay (mérites et CP estimés), actions des directives clôturées, faction du lieu, et filtres par période, pilote et spécialité. L’onglet Bâtir est refait pour se lire d’un coup d’œil : un bandeau de 3 chiffres, les 3 matériaux à apporter en priorité, puis la liste des chantiers avec leur pourcentage en grand (touchez un chantier pour voir ce qui manque).',
         important: false
     },
     {
