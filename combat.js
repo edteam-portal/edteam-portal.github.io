@@ -222,6 +222,8 @@
         h += boite("right", 70, "PRIME", c.pm ? FR(c.pm) + " cr" : "—", "", "jn");
         const wanted = /wanted|recherch/i.test(c.l || "");
         h += boite("right", 170, j ? "STATUT LÉGAL" : "FACTION", st >= 3 || c.f ? E(j ? (c.l || "—") : (c.f || "—")) : att(""), (c.l ? (j ? "" : "STATUT : " + E(String(c.l).toUpperCase())) : "") + (c.mi ? (c.l ? " · " : "") + "★ CIBLE DE MISSION" : ""), "", wanted || c.mi ? "var(--rg)" : "var(--vt)");
+        { const cr = campR(c, e), col = { r: "var(--rg)", v: "#00FF66", b: "#6FA8FF" }[cr[0]];
+          h += boite("right", 405, "PUISSANCE DÉFENDUE", st >= 3 || c.pw ? E(c.pw || "AUCUNE") : att(""), E(cr[1]), "", col); }
         h += campCible(c, e) === "r" ? menaceHtml(c) + tamponHtml(c) : "";
         return h;
     }
@@ -303,46 +305,47 @@
         return `<div class="liste">${L.length ? L.join("") : `<div class="cb-vide">Aucun ennemi éliminé pour le moment.</div>`}</div>`;
     }
     // camp d'un vaisseau verrouille : allie (equipage, faction qui nous soutient, statut « allie »), hostile (faction ennemie de la zone, statut recherche / hors-la-loi), sinon neutre
-    function camp(v, e) {
+    // camp d'une cible : [ton, raison] (v allie, r hostile, b neutre / inconnu) ; la raison explique la couleur
+    function campR(v, e) {
         const minus = x => String(x || "").trim().toLowerCase();
         const f = minus(v.f), l = String(v.l || ""), s = minus(e.soutien), en = minus(e.ennemi);
-        if (/^(équipage|equipage|crew)\b/i.test(String(v.p || "")) || /allied|alli|friend|\bamie?s?\b/i.test(l)) return "v";
+        if (/^(équipage|equipage|crew)\b/i.test(String(v.p || "")) || /allied|alli|friend|\bamie?s?\b/i.test(l)) return ["v", /allied|alli|friend|\bamie?s?\b/i.test(l) ? "Statut légal allié ou ami" : "Votre équipage"];
         const pw = minus(e.pw);
-        if (pw && (minus(v.pw) === pw || f === pw)) return "v";                                   // meme pouvoir Powerplay : allie, en zone de conflit comme ailleurs
-        if (pw && v.pw && minus(v.pw) !== pw) return "r";                                         // autre pouvoir Powerplay : ennemi, quel que soit le statut legal
-        if ((e.ag || []).some(a => minus(a[0]) === minus(v.p) && minus(a[1]) === f)) return "r";      // cible que vous avez agressee (crime enregistre) : hostile
-        if (f && s && f === s) return "v";
-        if (f && en && f === en) return "r";
-        // zone de conflit : les deux camps sont « Lawless » dans le journal, on ne se fie donc pas au statut
+        if (pw && (minus(v.pw) === pw || f === pw)) return ["v", "Même puissance que vous (" + (v.pw || v.f) + ")"];
+        if (pw && v.pw && minus(v.pw) !== pw) return ["r", "Puissance rivale : " + v.pw + " (vous : " + e.pw + ")"];
+        if ((e.ag || []).some(a => minus(a[0]) === minus(v.p) && minus(a[1]) === f)) return ["r", "Cible que vous avez agressée"];
+        if (f && s && f === s) return ["v", "Faction que vous soutenez"];
+        if (f && en && f === en) return ["r", "Faction ennemie de la zone"];
         const fe = minus(e.fe);
         const paire = (e.cf || []).find(q => q.some(x => minus(x) === f)), autre = paire ? minus(paire.find(x => minus(x) !== f)) : "";
-        if ((paire || e.zi) && (!l || /lawless|hors-la-loi/i.test(l))) {
+        if ((paire || e.zi) && (!l || /lawless|hors-la-loi/i.test(l))) {      // zone de conflit : les deux camps sont « Lawless », on ne se fie donc pas au statut
             const sys = minus(e.sys), mem = CB.mem[sys] || {};
             const amis = [s, minus(mem.s), fe, ...(CB.dirs.l || []).filter(d => /guerre|war/i.test(d.type_ordre) && minus(d.systeme_cible) === sys).map(d => minus(d.faction_cible))].filter(Boolean);
             const ennemis = [en, minus(mem.e)].filter(Boolean);
-            if (f && amis.includes(f)) return "v";
-            if (f && ennemis.includes(f)) return "r";
-            if (f && amis.length && (!(e.cf || []).length || paire)) return "r";       // la zone n'oppose que deux camps : une faction qui n'est pas la notre est hostile
-            if (autre && ennemis.includes(autre)) return "v";
-            return "b";      // camp pas encore connu (ni directive de guerre, ni elimination) : bleu
+            if (f && amis.includes(f)) return ["v", "Faction soutenue dans cette zone de conflit"];
+            if (f && ennemis.includes(f)) return ["r", "Faction ennemie dans cette zone de conflit"];
+            if (f && amis.length && (!(e.cf || []).length || paire)) return ["r", "Faction adverse (la zone n'oppose que deux camps)"];
+            if (autre && ennemis.includes(autre)) return ["v", "Adversaire de la faction ennemie"];
+            return ["b", "Camp pas encore connu (ni directive de guerre, ni élimination)"];
         }
-        // hors zone de conflit
-        if (/wanted|enemy|warrant|hostile|recherch/i.test(l) || (v.po && /wanted|warrant/i.test(String(e.ls || "")))) return "r";     // recherche, pouvoir rival (« Enemy »), police quand on est recherche
+        if (/wanted|enemy|warrant|hostile|recherch/i.test(l)) return ["r", "Statut légal : " + (l || "recherché")];
+        if (v.po && /wanted|warrant/i.test(String(e.ls || ""))) return ["r", "Police, et vous êtes recherché"];
         const rpk = Object.keys(e.rp || {}).find(k => minus(k) === f);
-        if ((rpk && Number(e.rp[rpk]) >= 35)) return "v";       // meme pouvoir Powerplay, ou reputation amie / alliee
-        if (/lawless|hors-la-loi/i.test(l)) return "r";
-        return "b";
+        if (rpk && Number(e.rp[rpk]) >= 35) return ["v", "Réputation amie avec " + v.f];
+        if (/lawless|hors-la-loi/i.test(l)) return ["r", "Hors-la-loi (statut Lawless)"];
+        return ["b", "Aucune relation connue" + (l ? " (statut " + l + ")" : "")];
     }
+    const camp = (v, e) => campR(v, e)[0];
     const VUS_MAX = 3;      // vaisseaux verrouilles recemment affiches (cartes + contacts du radar) : 3 pour des etiquettes lisibles
     function contacts(e) {
         const c = e.cible;
-        return (e.vus || []).filter(v => !(c && v.s === c.s && v.p === c.p)).slice(-VUS_MAX).reverse().map(v => Object.assign({}, v, { ton: camp(v, e) }));
+        return (e.vus || []).filter(v => !(c && v.s === c.s && v.p === c.p)).slice(-VUS_MAX).reverse().map(v => Object.assign({}, v, { ton: camp(v, e), raison: campR(v, e)[1] }));
     }
     // vaisseaux verrouillés récemment (sous la cible) : un hologramme par vaisseau, hors la cible en cours
     function vusHtml(e) {
-        const V = contacts(e);
-        if (!V.length) return "";
-        return `<div class="cb-vus"><div class="t">VAISSEAUX VERROUILLÉS RÉCEMMENT <em>${V.length}</em><span class="lg"><i class="lr"></i>hostile<i class="lv"></i>allié<i class="lb"></i>neutre</span></div><div class="g">${V.map((v, i) => `<div class="v t${v.ton}"><div class="h">${miniHolo(v.s, "v" + i, v.ton)}</div><div class="x"><b>${E(nomVaisseau(v.s) || v.sl || "Vaisseau")}</b><small>${E((v.j ? "CMD " : "") + (v.p || ""))}</small><small class="rg">${E(v.rg || "")}</small></div></div>`).join("")}</div></div>`;
+        const V = CB.liste = contacts(e);
+        if (!V.length) return `<div class="cb-vus"><div class="t">VAISSEAUX VERROUILLÉS RÉCEMMENT <em>0</em><span class="lg"><i class="lr"></i>hostile<i class="lv"></i>allié<i class="lb"></i>neutre</span></div><div class="g"><div class="vide">AUCUN VAISSEAU VERROUILLÉ RÉCEMMENT</div></div></div>`;
+        return `<div class="cb-vus"><div class="t">VAISSEAUX VERROUILLÉS RÉCEMMENT <em>${V.length}</em><span class="lg"><i class="lr"></i>hostile<i class="lv"></i>allié<i class="lb"></i>neutre</span></div><div class="g">${V.map((v, i) => `<div class="v t${v.ton}" role="button" tabindex="0" onclick="combatVu(${i})" onkeydown="if(event.key==='Enter')combatVu(${i})" title="Cliquer pour le détail"><div class="h">${miniHolo(v.s, "v" + i, v.ton)}</div><div class="x"><b>${E(nomVaisseau(v.s) || v.sl || "Vaisseau")}</b><small>${E((v.j ? "CMD " : "") + (v.p || ""))}</small><small class="rg">${E(v.rg || "")}</small></div></div>`).join("")}</div></div>`;
     }
     function chasse(e, veille) {
         const mode = modeDe(e), titre = (veille ? "DERNIER COMBAT · " : "") + (mode === "pvp" ? "DUELS" : "TABLEAU DE CHASSE"), em = mode === "pvp" ? (e.duels || [0, 0])[0] + " gagnés · " + (e.duels || [0, 0])[1] + " perdu(s)" : (e.nb || 0) + " éliminés";
@@ -513,9 +516,9 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-stats b{display:block;color:#fff;font-size:21px;font-weight:normal;letter-spacing:1px}.cb-stats b span{display:block;font-size:11px;letter-spacing:1px;color:var(--gr);margin-top:-2px}.cb-stats small{color:var(--gr);font-size:11px;letter-spacing:2px}
 .cb-stats .r b{color:var(--rg)}.cb-stats .j b{color:var(--jn)}.cb-stats .v b{color:var(--vt)}.cb-stats .c b{color:var(--cy)}
 .cb-stats .r:before{background:var(--rg)}.cb-stats .j:before{background:var(--jn)}.cb-stats .v:before{background:var(--vt)}.cb-stats .c:before{background:var(--cy)}
-.cb-rowA{display:grid;grid-template-columns:520px minmax(0,1fr);gap:12px;margin-bottom:12px;align-items:stretch}
+.cb-rowA{display:grid;grid-template-columns:clamp(300px,34%,520px) minmax(0,1fr);gap:12px;margin-bottom:12px;align-items:stretch}
 .cb-rowB{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:12px;align-items:stretch}
-.cb-moi{display:flex;flex-direction:column}.cb-moi.pied .cb-hol{min-height:470px}.cb-moi.pied .cb-hol svg{max-height:560px}
+.cb-moi{display:flex;flex-direction:column}.cb-moi:not(.pied) .cb-hol svg{display:block;margin:0 auto;width:100%;max-height:clamp(250px,calc(100vh - 500px),440px)}      /* hologramme du pilote : proportionnel a la hauteur de la fenetre (tablette, petit portable) */.cb-moi.pied .cb-hol{min-height:470px}.cb-moi.pied .cb-hol svg{max-height:560px}
 .cb-equip{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin:10px 0 6px;border-top:1px dashed var(--ln);padding-top:9px}.cb-equip>div{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center;font-size:12px;color:#e6f4f0;min-width:0}.cb-equip b{width:20px;height:20px;border-radius:50%;border:1px solid var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:normal;font-size:11px;box-shadow:0 0 6px color-mix(in srgb,var(--c) 60%,transparent)}.cb-equip small{display:block;color:var(--gr);font-size:10px;letter-spacing:2px}.cb-equip span{min-width:0}.cb-hol{position:relative;flex:1;min-height:340px;display:flex;justify-content:center;align-items:center}.cb-hol svg{width:100%;height:100%;max-height:440px}
 .cb-barre{display:grid;grid-template-columns:78px 1fr 62px;gap:8px;align-items:center;margin:6px 0;font-size:12px}.cb-barre span{color:var(--gr);letter-spacing:2px;font-size:11px}.cb-barre .j{height:9px;background:rgba(255,255,255,.08);position:relative}.cb-barre .j i{position:absolute;left:0;top:0;bottom:0;transition:width .4s}.cb-barre b{font-weight:normal;color:#fff;text-align:right}
 .cb-armes{margin-top:8px;border-top:1px dashed var(--ln);padding-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:1px 12px}.cb-armes h3{grid-column:1/3;margin:0 0 4px;font-size:11px;letter-spacing:2px;color:var(--or);font-weight:normal}.cb-armes h3 em{color:var(--gr);font-style:normal;margin-left:6px;font-size:10px}
@@ -544,6 +547,15 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-l.mort:after{content:"";position:absolute;left:8px;top:8px;width:44px;height:34px;background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--rg) calc(50% - 1.5px),var(--rg) calc(50% + 1.5px),transparent calc(50% + 1.5px)),linear-gradient(to top left,transparent calc(50% - 1.5px),var(--rg) calc(50% - 1.5px),var(--rg) calc(50% + 1.5px),transparent calc(50% + 1.5px));filter:drop-shadow(0 0 4px var(--rg))}
 .cb-l.mort .v small{color:var(--rg)}.cb-l.verrou{border-color:var(--rg);background:linear-gradient(90deg,rgba(255,59,48,.16),rgba(0,0,0,.2));box-shadow:0 0 14px rgba(255,59,48,.25)}.cb-l.verrou .v small{color:var(--rg)}.cb-l.vu{opacity:.85}
 .cb-vide{color:var(--gr);font-size:12px;padding:6px 0}
+.cb-vus .v{cursor:pointer;transition:filter .15s}.cb-vus .v:hover{filter:brightness(1.3)}.cb-vus .v:focus{outline:1px solid #fff;outline-offset:1px}
+#cmb-modale{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);font-family:'Share Tech Mono',Consolas,monospace}
+#cmb-modale .p{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;padding:22px 24px 20px;background:linear-gradient(180deg,color-mix(in srgb,var(--m) 12%,#050202),#050202);border:1px solid var(--m);box-shadow:0 0 40px color-mix(in srgb,var(--m) 35%,transparent);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px))}
+#cmb-modale .x{position:absolute;top:12px;right:14px;background:#000;border:1px solid var(--m);color:var(--m);width:32px;height:32px;cursor:pointer;font-size:15px}#cmb-modale .x:hover{background:var(--m);color:#000}
+#cmb-modale .tt{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding-right:44px}#cmb-modale .chip{border:1px solid var(--m);color:var(--m);padding:3px 12px;font-size:12px;letter-spacing:3px}#cmb-modale .tt small{color:#8b97a0;font-size:11px;letter-spacing:2px}
+#cmb-modale .cr{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:18px;align-items:center}#cmb-modale .h{background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--m) 16%,transparent),rgba(0,0,0,.5));border:1px solid color-mix(in srgb,var(--m) 40%,transparent);padding:8px}#cmb-modale .h svg{display:block;width:100%;height:auto;max-height:340px}
+#cmb-modale .d{display:grid;gap:9px}#cmb-modale .r small{display:block;color:#8b97a0;font-size:10px;letter-spacing:2px}#cmb-modale .r b{font-weight:normal;color:#fff;font-size:16px;letter-spacing:1px;overflow-wrap:anywhere}
+#cmb-modale .rs{margin-top:16px;padding:10px 14px;border-left:3px solid var(--m);background:color-mix(in srgb,var(--m) 9%,transparent)}#cmb-modale .rs small{display:block;color:#8b97a0;font-size:10px;letter-spacing:2px}#cmb-modale .rs b{font-weight:normal;color:var(--m);font-size:15px}
+@media (max-width:640px){#cmb-modale .cr{grid-template-columns:1fr}}
 .cb-sonsbar{display:flex;justify-content:flex-end;margin:-4px 0 8px}.cb-sonsbar button{background:transparent;border:1px solid #3a4a52;color:#8b97a0;font:inherit;font-size:11px;letter-spacing:2px;padding:4px 12px;cursor:pointer}.cb-sonsbar button.on{border-color:rgba(0,240,255,.5);color:#00F0FF}.cb-sonsbar button:hover{background:rgba(0,240,255,.12);color:#fff}
 .cb-tiers{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
 .cb-tier2{position:relative;display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center;padding:12px 14px 12px 10px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 15%,transparent),rgba(0,0,0,.42) 62%);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));box-shadow:inset 0 0 26px color-mix(in srgb,var(--c) 10%,transparent)}
@@ -588,7 +600,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb .cb-chasse .liste::-webkit-scrollbar,.cb .cb-3 .liste::-webkit-scrollbar{width:7px}.cb .cb-chasse .liste::-webkit-scrollbar-track,.cb .cb-3 .liste::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}.cb .cb-chasse .liste::-webkit-scrollbar-thumb,.cb .cb-3 .liste::-webkit-scrollbar-thumb{background:rgba(255,59,48,.55);border-radius:3px}
 .cb-k{grid-template-columns:78px minmax(0,1fr) auto;gap:9px;padding:6px 9px 6px 6px;margin-bottom:8px}.cb-k .th{width:78px;height:64px}.cb-k .n{font-size:14px}.cb-k .n small{font-size:11px}.cb-k .v b{font-size:16px}.cb-k .pl{font-size:9px;letter-spacing:1px;padding:0 5px;white-space:nowrap}
 .cb-vus .g{display:flex;flex-wrap:nowrap;gap:8px}.cb-vus .v{flex:1 1 0;min-width:0;max-width:430px;grid-template-columns:minmax(0,44%) minmax(0,1fr);column-gap:12px;padding:8px 12px}
-.cb-vus .v .h{width:100%;height:auto;aspect-ratio:5/4}.cb-vus .v .x{min-width:0;overflow:hidden}.cb-vus .v b,.cb-vus .v small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.cb-vus .t .lg{float:right;letter-spacing:1px;text-transform:uppercase;font-size:10px}.cb-vus .t .lg i{display:inline-block;width:9px;height:9px;margin:0 4px 0 12px;border-radius:50%;vertical-align:middle}.cb-vus .lg .lr{background:#FF3B30}.cb-vus .lg .lv{background:#00FF66}.cb-vus .lg .lb{background:#3D8BFF}
+.cb-vus .g{height:98px}.cb-vus .v{height:98px;box-sizing:border-box}.cb-vus .v .h{width:100%;height:82px;aspect-ratio:auto}.cb-vus .v .h svg{width:100%;height:100%}.cb-vus .vide{flex:1;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,.18);color:var(--gr);font-size:12px;letter-spacing:1px;height:98px;box-sizing:border-box}.cb-vus .v .x{min-width:0;overflow:hidden}.cb-vus .v b,.cb-vus .v small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.cb-vus .t .lg{float:right;letter-spacing:1px;text-transform:uppercase;font-size:10px}.cb-vus .t .lg i{display:inline-block;width:9px;height:9px;margin:0 4px 0 12px;border-radius:50%;vertical-align:middle}.cb-vus .lg .lr{background:#FF3B30}.cb-vus .lg .lv{background:#00FF66}.cb-vus .lg .lb{background:#3D8BFF}
 .cb-vus .v.tv{border-color:rgba(0,255,102,.45);background:linear-gradient(90deg,rgba(0,255,102,.1),rgba(0,0,0,.3))}.cb-vus .v.tv .h{border-color:rgba(0,255,102,.35);background:radial-gradient(circle at 50% 50%,rgba(0,255,102,.14),rgba(0,0,0,.45))}.cb-vus .v.tv small.rg{color:#7dffb0}
 .cb-vus .v.tb{border-color:rgba(61,139,255,.5);background:linear-gradient(90deg,rgba(61,139,255,.1),rgba(0,0,0,.3))}.cb-vus .v.tb .h{border-color:rgba(61,139,255,.4);background:radial-gradient(circle at 50% 50%,rgba(61,139,255,.16),rgba(0,0,0,.45))}.cb-vus .v.tb small.rg{color:#8db8ff}
 .cb-vus .v b{font-size:clamp(13px,1.15vw,18px);letter-spacing:1px}.cb-vus .v small{font-size:clamp(11px,.95vw,14px)}.cb-vus .v small.rg{font-size:clamp(11px,.9vw,13px)}
@@ -699,6 +711,26 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
     // interrupteur « sons du combat » (en plus du bouton ♪ du tableau de bord)
     function sonsEtiquette() { const b = document.getElementById("cmb-sons-btn"); if (!b) return; let on = true; try { on = localStorage.getItem("edteam_cmb_sons") !== "0"; } catch (x) {} b.className = on ? "on" : ""; b.textContent = (on ? "🔊" : "🔇") + " SONS DU COMBAT : " + (on ? "ACTIFS" : "COUPÉS"); }
     window.combatSons = function () { let on = true; try { on = localStorage.getItem("edteam_cmb_sons") !== "0"; localStorage.setItem("edteam_cmb_sons", on ? "0" : "1"); } catch (x) {} if (on) son("decryptage", false); else son("prechauffe"); sonsEtiquette(); if (typeof sonClic === "function") sonClic(); };
+    // modale du detail d'un vaisseau verrouille recemment
+    window.combatVu = function (i) {
+        const v = (CB.liste || [])[i]; if (!v) return;
+        const col = { r: "#FF3B30", v: "#00FF66", b: "#3D8BFF" }[v.ton], lib = { r: "HOSTILE", v: "ALLIÉ · NE PAS TIRER", b: "NEUTRE / CAMP INCONNU" }[v.ton];
+        const nom = (typeof nomVaisseau === "function" && nomVaisseau(v.s)) || v.sl || "Vaisseau", age = v.t ? Math.max(0, Math.round(Date.now() / 1000 - v.t)) : null;
+        const il = age === null ? "" : (age < 90 ? "il y a " + age + " s" : "il y a " + Math.round(age / 60) + " min");
+        const ligne = (t, x) => x ? '<div class="r"><small>' + t + '</small><b>' + x + '</b></div>' : "";
+        let m = document.getElementById("cmb-modale"); if (m) m.remove();
+        m = document.createElement("div"); m.id = "cmb-modale"; m.style.setProperty("--m", col);
+        m.innerHTML = '<div class="p" onclick="event.stopPropagation()"><button type="button" class="x" onclick="combatVuFermer()" title="Fermer (Échap)">✕</button>'
+            + '<div class="tt"><span class="chip">' + lib + '</span><small>VAISSEAU VERROUILLÉ' + (il ? " · " + il : "") + '</small></div>'
+            + '<div class="cr"><div class="h">' + miniHolo(v.s, "mv", v.ton) + '</div><div class="d">'
+            + ligne("VAISSEAU", E(String(nom).toUpperCase())) + ligne("PILOTE", (v.j ? "CMD " : "") + E(v.p || "—")) + (v.j ? "" : ligne("TYPE", "PNJ")) + ligne("RANG", E(String(v.rg || "").toUpperCase())) + ligne("FACTION", E(v.f || "—"))
+            + ligne("PUISSANCE DÉFENDUE", E(v.pw || "AUCUNE")) + ligne("STATUT LÉGAL", E(v.l || "—")) + '</div></div>'
+            + '<div class="rs"><small>POURQUOI CE CAMP ?</small><b>' + E(v.raison || "") + '</b></div></div>';
+        m.addEventListener("click", combatVuFermer); document.body.appendChild(m);
+        if (!window.__cmbEsc) { window.__cmbEsc = 1; document.addEventListener("keydown", e => { if (e.key === "Escape") combatVuFermer(); }); }
+        if (typeof sonClic === "function") sonClic();
+    };
+    window.combatVuFermer = function () { const m = document.getElementById("cmb-modale"); if (m) m.remove(); };
     window.combatHtml = function () { return squelette(); };
     window.combatApres = function () {
         if (!document.getElementById("cmb")) return;
@@ -769,7 +801,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
                 const tg = document.getElementById("cmb-tag"); if (tg) tg.textContent = c ? (ton === "v" ? "◉ CIBLE ALLIÉE · NE PAS TIRER" : ton === "b" ? (!(c.f || c.l) ? "◉ ANALYSE DE LA CIBLE" : (ev.zi || (ev.cf || []).length) ? "◉ CAMP À VÉRIFIER · PRUDENCE" : "◉ CIBLE NEUTRE") : c.j ? "◉ VERROUILLAGE ACTIF · JOUEUR" : "◉ VERROUILLAGE ACTIF") : "○ AUCUNE CIBLE";
                 const ti = document.getElementById("cmb-cible-t"); if (ti) ti.innerHTML = (ton === "v" ? "CIBLE ALLIÉE VERROUILLÉE" : ton === "b" && (c.f || c.l) ? ((ev.zi || (ev.cf || []).length) ? "CIBLE À VÉRIFIER VERROUILLÉE" : "CIBLE NEUTRE VERROUILLÉE") : c && c.j ? "JOUEUR VERROUILLÉ" : "CIBLE VERROUILLÉE") + (c ? ` <em>scan ${Math.min(3, c.st || 0)}/3</em>` : "");
                 maj("cmb-pied", piedCible(ev, c));
-                masque("cmb-vus", veille ? "" : vusHtml(ev));
+                masque("cmb-vus", vusHtml(ev));
                 echelle();
             }
         }

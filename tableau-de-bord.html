@@ -24,7 +24,7 @@
     <script src="minage.js?v=15"></script>
     <script src="exobio-valeurs.js?v=1"></script>
     <script src="exploration.js?v=52"></script>
-    <script src="combat.js?v=39"></script>
+    <script src="combat.js?v=41"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -499,6 +499,7 @@
         .tb-vm .cd .px { color:#FFD700; font-size:1.05em; white-space:nowrap; } .tb-vm .cd .px small { display:inline; }
         .tb-vm .cd .gn b { font-weight:normal; font-size:1.05em; } .tb-vm .cd .ag { font-size:.8em; }
         @media (max-width:1100px) { .tb-vm .cd { grid-template-columns:1fr 1fr; } }
+    #display-area { overflow-anchor: none; }     /* le navigateur ne decale plus la page tout seul quand le contenu change au-dessus de la zone regardee */
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -658,6 +659,8 @@
             if (MODE === "min" && typeof minageApres === "function") minageApres();
             if (MODE === "exp" && typeof explorationApres === "function") explorationApres();
             if (MODE === "cmb" && typeof combatApres === "function") combatApres();
+            zone.scrollTop = haut;      // la page est reconstruite en deux temps (squelette puis hologrammes) : on remet la position de defilement une fois le contenu en place, sinon elle saute (tablette)
+            requestAnimationFrame(() => { zone.scrollTop = haut; });
             majModale();
             tic();
             declencherVente();
