@@ -812,6 +812,12 @@
         function panneauCommerce() {
             // meme hologramme (modules du vaisseau) que l'onglet Missions : les racks de soute portent la cargaison (survol par marchandise) ; repli sur l'ancienne soute sans modules (plugin < 2.18) ou sans silhouette
             const nv = vendables().length, pied = `<div class="tbm-vente">${boutonRegistre()}</div>`;
+            // vaisseau pas encore modelise en hologramme (ecran large) : uniquement la CARTE du trajet, a droite de la feuille de route
+            if (window.innerWidth >= LARGE && !silhouetteActive()) {
+                const grandeC = carteCommerceHtml({ grande: true }) || carteVideHtml();
+                return `<div class="tbx-strip">${bandeauRang()}${cartes()}</div>
+                <div class="tbp-duo tbs tbmis"><div class="tb-etroit">${feuilleHtml()}</div><div class="tbp-droite">${grandeC}</div></div>`;
+            }
             const v = S && S.vaisseau, aMod = !!(v && v.mods && v.mods.length && typeof modulesHtml === "function");
             if (aMod) {
                 // deux vues comme l'onglet Missions : vaisseau (mini-carte dans la scene) ou carte du trajet ; sans trajet a tracer, le vaisseau seul
@@ -1757,6 +1763,8 @@
         const REGL = { etapes: [4, 6, 8, 10].includes(Number(lire("edteam_tb_etapes"))) ? Number(lire("edteam_tb_etapes")) : 8, heures: Number(lire("edteam_tb_heures")) || 72, grande: lire("edteam_tb_grande") !== "0", saut: Number(lire("edteam_tb_saut")) || 0 };
         const TOURNEE = { statut: "vide", donnees: null, message: "", calcule: null, essais: 0, minuteur: null, jeton: 0, t0: lire("edteam_tb_t0") || null, regl: null };
         const CLE_STOCK = "edteam_tb_tournee", CLE_ATTENTE = "edteam_tb_attente";
+        // un porte-vaisseaux (indicatif du type ABC-123) n'est pas un depart valable pour la recherche de tournee (Spansh ne trouve rien) : le serveur choisit alors la station la plus proche
+        const estPorteVaisseaux = n => /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(String(n || "").trim().toUpperCase());
         const sautAuto = () => { const v = S && S.vaisseau && Number(S.vaisseau.saut); return v ? Math.max(8, Math.floor(v * 0.85)) : 30; };
         const sautUtilise = () => REGL.saut || sautAuto();
         const reglCourants = () => ({ etapes: REGL.etapes, heures: REGL.heures, grande: REGL.grande, saut: sautUtilise() });
@@ -1798,7 +1806,7 @@
         async function interroger(jeton) {
             if (jeton !== TOURNEE.jeton || !S) return;
             const so = S.soute || {};
-            const args = { p_systeme: S.systeme, p_station: S.amarre && S.station ? S.station : null, p_cap: Number(so.cap) || 100, p_capital: Number(S.credits) || 50000000,
+            const args = { p_systeme: S.systeme, p_station: S.amarre && S.station && !estPorteVaisseaux(S.station) ? S.station : null, p_cap: Number(so.cap) || 100, p_capital: Number(S.credits) || 50000000,
                 p_saut: sautUtilise(), p_etapes: REGL.etapes, p_grande: REGL.grande, p_heures: REGL.heures };
             let r;
             try { r = await supabaseApp.rpc("tournee_commerce", args); } catch (e) { r = { error: { message: "Connexion impossible." } }; }

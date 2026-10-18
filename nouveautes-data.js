@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-commerce-pv-carte', date: '2026-10-18T12:52:00Z', type: 'CORRIGE',
+        titre: 'Commerce : tournée depuis un porte-vaisseaux, et carte pour les vaisseaux sans hologramme',
+        texte: 'La feuille de route ne trouvait aucune tournée quand vous étiez amarré à un porte-vaisseaux, car la recherche ne sait pas partir d’un porte-vaisseaux. Elle part maintenant de la station la plus proche. D’autre part, si votre vaisseau n’a pas encore d’hologramme, l’onglet Commerce affiche directement la carte du trajet à côté de la feuille de route, sans bouton de bascule.',
+        important: false
+    },
+    {
         id: '2026-10-flotte-hologrammes', date: '2026-10-18T12:36:00Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : 12 nouveaux vaisseaux en hologramme',
         texte: 'Votre vaisseau s’affiche en hologramme dans l’onglet Missions : modules, passagers dans leurs cabines et soute. Douze vaisseaux s’ajoutent : Imperial Courier, Imperial Cutter, Fer-de-Lance, Kestrel Mk II, Type-11 Prospector, Dolphin, Beluga Liner, Diamondback Scout, Cobra Mk V, Federal Gunship, Python et Python Mk II. Ils rejoignent le Panther, le Lynx, le Mandalay, le Type-8, le Caspian, l’Anaconda et la Corvette : 19 vaisseaux au total, 27 autres arriveront plus tard. Une annonce en plein écran présente la liste, une seule fois.',
