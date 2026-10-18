@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-flotte-hologrammes', date: '2026-10-18T12:36:00Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : 12 nouveaux vaisseaux en hologramme',
+        texte: 'Votre vaisseau s’affiche en hologramme dans l’onglet Missions : modules, passagers dans leurs cabines et soute. Douze vaisseaux s’ajoutent : Imperial Courier, Imperial Cutter, Fer-de-Lance, Kestrel Mk II, Type-11 Prospector, Dolphin, Beluga Liner, Diamondback Scout, Cobra Mk V, Federal Gunship, Python et Python Mk II. Ils rejoignent le Panther, le Lynx, le Mandalay, le Type-8, le Caspian, l’Anaconda et la Corvette : 19 vaisseaux au total, 27 autres arriveront plus tard. Une annonce en plein écran présente la liste, une seule fois.',
+        important: false
+    },
+    {
         id: '2026-10-campagnes-par-systeme', date: '2026-10-18T11:12:00Z', type: 'AMELIORE',
         titre: 'Campagnes : les missions classées par système',
         texte: 'Dans chaque campagne, les missions sont maintenant rangées par système, de A à Z, tous types mélangés (BGS, Powerplay, colonisation). Quand un système a plusieurs missions, elles sont regroupées sous un petit en-tête avec le nom du système et leur nombre. Sur PC comme sur mobile.',

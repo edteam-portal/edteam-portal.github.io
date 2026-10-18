@@ -122,6 +122,24 @@
             cta: 'DÉCOUVRIR LES CAMPAGNES',
             aide: 'Page BGS',
             lien: 'bgs.html'
+        },
+        {
+            id: 'flotte-2026-10',
+            couleur: '#00F0FF',
+            etiquette: '★ MISE À JOUR',
+            titre: 'DE NOUVEAUX VAISSEAUX EN HOLOGRAMME',
+            sous: 'Vos modules, vos passagers et votre soute, vus de dessus',
+            intro: 'Dans l’onglet Missions du tableau de bord, <b>votre vaisseau s’affiche en hologramme</b> : chaque module, vos passagers dans leurs cabines, votre soute qui se remplit. <b>Douze vaisseaux s’ajoutent aujourd’hui</b> à ceux déjà disponibles.',
+            etapes: [],
+            plein: true,
+            aVenir: 27,
+            galerie: [["Anaconda","images/vaisseaux/anaconda-dessus.webp"],["Beluga Liner","images/vaisseaux/beluga-dessus.webp"],["Caspian Explorer","images/vaisseaux/caspian-dessus.webp"],["Cobra Mk V","images/vaisseaux/cobramkv-dessus.webp"],["Diamondback Scout","images/vaisseaux/diamondback-dessus.webp"],["Dolphin","images/vaisseaux/dolphin-dessus.webp"],["Federal Corvette","images/vaisseaux/corvette-dessus.webp"],["Federal Gunship","images/vaisseaux/gunship-dessus.webp"],["Fer-de-Lance","images/vaisseaux/fdl-dessus.webp"],["Imperial Courier","images/vaisseaux/courrier-dessus.webp"],["Imperial Cutter","images/vaisseaux/cutter-dessus.webp"],["Kestrel Mk II","images/vaisseaux/kestrel-dessus.webp"],["Lynx Highliner","images/vaisseaux/lynx-dessus.webp"],["Mandalay","images/vaisseaux/mandalay-dessus.webp"],["Panther Clipper Mk II","images/vaisseaux/panther-dessus.webp"],["Python","images/vaisseaux/python-dessus.webp"],["Python Mk II","images/vaisseaux/pythonmk2-dessus.webp"],["Type-11 Prospector","images/vaisseaux/t11-dessus.webp"],["Type-8 Transporter","images/vaisseaux/type8-dessus.webp"]],
+            avis: '<b>Rien à faire de votre côté</b> : si votre vaisseau est dans la liste, l’hologramme apparaît tout seul. Sinon, vous gardez l’affichage habituel, avec les mêmes informations.',
+            cta: 'OUVRIR LE TABLEAU DE BORD',
+            aide: 'Menu du haut : TABLEAU DE BORD, onglet MISSIONS · à utiliser sur PC ou tablette',
+            lien: 'tableau-de-bord.html?mode=mis',
+            escadron: false,
+            mobile: false
         }
     ];
 
@@ -154,6 +172,17 @@
             '#edteam-annonce .anc-btn.gris{background:transparent;border-color:#555;color:#aaa}',
             '#edteam-annonce .anc-btn.gris:hover{background:#aaa;color:#000;box-shadow:none}',
             '#edteam-annonce .anc-aide{margin-top:12px;color:#777;font-size:.75em;letter-spacing:1px}',
+            '#edteam-annonce .anc-boite.plein{width:min(96vw,1180px)}',
+            '#edteam-annonce .anc-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:20px 0 0}',
+            '#edteam-annonce .anc-nef{position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--anc) 35%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--anc) 6%,transparent),rgba(0,0,0,.35));padding:8px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:6px}',
+            '#edteam-annonce .anc-nef:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 4px)}',
+            '#edteam-annonce .anc-nef img{height:150px;max-width:100%;object-fit:contain;transform:rotate(180deg);filter:grayscale(1) sepia(1) hue-rotate(150deg) saturate(4) brightness(1.05) contrast(1.05) drop-shadow(0 0 6px rgba(0,240,255,.55));opacity:.9}',
+            '#edteam-annonce .anc-nef span{color:#fff;font-size:.66em;letter-spacing:1.5px;text-align:center;line-height:1.3}',
+            '#edteam-annonce .anc-aven{margin:16px 0 0;border:1px dashed rgba(139,151,160,.55);padding:14px 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;text-align:left;background:rgba(255,255,255,.02)}',
+            '#edteam-annonce .anc-aven b{font-size:2.1em;color:#FF9A1F;letter-spacing:2px;line-height:1}',
+            '#edteam-annonce .anc-aven p{margin:0;flex:1;min-width:220px;color:#aab4bb;font-size:.84em;line-height:1.55} #edteam-annonce .anc-aven p strong{color:#fff;font-weight:normal}',
+            '#edteam-annonce .anc-barre{height:8px;flex-basis:100%;background:#0a1418;border:1px solid #1f2d33;position:relative} #edteam-annonce .anc-barre i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#007a85,var(--anc));box-shadow:0 0 10px color-mix(in srgb,var(--anc) 60%,transparent)}',
+            '@media (max-width:640px){#edteam-annonce .anc-gal{grid-template-columns:repeat(2,1fr)}#edteam-annonce .anc-nef img{height:110px}}',
             '@keyframes ancFond{from{opacity:0}to{opacity:1}}',
             '@keyframes ancEntree{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:none}}',
             '@media (max-width:640px){#edteam-annonce{align-items:flex-start}#edteam-annonce .anc-boite{padding:16px 14px 14px}#edteam-annonce .anc-eti{letter-spacing:2px;font-size:.7em;padding:3px 10px}#edteam-annonce .anc-titre{font-size:1.1em;letter-spacing:1.5px;margin:12px 0 4px}#edteam-annonce .anc-sous{font-size:.8em;letter-spacing:1px}#edteam-annonce .anc-intro{font-size:.82em;margin-top:10px;line-height:1.5}#edteam-annonce .anc-etapes{grid-template-columns:minmax(0,1fr);gap:8px;margin-top:14px}#edteam-annonce .anc-etape{display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:10px;padding:8px 10px}#edteam-annonce .anc-n{grid-row:1/3}#edteam-annonce .anc-et{margin-top:0;font-size:.76em}#edteam-annonce .anc-ed{margin-top:3px;font-size:.74em;line-height:1.4}#edteam-annonce .anc-actions{margin-top:14px;gap:8px}#edteam-annonce .anc-btn{width:100%;padding:11px 10px;font-size:.9em}#edteam-annonce .anc-aide{margin-top:8px;font-size:.68em}}',
@@ -169,12 +198,14 @@
         ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', a.titre);
         ov.style.setProperty('--anc', a.couleur);
         if (a.colonnes) ov.style.setProperty('--anc-cols', a.colonnes);
-        ov.innerHTML = '<div class="anc-boite">'
+        ov.innerHTML = '<div class="anc-boite' + (a.plein ? ' plein' : '') + '">'
             + '<span class="anc-eti">' + esc(a.etiquette) + '</span>'
             + '<div class="anc-titre">' + esc(a.titre) + '</div>'
             + '<div class="anc-sous">' + esc(a.sous) + '</div>'
             + '<div class="anc-intro">' + a.intro + '</div>'
             + '<div class="anc-etapes">' + a.etapes.map(function (e) { return '<div class="anc-etape"><span class="anc-n">' + esc(e.n) + '</span><div class="anc-et">' + esc(e.t) + '</div><div class="anc-ed">' + esc(e.d) + '</div></div>'; }).join('') + '</div>'
+            + (a.galerie ? '<div class="anc-gal">' + a.galerie.map(function (g) { return '<div class="anc-nef"><img src="' + esc(g[1]) + '" alt="' + esc(g[0]) + '" loading="lazy"><span>' + esc(g[0]).toUpperCase() + '</span></div>'; }).join('') + '</div>'
+                + '<div class="anc-aven"><b>' + a.aVenir + '</b><p><strong>vaisseaux encore à faire.</strong> Ils arriveront plus tard. ' + a.galerie.length + ' vaisseaux sont déjà modélisés, sur ' + (a.galerie.length + a.aVenir) + ' au total.</p><div class="anc-barre"><i style="width:' + (100 * a.galerie.length / (a.galerie.length + a.aVenir)).toFixed(1) + '%"></i></div></div>' : '')
             + (a.avis ? '<div class="anc-avis">' + a.avis + '</div>' : '')
             + '<div class="anc-actions"><button type="button" class="anc-btn" data-a="go">' + esc(a.cta) + '</button><button type="button" class="anc-btn gris" data-a="fermer">J’AI COMPRIS</button></div>'
             + '<div class="anc-aide">' + esc(a.aide) + '</div></div>';
