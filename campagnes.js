@@ -44,6 +44,8 @@
             '.camp-grip { color:#666; font-size:1.1em; letter-spacing:-3px; user-select:none; padding:0 2px; } .camp-tete:hover .camp-grip { color:#ddd; }',
             '.camp-carte { position:relative; } .camp-carte.glisse { opacity:.45; } .camp-carte.depot { outline:2px dashed #fff; outline-offset:-3px; background:rgba(255,255,255,.04); }',
             '.camp-trait { position:absolute; left:0; right:0; height:4px; background:#fff; box-shadow:0 0 12px #fff; z-index:20; pointer-events:none; } .camp-ligne.glisse { opacity:.35; }',
+            '.camp-sys { border-top:1px solid rgba(255,255,255,.22); } .camp-sys > .camp-ligne:first-of-type { border-top:0; }',
+            '.camp-sys-t { padding:7px 8px 4px; font-size:.78em; letter-spacing:3px; color:#cfe; background:rgba(255,255,255,.04); } .camp-sys-t span { color:#778; letter-spacing:1px; }',
             '.camp-ligne.veille { opacity:.55; }',
             '.camp-ligne.gris { opacity:.4; filter:grayscale(1); cursor:not-allowed; }',
             '.camp-ligne .txt { display:flex; align-items:center; gap:12px; min-width:0; }',
@@ -109,6 +111,18 @@
             + '<div class="camp-info">' + (m.info || '') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
     }
 
+    // lignes triées par système : en-tête « ◈ SYSTÈME · n missions » quand un système en a plusieurs
+    function groupes(lignes) {
+        var out = '', i = 0;
+        while (i < lignes.length) {
+            var j = i; while (j < lignes.length && lignes[j].sys === lignes[i].sys) j++;
+            var lot = lignes.slice(i, j).map(ligne).join('');
+            out += (j - i > 1 && lignes[i].sys) ? '<div class="camp-sys"><div class="camp-sys-t">◈ ' + esc(lignes[i].sys) + ' <span>· ' + (j - i) + ' missions</span></div>' + lot + '</div>' : lot;
+            i = j;
+        }
+        return out;
+    }
+
     // Les missions BGS d'une campagne : directives actives (en veille grisees)
     // influence de la faction en %, evolution depuis la directive (fleche) et etats actifs (guerre, election, epidemie, crise...), d'apres les releves EDSM
     function infoFaction(o) {
@@ -140,7 +154,7 @@
             var rs = resume[o.id] || {}; var mt = meta[o.id] || { global: 0 };
             var veille = veilleIds.has(String(o.id));
             var typeFr = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' }[o.type_ordre] || String(o.type_ordre || '').toUpperCase();
-            return { tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' ? '#FF3B3B' : o.type_ordre === 'ELECTION' ? '#4DA3FF' : null), veille: veille, pct: mt.global || 0, vous: mt.vous, avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
+            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' ? '#FF3B3B' : o.type_ordre === 'ELECTION' ? '#4DA3FF' : null), veille: veille, pct: mt.global || 0, vous: mt.vous, avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
                 clic: "ouvrirDetailResultat('" + o.id + "')", info: infoFaction(o),
                 texte: '<b>' + esc(String(o.systeme_cible || '').toUpperCase()) + '</b> <em>· ' + esc(String(o.faction_cible || '').toUpperCase()) + (veille ? ' · EN VEILLE' : '') + '</em>' };
         });
@@ -173,6 +187,8 @@
             var lignes = missionsBgs(ordres, opts.veilleIds || new Set(), opts.resume || {}, opts.meta || {});
             if (window.edteamCampagnesPP && !c.synthetique) lignes = lignes.concat(window.edteamCampagnesPP.lignes(c.id));
             if (window.edteamCampagnesCOL && !c.synthetique) lignes = lignes.concat(window.edteamCampagnesCOL.lignes(c.id));
+            // tri alphabétique par système (puis par type, stable) ; un système qui a plusieurs missions est regroupé sous un en-tête
+            lignes = lignes.map(function (l, i) { l.o = i; return l; }).sort(function (a, b) { return String(a.sys || '').localeCompare(String(b.sys || ''), 'fr') || (a.o - b.o); });
             var mesurees = lignes.filter(function (l) { return l.pct != null; });
             var av = mesurees.length ? Math.round(mesurees.reduce(function (s, l) { return s + (Number(l.pct) || 0); }, 0) / mesurees.length) : 0;
             var avous = lignes.filter(function (l) { return l.vous != null && l.pct != null; });
@@ -189,7 +205,7 @@
                 + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + fond(col, av) + '; --c:' + col + ';">' + neon(col, av, vAv) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, av, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
                 + (info ? '<span style="color:#888; font-size:.78em;">' + info + '</span>' : '') + pastille('PRIORITÉ ' + pr[0], pr[1])
                 + (actions ? '<span class="camp-actions">' + actions + '</span>' : '') + '</div>'
-                + '<div class="camp-lignes">' + (lignes.length ? lignes.map(ligne).join('') : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
+                + '<div class="camp-lignes">' + (lignes.length ? groupes(lignes) : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
                 + '</div>';
         }).join('') + '</div>';
         brancherGlisser(zone);

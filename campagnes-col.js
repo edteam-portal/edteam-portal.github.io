@@ -37,7 +37,7 @@
             return ((vue && vue.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(campagneId); }).map(function (m) {
                 var nb = Number(m.nb_livreurs) || 0;
                 var totL = (m.livreurs || []).reduce(function (s, p) { return s + (Number(p.t) || 0); }, 0), partL = totL > 0 ? Math.round((Number(m.tonnes_moi) || 0) * 100 / totL) : 0;
-                return { tag: 'COL #' + m.id + ' - ' + (m.type_col === 'CHANTIERS' ? 'CHANTIERS' : 'SYSTÈME'), domaine: 'COL', id: m.id, couleur: OR, pct: m.pct, vous: m.type_col === 'CHANTIERS' ? Math.round(m.pct * partL / 100) : null,
+                return { sys: String(m.systeme || '').toUpperCase(), tag: 'COL #' + m.id + ' - ' + (m.type_col === 'CHANTIERS' ? 'CHANTIERS' : 'SYSTÈME'), domaine: 'COL', id: m.id, couleur: OR, pct: m.pct, vous: m.type_col === 'CHANTIERS' ? Math.round(m.pct * partL / 100) : null,
                     avatars: window.edteamCampagnes ? window.edteamCampagnes.avatars((m.livreurs || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : '',
                     legendeTitre: m.type_col === 'CHANTIERS' ? 'Tonnes livrées sur les chantiers visés. La lueur néon à gauche : votre part des livraisons depuis la mission (' + partL + ' %).' : 'Étape de la colonisation du système : ' + (ETAPE_COURT[m.etape_fait] || ''),
                     clic: 'edteamCampagnesCOL.ouvrir(' + m.id + ')',

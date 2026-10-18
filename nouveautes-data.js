@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-campagnes-par-systeme', date: '2026-10-18T11:12:00Z', type: 'AMELIORE',
+        titre: 'Campagnes : les missions classées par système',
+        texte: 'Dans chaque campagne, les missions sont maintenant rangées par système, de A à Z, tous types mélangés (BGS, Powerplay, colonisation). Quand un système a plusieurs missions, elles sont regroupées sous un petit en-tête avec le nom du système et leur nombre. Sur PC comme sur mobile.',
+        important: false
+    },
+    {
         id: '2026-10-interception-bug', date: '2026-10-17T19:43:00Z', type: 'CORRIGE',
         titre: 'Tableau de bord : interception avec des passagers sans annonce',
         texte: 'Certaines interceptions par un PNJ ne déclenchaient pas l’annonce du pilote ni les cris des passagers pendant le mini-jeu, car le jeu n’envoie pas toujours de message de début. Le plugin détecte désormais l’interception directement dans l’état du vaisseau : l’annonce et les cris partent à chaque interception avec des passagers à bord, que l’interdicteur soit un PNJ ou un joueur.',

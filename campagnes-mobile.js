@@ -112,15 +112,28 @@
             d: '<b style="color:#fff;">' + lib + '</b>' + (m.terminee ? ' <span style="color:#2fe07a;">✓</span>' : ''), clic: 'edteamCampagnesMob.deplier(\'' + id + '\')' })
             + '<div class="mc-det" id="' + id + '" style="display:none;">' + detailCOL(m) + '</div></div>';
     }
+    // tri alphabétique par système ; un système qui a plusieurs missions est regroupé sous un en-tête « ◈ SYSTÈME · n missions »
+    function groupesSys(l) {
+        l = l.map(function (x, i) { x.o = i; return x; }).sort(function (a, b) { return a.s.localeCompare(b.s, 'fr') || (a.o - b.o); });
+        var out = [], i = 0;
+        while (i < l.length) {
+            var j = i; while (j < l.length && l[j].s === l[i].s) j++;
+            var lot = l.slice(i, j).map(function (x) { return x.h; }).join('');
+            out.push(j - i > 1 && l[i].s ? '<div class="mc-sys"><div class="mc-sys-t">◈ ' + esc(l[i].s) + ' <span>· ' + (j - i) + ' missions</span></div>' + lot + '</div>' : lot);
+            i = j;
+        }
+        return out;
+    }
     function blocCampagne(g, ctx) {
         var c = g.c, cc = COUL_CAMP[c.type_campagne] || '#aaa', prio = c.priorite || 3, pk = prio === 1 ? 'c' : prio === 2 ? 'h' : 'n';
         var lignes = [], pcts = [];
-        g.items.forEach(function (x) { lignes.push(ligneBgsMob(x.o, x.index, ctx)); pcts.push(ctx.avanc(x.o, ctx.resume[x.o.id] || { nb_participants: 0, types: {}, pilotes: [] }).pct); });
+        g.items.forEach(function (x) { lignes.push({ s: String(x.o.systeme_cible || '').toUpperCase(), h: ligneBgsMob(x.o, x.index, ctx) }); pcts.push(ctx.avanc(x.o, ctx.resume[x.o.id] || { nb_participants: 0, types: {}, pilotes: [] }).pct); });
         ((pp && pp.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(c.id); }).forEach(function (m) {
-            lignes.push(lignePPMob(m));
+            lignes.push({ s: String(m.systeme || '').toUpperCase(), h: lignePPMob(m) });
             var pl = Number(m.plafond_cp) || 0, pc = pl > 0 ? Math.min(100, 100 * cp(m.merites_total) / pl) : (m.etat && m.etat.progres != null ? Number(m.etat.progres) * 100 : null); if (pc != null) pcts.push(pc);
         });
-        ((col && col.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(c.id); }).forEach(function (m) { lignes.push(ligneCOLMob(m)); if (m.pct != null) pcts.push(Number(m.pct)); });
+        ((col && col.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(c.id); }).forEach(function (m) { lignes.push({ s: String(m.systeme || '').toUpperCase(), h: ligneCOLMob(m) }); if (m.pct != null) pcts.push(Number(m.pct)); });
+        lignes = groupesSys(lignes);
         var moy = pcts.length ? Math.round(pcts.reduce(function (s, v) { return s + v; }, 0) / pcts.length) : 0;
         var replie = lirePli().indexOf(String(c.id)) >= 0;
         var info = c.echeance ? '⏳ jusqu\'au ' + String(c.echeance).slice(8, 10) + '/' + String(c.echeance).slice(5, 7) : '';
@@ -162,6 +175,7 @@
             ".mc-row.conf { padding-top: 13px; padding-bottom: 13px; box-shadow: inset 4px 0 0 var(--k), inset 0 0 26px color-mix(in srgb, var(--k) 36%, transparent); outline: 1px solid color-mix(in srgb, var(--k) 70%, transparent); outline-offset: -1px; }",
             ".mc-score { font-family: 'Rajdhani', 'Share Tech Mono', sans-serif; font-weight: 700; font-size: 1.9em; letter-spacing: 2px; color: var(--k); text-shadow: 0 0 12px var(--k); line-height: 1; }",
             '.mc-det { padding: 10px 14px 12px; background: rgba(0,0,0,.4); border-top: 1px dashed #2a2a2a; }',
+            '.mc-sys-t { padding: 7px 14px 4px 16px; border-top: 1px solid rgba(255,255,255,.14); font-size: .62em; letter-spacing: 2.5px; color: #cfe; background: rgba(255,255,255,.04); } .mc-sys-t span { color: #778; letter-spacing: 1px; } .mc-sys > .mc-row:first-of-type, .mc-sys > .mc-w:first-of-type > .mc-row { border-top: 0; }',
             '.mc-vide { padding: 14px; color: #777; font-size: .75em; font-style: italic; }'
         ].join('\n');
         document.head.appendChild(s);

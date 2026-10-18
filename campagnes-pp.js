@@ -59,7 +59,7 @@
         lignes: function (campagneId) {
             return ((vue && vue.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(campagneId); }).map(function (m) {
                 var t = TYPE[m.type_pp] || [m.type_pp, '#aaa'], pc = pctControle(m), gris = !aPuissance();
-                return plafonne(m, { tag: 'PP #' + m.id + ' - ' + t[0].toUpperCase(), domaine: 'PP', id: m.id, couleur: PPC, gris: gris, pct: pc, vous: null, avatars: gris ? '' : (window.edteamCampagnes ? window.edteamCampagnes.avatars((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : ''),
+                return plafonne(m, { sys: String(m.systeme || '').toUpperCase(), tag: 'PP #' + m.id + ' - ' + t[0].toUpperCase(), domaine: 'PP', id: m.id, couleur: PPC, gris: gris, pct: pc, vous: null, avatars: gris ? '' : (window.edteamCampagnes ? window.edteamCampagnes.avatars((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : ''),
                     legendeTitre: 'Progression du contrôle du système, observée par un pilote de l\'escadron (le jeu ne donne pas d\'objectif : ce n\'est pas un effort)', clic: 'edteamCampagnesPP.ouvrir(' + m.id + ')', titre: 'Rejoignez une puissance (Powerplay) pour participer à cette mission',
                     info: gris ? '' : (m.etat ? '<span class="inf">' + esc(m.etat.controlling || 'sans puissance') + '</span>' + (m.etat.etat ? '<span>' + (ETAT[m.etat.etat] || esc(m.etat.etat)) + '</span>' : '') : '<span style="color:#888;">pas encore observé</span>') + '<span style="color:#aaa;" title="Mérites de l\'escadron sur ce système">' + fmt(m.merites_total) + ' mérites</span>',
                     texte: '<b>' + esc(String(m.systeme).toUpperCase()) + '</b>' });
