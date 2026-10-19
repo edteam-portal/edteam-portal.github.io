@@ -557,7 +557,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 #cmb-modale .d{display:grid;gap:9px}#cmb-modale .r small{display:block;color:#8b97a0;font-size:10px;letter-spacing:2px}#cmb-modale .r b{font-weight:normal;color:#fff;font-size:16px;letter-spacing:1px;overflow-wrap:anywhere}
 #cmb-modale .rs{margin-top:16px;padding:10px 14px;border-left:3px solid var(--m);background:color-mix(in srgb,var(--m) 9%,transparent)}#cmb-modale .rs small{display:block;color:#8b97a0;font-size:10px;letter-spacing:2px}#cmb-modale .rs b{font-weight:normal;color:var(--m);font-size:15px}
 @media (max-width:640px){#cmb-modale .cr{grid-template-columns:1fr}}
-.cb-sonsbar{display:flex;justify-content:flex-end;margin:-4px 0 8px}.cb-sonsbar button{background:transparent;border:1px solid #3a4a52;color:#8b97a0;font:inherit;font-size:11px;letter-spacing:2px;padding:4px 12px;cursor:pointer}.cb-sonsbar button.on{border-color:rgba(0,240,255,.5);color:#00F0FF}.cb-sonsbar button:hover{background:rgba(0,240,255,.12);color:#fff}
+.cb-sonsbar{display:flex;justify-content:flex-end;gap:8px;margin:-4px 0 8px}.cb-sonsbar button{background:transparent;border:1px solid #3a4a52;color:#8b97a0;font:inherit;font-size:11px;letter-spacing:2px;padding:4px 12px;cursor:pointer}.cb-sonsbar button.on{border-color:rgba(0,240,255,.5);color:#00F0FF}.cb-sonsbar button:hover{background:rgba(0,240,255,.12);color:#fff}
 .cb-tiers{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
 .cb-tier2{position:relative;display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center;padding:12px 14px 12px 10px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 15%,transparent),rgba(0,0,0,.42) 62%);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));box-shadow:inset 0 0 26px color-mix(in srgb,var(--c) 10%,transparent)}
 .cb-tier2:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);box-shadow:0 0 12px var(--c)}
@@ -664,7 +664,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 
     function squelette() {
         return CSS + `<div class="cb" id="cmb">
-<div class="cb-sonsbar"><button type="button" id="cmb-sons-btn" onclick="combatSons()" title="Sons du combat : décryptage, acquisition de cible, voix du capitaine à chaque élimination. Le bouton ♪ AMBIANCE du tableau de bord les coupe aussi."></button></div><div id="cmb-bandeau"></div><div id="cmb-bandes"></div><div class="cb-stats" id="cmb-stats"></div>
+<div class="cb-sonsbar"><button type="button" id="cmb-croises-btn" style="display:none" onclick="JCroises.ouvrir()" title="Historique des joueurs que l’escadron a verrouillés en jeu"></button><button type="button" id="cmb-sons-btn" onclick="combatSons()" title="Sons du combat : décryptage, acquisition de cible, voix du capitaine à chaque élimination. Le bouton ♪ AMBIANCE du tableau de bord les coupe aussi."></button></div><div id="cmb-bandeau"></div><div id="cmb-bandes"></div><div class="cb-stats" id="cmb-stats"></div>
 <div class="cb-rowA" id="cmb-rowA">
   <div class="bloc holo cb-moi" id="cmb-moi"><h2 id="cmb-moi-t">VOTRE VAISSEAU</h2><div class="cb-hol" id="cmb-holo-moi"></div><div id="cmb-moi-b"></div></div>
   <div id="cmb-droite" style="display:flex;flex-direction:column"></div>
@@ -777,7 +777,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
         if (!document.getElementById("cmb")) return;
         { const m0 = CB.etat; if (m0 && m0.sys) { const k = String(m0.sys).trim().toLowerCase(), mm = CB.mem[k] = CB.mem[k] || {}; if (m0.soutien) mm.s = m0.soutien; if (m0.ennemi) mm.e = m0.ennemi; } }
         const e = effectif(), p = posture(e), veille = !p.actif, pOn = p.pOn, pied = p.droitePied, ev = veille ? Object.assign({}, e, { cible: null, vus: [] }) : e;
-        document.getElementById("cmb").classList.toggle("veille", veille); sonsEtiquette(); son("prechauffe");
+        document.getElementById("cmb").classList.toggle("veille", veille); sonsEtiquette(); if (window.JCroises) JCroises.monterBouton("cmb-croises-btn"); son("prechauffe");
         const el = document.getElementById("cmb-droite"), ra = document.getElementById("cmb-rowA"), mo2 = document.getElementById("cmb-moi"), rb = document.getElementById("cmb-rowB");
         if (ra) ra.classList.toggle("pied", pOn);
         if (mo2) mo2.classList.toggle("pied", pOn);
@@ -826,9 +826,12 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
         const age = (Date.now() - new Date(r.maj_le || e.maj || 0).getTime()) / 1000;
         const reel = e.cb === undefined || !!e.cb;     // vrai combat (elimination, attaque, bouclier, mort, armes sorties) ; sinon simple verrouillage de cible : on renseigne l'onglet sans y basculer
         const debut = e.actif && age < 90 && reel && (!avant || !avant.actif || avant.debut !== e.debut || (avant.cb !== undefined && !avant.cb));
+        // verrouillage d'un JOUEUR (nouveau pilote ou nouveau vaisseau, ou meme joueur reverrouille apres 5 min) : on bascule aussi, meme sans combat, pour afficher la fiche ; jamais a l'ouverture de la page
+        const cj = e.cible, aj = avant && avant.cible;
+        const joueur = !initial && !!cj && !cj.m && !!cj.j && age < 60 && (!aj || aj.p !== cj.p || aj.s !== cj.s || (cj.t || 0) > (aj.t || 0) + 300);
         const pastille = document.getElementById("tb-cmb-pastille"); if (pastille) pastille.style.display = e.actif && reel ? "inline" : "none";
-        if (debut && typeof MODE !== "undefined" && MODE !== "cmb" && typeof S !== "undefined" && S) {
-            MODE = "cmb";                     // le combat commence : on bascule sur l'onglet (sans le memoriser : la page se rouvrira sur l'onglet habituel)
+        if ((debut || joueur) && typeof MODE !== "undefined" && MODE !== "cmb" && typeof S !== "undefined" && S) {
+            MODE = "cmb";                     // le combat commence (ou un joueur est verrouille) : on bascule sur l'onglet (sans le memoriser : la page se rouvrira sur l'onglet habituel)
             if (typeof rendre === "function") rendre();
             return;
         }

@@ -161,6 +161,27 @@
             lien: 'tableau-de-bord.html?mode=cmb',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'joueurs-croises-2026-10',
+            couleur: '#00F0FF',
+            plein: true,
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'LES JOUEURS QUE VOUS CROISEZ, L’ESCADRON S’EN SOUVIENT',
+            sous: 'Joueurs croisés : l’historique partagé de vos verrouillages',
+            intro: 'Chaque <b>joueur</b> que vous verrouillez en jeu est désormais gardé dans un historique <b>partagé par l’escadron</b>, pendant 30 jours. Un joueur recherché croisé à l’autre bout de la galaxie ? Vos camarades le retrouvent, avec son vaisseau, sa prime et l’endroit où il a été vu.',
+            visuel: function () { return window.JCroises ? JCroises.visuelAnnonce() : Promise.resolve(''); },
+            visuelApres: function () { if (window.JCroises) JCroises.visuelApres(); },
+            etapes: [
+                { n: '1', t: 'VERROUILLEZ', d: 'Gardez le <b>tableau de bord</b> ouvert sur votre second écran, <b>sur n’importe quel onglet</b> : quand vous verrouillez un joueur en jeu, il passe tout seul sur Combat et montre son hologramme. Rien à saisir.' },
+                { n: '2', t: 'L’ESCADRON SE SOUVIENT', d: 'Sa fiche rejoint l’historique : vaisseau, rang, faction, escadron, puissance, et statut légal et prime après un scan assez long. Une fiche par joueur, gardée 30 jours.' },
+                { n: '3', t: 'RETROUVEZ-LES', d: 'Le QG affiche le nombre de joueurs croisés et les derniers. Un clic ouvre la liste : recherche, filtres (recherchés, revus…) et le détail de chacun.' }
+            ],
+            avis: '<b>Plugin SYS.EDTEAM 2.40</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b>. Le plugin enregistre les joueurs verrouillés <b>même si le tableau de bord est fermé</b> ; il ne sert qu’à les voir en direct. Les membres de l’escadron n’y figurent pas.',
+            cta: 'OUVRIR LES JOUEURS CROISÉS',
+            aide: 'QG : carte « Joueurs croisés » · Combat : bouton « JOUEURS CROISÉS »',
+            action: function () { if (window.JCroises) JCroises.ouvrir(); },
+            mobile: false
         }
     ];
 
@@ -224,17 +245,21 @@
             + '<div class="anc-titre">' + esc(a.titre) + '</div>'
             + '<div class="anc-sous">' + esc(a.sous) + '</div>'
             + '<div class="anc-intro">' + a.intro + '</div>'
-            + '<div class="anc-etapes">' + a.etapes.map(function (e) { return '<div class="anc-etape"><span class="anc-n">' + esc(e.n) + '</span><div class="anc-et">' + esc(e.t) + '</div><div class="anc-ed">' + esc(e.d) + '</div></div>'; }).join('') + '</div>'
+            + '<div class="anc-visuel"></div>'
+            + '<div class="anc-etapes">' + a.etapes.map(function (e) { return '<div class="anc-etape"><span class="anc-n">' + esc(e.n) + '</span><div class="anc-et">' + esc(e.t) + '</div><div class="anc-ed">' + e.d + '</div></div>'; }).join('') + '</div>'
             + (a.galerie ? '<div class="anc-gal">' + a.galerie.map(function (g) { return '<div class="anc-nef"><img src="' + esc(g[1]) + '" alt="' + esc(g[0]) + '" loading="lazy"><span>' + esc(g[0]).toUpperCase() + '</span></div>'; }).join('') + '</div>'
                 + '<div class="anc-aven"><b>' + a.aVenir + '</b><p><strong>vaisseaux encore à faire.</strong> Ils arriveront plus tard. ' + a.galerie.length + ' vaisseaux sont déjà modélisés, sur ' + (a.galerie.length + a.aVenir) + ' au total.</p><div class="anc-barre"><i style="width:' + (100 * a.galerie.length / (a.galerie.length + a.aVenir)).toFixed(1) + '%"></i></div></div>' : '')
             + (a.avis ? '<div class="anc-avis">' + a.avis + '</div>' : '')
             + '<div class="anc-actions"><button type="button" class="anc-btn" data-a="go">' + esc(a.cta) + '</button><button type="button" class="anc-btn gris" data-a="fermer">J’AI COMPRIS</button></div>'
             + '<div class="anc-aide">' + esc(a.aide) + '</div></div>';
+        if (typeof a.visuel === 'function') {          // visuel construit a la demande (hologrammes charges a l\'ouverture) : l\'annonce s\'affiche sans l\'attendre
+            a.visuel().then(function (h) { var z = ov.querySelector('.anc-visuel'); if (z && h) { z.innerHTML = h; if (typeof a.visuelApres === 'function') a.visuelApres(); } }).catch(function () { /* sans visuel */ });
+        }
         function fermer(vaVoir) {
             var vues = lire(uid); if (vues.indexOf(a.id) < 0) vues.push(a.id); ecrire(uid, vues);
             document.removeEventListener('keydown', clavier);
             if (ov.parentNode) ov.parentNode.removeChild(ov);
-            if (vaVoir) { if (a.lien) window.location.href = a.lien; else if (typeof aller === 'function') aller(); }
+            if (vaVoir) { if (typeof a.action === 'function') a.action(); else if (a.lien) window.location.href = a.lien; else if (typeof aller === 'function') aller(); }
         }
         function clavier(e) { if (e.key === 'Escape') fermer(false); }
         ov.querySelector('[data-a="go"]').addEventListener('click', function () { fermer(true); });

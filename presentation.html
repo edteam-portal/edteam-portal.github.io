@@ -123,7 +123,7 @@
                 "name": "Fonctionne-t-il sur mobile ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les campagnes avec leur résultat dans le jeu, votre engagement (BGS et Powerplay) et le podium de l'escadron, la colonisation, le budget, l'escadron et la recommandation « Quoi faire », depuis un téléphone."
+                    "text": "Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les campagnes avec leur résultat dans le jeu, votre engagement (BGS et Powerplay) et le podium de l'escadron, la colonisation, le budget, l'escadron, depuis un téléphone."
                 }
             }
         ]
@@ -444,7 +444,6 @@
             <div class="scene">
                 <div class="liste" id="liste">
                 <button class="module" data-p="commander" data-m="qg" data-for="solo squad officier"><span>Quartier général</span><span class="pour">POUR VOUS</span></button>
-                <button class="module" data-p="commander" data-m="qf" data-for="solo squad officier"><span>Quoi faire</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="bgs" data-for="squad officier"><span>Campagnes et engagement</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="init" data-for="squad officier"><span>Initiatives des pilotes</span><span class="pour">POUR VOUS</span></button>
                 <button class="module" data-p="commander" data-m="pp" data-for="solo squad officier"><span>Powerplay 2.0</span><span class="pour">POUR VOUS</span></button>
@@ -461,12 +460,8 @@
                 </div>
                 <div class="detail" id="detail">
                 <article class="panel" id="module-qg" data-p="commander" data-m="qg">
-                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/qg.png" alt="Quartier général (écran 1)"><img class="" data-i="1" src="images/puissance-faction.png" alt="Ma puissance, Ma faction et Quoi faire (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/qg.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/puissance-faction.png')" aria-label="Écran 2"></button></div></div>
-                    <span class="kick">// MODULE 01 : SUPERVISION</span><h3>VISION STRATÉGIQUE</h3><p>Votre <strong>Quartier Général</strong> résume votre carrière d'un coup d'œil : rangs Powerplay, BGS, Fédération et auxiliaires dans l'en-tête (un clic ouvre le détail, sur toutes les pages), le <strong>nom de votre escadron</strong> et vos grades. En tête de page, trois cartes : <strong>Ma puissance</strong> (le portrait de votre puissance, son classement parmi les douze et la répartition de ses systèmes), <strong>Ma faction</strong> (le logo de votre escadron, déposé par l'Amiral, et les chiffres de votre faction) et <strong>Quoi faire</strong>.</p><p>Le <strong>Pilier de la semaine</strong> et l'<strong>Élan Powerplay</strong> sont mis à l'honneur, les <strong>chiffres clés</strong> tiennent sur un seul écran, et le <strong>Journal Tactique</strong> diffuse en direct les directives, les distinctions et le bilan du réseau. Chaque jeudi, une fenêtre vous présente la <strong>nouvelle édition d'EDNews</strong> de votre escadron. Plusieurs fois par semaine, une <strong>anecdote de l'escadron</strong> raconte, en courte histoire de roleplay, un fait réel d'un pilote (une livraison, un combat…) : chacun peut refuser d'y apparaître.</p><p class="note-sobre" style="font-size:.85em;color:#8a9;">Les chiffres de puissance et de faction viennent de la base communautaire Spansh, relevée chaque jour : ils peuvent avoir quelques jours de retard sur le jeu, dont le panneau fait foi.</p>
-                </article>
-                <article class="panel" id="module-qf" data-p="commander" data-m="qf">
-                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/quoi-faire.png" alt="Quoi faire : recommandations" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 11 : QUOI FAIRE</span><h3>VOUS NE SAVEZ PAS QUOI FAIRE EN VOUS CONNECTANT ?</h3><p>Une <strong>recommandation</strong> vous attend à l'ouverture : l'activité où votre aide compte le plus en ce moment, d'après les directives de votre escadron (à priorité égale, celle qui est le plus en retard), les chantiers de colonisation, votre rang BGS et vos mérites Powerplay.</p><p>Chaque idée mène directement au bon écran. Rien n'est obligatoire, et les idées s'adaptent à <strong>votre style de jeu</strong>, que vous pouvez changer. Disponible aussi sur le compagnon mobile.</p>
+                    <div class="ecran-d"><div class="cadre-d"><img class="on" data-i="0" src="images/qg.png" alt="Quartier général (écran 1)"><img class="" data-i="1" src="images/puissance-faction.png" alt="Ma puissance, Ma faction et Joueurs croisés (écran 2)" loading="lazy"></div><div class="vignettes"><button class="on" data-i="0" style="background-image:url('images/qg.png')" aria-label="Écran 1"></button><button class="" data-i="1" style="background-image:url('images/puissance-faction.png')" aria-label="Écran 2"></button></div></div>
+                    <span class="kick">// MODULE 01 : SUPERVISION</span><h3>VISION STRATÉGIQUE</h3><p>Votre <strong>Quartier Général</strong> résume votre carrière d'un coup d'œil : rangs Powerplay, BGS, Fédération et auxiliaires dans l'en-tête (un clic ouvre le détail, sur toutes les pages), le <strong>nom de votre escadron</strong> et vos grades. En tête de page, trois cartes : <strong>Ma puissance</strong> (le portrait de votre puissance, son classement parmi les douze et la répartition de ses systèmes), <strong>Ma faction</strong> (le logo de votre escadron, déposé par l'Amiral, et les chiffres de votre faction) et <strong>Joueurs croisés</strong> (les joueurs que votre escadron a verrouillés en jeu).</p><p>Le <strong>Pilier de la semaine</strong> et l'<strong>Élan Powerplay</strong> sont mis à l'honneur, les <strong>chiffres clés</strong> tiennent sur un seul écran, et le <strong>Journal Tactique</strong> diffuse en direct les directives, les distinctions et le bilan du réseau. Chaque jeudi, une fenêtre vous présente la <strong>nouvelle édition d'EDNews</strong> de votre escadron. Plusieurs fois par semaine, une <strong>anecdote de l'escadron</strong> raconte, en courte histoire de roleplay, un fait réel d'un pilote (une livraison, un combat…) : chacun peut refuser d'y apparaître.</p><p class="note-sobre" style="font-size:.85em;color:#8a9;">Les chiffres de puissance et de faction viennent de la base communautaire Spansh, relevée chaque jour : ils peuvent avoir quelques jours de retard sur le jeu, dont le panneau fait foi.</p>
                 </article>
 
                 <article class="panel" id="module-bgs" data-p="commander" data-m="bgs">
@@ -521,7 +516,7 @@
                 </article>
                 <article class="panel" id="module-mobile" data-p="connecte" data-m="mobile">
                     <div class="ecran-d"><div class="cadre-d"><img class="contain on" data-i="0" src="images/mobile-poche.png?v=2" alt="Compagnon mobile : accueil, campagnes, engagement" loading="lazy"></div></div>
-                    <span class="kick">// MODULE 10 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Le <strong>compagnon mobile</strong> reprend l'essentiel dans une interface pensée pour le pouce : cinq onglets : accueil (rang BGS, Powerplay, finances, Pilier, Élan, semaine de l'escadron), <strong>Engagement</strong> (les campagnes avec une ligne par mission et le résultat dans le jeu, votre progression BGS et Powerplay, le podium de l'escadron et le classement de la semaine, les exploits), Bâtir (colonisation en direct et budget), équipage de l'escadron, et la recommandation « Quoi faire ».</p><p>Même compte, mêmes titres et mêmes chiffres que sur le PC. Scannez le QR code en bas de page, puis ajoutez-le à l'écran d'accueil.</p>
+                    <span class="kick">// MODULE 10 : LIAISON DISTANTE</span><h3>LE COMMANDEMENT DANS LA POCHE</h3><p>Pas devant votre PC ? Le <strong>compagnon mobile</strong> reprend l'essentiel dans une interface pensée pour le pouce : cinq onglets : accueil (rang BGS, Powerplay, finances, Pilier, Élan, semaine de l'escadron), <strong>Engagement</strong> (les campagnes avec une ligne par mission et le résultat dans le jeu, votre progression BGS et Powerplay, le podium de l'escadron et le classement de la semaine, les exploits), Bâtir (colonisation en direct et budget) et équipage de l'escadron.</p><p>Même compte, mêmes titres et mêmes chiffres que sur le PC. Scannez le QR code en bas de page, puis ajoutez-le à l'écran d'accueil.</p>
                 </article>
                 </div>
             </div>
@@ -591,7 +586,7 @@
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">PHOTO ET ANECDOTES : QUI VOIT QUOI ?</h3>
                 <p style="margin: 0 0 26px;">La photo de commandant est facultative : elle est visible par votre escadron et par les pilotes de votre puissance, et vous pouvez la retirer quand vous voulez. Les anecdotes sont de courtes histoires de roleplay écrites par une IA à partir d'un fait réel de votre activité, visibles seulement par votre escadron ; vous pouvez refuser d'y apparaître à tout moment.</p>
                 <h3 style="color: #fff; font-size: 1em; letter-spacing: 2px; margin: 0 0 6px;">FONCTIONNE-T-IL SUR MOBILE ?</h3>
-                <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les campagnes avec leur résultat dans le jeu, votre engagement (BGS et Powerplay) et le podium de l'escadron, la colonisation, le budget, l'escadron et la recommandation « Quoi faire », depuis un téléphone.</p>
+                <p style="margin: 0 0 26px;">Oui. Le compagnon mobile reprend l'accueil (rangs, finances, Pilier, Élan), les campagnes avec leur résultat dans le jeu, votre engagement (BGS et Powerplay) et le podium de l'escadron, la colonisation, le budget, l'escadron, depuis un téléphone.</p>
             </div>
         </div>
     </div></details>
@@ -627,7 +622,7 @@
     /* ---------- Piliers, modules, profils (les textes sont dans le HTML : ce code ne fait qu'afficher / masquer) ---------- */
     (function () {
         const PILIERS = [{"id":"commander","c":"#00F0FF","g":"rgba(0,240,255,.12)"},{"id":"construire","c":"#FF7100","g":"rgba(255,113,0,.12)"},{"id":"progresser","c":"#FFD700","g":"rgba(255,215,0,.10)"},{"id":"connecte","c":"#00FF66","g":"rgba(0,255,102,.10)"}];
-        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"qf","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"init","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"tb","p":"connecte","pour":["solo","squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]}];
+        const MODULES = [{"id":"qg","p":"commander","pour":["solo","squad","officier"]},{"id":"bgs","p":"commander","pour":["squad","officier"]},{"id":"init","p":"commander","pour":["squad","officier"]},{"id":"pp","p":"commander","pour":["solo","squad","officier"]},{"id":"esc","p":"commander","pour":["squad","officier"]},{"id":"colo","p":"construire","pour":["solo","squad","officier"]},{"id":"budget","p":"construire","pour":["solo","squad","officier"]},{"id":"plaques","p":"progresser","pour":["squad","officier"]},{"id":"spe","p":"progresser","pour":["squad","officier"]},{"id":"pilier","p":"progresser","pour":["squad","officier"]},{"id":"elan","p":"progresser","pour":["squad","officier"]},{"id":"rang","p":"progresser","pour":["squad","officier"]},{"id":"tb","p":"connecte","pour":["solo","squad","officier"]},{"id":"mobile","p":"connecte","pour":["solo","squad","officier"]}];
         let pilier = 'commander', mod = 'qg', vue = 'tout';
         const $ = id => document.getElementById(id);
         const visible = m => vue === 'tout' || m.pour.indexOf(vue) >= 0;
@@ -1049,6 +1044,6 @@
     })();
     </script>
     <script>window.EDTEAM_PIED_VISITEUR = true;   // page publique : le pied de page n'affiche pas l'aide, les nouveautés ni le compagnon mobile (utiles une fois inscrit)</script>
-    <script src="footer.js?v=26"></script>
+    <script src="footer.js?v=27"></script>
 </body>
 </html>

@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-joueurs-croises', date: '2026-10-19T11:00:00Z', type: 'NOUVEAU',
+        titre: 'Joueurs croisés : l’historique des joueurs verrouillés par l’escadron',
+        texte: 'Chaque joueur (pas les PNJ) que l’un de vos pilotes verrouille dans l’onglet Combat est maintenant gardé dans un historique partagé par l’escadron, pendant 30 jours après la dernière fois qu’il est croisé. Le QG affiche à la place de « Quoi faire » le nombre de joueurs croisés : un clic ouvre la liste, avec une recherche, et chaque ligne se déplie pour montrer le vaisseau, le rang, la faction, l’escadron, la puissance, le statut légal, la prime, le dernier système et le pilote qui l’a vu. Le même historique s’ouvre depuis un bouton de l’onglet Combat. « Quoi faire » est retiré du QG, comme il l’avait été du mobile. Si le tableau de bord est ouvert sur votre second écran, verrouiller un joueur en jeu ouvre aussitôt son onglet Combat, quel que soit l’onglet où vous étiez ; l’enregistrement, lui, se fait même sans la page. Les membres de votre escadron n’apparaissent jamais dans la liste.',
+        important: false,
+        action: 'Mettre à jour le plugin SYS.EDTEAM (2.40)'
+    },
+    {
         id: '2026-10-combat-fiche-vus', date: '2026-10-19T10:10:00Z', type: 'AMELIORE',
         titre: 'Combat : l’escadron et la prime dans la fiche d’un vaisseau verrouillé',
         texte: 'Dans l’onglet Combat, la fiche qui s’ouvre quand vous touchez un vaisseau verrouillé récemment affiche maintenant son escadron et sa prime, quand le jeu les a donnés (un scan complet est nécessaire pour la prime). Mettez à jour le plugin (version 2.39) pour en profiter.',

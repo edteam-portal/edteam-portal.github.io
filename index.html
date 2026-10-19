@@ -37,7 +37,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=4"></script>
-    <script src="quoifaire.js?v=12"></script>
+    <script src="joueurs-croises.js?v=5"></script>
     <script src="qgsuivi.js?v=38"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
@@ -420,7 +420,7 @@
                 <!-- PILOTE INDEPENDANT : rejoindre un escadron avec le code d'invitation de son Amiral (fonction rejoindre_escadron). Rempli par afficherRejoindreEscadron() -->
                 <div id="qg-rejoindre-escadron" style="display: none;"></div>
 
-                <!-- RANGEE D'ENTREE : MA PUISSANCE (Powerplay) | MA FACTION (BGS, avec la bande EDNews) | QUOI FAIRE. Cartes de puissance et de faction : qgsuivi.js. -->
+                <!-- RANGEE D'ENTREE : MA PUISSANCE (Powerplay) | MA FACTION (BGS, avec la bande EDNews) | JOUEURS CROISES. Cartes de puissance et de faction : qgsuivi.js. -->
                 <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch;">
 
                     <div id="qg-carte-puissance" style="flex: 1.15 1 320px; min-width: 0; display: none;"></div>
@@ -439,7 +439,7 @@
                         <div id="qg-faction-src" class="qs-src"></div>
                     </div>
 
-                    <div id="qf-bande" class="qf-slot" data-display="flex" data-style="carte" style="flex: 1 1 300px; min-width: 0; display: none;"></div>
+                    <div id="qg-croises" data-display="flex" style="flex: 1 1 300px; min-width: 0; display: none;"></div>
 
                 </div>
                 <!-- FIN RANGEE D'ENTREE -->
@@ -491,14 +491,6 @@
             <!-- FIN DE L'ONGLET DOSSIER COMMANDANT -->
 
         </main>
-    </div>
-
-    <!-- MODAL QUOI FAIRE -->
-    <div class="modal-overlay" id="modal-quoifaire" onclick="fermerQuoiFaire()" style="z-index: 4600;">
-        <div class="modal-content" style="max-width: 860px; width: 94%; max-height: 90vh; overflow-y: auto; background: #05080a; border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); padding: 22px 26px;" onclick="event.stopPropagation()">
-            <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerQuoiFaire()">X</div>
-            <div id="qf-corps"></div>
-        </div>
     </div>
 
     <!-- MODAL AIDE SYNCHRONISATION (FLOTTE & CARRIER) -->
@@ -1475,7 +1467,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (data && data.est_approuve) {
                 profilCommandant = data;
                 window.profilCommandant = data;
-                if (window.QF) QF.monterBande('qf-bande');
+                if (window.JCroises) JCroises.monterCarte('qg-croises');
                 if (window.QGSuivi) QGSuivi.monter('qg-carte-puissance', 'qg-carte-faction');
                 enregistrerTelemetrie('page', 'qg');
                 synchroniserTelemetrie();
@@ -2488,22 +2480,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
     <!-- ========================================== -->
 
 
-    <!-- MOTEUR DU QG : QUOI FAIRE, CHRONOMETRAGE -->
+    <!-- MOTEUR DU QG : CHRONOMETRAGE -->
     <script>
-        // ---- QUOI FAIRE (quoifaire.js) : la bande du QG ouvre cette fenetre ; chaque idee renvoie vers le bon ecran
-        function fermerQuoiFaire() { if (typeof sonClic === 'function') sonClic(); document.getElementById('modal-quoifaire').style.display = 'none'; }
-        if (window.QF) {
-            QF.onOuvrirTableau = function () {
-                if (typeof sonClic === 'function') sonClic();
-                document.getElementById('modal-quoifaire').style.display = 'flex';
-                QF.monterTableau('qf-corps', false);
-            };
-            QF.destinations.rang = function () { fermerQuoiFaire(); window.ouvrirCarriere('bgs'); };
-            QF.destinations.pp = function () { fermerQuoiFaire(); window.ouvrirCarriere('pp'); };
-            QF.destinations.rejoindre = function () { fermerQuoiFaire(); if (typeof window.edteamOuvrirAide === 'function') window.edteamOuvrirAide('demarrer'); };
-        }
-
-
         // ==========================================
         // MOTEUR DE CHRONOMÉTRAGE TACTIQUE
         // ==========================================
@@ -3016,7 +2994,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
-    <script src="annonce.js?v=9"></script>
-    <script src="footer.js?v=26"></script>
+    <script src="annonce.js?v=11"></script>
+    <script src="footer.js?v=27"></script>
 </body>
 </html>
