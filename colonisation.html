@@ -20,7 +20,7 @@
     <script src="photos.js?v=2"></script>
     <script src="navigation.js?v=35"></script>
     <script src="dialogue.js?v=1"></script>
-    <script src="colonisation-architectes.js?v=2"></script>
+    <script src="colonisation-architectes.js?v=3"></script>
     <script src="colonisation-types.js?v=2"></script>
     <script src="colonisation-effets.js?v=7"></script>
     <script src="colonisation-visuels.js?v=1"></script>
@@ -1211,7 +1211,7 @@
             rendreCarte();   // applique le zoom et le centre conservés (et le libellé du zoom)
             JR.q = ''; JR.type = ''; JR.pilote = ''; JR.pilotesOk = false;
             chargerJournalBloc(!!window.__jrForce); window.__jrForce = false;
-            if (typeof window.coloMajListeArchi === 'function') { window.coloMajListeArchi(); window.coloAccueilArchi(); }
+            if (typeof window.coloMajListeArchi === 'function') window.coloMajListeArchi();
             if (typeof window.coloAvatarsListe === 'function') window.coloAvatarsListe();
         }
 

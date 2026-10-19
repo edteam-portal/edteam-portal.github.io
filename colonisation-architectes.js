@@ -1,4 +1,4 @@
-// SYSTEMES SANS ARCHITECTE (page Colonisation) : bandeau visible + liste a declarer + fenetre d'accueil tant qu'il en reste.
+// SYSTEMES SANS ARCHITECTE (page Colonisation) : bandeau visible + liste a declarer (plus de fenetre automatique a l'ouverture de la page).
 // Le jeu n'ecrit pas toujours la revendication d'un systeme : l'architecte est alors « inconnu » et le pilote peut se declarer (SQL 87, fonction declarerArchitecte de la page).
 // La fenetre tient dans l'ecran (marges, defilement INTERNE, en-tete fixe) : lisible sur un portable de 14 pouces. Deux colonnes quand la largeur le permet.
 // Depend de : window.__colo (systemes), declarerArchitecte(adresse, retirer, silencieux), ouvrirSysteme(i), window.edInfo. Aucune lecture de la base.
@@ -79,10 +79,5 @@
   window.coloArchiDeclarer = async function (adresse) {
     const ok = await window.declarerArchitecte(adresse, false, true);
     if (ok) window.coloMajListeArchi();
-  };
-  // fenetre d'accueil : une seule fois par chargement de la page, tant qu'il reste des systemes sans architecte
-  window.coloAccueilArchi = function () {
-    if (window.__caVu || !tous().length) return; window.__caVu = true;
-    setTimeout(() => { const mc = document.getElementById('modal-colo'); if (tous().length && !(mc && mc.style.display === 'flex')) { ST.filtre = ''; monter(true); } }, 500);
   };
 })();
