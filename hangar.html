@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>EDTEAM // MON HANGAR</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=4"></script>
+    <script src="son.js?v=1"></script>
+    <script src="hangar.js?v=1"></script>
+    <script src="navigation.js?v=36"></script>
+
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; min-height: 100vh; }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-orange); box-shadow: 0 0 15px var(--ed-orange-glow), 0 0 5px var(--ed-orange); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 8s linear infinite; }
+        @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div id="holo-tooltip"></div>
+    <nav id="side-menu"></nav>
+
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+        <main class="data-window" id="display-area" style="padding-top: 5px;">
+            <div style="color: #666; font-style: italic; text-align: center; margin-top: 40px;">&gt; CHARGEMENT DU HANGAR...</div>
+        </main>
+    </div>
+
+    <script>
+        const supabaseApp = window.supabaseApp;
+        let profilCommandant = null;
+
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            if (data && data.est_approuve) {
+                profilCommandant = data;
+                window.profilCommandant = data;
+                if (data.est_amiral || data.est_directeur) {
+                    const navAmiraute = document.getElementById('nav-bureau-amiraute');
+                    if (navAmiraute) navAmiraute.style.display = 'flex';
+                    if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
+                }
+                const navBgs = document.getElementById('nav-bgs-factions');
+                if (navBgs && localStorage.getItem('edteam_acces_bgs') === 'true') navBgs.style.display = 'flex';
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+                const apiKeyDisplay = document.getElementById('api-key-display');
+                if (apiKeyDisplay) apiKeyDisplay.innerText = data.cle_api;
+
+                const mainUi = document.getElementById('main-ui');
+                if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
+                if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+
+                window.EdteamHangar.monter(document.getElementById('display-area'));
+            } else {
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+
+    <script src="footer.js?v=28"></script>
+</body>
+</html>

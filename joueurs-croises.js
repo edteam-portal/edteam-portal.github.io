@@ -94,7 +94,7 @@
     const charger = src => new Promise(ok => { const s = document.createElement('script'); s.src = src; s.onload = () => ok(true); s.onerror = () => ok(false); document.head.appendChild(s); });
     // hologrammes : charges a la demande (sans eux, la fenetre reste utilisable, sans le dessin du vaisseau)
     async function holos() {
-        try { if (typeof SILHOUETTES === 'undefined') await charger('silhouettes-data.js?v=2'); if (!window.HoloVaisseau) await charger('holo-vaisseau.js?v=1'); } catch (e) { /* sans hologramme */ }
+        try { if (typeof SILHOUETTES === 'undefined') await charger('silhouettes-data.js?v=2'); if (!window.HoloVaisseau) await charger('holo-vaisseau.js?v=2'); } catch (e) { /* sans hologramme */ }
         return !!window.HoloVaisseau && typeof SILHOUETTES !== 'undefined';
     }
 

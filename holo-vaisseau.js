@@ -2,11 +2,11 @@
 // Depend de SILHOUETTES (silhouettes-data.js). Sans hologramme dedie pour un vaisseau : silhouette generique. A garder identique au rendu de combat.js.
 (function () {
     "use strict";
-    const T_CYAN = "0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0", T_ROUGE = "0.36 0.72 0.14 0 0   0.09 0.18 0.035 0 0   0.05 0.1 0.02 0 0   0 0 0 1 0", T_VERT = "0.05 0.1 0.02 0 0   0.36 0.72 0.14 0 0   0.05 0.1 0.02 0 0   0 0 0 1 0", T_BLEU = "0.04 0.08 0.015 0 0   0.12 0.25 0.05 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0";
-    const TONS = { r: "#FF3B30", c: "#00F0FF", v: "#00FF66", b: "#3D8BFF" };      // r hostile, v allie, b neutre, c cyan (le pilote)
+    const T_CYAN = "0 0 0 0 0   0.28 0.55 0.1 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0", T_ROUGE = "0.36 0.72 0.14 0 0   0.09 0.18 0.035 0 0   0.05 0.1 0.02 0 0   0 0 0 1 0", T_VERT = "0.05 0.1 0.02 0 0   0.36 0.72 0.14 0 0   0.05 0.1 0.02 0 0   0 0 0 1 0", T_BLEU = "0.04 0.08 0.015 0 0   0.12 0.25 0.05 0 0   0.36 0.72 0.14 0 0   0 0 0 1 0", T_AMBRE = "0.36 0.72 0.14 0 0   0.2 0.4 0.08 0 0   0.02 0.04 0.01 0 0   0 0 0 1 0";
+    const TONS = { r: "#FF3B30", c: "#00F0FF", v: "#00FF66", b: "#3D8BFF", o: "#FFB000" };      // r hostile, v allie, b neutre, c cyan (le pilote)
     function silDe(cle) { try { return SILHOUETTES[String(cle || "").toLowerCase()] || null; } catch (e) { return null; } }
     function holoVaisseau(sil, id, extra, rouge) {
-        const W = sil.W, H = sil.H, ton = rouge === true ? "r" : rouge || "c", col = TONS[ton], mat = { r: T_ROUGE, c: T_CYAN, v: T_VERT, b: T_BLEU }[ton], f1 = { r: "feFuncR", c: "feFuncG", v: "feFuncG", b: "feFuncB" }[ton], f2 = { r: "feFuncG", c: "feFuncB", v: "feFuncR", b: "feFuncG" }[ton];
+        const W = sil.W, H = sil.H, ton = rouge === true ? "r" : rouge || "c", col = TONS[ton], mat = { r: T_ROUGE, c: T_CYAN, v: T_VERT, b: T_BLEU, o: T_AMBRE }[ton], f1 = { r: "feFuncR", c: "feFuncG", v: "feFuncG", b: "feFuncB", o: "feFuncR" }[ton], f2 = { r: "feFuncG", c: "feFuncB", v: "feFuncR", b: "feFuncG", o: "feFuncG" }[ton];
         return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"><defs>
 <filter id="h${id}" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${mat}"/><feComponentTransfer><${f1} type="gamma" amplitude="1.35" exponent="1.3" offset="0"/><${f2} type="gamma" amplitude="1.35" exponent="1.45" offset="0"/></feComponentTransfer></filter>
 <filter id="l${id}"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -19,7 +19,7 @@
     }
     // silhouette generique (vaisseau sans hologramme dedie) : meme rendu, forme dessinee
     function holoGenerique(id, rouge) {
-        const ton = rouge === true ? "r" : rouge || "c", col = TONS[ton], fill = { r: "rgba(255,59,48,.18)", c: "rgba(0,240,255,.16)", v: "rgba(0,255,102,.16)", b: "rgba(61,139,255,.18)" }[ton];
+        const ton = rouge === true ? "r" : rouge || "c", col = TONS[ton], fill = { r: "rgba(255,59,48,.18)", c: "rgba(0,240,255,.16)", v: "rgba(0,255,102,.16)", b: "rgba(61,139,255,.18)", o: "rgba(255,176,0,.16)" }[ton];
         const demi = `<path d="M200 6 L208 46 L218 76 L246 100 L330 160 L352 204 L338 216 L296 206 L272 222 L252 246 L228 258 L212 252 L200 256" fill="${fill}" stroke="${col}" stroke-width="1.8"/>
 <path d="M200 38 L212 80 L244 118 L296 166 M218 76 L236 150 L262 214 M244 118 L236 150 M296 206 L270 168 M236 150 L214 212 L206 250" fill="none" stroke="${col}" stroke-opacity=".55" stroke-width="1"/>
 <path d="M338 216 L346 252 L324 246 L306 226" fill="${fill}" stroke="${col}" stroke-width="1.2"/>`;

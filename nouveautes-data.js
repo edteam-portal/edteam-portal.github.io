@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-hangar', date: '2026-10-19T19:46:05Z', type: 'NOUVEAU',
+        titre: 'Mon hangar : vos vaisseaux et leur équipement actuel, en hologramme',
+        texte: 'Une nouvelle page Mon hangar (menu latéral, sous le Quartier général) liste tous vos vaisseaux avec leur hologramme, coloré selon la taille (vert S, cyan M, ambre L), et l’équipement actuel de chacun : modules, niveau d’ingénierie, plan, effet expérimental, ingénieur. Les membres de votre escadron voient votre hangar depuis votre fiche pilote (bouton HANGAR de la page Escadron) ; il n’affiche ni valeur en crédits ni position. Le menu latéral est aussi plus compact pour tenir sur une tablette en paysage. Le hangar se remplit tout seul avec le plugin 2.41 : relancez EDMC une fois. Une annonce en plein écran présente le module, une seule fois.',
+        important: false,
+        action: 'Mettre à jour le plugin SYS.EDTEAM (2.41)'
+    },
+    {
         id: '2026-10-flotte-hologrammes-2', date: '2026-10-19T18:29:30Z', type: 'NOUVEAU',
         titre: 'Tableau de bord : 13 nouveaux vaisseaux en hologramme',
         texte: 'Votre vaisseau s’affiche en hologramme dans l’onglet Missions : modules, passagers dans leurs cabines et soute. Treize vaisseaux s’ajoutent : Imperial Eagle, Eagle, Viper Mk III, Cobra Mk III, Type-6 Transporter, Diamondback Explorer, Keelback, Vulture, Asp Explorer, Federal Dropship, Type-7 Transporter, Krait Mk II et Corsair. 32 vaisseaux sont maintenant disponibles, 14 autres arriveront plus tard. Une annonce en plein écran présente la liste, une seule fois.',

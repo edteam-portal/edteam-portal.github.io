@@ -20,6 +20,12 @@ window.supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
 window.supabaseApp = window.supabase.createClient(window.supabaseUrl, window.supabaseKey);
 
 function injecterArchitectureGlobale() {
+    // Menu lateral plus compact : avec le Hangar il compte 13 entrees, trop pour une tablette en paysage (hauteur 600 a 800 px). Defile si besoin, sans barre visible.
+    if (!document.getElementById('nav-compact-css')) {
+        const st = document.createElement('style'); st.id = 'nav-compact-css';
+        st.textContent = '#side-menu { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; padding-top: 8px; } #side-menu::-webkit-scrollbar { display: none; } #side-menu .nav-link { padding-top: 10px; padding-bottom: 10px; } #side-menu .hamburger-btn { margin-bottom: 8px; } #nav-deconnexion { margin-top: 4px !important; margin-bottom: 8px !important; } @media (max-height: 760px) { #side-menu .nav-link { padding-top: 6px; padding-bottom: 6px; } #side-menu .hamburger-btn { margin-bottom: 4px; } #nav-deconnexion { margin-bottom: 4px !important; } }';
+        document.head.appendChild(st);
+    }
     const path = window.location.pathname;
     const page = path.split("/").pop() || "index.html";
 
@@ -38,6 +44,10 @@ function injecterArchitectureGlobale() {
                 <span id="badge-amiraute" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 10; text-align: center;">0</span>
             </div>
             <span class="nav-text">QUARTIER GÉNÉRAL</span>
+        </a>
+        <a href="hangar.html" id="nav-link-hangar" class="nav-link ${page === 'hangar.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.2 6.3 7 4.9-.9 2.1-5.3-1.4.6 5.1-3.6 1.4-3.6-1.4.6-5.1-5.3 1.4-.9-2.1 7-4.9z"></path><line x1="12" y1="9" x2="12" y2="14"></line></svg></div>
+            <span class="nav-text">MON HANGAR</span>
         </a>
         <a href="budget.html" id="nav-link-budget" class="nav-link ${page === 'budget.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="7" ry="3"></ellipse><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"></path><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"></path></svg></div>

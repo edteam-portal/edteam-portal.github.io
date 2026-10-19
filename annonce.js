@@ -182,6 +182,27 @@
             lien: 'tableau-de-bord.html?mode=mis',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'hangar-2026-10',
+            couleur: '#00F0FF',
+            etiquette: '★ NOUVEAU MODULE',
+            titre: 'VOTRE HANGAR, VAISSEAU PAR VAISSEAU',
+            sous: 'Vos vaisseaux et leur équipement, en hologramme',
+            intro: 'Une nouvelle page <b>Mon hangar</b> (menu latéral, sous le Quartier général) liste <b>tous vos vaisseaux</b> avec leur hologramme et l’équipement actuel de chacun, <b>sans rien saisir</b>. Les membres de votre escadron peuvent aussi voir le vôtre depuis votre fiche.',
+            colonnes: 2,
+            etapes: [
+                { n: '1', t: 'LA FLOTTE D’UN COUP D’ŒIL', d: 'Chaque vaisseau avec son hologramme, coloré selon sa taille : vert pour les petits (S), cyan pour les moyens (M), ambre pour les grands (L). Recherche et filtres S, M, L pour retrouver un vaisseau.' },
+                { n: '2', t: 'L’ÉQUIPEMENT ACTUEL', d: 'Armement, utilitaires, modules de base et optionnels. Pour chaque module modifié : son niveau d’ingénierie (G1 à G5), son plan, son effet expérimental et l’ingénieur.' },
+                { n: '3', t: 'LE HANGAR DES AUTRES', d: 'Sur la page Escadron, ouvrez la fiche d’un pilote de votre escadron et cliquez sur HANGAR. Personne d’autre que vous et votre escadron ne peut le voir, et il n’affiche ni valeur en crédits ni position.' },
+                { n: '4', t: 'RIEN À SAISIR', d: 'Le hangar se remplit tout seul à partir de vos journaux de jeu. Un vaisseau que vous n’avez jamais piloté avec le plugin s’affiche sans équipement, et se complète dès que vous le pilotez.' }
+            ],
+            avis: '<b>Plugin SYS.EDTEAM 2.41</b> : il se met à jour tout seul au démarrage d’EDMC, <b>relancez EDMC une fois</b> : il relit alors vos journaux et envoie votre hangar. Le menu latéral est aussi plus compact, pour tenir sur une tablette en paysage.',
+            cta: 'OUVRIR MON HANGAR',
+            aide: 'Menu latéral : MON HANGAR · à utiliser sur PC ou tablette',
+            lien: 'hangar.html',
+            escadron: false,
+            mobile: false
         }
     ];
 

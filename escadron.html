@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=35"></script>
+    <script src="navigation.js?v=36"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="vitrine-module.js?v=1"></script>
     <script src="chiffres-cles.js?v=4"></script>
@@ -392,6 +392,9 @@
         .fp-puces { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
         .fp-meta { color: #888; font-size: 0.78em; margin-top: 8px; letter-spacing: 0.5px; }
         .fp-meta b { color: #00FF66; }
+        .fp-hangar { flex: none; align-self: flex-start; margin-top: 4px; margin-right: 34px; background: rgba(0, 240, 255, 0.06); border: 1px solid #00F0FF; color: #00F0FF; font-family: inherit; font-size: 0.82em; letter-spacing: 2px; padding: 8px 16px; cursor: pointer; transition: 0.15s; }
+        .fp-hangar:hover { background: rgba(0, 240, 255, 0.18); box-shadow: 0 0 14px rgba(0, 240, 255, 0.35); }
+        @media (max-width: 800px) { .fp-entete { flex-wrap: wrap; } .fp-hangar { margin-right: 0; } }
         .fp-titres { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; margin: 18px 0 4px; padding: 14px 18px; border: 1px solid rgba(255, 215, 0, 0.25); background: rgba(255, 215, 0, 0.04); }
         .fp-titres-liste { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
         .fp-badges { margin-left: auto; display: flex; flex-direction: column; gap: 8px; }
@@ -512,6 +515,7 @@
                             <div id="modal-cmdr-roles" class="fp-puces"></div>
                             <div id="modal-cmdr-meta" class="fp-meta"></div>
                         </div>
+                        <button type="button" class="fp-hangar" onclick="ouvrirHangarFiche()" title="Les vaisseaux de ce pilote et leur équipement">▤ HANGAR</button>
                     </div>
 
                     <!-- TITRES DE SPÉCIALISTE + distinctions de la semaine (masqué si le pilote n'en a aucune) -->
@@ -966,6 +970,16 @@
             return `<div class="fp-dom"><span>${libelle}</span><span><span class="fp-rang">${nom}</span><div class="fp-barre petit${or ? ' or' : ''}"><i style="width: ${pct}%;"></i></div></span><span class="fp-pct${or ? ' or' : ''}">${pct} %</span></div>`;
         }
 
+        // Hangar du pilote dont la fiche est ouverte (hangar.js n'est charge qu'au premier clic)
+        async function ouvrirHangarFiche() {
+            const id = window.__ficheCourante;
+            if (!id) return;
+            try {
+                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=1'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+                window.EdteamHangar.ouvrir(id);
+            } catch (e) { console.error('Hangar :', e); }
+        }
+
         async function ouvrirProfilPilote(userId) {
             try {
                 window.__ficheCourante = userId;
@@ -1249,6 +1263,6 @@
 
     <script src="medailles.js?v=9"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="footer.js?v=27"></script>
+    <script src="footer.js?v=28"></script>
 </body>
 </html>
