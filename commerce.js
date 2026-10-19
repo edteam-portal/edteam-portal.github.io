@@ -98,6 +98,7 @@
     .ec-px2{color:#e8a35a;font-size:1.02em;line-height:1.4}
     .ec-msg{padding:34px 18px;text-align:center;color:#aaa;line-height:1.7}
     .ec-msg b{color:#FFD700;letter-spacing:2px;font-weight:normal;display:block;margin-bottom:6px}
+    .ec-msg .ec-elargir{margin-top:6px;background:rgba(0,240,255,.1);border:1px solid #00F0FF;color:#00F0FF;font-family:inherit;font-size:.95em;letter-spacing:1.5px;padding:8px 18px;cursor:pointer}.ec-msg .ec-elargir:hover{background:rgba(0,240,255,.22)}
     .ec-spin{display:inline-block;width:14px;height:14px;border:2px solid #FFD700;border-top-color:transparent;border-radius:50%;animation:ecTourne .9s linear infinite;vertical-align:-2px;margin-right:8px}
     @keyframes ecTourne{to{transform:rotate(360deg)}}
     .ec-bandeau{border:1px solid rgba(255,215,0,.45);background:rgba(255,215,0,.07);color:#FFD700;padding:7px 12px;font-size:.76em;margin-bottom:14px;letter-spacing:1px}
@@ -111,7 +112,7 @@
     }`;
 
     const STOCKS = [100, 500, 1000, 2000], RAYONS = [20, 40, 80, 120, 200];
-    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, heures: lire('edteam_com_h24') === '1' ? 24 : 168, stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
+    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, heures: (() => { const v = parseInt(lire('edteam_com_h') || '', 10); return [24, 168, 4320].includes(v) ? v : (lire('edteam_com_h24') === '1' ? 24 : 168); })(), stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
         grande: () => lire('edteam_com_grande') !== '0'
@@ -126,6 +127,7 @@
         const j = Math.floor(h / 24);
         return j === 1 ? 'hier' : j < 60 ? 'il y a ' + j + ' j' : 'il y a ' + Math.round(j / 30) + ' mois';
     }
+    function libH(h) { return h === 24 ? '24 h' : h === 4320 ? '6 mois' : '7 jours'; }
     function ageTxt(j) { return j === null ? 'date inconnue' : j < 1 ? 'aujourd\'hui' : j === 1 ? 'hier' : j < 60 ? 'il y a ' + j + ' j' : 'il y a ' + Math.round(j / 30) + ' mois'; }
     function pastilleAge(maj) {
         const h = ageHeures(maj), frais = h !== null && h <= 48;
@@ -184,7 +186,7 @@
             + '<span>RAYON D\'ACHAT' + seg(RAYONS, etat.rayon, 'rayon', ' al') + '</span>'
             + '<span title="Ne cherche que les stations qui ont au moins ce stock">STOCK MINI À L\'ACHAT' + seg(STOCKS, etat.stock, 'stock', ' t') + '</span>'
             + '<button type="button" class="ec-tg ' + (prefs.grande() ? 'on' : '') + '" onclick="edteamCommerce.bascule(\'grande\')"><i></i>GRANDE PISTE</button>'
-            + '<button type="button" class="ec-tg ' + (etat.heures === 24 ? 'on' : '') + '" onclick="edteamCommerce.h24()" title="Par défaut, seuls les marchés relevés depuis moins de 7 jours sont proposés"><i></i>RELEVÉS DE MOINS DE 24 H</button></div>';
+            + '<span title="Âge maximal du relevé d\'un marché chez Spansh. Par défaut 7 jours ; 6 mois si les stations de la faction ne sont plus visitées.">RELEVÉS DE MOINS DE' + [[24, '24 h'], [168, '7 j'], [4320, '6 mois']].reduce((a, x) => a + '<button type="button" class="' + (x[0] === etat.heures ? 'on' : '') + '" onclick="edteamCommerce.fraicheur(' + x[0] + ')">' + x[1] + '</button>', '<span class="ec-seg">') + '</span></span></div>';
     }
     function msg(titre, texte, spin) { return '<div class="ec-msg"><b>' + (spin ? '<span class="ec-spin"></span>' : '') + E(titre) + '</b>' + texte + '</div>'; }
     function copier(texte, el, ev) {
@@ -218,7 +220,7 @@
             + (autresDest.length ? '<br>aussi : ' + autresDest.map(x => cp(x.station)).join(' · ') : '') + '</div></div>'
             + '<div class="ec-fr" style="min-width:0"><span class="ec-pill ec-rouge-pill">VENDRE ICI : L\'INFLUENCE DE LA FACTION BAISSE</span></div></div>'
             + etatsLigne() + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
-        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou désactivez « Relevés de moins de 24 h » ou « Grande piste ».');
+        if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou élargissez les relevés (7 jours, 6 mois) ou désactivez « Grande piste ».');
         const best = routes[0], autres = routes.slice(1, 7), coul = ['#FF7100', '#FF3333', '#FFD700', '#00F0FF', '#FF4FD8', '#c9ccd1'];
         h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>'
           + '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
@@ -248,11 +250,13 @@
         if (etat.mode === 'contrebande') return h + corpsContre(d);
         const dest = d.destinations || [];
         if (!dest.length || !(d.marchandises || []).length) {
-            return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché relevé depuis moins de ' + (etat.heures === 24 ? '24 h' : '7 jours') + ' chez Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand ou un stock minimal plus faible.');
+            const ages = dest.map(x => ageHeures(x.maj)).filter(x => x !== null), frais = ages.length ? Math.min.apply(null, ages) : null;
+            const aide = etat.heures < 4320 && dest.length ? '<br><br>Chez Spansh, le relevé le plus récent d\'une station de ' + E(d.faction || etat.faction) + ' date de <strong style="color:#fff">' + E(ageTxtH(frais).replace(/^il y a /, '')) + '</strong> : personne ne s\'y est amarré depuis.<br><button type="button" class="ec-elargir" onclick="edteamCommerce.fraicheur(4320)">ESSAYER AVEC LES RELEVÉS DE MOINS DE 6 MOIS</button>' : '';
+            return h + msg('AUCUNE ROUTE', E(d.faction || etat.faction) + ' n\'a aucune station avec un marché relevé depuis moins de ' + libH(etat.heures) + ' chez Spansh dans ' + E(d.systeme || etat.systeme) + ', ou rien de rentable à acheter à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand ou un stock minimal plus faible.' + aide);
         }
         const routes = calculer(d);
         if (!routes.length) {
-            return h + msg('AUCUNE ROUTE AVEC CES RÉGLAGES', 'Aucune marchandise ne rapporte avec votre soute, la taille de piste et la fraîcheur choisies.<br>Essayez de désactiver « Relevés de moins de 24 h » ou « Grande piste », ou d\'agrandir le rayon.');
+            return h + msg('AUCUNE ROUTE AVEC CES RÉGLAGES', 'Aucune marchandise ne rapporte avec votre soute, la taille de piste et la fraîcheur choisies.<br>Essayez d\'élargir les relevés (7 jours, 6 mois), de désactiver « Grande piste » ou d\'agrandir le rayon.');
         }
         const best = routes[0], autres = routes.slice(1, 7);
         const jv = ageHeures(best.v.maj), vFrais = jv !== null && jv <= 48;
@@ -260,7 +264,7 @@
         h += '<div class="ec-s">DESTINATION <b>· là où vendre fait monter ' + E(d.faction || etat.faction) + '</b></div>'
           + '<div class="ec-dest"><div><div class="lib">STATION DE LA FACTION · LA MIEUX PLACÉE POUR CETTE ROUTE</div><div class="nom">' + cp(best.v.station, String(best.v.station).toUpperCase()) + '</div>'
           + '<div class="sous">' + E(String(d.systeme || etat.systeme).toUpperCase()) + ' · ' + (best.v.planetaire ? 'planétaire' : 'orbitale') + (best.v.grande ? ' · grande piste' : ' · petite piste') + ' · ' + nbDest + ' station' + (nbDest > 1 ? 's' : '') + ' de la faction avec marché dans le système</div></div>'
-          + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (7 jours, ou 24 h).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
+          + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (24 h, 7 jours ou 6 mois).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
         h += etatsLigne();
         h += '<div class="ec-s">LA MEILLEURE ROUTE POUR <b>' + prefs.soute() + ' t</b></div>';
         h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + '</span>' + '</div>'
@@ -284,7 +288,7 @@
         const o = assurerDom();
         o.innerHTML = '<div class="ec-m' + (etat.mode === 'contrebande' ? ' ec-rouge' : '') + '">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
             + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : 'Routes classées par bénéfice total pour votre soute')
-            + (etat.calc_le ? ' · recherche faite ' + E(ageTxtH(ageHeures(etat.calc_le))) : '') + ' · marchés relevés depuis moins de ' + (etat.heures === 24 ? '24 h' : '7 jours') + '.</div></div>';
+            + (etat.calc_le ? ' · recherche faite ' + E(ageTxtH(ageHeures(etat.calc_le))) : '') + ' · marchés relevés depuis moins de ' + libH(etat.heures) + '.</div></div>';
         o.style.display = 'flex';
     }
 
@@ -319,7 +323,7 @@
         regler(v) { ecrire('edteam_com_soute', String(Math.max(10, Math.min(5000, parseInt(v, 10) || 200)))); rendre(); },
         rayon(v) { if (v === etat.rayon) return; etat.rayon = v; etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
         stock(v) { if (v === etat.stock) return; etat.stock = v; ecrire('edteam_com_stock', String(v)); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
-        h24() { etat.heures = etat.heures === 24 ? 168 : 24; ecrire('edteam_com_h24', etat.heures === 24 ? '1' : '0'); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
+        fraicheur(h) { if (![24, 168, 4320].includes(h) || h === etat.heures) return; etat.heures = h; ecrire('edteam_com_h', String(h)); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
         bascule(k) { ecrire('edteam_com_grande', prefs.grande() ? '0' : '1'); rendre(); },
         copie(el, txt, ev) { copier(String(txt), el, ev); },
         // bouton « Où vendre ? » d'une directive de hausse en cours ; vide pour les autres

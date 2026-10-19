@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ou-vendre-6-mois', date: '2026-10-19T19:59:45Z', type: 'AMELIORE',
+        titre: 'Où vendre ? : relevés de 24 h, 7 jours ou 6 mois',
+        texte: 'Quand les stations de la faction visée ne sont plus visitées, les relevés de marché de Spansh deviennent très vieux et la fenêtre « Où vendre ? » ne trouvait plus aucune route. Le réglage de fraîcheur propose maintenant trois niveaux : moins de 24 h, moins de 7 jours (par défaut) ou moins de 6 mois. Sans route, le message indique l’âge du dernier relevé connu et un bouton permet d’élargir à 6 mois. Avec des relevés anciens, vérifiez toujours le marché à l’arrivée : les prix peuvent avoir changé.',
+        important: false
+    },
+    {
         id: '2026-10-hangar', date: '2026-10-19T19:46:05Z', type: 'NOUVEAU',
         titre: 'Mon hangar : vos vaisseaux et leur équipement actuel, en hologramme',
         texte: 'Une nouvelle page Mon hangar (menu latéral, sous le Quartier général) liste tous vos vaisseaux avec leur hologramme, coloré selon la taille (vert S, cyan M, ambre L), et l’équipement actuel de chacun : modules, niveau d’ingénierie, plan, effet expérimental, ingénieur. Les membres de votre escadron voient votre hangar depuis votre fiche pilote (bouton HANGAR de la page Escadron) ; il n’affiche ni valeur en crédits ni position. Le menu latéral est aussi plus compact pour tenir sur une tablette en paysage. Le hangar se remplit tout seul avec le plugin 2.41 : relancez EDMC une fois. Une annonce en plein écran présente le module, une seule fois.',
