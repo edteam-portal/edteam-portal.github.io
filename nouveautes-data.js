@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-flotte-hologrammes-2', date: '2026-10-19T18:29:30Z', type: 'NOUVEAU',
+        titre: 'Tableau de bord : 13 nouveaux vaisseaux en hologramme',
+        texte: 'Votre vaisseau s’affiche en hologramme dans l’onglet Missions : modules, passagers dans leurs cabines et soute. Treize vaisseaux s’ajoutent : Imperial Eagle, Eagle, Viper Mk III, Cobra Mk III, Type-6 Transporter, Diamondback Explorer, Keelback, Vulture, Asp Explorer, Federal Dropship, Type-7 Transporter, Krait Mk II et Corsair. 32 vaisseaux sont maintenant disponibles, 14 autres arriveront plus tard. Une annonce en plein écran présente la liste, une seule fois.',
+        important: false
+    },
+    {
         id: '2026-10-joueurs-croises', date: '2026-10-19T11:00:00Z', type: 'NOUVEAU',
         titre: 'Joueurs croisés : l’historique des joueurs verrouillés par l’escadron',
         texte: 'Chaque joueur (pas les PNJ) que l’un de vos pilotes verrouille dans l’onglet Combat est maintenant gardé dans un historique partagé par l’escadron, pendant 30 jours après la dernière fois qu’il est croisé. Le QG affiche à la place de « Quoi faire » le nombre de joueurs croisés : un clic ouvre la liste, avec une recherche, et chaque ligne se déplie pour montrer le vaisseau, le rang, la faction, l’escadron, la puissance, le statut légal, la prime, le dernier système et le pilote qui l’a vu. Le même historique s’ouvre depuis un bouton de l’onglet Combat. « Quoi faire » est retiré du QG, comme il l’avait été du mobile. Si le tableau de bord est ouvert sur votre second écran, verrouiller un joueur en jeu ouvre aussitôt son onglet Combat, quel que soit l’onglet où vous étiez ; l’enregistrement, lui, se fait même sans la page. Les membres de votre escadron n’apparaissent jamais dans la liste.',

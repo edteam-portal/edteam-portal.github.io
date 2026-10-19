@@ -47,7 +47,7 @@
     function style() { if (!document.getElementById('cm-css')) { const s = document.createElement('style'); s.id = 'cm-css'; s.textContent = CSS; document.head.appendChild(s); } }
     const charger = src => new Promise(ok => { const s = document.createElement('script'); s.src = src; s.onload = () => ok(true); s.onerror = () => ok(false); document.head.appendChild(s); });
     async function holos() {
-        try { if (typeof SILHOUETTES === 'undefined') await charger('silhouettes-data.js?v=1'); if (!window.HoloVaisseau) await charger('holo-vaisseau.js?v=1'); } catch (e) { /* sans hologramme */ }
+        try { if (typeof SILHOUETTES === 'undefined') await charger('silhouettes-data.js?v=2'); if (!window.HoloVaisseau) await charger('holo-vaisseau.js?v=1'); } catch (e) { /* sans hologramme */ }
         return !!window.HoloVaisseau && typeof SILHOUETTES !== 'undefined';
     }
 

@@ -124,24 +124,6 @@
             lien: 'bgs.html'
         },
         {
-            id: 'flotte-2026-10',
-            couleur: '#00F0FF',
-            etiquette: '★ MISE À JOUR',
-            titre: 'DE NOUVEAUX VAISSEAUX EN HOLOGRAMME',
-            sous: 'Vos modules, vos passagers et votre soute, vus de dessus',
-            intro: 'Dans l’onglet Missions du tableau de bord, <b>votre vaisseau s’affiche en hologramme</b> : chaque module, vos passagers dans leurs cabines, votre soute qui se remplit. <b>Douze vaisseaux s’ajoutent aujourd’hui</b> à ceux déjà disponibles.',
-            etapes: [],
-            plein: true,
-            aVenir: 27,
-            galerie: [["Anaconda","images/vaisseaux/anaconda-dessus.webp"],["Beluga Liner","images/vaisseaux/beluga-dessus.webp"],["Caspian Explorer","images/vaisseaux/caspian-dessus.webp"],["Cobra Mk V","images/vaisseaux/cobramkv-dessus.webp"],["Diamondback Scout","images/vaisseaux/diamondback-dessus.webp"],["Dolphin","images/vaisseaux/dolphin-dessus.webp"],["Federal Corvette","images/vaisseaux/corvette-dessus.webp"],["Federal Gunship","images/vaisseaux/gunship-dessus.webp"],["Fer-de-Lance","images/vaisseaux/fdl-dessus.webp"],["Imperial Courier","images/vaisseaux/courrier-dessus.webp"],["Imperial Cutter","images/vaisseaux/cutter-dessus.webp"],["Kestrel Mk II","images/vaisseaux/kestrel-dessus.webp"],["Lynx Highliner","images/vaisseaux/lynx-dessus.webp"],["Mandalay","images/vaisseaux/mandalay-dessus.webp"],["Panther Clipper Mk II","images/vaisseaux/panther-dessus.webp"],["Python","images/vaisseaux/python-dessus.webp"],["Python Mk II","images/vaisseaux/pythonmk2-dessus.webp"],["Type-11 Prospector","images/vaisseaux/t11-dessus.webp"],["Type-8 Transporter","images/vaisseaux/type8-dessus.webp"]],
-            avis: '<b>Rien à faire de votre côté</b> : si votre vaisseau est dans la liste, l’hologramme apparaît tout seul. Sinon, vous gardez l’affichage habituel, avec les mêmes informations.',
-            cta: 'OUVRIR LE TABLEAU DE BORD',
-            aide: 'Menu du haut : TABLEAU DE BORD, onglet MISSIONS · à utiliser sur PC ou tablette',
-            lien: 'tableau-de-bord.html?mode=mis',
-            escadron: false,
-            mobile: false
-        },
-        {
             id: 'combat-2026-10',
             couleur: '#FF3B30',
             etiquette: '★ NOUVEAU MODULE',
@@ -181,6 +163,24 @@
             cta: 'OUVRIR LES JOUEURS CROISÉS',
             aide: 'QG : carte « Joueurs croisés » · Combat : bouton « JOUEURS CROISÉS »',
             action: function () { if (window.JCroises) JCroises.ouvrir(); },
+            mobile: false
+        },
+        {
+            id: 'flotte-2026-10-b',
+            couleur: '#00F0FF',
+            etiquette: '★ MISE À JOUR',
+            titre: 'TREIZE NOUVEAUX VAISSEAUX EN HOLOGRAMME',
+            sous: 'Eagle, Viper, Cobra Mk III, Asp, Krait, Corsair et sept autres',
+            intro: 'Dans l’onglet Missions du tableau de bord, <b>votre vaisseau s’affiche en hologramme</b> : chaque module, vos passagers dans leurs cabines, votre soute qui se remplit. <b>Treize vaisseaux s’ajoutent aujourd’hui</b> à ceux déjà disponibles.',
+            etapes: [],
+            plein: true,
+            aVenir: 14,
+            galerie: [["Anaconda","images/vaisseaux/anaconda-dessus.webp"],["Asp Explorer","images/vaisseaux/asp-dessus.webp"],["Beluga Liner","images/vaisseaux/beluga-dessus.webp"],["Caspian Explorer","images/vaisseaux/caspian-dessus.webp"],["Cobra Mk III","images/vaisseaux/cobramkiii-dessus.webp"],["Cobra Mk V","images/vaisseaux/cobramkv-dessus.webp"],["Corsair","images/vaisseaux/corsair-dessus.webp"],["Diamondback Explorer","images/vaisseaux/dbx-dessus.webp"],["Diamondback Scout","images/vaisseaux/diamondback-dessus.webp"],["Dolphin","images/vaisseaux/dolphin-dessus.webp"],["Eagle","images/vaisseaux/eaglemk1-dessus.webp"],["Federal Corvette","images/vaisseaux/corvette-dessus.webp"],["Federal Dropship","images/vaisseaux/dropship-dessus.webp"],["Federal Gunship","images/vaisseaux/gunship-dessus.webp"],["Fer-de-Lance","images/vaisseaux/fdl-dessus.webp"],["Imperial Courier","images/vaisseaux/courrier-dessus.webp"],["Imperial Cutter","images/vaisseaux/cutter-dessus.webp"],["Imperial Eagle","images/vaisseaux/eagle-dessus.webp"],["Keelback","images/vaisseaux/keelback-dessus.webp"],["Kestrel Mk II","images/vaisseaux/kestrel-dessus.webp"],["Krait Mk II","images/vaisseaux/krait2-dessus.webp"],["Lynx Highliner","images/vaisseaux/lynx-dessus.webp"],["Mandalay","images/vaisseaux/mandalay-dessus.webp"],["Panther Clipper Mk II","images/vaisseaux/panther-dessus.webp"],["Python","images/vaisseaux/python-dessus.webp"],["Python Mk II","images/vaisseaux/pythonmk2-dessus.webp"],["Type-11 Prospector","images/vaisseaux/t11-dessus.webp"],["Type-6 Transporter","images/vaisseaux/type6-dessus.webp"],["Type-7 Transporter","images/vaisseaux/type7t-dessus.webp"],["Type-8 Transporter","images/vaisseaux/type8-dessus.webp"],["Viper Mk III","images/vaisseaux/viper-dessus.webp"],["Vulture","images/vaisseaux/vulture-dessus.webp"]],
+            avis: '<b>Rien à faire de votre côté</b> : si votre vaisseau est dans la liste, l’hologramme apparaît tout seul. Sinon, vous gardez l’affichage habituel, avec les mêmes informations.',
+            cta: 'OUVRIR LE TABLEAU DE BORD',
+            aide: 'Menu du haut : TABLEAU DE BORD, onglet MISSIONS · à utiliser sur PC ou tablette',
+            lien: 'tableau-de-bord.html?mode=mis',
+            escadron: false,
             mobile: false
         }
     ];

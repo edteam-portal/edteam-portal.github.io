@@ -20,7 +20,7 @@
     <script src="photos.js?v=2"></script>
     <script src="navigation.js?v=35"></script>
     <script src="modules-data.js?v=1"></script>
-    <script src="silhouettes-data.js?v=1"></script>
+    <script src="silhouettes-data.js?v=2"></script>
     <script src="modules-vaisseau.js?v=24"></script>
     <script src="minage.js?v=15"></script>
     <script src="exobio-valeurs.js?v=1"></script>
@@ -858,7 +858,7 @@
         const LARGE = 1000;
         // liste des vaisseaux modelises : se met a jour toute seule des qu'une entree de SILHOUETTES est ajoutee (champ nom)
         function listeModelises() { const n = Object.values(SILHOUETTES).map(x => x.nom).filter(Boolean); return n.length > 1 ? n.slice(0, -1).map(x => `<b>${x}</b>`).join(", ") + " et <b>" + n[n.length - 1] + "</b>" : n.map(x => `<b>${x}</b>`).join(""); }
-        const FLOTTE_A_FAIRE = 27;      // vaisseaux restant a modeliser (a corriger a la main quand on en ajoute ; meme chiffre dans annonce.js)
+        const FLOTTE_A_FAIRE = 14;      // vaisseaux restant a modeliser (a corriger a la main quand on en ajoute ; meme chiffre dans annonce.js)
         function noteVaisseaux() {
             if (!S || (S.pied && S.pied.on) || window.innerWidth < LARGE) return "";
             const modele = !!SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()], n = Object.keys(SILHOUETTES).length;
