@@ -31,6 +31,7 @@
 .cm-nm{min-width:0}.cm-nm b{display:block;color:#fff;font-weight:normal;letter-spacing:1px;font-size:.95em;overflow-wrap:anywhere;line-height:1.25}.cm-nm span{display:block;color:#8fb7bf;font-size:.68em;letter-spacing:.4px;margin-top:2px}
 .cm-nm .fa{color:#b9c8ce;font-size:.66em;margin-top:3px;line-height:1.4}.cm-nm .fa span{display:inline;font-size:1em;margin:0;letter-spacing:0}.cm-nm .pw{color:#8fd3ff}.cm-nm .pw0{color:#6f7c84;font-style:italic}.cm-nm .tg{color:#FFD700;letter-spacing:1px}
 .cm-ri{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;align-self:start}.cm-ri u{text-decoration:none;color:#7d8a92;font-size:.62em;white-space:nowrap}.cm-ri em{font-style:normal;color:#00F0FF;font-size:.8em}
+.cm-sy{color:#9fd3e0;font-size:.62em;letter-spacing:.5px;max-width:130px;overflow-wrap:anywhere}
 .cm-pm{display:inline-block;border:1px solid #FF3B30;color:#FF6B5F;border-radius:6px;font-size:.54em;letter-spacing:1px;padding:2px 6px;white-space:nowrap}
 .cm-plus{display:block;width:100%;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.45);color:#00F0FF;font-family:inherit;font-size:.72em;letter-spacing:2px;padding:13px;border-radius:14px;cursor:pointer}
 .cm-vide{color:#8b97a0;text-align:center;padding:26px 14px;font-size:.82em;line-height:1.55}
@@ -79,7 +80,7 @@
         return '<div class="cm-c" style="--t:' + COUL[t] + '" onclick="croisesMobile.fiche(' + i + ')"><div class="cm-th">' + holo(x, 'cmt' + i) + '</div>'
             + '<div class="cm-nm"><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><span>' + E(nomDe(x)) + (x.rg ? ' · ' + E(String(x.rg).toUpperCase()) : '') + '</span>'
             + '<div class="fa">' + (x.f ? '<div>' + E(x.f) + '</div>' : '') + '<div>' + pwTxt(x) + '</div>' + (x.e ? '<div class="tg">[' + E(x.e) + ']</div>' : '') + '</div></div>'
-            + '<div class="cm-ri">' + (x.pm > 0 ? '<span class="cm-pm">PRIME ' + FR(x.pm) + ' CR</span>' : (estRecherche(x) ? '<span class="cm-pm">RECHERCHÉ</span>' : (t === 'r' ? '<span class="cm-pm">CAMP RIVAL</span>' : ''))) + '<u>' + il(x.d) + '</u><em>×' + x.nb + '</em></div></div>';
+            + '<div class="cm-ri">' + (x.pm > 0 ? '<span class="cm-pm">PRIME ' + FR(x.pm) + ' CR</span>' : (estRecherche(x) ? '<span class="cm-pm">RECHERCHÉ</span>' : '')) + (x.sys ? '<span class="cm-sy">' + E(x.sys) + '</span>' : '') + '<u>' + il(x.d) + '</u><em>×' + x.nb + '</em></div></div>';
     }
     function corps() {
         const L = ST.liste, el = document.getElementById('cm-corps'); if (!el) return;

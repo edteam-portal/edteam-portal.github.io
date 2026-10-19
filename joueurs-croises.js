@@ -36,6 +36,7 @@
 .jc-l .fa{color:#b9c8ce;font-size:.8em;overflow-wrap:anywhere}.jc-l .fa i{font-style:normal;color:#FFD700;letter-spacing:1px}.jc-l .fa .pw{color:#8fd3ff}.jc-l .fa .pw0{color:#6f7c84;font-style:italic}
 .jc-l .vu{color:#9aa7ad;font-size:.76em}.jc-l .nm .mt{display:none}.jc-l .nb{color:#00F0FF;text-align:right;font-size:.9em}
 .jc-chip{display:inline-block;border:1px solid var(--t);color:var(--t);font-size:.66em;letter-spacing:2px;padding:2px 8px;white-space:nowrap}
+.jc-l .pc{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}.jc-l .pc .jc-sy{color:#9fd3e0;font-size:.84em;letter-spacing:.5px;overflow-wrap:anywhere}
 .jc-d{display:none;padding:6px 14px 16px 14px;gap:16px 22px;grid-template-columns:minmax(0,290px) minmax(0,1fr);align-items:center}.jc-r.ouv .jc-d{display:grid}.jc-r.ouv .jc-l{background:color-mix(in srgb,var(--t) 9%,transparent)}
 .jc-g{background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--t) 16%,transparent),rgba(0,0,0,.5));border:1px solid color-mix(in srgb,var(--t) 40%,transparent);padding:8px}.jc-g svg{display:block;width:100%;height:auto;max-height:230px}
 .jc-dt{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 18px}.jc-dt .tt{grid-column:1/-1}
@@ -121,7 +122,7 @@
     function carteHtml(r, L, id, apercu) {
         const t = Number(r.total) || 0, s = Number(r.semaine) || 0, d = L[0];
         const reticule = '<svg class="ret" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="9"/><path d="M32 2v14M32 48v14M2 32h14M48 32h14"/></svg>';
-        const flux = L.map(x => '<div style="--t:' + COUL[ton(x)] + '"><i></i><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><em>' + E(String(nomV(x))) + '</em><u>' + il(x.d).replace('il y a ', '') + '</u></div>').join('');
+        const flux = L.map(x => '<div style="--t:' + COUL[ton(x)] + '"><i></i><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><em>' + E(String(x.sys || nomV(x))) + '</em><u>' + il(x.d).replace('il y a ', '') + '</u></div>').join('');
         return '<div class="jc-carte"' + (apercu ? '' : ' onclick="JCroises.ouvrir()" onmouseenter="if(typeof sonHover===\'function\') sonHover()"')
             + (d ? ' style="--t:' + COUL[ton(d)] + '"' : '') + '><div class="hl" id="' + id + '-hl">' + reticule + (d ? '<span class="lab">' + E(String(nomV(d) || 'VAISSEAU').toUpperCase()) + '</span>' : '') + '</div>'
             + '<div class="co"><div class="e">JOUEURS CROISÉS · COMBAT</div>'
@@ -220,7 +221,7 @@
     function ligne(x, i) {
         const t = ton(x), nom = nomV(x), ouv = ST.ouvert === x.n.toLowerCase();
         const det = (c, v, cls) => v ? '<div' + (cls ? ' class="' + cls + '"' : '') + '><small>' + c + '</small><b>' + v + '</b></div>' : '';
-        const pc = x.pm > 0 ? '<span class="jc-chip" style="--t:#FF3B30">PRIME ' + FR(x.pm) + ' CR</span>' : (estRecherche(x) ? '<span class="jc-chip" style="--t:#FF3B30">RECHERCHÉ</span>' : (t === 'r' ? '<span class="jc-chip" style="--t:#FF3B30">CAMP RIVAL</span>' : ''));
+        const pc = (x.pm > 0 ? '<span class="jc-chip" style="--t:#FF3B30">PRIME ' + FR(x.pm) + ' CR</span>' : (estRecherche(x) ? '<span class="jc-chip" style="--t:#FF3B30">RECHERCHÉ</span>' : '')) + (x.sys ? '<span class="jc-sy" title="Système où il a été croisé">' + E(x.sys) + '</span>' : '');
         return '<div class="jc-r' + (ouv ? ' ouv' : '') + '" style="--t:' + COUL[t] + '"><div class="jc-l" onclick="JCroises.basculer(this.parentNode)" data-k="' + E(x.n.toLowerCase()) + '" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
             + '<div class="jc-th">' + holo(x, i, false) + '</div>'
             + '<div class="nm">CMD ' + E(x.n.toUpperCase()) + '<small>' + E(String(nom)) + (x.rg ? ' · ' + E(String(x.rg).toUpperCase()) : '') + '<span class="mt"> · ' + il(x.d) + (x.pm > 0 ? ' · PRIME ' + FR(x.pm) + ' CR' : '') + '</span></small></div>'
