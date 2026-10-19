@@ -33,7 +33,7 @@
 .jc-th .tbs-balai,.jc-g .tbs-balai{animation:none}.jc-r.ouv .jc-g .tbs-balai{animation:jcBal 5s linear infinite}
 @keyframes jcBal{from{transform:translateY(0)}to{transform:translateY(var(--h))}}@media (prefers-reduced-motion:reduce){.jc-r.ouv .jc-g .tbs-balai{animation:none}}
 .jc-l .nm{color:#fff;font-size:.98em;letter-spacing:1px;overflow-wrap:anywhere}.jc-l .nm small{display:block;color:#8fb7bf;font-size:.74em;letter-spacing:.5px}
-.jc-l .fa{color:#b9c8ce;font-size:.8em;overflow-wrap:anywhere}.jc-l .fa i{font-style:normal;color:#FFD700;letter-spacing:1px}
+.jc-l .fa{color:#b9c8ce;font-size:.8em;overflow-wrap:anywhere}.jc-l .fa i{font-style:normal;color:#FFD700;letter-spacing:1px}.jc-l .fa .pw{color:#8fd3ff}.jc-l .fa .pw0{color:#6f7c84;font-style:italic}
 .jc-l .vu{color:#9aa7ad;font-size:.76em}.jc-l .nm .mt{display:none}.jc-l .nb{color:#00F0FF;text-align:right;font-size:.9em}
 .jc-chip{display:inline-block;border:1px solid var(--t);color:var(--t);font-size:.66em;letter-spacing:2px;padding:2px 8px;white-space:nowrap}
 .jc-d{display:none;padding:6px 14px 16px 14px;gap:16px 22px;grid-template-columns:minmax(0,290px) minmax(0,1fr);align-items:center}.jc-r.ouv .jc-d{display:grid}.jc-r.ouv .jc-l{background:color-mix(in srgb,var(--t) 9%,transparent)}
@@ -184,7 +184,9 @@
     function ton(x) { return tonDe(x); }
     const tonDe = x => /\b(ami|amie|friend|ally|allie|allié)\b/i.test(x.l || '') ? 'v' : (x.pm > 0 || /wanted|recherch|outlaw|hors.la.loi/i.test(x.l || '')) ? 'r' : 'b';
     function nomV(x) { return nomDe(x); }
-    const nomDe = x => (typeof nomVaisseau === 'function' && x.s && nomVaisseau(x.s)) || x.sl || x.s || '';
+    const joli = k => String(k || '').replace(/_nx$/i, '').replace(/_/g, ' ').replace(/\b[a-z]/g, c => c.toUpperCase());
+    const nomBrut = (n, k) => n && String(n).toLowerCase() !== String(k || '').toLowerCase() ? n : '';
+    const nomDe = x => nomBrut(typeof nomVaisseau === 'function' && x.s ? nomVaisseau(x.s) : '', x.s) || nomBrut(x.sl, x.s) || (typeof SILHOUETTES !== 'undefined' && x.s && SILHOUETTES[String(x.s).toLowerCase()] && SILHOUETTES[String(x.s).toLowerCase()].nom) || joli(x.s);
     function filtrer() {
         const q = ST.q.trim().toLowerCase();
         let L = ST.liste.filter(x => (!q || [x.n, x.sl, x.s, x.rg, x.f, x.e, x.pw, x.sys, x.par].some(v => String(v || '').toLowerCase().includes(q)))
@@ -200,6 +202,8 @@
         const L = ST.liste, rech = L.filter(x => ton(x) === 'r').length, revus = L.filter(x => x.nb > 1).length, der = L.reduce((m, x) => Math.max(m, x.d || 0), 0);
         return '<div><small>JOUEURS CROISÉS</small><b>' + FR(L.length) + '</b></div><div class="r"><small>RECHERCHÉS</small><b>' + FR(rech) + '</b></div><div><small>REVUS PLUSIEURS FOIS</small><b>' + FR(revus) + '</b></div><div><small>DERNIER CROISÉ</small><b class="p">' + (der ? il(der).toUpperCase() : '—') + '</b></div>';
     }
+    // puissance : le jeu ne la donne qu'apres un scan complet (comme le statut legal) ; sans elle, statut connu = aucune puissance soutenue, statut inconnu = scan incomplet
+    const pwHtml = x => x.pw ? '<span class="pw">' + E(x.pw) + '</span>' : '<span class="pw0">' + (x.l ? 'Aucune puissance soutenue' : 'Puissance non relevée') + '</span>';
     function ligne(x, i) {
         const t = ton(x), nom = nomV(x), ouv = ST.ouvert === x.n.toLowerCase();
         const det = (c, v, cls) => v ? '<div' + (cls ? ' class="' + cls + '"' : '') + '><small>' + c + '</small><b>' + v + '</b></div>' : '';
@@ -207,11 +211,11 @@
         return '<div class="jc-r' + (ouv ? ' ouv' : '') + '" style="--t:' + COUL[t] + '"><div class="jc-l" onclick="JCroises.basculer(this.parentNode)" data-k="' + E(x.n.toLowerCase()) + '" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
             + '<div class="jc-th">' + holo(x, i, false) + '</div>'
             + '<div class="nm">CMD ' + E(x.n.toUpperCase()) + '<small>' + E(String(nom)) + (x.rg ? ' · ' + E(String(x.rg).toUpperCase()) : '') + '<span class="mt"> · ' + il(x.d) + (x.pm > 0 ? ' · PRIME ' + FR(x.pm) + ' CR' : '') + '</span></small></div>'
-            + '<div class="fa">' + E(x.f || '—') + (x.e ? ' <i>[' + E(x.e) + ']</i>' : '') + '</div><div class="pc">' + pc + '</div>'
+            + '<div class="fa">' + (x.f ? '<div>' + E(x.f) + '</div>' : '') + '<div>' + pwHtml(x) + '</div>' + (x.e ? '<div><i>[' + E(x.e) + ']</i></div>' : '') + '</div><div class="pc">' + pc + '</div>'
             + '<div class="vu">' + il(x.d) + '</div><div class="nb" title="Croisements : un verrouillage séparé du précédent d’au moins 10 minutes">×' + x.nb + '</div></div>'
             + '<div class="jc-d"><div class="jc-g">' + (ouv ? holo(x, i, true) : '') + '</div><div class="jc-dt"><div class="tt"><span class="jc-chip">' + LIB[t] + '</span></div>'
             + det('PREMIÈRE VUE', date(x.p)) + det('DERNIÈRE VUE', date(x.d)) + det('DERNIER SYSTÈME', E(x.sys)) + det('VU PAR', x.par ? 'CMDR ' + E(String(x.par).toUpperCase()) : '')
-            + det('VAISSEAU', E(String(nom))) + det('RANG', E(x.rg)) + det('FACTION', E(x.f)) + det('ESCADRON DU JOUEUR', E(x.e)) + det('PUISSANCE', E(x.pw)) + det('STATUT LÉGAL', E(x.l))
+            + det('VAISSEAU', E(String(nom))) + det('RANG', E(x.rg)) + det('FACTION', E(x.f)) + det('ESCADRON DU JOUEUR', E(x.e)) + det('PUISSANCE', x.pw ? E(x.pw) : (x.l ? 'Aucune puissance soutenue' : 'Non relevée (scan incomplet)')) + det('STATUT LÉGAL', E(x.l))
             + det('PRIME', x.pm > 0 ? FR(x.pm) + ' cr' : '', 'pr') + det('CROISEMENTS', x.nb) + '</div></div></div>';
     }
     function lignes() {
