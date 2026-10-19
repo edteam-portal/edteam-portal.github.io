@@ -192,7 +192,7 @@
         const P = window.EdteamPuissances, moi = miennePw(), rel = P && x.pw && moi ? P.relation(moi, x.pw) : '';
         if (rel === 'meme') return ['v', 'MÊME PUISSANCE'];
         if (rel === 'bloc') return ['v', 'MÊME CAMP : ' + P.nomCamp(x.pw).toUpperCase()];
-        if (rel === 'rival') return ['r', 'CAMP RIVAL' + (P.nomCamp(x.pw) ? ' : ' + P.nomCamp(x.pw).toUpperCase() : '')];
+        if (rel === 'rival') return ['r', P.independantes(moi, x.pw) ? 'PUISSANCE RIVALE' : 'CAMP RIVAL' + (P.nomCamp(x.pw) ? ' : ' + P.nomCamp(x.pw).toUpperCase() : '')];
         return estRecherche(x) ? ['r', 'RECHERCHÉ'] : ['b', 'NEUTRE'];
     };
     const tonDe = x => campDe(x)[0];
@@ -263,7 +263,7 @@
             + '<div class="jc-f"><button type="button" class="on" onclick="JCroises.cat(\'tous\',this)">TOUS</button><button type="button" onclick="JCroises.cat(\'recherches\',this)">RECHERCHÉS</button><button type="button" onclick="JCroises.cat(\'revus\',this)">REVUS</button><button type="button" onclick="JCroises.cat(\'escadron\',this)">AVEC ESCADRON</button></div>'
             + '<select class="jc-s" onchange="JCroises.tri(this.value)"><option value="recent">Les plus récents</option><option value="nb">Les plus croisés</option></select><span class="jc-n" id="jc-n"></span></div>'
             + '<div class="jc-c" id="jc-c"><div class="jc-vide">Chargement…</div></div>'
-            + '<div class="jc-note">Joueurs que les pilotes de l’escadron ont verrouillés dans l’onglet Combat. Une fiche par joueur, conservée 30 jours après la dernière fois qu’il est croisé. Les membres de l’escadron n’y figurent pas. Statut légal et prime n’apparaissent qu’après un scan assez long. Rouge : camp rival (puissance d’un autre camp que la vôtre : Fédération, Empire, Alliance ou indépendants), recherché ou prime · vert : allié, même puissance ou même camp · bleu : neutre ou puissance inconnue.</div></div>';
+            + '<div class="jc-note">Joueurs que les pilotes de l’escadron ont verrouillés dans l’onglet Combat. Une fiche par joueur, conservée 30 jours après la dernière fois qu’il est croisé. Les membres de l’escadron n’y figurent pas. Statut légal et prime n’apparaissent qu’après un scan assez long. Rouge : camp rival (puissance d’un autre camp que la vôtre : Fédération, Empire, Alliance ; deux puissances indépendantes différentes sont rivales), recherché ou prime · vert : allié, même puissance ou même camp · bleu : neutre ou puissance inconnue.</div></div>';
         document.body.appendChild(m); document.addEventListener('keydown', cle, true);
         ST.q = ''; ST.ouvert = null; ST.filtre = 'tous'; ST.nb = PAGE; ST.tri = 'recent';
         try {

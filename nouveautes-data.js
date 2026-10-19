@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-camps-puissances', date: '2026-10-19T21:37:49Z', type: 'AMELIORE',
         titre: 'Combat et joueurs croisés : les camps des puissances',
-        texte: 'Chaque puissance Powerplay appartient à un camp : Fédération, Empire, Alliance ou indépendants. Un joueur de la même puissance ou du même camp que vous s’affiche désormais en vert, un joueur d’un autre camp en rouge (« camp rival »). La règle s’applique dans l’onglet Combat, dans la fenêtre « Joueurs croisés » et dans l’onglet mobile « Croisés », où la puissance comptait peu jusqu’ici. Avant, deux puissances d’un même camp (par exemple Felicia Winters et Jerome Archer) passaient en rouge dans l’onglet Combat. Sans puissance connue, la couleur reste fondée sur le statut légal et la prime.',
+        texte: 'Chaque puissance Powerplay appartient à un camp : Fédération, Empire, Alliance ou indépendants. Un joueur de la même puissance ou du même camp que vous s’affiche désormais en vert, un joueur d’un autre camp en rouge (« camp rival »). Les puissances indépendantes ne sont pas alliées entre elles : deux indépendantes différentes sont rivales. La règle s’applique dans l’onglet Combat, dans la fenêtre « Joueurs croisés » et dans l’onglet mobile « Croisés », où la puissance comptait peu jusqu’ici. Avant, deux puissances d’un même camp (par exemple Felicia Winters et Jerome Archer) passaient en rouge dans l’onglet Combat. Sans puissance connue, la couleur reste fondée sur le statut légal et la prime.',
         important: false
     },
     {

@@ -1397,7 +1397,7 @@
         // JOUEURS CROISES : le fichier (croises-mobile.js) n'est charge qu'a la premiere ouverture de l'onglet ; une seule lecture serveur, mise en memoire 5 minutes
         function chargerCroisesMobile(force) {
             if (window.croisesMobile) { window.croisesMobile.ouvrir(!!force); return; }
-            const sc = document.createElement('script'); sc.src = 'croises-mobile.js?v=2';
+            const sc = document.createElement('script'); sc.src = 'croises-mobile.js?v=3';
             sc.onload = () => { if (window.croisesMobile) window.croisesMobile.ouvrir(false); };
             sc.onerror = () => { const c = xEl('cm-corps'); if (c) c.innerHTML = '<div class="xmut" style="text-align: center; padding: 30px;">Impossible de charger cet onglet pour le moment.</div>'; };
             document.head.appendChild(sc);

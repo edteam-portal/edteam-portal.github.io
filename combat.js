@@ -316,6 +316,7 @@
             // camps : Fédération, Empire, Alliance, Indépendants (puissances.js) : même camp = vert, camp différent = rouge
             const rel = P ? P.relation(e.pw, v.pw) : "rival", cv = P ? P.nomCamp(v.pw) : "", ce = P ? P.nomCamp(e.pw) : "";
             if (rel === "bloc") return ["v", "Même camp que vous : " + ce + " (" + v.pw + ", vous : " + e.pw + ")"];
+            if (P && P.independantes(e.pw, v.pw)) return ["r", "Puissance rivale : " + v.pw + " (vous : " + e.pw + "), deux puissances indépendantes ne sont pas alliées"];
             return ["r", "Camp rival : " + (cv ? cv + " (" + v.pw + ")" : v.pw) + " contre " + (ce ? ce + " (vous : " + e.pw + ")" : "vous : " + e.pw)];
         }
         if ((e.ag || []).some(a => minus(a[0]) === minus(v.p) && minus(a[1]) === f)) return ["r", "Cible que vous avez agressée"];

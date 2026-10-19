@@ -60,7 +60,7 @@
         const P = window.EdteamPuissances, moi = miennePw(), rel = P && x.pw && moi ? P.relation(moi, x.pw) : '';
         if (rel === 'meme') return ['v', 'MÊME PUISSANCE'];
         if (rel === 'bloc') return ['v', 'MÊME CAMP : ' + P.nomCamp(x.pw).toUpperCase()];
-        if (rel === 'rival') return ['r', 'CAMP RIVAL' + (P.nomCamp(x.pw) ? ' : ' + P.nomCamp(x.pw).toUpperCase() : '')];
+        if (rel === 'rival') return ['r', P.independantes(moi, x.pw) ? 'PUISSANCE RIVALE' : 'CAMP RIVAL' + (P.nomCamp(x.pw) ? ' : ' + P.nomCamp(x.pw).toUpperCase() : '')];
         return estRecherche(x) ? ['r', 'RECHERCHÉ'] : ['b', 'NEUTRE'];
     };
     const ton = x => campDe(x)[0];
@@ -129,7 +129,7 @@
         ST.enCours = true; ST.erreur = false; if (!ST.liste) corps();
         try {
             const c = client(); if (!c) throw new Error('client indisponible');
-            const [r] = await Promise.all([c.rpc('joueurs_croises_lire', { p_limite: LIMITE }), holos().then(ok => { ST.holo = ok; }), window.EdteamPuissances ? true : charger('puissances.js?v=1')]);
+            const [r] = await Promise.all([c.rpc('joueurs_croises_lire', { p_limite: LIMITE }), holos().then(ok => { ST.holo = ok; }), window.EdteamPuissances ? true : charger('puissances.js?v=2')]);
             if (!r || r.error || !r.data) throw new Error(r && r.error ? r.error.message : 'indisponible');
             ST.liste = (r.data.liste || []).filter(x => x && x.n); ST.total = r.data.total || ST.liste.length; ST.t = Date.now(); ST.nb = PAGE;
         } catch (e) { ST.erreur = !ST.liste; console.error('Joueurs croisés :', e); }
