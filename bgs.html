@@ -1425,6 +1425,7 @@
                 const moi = estF1 ? res.conflit.s1 : res.conflit.s2, adv = estF1 ? res.conflit.s2 : res.conflit.s1;
                 conflit = `<div style="margin-top: 10px; border: 1px dashed ${c}; padding: 8px 12px; font-size: 0.9em; color: #ccc;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE DU CONFLIT : <b style="color: ${cs}; font-size: 1.2em;">${moi} – ${adv}</b> <span style="color: #777;">vs</span> <b style="color: #aaa;">${escapeHtml(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</b> <span style="color: #666; font-size: 0.8em;">· relevé ${bgsAge(res.conflit.maj)}</span></div>`;
             }
+            else if (donnees && (ordre.type_ordre === 'GUERRE' || ordre.type_ordre === 'ELECTION')) conflit = `<div style="margin-top: 10px; border: 1px dashed #555; padding: 8px 12px; font-size: 0.85em; color: #888;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE DU CONFLIT : <b style="color: #aaa;">non relevé</b> · il vient du journal d'un pilote présent dans le système : un pilote doit y passer (saut ou reconnexion) avec le plugin à jour.</div>`;
             const tableVoisines = voisines.length ? `<table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">${voisines.map(x => {
                 const moi = String(x.n || '').trim().toLowerCase() === f;
                 const etat = (x.a && x.a.length ? x.a.join(', ') : (x.e || 'Aucun'));
