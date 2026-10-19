@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-colonisation-valeurs-dodec', date: '2026-10-19T23:04:01Z', type: 'AMELIORE',
+        titre: 'Colonisation : valeurs à jour, Dodecahedron et ports principaux',
+        texte: 'Le profil d’un système colonisé utilise maintenant les valeurs de la dernière version de la feuille communautaire de CMDR DaftMav, calée sur la mise à jour « Dodec » : une cinquantaine d’installations changent (développement, technologie, richesse, niveau de vie, population). Le Dodecahedron est enfin chiffré. Les recettes des ports principaux (premier site d’un système) étaient incomplètes : elles sont corrigées d’après les chantiers réellement relevés en jeu, ce qui permet de les reconnaître, et un Ocellus ou Orbis principal n’est plus pris pour un Dodecahedron. Les avant-postes ordinaires ne comptent plus d’aluminium en trop. Ces valeurs restent des estimations : seuls trois avant-postes ont été mesurés en jeu.',
+        important: false
+    },
+    {
         id: '2026-10-camps-puissances', date: '2026-10-19T21:37:49Z', type: 'AMELIORE',
         titre: 'Combat et joueurs croisés : les camps des puissances',
         texte: 'Chaque puissance Powerplay appartient à un camp : Fédération, Empire, Alliance ou indépendants. Un joueur de la même puissance ou du même camp que vous s’affiche désormais en vert, un joueur d’un autre camp en rouge (« camp rival »). Les puissances indépendantes ne sont pas alliées entre elles : deux indépendantes différentes sont rivales. La règle s’applique dans l’onglet Combat, dans la fenêtre « Joueurs croisés » et dans l’onglet mobile « Croisés », où la puissance comptait peu jusqu’ici. Avant, deux puissances d’un même camp (par exemple Felicia Winters et Jerome Archer) passaient en rouge dans l’onglet Combat. Sans puissance connue, la couleur reste fondée sur le statut légal et la prime.',
