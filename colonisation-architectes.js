@@ -38,6 +38,7 @@
   const ST = { filtre: '' };
 
   window.coloBanniereArchi = function () {
+    css();     // le style est charge ici : la fenetre n'est plus ouverte d'office
     const L = tous(); if (!L.length) return '';
     return `<div class="ca-ban"><span>⚠ <b>${L.length}</b> SYSTÈME${L.length > 1 ? 'S' : ''} SANS ARCHITECTE <small style="color:#c9b15a;letter-spacing:1px">(à déclarer)</small></span><button type="button" onclick="coloListeArchi(false)">VOIR LA LISTE</button></div>`;
   };
