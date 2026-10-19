@@ -784,6 +784,13 @@
                 <button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="ouvrirSalleBgsMobile()">CLASSEMENT BGS DE L'ESCADRON</button>
             </div>
 
+            <!-- ========================================== -->
+            <!-- JOUEURS CROISES : charge a la demande (croises-mobile.js) -->
+            <!-- ========================================== -->
+            <div id="tab-croises" style="display: none; flex-direction: column; gap: 12px;">
+                <div id="cm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des joueurs croisés…</div></div>
+            </div>
+
         </main>
 
         <!-- BARRE BASSE -->
@@ -803,6 +810,10 @@
             <button id="nav-btn-escadron" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('escadron')">
                 <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3.5 3.5 0 0 1 0 7M22 20c0-2.6-1.7-4.6-4-5.5"></path></svg>
                 <span>ESCADRON</span>
+            </button>
+            <button id="nav-btn-croises" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('croises')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"></circle><circle cx="12" cy="12" r="2.6"></circle><path d="M12 1.5v5M12 17.5v5M1.5 12h5M17.5 12h5"></path></svg>
+                <span>CROISÉS</span>
             </button>
         </nav>
 
@@ -1362,7 +1373,7 @@
             return true;
         }
 
-        const X_ONGLETS = ['qg', 'bgs', 'batir', 'escadron'];
+        const X_ONGLETS = ['qg', 'bgs', 'batir', 'escadron', 'croises'];
         function switchMobileTab(tabId) {
             sonClic();
             window.scrollTo(0, 0);
@@ -1379,7 +1390,17 @@
             else if (tabId === 'bgs') chargerBGSMobile(false);
             else if (tabId === 'batir') chargerBatirMobile(false);
             else if (tabId === 'escadron') chargerEscadronMobile(false);
+            else if (tabId === 'croises') chargerCroisesMobile(false);
             setTimeout(xMajCloche, 600);
+        }
+
+        // JOUEURS CROISES : le fichier (croises-mobile.js) n'est charge qu'a la premiere ouverture de l'onglet ; une seule lecture serveur, mise en memoire 5 minutes
+        function chargerCroisesMobile(force) {
+            if (window.croisesMobile) { window.croisesMobile.ouvrir(!!force); return; }
+            const sc = document.createElement('script'); sc.src = 'croises-mobile.js?v=1';
+            sc.onload = () => { if (window.croisesMobile) window.croisesMobile.ouvrir(false); };
+            sc.onerror = () => { const c = xEl('cm-corps'); if (c) c.innerHTML = '<div class="xmut" style="text-align: center; padding: 30px;">Impossible de charger cet onglet pour le moment.</div>'; };
+            document.head.appendChild(sc);
         }
 
         // Cloche : liste de ce qui n'a pas encore ete lu (nouveautes, journal, EDNews, exploits, titre menace)
@@ -1473,6 +1494,7 @@
                 // 5. Barre du bas : BGS (membres avec acces) et Escadron (membres)
                 const navBgs = xEl('nav-btn-bgs'); if (navBgs) navBgs.style.display = xAccesBgs() ? 'flex' : 'none';
                 const navEsc = xEl('nav-btn-escadron'); if (navEsc) navEsc.style.display = xEstMembre() ? 'flex' : 'none';
+                const navCro = xEl('nav-btn-croises'); if (navCro) navCro.style.display = xEstMembre() ? 'flex' : 'none';
             } catch (error) {
                 console.error('SYS.EDTEAM MOBILE : Erreur de rendu de l\'accueil ->', error);
             }
