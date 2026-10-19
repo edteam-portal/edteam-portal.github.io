@@ -182,7 +182,20 @@
     // ---- la fenetre
     const ST = { liste: [], q: '', tri: 'recent', filtre: 'tous', ouvert: null, nb: PAGE, holo: false };
     function ton(x) { return tonDe(x); }
-    const tonDe = x => /\b(ami|amie|friend|ally|allie|allié)\b/i.test(x.l || '') ? 'v' : (x.pm > 0 || /wanted|recherch|outlaw|hors.la.loi/i.test(x.l || '')) ? 'r' : 'b';
+
+    // CAMP d'un joueur croise : [ton, libelle]. Ordre : statut legal allie ; puissance (la votre, celle de la fiche pilote, contre la sienne : meme puissance ou meme camp = vert, camp rival = rouge ;
+    // camps : Federation, Empire, Alliance, Independants, voir puissances.js) ; recherche ou prime = rouge ; sinon neutre (bleu)
+    const estRecherche = x => x.pm > 0 || /wanted|recherch|outlaw|hors.la.loi/i.test(x.l || '');
+    const miennePw = () => { try { const p = (typeof profilCommandant !== 'undefined' && profilCommandant) || window.profilCommandant; return (p && p.puissance_nom) || ''; } catch (e) { return ''; } };
+    const campDe = x => {
+        if (/\b(ami|amie|friend|ally|allie|allié)\b/i.test(x.l || '')) return ['v', 'ALLIÉ'];
+        const P = window.EdteamPuissances, moi = miennePw(), rel = P && x.pw && moi ? P.relation(moi, x.pw) : '';
+        if (rel === 'meme') return ['v', 'MÊME PUISSANCE'];
+        if (rel === 'bloc') return ['v', 'MÊME CAMP : ' + P.nomCamp(x.pw).toUpperCase()];
+        if (rel === 'rival') return ['r', 'CAMP RIVAL' + (P.nomCamp(x.pw) ? ' : ' + P.nomCamp(x.pw).toUpperCase() : '')];
+        return estRecherche(x) ? ['r', 'RECHERCHÉ'] : ['b', 'NEUTRE'];
+    };
+    const tonDe = x => campDe(x)[0];
     function nomV(x) { return nomDe(x); }
     const joli = k => String(k || '').replace(/_nx$/i, '').replace(/_/g, ' ').replace(/\b[a-z]/g, c => c.toUpperCase());
     const nomBrut = (n, k) => n && String(n).toLowerCase() !== String(k || '').toLowerCase() ? n : '';
@@ -190,7 +203,7 @@
     function filtrer() {
         const q = ST.q.trim().toLowerCase();
         let L = ST.liste.filter(x => (!q || [x.n, x.sl, x.s, x.rg, x.f, x.e, x.pw, x.sys, x.par].some(v => String(v || '').toLowerCase().includes(q)))
-            && (ST.filtre === 'tous' || (ST.filtre === 'recherches' && ton(x) === 'r') || (ST.filtre === 'revus' && x.nb > 1) || (ST.filtre === 'escadron' && x.e)));
+            && (ST.filtre === 'tous' || (ST.filtre === 'recherches' && estRecherche(x)) || (ST.filtre === 'revus' && x.nb > 1) || (ST.filtre === 'escadron' && x.e)));
         return L.slice().sort(ST.tri === 'nb' ? (a, b) => (b.nb - a.nb) || (b.d - a.d) : (a, b) => b.d - a.d);
     }
     function holo(x, i, grand) {
@@ -199,7 +212,7 @@
         try { return H.mini(x.s, id, rouge); } catch (e) { return ''; }
     }
     function bande() {
-        const L = ST.liste, rech = L.filter(x => ton(x) === 'r').length, revus = L.filter(x => x.nb > 1).length, der = L.reduce((m, x) => Math.max(m, x.d || 0), 0);
+        const L = ST.liste, rech = L.filter(estRecherche).length, revus = L.filter(x => x.nb > 1).length, der = L.reduce((m, x) => Math.max(m, x.d || 0), 0);
         return '<div><small>JOUEURS CROISÉS</small><b>' + FR(L.length) + '</b></div><div class="r"><small>RECHERCHÉS</small><b>' + FR(rech) + '</b></div><div><small>REVUS PLUSIEURS FOIS</small><b>' + FR(revus) + '</b></div><div><small>DERNIER CROISÉ</small><b class="p">' + (der ? il(der).toUpperCase() : '—') + '</b></div>';
     }
     // puissance : le jeu ne la donne qu'apres un scan complet (comme le statut legal) ; sans elle, statut connu = aucune puissance soutenue, statut inconnu = scan incomplet
@@ -207,13 +220,13 @@
     function ligne(x, i) {
         const t = ton(x), nom = nomV(x), ouv = ST.ouvert === x.n.toLowerCase();
         const det = (c, v, cls) => v ? '<div' + (cls ? ' class="' + cls + '"' : '') + '><small>' + c + '</small><b>' + v + '</b></div>' : '';
-        const pc = x.pm > 0 ? '<span class="jc-chip" style="--t:#FF3B30">PRIME ' + FR(x.pm) + ' CR</span>' : (t === 'r' ? '<span class="jc-chip" style="--t:#FF3B30">RECHERCHÉ</span>' : '');
+        const pc = x.pm > 0 ? '<span class="jc-chip" style="--t:#FF3B30">PRIME ' + FR(x.pm) + ' CR</span>' : (estRecherche(x) ? '<span class="jc-chip" style="--t:#FF3B30">RECHERCHÉ</span>' : (t === 'r' ? '<span class="jc-chip" style="--t:#FF3B30">CAMP RIVAL</span>' : ''));
         return '<div class="jc-r' + (ouv ? ' ouv' : '') + '" style="--t:' + COUL[t] + '"><div class="jc-l" onclick="JCroises.basculer(this.parentNode)" data-k="' + E(x.n.toLowerCase()) + '" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
             + '<div class="jc-th">' + holo(x, i, false) + '</div>'
             + '<div class="nm">CMD ' + E(x.n.toUpperCase()) + '<small>' + E(String(nom)) + (x.rg ? ' · ' + E(String(x.rg).toUpperCase()) : '') + '<span class="mt"> · ' + il(x.d) + (x.pm > 0 ? ' · PRIME ' + FR(x.pm) + ' CR' : '') + '</span></small></div>'
             + '<div class="fa">' + (x.f ? '<div>' + E(x.f) + '</div>' : '') + '<div>' + pwHtml(x) + '</div>' + (x.e ? '<div><i>[' + E(x.e) + ']</i></div>' : '') + '</div><div class="pc">' + pc + '</div>'
             + '<div class="vu">' + il(x.d) + '</div><div class="nb" title="Croisements : un verrouillage séparé du précédent d’au moins 10 minutes">×' + x.nb + '</div></div>'
-            + '<div class="jc-d"><div class="jc-g">' + (ouv ? holo(x, i, true) : '') + '</div><div class="jc-dt"><div class="tt"><span class="jc-chip">' + LIB[t] + '</span></div>'
+            + '<div class="jc-d"><div class="jc-g">' + (ouv ? holo(x, i, true) : '') + '</div><div class="jc-dt"><div class="tt"><span class="jc-chip">' + campDe(x)[1] + '</span></div>'
             + det('PREMIÈRE VUE', date(x.p)) + det('DERNIÈRE VUE', date(x.d)) + det('DERNIER SYSTÈME', E(x.sys)) + det('VU PAR', x.par ? 'CMDR ' + E(String(x.par).toUpperCase()) : '')
             + det('VAISSEAU', E(String(nom))) + det('RANG', E(x.rg)) + det('FACTION', E(x.f)) + det('ESCADRON DU JOUEUR', E(x.e)) + det('PUISSANCE', x.pw ? E(x.pw) : (x.l ? 'Aucune puissance soutenue' : 'Non relevée (scan incomplet)')) + det('STATUT LÉGAL', E(x.l))
             + det('PRIME', x.pm > 0 ? FR(x.pm) + ' cr' : '', 'pr') + det('CROISEMENTS', x.nb) + '</div></div></div>';
@@ -250,7 +263,7 @@
             + '<div class="jc-f"><button type="button" class="on" onclick="JCroises.cat(\'tous\',this)">TOUS</button><button type="button" onclick="JCroises.cat(\'recherches\',this)">RECHERCHÉS</button><button type="button" onclick="JCroises.cat(\'revus\',this)">REVUS</button><button type="button" onclick="JCroises.cat(\'escadron\',this)">AVEC ESCADRON</button></div>'
             + '<select class="jc-s" onchange="JCroises.tri(this.value)"><option value="recent">Les plus récents</option><option value="nb">Les plus croisés</option></select><span class="jc-n" id="jc-n"></span></div>'
             + '<div class="jc-c" id="jc-c"><div class="jc-vide">Chargement…</div></div>'
-            + '<div class="jc-note">Joueurs que les pilotes de l’escadron ont verrouillés dans l’onglet Combat. Une fiche par joueur, conservée 30 jours après la dernière fois qu’il est croisé. Les membres de l’escadron n’y figurent pas. Statut légal et prime n’apparaissent qu’après un scan assez long. Rouge : recherché ou prime · vert : allié · bleu : neutre.</div></div>';
+            + '<div class="jc-note">Joueurs que les pilotes de l’escadron ont verrouillés dans l’onglet Combat. Une fiche par joueur, conservée 30 jours après la dernière fois qu’il est croisé. Les membres de l’escadron n’y figurent pas. Statut légal et prime n’apparaissent qu’après un scan assez long. Rouge : camp rival (puissance d’un autre camp que la vôtre : Fédération, Empire, Alliance ou indépendants), recherché ou prime · vert : allié, même puissance ou même camp · bleu : neutre ou puissance inconnue.</div></div>';
         document.body.appendChild(m); document.addEventListener('keydown', cle, true);
         ST.q = ''; ST.ouvert = null; ST.filtre = 'tous'; ST.nb = PAGE; ST.tri = 'recent';
         try {

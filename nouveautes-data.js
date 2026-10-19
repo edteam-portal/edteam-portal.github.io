@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-camps-puissances', date: '2026-10-19T21:37:49Z', type: 'AMELIORE',
+        titre: 'Combat et joueurs croisés : les camps des puissances',
+        texte: 'Chaque puissance Powerplay appartient à un camp : Fédération, Empire, Alliance ou indépendants. Un joueur de la même puissance ou du même camp que vous s’affiche désormais en vert, un joueur d’un autre camp en rouge (« camp rival »). La règle s’applique dans l’onglet Combat, dans la fenêtre « Joueurs croisés » et dans l’onglet mobile « Croisés », où la puissance comptait peu jusqu’ici. Avant, deux puissances d’un même camp (par exemple Felicia Winters et Jerome Archer) passaient en rouge dans l’onglet Combat. Sans puissance connue, la couleur reste fondée sur le statut légal et la prime.',
+        important: false
+    },
+    {
         id: '2026-10-ou-vendre-6-mois', date: '2026-10-19T19:59:45Z', type: 'AMELIORE',
         titre: 'Où vendre ? : relevés de 24 h, 7 jours ou 6 mois',
         texte: 'Quand les stations de la faction visée ne sont plus visitées, les relevés de marché de Spansh deviennent très vieux et la fenêtre « Où vendre ? » ne trouvait plus aucune route. Le réglage de fraîcheur propose maintenant trois niveaux : moins de 24 h, moins de 7 jours (par défaut) ou moins de 6 mois. Sans route, le message indique l’âge du dernier relevé connu et un bouton permet d’élargir à 6 mois. Avec des relevés anciens, vérifiez toujours le marché à l’arrivée : les prix peuvent avoir changé.',

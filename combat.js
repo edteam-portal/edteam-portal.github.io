@@ -310,9 +310,14 @@
         const minus = x => String(x || "").trim().toLowerCase();
         const f = minus(v.f), l = String(v.l || ""), s = minus(e.soutien), en = minus(e.ennemi);
         if (/^(équipage|equipage|crew)\b/i.test(String(v.p || "")) || /allied|alli|friend|\bamie?s?\b/i.test(l)) return ["v", /allied|alli|friend|\bamie?s?\b/i.test(l) ? "Statut légal allié ou ami" : "Votre équipage"];
-        const pw = minus(e.pw);
+        const pw = minus(e.pw), P = window.EdteamPuissances;
         if (pw && (minus(v.pw) === pw || f === pw)) return ["v", "Même puissance que vous (" + (v.pw || v.f) + ")"];
-        if (pw && v.pw && minus(v.pw) !== pw) return ["r", "Puissance rivale : " + v.pw + " (vous : " + e.pw + ")"];
+        if (pw && v.pw && minus(v.pw) !== pw) {
+            // camps : Fédération, Empire, Alliance, Indépendants (puissances.js) : même camp = vert, camp différent = rouge
+            const rel = P ? P.relation(e.pw, v.pw) : "rival", cv = P ? P.nomCamp(v.pw) : "", ce = P ? P.nomCamp(e.pw) : "";
+            if (rel === "bloc") return ["v", "Même camp que vous : " + ce + " (" + v.pw + ", vous : " + e.pw + ")"];
+            return ["r", "Camp rival : " + (cv ? cv + " (" + v.pw + ")" : v.pw) + " contre " + (ce ? ce + " (vous : " + e.pw + ")" : "vous : " + e.pw)];
+        }
         if ((e.ag || []).some(a => minus(a[0]) === minus(v.p) && minus(a[1]) === f)) return ["r", "Cible que vous avez agressée"];
         if (f && s && f === s) return ["v", "Faction que vous soutenez"];
         if (f && en && f === en) return ["r", "Faction ennemie de la zone"];

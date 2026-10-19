@@ -51,7 +51,19 @@
         return !!window.HoloVaisseau && typeof SILHOUETTES !== 'undefined';
     }
 
-    const ton = x => /\b(ami|amie|friend|ally|allie|allié)\b/i.test(x.l || '') ? 'v' : (x.pm > 0 || /wanted|recherch|outlaw|hors.la.loi/i.test(x.l || '')) ? 'r' : 'b';
+    // CAMP d'un joueur croise : [ton, libelle]. Ordre : statut legal allie ; puissance (la votre, celle de la fiche pilote, contre la sienne : meme puissance ou meme camp = vert, camp rival = rouge ;
+    // camps : Federation, Empire, Alliance, Independants, voir puissances.js) ; recherche ou prime = rouge ; sinon neutre (bleu)
+    const estRecherche = x => x.pm > 0 || /wanted|recherch|outlaw|hors.la.loi/i.test(x.l || '');
+    const miennePw = () => { try { const p = (typeof profilCommandant !== 'undefined' && profilCommandant) || window.profilCommandant; return (p && p.puissance_nom) || ''; } catch (e) { return ''; } };
+    const campDe = x => {
+        if (/\b(ami|amie|friend|ally|allie|allié)\b/i.test(x.l || '')) return ['v', 'ALLIÉ'];
+        const P = window.EdteamPuissances, moi = miennePw(), rel = P && x.pw && moi ? P.relation(moi, x.pw) : '';
+        if (rel === 'meme') return ['v', 'MÊME PUISSANCE'];
+        if (rel === 'bloc') return ['v', 'MÊME CAMP : ' + P.nomCamp(x.pw).toUpperCase()];
+        if (rel === 'rival') return ['r', 'CAMP RIVAL' + (P.nomCamp(x.pw) ? ' : ' + P.nomCamp(x.pw).toUpperCase() : '')];
+        return estRecherche(x) ? ['r', 'RECHERCHÉ'] : ['b', 'NEUTRE'];
+    };
+    const ton = x => campDe(x)[0];
     const joli = k => String(k || '').replace(/_nx$/i, '').replace(/_/g, ' ').replace(/\b[a-z]/g, c => c.toUpperCase());
     const nomDe = x => (x.sl && String(x.sl).toLowerCase() !== String(x.s || '').toLowerCase() ? x.sl : '') || (typeof SILHOUETTES !== 'undefined' && x.s && SILHOUETTES[String(x.s).toLowerCase()] && SILHOUETTES[String(x.s).toLowerCase()].nom) || joli(x.s);
     const pwTxt = x => x.pw ? '<span class="pw">' + E(x.pw) + '</span>' : '<span class="pw0">' + (x.l ? 'Aucune puissance soutenue' : 'Puissance non relevée') + '</span>';
@@ -60,19 +72,19 @@
     function filtrer() {
         const q = ST.q.trim().toLowerCase();
         return (ST.liste || []).filter(x => (!q || [x.n, x.sl, x.s, x.rg, x.f, x.e, x.pw, x.sys, x.par].some(v => String(v || '').toLowerCase().includes(q)))
-            && (ST.f === 'tous' || (ST.f === 'recherches' && ton(x) === 'r') || (ST.f === 'revus' && x.nb > 1) || (ST.f === 'escadron' && x.e)));
+            && (ST.f === 'tous' || (ST.f === 'recherches' && estRecherche(x)) || (ST.f === 'revus' && x.nb > 1) || (ST.f === 'escadron' && x.e)));
     }
     function carte(x, i) {
         const t = ton(x);
         return '<div class="cm-c" style="--t:' + COUL[t] + '" onclick="croisesMobile.fiche(' + i + ')"><div class="cm-th">' + holo(x, 'cmt' + i) + '</div>'
             + '<div class="cm-nm"><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><span>' + E(nomDe(x)) + (x.rg ? ' · ' + E(String(x.rg).toUpperCase()) : '') + '</span>'
             + '<div class="fa">' + (x.f ? '<div>' + E(x.f) + '</div>' : '') + '<div>' + pwTxt(x) + '</div>' + (x.e ? '<div class="tg">[' + E(x.e) + ']</div>' : '') + '</div></div>'
-            + '<div class="cm-ri">' + (x.pm > 0 ? '<span class="cm-pm">PRIME ' + FR(x.pm) + ' CR</span>' : (t === 'r' ? '<span class="cm-pm">RECHERCHÉ</span>' : '')) + '<u>' + il(x.d) + '</u><em>×' + x.nb + '</em></div></div>';
+            + '<div class="cm-ri">' + (x.pm > 0 ? '<span class="cm-pm">PRIME ' + FR(x.pm) + ' CR</span>' : (estRecherche(x) ? '<span class="cm-pm">RECHERCHÉ</span>' : (t === 'r' ? '<span class="cm-pm">CAMP RIVAL</span>' : ''))) + '<u>' + il(x.d) + '</u><em>×' + x.nb + '</em></div></div>';
     }
     function corps() {
         const L = ST.liste, el = document.getElementById('cm-corps'); if (!el) return;
         if (!L) { el.innerHTML = '<div class="cm-vide">' + (ST.erreur ? 'Impossible de charger la liste pour le moment.<br><br><button class="cm-plus" onclick="croisesMobile.ouvrir(true)">RÉESSAYER</button>' : 'Chargement des joueurs croisés…') + '</div>'; return; }
-        const rech = L.filter(x => ton(x) === 'r').length, revus = L.filter(x => x.nb > 1).length, sem = L.filter(x => x.d > Date.now() / 1000 - 604800).length, semPlus = L.length >= LIMITE && sem === L.length ? '+' : '';
+        const rech = L.filter(estRecherche).length, revus = L.filter(x => x.nb > 1).length, sem = L.filter(x => x.d > Date.now() / 1000 - 604800).length, semPlus = L.length >= LIMITE && sem === L.length ? '+' : '';
         const A = filtrer(), vus = A.slice(0, ST.nb);
         el.innerHTML = '<div class="cm-hero"><small>COMBAT · ESCADRON</small><div class="n">' + FR(ST.total) + '</div><div class="s">joueur' + (ST.total > 1 ? 's' : '') + ' verrouillé' + (ST.total > 1 ? 's' : '') + ' par l’escadron' + (L.length ? ' · dernier ' + il(L[0].d) : '') + '</div>'
             + '<div class="cm-tl"><div><i>7 JOURS</i><b>' + FR(sem) + semPlus + '</b></div><div class="r"><i>RECHERCHÉS</i><b>' + FR(rech) + '</b></div><div><i>REVUS</i><b>' + FR(revus) + '</b></div></div></div>'
@@ -100,7 +112,7 @@
         let m = document.getElementById('modal-croise');
         if (!m) { m = document.createElement('div'); m.id = 'modal-croise'; m.className = 'modal-overlay'; m.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;display:none;justify-content:center;align-items:flex-end;z-index:6000'; m.onclick = () => { m.style.display = 'none'; }; document.body.appendChild(m); }
         const t = ton(x), det = (k, v, cls) => v ? '<div' + (cls ? ' class="' + cls + '"' : '') + '><small>' + k + '</small><b>' + v + '</b></div>' : '';
-        m.innerHTML = '<div class="card" style="--t:' + COUL[t] + '" onclick="event.stopPropagation()"><div class="cm-sh"><div class="xsp"><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><span class="k">' + LIB[t] + '</span></div><span class="x" onclick="document.getElementById(\'modal-croise\').style.display=\'none\'">✕</span></div>'
+        m.innerHTML = '<div class="card" style="--t:' + COUL[t] + '" onclick="event.stopPropagation()"><div class="cm-sh"><div class="xsp"><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><span class="k">' + campDe(x)[1] + '</span></div><span class="x" onclick="document.getElementById(\'modal-croise\').style.display=\'none\'">✕</span></div>'
             + '<div class="cm-sb"><div class="cm-g">' + holo(x, 'cmg') + '</div><div class="cm-dt">'
             + det('VAISSEAU', E(nomDe(x))) + det('RANG', E(x.rg)) + det('FACTION', E(x.f)) + det('ESCADRON DU JOUEUR', E(x.e))
             + det('PUISSANCE', x.pw ? E(x.pw) : (x.l ? 'Aucune puissance soutenue' : 'Non relevée (scan incomplet)'), 'l') + det('STATUT LÉGAL', E(x.l)) + det('PRIME', x.pm > 0 ? FR(x.pm) + ' cr' : '', 'pr')
@@ -117,7 +129,7 @@
         ST.enCours = true; ST.erreur = false; if (!ST.liste) corps();
         try {
             const c = client(); if (!c) throw new Error('client indisponible');
-            const [r] = await Promise.all([c.rpc('joueurs_croises_lire', { p_limite: LIMITE }), holos().then(ok => { ST.holo = ok; })]);
+            const [r] = await Promise.all([c.rpc('joueurs_croises_lire', { p_limite: LIMITE }), holos().then(ok => { ST.holo = ok; }), window.EdteamPuissances ? true : charger('puissances.js?v=1')]);
             if (!r || r.error || !r.data) throw new Error(r && r.error ? r.error.message : 'indisponible');
             ST.liste = (r.data.liste || []).filter(x => x && x.n); ST.total = r.data.total || ST.liste.length; ST.t = Date.now(); ST.nb = PAGE;
         } catch (e) { ST.erreur = !ST.liste; console.error('Joueurs croisés :', e); }
