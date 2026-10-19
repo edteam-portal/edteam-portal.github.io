@@ -729,8 +729,8 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
         m.innerHTML = '<div class="p" onclick="event.stopPropagation()"><button type="button" class="x" onclick="combatVuFermer()" title="Fermer (Échap)">✕</button>'
             + '<div class="tt"><span class="chip">' + lib + '</span><small>VAISSEAU VERROUILLÉ' + (il ? " · " + il : "") + '</small></div>'
             + '<div class="cr"><div class="h">' + miniHolo(v.s, "mv", v.ton) + '</div><div class="d">'
-            + ligne("VAISSEAU", E(String(nom).toUpperCase())) + ligne("PILOTE", (v.j ? "CMD " : "") + E(v.p || "—")) + (v.j ? "" : ligne("TYPE", "PNJ")) + ligne("RANG", E(String(v.rg || "").toUpperCase())) + ligne("FACTION", E(v.f || "—"))
-            + ligne("PUISSANCE DÉFENDUE", E(v.pw || "AUCUNE")) + ligne("STATUT LÉGAL", E(v.l || "—")) + '</div></div>'
+            + ligne("VAISSEAU", E(String(nom).toUpperCase())) + ligne("PILOTE", (v.j ? "CMD " : "") + E(v.p || "—")) + (v.j ? "" : ligne("TYPE", "PNJ")) + ligne("RANG", E(String(v.rg || "").toUpperCase())) + ligne("FACTION", E(v.f || "—")) + ligne("ESCADRON", E(v.e || ""))
+            + ligne("PUISSANCE DÉFENDUE", E(v.pw || "AUCUNE")) + ligne("STATUT LÉGAL", E(v.l || "—")) + ligne("PRIME", v.pm > 0 ? FR(v.pm) + " cr" : "") + '</div></div>'
             + '<div class="rs"><small>POURQUOI CE CAMP ?</small><b>' + E(v.raison || "") + '</b></div></div>';
         m.addEventListener("click", combatVuFermer); document.body.appendChild(m);
         if (!window.__cmbEsc) { window.__cmbEsc = 1; document.addEventListener("keydown", e => { if (e.key === "Escape") combatVuFermer(); }); }

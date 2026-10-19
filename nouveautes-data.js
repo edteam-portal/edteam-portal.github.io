@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-combat-fiche-vus', date: '2026-10-19T10:10:00Z', type: 'AMELIORE',
+        titre: 'Combat : l’escadron et la prime dans la fiche d’un vaisseau verrouillé',
+        texte: 'Dans l’onglet Combat, la fiche qui s’ouvre quand vous touchez un vaisseau verrouillé récemment affiche maintenant son escadron et sa prime, quand le jeu les a donnés (un scan complet est nécessaire pour la prime). Mettez à jour le plugin (version 2.39) pour en profiter.',
+        important: false,
+        action: 'Mettre à jour le plugin SYS.EDTEAM (2.39)'
+    },
+    {
         id: '2026-10-mobile-allege', date: '2026-10-18T20:45:00Z', type: 'AMELIORE',
         titre: 'Mobile : plus léger, journal des exploits complet',
         texte: 'Le compagnon mobile est allégé : les blocs « L’escadron en chiffres » et « Rangs de pilote » de l’accueil, la carrière BGS de l’onglet Engagement et l’onglet Quoi faire ont disparu. Les nouveautés passent dans un bouton ✨ de l’en-tête, avec une pastille quand il y en a du non lu. Le réglage des initiatives est maintenant en bas de l’onglet Campagnes. Le journal des exploits reprend celui du PC : lignes Powerplay (mérites et CP estimés), actions des directives clôturées, faction du lieu, et filtres par période, pilote et spécialité. L’onglet Bâtir est refait pour se lire d’un coup d’œil : un bandeau de 3 chiffres, les 3 matériaux à apporter en priorité, puis la liste des chantiers avec leur pourcentage en grand (touchez un chantier pour voir ce qui manque).',
