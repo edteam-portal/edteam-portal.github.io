@@ -132,7 +132,7 @@
         var fm = function (v, signe) { var n = Math.abs(Number(v)).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); return (signe ? (v > 0 ? '+' : v < 0 ? '−' : '') : '') + n; };
         var sens = typeof bgsSens === 'function' ? bgsSens(o, res) : null;
         var coul = ({ up: '#2fe07a', dn: '#ff4d4d', fl: '#8a8a8a', att: '#8a8a8a' })[sens || 'att'];
-        var cK = o.type_ordre === 'GUERRE' ? '#FF3B3B' : o.type_ordre === 'ELECTION' ? '#4DA3FF' : null;
+        var cK = o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null;
         if (cK && res.conflit) {
             var fc = String(o.faction_cible || '').trim().toLowerCase(), e1 = String(res.conflit.f1 || '').trim().toLowerCase() === fc;
             var etc = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
@@ -150,12 +150,20 @@
         var etats = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
         return h + (etats ? '<span style="display:inline-flex;">' + etats + '</span>' : '');
     }
+    // couleur d'une guerre ou d'une election selon le score du jeu (votre faction en premier) : vert si elle gagne, rouge si elle perd, bleu a egalite ou sans score releve
+    function couleurConflit(o) {
+        var R = window.cacheResultatsBgs, res = R && R.dir && R.dir[o.id];
+        if (!res || !res.donnees || !res.conflit) return '#4DA3FF';
+        var fc = String(o.faction_cible || '').trim().toLowerCase(), e1 = String(res.conflit.f1 || '').trim().toLowerCase() === fc;
+        var moi = Number(e1 ? res.conflit.s1 : res.conflit.s2), adv = Number(e1 ? res.conflit.s2 : res.conflit.s1);
+        return moi > adv ? '#2fe07a' : moi < adv ? '#FF3B3B' : '#4DA3FF';
+    }
     function missionsBgs(ordres, veilleIds, resume, meta) {
         return ordres.map(function (o) {
             var rs = resume[o.id] || {}; var mt = meta[o.id] || { global: 0 };
             var veille = veilleIds.has(String(o.id));
             var typeFr = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' }[o.type_ordre] || String(o.type_ordre || '').toUpperCase();
-            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' ? '#FF3B3B' : o.type_ordre === 'ELECTION' ? '#4DA3FF' : null), veille: veille, pct: mt.global || 0, vous: mt.vous, avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
+            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.global || 0, vous: mt.vous, avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
                 clic: "ouvrirDetailResultat('" + o.id + "')", info: infoFaction(o),
                 texte: '<b>' + esc(String(o.systeme_cible || '').toUpperCase()) + '</b> <em>· ' + esc(String(o.faction_cible || '').toUpperCase()) + (veille ? ' · EN VEILLE' : '') + '</em>' };
         });

@@ -84,7 +84,9 @@
         var sens = ctx.sens(o, res), cs = ctx.SENS[sens || 'att'], d, kk = null;
         if (donnees && res.conflit && k) {
             var f = String(o.faction_cible || '').trim().toLowerCase(), e1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
-            d = '<span class="mc-score" style="--k:' + k + ';">' + (e1 ? res.conflit.s1 : res.conflit.s2) + ' – ' + (e1 ? res.conflit.s2 : res.conflit.s1) + '</span>'; kk = k;
+            var sm = Number(e1 ? res.conflit.s1 : res.conflit.s2), sa = Number(e1 ? res.conflit.s2 : res.conflit.s1);
+            k = sm > sa ? '#2fe07a' : sm < sa ? '#FF3B3B' : '#4DA3FF';      // vert : on gagne, rouge : on perd, bleu : egalite
+            d = '<span class="mc-score" style="--k:' + k + ';">' + sm + ' – ' + sa + '</span>'; kk = k;
         } else if (donnees) {
             var fl = res.variation === null || res.variation === undefined ? '' : (res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '=');
             d = '<b style="color:#fff;">' + ctx.pct(res.influence) + ' %</b>' + (fl ? ' <span style="color:' + cs + ';">' + fl + (fl === '=' ? '' : ' ' + ctx.pts(res.variation)) + '</span>' : '');

@@ -18,10 +18,11 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=36"></script>
+    <script src="navigation.js?v=38"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=11"></script>
+    <script src="campagnes.js?v=12"></script>
+    <script src="bgs-ticks.js?v=1"></script>
     <script src="campagnes-pp.js?v=9"></script>
     <script src="campagnes-col.js?v=7"></script>
     <script src="vitrine-module.js?v=1"></script>
@@ -1228,13 +1229,6 @@
         // SQL 85 : humeur des factions, activité du système (trafic, morts), heure du dernier tick
         const BGS_HUMEUR = { Elated: ['Euphorique', '#2fe07a'], Happy: ['Heureux', '#2fe07a'], Discontented: ['Mécontent', '#FFB000'], Unhappy: ['Malheureux', '#ff7a45'], Despondent: ['Désespéré', '#ff4d4d'] };
         const bgsHumeur = h => { const x = BGS_HUMEUR[h]; return x ? `<span style="color: ${x[1]}; white-space: nowrap;">● ${x[0]}</span>` : ''; };
-        function bgsTickTexte() {
-            const tk = (window.cacheResultatsBgs || {}).tick;
-            if (!tk) return '';
-            const d = new Date(tk * 1000), hh = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
-            const min = Math.max(0, Math.round((Date.now() / 1000 - tk) / 60));
-            return 'dernier tick : ' + (min < 60 ? 'il y a ' + min + ' min' : 'il y a ' + Math.floor(min / 60) + ' h ' + String(min % 60).padStart(2, '0')) + ' (' + hh + ' UTC)';
-        }
         // tendance : moyenne des 7 derniers jours contre les 7 jours d'avant (au moins 4 relevés de chaque côté)
         function bgsTendance(c, col) {
             const now = Date.now() / 1000, a = [], b = [];
@@ -1464,7 +1458,7 @@
                     <b style="color: #fff; letter-spacing: 2px; font-size: 1.15em;">${escapeHtml(String(ordre.faction_cible || '').toUpperCase())}</b>
                     <span style="color: #888;">· ${escapeHtml(String(ordre.systeme_cible || '').toUpperCase())}</span>
                 </div>
-                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}${bgsTickTexte() ? ` · <span style="color: #00F0FF;">${bgsTickTexte()}</span>` : ''}</div>
+                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}</div>
 
                 <div class="bgs-paysage">
                 <div class="bgs-col-effort">
@@ -1485,7 +1479,7 @@
                 <!-- 2. LE RÉSULTAT DU JEU -->
                 <div class="bgs-col-jeu">
                     <div class="bgs-cadre"><div class="bgs-cadre-t">RÉSULTAT DU JEU <small>· influence sur 30 jours</small></div>
-                        ${donnees ? bgsCourbeGrande(res.courbe, ordre.date_emission ? new Date(ordre.date_emission).getTime() / 1000 : null, cs) : '<div style="color: #777; font-size: 0.85em; padding: 30px 10px; text-align: center; border: 1px dashed #333;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>'}
+                        <div class="bt-zone">${donnees ? bgsCourbeGrande(res.courbe, ordre.date_emission ? new Date(ordre.date_emission).getTime() / 1000 : null, cs) : '<div style="color: #777; font-size: 0.85em; padding: 30px 10px; text-align: center; border: 1px dashed #333;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>'}</div>
                         ${stats}${conflit}
                     </div>
                     <div class="bgs-cadre"><div class="bgs-cadre-t">FACTIONS ET ÉTATS</div>
@@ -1500,6 +1494,8 @@
             m.querySelector('.modal-content').style.boxShadow = `0 0 40px ${c}30`;
             document.getElementById('ordre-resultat-corps').innerHTML = html;
             m.style.display = 'flex';
+            // barres « effort par tick » (bgs-ticks.js) : sous la courbe et sur la barre d'effort ; sans le SQL 109 la modale reste telle quelle
+            if (donnees && window.EdteamBgsTicks) { const corps = document.getElementById('ordre-resultat-corps'); window.EdteamBgsTicks.monter({ ordre, res, couleur: cs, cap: meta.caps, nb: meta.nb, zone: corps.querySelector('.bt-zone'), barre: corps.querySelector('.bgs-hero .jgh'), globalAffiche: meta.global, mobile: false }); }
         };
 
         // --- AFFICHAGE DYNAMIQUE DES ORDRES BGS SUR LE TABLEAU DE BORD ---
@@ -1993,7 +1989,7 @@
 
                         window.cacheJaugesBgs[ordre.id] = htmlJauges;
                         const miniJauges = (window.__jc || []).slice(); window.__jc = null;
-                        window.cacheMetaBgs[ordre.id] = { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, pilotes: rs.pilotes || [] };
+                        window.cacheMetaBgs[ordre.id] = { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, pilotes: rs.pilotes || [], caps: capsTotal, nb: nbParticipants };
 
                         htmlAccordionsFactions += bgsCarteHTML(ordre, res, sens, { global: avancementGlobal, part: partPilote, vous: avancementVousLargeur, couleur: colorPrinc, pilotes: rs.pilotes || [], poids: poidsTotalEscadron, mini: miniJauges, large: estInit || factionsDuSysteme.length === 1,
                             init: estInit ? { info: infosInit[ordre.id], pilotes: rs.pilotes || [], nb: rs.nb_participants || 0 } : null });

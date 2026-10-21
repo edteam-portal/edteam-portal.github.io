@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=36"></script>
+    <script src="navigation.js?v=38"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="vitrine-module.js?v=1"></script>
     <script src="chiffres-cles.js?v=4"></script>
@@ -975,7 +975,7 @@
             const id = window.__ficheCourante;
             if (!id) return;
             try {
-                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=1'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=2'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
                 window.EdteamHangar.ouvrir(id);
             } catch (e) { console.error('Hangar :', e); }
         }

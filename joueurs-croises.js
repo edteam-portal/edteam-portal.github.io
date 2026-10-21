@@ -65,7 +65,9 @@
 .jc-carte .fl b{font-weight:normal;color:#fff;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.jc-carte .fl em{font-style:normal;color:#8fb7bf;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:36%}.jc-carte .fl u{text-decoration:none;color:#7d8a92;flex:none}
 .jc-carte .p{margin-top:auto;color:var(--c);font-size:.68em;letter-spacing:2px;display:flex;justify-content:space-between;gap:8px}
 .jc-carte .vide{color:#9aa7ad;font-size:.76em;line-height:1.45;margin:auto 0}
-@media (prefers-reduced-motion:reduce){.jc-carte .hl .tbs-balai{animation:none}}
+.jc-carte .nv{position:absolute;top:9px;right:12px;z-index:4;background:#FF3B30;color:#fff;font-size:.62em;font-weight:bold;letter-spacing:2px;padding:3px 9px;box-shadow:0 0 12px rgba(255,59,48,.7);animation:jcNv 1.4s ease-in-out infinite}
+@keyframes jcNv{0%,100%{opacity:1}50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.jc-carte .hl .tbs-balai,.jc-carte .nv{animation:none}}
 .jv{display:grid;grid-template-columns:minmax(0,1.05fr) 54px minmax(0,1.2fr);gap:6px;align-items:stretch;margin:18px 0 0;text-align:left}
 .jv-lock{--t:#FF3B30;position:relative;border:1px solid color-mix(in srgb,var(--t) 60%,transparent);background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--t) 16%,transparent),rgba(0,0,0,.6) 70%);padding:10px 12px 12px;overflow:hidden;box-shadow:0 0 26px color-mix(in srgb,var(--t) 22%,transparent)}
 .jv-lock:before,.jv-lock:after{content:"";position:absolute;width:14px;height:14px;border:solid var(--t);z-index:3}.jv-lock:before{top:4px;left:4px;border-width:2px 0 0 2px}.jv-lock:after{bottom:4px;right:4px;border-width:0 2px 2px 0}
@@ -110,6 +112,17 @@
         return enCours;
     };
 
+    // ---- signal NOUVEAU : un joueur enregistre pour la premiere fois depuis la derniere ouverture de la fenetre (memorise sur cet appareil ; date serveur, pas d'ecart d'horloge)
+    const CLE_VU = 'edteam_jc_vu';
+    const luVu = () => { try { const v = localStorage.getItem(CLE_VU); return v === null ? null : Number(v) || 0; } catch (e) { return null; } };
+    function nouveau(r) {
+        const n = Number(r && r.dernier_nouveau) || 0; if (!n) return false;
+        const vu = luVu();
+        if (vu === null) { try { localStorage.setItem(CLE_VU, String(n)); } catch (e) { /* sans memoire : pas de signal */ } return false; }   // premiere visite sur cet appareil : l'existant n'est pas "nouveau"
+        return n > vu;
+    }
+    function marquerVu() { const n = memo && Number(memo.dernier_nouveau) || 0; if (n) { try { localStorage.setItem(CLE_VU, String(n)); } catch (e) { /* ignore */ } } document.querySelectorAll('#jc-nv').forEach(e => e.remove()); }
+
     // ---- carte du QG : compteur (resume) + les 3 derniers joueurs croises (joueurs_croises_lire(3), quelques centaines d'octets) ; hologramme du dernier vaisseau charge ensuite
     let apMemo = null, apT = 0;
     async function apercu() {
@@ -124,7 +137,7 @@
         const reticule = '<svg class="ret" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="9"/><path d="M32 2v14M32 48v14M2 32h14M48 32h14"/></svg>';
         const flux = L.map(x => '<div style="--t:' + COUL[ton(x)] + '"><i></i><b>CMD ' + E(String(x.n).toUpperCase()) + '</b><em>' + E(String(x.sys || nomV(x))) + '</em><u>' + il(x.d).replace('il y a ', '') + '</u></div>').join('');
         return '<div class="jc-carte"' + (apercu ? '' : ' onclick="JCroises.ouvrir()" onmouseenter="if(typeof sonHover===\'function\') sonHover()"')
-            + (d ? ' style="--t:' + COUL[ton(d)] + '"' : '') + '><div class="hl" id="' + id + '-hl">' + reticule + (d ? '<span class="lab">' + E(String(nomV(d) || 'VAISSEAU').toUpperCase()) + '</span>' : '') + '</div>'
+            + (d ? ' style="--t:' + COUL[ton(d)] + '"' : '') + '>' + (!apercu && nouveau(r) ? '<span class="nv" id="jc-nv">NOUVEAU</span>' : '') + '<div class="hl" id="' + id + '-hl">' + reticule + (d ? '<span class="lab">' + E(String(nomV(d) || 'VAISSEAU').toUpperCase()) + '</span>' : '') + '</div>'
             + '<div class="co"><div class="e">JOUEURS CROISÉS · COMBAT</div>'
             + (t ? '<div class="row"><div class="big"><b>' + FR(t) + '</b><span>joueur' + (t > 1 ? 's' : '') + ' verrouillé' + (t > 1 ? 's' : '') + ' par l’escadron</span></div>'
                 + '<div class="tl"><div><small>CETTE SEMAINE</small><b>' + FR(s) + '</b></div><div><small>DERNIER</small><b>' + il(r.dernier) + '</b></div></div></div>'
@@ -247,7 +260,7 @@
         const k = r.firstChild.getAttribute('data-k'), ouvre = ST.ouvert !== k; ST.ouvert = ouvre ? k : null;
         document.querySelectorAll('#jc-plein .jc-r.ouv').forEach(o => { if (o !== r) o.classList.remove('ouv'); });
         r.classList.toggle('ouv', ouvre);
-        if (ouvre) { const x = ST.liste.find(y => y.n.toLowerCase() === k), g = r.querySelector('.jc-g'); if (x && g && !g.firstChild) g.innerHTML = holo(x, 'x', true); }
+        if (ouvre) { const x = ST.liste.find(y => y.n.toLowerCase() === k), g = r.querySelector('.jc-g'); if (x && g && !g.firstChild) g.innerHTML = holo(x, 'x' + ST.liste.indexOf(x), true); }
     };
     JC.filtre = function (v) { ST.q = String(v || ''); ST.nb = PAGE; maj(); };
     JC.tri = function (v) { ST.tri = v === 'nb' ? 'nb' : 'recent'; ST.nb = PAGE; maj(); };
@@ -256,6 +269,7 @@
     function cle(e) { if (e.key === 'Escape' && document.getElementById('jc-plein')) { e.stopPropagation(); JC.fermer(); } }
     JC.ouvrir = async function () {
         style(); if (typeof sonClic === 'function') sonClic();
+        marquerVu();
         JC.fermer();
         const m = document.createElement('div'); m.id = 'jc-plein'; m.onclick = e => { if (e.target === m) JC.fermer(); };
         m.innerHTML = '<div class="jc-p" role="dialog" aria-modal="true"><div class="jc-h"><div><small>COMBAT · ESCADRON</small><b>JOUEURS CROISÉS</b></div><button type="button" class="jc-x" onclick="JCroises.fermer()">FERMER</button></div>'

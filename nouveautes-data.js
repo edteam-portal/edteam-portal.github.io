@@ -5,6 +5,42 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-effort-par-tick', date: '2026-10-21T21:17:04Z', type: 'NOUVEAU',
+        titre: 'Directives : l’effort de l’escadron, tick par tick',
+        texte: 'Dans la fenêtre d’une directive, une petite barre apparaît sous la courbe d’influence pour chaque tick : plus elle est haute, plus l’escadron a fourni d’effort pendant cette période. Au survol, vous voyez la période, la part de l’effort et la variation d’influence autour du tick. La barre d’effort de l’escadron est aussi découpée par tick, avec la date. Une directive récente zoome automatiquement sur ses premiers jours (un bouton permet de revenir à la vue sur 30 jours). Cela aide à comprendre pourquoi l’influence a bougé tel jour. Le jeu et d’autres escadrons agissent aussi : c’est une aide à la lecture, pas une preuve.',
+        important: false
+    },
+    {
+        id: '2026-10-tick-en-tete', date: '2026-10-21T21:17:03Z', type: 'NOUVEAU',
+        titre: 'Le tick du BGS dans l’en-tête',
+        texte: 'Au milieu de l’en-tête, un compte à rebours à la seconde donne le prochain tick, avec une marge d’incertitude. Le détecteur communautaire de ticks (tick.edcd.io) n’avait plus rien enregistré depuis plusieurs jours : dans ce cas l’heure est marquée « estimé » et calculée d’après les derniers jours, puis l’heure exacte revient dès qu’un vrai tick est détecté. La mention « dernier tick » des fenêtres de directives, qui pouvait être fausse, disparaît. Le bloc du nom d’escadron et du grade quitte l’en-tête pour laisser la place.',
+        important: false
+    },
+    {
+        id: '2026-10-hangar-edsy', date: '2026-10-21T21:17:02Z', type: 'NOUVEAU',
+        titre: 'Hangar : simuler l’ingénierie sur EDSY',
+        texte: 'Chaque vaisseau de votre hangar (et ceux des membres de l’escadron) a un bouton « Simuler sur EDSY » : il ouvre EDSY avec la configuration du vaisseau, modules et ingénierie compris, pour tester d’autres plans ou effets sans rien refaire à la main. Les valeurs exactes de vos jets d’ingénierie ne sont pas connues : EDSY part du jet maximal.',
+        important: false
+    },
+    {
+        id: '2026-10-menu-lateral', date: '2026-10-21T21:17:01Z', type: 'AMELIORE',
+        titre: 'Menu latéral : boutons plus grands, déconnexion toujours visible',
+        texte: 'Les boutons du menu latéral sont plus grands et mieux espacés. Nouveautés, gestion du compte et déconnexion restent épinglés en bas du menu : sur une tablette en paysage, où la liste est plus haute que l’écran, le bouton de déconnexion ne disparaît plus (la liste du haut défile).',
+        important: false
+    },
+    {
+        id: '2026-10-scores-conflit-couleurs', date: '2026-10-21T21:17:00Z', type: 'AMELIORE',
+        titre: 'Guerres et élections : scores en vert, rouge ou bleu',
+        texte: 'Dans les barres de guerre et d’élection de la page Engagement (et sur mobile), le score et le cadre sont verts quand votre faction gagne, rouges quand elle perd, bleus en cas d’égalité ou tant qu’aucun score n’est relevé.',
+        important: false
+    },
+    {
+        id: '2026-10-croises-journal-signal', date: '2026-10-21T20:15:40Z', type: 'AMELIORE',
+        titre: 'Joueurs croisés : journal tactique, signal « nouveau » et couleur du vaisseau',
+        texte: 'Quand un joueur est croisé pour la première fois par l’escadron, une ligne « Joueur croisé » apparaît dans le journal tactique, et un signal NOUVEAU clignote sur le bloc du Quartier général jusqu’à ce que vous ouvriez la fenêtre. Autre correction : dans la fenêtre, le vaisseau agrandi d’un joueur ennemi reste maintenant entièrement rouge, au lieu de rester bleu avec un simple contour rouge.',
+        important: false
+    },
+    {
         id: '2026-10-colonisation-valeurs-dodec', date: '2026-10-19T23:04:01Z', type: 'AMELIORE',
         titre: 'Colonisation : valeurs à jour, Dodecahedron et ports principaux',
         texte: 'Le profil d’un système colonisé utilise maintenant les valeurs de la dernière version de la feuille communautaire de CMDR DaftMav, calée sur la mise à jour « Dodec » : une cinquantaine d’installations changent (développement, technologie, richesse, niveau de vie, population). Le Dodecahedron est enfin chiffré. Les recettes des ports principaux (premier site d’un système) étaient incomplètes : elles sont corrigées d’après les chantiers réellement relevés en jeu, ce qui permet de les reconnaître, et un Ocellus ou Orbis principal n’est plus pris pour un Dodecahedron. Les avant-postes ordinaires ne comptent plus d’aluminium en trop. Ces valeurs restent des estimations : seuls trois avant-postes ont été mesurés en jeu.',

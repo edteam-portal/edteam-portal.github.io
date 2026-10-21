@@ -20,7 +20,8 @@
     <script src="annonce.js?v=13"></script>
     <script src="revelations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
-    <script src="campagnes-mobile.js?v=5"></script>
+    <script src="campagnes-mobile.js?v=6"></script>
+    <script src="bgs-ticks.js?v=1"></script>
     <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
     <script src="qgsuivi.js?v=38"></script>
@@ -1819,13 +1820,6 @@
         // SQL 85 : humeur des factions, activité du système (trafic, morts), heure du dernier tick
         const X_HUMEUR = { Elated: ['Euphorique', '#2fe07a'], Happy: ['Heureux', '#2fe07a'], Discontented: ['Mécontent', '#FFB000'], Unhappy: ['Malheureux', '#ff7a45'], Despondent: ['Désespéré', '#ff4d4d'] };
         const xHumeur = h => { const x = X_HUMEUR[h]; return x ? `<span style="color: ${x[1]}; white-space: nowrap;">● ${x[0]}</span>` : ''; };
-        function xTickTexte() {
-            const tk = (window.cacheResultatsBgs || {}).tick;
-            if (!tk) return '';
-            const d = new Date(tk * 1000), hh = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
-            const min = Math.max(0, Math.round((Date.now() / 1000 - tk) / 60));
-            return 'dernier tick : ' + (min < 60 ? 'il y a ' + min + ' min' : 'il y a ' + Math.floor(min / 60) + ' h ' + String(min % 60).padStart(2, '0')) + ' (' + hh + ' UTC)';
-        }
         function xTendance(c, col) {
             const now = Date.now() / 1000, a = [], b = [];
             (c || []).forEach(p => { const v = Number(p[col]); if (!isFinite(v) || p[col] === null) return; const age = (now - p[0]) / 86400; (age <= 7 ? a : age <= 14 ? b : []).push(v); });
@@ -2277,7 +2271,7 @@
                 if (donnees) {
                     const cb = res.courbe || [];
                     const sur30 = cb.length >= 2 ? (cb[cb.length - 1][1] - cb[0][1]) * 100 : null;
-                    corps += xCourbeGrande(cb, ordre.date_emission ? new Date(ordre.date_emission).getTime() / 1000 : null, cs);
+                    corps += '<div class="bt-zone">' + xCourbeGrande(cb, ordre.date_emission ? new Date(ordre.date_emission).getTime() / 1000 : null, cs) + '</div>';
                     corps += `<div style="display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 8px; font-size: 0.78em; color: #aaa;"><span>Maintenant <b style="color: #fff; font-weight: normal;">${xPct(res.influence)} %</b></span>${res.variation !== null ? `<span>Depuis la directive <b style="color: ${colVar(res.variation)}; font-weight: normal;">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : ''} ${xPts(res.variation)} pts</b></span>` : ''}${sur30 !== null ? `<span>Sur la période <b style="color: ${colVar(sur30)}; font-weight: normal;">${sur30 > 0 ? '▲' : sur30 < 0 ? '▼' : ''} ${xPts(sur30)} pts</b></span>` : ''}</div>`;
                     if (res.conflit) {
                         const estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
@@ -2301,7 +2295,7 @@
                 const vousJ = Math.round(avJ.pct * avJ.part / 100);
                 // 1. L'EFFORT (le coeur de l'application) : bandeau, puis les jauges par type d'action
                 xEl('ordre-modal-effort').innerHTML = `
-                    <div style="color: #777; font-size: 0.7em; margin-bottom: 8px;">${ordre.origine === 'PILOTE' ? 'Initiative lancée' : 'Directive émise'} il y a ${jours} jour${jours > 1 ? 's' : ''}${xTickTexte() ? ` · <span style="color: #00F0FF;">${xTickTexte()}</span>` : ''}</div>
+                    <div style="color: #777; font-size: 0.7em; margin-bottom: 8px;">${ordre.origine === 'PILOTE' ? 'Initiative lancée' : 'Directive émise'} il y a ${jours} jour${jours > 1 ? 's' : ''}</div>
                     <div class="mdet-hero" style="border-color: ${couleur};">
                         <div class="r1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${avJ.pct} %</b></div>
                         <div class="r1"><span>MA PART</span><b style="color: ${couleur};">${avJ.part} %</b></div>
@@ -2313,6 +2307,12 @@
                 xEl('ordre-modal-resultat').innerHTML = `
                     <div class="mdet-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS${donnees ? ' <span style="color: #777; letter-spacing: 0;">· mis à jour ' + xAge(res.maj_edsm) + '</span>' : ''}</div>${corps}
                     <div style="color: #777; font-size: 0.66em; line-height: 1.5; margin-top: 8px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
+                // barres « effort par tick » (bgs-ticks.js) : sous la courbe et sur la barre d'effort
+                if (donnees && window.EdteamBgsTicks) {
+                    const nbT = Math.max(1, Number(rsJ.nb_actifs) || Number(rsJ.nb_participants) || 0), baseT = Object.assign({}, xPlafonds(ordre.population || 0), ordre.plafonds_custom || {}), capT = {};
+                    Object.keys(baseT).forEach(k => { capT[k] = baseT[k] * nbT; });
+                    window.EdteamBgsTicks.monter({ ordre, res, couleur: cs, cap: capT, nb: nbT, zone: xEl('ordre-modal-resultat').querySelector('.bt-zone'), barre: xEl('ordre-modal-effort').querySelector('.jgh'), globalAffiche: avJ.pct, mobile: true });
+                }
             }
             xEl('modal-ordre-details').style.display = 'flex';
         };

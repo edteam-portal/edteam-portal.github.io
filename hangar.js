@@ -57,6 +57,8 @@
 .hg-g .tbs-balai{animation:hgBal 5s linear infinite}
 .hg-t b{display:block;color:#fff;font-weight:normal;font-size:1.3em;letter-spacing:2px;overflow-wrap:anywhere}.hg-t small{display:block;color:var(--t);letter-spacing:2px;font-size:.78em;margin-top:8px}
 .hg-t .rs{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}.hg-t .rs span{border:1px solid #1d3a44;background:rgba(0,240,255,.05);padding:3px 10px;font-size:.74em;letter-spacing:1px;color:#b9c8ce}.hg-t .rs span b{display:inline;font-size:1em;color:#FFD54A;letter-spacing:0}
+.hg-edsy{display:inline-block;margin-top:12px;background:rgba(var(--tr),.1);border:1px solid var(--t);color:#fff;font:inherit;font-size:.74em;letter-spacing:2px;padding:7px 12px;cursor:pointer;text-align:left}.hg-edsy:hover{background:rgba(var(--tr),.25)}.hg-edsy[disabled]{opacity:.6;cursor:wait}
+.hg-edsy-n{display:block;margin-top:6px;color:#7d8a92;font-size:.66em;line-height:1.5;letter-spacing:.5px}
 .hg-mod{min-width:0}
 .hg-mod h4{margin:12px 0 4px;color:var(--t);font-weight:normal;font-size:.74em;letter-spacing:3px;border-bottom:1px solid rgba(var(--tr),.3);padding-bottom:3px}.hg-mod h4:first-child{margin-top:0}
 .hg-li{display:grid;grid-template-columns:44px minmax(0,1.3fr) 54px minmax(0,1.4fr);gap:10px;align-items:baseline;padding:3px 0;font-size:.84em;border-bottom:1px dotted rgba(255,255,255,.06)}
@@ -134,6 +136,30 @@
     }
     const stats = v => { const l = (v.m || []).filter(x => x.i), e = l.filter(x => x.g); return { n: l.length, g: e.length, g5: e.filter(x => +x.g === 5).length }; };
 
+    // ---- lien EDSY : la configuration du vaisseau au format SLEF (celui du Loadout du journal), compressee (zlib) puis en base64 URL-safe, dans #/I= (le format d'import d'EDSY)
+    function slef(v) {
+        const mods = (v.m || []).filter(m => m.i).map(m => {
+            const o = { Slot: m.s, Item: m.i, On: m.o !== 0, Priority: 0 };
+            if (m.g) { o.Engineering = { BlueprintName: m.b || "", Level: +m.g, Quality: 1 }; if (m.e) o.Engineering.Engineer = m.e; if (m.x) o.Engineering.ExperimentalEffect = m.x; }
+            return o;
+        });
+        return JSON.stringify([{ header: { appName: "SYS.EDTEAM", appVersion: "1" }, data: { event: "Loadout", Ship: v.t, ShipName: v.n || "", ShipIdent: "", Modules: mods } }]);
+    }
+    async function lienEdsy(v) {
+        if (typeof CompressionStream === "undefined") throw new Error("navigateur trop ancien");
+        const cs = new Blob([new TextEncoder().encode(slef(v))]).stream().pipeThrough(new CompressionStream("deflate"));
+        const buf = new Uint8Array(await new Response(cs).arrayBuffer());
+        let bin = ""; for (let i = 0; i < buf.length; i += 8192) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 8192));
+        return "https://edsy.org/#/I=" + btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+    async function ouvrirEdsy(v, bouton) {
+        const w = window.open("about:blank", "_blank");   // ouverte tout de suite (un onglet ouvert apres un calcul asynchrone serait bloque)
+        bouton.disabled = true;
+        try { const u = await lienEdsy(v); if (w) { w.opener = null; w.location.href = u; } else window.location.href = u; }
+        catch (e) { if (w) w.close(); console.error("EDSY :", e); alert("Impossible de préparer le lien EDSY."); }
+        bouton.disabled = false;
+    }
+
     // ---- lecture ----
     async function lire(userId) {
         const cle = CLE_CACHE + (userId || "moi");
@@ -155,7 +181,7 @@
         const tete = '<div class="hg-c"><div class="hg-g">' + holoDe(v, "hd" + v.i, tz) + '</div><div class="hg-t"><small><span class="hg-sz">' + LZ[tz] + "</span>" + E(nomVaisseau(v.t).toUpperCase()) + " · " + NZ[tz] + (sil ? "" : " · HOLOGRAMME GÉNÉRIQUE") + "</small><b>" + E(v.n || nomVaisseau(v.t)) + "</b>";
         if (!Array.isArray(v.m)) return '<div class="hg-d t' + tz + '">' + tete + (v.c ? '<div class="rs"><span>VAISSEAU PILOTÉ</span></div>' : "") + '</div></div><div class="hg-inc">Équipement inconnu pour l’instant. Il apparaît dès que le pilote a piloté ce vaisseau avec le plugin lancé, ou a modifié son équipement.</div></div>';
         const g = groupes(v), bloc = (t, a) => a.length ? "<h4>" + t + "</h4>" + a.map(ligne).join("") : "";
-        return '<div class="hg-d t' + tz + '">' + tete + '<div class="rs"><span><b>' + st.n + "</b> modules</span><span><b>" + st.g + "</b> ingénierés</span><span><b>" + st.g5 + "</b> en G5</span>" + (v.c ? "<span>PILOTÉ</span>" : "") + "</div></div></div>"
+        return '<div class="hg-d t' + tz + '">' + tete + '<div class="rs"><span><b>' + st.n + "</b> modules</span><span><b>" + st.g + "</b> ingénierés</span><span><b>" + st.g5 + "</b> en G5</span>" + (v.c ? "<span>PILOTÉ</span>" : "") + '</div>' + (st.n ? '<button type="button" class="hg-edsy" data-edsy="' + v.i + '">SIMULER SUR EDSY ↗</button><span class="hg-edsy-n">Ouvre cette configuration dans EDSY pour tester l’ingénierie. Les valeurs exactes des jets ne sont pas connues : EDSY part du jet maximal.</span>' : "") + "</div></div>"
             + '<div class="hg-mod">' + bloc("ARMEMENT", g.a) + bloc("UTILITAIRES", g.u) + bloc("MODULES DE BASE", g.c) + bloc("MODULES OPTIONNELS", g.o) + "</div></div>";
     }
 
@@ -190,6 +216,7 @@
         cont.addEventListener("click", e => {
             const x = e.target.closest("[data-x]"), r = e.target.closest("[data-v]"), f = e.target.closest("[data-f]"), z = e.target.closest("[data-z]");
             if (x && opts.fermer) { opts.fermer(); return; }
+            const ed = e.target.closest("[data-edsy]"); if (ed) { const v = tous.find(y => y.i === +ed.dataset.edsy); if (v) ouvrirEdsy(v, ed); return; }
             if (r) { ET.sel = +r.dataset.v; dessiner(); } else if (f) { ET.f = f.dataset.f; dessiner(); } else if (z) { ET.z = ET.z === +z.dataset.z ? 0 : +z.dataset.z; dessiner(); }
         });
         cont.querySelector(".hg-q").addEventListener("input", e => { ET.q = e.target.value; dessiner(); });

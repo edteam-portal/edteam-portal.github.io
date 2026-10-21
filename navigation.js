@@ -20,10 +20,10 @@ window.supabaseKey = 'sb_publishable_AASqgRggHdIGttZHPGaWkA_VqrhuYNg';
 window.supabaseApp = window.supabase.createClient(window.supabaseUrl, window.supabaseKey);
 
 function injecterArchitectureGlobale() {
-    // Menu lateral plus compact : avec le Hangar il compte 13 entrees, trop pour une tablette en paysage (hauteur 600 a 800 px). Defile si besoin, sans barre visible.
+    // Menu lateral plus compact : avec le Hangar il compte 13 entrees, trop pour une tablette en paysage (hauteur 600 a 800 px). Defile si besoin, sans barre visible ; Nouveautes, compte et deconnexion restent epingles en bas (#nav-bas), toujours visibles.
     if (!document.getElementById('nav-compact-css')) {
         const st = document.createElement('style'); st.id = 'nav-compact-css';
-        st.textContent = '#side-menu { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; padding-top: 8px; } #side-menu::-webkit-scrollbar { display: none; } #side-menu .nav-link { padding-top: 10px; padding-bottom: 10px; } #side-menu .hamburger-btn { margin-bottom: 8px; } #nav-deconnexion { margin-top: 4px !important; margin-bottom: 8px !important; } @media (max-height: 760px) { #side-menu .nav-link { padding-top: 6px; padding-bottom: 6px; } #side-menu .hamburger-btn { margin-bottom: 4px; } #nav-deconnexion { margin-bottom: 4px !important; } }';
+        st.textContent = "#side-menu { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; padding-top: 8px; } #side-menu::-webkit-scrollbar { display: none; } #side-menu .nav-link { padding: 15px; margin: 3px 0; } #side-menu .nav-icon svg { width: 26px; height: 26px; } #side-menu .nav-text { font-size: 1em; } #side-menu .hamburger-btn { margin-bottom: 10px; } #nav-bas { position: sticky; bottom: 0; margin-top: auto; flex: none; z-index: 3; padding: 4px 0 6px; background: #0a0a0a; border-top: 1px solid rgba(255,255,255,.12); } #nav-bas .nav-link { margin: 2px 0 !important; border-top: 0 !important; } @media (max-height: 820px) { #side-menu .nav-link { padding: 11px 15px; margin: 2px 0; } #side-menu .nav-icon svg { width: 24px; height: 24px; } #side-menu .hamburger-btn { margin-bottom: 6px; } } @media (max-height: 640px) { #side-menu .nav-link { padding: 8px 15px; margin: 1px 0; } #side-menu .nav-icon svg { width: 22px; height: 22px; } #side-menu .hamburger-btn { margin-bottom: 3px; } #nav-bas { padding: 2px 0 3px; } }";
         document.head.appendChild(st);
     }
     const path = window.location.pathname;
@@ -76,6 +76,7 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18c.8-2.4 2.9-3.5 5.5-3.5s4.7 1.1 5.5 3.5"></path></svg></div>
             <span class="nav-text">PHOTOS DES PILOTES</span>
         </a>
+        <div id="nav-bas">
         <a href="#" id="nav-nouveautes" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);" onclick="event.preventDefault(); if(typeof edteamOuvrirNouveautes==='function') edteamOuvrirNouveautes()" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'NOUVEAUTÉS<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Ce qui vient d\\'être ajouté à EDTEAM</span>', '#FFD700')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
             <div class="nav-icon" style="position: relative;"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="ft-point" style="display: none; position: absolute; top: -3px; right: -4px; width: 9px; height: 9px; border-radius: 50%; background: #FF7100; box-shadow: 0 0 8px #FF7100;"></span></div>
             <span class="nav-text">NOUVEAUTÉS</span>
@@ -84,10 +85,11 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
             <span class="nav-text">GESTION DU COMPTE</span>
         </a>
-        <a href="#" id="nav-deconnexion" class="nav-link" style="margin-bottom: 16px; margin-top: 10px;" onclick="event.preventDefault(); deconnexion()" onmouseenter="if(typeof sonHover==='function') sonHover(); this.style.color='var(--ed-red)'; this.style.borderLeftColor='var(--ed-red)'; this.style.background='rgba(255,51,51,0.1)'; if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'DÉCONNEXION<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Quitter votre session</span>', '#FF3333')" onmouseleave="this.style.color=''; this.style.borderLeftColor=''; this.style.background=''; if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
+        <a href="#" id="nav-deconnexion" class="nav-link" onclick="event.preventDefault(); deconnexion()" onmouseenter="if(typeof sonHover==='function') sonHover(); this.style.color='var(--ed-red)'; this.style.borderLeftColor='var(--ed-red)'; this.style.background='rgba(255,51,51,0.1)'; if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'DÉCONNEXION<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Quitter votre session</span>', '#FF3333')" onmouseleave="this.style.color=''; this.style.borderLeftColor=''; this.style.background=''; if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg></div>
             <span class="nav-text">DÉCONNEXION</span>
         </a>
+        </div>
     `;
 
     // --- B. LE HEADER GLOBAL ---
@@ -118,7 +120,6 @@ function injecterArchitectureGlobale() {
                 .hd-rg { height: 44px; padding: 0 10px 0 6px; gap: 6px; } .hd-rg .l { display: none; } .hd-rg .hx { width: 27px; height: 30px; }
                 .hd-rg .vl { display: none; } .hd-rg .vc { display: inline; } .hd-rg .v small { display: none; }
                 .hd-rangs { gap: 6px; }
-                #header-escadron { min-width: 0 !important; padding: 5px 11px !important; }
                 #stats-pilotes-box { padding: 4px 10px !important; } #stats-pilotes-box .stats-lib { display: none; }
             }
         </style>
@@ -136,19 +137,11 @@ function injecterArchitectureGlobale() {
                     </div>
                 </div>
 
-                <div id="header-escadron"
-                    style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; font-size: 0.8em; letter-spacing: 1px; gap: 4px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.3); border-radius: 4px; padding: 5px 14px; white-space: nowrap; box-sizing: border-box; min-width: 150px;">
-                    <div id="header-escadron-nom" style="color: var(--ed-orange); font-size: 1.1em; font-weight: bold; letter-spacing: 2px; line-height: 1.1;">---</div>
-                    <div id="header-grades" style="display: flex; gap: 6px; flex-wrap: nowrap;"></div>
-                </div>
-
                 <div class="hd-sep"></div>
                 <div id="header-rangs" class="hd-rangs"></div>
-
-
-
             </div>
-            <div style="display: flex; align-items: center; justify-content: flex-end; flex-grow: 1; padding-right: 5px; gap: 8px;">
+            <div id="header-tick"></div>
+            <div style="display: flex; align-items: center; justify-content: flex-end; flex: none; padding-right: 5px; gap: 8px;">
                     <div id="header-inscriptions" onclick="ouvrirInscriptionsEnCours()"
                         style="display: none; align-items: center; gap: 6px; font-size: 0.8em; letter-spacing: 1px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
                         title="Inscriptions en cours : comptes créés mais pas encore finalisés au sas (visible du Directeur seulement). Cliquez pour le détail.">
@@ -240,6 +233,7 @@ function injecterArchitectureGlobale() {
     if (mainUi && !document.querySelector('.hud-header')) {
         mainUi.insertAdjacentHTML('afterbegin', headerGlobalHTML);
         if (window.edteamSon) window.edteamSon.majUI();
+        if (!window.EdteamTick) { const sc = document.createElement('script'); sc.src = 'tick.js?v=5'; document.head.appendChild(sc); }   // heure du tick + compte a rebours (tick.js)
     }
 
     if (!document.getElementById('modal-gestion-compte')) {
@@ -277,10 +271,8 @@ window.actualiserHeader = function(profilData) {
         const elCmdr = document.getElementById('cmdr-name-display');
         if (elCmdr) elCmdr.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase();
     }
-    // --- ESCADRON ET GRADES (a la place de l'ancien casier et des soldes : tout est deja dans le profil, aucune requete) ---
+    // --- PILOTE INDEPENDANT : memorise pour le menu (BGS et Escadron verrouilles), tout est deja dans le profil, aucune requete ---
     if (profilData.escadron_id !== undefined) {
-        const elNom = document.getElementById('header-escadron-nom');
-        const elGr = document.getElementById('header-grades');
         const esc = String(profilData.escadron_id || '').trim();
         const independant = !esc || esc.toUpperCase() === 'INDEPENDANT';
         // BGS et Escadron : visibles avec un cadenas pour un pilote sans escadron (la page affiche alors sa vitrine)
@@ -290,31 +282,6 @@ window.actualiserHeader = function(profilData) {
             lien.classList.toggle('verrou', independant);
             if (independant) { lien.style.display = 'flex'; lien.title = 'Réservé aux membres d\'un escadron'; } else lien.removeAttribute('title');
         });
-        if (elNom) elNom.innerText = independant ? 'PILOTE INDÉPENDANT' : esc.toUpperCase();
-        if (elNom) elNom.style.color = independant ? 'var(--ed-blue)' : 'var(--ed-orange)';
-        const boite = document.getElementById('header-escadron');
-        if (boite) {
-            boite.style.borderColor = independant ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 113, 0, 0.3)';
-            boite.style.background = independant ? 'rgba(0, 240, 255, 0.05)' : 'rgba(255, 113, 0, 0.05)';
-            boite.setAttribute('onmouseenter', independant
-                ? "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'PILOTE INDÉPENDANT<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Les modules BGS et Escadron sont réservés aux membres d\\'un escadron.</span>', '#00F0FF')"
-                : "if(typeof showHoloTooltip === 'function') showHoloTooltip(event, 'ESCADRON<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Votre escadron et vos accréditations.</span>', '#FF7100')");
-            boite.setAttribute('onmouseleave', "if(typeof hideHoloTooltip === 'function') hideHoloTooltip()");
-        }
-        if (elGr) {
-            const pastille = (txt, col, info) => '<span style="color:' + col + '; border:1px solid ' + col + '; background:rgba(255,255,255,0.04); padding:1px 8px; border-radius:3px; font-size:0.78em; font-weight:bold; letter-spacing:1px; cursor:help;"'
-                + ' onmouseenter="if(typeof showHoloTooltip === \'function\') showHoloTooltip(event, \'' + info + '\', \'' + col + '\')" onmouseleave="if(typeof hideHoloTooltip === \'function\') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip === \'function\') moveHoloTooltip(event)">' + txt + '</span>';
-            let g = '';
-            if (!independant) {
-                let rangJeu = 3; try { rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3'); } catch (e) {}
-                if (profilData.est_amiral) g += pastille('AMIRAL', '#FF3333', 'COMMANDANT SUPRÊME<br>Gère les effectifs, accrédite les officiers et publie les ordres BGS.');
-                else if (rangJeu === 4) g += pastille('RECRUE', '#cccccc', 'RECRUE<br>Jusqu’à ce que l’Amiral te passe PILOTE dans le jeu.');
-                else g += pastille('PILOTE', '#FF7100', 'MEMBRE ACTIF<br>Accès aux opérations de l’escadron.');
-                if (!profilData.est_amiral && profilData.est_officier) g += pastille('OFFICIER BGS', '#00FF66', 'GESTION TACTIQUE BGS<br>Autorisé à publier les ordres de l’Amiral.');
-            }
-            elGr.innerHTML = g;
-            elGr.style.display = g ? 'flex' : 'none';
-        }
     }
 
     // --- PASTILLES DE RANG (Powerplay, BGS, Federation, Auxiliaires) : tout est dans le profil, aucune requete ---
