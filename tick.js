@@ -122,6 +122,14 @@
         }
         return out.sort((a, b) => a.t - b.t);
     }
-    window.EdteamTick = { demarrer, calculer, liste, assurer: () => rafraichir().then(() => true, () => false) };
+    // etat pour d'autres blocs (bande « Aujourd'hui » des quotas) : texte du compte a rebours et marge en minutes ; null sans donnee
+    function prochain() {
+        const c = lire(); if (!c || !c.l.length) return null;
+        const now = Date.now(), s = calculer(c.l, now), marge = Math.round((s.fin - s.debut) / 120000);
+        if (s.etat === "attendu") return { texte: "en retard", marge: 0, etat: s.etat, estime: s.estime };
+        if (s.etat === "fenetre") return { texte: "imminent", marge: 0, etat: s.etat, estime: s.estime };
+        return { texte: "dans " + hms((s.debut + s.fin) / 2 / 1000 - now / 1000), marge, etat: s.etat, estime: s.estime };
+    }
+    window.EdteamTick = { demarrer, calculer, liste, prochain, assurer: () => rafraichir().then(() => true, () => false) };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", demarrer); else demarrer();
 })();

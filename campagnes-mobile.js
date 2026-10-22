@@ -70,8 +70,8 @@
     }
     function ligneMob(o) {
         var pct = Math.max(0, Math.min(100, Number(o.pct) || 0)), vous = o.vous == null ? 0 : Math.max(0, Math.min(pct, Number(o.vous) || 0)), c = o.c;
-        var fond = pct > 0 ? 'linear-gradient(90deg,' + c + '3a 0,' + c + '3a ' + pct + '%, rgba(0,0,0,0) ' + pct + '%)' : 'none';
-        var l3 = (o.avs || '') + (o.etats ? '<span class="mc-et">' + o.etats + '</span>' : '');
+        var fond = o.fondRes || (pct > 0 ? 'linear-gradient(90deg,' + c + '3a 0,' + c + '3a ' + pct + '%, rgba(0,0,0,0) ' + pct + '%)' : 'none');
+        var l3 = (o.avs || '') + (o.etats ? '<span class="mc-et">' + o.etats + '</span>' : '') + (o.pips ? '<span style="margin-left:auto;">' + o.pips + '</span>' : '');
         return '<div class="mc-row' + (o.k ? ' conf' : '') + (o.gris ? ' gris' : '') + '" style="--c:' + c + ';' + (o.k ? ' --k:' + o.k + ';' : '') + ' background:' + fond + ';"' + (o.clic ? ' onclick="' + o.clic + '"' : '') + '>'
             + (vous > 0 ? '<i class="mc-neon" style="width:' + vous + '%;"></i>' : '')
             + '<div class="l1"><span class="mc-tag" style="color:' + c + '; border-color:' + c + ';">' + o.tag + '</span><b class="mc-sys">' + o.sys + '</b>' + (o.pct == null ? '' : '<span class="mc-pc" style="color:' + c + ';">' + Math.round(pct) + ' %</span>') + '</div>'
@@ -88,12 +88,15 @@
             k = sm > sa ? '#2fe07a' : sm < sa ? '#FF3B3B' : '#4DA3FF';      // vert : on gagne, rouge : on perd, bleu : egalite
             d = '<span class="mc-score" style="--k:' + k + ';">' + sm + ' – ' + sa + '</span>'; kk = k;
         } else if (donnees) {
-            var fl = res.variation === null || res.variation === undefined ? '' : (res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '=');
-            d = '<b style="color:#fff;">' + ctx.pct(res.influence) + ' %</b>' + (fl ? ' <span style="color:' + cs + ';">' + fl + (fl === '=' ? '' : ' ' + ctx.pts(res.variation)) + '</span>' : '');
+            var vt = window.EdteamUtile && window.EdteamUtile.variation ? window.EdteamUtile.variation(o, res) : null, vv = vt ? vt.v : res.variation;
+            if (vt) cs = ctx.SENS[vt.sens] || cs;
+            var fl = vv === null || vv === undefined ? '' : (Math.abs(vv) < 0.05 ? '=' : vv > 0 ? '▲' : '▼');
+            d = '<b style="color:#fff;">' + ctx.pct(res.influence) + ' %</b>' + (fl ? ' <span style="color:' + cs + ';" title="' + (vt ? 'Évolution ' + vt.fen : 'Évolution depuis la directive') + '">' + fl + (fl === '=' ? '' : ' ' + ctx.pts(vv)) + '</span>' : '');
         } else d = '<span style="color:#666;">—</span>';
         var typeFr = o.type_ordre === 'ELECTION' ? 'ÉLECTION' : String(o.type_ordre || '');
-        return ligneMob({ c: COUL_BGS, k: kk, tag: '#' + o.id + ' · ' + typeFr, sys: esc(String(o.systeme_cible || '').toUpperCase()), pct: av.pct, vous: vous, g: esc(String(o.faction_cible || '').toUpperCase()), d: d,
-            avs: avatarsMob(rs.pilotes), etats: window.edteamEtats && donnees ? window.edteamEtats.badges(res, true) : '', clic: 'ouvrirModalOrdre(' + index + ', \'' + COUL_BGS + '\')' });
+        return ligneMob({ c: COUL_BGS, k: kk, tag: '#' + o.id + ' · ' + typeFr, sys: esc(String(o.systeme_cible || '').toUpperCase()), pct: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? null : av.pct, vous: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? 0 : vous, g: esc(String(o.faction_cible || '').toUpperCase()), d: d,
+            avs: avatarsMob(rs.pilotes), etats: window.edteamEtats && donnees ? window.edteamEtats.badges(res, true) : '', fondRes: window.EdteamUtile && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? window.EdteamUtile.fondLigne(o, res, ctx.sens) : '',
+            pips: window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) : '', clic: 'ouvrirModalOrdre(' + index + ', \'' + COUL_BGS + '\')' });
     }
     function lignePPMob(m) {
         var t = TYPE_PP[m.type_pp] || [m.type_pp, '#aaa'], pc = m.etat && m.etat.progres != null ? Math.round(Number(m.etat.progres) * 100) : null, gris = !aPuissance();
@@ -129,7 +132,9 @@
     function blocCampagne(g, ctx) {
         var c = g.c, cc = COUL_CAMP[c.type_campagne] || '#aaa', prio = c.priorite || 3, pk = prio === 1 ? 'c' : prio === 2 ? 'h' : 'n';
         var lignes = [], pcts = [];
-        g.items.forEach(function (x) { lignes.push({ s: String(x.o.systeme_cible || '').toUpperCase(), h: ligneBgsMob(x.o, x.index, ctx) }); pcts.push(ctx.avanc(x.o, ctx.resume[x.o.id] || { nb_participants: 0, types: {}, pilotes: [] }).pct); });
+        // mesure sans objectif (SQL 111) : directives de la campagne ou au moins un pilote a agi depuis le dernier tick (a la place du pourcentage d'avancement)
+        var qm = window.cacheQuotasBgs, actif = (qm && g.items.length && g.items.every(function (x) { return qm[x.o.id] && qm[x.o.id].agi !== undefined; })) ? { total: g.items.length, n: g.items.filter(function (x) { return Number(qm[x.o.id].agi) > 0; }).length } : null;
+        g.items.forEach(function (x) { lignes.push({ s: String(x.o.systeme_cible || '').toUpperCase(), h: ligneBgsMob(x.o, x.index, ctx) }); if (!actif) pcts.push(ctx.avanc(x.o, ctx.resume[x.o.id] || { nb_participants: 0, types: {}, pilotes: [] }).pct); });
         ((pp && pp.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(c.id); }).forEach(function (m) {
             lignes.push({ s: String(m.systeme || '').toUpperCase(), h: lignePPMob(m) });
             var pl = Number(m.plafond_cp) || 0, pc = pl > 0 ? Math.min(100, 100 * cp(m.merites_total) / pl) : (m.etat && m.etat.progres != null ? Number(m.etat.progres) * 100 : null); if (pc != null) pcts.push(pc);
@@ -140,9 +145,9 @@
         var replie = lirePli().indexOf(String(c.id)) >= 0;
         var info = c.echeance ? '⏳ jusqu\'au ' + String(c.echeance).slice(8, 10) + '/' + String(c.echeance).slice(5, 7) : '';
         return '<div class="mc-camp' + (replie ? ' rep' : '') + '" id="mcc-' + c.id + '" style="--cc:' + cc + ';">'
-            + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '3a 0,' + cc + '3a ' + moy + '%, rgba(0,0,0,0) ' + moy + '%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
+            + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '3a 0,' + cc + '3a ' + (pcts.length && !actif ? moy : 0) + '%, rgba(0,0,0,0) ' + (pcts.length && !actif ? moy : 0) + '%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
             + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
-            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span><span class="mc-pc" style="color:' + cc + ';">' + moy + ' %</span><span class="mc-fl">▾</span></div>'
+            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span><span class="mc-pc" style="color:' + cc + ';">' + (pcts.length && !actif ? moy + ' %' : '') + '</span><span class="mc-fl">▾</span></div>'
             + (info ? '<div class="r3">' + info + '</div>' : '') + '</div>'
             + '<div class="mc-lignes">' + (lignes.join('') || '<div class="mc-vide">Aucune mission dans cette campagne.</div>') + '</div></div>';
     }
@@ -174,7 +179,7 @@
             '.mc-avs { display: inline-flex; } .mc-avs > * { margin-left: -7px; } .mc-avs > *:first-child { margin-left: 0; }',
             '.mc-et { display: inline-flex; flex-wrap: wrap; gap: 3px; }',
             '.mc-row.gris { opacity: .4; filter: grayscale(1); }',
-            ".mc-row.conf { padding-top: 13px; padding-bottom: 13px; box-shadow: inset 4px 0 0 var(--k), inset 0 0 26px color-mix(in srgb, var(--k) 36%, transparent); outline: 1px solid color-mix(in srgb, var(--k) 70%, transparent); outline-offset: -1px; }",
+            ".mc-row.conf { padding-top: 13px; padding-bottom: 13px; }",
             ".mc-score { font-family: 'Rajdhani', 'Share Tech Mono', sans-serif; font-weight: 700; font-size: 1.9em; letter-spacing: 2px; color: var(--k); text-shadow: 0 0 12px var(--k); line-height: 1; }",
             '.mc-det { padding: 10px 14px 12px; background: rgba(0,0,0,.4); border-top: 1px dashed #2a2a2a; }',
             '.mc-sys-t { padding: 7px 14px 4px 16px; border-top: 1px solid rgba(255,255,255,.14); font-size: .62em; letter-spacing: 2.5px; color: #cfe; background: rgba(255,255,255,.04); } .mc-sys-t span { color: #778; letter-spacing: 1px; } .mc-sys > .mc-row:first-of-type, .mc-sys > .mc-w:first-of-type > .mc-row { border-top: 0; }',
@@ -198,7 +203,14 @@
             return ((pp && pp.missions) || []).concat((col && col.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(campagneId); }).length;
         },
         // rendu complet des blocs de campagne (ctx fourni par mobile.html)
-        rendreCampagnes: function (ctx) { return ctx.groupes.filter(function (g) { return g.items.length || API.nb(g.c.id); }).map(function (g) { return blocCampagne(g, ctx); }).join(''); },
+        rendreCampagnes: function (ctx) {
+            // bande « Ou etes-vous le plus utile ? » (utile-bgs.js) : situation des directives, jamais l'activite personnelle
+            var ordres = [], camps = {}; API.idx = {};
+            ctx.groupes.forEach(function (g) { camps[g.c.id] = g.c; g.items.forEach(function (x) { ordres.push(x.o); API.idx[x.o.id] = x.index; }); });
+            var bande = window.EdteamUtile && window.cacheQuotasBgs ? window.EdteamUtile.legende() : '';
+            return bande + ctx.groupes.filter(function (g) { return g.items.length || API.nb(g.c.id); }).map(function (g) { return blocCampagne(g, ctx); }).join('');
+        },
+        ouvrirOrdre: function (id) { if (API.idx && API.idx[id] != null && typeof window.ouvrirModalOrdre === 'function') window.ouvrirModalOrdre(API.idx[id], COUL_BGS); },
         basculer: function (id) {
             if (typeof sonClic === 'function') sonClic();
             var e = document.getElementById('mcc-' + id); if (!e) return;

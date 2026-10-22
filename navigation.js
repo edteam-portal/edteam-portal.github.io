@@ -233,7 +233,7 @@ function injecterArchitectureGlobale() {
     if (mainUi && !document.querySelector('.hud-header')) {
         mainUi.insertAdjacentHTML('afterbegin', headerGlobalHTML);
         if (window.edteamSon) window.edteamSon.majUI();
-        if (!window.EdteamTick) { const sc = document.createElement('script'); sc.src = 'tick.js?v=5'; document.head.appendChild(sc); }   // heure du tick + compte a rebours (tick.js)
+        if (!window.EdteamTick) { const sc = document.createElement('script'); sc.src = 'tick.js?v=6'; document.head.appendChild(sc); }   // heure du tick + compte a rebours (tick.js)
     }
 
     if (!document.getElementById('modal-gestion-compte')) {

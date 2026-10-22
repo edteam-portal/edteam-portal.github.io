@@ -57,6 +57,7 @@
             '.camp-avs .dir-avs { margin-left:0; }',
             '.camp-info { display:flex; align-items:center; gap:10px; justify-content:flex-end; white-space:nowrap; font-size:.85em; }',
             '.camp-info .inf { color:#fff; font-weight:bold; }',
+            '.qj-c2 { display:inline-flex; justify-content:flex-end; min-width:178px; margin-left:8px; flex:none; }',
             '.camp-vide { padding:10px 6px; border-top:1px dashed #2a2a2a; color:#777; font-size:.85em; font-style:italic; }',
             '.camp-btn { background:transparent; border:1px solid #555; color:#bbb; padding:3px 10px; font-family:inherit; font-size:.72em; letter-spacing:1px; cursor:pointer; }',
             '.camp-btn:hover { border-color:#00F0FF; color:#00F0FF; } .camp-btn.rouge:hover { border-color:#FF3333; color:#FF3333; }',
@@ -107,7 +108,7 @@
         var actions = estCommandement() && m.domaine ? '<span class="camp-ics">' + ic('Modifier la mission', '✎', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'edit\',' + m.id + ')')
             + ic('Clôturer la mission', '📦', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'close\',' + m.id + ')') + ic('Supprimer la mission', '🗑', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'delete\',' + m.id + ')', true) + '</span>' : '<span></span>';
         var glisser = estAmiral() && m.domaine && !m.gris ? ' draggable="true" data-mdom="' + m.domaine + '" data-mid="' + m.id + '"' : '';
-        return '<div class="camp-ligne' + (m.conflit ? ' conflit' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + fond(m.couleur, m.pct) + '; --c:' + m.couleur + ';' + (m.conflit ? ' --k:' + m.conflit + ';' : '') + '">' + neon(m.couleur, m.pct, m.vous)
+        return '<div class="camp-ligne' + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + (m.fondRes || fond(m.couleur, m.pct)) + '; --c:' + m.couleur + ';">' + neon(m.couleur, m.pct, m.vous)
             + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span>' + (m.avatars || '') + '</div>'
             + '<div class="camp-info">' + (m.info || '') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
     }
@@ -139,9 +140,11 @@
             return '<span class="camp-score" style="--k:' + cK + ';" title="' + (o.type_ordre === 'GUERRE' ? 'Score de la guerre' : 'Score de l élection') + ' (jours gagnés), votre faction en premier">' + (e1 ? res.conflit.s1 : res.conflit.s2) + ' – ' + (e1 ? res.conflit.s2 : res.conflit.s1) + '</span>' + (etc ? '<span style="display:inline-flex;">' + etc + '</span>' : '');
         }
         var h = '<span class="inf" title="Influence actuelle de la faction (relevé EDSM)">' + fm(Number(res.influence) * 100, false) + ' %</span>';
-        if (res.variation !== null && res.variation !== undefined) {
-            var v = Number(res.variation), fl = Math.abs(v) < 0.05 ? '=' : (v > 0 ? '▲' : '▼');
-            h += '<span style="color:' + coul + ';" title="Évolution de l\'influence depuis la directive (points)">' + fl + (fl === '=' ? '' : ' ' + fm(v, true)) + '</span>';
+        var vt = window.EdteamUtile && window.EdteamUtile.variation ? window.EdteamUtile.variation(o, res) : null;
+        if (vt) coul = ({ up: '#2fe07a', dn: '#ff4d4d', fl: '#8a8a8a' })[vt.sens] || coul;
+        if (vt || (res.variation !== null && res.variation !== undefined)) {
+            var v = vt ? vt.v : Number(res.variation), fl = Math.abs(v) < 0.05 ? '=' : (v > 0 ? '▲' : '▼');
+            h += '<span style="color:' + coul + ';" title="' + (vt ? 'Évolution de l\'influence ' + vt.fen + ' (points)' : 'Évolution de l\'influence depuis la directive (points)') + '">' + fl + (fl === '=' ? '' : ' ' + fm(v, true)) + '</span>';
         }
         if (res.conflit) {
             var f = String(o.faction_cible || '').trim().toLowerCase(), estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
@@ -163,8 +166,8 @@
             var rs = resume[o.id] || {}; var mt = meta[o.id] || { global: 0 };
             var veille = veilleIds.has(String(o.id));
             var typeFr = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' }[o.type_ordre] || String(o.type_ordre || '').toUpperCase();
-            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.global || 0, vous: mt.vous, avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
-                clic: "ouvrirDetailResultat('" + o.id + "')", info: infoFaction(o),
+            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
+                clic: "ouvrirDetailResultat('" + o.id + "')", info: infoFaction(o) + (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
                 texte: '<b>' + esc(String(o.systeme_cible || '').toUpperCase()) + '</b> <em>· ' + esc(String(o.faction_cible || '').toUpperCase()) + (veille ? ' · EN VEILLE' : '') + '</em>' };
         });
     }
@@ -190,7 +193,10 @@
             return;
         }
         var repliees = lirePli();
-        zone.innerHTML = titre + '<div style="display:grid; gap:12px;">' + camps.map(function (c) {
+        // bande « Aujourd'hui » : quotas du jour faits et directives a traiter en premier (quotas-jour.js, SQL 110) ; vide si la fonction serveur est absente
+        var mapC = {}; camps.forEach(function (c) { mapC[c.id] = c; });
+        var bande = window.EdteamUtile && window.cacheQuotasBgs && typeof bgsSens === 'function' ? window.EdteamUtile.legende() : '';
+        zone.innerHTML = titre + bande + '<div style="display:grid; gap:12px;">' + camps.map(function (c) {
             var col = COUL[c.type_campagne] || '#aaa', pr = PRIO[c.priorite] || PRIO[3];
             var ordres = c.synthetique ? orphelines : (opts.ordres || []).filter(function (o) { return String(o.campagne_id) === String(c.id); });
             var lignes = missionsBgs(ordres, opts.veilleIds || new Set(), opts.resume || {}, opts.meta || {});
@@ -202,6 +208,7 @@
             var av = mesurees.length ? Math.round(mesurees.reduce(function (s, l) { return s + (Number(l.pct) || 0); }, 0) / mesurees.length) : 0;
             var avous = lignes.filter(function (l) { return l.vous != null && l.pct != null; });
             var vAv = avous.length ? Math.round(avous.reduce(function (s, l) { return s + (Number(l.vous) || 0); }, 0) / mesurees.length) : 0;
+            var sansPct = ordres.some(function (o) { return ((opts.meta || {})[o.id] || {}).jour; });
             var info = c.echeance ? '⏳ jusqu\'au ' + dateCourte(c.echeance) : '';
             var bulle = '';
             if (c.briefing) {
@@ -211,7 +218,7 @@
             var actions = c.synthetique ? '' : '<span class="camp-ics">' + (cmd ? ic('Ajouter une mission à cette campagne', '＋', 'edteamCampagnes.ajouter(' + c.id + ')') : '')
                 + (amiral ? ic('Modifier la campagne', '✎', 'edteamCampagnes.ouvrir(' + c.id + ')') + ic('Clôturer la campagne et ses missions', '📦', 'edteamCampagnes.cloturer(' + c.id + ')') + ic('Supprimer la campagne (seulement si elle est vide)', '🗑', 'edteamCampagnes.supprimer(' + c.id + ')', true) : '') + '</span>';
             return '<div class="bloc camp-carte' + (repliees.indexOf(String(c.id)) >= 0 ? ' repliee' : '') + '" id="camp-' + c.id + '" style="--bdc:' + col + 'bf; --accent:' + col + '; --teinte:' + col + '12; --lueur:' + col + '14; border:1px solid ' + col + '99; box-shadow: inset 4px 0 0 ' + col + ', 0 0 18px ' + col + '18;">'
-                + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + fond(col, av) + '; --c:' + col + ';">' + neon(col, av, vAv) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, av, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
+                + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + (sansPct ? 'none' : fond(col, av)) + '; --c:' + col + ';">' + (sansPct ? '' : neon(col, av, vAv)) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, mesurees.length && !sansPct ? av : null, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
                 + (info ? '<span style="color:#888; font-size:.78em;">' + info + '</span>' : '') + pastille('PRIORITÉ ' + pr[0], pr[1])
                 + (actions ? '<span class="camp-actions">' + actions + '</span>' : '') + '</div>'
                 + '<div class="camp-lignes">' + (lignes.length ? groupes(lignes) : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'

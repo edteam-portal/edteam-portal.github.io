@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-directive-efficacite', date: '2026-10-21T23:50:26Z', type: 'NOUVEAU',
+        titre: 'Directives : où votre effort est le plus efficace, participants et bilan',
+        texte: 'Le jeu applique des rendements décroissants : au-delà d’un certain volume par tick, une activité fait de moins en moins bouger l’influence. Dans la fenêtre d’une directive de hausse ou de baisse, chaque barre d’activité montre votre quota personnel du tick (« 8 / 15 INF · encore ~7 à plein effet », puis « ✓ plein effet atteint » : le surplus compte toujours pour votre rang BGS) ; elle repart de zéro à chaque tick. C’est un repère, pas une obligation. Les seuils dépendent de la population du système et viennent d’un guide communautaire (non officiel) ; les guerres et les élections n’ont pas de limite d’effet. La fenêtre affiche aussi les avatars des participants (un point vert : a joué aujourd’hui) et un bilan depuis l’émission : total de l’escadron, votre part, votre rythme sur les cinq derniers ticks et classement des pilotes par activité. Sous la courbe d’influence, chaque tick montre combien de pilotes ont agi.',
+        important: true
+    },
+    {
+        id: '2026-10-engagement-utile', date: '2026-10-21T23:50:25Z', type: 'AMELIORE',
+        titre: 'Page Engagement : couleur des résultats',
+        texte: 'Le fond de chaque ligne de directive indique le résultat depuis le dernier tick : vert quand l’objectif est atteint (l’influence a monté pour une hausse, baissé pour une baisse), rouge quand il ne l’est pas — c’est là que votre aide sert le plus —, bleu quand l’influence n’a pas bougé. Le fond est net quand EDSM a mesuré depuis le tick, pâle sinon (variation sur 48 h). Chaque ligne affiche aussi une petite icône par activité, qui se remplit avec votre volume du tick et passe en ✓ quand le plein effet est atteint. Les pourcentages d’avancement d’escadron disparaissent : rien ne permettait de fixer un vrai « 100 % ».',
+        important: false
+    },
+    {
         id: '2026-10-effort-par-tick', date: '2026-10-21T21:17:04Z', type: 'NOUVEAU',
         titre: 'Directives : l’effort de l’escadron, tick par tick',
         texte: 'Dans la fenêtre d’une directive, une petite barre apparaît sous la courbe d’influence pour chaque tick : plus elle est haute, plus l’escadron a fourni d’effort pendant cette période. Au survol, vous voyez la période, la part de l’effort et la variation d’influence autour du tick. La barre d’effort de l’escadron est aussi découpée par tick, avec la date. Une directive récente zoome automatiquement sur ses premiers jours (un bouton permet de revenir à la vue sur 30 jours). Cela aide à comprendre pourquoi l’influence a bougé tel jour. Le jeu et d’autres escadrons agissent aussi : c’est une aide à la lecture, pas une preuve.',

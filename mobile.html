@@ -20,8 +20,10 @@
     <script src="annonce.js?v=13"></script>
     <script src="revelations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
-    <script src="campagnes-mobile.js?v=6"></script>
-    <script src="bgs-ticks.js?v=1"></script>
+    <script src="campagnes-mobile.js?v=14"></script>
+    <script src="quotas-jour.js?v=9"></script>
+    <script src="utile-bgs.js?v=9"></script>
+    <script src="bgs-ticks.js?v=5"></script>
     <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
     <script src="qgsuivi.js?v=38"></script>
@@ -1727,6 +1729,8 @@
         }
 
         // Avancement d'une directive et part du pilote : meme calcul que la page BGS du PC
+        function xQuotaJour(o) { const E = window.EdteamQuotas, m = window.cacheQuotasBgs; return (E && m && m[o.id] && E.types(o.type_ordre)) ? m[o.id] : null; }
+        function xCompteurJour(o) { const E = window.EdteamQuotas, m = window.cacheQuotasBgs; return (E && m && m[o.id] && E.compteur(o.type_ordre, m[o.id])) ? m[o.id] : null; }
         function xAvancementOrdre(o, rs) {
             const nb = Math.max(1, Number(rs.nb_actifs) || Number(rs.nb_participants) || 0);  // pilotes actifs du cycle (serveur) ; repli : participants
             const base = Object.assign({}, xPlafonds(o.population || 0), o.plafonds_custom || {});
@@ -1778,6 +1782,8 @@
                 // campagnes actives (script SQL 95) : les directives y sont rangees
                 const rc = await supabaseApp.from('campagnes').select('*').eq('escadron_id', profilCommandant.escadron_id).eq('statut', 'ACTIVE');
                 const campagnes = rc.error ? [] : (rc.data || []);
+                // quotas du jour (SQL 110, quotas-jour.js) : un seul appel pour toutes les directives ; sans la fonction serveur, l'affichage d'avant est conserve
+                if (window.EdteamQuotas && ordres && ordres.length) { try { await window.EdteamQuotas.charger(!!force); } catch (e) { /* affichage d'avant */ } }
                 return { ordres: ordres || [], resume, infos, veille, campagnes };
             }, force);
         }
@@ -1894,6 +1900,22 @@
             });
         }
         function xJaugesOrdre(o, rs) {
+            const QJ = xQuotaJour(o), CJ = QJ ? null : xCompteurJour(o), EQ = window.EdteamQuotas;
+            if (QJ) {
+                return EQ.lignes(o.type_ordre, QJ).map(l => { const m = EQ.META[l.ty], col = l.reduit ? '#2fe07a' : m.ch;
+                    return `<div style="background: linear-gradient(to right, ${col}66 0%, ${col}66 ${l.prog}%, rgba(0,0,0,0.5) ${l.prog}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
+                        <div style="color: #fff; font-weight: bold;"><span>${m.titre}</span></div>
+                        <div style="color: #bbb; margin-top: 3px;">${EQ.texteMarge(l.ty, l)}</div>
+                    </div>`; }).join('') + (o.type_ordre === 'BAISSE' ? '<div style="color:#777; font-size:0.9em; line-height:1.5; margin-top:6px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive.</div>' : '');
+            }
+            if (CJ) {
+                const M = CJ.moi || {}, nfr = n => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n);
+                const cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;border:1px solid rgba(255,255,255,0.05);border-radius:8px;background:rgba(0,0,0,0.5);padding:8px 10px;font-size:0.78em;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
+                const lignes = o.type_ordre === 'GUERRE'
+                    ? cell('🏆', 'Victoires en CZ', '<b>' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">· ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>') + cell('⚔️', 'Bons de combat', '<b>' + EQ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>') + cell('🎯', 'Missions militaires', '<b>' + Math.round((M.MISSIONS || {}).n || 0) + '</b>')
+                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>');
+                return lignes + '<div style="color:#777; font-size:0.66em; line-height:1.5; margin-top:4px;">Guerres et élections : aucune limite, faites-en le plus possible (pas de quota).</div>';
+            }
             return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
                     <div style="color: #fff; font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span>${titre}</span></div>
                     <div style="color: #bbb; margin-top: 3px;">Moi <b style="color: #fff;">${f(moi)}${u}</b> <span style="color: #666;">|</span> Escadron <b style="color: #fff;">${f(esc)} / ${f(plafond)}${u}</b></div>
@@ -1901,8 +1923,10 @@
         }
 
         // panneau EFFORT (le coeur de l'application) : effort de l'escadron et ma part en gros, jauge a deux tons ; en carte large, une barre par type d'action
-        function xEffortPanel(av, c, mini) {
+        function xEffortPanel(av, c, mini, nPart) {
             const vous = Math.round(av.pct * av.part / 100);
+            if (nPart != null) return `<div class="eff"><div class="lab">EFFORT</div>
+                <div class="nums"><span>PARTICIPANTS <b style="color: #fff;">${nPart}</b></span><span>MA PART <b style="color: var(--ed-orange);">${av.part} %</b></span></div></div>`;
             return `<div class="eff"><div class="lab">EFFORT</div>
                 <div class="nums"><span>ESCADRON <b style="color: #fff;">${av.pct} %</b></span><span>MA PART <b style="color: var(--ed-orange);">${av.part} %</b></span></div>
                 <div class="jg"><i style="width: ${av.pct}%; opacity: 0.5; background: ${c};"></i><i style="width: ${vous}%; background: ${c}; box-shadow: 0 0 9px ${c}, 0 0 2px ${c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
@@ -1935,7 +1959,7 @@
                 <div class="fac">${XESC(String(o.faction_cible || 'CIBLE').toUpperCase())}</div>
                 ${etatsC ? `<div style="margin: 2px 0 6px;">${etatsC}</div>` : ''}
                 ${centre}
-                ${xEffortPanel(av, c, seule ? xJaugesDonnees(o, rs) : null)}
+                ${xEffortPanel(av, c, seule && !xQuotaJour(o) && !xCompteurJour(o) ? xJaugesDonnees(o, rs) : null, (xQuotaJour(o) || xCompteurJour(o)) ? (rs.pilotes || []).length : null)}
             </div>`;
         }
 
@@ -2296,22 +2320,26 @@
                 // 1. L'EFFORT (le coeur de l'application) : bandeau, puis les jauges par type d'action
                 xEl('ordre-modal-effort').innerHTML = `
                     <div style="color: #777; font-size: 0.7em; margin-bottom: 8px;">${ordre.origine === 'PILOTE' ? 'Initiative lancée' : 'Directive émise'} il y a ${jours} jour${jours > 1 ? 's' : ''}</div>
-                    <div class="mdet-hero" style="border-color: ${couleur};">
+                    ${(xQuotaJour(ordre) || xCompteurJour(ordre)) ? `<div class="mdet-hero" style="border-color: ${couleur};">
+                        <div class="r1"><span>PARTICIPANTS</span><b id="bt-hero-n" style="color: #fff;">${(rsJ.pilotes || []).length}</b></div>
+                        <div class="r1"><span>MA PART</span><b style="color: ${couleur};">${avJ.part} %</b></div>
+                        <div id="bt-hero">${(rsJ.pilotes || []).slice(0, 12).map(x => window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 30 }) : '').join('')}</div>
+                    </div>
+                    <div class="mdet-sec" style="margin-top: 12px;">BILAN DEPUIS L'ÉMISSION <span style="color: #777; letter-spacing: 0;">· escadron et toi</span></div>
+                    <div id="bt-bilan"><div class="xmut" style="padding: 8px 2px;">Chargement du bilan…</div></div>` : `<div class="mdet-hero" style="border-color: ${couleur};">
                         <div class="r1"><span>EFFORT DE L'ESCADRON</span><b style="color: #fff;">${avJ.pct} %</b></div>
                         <div class="r1"><span>MA PART</span><b style="color: ${couleur};">${avJ.part} %</b></div>
                         <div class="jgh"><i style="width: ${avJ.pct}%; opacity: 0.5; background: ${couleur};"></i><i style="width: ${vousJ}%; background: ${couleur}; box-shadow: 0 0 9px ${couleur}, 0 0 2px ${couleur}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
-                    </div>
-                    <div class="mdet-sec" style="margin-top: 12px;">EFFORT PAR TYPE D'ACTION</div>
+                    </div>`}
+                    <div class="mdet-sec" style="margin-top: 12px;">${(xQuotaJour(ordre) || xCompteurJour(ordre)) ? 'TON QUOTA DU TICK <span style="color: #777; letter-spacing: 0;">· depuis le dernier tick</span>' : 'EFFORT PAR TYPE D\'ACTION'}</div>
                     <div style="display: flex; flex-direction: column; gap: 5px;">${xJaugesOrdre(ordre, rsJ)}</div>`;
                 // 2. LE RESULTAT DU JEU (apres les efforts individuels)
                 xEl('ordre-modal-resultat').innerHTML = `
                     <div class="mdet-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS${donnees ? ' <span style="color: #777; letter-spacing: 0;">· mis à jour ' + xAge(res.maj_edsm) + '</span>' : ''}</div>${corps}
                     <div style="color: #777; font-size: 0.66em; line-height: 1.5; margin-top: 8px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
                 // barres « effort par tick » (bgs-ticks.js) : sous la courbe et sur la barre d'effort
-                if (donnees && window.EdteamBgsTicks) {
-                    const nbT = Math.max(1, Number(rsJ.nb_actifs) || Number(rsJ.nb_participants) || 0), baseT = Object.assign({}, xPlafonds(ordre.population || 0), ordre.plafonds_custom || {}), capT = {};
-                    Object.keys(baseT).forEach(k => { capT[k] = baseT[k] * nbT; });
-                    window.EdteamBgsTicks.monter({ ordre, res, couleur: cs, cap: capT, nb: nbT, zone: xEl('ordre-modal-resultat').querySelector('.bt-zone'), barre: xEl('ordre-modal-effort').querySelector('.jgh'), globalAffiche: avJ.pct, mobile: true });
+                if ((xQuotaJour(ordre) || xCompteurJour(ordre)) && window.EdteamBgsTicks) {
+                    window.EdteamBgsTicks.monter({ ordre, res: donnees ? res : null, couleur: cs, zone: xEl('ordre-modal-resultat').querySelector('.bt-zone'), zoneBilan: xEl('ordre-modal-effort').querySelector('#bt-bilan'), zoneHero: xEl('ordre-modal-effort').querySelector('#bt-hero'), zoneResume: xEl('ordre-modal-effort').querySelector('#bt-hero-n'), moiId: profilCommandant ? profilCommandant.user_id : null, mobile: true });
                 }
             }
             xEl('modal-ordre-details').style.display = 'flex';
@@ -3972,7 +4000,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=33', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=39', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {
