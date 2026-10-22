@@ -113,7 +113,7 @@
     // aide en plein ecran (carte-aide.js), chargee seulement quand on l'ouvre
     function ouvrirAide(page) {
         if (window.EdteamCarteAide) { window.EdteamCarteAide.ouvrir(page); return; }
-        const sc = document.createElement("script"); sc.src = "carte-aide.js?v=2"; sc.onload = () => { if (window.EdteamCarteAide) window.EdteamCarteAide.ouvrir(page); }; sc.onerror = () => { /* aide indisponible : rien d'autre a faire */ };
+        const sc = document.createElement("script"); sc.src = "carte-aide.js?v=4"; sc.onload = () => { if (window.EdteamCarteAide) window.EdteamCarteAide.ouvrir(page); }; sc.onerror = () => { /* aide indisponible : rien d'autre a faire */ };
         document.head.appendChild(sc);
     }
     const ETATS_FR = { Stronghold: "Défendu", Fortified: "Consolidé", Exploited: "Exploité" };
