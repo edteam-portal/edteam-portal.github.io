@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-alerte-joueur-verrouille', date: '2026-10-22T23:18:44Z', type: 'NOUVEAU',
+        titre: 'Alerte combat : un joueur est verrouillé, sur n’importe quelle page',
+        texte: 'Sur le second écran ou la tablette, une nouvelle option du pied de page, « ALERTE COMBAT », affiche un gros bouton clignotant au milieu de la page où vous êtes quand un autre joueur (un CMDR, pas un PNJ) est verrouillé en jeu. Un clic ouvre l’onglet Combat du tableau de bord, dans le même onglet. L’option se règle à chaque session de jeu : elle ne dure que tant que la session en cours continue (EDMC et le jeu lancés, page visible), se met en veille après 3 heures sans joueur verrouillé et se désactive toute seule à la session suivante. Elle ne consomme rien tant qu’elle est désactivée.',
+        important: false,
+        action: 'Plugin 2.44 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois.'
+    },
+    {
         id: '2026-10-espion-distinction', date: '2026-10-22T22:01:19Z', type: 'NOUVEAU',
         titre: 'Nouvelle distinction : L’ESPION (RENSEIGNEMENT)',
         texte: 'Un huitième titre rejoint le mur des spécialistes : L’ESPION, pour le pilote qui renseigne le plus l’escadron. Une action = 1 point BGS = 1 point pour la distinction, et il n’y a que deux façons d’en gagner : arriver dans un système de la liste à repérer, ou scanner un joueur d’un autre escadron (onglet Combat du tableau de bord, scan de stade 2 ou plus, une fois par joueur et par jour). Ce n’est pas une course : le but est que tous les systèmes soient à jour. Une fenêtre plein écran présente la distinction une fois à chaque pilote. Chaque action a sa ligne dans le journal des exploits (PC et mobile).',

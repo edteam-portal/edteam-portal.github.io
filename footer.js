@@ -25,6 +25,8 @@
         + '.ft-aide:hover{background:rgba(255,113,0,.18);box-shadow:0 0 12px rgba(255,113,0,.5);color:#fff}'
         + '.ft-son{padding:3px 8px;color:#999;background:transparent;border:1px solid #444}'
         + '.ft-son:hover{color:var(--ed-blue,#00F0FF);border-color:var(--ed-blue,#00F0FF)}'
+        + '.ft-alerte{padding:3px 9px;color:#999;background:transparent;border:1px solid #444;letter-spacing:1px}'
+        + '.ft-alerte:hover{color:var(--ed-blue,#00F0FF);border-color:var(--ed-blue,#00F0FF)}'
         + '.ft-nouv{position:relative;color:#FFD700;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.45)}'
         + '.ft-nouv:hover{background:rgba(255,215,0,.16);box-shadow:0 0 12px rgba(255,215,0,.45);color:#fff}'
         + '.ft-point{width:8px;height:8px;border-radius:50%;background:#FF7100;box-shadow:0 0 8px #FF7100;position:absolute;top:-3px;right:-3px}'
@@ -73,11 +75,20 @@
         var o = document.getElementById('ft-mobile-overlay');
         if (o) o.style.display = 'none';
     }
+    // Alerte « joueur verrouille » (alerte-combat.js) : charge seulement si l'option est activee ou au premier clic ; aucune connexion tant que l'option n'est pas activee
+    window.edteamAlerteBasculer = function () {
+        function go() { if (window.EdteamAlerte) window.EdteamAlerte.basculer(); }
+        if (window.EdteamAlerte) { go(); return; }
+        var s = document.createElement('script'); s.src = 'alerte-combat.js?v=1'; s.onload = go; document.head.appendChild(s);
+    };
+    (function () {
+        try { var o = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); if (o && o.on && !/tableau-de-bord/i.test(location.pathname)) { var s = document.createElement('script'); s.src = 'alerte-combat.js?v=1'; document.head.appendChild(s); } } catch (e) { /* stockage indisponible */ }
+    })();
     // L'aide (FAQ) est chargee a la premiere ouverture seulement : aide.js
     window.edteamOuvrirAide = function (section) {
         if (window.edteamAide) { window.edteamAide.ouvrir(section); return; }
         var s = document.createElement('script');
-        s.src = 'aide.js?v=42';
+        s.src = 'aide.js?v=43';
         s.onload = function () { if (window.edteamAide) window.edteamAide.ouvrir(section); };
         document.head.appendChild(s);
     };
@@ -171,6 +182,7 @@
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
+            +   (visiteur || /tableau-de-bord/i.test(location.pathname) ? '' : '<button type="button" class="ft-btn ft-alerte" data-alerte-toggle onclick="edteamAlerteBasculer()">⚠ ALERTE COMBAT : DÉSACTIVÉE</button>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')
             + '</div>'
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>'; }
