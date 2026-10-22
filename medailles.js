@@ -15,6 +15,7 @@
         { code: 'SCI', nom: "L'EXPERT SCIENTIFIQUE",         sous: 'SCIENCE',      couleur: '#B026FF', unite: 'cr',  mesure: 'cartographie et exobiologie, en crédits cumulés',          desc: "Le pilote qui a rapporté les données de cartographie et d'exobiologie les plus précieuses pour la faction de l'escadron." },
         { code: 'EXE', nom: "L'EXÉCUTEUR",         sous: 'OP. NOIRES',   couleur: '#FF3333', unite: 'ops', mesure: "meurtres, vols, piratages et contrebande contre une autre faction que celle de l'escadron, et missions échouées sous une directive de baisse",    desc: "L'agent des ombres le plus actif contre les factions rivales : meurtres, vols, piratages, contrebande, et missions échouées sous une directive de baisse (10 par jour au plus). Les autres échecs ne comptent pas." },
         { code: 'GUE', nom: 'SEIGNEUR DE GUERRE',  sous: 'CONFLITS',     couleur: '#FF9A3C', unite: 'vict', mesure: 'victoires en zone de conflit',        desc: "Le vétéran qui a remporté le plus de victoires en zone de conflit pour la faction de l'escadron." },
+        { code: 'ESP', nom: "L'ESPION",            sous: 'RENSEIGNEMENT', couleur: '#C9D1DB', unite: 'sys', mesure: 'actions de renseignement : systèmes de la liste à repérer actualisés en y sautant, et joueurs scannés (1 action = 1 point BGS)', desc: "L'agent de renseignement de l'escadron : le pilote qui a le plus renseigné l'escadron, en actualisant les systèmes de la liste par ses sauts et en scannant des joueurs. Aucune course : le but est que tous les systèmes soient à jour." },
     ];
     const PAR_CODE = {}; TITRES.forEach(t => { PAR_CODE[t.code] = t; });
 
@@ -27,7 +28,7 @@
             return (v / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' M CR';
         }
         const n = Math.round(v).toLocaleString('fr-FR');
-        return unite === 't' ? n + ' t' : unite === 'vict' ? n + (v > 1 ? ' victoires' : ' victoire') : unite === 'ops' ? n + (v > 1 ? ' opérations' : ' opération') : n + (v > 1 ? ' pts' : ' pt');
+        return unite === 'sys' ? n + (v > 1 ? ' actions' : ' action') : unite === 't' ? n + ' t' : unite === 'vict' ? n + (v > 1 ? ' victoires' : ' victoire') : unite === 'ops' ? n + (v > 1 ? ' opérations' : ' opération') : n + (v > 1 ? ' pts' : ' pt');
     }
 
     // ---------- MEDAILLE VECTORIELLE (aucune image, aucune requete) ----------
@@ -42,6 +43,7 @@
             <linearGradient id="gradTitane" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F4F7FA"/><stop offset="40%" stop-color="#9fb0bf"/><stop offset="100%" stop-color="#3f4c6b"/></linearGradient>
             <linearGradient id="gradBronze" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffc56b"/><stop offset="45%" stop-color="#cd7f32"/><stop offset="100%" stop-color="#4a2511"/></linearGradient>
             <linearGradient id="gradPlatine" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#B0C4DE"/><stop offset="100%" stop-color="#6a7a8c"/></linearGradient>
+            <linearGradient id="gradNoir" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4b4e57"/><stop offset="45%" stop-color="#14151a"/><stop offset="100%" stop-color="#000000"/></linearGradient>
             <linearGradient id="gradSombre" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6a6a6a"/><stop offset="50%" stop-color="#262626"/><stop offset="100%" stop-color="#050505"/></linearGradient>
             <linearGradient id="gradAcier" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#C8CED3"/><stop offset="50%" stop-color="#6f7479"/><stop offset="100%" stop-color="#2F4F4F"/></linearGradient>
             <linearGradient id="gradRim" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/><stop offset="45%" stop-color="#8a8a8a"/><stop offset="100%" stop-color="#000000"/></linearGradient>
@@ -79,6 +81,7 @@
         else if (type === 'EXE') { grad = 'gradSombre'; ribbon = '#C41E1E'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="38" x2="50" y2="46" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="74" x2="50" y2="82" stroke="#FF3333" stroke-width="3"/><line x1="28" y1="60" x2="36" y2="60" stroke="#FF3333" stroke-width="3"/><line x1="64" y1="60" x2="72" y2="60" stroke="#FF3333" stroke-width="3"/>'; }
         else if (type === 'GUE') { grad = 'gradAcier'; ribbon = '#E8740C'; icone = '<line x1="38" y1="48" x2="62" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><line x1="62" y1="48" x2="38" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="60" r="4" fill="#FF7100" filter="url(#glowMedal)"/>'; }
         else if (type === 'BAT') { grad = 'gradOr'; ribbon = '#D9A800'; icone = '<polygon points="50,40 68,50 68,70 50,80 32,70 32,50" fill="none" stroke="url(#gradOr)" stroke-width="3"/><path d="M50,40 L50,80 M32,50 L68,70 M32,70 L68,50" stroke="url(#gradOr)" stroke-width="2"/>'; }
+        else if (type === 'ESP') { grad = 'gradNoir'; ribbon = '#2a2b33'; icone = '<path d="M28,60 Q50,41 72,60 Q50,79 28,60 Z" fill="none" stroke="#E6EAF0" stroke-width="3"/><circle cx="50" cy="60" r="7.5" fill="#E6EAF0"/><circle cx="50" cy="60" r="3" fill="#000"/><line x1="50" y1="40" x2="50" y2="46" stroke="#E6EAF0" stroke-width="2.2" stroke-linecap="round"/>'; }
         const aura = vacant ? '' : `<circle cx="50" cy="60" r="21" fill="none" stroke="${couleurAura}" stroke-width="1.4" opacity="0.7" filter="url(#glowMedal)"/>`;
         const lau = lauriers(vacant ? '#555' : ribbon);
         const reflet = vacant ? '' : '<ellipse cx="37" cy="43" rx="15" ry="7" transform="rotate(-38 37 43)" fill="url(#gradShine)"/><path d="M22,56 A29,29 0 0 1 46,31" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.35"/>';
@@ -203,23 +206,43 @@
         }).join('');
     };
 
-    // Journal des exploits : les rafales de MEURTRES, de PIRATAGES et d'ECHECS de mission (une ligne par action cote base, 1 point chacune sous BAISSE) sont presentees 5 par ligne.
-    // Meme pilote, meme type, meme directive (ou soutien libre), meme faction et meme systeme ; une pause de plus de 30 min ouvre une nouvelle ligne.
-    // Seul l'affichage change : la valeur de la ligne regroupee est la SOMME (donc 1 point par meurtre ou piratage dans la colonne RANG BGS). Une ligne en cours (moins de 5) grossit au fil des actions.
+    // Journal des exploits : les actions de MEME TYPE d'un meme pilote faites a moins de 5 minutes l'une de l'autre sont presentees sur UNE ligne, valeurs additionnees
+    // (ex. 5 ventes de marchandises = la somme des CR). Seul l'affichage change : la valeur de la ligne regroupee est la SOMME, donc les points de la colonne RANG BGS sont ceux de la somme.
+    //  - actions repetitives (MEURTRES, PIRATAGE, ECHECS : 1 point chacune) : 5 par ligne, une pause de plus de 30 min ouvre une nouvelle ligne (regle d'origine) ;
+    //  - renseignement (RENSEIGNEMENT, SCAN_JOUEUR, MAJ_DONNEE) : 5 par ligne, 5 minutes entre deux actions, systemes differents reunis (la ligne indique « N systemes ») ;
+    //  - autres actions (economie, securite, science, missions, victoires, vols, contrebande) : meme directive (ou soutien libre), meme faction et meme systeme, 5 minutes entre deux actions, sans limite de nombre.
+    // La colonisation (une ligne par livraison, details propres) et les lignes du Powerplay ne sont pas regroupees. Champ ajoute : regroupe (nombre d'actions reunies).
     // Entree et sortie : lignes du journal triees de la plus recente a la plus ancienne.
     window.regrouperRafalesJournal = function (lignes, taille) {
-        const N = taille || 5, PAUSE = 30 * 60000, TYPES = { MEURTRES: 1, PIRATAGE: 1, ECHECS: 1 };
+        const N = taille || 5, PAUSE_RAFALE = 30 * 60000, PAUSE = 5 * 60000;
+        const RAFALE = { MEURTRES: 1, PIRATAGE: 1, ECHECS: 1 }, ESPION = { RENSEIGNEMENT: 1, SCAN_JOUEUR: 1, MAJ_DONNEE: 1 },
+              GENERAL = { ECONOMIE: 1, SECURITE: 1, SCIENCE: 1, CONTREBANDE: 1, MISSIONS: 1, ELECTION_MISSIONS: 1, GUERRE_MISSIONS: 1, CZ_VICTOIRES: 1, VOLS: 1 };
         const ts = e => { const t = new Date(String(e.date_action || '').replace(' ', 'T')).getTime(); return isNaN(t) ? 0 : t; };
         const sortie = [], ouverts = {};
-        const fermer = c => sortie.push(Object.assign({}, c.derniere, { valeur: c.somme, regroupe: c.n, date_action: c.derniere.date_action }));
+        const fermer = c => {
+            const r = Object.assign({}, c.derniere, { valeur: c.somme, regroupe: c.n, date_action: c.derniere.date_action });
+            if (c.espion && c.n > 1) {
+                const sys = Object.keys(c.systemes);
+                if (sys.length > 1) r.systeme = sys.length + ' SYSTÈMES';
+                if (c.derniere.type_action === 'MAJ_DONNEE') r.details = Object.keys(c.kinds).join(' · ');
+                else if (c.derniere.type_action === 'SCAN_JOUEUR') { const j = Object.keys(c.noms); r.details = j.slice(0, 3).join(', ') + (j.length > 3 ? ' +' + (j.length - 3) : ''); }
+            }
+            sortie.push(r);
+        };
         lignes.slice().sort((a, b) => ts(a) - ts(b)).forEach(e => {
-            if (!TYPES[e.type_action]) { sortie.push(e); return; }
-            const cle = [e.user_id, e.type_action, e.ordre_id || '', e.faction || '', e.systeme || ''].join('|'), t = ts(e), v = Number(e.valeur) || 1;
+            const T = e.type_action, rafale = !!RAFALE[T], espion = !!ESPION[T];
+            if (!rafale && !espion && !GENERAL[T]) { sortie.push(e); return; }
+            const cle = (espion ? [e.user_id, T] : [e.user_id, T, e.ordre_id || '', e.faction || '', e.systeme || '']).join('|'), t = ts(e), v = Number(e.valeur) || (rafale ? 1 : 0);
             let c = ouverts[cle];
-            if (c && t - c.t > PAUSE) { fermer(c); c = null; }
-            if (!c) c = ouverts[cle] = { somme: 0, n: 0, t: t, derniere: e };
+            if (c && t - c.t > (rafale ? PAUSE_RAFALE : PAUSE)) { fermer(c); c = null; }
+            if (!c) c = ouverts[cle] = { somme: 0, n: 0, t: t, derniere: e, espion: espion, systemes: {}, kinds: {}, noms: {} };
             c.somme += v; c.n += 1; c.t = t; c.derniere = e;
-            if (c.somme >= N) { fermer(c); delete ouverts[cle]; }
+            if (espion) {
+                c.systemes[String(e.systeme || '')] = 1;
+                String(e.details || '').split(' · ').forEach(k => { if (k) c.kinds[k] = 1; });
+                if (T === 'SCAN_JOUEUR') c.noms[String(e.details || '').split(' · ')[0].replace(/^CMDR /i, '')] = 1;
+            }
+            if ((rafale || espion) && c.n >= N) { fermer(c); delete ouverts[cle]; }
         });
         Object.keys(ouverts).forEach(k => fermer(ouverts[k]));
         return sortie.sort((a, b) => ts(b) - ts(a));
@@ -228,7 +251,7 @@
     // Specialite d'une action BGS = le titre que cette action fait progresser (meme correspondance que le calcul serveur des titres) ;
     // sert a colorer le journal des exploits (PC et mobile). Un echec ne fait progresser aucun titre : gris neutre.
     const SPEC_DE_ACTION = { SECURITE: 'SEC', MISSIONS: 'LOG', ELECTION_MISSIONS: 'LOG', GUERRE_MISSIONS: 'LOG', ECONOMIE: 'ECO', COLONISATION: 'BAT', SCIENCE: 'SCI',
-                             MEURTRES: 'EXE', VOLS: 'EXE', PIRATAGE: 'EXE', CONTREBANDE: 'EXE', CZ_VICTOIRES: 'GUE' };
+                             MEURTRES: 'EXE', VOLS: 'EXE', PIRATAGE: 'EXE', CONTREBANDE: 'EXE', CZ_VICTOIRES: 'GUE', RENSEIGNEMENT: 'ESP', SCAN_JOUEUR: 'ESP', MAJ_DONNEE: 'ESP' };
     window.specialiteAction = function (type, typeOrdre) {
         const T = String(type || '').toUpperCase();
         // un echec n'a pas de specialite, SAUF sous une directive de BAISSE (action offensive : script SQL 66)

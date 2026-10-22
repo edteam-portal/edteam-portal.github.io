@@ -25,7 +25,7 @@
         { k: 'exobio', champ: 'rang_exobio', table: 'exobio', couleur: CERCLE, eti: 'NOUVEAU RANG · EXOBIOLOGIE', ico: '&#9678;', lib: 'd’exobiologie' },
         { k: 'merc', champ: 'rang_mercenary', table: 'mercenary', couleur: CERCLE, eti: 'NOUVEAU RANG · MERCENAIRE', ico: '&#9678;', lib: 'de mercenaire' }
     ];
-    var PRIO = { rang: 1, plaque: 2, dist: 3, pilier: 4, elan: 5 };
+    var PRIO = { rang: 1, plaque: 2, dist: 3, pilier: 4, elan: 5, espion: 6 };
 
     var etat = { profil: null, opts: {}, file: [], ids: {}, enCours: false, minuteur: null, derniereGlobale: 0, anecdote: null, carte: null };
 
@@ -187,6 +187,7 @@
             else if (it.type === 'elan') m.elan = it.cle;
             else if (it.type === 'dist') { if (!Array.isArray(m.ti)) m.ti = []; if (m.ti.indexOf(it.cle) < 0) m.ti.push(it.cle); m.ti = m.ti.slice(-100); }
             else if (it.type === 'anecdote') m.an = it.x.id;
+            else if (it.type === 'espion') m.esp = 1;
         });
     }
 
@@ -349,6 +350,18 @@
             + (moi ? '<div class="er-moi">C’EST TOI ! BRAVO</div>' : '') + compteur(i, n) + boutons(i, n) + '</div>';
     }
 
+    // annonce de la distinction L'ESPION (RENSEIGNEMENT) : une fois par pilote
+    function htmlEspion(it, i, n) {
+        var meta = (typeof window.titreMeta === 'function' && window.titreMeta('ESP')) || { nom: 'L’ESPION', sous: 'RENSEIGNEMENT', couleur: '#C9D1DB' };
+        var medaille = typeof window.forgerMedailleSVG === 'function' ? window.forgerMedailleSVG('ESP', meta.couleur) : '<div class="er-ico">&#9673;</div>';
+        return '<div class="er-b"><span class="er-eti">NOUVELLE DISTINCTION</span><div class="er-med">' + medaille + '</div>'
+            + '<div class="er-t">' + esc(meta.nom) + '</div><div class="er-s">' + esc(meta.sous) + '</div>'
+            + '<div class="er-d">Les outils en ligne ont des heures de retard sur ce qui se passe dans nos systèmes. <b>Chaque pilote peut aider l’escadron à voir clair :</b> '
+            + '<b>deux façons</b> de gagner <b>1 point BGS</b> : arriver dans un système de la liste à repérer, ou scanner un joueur d’un autre escadron. Chaque action compte aussi pour la distinction <b>' + esc(meta.nom) + '</b>.'
+            + '<br>Ce n’est pas une course : le but est que <b>tous les systèmes soient repérés</b>. La liste et la route sont sur la page Engagement, le bouton de l’Amiral.</div>'
+            + compteur(i, n) + boutons(i, n) + '</div>';
+    }
+
     function htmlSpectacle(it, i, n) {
         var x = it.x, pilier = it.type === 'pilier', moi = String(x.user_id) === String(it.p.user_id), po = portrait(x.user_id, x.cmdr_nom);
         var glyphe = pilier ? '&#9733;' : '&#9670;', eti, pct, pastille, sous, desc;
@@ -386,7 +399,7 @@
     }
     function fermerRacine() { var ov = document.getElementById('edteam-revel'); if (ov) ov.remove(); }
 
-    function couleurDe(it) { return it.type === 'rang' ? it.d.couleur : it.type === 'plaque' ? libellePlaque(it.x).place.col : it.type === 'dist' ? '#FF4FD8' : it.type === 'pilier' ? '#FFD700' : '#00F0FF'; }
+    function couleurDe(it) { return it.type === 'rang' ? it.d.couleur : it.type === 'plaque' ? libellePlaque(it.x).place.col : it.type === 'dist' ? '#FF4FD8' : it.type === 'espion' ? '#C9D1DB' : it.type === 'pilier' ? '#FFD700' : '#00F0FF'; }
 
     // joue une chaine d'elements, un par un ; rend la main quand elle est finie
     function chaine(liste) {
@@ -406,7 +419,7 @@
                 marquer(it);   // vu des qu'il est montre
                 ov.className = it.type === 'pilier' || it.type === 'elan' ? 'spec' : '';
                 ov.style.setProperty('--c', couleurDe(it));
-                ov.innerHTML = it.type === 'rang' ? htmlRang(it, i, n) : it.type === 'plaque' ? htmlPlaque(it, i, n) : it.type === 'dist' ? htmlDist(it, i, n) : htmlSpectacle(it, i, n);
+                ov.innerHTML = it.type === 'rang' ? htmlRang(it, i, n) : it.type === 'plaque' ? htmlPlaque(it, i, n) : it.type === 'dist' ? htmlDist(it, i, n) : it.type === 'espion' ? htmlEspion(it, i, n) : htmlSpectacle(it, i, n);
                 var s = ov.querySelector('[data-a="suite"]'), t = ov.querySelector('[data-a="tout"]');
                 if (s) s.addEventListener('click', function () { sortir(false); });
                 if (t) t.addEventListener('click', function () { sortir(true); });
@@ -461,7 +474,7 @@
             css();
             if (etat.file.length) {
                 var liste = etat.file.splice(0).sort(function (a, b) { return PRIO[a.type] - PRIO[b.type]; });
-                if (liste.some(function (it) { return it.type === 'dist'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=7');
+                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=11');
                 if (liste.some(function (it) { return it.type === 'plaque'; }) && typeof window.forgerRubanSVG !== 'function') await chargerScript('rubans.js?v=1');
                 await chaine(liste);
             }
@@ -481,6 +494,8 @@
                 if (opts && opts.db) etat.opts.db = opts.db;
                 var items = [];
                 detecterRangs(profil, items);
+                var vu = lire(profil.user_id);
+                if (aEscadron(profil) && !(vu && vu.esp)) items.push({ type: 'espion', id: 'esp:' + profil.user_id, cle: '1', p: profil });     // la nouvelle distinction L'ESPION : annoncee une seule fois a chaque pilote d'un escadron (aucune requete)
                 ajouter(items);
                 globales(profil, false);
                 if (etat.file.length) { clearTimeout(etat.minuteur); etat.minuteur = setTimeout(jouer, 1800); }

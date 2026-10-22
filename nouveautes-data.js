@@ -5,6 +5,26 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-espion-distinction', date: '2026-10-22T22:01:19Z', type: 'NOUVEAU',
+        titre: 'Nouvelle distinction : L’ESPION (RENSEIGNEMENT)',
+        texte: 'Un huitième titre rejoint le mur des spécialistes : L’ESPION, pour le pilote qui renseigne le plus l’escadron. Une action = 1 point BGS = 1 point pour la distinction, et il n’y a que deux façons d’en gagner : arriver dans un système de la liste à repérer, ou scanner un joueur d’un autre escadron (onglet Combat du tableau de bord, scan de stade 2 ou plus, une fois par joueur et par jour). Ce n’est pas une course : le but est que tous les systèmes soient à jour. Une fenêtre plein écran présente la distinction une fois à chaque pilote. Chaque action a sa ligne dans le journal des exploits (PC et mobile).',
+        important: false,
+        action: 'Plugin 2.43 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois (nécessaire pour les scans de joueurs et le repérage).'
+    },
+    {
+        id: '2026-10-mission-reperage', date: '2026-10-22T22:01:18Z', type: 'NOUVEAU',
+        titre: 'Mission de repérage : les pilotes mettent les données à jour',
+        texte: 'Sur la page Engagement, un bouton « N systèmes à repérer » (à droite de CARTE GALACTIQUE) ouvre la route de repérage et le message d’EDTEAM. La liste réunit les systèmes dont la donnée est trop vieille : directives, menaces d’expansion rivale et conquêtes Powerplay ennemies. Il suffit d’y arriver en jeu, sans s’y poser : le plugin envoie ce que voit votre jeu, le système sort de la liste pour tout l’escadron et vous gagnez 1 point BGS. La route est triée pour le temps de vol (chemin le plus court depuis votre position). Le directeur règle les âges limites, le seuil de conquête, le rayon et les modes BGS / Powerplay ; l’Amiral et le directeur peuvent écarter un système de la liste (et le remettre à tout moment).',
+        important: false,
+        action: 'Plugin 2.43 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois.'
+    },
+    {
+        id: '2026-10-journal-regroupe', date: '2026-10-22T22:01:17Z', type: 'AMELIORE',
+        titre: 'Journal des exploits : les actions rapprochées sont regroupées',
+        texte: 'Les actions de même type d’un même pilote faites à moins de 5 minutes l’une de l’autre tiennent sur une seule ligne, valeurs additionnées : cinq ventes de marchandises donnent un seul total en crédits, avec les points correspondants. Les repérages, les scans et les actions répétitives (meurtres, piratages) sont regroupés par 5. Les livraisons de colonisation gardent leur ligne.',
+        important: false
+    },
+    {
         id: '2026-10-score-conflit-par-pilote', date: '2026-10-22T17:00:45Z', type: 'AMELIORE',
         titre: 'Scores de guerre et d’élection : qui les a relevés',
         texte: 'Dans la fenêtre d’une directive de guerre ou d’élection, le score du conflit indique maintenant « relevé par CMDR … il y a … » : le pilote de l’escadron qui l’a envoyé en arrivant dans le système. Aucun changement à faire côté plugin.',

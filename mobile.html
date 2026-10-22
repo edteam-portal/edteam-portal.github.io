@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="photos.js?v=2"></script>
     <script src="annonce.js?v=15"></script>
-    <script src="revelations.js?v=2"></script>
+    <script src="revelations.js?v=5"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagnes-mobile.js?v=14"></script>
     <script src="quotas-jour.js?v=11"></script>
@@ -29,7 +29,7 @@
     <script src="qgsuivi.js?v=38"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=2"></script>
-    <script src="medailles.js?v=9"></script>
+    <script src="medailles.js?v=14"></script>
     <script src="etats-faction.js?v=4"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
@@ -731,7 +731,7 @@
                         <select id="m-exp-periode" class="m-input" style="padding: 11px 12px; font-size: 0.78em; border-radius: 12px;" onchange="rendreExploitsMobile()"><option value="TICK" selected>DEPUIS LE CYCLE</option><option value="7J">7 DERNIERS JOURS</option><option value="30J">30 DERNIERS JOURS</option></select>
                         <select id="m-exp-pilote" class="m-input" style="padding: 11px 12px; font-size: 0.78em; border-radius: 12px;" onchange="rendreExploitsMobile()"><option value="ALL" selected>TOUT L'ESCADRON</option><option value="ME">MON DOSSIER</option></select>
                     </div>
-                    <select id="m-exp-type" class="m-input" style="padding: 11px 12px; font-size: 0.78em; border-radius: 12px;" onchange="rendreExploitsMobile()"><option value="ALL" selected>TOUTES LES SPÉCIALITÉS</option><option value="SEC">SÉCURITÉ</option><option value="LOG">MISSIONS</option><option value="ECO">ÉCONOMIE</option><option value="BAT">COLONISATION</option><option value="SCI">SCIENCE</option><option value="EXE">OP. NOIRES</option><option value="GUE">CONFLITS</option><option value="ECH">MISSIONS ÉCHOUÉES</option><option value="PP">POWERPLAY</option></select>
+                    <select id="m-exp-type" class="m-input" style="padding: 11px 12px; font-size: 0.78em; border-radius: 12px;" onchange="rendreExploitsMobile()"><option value="ALL" selected>TOUTES LES SPÉCIALITÉS</option><option value="SEC">SÉCURITÉ</option><option value="LOG">MISSIONS</option><option value="ECO">ÉCONOMIE</option><option value="BAT">COLONISATION</option><option value="SCI">SCIENCE</option><option value="EXE">OP. NOIRES</option><option value="GUE">CONFLITS</option><option value="ESP">RENSEIGNEMENT</option><option value="ECH">MISSIONS ÉCHOUÉES</option><option value="PP">POWERPLAY</option></select>
                     <div class="xsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="m-filtre-exploits" placeholder="Pilote ou OP.#…" oninput="filtrerJournalExploitsMobile()"></div>
                     <div id="m-exploits-container" style="display: flex; flex-direction: column; gap: 8px;">
                         <div class="xmut" style="text-align: center; padding: 15px;">Écoute des rapports de missions...</div>
@@ -1181,6 +1181,7 @@
             else if (type === 'EXE') { grad = 'gradSombre'; icone = '<circle cx="50" cy="60" r="14" fill="none" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="38" x2="50" y2="46" stroke="#FF3333" stroke-width="3"/><line x1="50" y1="74" x2="50" y2="82" stroke="#FF3333" stroke-width="3"/><line x1="28" y1="60" x2="36" y2="60" stroke="#FF3333" stroke-width="3"/><line x1="64" y1="60" x2="72" y2="60" stroke="#FF3333" stroke-width="3"/>'; } 
             else if (type === 'GUE') { grad = 'gradAcier'; icone = '<line x1="38" y1="48" x2="62" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><line x1="62" y1="48" x2="38" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="60" r="4" fill="#FF7100" filter="url(#glowMedal)"/>'; } 
             else if (type === 'BAT') { grad = 'gradOr'; icone = '<polygon points="50,40 68,50 68,70 50,80 32,70 32,50" fill="none" stroke="url(#gradOr)" stroke-width="3"/><path d="M50,40 L50,80 M32,50 L68,70 M32,70 L68,50" stroke="url(#gradOr)" stroke-width="2"/>'; }
+            else if (type === 'ESP') { grad = 'gradNoir'; icone = '<path d="M28,60 Q50,41 72,60 Q50,79 28,60 Z" fill="none" stroke="#E6EAF0" stroke-width="3"/><circle cx="50" cy="60" r="7.5" fill="#E6EAF0"/><circle cx="50" cy="60" r="3" fill="#000"/><line x1="50" y1="40" x2="50" y2="46" stroke="#E6EAF0" stroke-width="2.2" stroke-linecap="round"/>'; }
             else if (type === 'ELE') { grad = 'gradOr'; icone = '<polygon points="50,42 54,52 64,53 56,60 58,70 50,65 42,70 44,60 36,53 46,52" fill="url(#gradOr)"/>'; }
 
             return `
@@ -1190,6 +1191,7 @@
                     <linearGradient id="gradTitane" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E2E2E2"/><stop offset="50%" stop-color="#8e9eab"/><stop offset="100%" stop-color="#3f4c6b"/></linearGradient>
                     <linearGradient id="gradBronze" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffb347"/><stop offset="50%" stop-color="#cd7f32"/><stop offset="100%" stop-color="#4a2511"/></linearGradient>
                     <linearGradient id="gradPlatine" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#B0C4DE"/><stop offset="100%" stop-color="#708090"/></linearGradient>
+                    <linearGradient id="gradNoir" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4b4e57"/><stop offset="45%" stop-color="#14151a"/><stop offset="100%" stop-color="#000000"/></linearGradient>
                     <linearGradient id="gradSombre" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#555555"/><stop offset="50%" stop-color="#222222"/><stop offset="100%" stop-color="#050505"/></linearGradient>
                     <linearGradient id="gradAcier" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A9A9A9"/><stop offset="50%" stop-color="#696969"/><stop offset="100%" stop-color="#2F4F4F"/></linearGradient>
                     <filter id="glowMedal"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -2438,7 +2440,7 @@
             while (c.getUTCDay() !== 4 || c.getTime() > Date.now()) c.setUTCDate(c.getUTCDate() - 1);
             return c.getTime();
         }
-        const X_SPEC_TYPES = { SEC: ['SECURITE'], LOG: ['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'], ECO: ['ECONOMIE'], SCI: ['SCIENCE'], GUE: ['CZ_VICTOIRES'], EXE: ['MEURTRES', 'VOLS', 'PIRATAGE', 'CONTREBANDE', 'ECHECS'], ECH: ['ECHECS'] };
+        const X_SPEC_TYPES = { SEC: ['SECURITE'], LOG: ['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'], ECO: ['ECONOMIE'], SCI: ['SCIENCE'], GUE: ['CZ_VICTOIRES'], EXE: ['MEURTRES', 'VOLS', 'PIRATAGE', 'CONTREBANDE', 'ECHECS'], ESP: ['RENSEIGNEMENT', 'SCAN_JOUEUR', 'MAJ_DONNEE'], ECH: ['ECHECS'] };
 
         async function chargerExploitsMobile(force) {
             const cont = xEl('m-exploits-container');
@@ -2521,7 +2523,7 @@
                 return v > 10000 ? v / 2000000 : v;
             };
             const coloNomJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
-            const estBgsType = ['SEC', 'LOG', 'ECO', 'SCI', 'GUE', 'EXE', 'ECH'].includes(fType);
+            const estBgsType = ['SEC', 'LOG', 'ECO', 'SCI', 'GUE', 'EXE', 'ESP', 'ECH'].includes(fType);
             const ppType = fType === 'PP';
             let lignesBgs = efforts.filter(e => dansPeriode(e) && (fPilote === 'ALL' || String(e.user_id) === idPilote));
             if (estBgsType) lignesBgs = lignesBgs.filter(e => (X_SPEC_TYPES[fType] || []).includes(e.type_action));
@@ -2565,8 +2567,8 @@
                 // couleur = SPÉCIALITÉ de l'action (celle du mur des spécialistes), plus le type de directive
                 const col = window.specialiteAction ? window.specialiteAction(action, ordre ? ordre.type_ordre : null).couleur : '#8a8f98';
                 const vecteur = action === 'CZ_VICTOIRES' ? 'GUERRE' : (action === 'SCIENCE' && e.details === 'Exobiologie') ? 'EXOBIOLOGIE' : action;
-                const etiquette = ordre ? `OP.#${e.ordre_id} · ${vecteur}` : e.ordre_id ? `OP.#${e.ordre_id} (CLÔTURÉE) · ${vecteur}` : `SOUTIEN LIBRE · ${vecteur}`;
-                const lieuSys = String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase(), lieuFac = String(ordre ? ordre.faction_cible : (e.faction || '')).toUpperCase();
+                const etiquette = action === 'RENSEIGNEMENT' ? 'RENSEIGNEMENT · ESPIONNAGE' : action === 'SCAN_JOUEUR' ? 'RENSEIGNEMENT · SCAN' : action === 'MAJ_DONNEE' ? 'RENSEIGNEMENT · DONNÉES' : ordre ? `OP.#${e.ordre_id} · ${vecteur}` : e.ordre_id ? `OP.#${e.ordre_id} (CLÔTURÉE) · ${vecteur}` : `SOUTIEN LIBRE · ${vecteur}`;
+                const lieuSys = String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase(), lieuFac = String(ordre ? ordre.faction_cible : ((action === 'SCAN_JOUEUR' || action === 'MAJ_DONNEE') ? (e.details || '') : (e.faction || ''))).toUpperCase();
                 const lieu = XESC(lieuSys) + (lieuFac ? ' // ' + XESC(lieuFac) : '');
                 const pr = pointsRang(action, e.valeur, action === 'ECHECS' && !!ordre && String(ordre.type_ordre).toUpperCase() === 'BAISSE');
                 const ptsTxt = !(pr > 0) ? '' : `${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS`;
@@ -2576,9 +2578,12 @@
                 else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(action)) q = `+${e.valeur} INF`;
                 else if (action === 'ECHECS') q = `${e.valeur} ÉCHEC${e.valeur > 1 ? 'S' : ''}`;
                 else if (action === 'MEURTRES') q = `${e.valeur} MEURTRE${e.valeur > 1 ? 'S' : ''}`;
-                else if (action === 'CZ_VICTOIRES') q = '+1 BATAILLE GAGNÉE';
+                else if (action === 'CZ_VICTOIRES') q = '+' + (Number(e.valeur) || 1) + ' BATAILLE' + ((Number(e.valeur) || 1) > 1 ? 'S' : '') + ' GAGNÉE' + ((Number(e.valeur) || 1) > 1 ? 'S' : '');
                 else if (action === 'VOLS') q = `${e.valeur} VOL${e.valeur > 1 ? 'S' : ''}`;
                 else if (action === 'PIRATAGE') q = `${e.valeur} PIRATAGE${e.valeur > 1 ? 'S' : ''}`;
+                else if (action === 'RENSEIGNEMENT') q = `+${e.valeur} SYSTÈME${e.valeur > 1 ? 'S' : ''} REPÉRÉ${e.valeur > 1 ? 'S' : ''}`;
+                else if (action === 'SCAN_JOUEUR') q = '+' + (e.regroupe || 1) + ' JOUEUR' + ((e.regroupe || 1) > 1 ? 'S' : '') + ' SCANNÉ' + ((e.regroupe || 1) > 1 ? 'S' : '');
+                else if (action === 'MAJ_DONNEE') q = '+' + (e.regroupe || 1) + ' MISE' + ((e.regroupe || 1) > 1 ? 'S' : '') + ' À JOUR';
                 return carte(col, 'CMDR ' + cmdr, quand, XESC(etiquette), XESC(String(q)), (lieu.trim() || ptsTxt) ? ligneBas(lieu, ptsTxt) : '');
             }).join('');
             if (tout.length > limite) h += `<button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="expPlusMobile()">AFFICHER LES SUIVANTES (${tout.length - limite})</button>`;
@@ -4000,7 +4005,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=41', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=42', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

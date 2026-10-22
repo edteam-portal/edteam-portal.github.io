@@ -21,13 +21,13 @@
     <script src="navigation.js?v=39"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=34"></script>
+    <script src="campagnes.js?v=54"></script>
     <script src="quotas-jour.js?v=11"></script>
     <script src="utile-bgs.js?v=9"></script>
     <script src="bgs-ticks.js?v=6"></script>
     <script src="bgs-participants.js?v=1"></script>
     <script src="pp-etat.js?v=5"></script>
-    <script src="carte-campagnes.js?v=34"></script>
+    <script src="carte-campagnes.js?v=47"></script>
     <script src="campagnes-pp.js?v=19"></script>
     <script src="campagnes-col.js?v=7"></script>
     <script src="vitrine-module.js?v=1"></script>
@@ -696,6 +696,7 @@
         // Filtre « spécialité » : types d'action qui font progresser chaque titre du mur des spécialistes (même correspondance que le calcul serveur des titres)
         const TYPES_SPECIALITE = {
             SEC: ['SECURITE'], LOG: ['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'], ECO: ['ECONOMIE'], SCI: ['SCIENCE'], GUE: ['CZ_VICTOIRES'], ECH: ['ECHECS'],
+            ESP: ['RENSEIGNEMENT', 'SCAN_JOUEUR', 'MAJ_DONNEE'],
             EXE: ['MEURTRES', 'VOLS', 'PIRATAGE', 'CONTREBANDE', 'ECHECS'],   // les échecs n'y comptent que sous une directive de baisse (filtré plus bas)
             BAT: []                                                          // colonisation : stations terminées et paliers de livraisons seulement (pas chaque livraison)
         };
@@ -2825,7 +2826,7 @@
 
                             const ordreConcerne = ordres.find(o => String(o.id) === String(a.ordre_id));
                             const cibleSys = escapeHtml(ordreConcerne ? ordreConcerne.systeme_cible.toUpperCase() : (a.systeme ? a.systeme.toUpperCase() : "SECTEUR LOCAL"));
-                            const cibleFac = escapeHtml(ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : (a.faction ? a.faction.toUpperCase() : "SOUTIEN FLOTTE"));
+                            const cibleFac = escapeHtml(ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : ((a.type_action === 'SCAN_JOUEUR' || a.type_action === 'MAJ_DONNEE') && a.details ? String(a.details).toUpperCase() : (a.faction ? a.faction.toUpperCase() : "SOUTIEN FLOTTE")));
                             
                             let typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "LIBRE";
                             let badgeOrdreTexte = ordreConcerne ? `#${ordreConcerne.id} | ${typeOrdre}` : "SOUTIEN LIBRE";
@@ -2837,6 +2838,11 @@
                             if (a.type_action === 'COLONISATION') {
                                 typeOrdre = "COLONISATION";
                                 badgeOrdreTexte = "COLONISATION";
+                            }
+
+                            if (a.type_action === 'RENSEIGNEMENT' || a.type_action === 'SCAN_JOUEUR' || a.type_action === 'MAJ_DONNEE') {
+                                typeOrdre = "RENSEIGNEMENT";
+                                badgeOrdreTexte = "RENSEIGNEMENT";
                             }
 
                             let formatValeur = a.valeur;
@@ -2856,17 +2862,29 @@
                             } else if (a.type_action === 'MEURTRES') {
                                 formatValeur = `${a.valeur} MEURTRE${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'CZ_VICTOIRES') {
-                                formatValeur = `+1 BATAILLE GAGNÉE`;
+                                formatValeur = `+${a.valeur || 1} BATAILLE${(a.valeur || 1) > 1 ? 'S' : ''} GAGNÉE${(a.valeur || 1) > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'VOLS') {
                                 formatValeur = `${a.valeur} VOL${a.valeur > 1 ? 'S' : ''}`;
                             } else if (a.type_action === 'PIRATAGE') {
                                 formatValeur = `${a.valeur} PIRATAGE${a.valeur > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'RENSEIGNEMENT') {
+                                formatValeur = `+${a.valeur} SYSTÈME${a.valeur > 1 ? 'S' : ''} REPÉRÉ${a.valeur > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'SCAN_JOUEUR') {
+                                formatValeur = `+${a.regroupe || 1} JOUEUR${(a.regroupe || 1) > 1 ? 'S' : ''} SCANNÉ${(a.regroupe || 1) > 1 ? 'S' : ''}`;
+                            } else if (a.type_action === 'MAJ_DONNEE') {
+                                formatValeur = `+${a.regroupe || 1} MISE${(a.regroupe || 1) > 1 ? 'S' : ''} À JOUR`;
                             }
 
                             // Vecteur tactique
                             let vecteurTexte = a.type_action;
                             if (a.type_action === 'CZ_VICTOIRES') {
                                 vecteurTexte = "GUERRE";
+                            } else if (a.type_action === 'RENSEIGNEMENT') {
+                                vecteurTexte = "ESPIONNAGE";
+                            } else if (a.type_action === 'SCAN_JOUEUR') {
+                                vecteurTexte = "SCAN";
+                            } else if (a.type_action === 'MAJ_DONNEE') {
+                                vecteurTexte = "DONNÉES";
                             } else if (a.type_action === 'COLONISATION') {
                                 vecteurTexte = "CHANTIER";
                             } else if (a.type_action === 'SCIENCE' && a.details === 'Exobiologie') {
@@ -3088,7 +3106,7 @@
                 <select id="filtre-pilote" class="tactical-filter"><option value="ALL" selected>[ TOUT L'ESCADRON ]</option><option value="ME">> MON DOSSIER PERSONNEL</option></select>
                 <select id="filtre-periode" class="tactical-filter"><option value="ALL">TOUT L'HISTORIQUE</option><option value="TICK_HEBDO" selected>DEPUIS LE DERNIER CYCLE (JEUDI)</option><option value="7J">7 DERNIERS JOURS</option><option value="30J">30 DERNIERS JOURS</option></select>
                 <select id="filtre-ordre" class="tactical-filter" title="Directive"><option value="ALL" selected>[ TOUTES LES ACTIVITÉS ]</option><option value="ACTIF">[ MISSIONS EN COURS ]</option><option value="CLOS">[ MISSIONS CLÔTURÉES ]</option><option value="LIBRE">[ SOUTIEN LIBRE ]</option></select>
-                <select id="filtre-specialite" class="tactical-filter" title="Spécialité (titres du mur des spécialistes)"><option value="ALL" selected>[ TOUTES LES SPÉCIALITÉS ]</option><option value="SEC">FER DE LANCE · SÉCURITÉ</option><option value="LOG">MAÎTRE LOGISTICIEN · MISSIONS</option><option value="ECO">LE MAGNAT · ÉCONOMIE</option><option value="BAT">LE BÂTISSEUR · COLONISATION</option><option value="SCI">EXPERT SCIENTIFIQUE · SCIENCE</option><option value="EXE">L'EXÉCUTEUR · OP. NOIRES</option><option value="GUE">SEIGNEUR DE GUERRE · CONFLITS</option><option value="ECH">MISSIONS ÉCHOUÉES</option><optgroup label="POWERPLAY"><option value="PPALL">TOUT LE POWERPLAY</option><option value="PPREN">RENFORCEMENT</option><option value="PPSAP">SAPE</option><option value="PPACQ">ACQUISITION</option></optgroup></select>
+                <select id="filtre-specialite" class="tactical-filter" title="Spécialité (titres du mur des spécialistes)"><option value="ALL" selected>[ TOUTES LES SPÉCIALITÉS ]</option><option value="SEC">FER DE LANCE · SÉCURITÉ</option><option value="LOG">MAÎTRE LOGISTICIEN · MISSIONS</option><option value="ECO">LE MAGNAT · ÉCONOMIE</option><option value="BAT">LE BÂTISSEUR · COLONISATION</option><option value="SCI">EXPERT SCIENTIFIQUE · SCIENCE</option><option value="EXE">L'EXÉCUTEUR · OP. NOIRES</option><option value="GUE">SEIGNEUR DE GUERRE · CONFLITS</option><option value="ESP">L'ESPION · RENSEIGNEMENT</option><option value="ECH">MISSIONS ÉCHOUÉES</option><optgroup label="POWERPLAY"><option value="PPALL">TOUT LE POWERPLAY</option><option value="PPREN">RENFORCEMENT</option><option value="PPSAP">SAPE</option><option value="PPACQ">ACQUISITION</option></optgroup></select>
                 <input id="filtre-recherche" class="tactical-filter" type="search" placeholder="Système, faction, pilote…" autocomplete="off" style="cursor: text;">
             </div>
             <div id="modal-exploit-feed-content" style="overflow-y: auto; flex-grow: 1; padding-right: 10px;">
@@ -3148,7 +3166,7 @@
         };
     </script>
 
-    <script src="medailles.js?v=9"></script>
+    <script src="medailles.js?v=14"></script>
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=4"></script>
     <script src="commerce.js?v=7"></script>

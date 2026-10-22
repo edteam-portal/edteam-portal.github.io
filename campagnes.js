@@ -72,7 +72,7 @@
             '.camp-jg { position:relative; display:block; height:14px; cursor:help; background:#12151b; align-self:center; } .camp-jg > * { position:absolute; top:3px; bottom:3px; display:block; }',
             '.camp-jg i { left:0; background:#6f8196; } .camp-jg b { min-width:3px; } .camp-jg b.h { background:repeating-linear-gradient(135deg, var(--s) 0 3px, color-mix(in srgb, var(--s) 30%, transparent) 3px 6px); border:1px solid var(--s); box-sizing:border-box; } .camp-jg b.m { background:var(--s); box-shadow:0 0 8px var(--s); }',
             '.camp-jg u { top:1px; bottom:1px; width:4px; background-clip:content-box; padding:0 1px; box-sizing:border-box; background:#fff; opacity:.85; }',
-            '.camp-vue { display:flex; justify-content:flex-end; align-items:center; gap:0; margin:0 2px 10px; font-size:.8em; color:#9ab; letter-spacing:3px; } .camp-vue > span { margin-right:12px; }',
+            '.camp-vue { display:flex; justify-content:flex-end; align-items:center; gap:0; margin:0 2px 10px; font-size:.8em; color:#9ab; letter-spacing:3px; } .camp-vue > span { margin-right:12px; } .camp-vue > #reperage-bande { margin:0 0 0 22px; }',
             '.camp-vue .camp-btn { font-size:1em; padding:8px 22px; letter-spacing:2px; border-color:#3a4a55; color:#9ab; } .camp-vue .camp-btn + .camp-btn { margin-left:-1px; }',
             '.camp-vue .camp-btn.actif { border-color:#00F0FF; color:#00F0FF; background:rgba(0,240,255,.16); box-shadow:0 0 14px rgba(0,240,255,.35), inset 0 0 10px rgba(0,240,255,.15); position:relative; z-index:1; }',
             '.camp-grille { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:14px; padding:4px 0 8px; }',
@@ -274,7 +274,7 @@
         var mapC = {}; camps.forEach(function (c) { mapC[c.id] = c; });
         var bande = window.EdteamUtile && window.cacheQuotasBgs && typeof bgsSens === 'function' ? window.EdteamUtile.legende() : '';
         var vue = vueCourante();
-        var bascule = '<div class="camp-vue"><span>AFFICHAGE</span><button type="button" class="camp-btn' + (vue === 'lignes' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;lignes&quot;)">☰ LIGNES</button><button type="button" class="camp-btn' + (vue === 'cartes' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;cartes&quot;)">▦ CARTES</button><button type="button" class="camp-btn' + (vue === 'carte' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;carte&quot;)">◉ CARTE GALACTIQUE</button></div>';
+        var bascule = '<div class="camp-vue"><span>AFFICHAGE</span><button type="button" class="camp-btn' + (vue === 'lignes' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;lignes&quot;)">☰ LIGNES</button><button type="button" class="camp-btn' + (vue === 'cartes' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;cartes&quot;)">▦ CARTES</button><button type="button" class="camp-btn' + (vue === 'carte' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;carte&quot;)">◉ CARTE GALACTIQUE</button><span id="reperage-bande"></span></div>';
         var datCarte = [];
         var htmlCamps = camps.map(function (c) {
             var col = COUL[c.type_campagne] || '#aaa', pr = PRIO[c.priorite] || PRIO[3];
@@ -308,9 +308,24 @@
                 + '</div>';
         }).join('');
         zone.innerHTML = titre + bascule + bande + (vue === 'carte' ? '<div id="camp-carte"></div>' : '<div style="display:grid; gap:12px; grid-template-columns:minmax(0,1fr);">' + htmlCamps + '</div>');
+        // couleur de chaque systeme de directive (meme logique que la carte : rouge a contre-sens, bleu inchange, vert dans le sens voulu), reprise par le bandeau de reperage
+        var resDir = {}; datCarte.forEach(function (cp) { cp.lignes.forEach(function (l) { var k = String(l.sys || '').toUpperCase(), r = l.res || 'fl', o = resDir[k]; if (!o || r === 'dn' || (r === 'fl' && o === 'up')) resDir[k] = r; }); }); window.__edtResDirectives = resDir;
         if (vue === 'carte' && window.EdteamCarteCampagnes) window.EdteamCarteCampagnes.monter(document.getElementById('camp-carte'), { campagnes: datCarte });
         brancherGlisser(zone);
         brancherInfobulles(zone);
+        reperage();
+    }
+    // bandeau « Renseignement » (mission de reperage, script SQL 121) : visible de tous les pilotes d'un escadron, charge a la demande (reperage.js)
+    function reperage() {
+        var el = document.getElementById('reperage-bande'); if (!el) return;
+        var esc = String(moi().escadron_id || '').trim().toUpperCase();
+        if (!esc || esc === 'INDEPENDANT') { el.remove(); return; }
+        if (window.EdteamReperage) { window.EdteamReperage.monter(el); return; }
+        if (window.__reperageCharge) return; window.__reperageCharge = true;
+        var sc = document.createElement('script'); sc.src = 'reperage.js?v=20';
+        sc.onload = function () { var e2 = document.getElementById('reperage-bande'); if (e2 && window.EdteamReperage) window.EdteamReperage.monter(e2); };
+        sc.onerror = function () { window.__reperageCharge = false; };
+        document.head.appendChild(sc);
     }
     // plusieurs lignes : la premiere sert de titre
     function texteBulle(t, col) {
