@@ -30,7 +30,7 @@
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=2"></script>
     <script src="medailles.js?v=9"></script>
-    <script src="etats-faction.js?v=3"></script>
+    <script src="etats-faction.js?v=4"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
     <style>
@@ -1952,7 +1952,7 @@
                 const fl = res.variation === null ? '' : (res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '=');
                 centre = `<div class="big"><span class="n">${xPct(res.influence)}<small> %</small></span>${res.variation !== null ? `<span class="d" style="color: ${cs};">${fl} ${xPts(res.variation)}</span>` : ''}</div>${xSpark(res.courbe, cs)}`;
             }
-            const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}">${ancien ? '⚠ ' : ''}${xAge(res.maj_edsm)}</span>` : '';
+            const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}">${ancien ? '⚠ ' : ''}${res.par ? '👤 ' : ''}${xAge(res.maj_edsm)}</span>` : '';
             const etatsC = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
             return `<div class="mdc${ancien ? ' ancien' : ''}${seule ? ' seule' : ''}" id="mdc-${o.id}" style="border-top-color: ${o.origine === 'PILOTE' ? '#FF4FD8' : c};" onclick="ouvrirModalOrdre(${index}, '${o.origine === 'PILOTE' ? '#FF4FD8' : c}')">
                 <div class="haut"><span class="xtag" style="color: ${c};">#${o.id} ${XESC(type)}</span>${age}</div>
@@ -2335,7 +2335,7 @@
                     <div style="display: flex; flex-direction: column; gap: 5px;">${xJaugesOrdre(ordre, rsJ)}</div>`;
                 // 2. LE RESULTAT DU JEU (apres les efforts individuels)
                 xEl('ordre-modal-resultat').innerHTML = `
-                    <div class="mdet-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS${donnees ? ' <span style="color: #777; letter-spacing: 0;">· mis à jour ' + xAge(res.maj_edsm) + '</span>' : ''}</div>${corps}
+                    <div class="mdet-sec">RÉSULTAT DU JEU · INFLUENCE SUR 30 JOURS${donnees ? ' <span style="color: #777; letter-spacing: 0;">· mis à jour ' + (res.par ? 'par CMDR ' + String(res.par).toUpperCase().replace(/[<>&"']/g, '') + ' ' : '') + xAge(res.maj_edsm) + '</span>' : ''}</div>${corps}
                     <div style="color: #777; font-size: 0.66em; line-height: 1.5; margin-top: 8px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;
                 // barres « effort par tick » (bgs-ticks.js) : sous la courbe et sur la barre d'effort
                 if ((xQuotaJour(ordre) || xCompteurJour(ordre)) && window.EdteamBgsTicks) {
@@ -4000,7 +4000,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=40', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=41', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

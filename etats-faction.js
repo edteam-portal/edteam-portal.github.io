@@ -45,7 +45,7 @@
     function bloc(res) {
         if (!res || !res.donnees) return '';
         return '<div style="display:flex;flex-direction:column;gap:5px;">' + badges(res, false)
-            + '<span style="color:#777;font-size:.68em;">Relevé EDSM ' + E(age(res.maj_edsm)) + ' · information, sans effet sur le classement des routes</span></div>';
+            + '<span style="color:#777;font-size:.68em;">' + (res.par ? 'Relevé par CMDR ' + E(String(res.par).toUpperCase()) + ' (dans le jeu) ' : 'Relevé EDSM ') + E(age(res.maj_edsm)) + ' · information, sans effet sur le classement des routes</span></div>';
     }
     // Etat qui « colle » a une marchandise (categorie Spansh) : seulement armes/guerre, nourriture/famine, medicaments/epidemie
     function enPhase(res, categorie) {

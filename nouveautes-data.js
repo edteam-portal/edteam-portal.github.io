@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-releve-pilote-systeme', date: '2026-10-22T16:22:27Z', type: 'AMELIORE',
+        titre: 'Directives : le système est relevé par vos camarades quand ils s’y rendent',
+        texte: 'EDSM ne met à jour un système que lorsqu’un joueur le visite avec un outil qui envoie ses données, d’où des résultats parfois vieux de plus d’un jour. Désormais, quand un pilote de l’escadron arrive dans un système ciblé par une directive active, le plugin (v2.42) relève l’influence et les états des factions dans le journal du jeu : la fenêtre de la directive affiche « mis à jour par CMDR … il y a … ». La donnée la plus récente est gardée, EDSM ou pilote. Rien n’est envoyé pour les autres systèmes.',
+        important: false,
+        action: 'Plugin 2.42 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois.'
+    },
+    {
         id: '2026-10-carte-galactique', date: '2026-10-22T15:53:33Z', type: 'NOUVEAU',
         titre: 'Carte galactique des campagnes : où agir, et ce qui s’approche',
         texte: 'Troisième affichage de la page Engagement : chaque système de mission est placé sur une carte (vue de dessus ou de côté), coloré selon le résultat, la participation ou la priorité. Survolez pour voir la directive, cliquez pour l’ouvrir, clic droit pour copier le nom dans le jeu. Un filtre « À renforcer » montre où l’aide est utile, et les systèmes de votre faction, vos colonies et la puissance défendue apparaissent en fond. Des alarmes signalent ce qui s’approche : puissance ennemie en place ou en conquête (Powerplay) et expansion d’une faction rivale vers vos systèmes (BGS, avec la route). Le bouton « Aide » de la carte explique tout en 8 pages. Sur PC et tablette.',

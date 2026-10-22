@@ -1380,7 +1380,7 @@
                 const fleche = res.variation === null ? '' : (res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : '=');
                 centre = `<div class="big"><span class="n">${bgsPct(res.influence)}<small> %</small></span>${res.variation !== null ? `<span class="d" style="color: ${couleurSens};">${fleche} ${bgsPts(res.variation)}</span>` : ''}</div>${bgsSpark(res.courbe, couleurSens)}`;
             }
-            const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}" title="Dernière mise à jour du jeu connue d'EDSM">${ancien ? '⚠ ' : ''}${bgsAge(res.maj_edsm)}</span>` : '';
+            const age = donnees ? `<span class="age${ancien ? ' vieux' : ''}" title="${res.par ? 'Relevé par un pilote de l’escadron : CMDR ' + String(res.par || '').toUpperCase().replace(/[<>&"']/g, '') : "Dernière mise à jour du jeu connue d'EDSM"}">${ancien ? '⚠ ' : ''}${res.par ? '👤 ' : ''}${bgsAge(res.maj_edsm)}</span>` : '';
             const etatsCarte = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
             const ligneEtats = etatsCarte ? `<div style="margin: 2px 0 6px;">${etatsCarte}</div>` : '';
             const bandeauInit = meta.init ? bgsBandeauInitiative(ordre, meta.init) : '';
@@ -1501,7 +1501,7 @@
                     <b style="color: #fff; letter-spacing: 2px; font-size: 1.15em;">${escapeHtml(String(ordre.faction_cible || '').toUpperCase())}</b>
                     <span style="color: #888;">· ${escapeHtml(String(ordre.systeme_cible || '').toUpperCase())}</span>
                 </div>
-                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? ` · jeu mis à jour ${bgsAge(res.maj_edsm)}` : ' · en attente du premier relevé du jeu'}</div>
+                <div style="color: #777; font-size: 0.8em; margin-top: 4px;">${estIni ? 'Initiative lancée par CMDR ' + escapeHtml(String(infoIni.createur || 'inconnu').toUpperCase()) + ' il y a ' : 'Directive émise il y a '}${jours} jour${jours > 1 ? 's' : ''}${donnees ? (res.par ? ` · <span style="color:#9be8ff;" title="Relevé fait dans le jeu par un pilote de l’escadron en arrivant dans ce système">mis à jour par CMDR ${String(res.par || '').toUpperCase().replace(/[<>&"']/g, '')} ${bgsAge(res.maj_edsm)}</span>` : ` · jeu mis à jour ${bgsAge(res.maj_edsm)}`) : ' · en attente du premier relevé du jeu'}</div>
 
                 <div class="bgs-paysage">
                 <div class="bgs-col-effort">
@@ -3150,7 +3150,7 @@
 
     <script src="medailles.js?v=9"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="etats-faction.js?v=3"></script>
+    <script src="etats-faction.js?v=4"></script>
     <script src="commerce.js?v=7"></script>
     <script src="footer.js?v=32"></script>
 </body>
