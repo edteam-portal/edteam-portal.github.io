@@ -188,13 +188,26 @@
     // ---- la route ----
     async function ouvrir() {
         if (document.getElementById("rp-modale")) return; css();
-        const d = await charger(true), p = await maPosition(); if (!d) return; await photos();
+        const d = await charger(true); let p = await maPosition(); if (!d) return; await photos();
         const ov = document.createElement("div"); ov.id = "rp-modale"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Route de repérage");
         document.body.appendChild(ov);
         const fermer = () => { document.removeEventListener("keydown", cl); ov.remove(); }; const cl = e => { if (e.key === "Escape") fermer(); };
         document.addEventListener("keydown", cl); ov.addEventListener("click", e => { if (e.target === ov) fermer(); });
-        const dessiner = (dd) => { ov.innerHTML = vue(dd, p); brancherModale(ov, dd, p, fermer, dessiner); };
+        // dd : donnees ; pp : nouvelle position (facultatif) : la position et le defilement sont conserves a chaque redessin
+        const dessiner = (dd, pp) => {
+            if (pp !== undefined) p = pp;
+            const g = ov.querySelector(".rp-liste"), dr = ov.querySelector(".rp-droite"), sg = g ? g.scrollTop : 0, sd = dr ? dr.scrollTop : 0;
+            ov.innerHTML = vue(dd, p); brancherModale(ov, dd, p, fermer, dessiner);
+            const g2 = ov.querySelector(".rp-liste"), d2 = ov.querySelector(".rp-droite"); if (g2) g2.scrollTop = sg; if (d2) d2.scrollTop = sd;
+        };
         dessiner(d);
+        // la fenetre suit le pilote : toutes les 45 s la liste et la position sont relues (sauf pendant la saisie d'un champ)
+        const iv = setInterval(async () => {
+            const m = document.getElementById("rp-modale"); if (!m) { clearInterval(iv); return; }
+            const a = document.activeElement; if (a && m.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+            memo = null; pos = null; const n = await charger(true), np = await maPosition();
+            if (n && document.getElementById("rp-modale")) dessiner(n, np);
+        }, 45000);
     }
     function vue(d, p) {
         const fl = filtrer(d, p), items = fl.items, faits = d.faits || [], rt = route(items, p), r = d.reglages || {};
@@ -262,7 +275,7 @@
             const r = await window.supabaseApp.rpc(rpc, { p_systeme: systeme });
             if (r.error) { const m = ov.querySelector(".rp-liste .rp-note:last-child") || ov.querySelector(".rp-liste"); if (m) m.insertAdjacentHTML("afterbegin", "<div class=\"rp-note\" style=\"color:#ff8a8a\">" + E(r.error.message || "refusé") + "</div>"); return; }
             memo = null; const n = await charger(true); const np = await maPosition();
-            if (n && document.getElementById("rp-modale")) { p = np; d = n; dessiner(n); }
+            if (n && document.getElementById("rp-modale")) { p = np; d = n; dessiner(n, np); }
             const bande = document.getElementById("reperage-bande"); if (bande) monter(bande);
         };
         ov.querySelectorAll("[data-ign]").forEach(b => b.onclick = e => { e.stopPropagation(); agir("reperage_ignorer", b.dataset.ign); });
@@ -271,7 +284,7 @@
         ov.querySelectorAll("[data-rp=ecartes]").forEach(b => b.onclick = () => { if (!ecartesOuvert) { ecartesOuvert = true; dessiner(d); } const e = ov.querySelector("#rp-ecartes"); if (e) { e.scrollIntoView({ behavior: "smooth", block: "center" }); e.style.boxShadow = "0 0 0 2px #ffd166"; setTimeout(() => { e.style.boxShadow = ""; }, 1600); } });
         ov.querySelectorAll("[data-mode]").forEach(cb => cb.onchange = () => { const g = ov.querySelector("#rp-g-" + cb.dataset.mode); if (!g) return; g.style.opacity = cb.checked ? "" : ".4"; g.querySelectorAll("input").forEach(i => { i.disabled = !cb.checked; }); });
         ov.querySelectorAll("[data-rp=msg]").forEach(b => b.onclick = () => { msgOuvert = !msgOuvert; dessiner(d); });
-        ov.querySelectorAll("[data-rp=actualiser]").forEach(b => b.onclick = async () => { b.textContent = "…"; const n = await charger(true); const np = await maPosition(); if (n && document.getElementById("rp-modale")) { p = np; d = n; dessiner(n); } });
+        ov.querySelectorAll("[data-rp=actualiser]").forEach(b => b.onclick = async () => { b.textContent = "…"; pos = null; const n = await charger(true); const np = await maPosition(); if (n && document.getElementById("rp-modale")) { p = np; d = n; dessiner(n, np); } });
         ov.querySelectorAll("[data-rp=enregistrer]").forEach(b => b.onclick = async () => {
             const v = k => Number((ov.querySelector("#rp-" + k) || {}).value), msg = ov.querySelector("[data-rp=msg]");
             const r = await window.supabaseApp.rpc("reperage_reglages_ecrire", { p_age_directive: v("age_directive_h"), p_age_expansion: v("age_expansion_h"), p_age_place_libre: (d.reglages || {}).age_place_libre_h || 72, p_age_conquete: v("age_conquete_h") || 48, p_age_conquete_forte: (d.reglages || {}).age_conquete_forte_h || 24, p_actif: !!((ov.querySelector("#rp-mode-bgs") || {}).checked || (ov.querySelector("#rp-mode-pp") || {}).checked), p_bgs: !!(ov.querySelector("#rp-mode-bgs") || {}).checked, p_pp: !!(ov.querySelector("#rp-mode-pp") || {}).checked, p_rayon: Number((ov.querySelector("#rp-rayon_max_al") || {}).value) || 500, p_seuil: v("seuil_conquete_pct") || 25 });

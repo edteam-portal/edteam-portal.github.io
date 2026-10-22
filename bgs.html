@@ -2826,7 +2826,7 @@
 
                             const ordreConcerne = ordres.find(o => String(o.id) === String(a.ordre_id));
                             const cibleSys = escapeHtml(ordreConcerne ? ordreConcerne.systeme_cible.toUpperCase() : (a.systeme ? a.systeme.toUpperCase() : "SECTEUR LOCAL"));
-                            const cibleFac = escapeHtml(ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : ((a.type_action === 'SCAN_JOUEUR' || a.type_action === 'MAJ_DONNEE') && a.details ? String(a.details).toUpperCase() : (a.faction ? a.faction.toUpperCase() : "SOUTIEN FLOTTE")));
+                            const cibleFac = escapeHtml(ordreConcerne ? ordreConcerne.faction_cible.toUpperCase() : ((a.type_action === 'SCAN_JOUEUR' || a.type_action === 'MAJ_DONNEE' || a.type_action === 'RENSEIGNEMENT') && a.details ? String(a.details).toUpperCase() : (a.faction ? a.faction.toUpperCase() : "SOUTIEN FLOTTE")));
                             
                             let typeOrdre = ordreConcerne ? ordreConcerne.type_ordre.toUpperCase() : "LIBRE";
                             let badgeOrdreTexte = ordreConcerne ? `#${ordreConcerne.id} | ${typeOrdre}` : "SOUTIEN LIBRE";

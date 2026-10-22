@@ -2568,7 +2568,7 @@
                 const col = window.specialiteAction ? window.specialiteAction(action, ordre ? ordre.type_ordre : null).couleur : '#8a8f98';
                 const vecteur = action === 'CZ_VICTOIRES' ? 'GUERRE' : (action === 'SCIENCE' && e.details === 'Exobiologie') ? 'EXOBIOLOGIE' : action;
                 const etiquette = action === 'RENSEIGNEMENT' ? 'RENSEIGNEMENT · ESPIONNAGE' : action === 'SCAN_JOUEUR' ? 'RENSEIGNEMENT · SCAN' : action === 'MAJ_DONNEE' ? 'RENSEIGNEMENT · DONNÉES' : ordre ? `OP.#${e.ordre_id} · ${vecteur}` : e.ordre_id ? `OP.#${e.ordre_id} (CLÔTURÉE) · ${vecteur}` : `SOUTIEN LIBRE · ${vecteur}`;
-                const lieuSys = String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase(), lieuFac = String(ordre ? ordre.faction_cible : ((action === 'SCAN_JOUEUR' || action === 'MAJ_DONNEE') ? (e.details || '') : (e.faction || ''))).toUpperCase();
+                const lieuSys = String(ordre ? ordre.systeme_cible : (e.systeme || '')).toUpperCase(), lieuFac = String(ordre ? ordre.faction_cible : ((action === 'SCAN_JOUEUR' || action === 'MAJ_DONNEE' || action === 'RENSEIGNEMENT') ? (e.details || '') : (e.faction || ''))).toUpperCase();
                 const lieu = XESC(lieuSys) + (lieuFac ? ' // ' + XESC(lieuFac) : '');
                 const pr = pointsRang(action, e.valeur, action === 'ECHECS' && !!ordre && String(ordre.type_ordre).toUpperCase() === 'BAISSE');
                 const ptsTxt = !(pr > 0) ? '' : `${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS`;
