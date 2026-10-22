@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-score-conflit-par-pilote', date: '2026-10-22T17:00:45Z', type: 'AMELIORE',
+        titre: 'Scores de guerre et d’élection : qui les a relevés',
+        texte: 'Dans la fenêtre d’une directive de guerre ou d’élection, le score du conflit indique maintenant « relevé par CMDR … il y a … » : le pilote de l’escadron qui l’a envoyé en arrivant dans le système. Aucun changement à faire côté plugin.',
+        important: false
+    },
+    {
         id: '2026-10-releve-pilote-systeme', date: '2026-10-22T16:22:27Z', type: 'AMELIORE',
         titre: 'Directives : le système est relevé par vos camarades quand ils s’y rendent',
         texte: 'EDSM ne met à jour un système que lorsqu’un joueur le visite avec un outil qui envoie ses données, d’où des résultats parfois vieux de plus d’un jour. Désormais, quand un pilote de l’escadron arrive dans un système ciblé par une directive active, le plugin (v2.42) relève l’influence et les états des factions dans le journal du jeu : la fenêtre de la directive affiche « mis à jour par CMDR … il y a … ». La donnée la plus récente est gardée, EDSM ou pilote. Rien n’est envoyé pour les autres systèmes.',

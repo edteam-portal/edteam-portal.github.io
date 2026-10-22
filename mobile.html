@@ -2300,7 +2300,7 @@
                     if (res.conflit) {
                         const estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
                         const moi = estF1 ? res.conflit.s1 : res.conflit.s2, adv = estF1 ? res.conflit.s2 : res.conflit.s1;
-                        corps += `<div style="margin-top: 8px; border: 1px dashed ${couleur}; border-radius: 8px; padding: 7px 10px; font-size: 0.8em; color: #ccc;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE <b style="color: ${cs}; font-size: 1.15em;">${moi} – ${adv}</b> <span style="color: #777;">vs</span> <b style="color: #aaa;">${XESC(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</b> <span style="color: #666; font-size: 0.85em;">· ${xAge(res.conflit.maj)}</span></div>`;
+                        corps += `<div style="margin-top: 8px; border: 1px dashed ${couleur}; border-radius: 8px; padding: 7px 10px; font-size: 0.8em; color: #ccc;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE <b style="color: ${cs}; font-size: 1.15em;">${moi} – ${adv}</b> <span style="color: #777;">vs</span> <b style="color: #aaa;">${XESC(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</b> <span style="color: #666; font-size: 0.85em;">· ${res.conflit.par ? 'par CMDR ' + String(res.conflit.par || '').toUpperCase().replace(/[<>&"']/g, '') + ' ' : ''}${xAge(res.conflit.maj)}</span></div>`;
                     }
                 } else {
                     corps += '<div class="xmut" style="padding: 18px 8px; text-align: center; border: 1px dashed #333; border-radius: 8px;">Le premier relevé du jeu arrive au prochain passage (08:10 ou 19:10 UTC).</div>';
