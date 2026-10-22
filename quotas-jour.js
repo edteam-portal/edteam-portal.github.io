@@ -81,15 +81,15 @@
         const L = lignes(ordre.type_ordre, entree); if (!L) return ""; css2();
         return "<span class=\"qj-pips\">" + L.map(l => {
             const M = META[l.ty], ok = l.q > 0 && l.s >= l.q, pc = l.q > 0 ? Math.min(100, Math.round(100 * l.s / l.q)) : 0;
-            const tip = M.court + " : " + val(l.ty, l.s) + " / " + val(l.ty, l.q) + " (effet plein jusqu'à ce volume, par tick)";
-            return "<span class=\"qj-pip" + (ok ? " ok" : pc > 0 ? " p" : "") + "\" style=\"--c:" + M.ch + "\" title=\"" + E(tip) + "\"><s style=\"width:" + pc + "%\"></s><span>" + (ok ? "✓" : M.e) + "</span></span>";
+            const tip = M.titre + "\nTon action depuis le dernier tick : " + val(l.ty, l.s) + " sur " + val(l.ty, l.q) + " d'effet plein.\n" + (ok ? "✓ Plein effet atteint : le surplus compte pour ton rang." : "Encore ~" + val(l.ty, l.reste) + " avant que l'effet diminue.");
+            return "<span class=\"qj-pip" + (ok ? " ok" : pc > 0 ? " p" : "") + "\" style=\"--c:" + M.ch + "\" data-tip=\"" + E(tip) + "\" data-tc=\"" + M.ch + "\"><s style=\"width:" + pc + "%\"></s><span>" + (ok ? "✓" : M.e) + "</span></span>";
         }).join("") + "</span>";
     }
 
     // ---------------- MESURES NEUTRES (SQL 111) ----------------
     const CSS2 = `
 .qj-pips{display:inline-flex;gap:5px;align-items:center;justify-content:flex-end}
-.qj-pip{position:relative;width:34px;height:24px;border:1px solid #3a3a3a;background:#111;font-size:.82em;display:grid;place-items:center;overflow:hidden;opacity:.6}
+.qj-pip{cursor:help;position:relative;width:34px;height:24px;border:1px solid #3a3a3a;background:#111;font-size:.82em;display:grid;place-items:center;overflow:hidden;opacity:.6}
 .qj-pip s{position:absolute;left:0;top:0;bottom:0;background:var(--c);opacity:.7;text-decoration:none}.qj-pip span{position:relative}
 .qj-pip.p{border-color:var(--c);opacity:1}.qj-pip.ok{border-color:#2fe07a;opacity:1}.qj-pip.ok s{background:#1c8a4a;opacity:1}.qj-pip.ok span{color:#fff;font-weight:bold}
 .qj-p{position:relative;display:inline-flex;margin:0 8px 6px 0;line-height:0}
@@ -169,5 +169,5 @@
     }
     function bascule(ligne) { const n = ligne.nextElementSibling; if (n && n.classList.contains("qj-rang")) { if (typeof sonClic === "function") sonClic(); n.classList.toggle("ouv"); } }
 
-    window.EdteamQuotas = { charger, types, META, lignes, compteur, texteMarge, pips, val, ticksEnvoi, assurerTicks, participants, bilan, bascule, css2, av };
+    window.EdteamQuotas = { charger, types, META, lignes, compteur, texteMarge, pips, val, ticksEnvoi, assurerTicks, participants, bilan, bascule, css2, av, fmtBilan, NOMS, TYPES_BILAN };
 })();

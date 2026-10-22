@@ -1,12 +1,12 @@
 // MISSIONS POWERPLAY (page BGS) : lignes dans les campagnes, fenetre d'une mission, cartes des initiatives, formulaires du commandement et des pilotes.
 // Donnees : fonction serveur pp_missions_vue() (script SQL 96), missions creees par creer_mission_pp (commandement) ou lancer_initiative_pp / proposer_initiative_pp (pilotes, script SQL 97).
 // Regles : un pilote d'un escadron SANS puissance voit les missions grisees (cadenas) et ne peut pas les ouvrir. Les « CP » sont une ESTIMATION (merites / 4) : le taux n'est pas confirme par le jeu.
-// L'etat d'un systeme (controle, progression) vient des journaux de jeu des pilotes de l'escadron : « observe il y a X ». Aucun seuil d'etat n'est affiche (non confirmes).
+// L'etat d'un systeme (controle, progression) vient des journaux de jeu des pilotes de l'escadron : « observe il y a X ». La barre a 4 zones et ses deux curseurs : voir pp-etat.js (regles mesurees le 22/10).
 (function () {
     'use strict';
     var PPC = '#8A7CFF';
     var TYPE = { RENFORCEMENT: ['Renforcement', '#00FF66'], SAPE: ['Sape', '#FF3333'], ACQUISITION: ['Acquisition', '#EDEDED'] };
-    var ETAT = { Exploited: 'Exploité', Fortified: 'Fortifié', Stronghold: 'Bastion', Unoccupied: 'Inoccupé' };
+    var ETAT = { Exploited: 'Exploité', Fortified: 'Consolidé', Stronghold: 'Défendu', Unoccupied: 'Inoccupé' };
     var ORIGINE = { PRIMES: 'Primes', COMBAT: 'Combat', MISSIONS: 'Missions', LIVRAISONS: 'Livraisons Powerplay', COMMERCE: 'Commerce', EXPLORATION: 'Exploration', SAUVETAGE: 'Sauvetage', COMMUNAUTE: 'Objectif communautaire', AUTRE: 'Non identifiée' };
     var esc = function (s) { return typeof window.escapeHtml === 'function' ? window.escapeHtml(String(s == null ? '' : s)) : String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
     var db = function () { return window.supabaseApp; };
@@ -17,7 +17,7 @@
     var vue = null, domCmd = 'BGS', domIni = 'BGS', typeCmd = 'RENFORCEMENT', typeIni = 'RENFORCEMENT';
 
     function pastille(txt, col) { return '<span class="camp-pastille" style="color:' + col + '; border-color:' + col + '; background:' + col + '1a;">' + txt + '</span>'; }
-    function barre(pct, col, txt, h) { pct = Math.max(0, Math.min(100, Number(pct) || 0)); h = h || 16; return '<div style="position:relative; height:' + h + 'px; background:#111; border:1px solid #333; border-radius:2px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:linear-gradient(90deg,' + col + '55,' + col + ');"></div><span style="position:absolute; inset:0; font-size:.7em; color:#fff; text-align:center; line-height:' + h + 'px; letter-spacing:1px; text-shadow:0 0 3px #000;">' + txt + '</span></div>'; }
+    function barre(pct, col, txt, h) { pct = Math.max(0, Math.min(100, Number(pct) || 0)); h = h || 16; if (/^#[0-9a-f]{3}$/i.test(col)) col = '#' + col.charAt(1) + col.charAt(1) + col.charAt(2) + col.charAt(2) + col.charAt(3) + col.charAt(3); return '<div style="position:relative; height:' + h + 'px; background:#111; border:1px solid #333; border-radius:2px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:linear-gradient(90deg,' + col + '55,' + col + ');"></div><span style="position:absolute; inset:0; font-size:.7em; color:#fff; text-align:center; line-height:' + h + 'px; letter-spacing:1px; text-shadow:0 0 3px #000;">' + txt + '</span></div>'; }
     function age(iso) { if (!iso) return ''; var h = (Date.now() - new Date(iso).getTime()) / 3600000; if (h < 1) return 'il y a ' + Math.max(1, Math.round(h * 60)) + ' min'; if (h < 48) return 'il y a ' + Math.round(h) + ' h'; return 'il y a ' + Math.round(h / 24) + ' j'; }
     function prochainReleve() {
         var n = new Date(), d = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate(), 7, 0, 0));
@@ -29,18 +29,6 @@
     function pctControle(m) { return m.etat && m.etat.progres != null ? Math.round(Number(m.etat.progres) * 100) : null; }
     function trouver(id) { return ((vue && vue.missions) || []).filter(function (m) { return String(m.id) === String(id); })[0] || null; }
     function nomCampagne(id) { var c = (window.cacheCampagnes || []).filter(function (x) { return String(x.id) === String(id); })[0]; return c ? c.nom : null; }
-
-    // Plafond de CP fixe par le commandement : la barre = CP estimes de la mission / plafond (sinon : progression du controle observee)
-    function plafonne(m, o) {
-        var pl = Number(m.plafond_cp) || 0;
-        if (!(pl > 0) || o.gris) return o;
-        var fait = cp(m.merites_total), mien = cp(m.merites_moi);
-        o.pct = Math.min(100, Math.round(100 * fait / pl));
-        o.vous = Math.min(o.pct, Math.round(100 * mien / pl));
-        o.legendeTitre = 'Objectif de ' + fmt(pl) + ' CP fixé par le commandement : ≈ ' + fmt(fait) + ' CP réalisés par l\'escadron (mérites ÷ 4, estimation). La lueur néon à gauche : votre part.';
-        o.info = '<span class="inf" title="CP estimés réalisés / plafond fixé par le commandement">≈ ' + fmt(fait) + ' / ' + fmt(pl) + ' CP</span>' + (fait >= pl ? '<span style="color:#2fe07a;">objectif atteint</span>' : '') + (o.info || '');
-        return o;
-    }
 
     var API = {
         // une lecture, partagee par toute la page (un seul appel serveur)
@@ -57,12 +45,21 @@
 
         // lignes d'une campagne (format de campagnes.js)
         lignes: function (campagneId) {
+            var E = window.EdteamPPEtat;
             return ((vue && vue.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(campagneId); }).map(function (m) {
-                var t = TYPE[m.type_pp] || [m.type_pp, '#aaa'], pc = pctControle(m), gris = !aPuissance();
-                return plafonne(m, { sys: String(m.systeme || '').toUpperCase(), tag: 'PP #' + m.id + ' - ' + t[0].toUpperCase(), domaine: 'PP', id: m.id, couleur: PPC, gris: gris, pct: pc, vous: null, avatars: gris ? '' : (window.edteamCampagnes ? window.edteamCampagnes.avatars((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : ''),
-                    legendeTitre: 'Progression du contrôle du système, observée par un pilote de l\'escadron (le jeu ne donne pas d\'objectif : ce n\'est pas un effort)', clic: 'edteamCampagnesPP.ouvrir(' + m.id + ')', titre: 'Rejoignez une puissance (Powerplay) pour participer à cette mission',
-                    info: gris ? '' : (m.etat ? '<span class="inf">' + esc(m.etat.controlling || 'sans puissance') + '</span>' + (m.etat.etat ? '<span>' + (ETAT[m.etat.etat] || esc(m.etat.etat)) + '</span>' : '') : '<span style="color:#888;">pas encore observé</span>') + '<span style="color:#aaa;" title="Mérites de l\'escadron sur ce système">' + fmt(m.merites_total) + ' mérites</span>',
-                    texte: '<b>' + esc(String(m.systeme).toUpperCase()) + '</b>' });
+                var t = TYPE[m.type_pp] || [m.type_pp, '#aaa'], gris = !aPuissance();
+                // acquisition : le sens du mouvement n'est pas etabli (systeme sans controle) ; pas de couleur de resultat
+                var c = E && !gris && m.type_pp !== 'ACQUISITION' ? E.calc(m) : null;
+                var observe = m.etat ? '<span style="color:#9ab; font-size:.78em; letter-spacing:1px; text-transform:uppercase;">' + (ETAT[m.etat.etat] || esc(m.etat.etat || 'sans état')) + '</span>' : '<span style="color:#888; font-size:.78em;">pas encore observé</span>';
+                var merites = gris ? '' : '<span class="qj-c2" style="justify-content:flex-end; color:#aaa; font-size:.85em;" title="Mérites de l\'escadron sur ce système">' + fmt(m.merites_total) + ' mérites</span>';
+                var ligne = { sys: String(m.systeme || '').toUpperCase(), tag: 'PP #' + m.id + ' - ' + t[0].toUpperCase(), domaine: 'PP', id: m.id, couleur: PPC, gris: gris, pct: null, vous: null,
+                    avatars: gris ? '' : (window.edteamCampagnes ? window.edteamCampagnes.avatars((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })) : ''),
+                    legendeTitre: 'État du système observé par un pilote de l\'escadron (journal de jeu)', clic: 'edteamCampagnesPP.ouvrir(' + m.id + ')', titre: 'Rejoignez une puissance (Powerplay) pour participer à cette mission',
+                    infoE: gris ? '' : (c ? E.resume(c) : observe), infoM: merites,
+                    texte: '<b>' + esc(String(m.systeme).toUpperCase()) + '</b>' + (m.etat && m.etat.controlling ? ' <em>· ' + esc(m.etat.controlling.toUpperCase()) + '</em>' : '') };
+                ligne.info = ligne.infoE + ligne.infoM;
+                if (c) { ligne.sig = { sens: c.sens, pale: c.pale }; ligne.jauge = E.barre(c, false); }
+                return ligne;
             });
         },
 
@@ -112,10 +109,33 @@
             var jours = Math.max(1, Math.ceil((Date.now() - new Date(m.date_emission).getTime()) / 86400000));
             var camp = !estIni ? nomCampagne(m.campagne_id) : null;
             var origines = Object.keys(m.origines || {}).map(function (k) { return [k, Number(m.origines[k]) || 0]; }).sort(function (a, b) { return b[1] - a[1]; });
-            var maxO = origines.length ? origines[0][1] : 1;
-            var lignesOrig = origines.length ? origines.map(function (o) { return '<div style="display:grid; grid-template-columns:150px 1fr 70px; gap:10px; align-items:center; font-size:.82em; color:' + (o[0] === 'AUTRE' ? '#777' : '#aaa') + ';"><span>' + esc(ORIGINE[o[0]] || o[0]) + '</span>' + barre(o[1] * 100 / maxO, o[0] === 'AUTRE' ? '#666' : PPC, '', 8) + '<b style="color:#fff; text-align:right;">' + fmt(o[1]) + '</b></div>'; }).join('')
+            var COUL_ORIG = { PRIMES: '#ff6a6a', COMBAT: '#ff9f43', MISSIONS: '#8A7CFF', LIVRAISONS: '#00c8ff', COMMERCE: '#2fe07a', EXPLORATION: '#ffd166', SAUVETAGE: '#4DA3FF', COMMUNAUTE: '#ff4fd8', AUTRE: '#8a949c' };
+            var totO = origines.reduce(function (acc, o) { return acc + o[1]; }, 0);
+            var partO = function (v) { var p = totO > 0 ? 100 * v / totO : 0; return p > 0 && p < 1 ? '< 1 %' : Math.round(p) + ' %'; };
+            var lignesOrig = origines.length && totO > 0 ? '<div style="display:flex; height:24px; border:1px solid #333; background:#111; margin:2px 0 10px;">' + origines.map(function (o) {
+                    var col = COUL_ORIG[o[0]] || '#8a949c', nom = ORIGINE[o[0]] || o[0];
+                    return '<span data-pptip="' + esc(nom + '\n' + fmt(o[1]) + ' mérites (' + partO(o[1]) + ' des mérites de l\'escadron sur ce système)') + '" data-tc="' + col + '" style="flex:' + o[1] + ' 1 0; min-width:2px; background:' + col + '; border-right:1px solid #0a0a0a; cursor:help;"></span>';
+                }).join('') + '</div><div style="display:flex; flex-direction:column; gap:5px;">' + origines.map(function (o) {
+                    var col = COUL_ORIG[o[0]] || '#8a949c';
+                    return '<div style="display:grid; grid-template-columns:14px 1fr auto 56px; gap:10px; align-items:center; font-size:.88em; color:' + (o[0] === 'AUTRE' ? '#9aa' : '#ccc') + ';"><i style="display:block; width:11px; height:11px; background:' + col + ';"></i><span>' + esc(ORIGINE[o[0]] || o[0]) + '</span><b style="color:#fff; text-align:right;">' + fmt(o[1]) + '</b><span style="color:#888; text-align:right;">' + partO(o[1]) + '</span></div>';
+                }).join('') + '</div>'
                 : '<div style="color:#777; font-size:.85em; font-style:italic;">Aucun mérite enregistré pour le moment.</div>';
-            var pil = (m.pilotes || []).map(function (p) { var estMoi = String(p.u) === String(moi().user_id); return '<div style="display:flex; justify-content:space-between; padding:7px 12px; border-bottom:1px solid rgba(255,255,255,.05); font-size:.9em;"><span style="color:' + (estMoi ? '#fff' : c) + '; font-weight:bold; letter-spacing:1px;">CMDR ' + esc(String(p.nom || 'INCONNU').toUpperCase()) + (estMoi ? ' (VOUS)' : '') + '</span><span><span style="color:#aaa; margin-right:12px;">≈ ' + fmt(cp(p.m)) + ' CP</span><b style="color:' + c + ';">' + fmt(p.m) + ' MÉRITES</b></span></div>'; }).join('')
+            var totP = (m.pilotes || []).reduce(function (acc, p) { return acc + (Number(p.m) || 0); }, 0);
+            var pil = (m.pilotes || []).map(function (p) {
+                var estMoi = String(p.u) === String(moi().user_id), part = totP > 0 ? 100 * (Number(p.m) || 0) / totP : 0;
+                var av = window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ uid: p.u, nom: p.nom, role: 'pilote', taille: 44 }) : '';
+                // repartition de SES merites par origine (script SQL 112) : une fine barre cumulee, memes couleurs que celle de l'escadron
+                var po = p.o && typeof p.o === 'object' ? Object.keys(p.o).map(function (k) { return [k, Number(p.o[k]) || 0]; }).filter(function (x) { return x[1] > 0; }).sort(function (x, y) { return y[1] - x[1]; }) : [];
+                var totPo = po.reduce(function (acc, x) { return acc + x[1]; }, 0);
+                var barP = totPo > 0 ? '<span style="display:flex; height:6px; margin-top:7px; background:#111; border:1px solid #262626;">' + po.map(function (x) {
+                    var col = COUL_ORIG[x[0]] || '#8a949c', pp = 100 * x[1] / totPo;
+                    return '<span data-pptip="' + esc((ORIGINE[x[0]] || x[0]) + '\n' + fmt(x[1]) + ' mérites (' + (pp < 1 ? '< 1' : Math.round(pp)) + ' % de ses mérites)') + '" data-tc="' + col + '" style="flex:' + x[1] + ' 1 0; min-width:2px; background:' + col + '; opacity:.85; cursor:help;"></span>';
+                }).join('') + '</span>' : '';
+                return '<div style="display:flex; align-items:center; gap:14px; padding:9px 14px; min-height:62px; border-bottom:1px solid rgba(255,255,255,.06);">' + av
+                    + '<span style="flex:1; min-width:0;"><span style="display:block; color:' + (estMoi ? '#fff' : c) + '; font-weight:bold; letter-spacing:1px; font-size:1.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CMDR ' + esc(String(p.nom || 'INCONNU').toUpperCase()) + (estMoi ? ' (VOUS)' : '') + '</span>'
+                    + '<span style="color:#8a949c; font-size:.8em;">≈ ' + fmt(cp(p.m)) + ' pts de contrôle</span>' + barP + '</span>'
+                    + '<span style="text-align:right; flex:none; min-width:150px;"><b style="color:' + c + '; font-size:1.25em;">' + fmt(p.m) + '</b> <span style="color:#9ab; font-size:.72em; letter-spacing:1px;">MÉRITES</span><span style="display:block; color:#8a949c; font-size:.8em;">' + (part > 0 && part < 1 ? '< 1' : Math.round(part)) + ' % des participants</span></span></div>';
+            }).join('')
                 || '<div style="color:#666; text-align:center; font-size:.9em; padding:16px; font-style:italic;">Aucun participant pour le moment.</div>';
             var etat = m.etat, hist = m.hist || [], courbe = '';
             if (hist.length >= 2) {
@@ -123,34 +143,38 @@
                 var pts = hist.map(function (p, i) { return (5 + i * 290 / (hist.length - 1)).toFixed(1) + ',' + (55 - (vs[i] - mn) / (mx - mn) * 50).toFixed(1); });
                 courbe = '<svg viewBox="0 0 300 60" style="width:100%; height:70px; background:rgba(255,255,255,.02); border:1px solid #222;"><polyline fill="none" stroke="' + PPC + '" stroke-width="2" points="' + pts.join(' ') + '"/>' + pts.map(function (p) { var xy = p.split(','); return '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="3" fill="' + PPC + '"/>'; }).join('') + '</svg>';
             }
-            var blocEtat = etat ? '<div style="color:#aaa; font-size:.85em; margin:6px 0 6px;">' + (etat.controlling ? 'Contrôlé par <b style="color:#fff;">' + esc(etat.controlling) + '</b>' : 'Aucune puissance ne contrôle ce système') + (etat.etat ? ' · état <b style="color:#fff;">' + (ETAT[etat.etat] || esc(etat.etat)) + '</b>' : '') + '</div>'
-                    + (pc != null ? barre(pc, PPC, 'progression du contrôle : ' + pc + ' %', 22) : '')
-                    + '<div style="display:flex; gap:6px 24px; flex-wrap:wrap; margin-top:12px; font-size:.88em; color:#aaa;">' + (etat.renf != null ? '<span>Points de renforcement <b style="color:#fff;">' + fmt(etat.renf) + '</b></span>' : '') + (etat.sape != null ? '<span>Points de sape <b style="color:#fff;">' + fmt(etat.sape) + '</b></span>' : '') + '</div>'
-                    + '<div style="color:#777; font-size:.74em; margin-top:4px;">Totaux du jeu pour tout le système, toutes puissances et tous les pilotes confondus.</div>'
-                    + (courbe ? '<div class="bgs-sec" style="margin-top:16px;">ÉVOLUTION OBSERVÉE <span style="color:#777; letter-spacing:0;">· progression du contrôle à chaque passage d\'un pilote de l\'escadron</span></div>' + courbe : '')
-                    + ((etat.powers || []).length ? '<div class="bgs-sec" style="margin-top:12px;">PUISSANCES EN PRÉSENCE</div><div style="font-size:.85em; line-height:1.8; color:#bbb;">' + etat.powers.map(function (p) { return (p === etat.controlling ? '★ <b style="color:#fff;">' + esc(p) + '</b>' : esc(p)); }).join(' · ') + '</div>' : '')
-                : '<div style="color:#999; font-size:.88em; line-height:1.6; padding:14px 4px;">Ce système n\'a pas encore été observé : son état sera relevé dès qu\'un pilote de l\'escadron y passera.</div>';
+            var E = window.EdteamPPEtat, calc = E && etat ? E.calc(m) : null;
+            var ctx = { puissance: etat && etat.controlling, prochain: prochainReleve() };
+            var coulEtat = { Exploited: '#c0504d', Fortified: '#4f9d4f', Stronghold: '#9a5fc0', Unoccupied: '#8a8a8a' };
+            var ce = etat ? (coulEtat[etat.etat] || '#8a8a8a') : '#8a8a8a';
+            var vieux = etat && etat.observe_le ? (Date.now() - new Date(etat.observe_le).getTime()) / 3600000 > 24 : false;
+            var portrait = etat && etat.controlling && E ? E.portrait(etat.controlling, 76, ce) : '';
+            var entete = etat ? '<div style="display:flex; align-items:center; gap:16px; margin:2px 0 16px;">' + portrait + '<div style="flex:1; min-width:0;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;"><span style="border:1px solid ' + ce + '; background:' + ce + '33; color:#fff; padding:4px 14px; font-size:1.15em; letter-spacing:3px; font-weight:bold;">' + esc((ETAT[etat.etat] || etat.etat || 'SANS ÉTAT').toUpperCase()) + '</span>'
+                + '<span style="color:#bbb;">' + (etat.controlling ? 'Contrôlé par <b style="color:#fff;">' + esc(etat.controlling) + '</b>' : 'Aucune puissance ne contrôle ce système') + '</span></div>'
+                + '<div style="color:' + (vieux ? '#ffb000' : '#9ab') + '; font-size:.8em; margin-top:8px;">Relevé ' + age(etat.observe_le) + (etat.observe_par ? ' par CMDR ' + esc(String(etat.observe_par).toUpperCase()) : '') + (vieux ? ' · ancien' : '') + '</div></div></div>' : '';
+            var blocEtat = etat ? entete
+                    + (calc ? E.panneau(calc, m, ctx) : '<div style="color:#aaa; font-size:.92em; line-height:1.6; margin-bottom:6px;">' + (pc != null ? 'Progression observée : ' + pc + ' %. ' : 'Ce système n\'a pas de position chiffrée dans les journaux de jeu (un système inoccupé n\'en a pas). ')
+                        + (etat.renf != null ? 'Renforcement du cycle : <b style="color:#fff;">' + fmt(etat.renf) + '</b> pts · sape : <b style="color:#fff;">' + fmt(etat.sape) + '</b> pts.' : '') + '</div>')
+                    + (courbe ? '<div class="bgs-sec" style="margin-top:18px;">ÉVOLUTION OBSERVÉE <span style="color:#777; letter-spacing:0;">· position dans la zone d\'état à chaque passage d\'un pilote de l\'escadron</span></div>' + courbe : '')
+                    + ((etat.powers || []).length ? '<div class="bgs-sec" style="margin-top:14px;">PUISSANCES EN PRÉSENCE</div><div style="font-size:.88em; line-height:1.6; color:#bbb; margin-top:6px;">' + etat.powers.map(function (p) { var ctl = p === etat.controlling; return '<span style="display:inline-flex; align-items:center; gap:7px; margin:0 14px 6px 0; white-space:nowrap;">' + (E ? E.portrait(p, 28, ctl ? ce : '#444') : '') + (ctl ? '★ <b style="color:#fff;">' + esc(p) + '</b>' : esc(p)) + '</span>'; }).join('') + '</div>' : '')
+                : '<div style="color:#999; font-size:.92em; line-height:1.6; padding:14px 4px;">Ce système n\'a pas encore été observé : son état sera relevé dès qu\'un pilote de l\'escadron y passera.</div>';
             var peutCloturer = estCmd() || (estIni && String(m.auteur_id) === String(moi().user_id));
             var boutons = (peutCloturer ? '<button class="ini-btn gris" onclick="edteamCampagnesPP.cloturer(' + m.id + ', ' + (estIni && !estCmd()) + ')">' + (estIni ? (estCmd() ? 'RETIRER L\'INITIATIVE' : 'CLÔTURER MON INITIATIVE') : 'CLÔTURER LA MISSION') + '</button>' : '')
                 + (estIni && estCmd() ? '<button class="ini-btn" onclick="edteamCampagnesPP.adopter(' + m.id + ')">TRANSFORMER EN MISSION DE CAMPAGNE</button>' : '');
-            var pl = Number(m.plafond_cp) || 0, cpFait = cp(total), pctObj = pl > 0 ? Math.min(100, Math.round(100 * cpFait / pl)) : 100, myObj = pl > 0 ? Math.min(pctObj, Math.round(100 * cp(mien) / pl)) : part;
+            var tuileG = function (titre, val, sous, coul) { return '<div style="flex:1; min-width:130px; background:linear-gradient(90deg, color-mix(in srgb, ' + c + ' 15%, #0a0c10), #0a0c10 72%); border-left:4px solid ' + c + '; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); padding:10px 12px;"><div style="color:#9ab; font-size:.68em; letter-spacing:2px;">' + titre + '</div><div style="color:' + (coul || '#fff') + '; font-size:1.8em; font-weight:bold; line-height:1.15; margin:3px 0;">' + val + '</div><div style="color:#8a949c; font-size:.74em; line-height:1.4;">' + sous + '</div></div>'; };
             var html = '<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-right:30px;">' + pastille('POWERPLAY', PPC) + ' ' + pastille(t[0].toUpperCase(), t[1])
                 + (estIni ? ' <span style="color:#FF4FD8; border:1px solid #FF4FD8; background:rgba(255,79,216,.1); padding:1px 8px; font-size:.8em; font-weight:bold; letter-spacing:2px;">★ INITIATIVE</span>' : '')
                 + ' <b style="color:#fff; letter-spacing:2px; font-size:1.15em;">' + esc(String(m.systeme).toUpperCase()) + '</b>' + (etat && etat.controlling ? '<span style="color:#888;">· ' + esc(etat.controlling.toUpperCase()) + (etat.etat ? ' · ' + (ETAT[etat.etat] || esc(etat.etat)).toUpperCase() : '') + '</span>' : '') + '</div>'
                 + '<div style="color:#777; font-size:.8em; margin-top:4px;">' + (estIni ? 'Initiative lancée par CMDR ' + esc(String(m.createur || 'inconnu').toUpperCase()) + ' il y a ' + jours + ' j' : 'Mission' + (camp ? ' de la campagne « ' + esc(camp) + ' »' : '') + (m.createur ? ' · ciblée par CMDR ' + esc(String(m.createur).toUpperCase()) : ''))
                 + (m.briefing ? ' · « ' + esc(m.briefing) + ' »' : '') + '</div>'
-                + '<div class="bgs-paysage"><div class="bgs-col-effort"><div class="bgs-cadre"><div class="bgs-cadre-t">EFFORT</div>'
-                + '<div class="bgs-hero" style="border-color:' + c + '; margin-top:0;"><div class="h1"><span>MÉRITES DE L\'ESCADRON</span><b style="color:#fff;">' + fmt(total) + ' <small style="color:#bbb; font-size:.5em;">· ≈ ' + fmt(cp(total)) + ' CP</small></b></div><div class="h2"><span>TA PART</span><b style="color:' + c + ';">' + part + ' %</b></div>'
-                + '<div class="jgh"><i style="width: ' + pctObj + '%; opacity: 0.5; background: ' + c + ';"></i><i style="width: ' + myObj + '%; background: ' + c + '; box-shadow: 0 0 9px ' + c + ', 0 0 2px ' + c + ', inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div></div>'
-                + (pl > 0 ? '<div style="margin-top:8px; font-size:.88em; color:#bbb;">OBJECTIF FIXÉ PAR LE COMMANDEMENT : <b style="color:#fff;">' + fmt(pl) + ' CP</b> · réalisé ≈ <b style="color:' + c + ';">' + fmt(cpFait) + ' CP</b> (' + pctObj + ' %)' + (cpFait >= pl ? ' · <b style="color:#2fe07a;">objectif atteint</b>' : '') + '<div style="color:#777; font-size:.85em; margin-top:2px;">Les mérites continuent d\'être enregistrés au-delà. CP = mérites ÷ 4 (estimation).</div></div>' : '')
-                + '<div style="color:#999; font-size:.8em; margin-top:8px;">Depuis le dernier relevé (jeudi 07:00 UTC) : <b style="color:#fff;">' + fmt(m.merites_cycle) + ' mérites</b> · ≈ ' + fmt(cp(m.merites_cycle)) + ' CP</div>'
-                + '<div class="bgs-sec" style="margin-top:14px;">MÉRITES PAR ORIGINE <span style="color:#777; letter-spacing:0;">· « non identifiée » : gains que le jeu ne rattache à aucune action</span></div><div style="display:flex; flex-direction:column; gap:7px;">' + lignesOrig + '</div>'
-                + '<div class="bgs-dossier" style="border-color:' + c + '55; margin-top:14px;"><div class="tete" onclick="bgsToggleDossier(this)"><span style="color:' + c + '; letter-spacing:2px; font-weight:bold;">PARTICIPANTS</span><span style="color:#888; font-size:.85em;">' + (m.nb_pilotes || 0) + ' pilote' + (m.nb_pilotes > 1 ? 's' : '') + ' · tu pèses ' + part + ' %</span><span class="fl" style="color:' + c + ';">▼</span></div><div class="corps" style="display:none;">' + pil + '</div></div>'
+                + '<div class="bgs-paysage"><div class="bgs-col-effort"><div class="bgs-cadre"><div class="bgs-cadre-t">CE QUE L\'ESCADRON A APPORTÉ</div>'
+                + '<div style="display:flex; gap:10px; flex-wrap:wrap;">' + tuileG('DEPUIS LE DÉBUT', fmt(total), 'mérites · ≈ ' + fmt(cp(total)) + ' pts de contrôle') + tuileG('CE CYCLE', fmt(m.merites_cycle), 'mérites depuis jeudi 07:00 UTC · ≈ ' + fmt(cp(m.merites_cycle)) + ' pts') + tuileG('TA PART', part + ' %', 'de l\'effort de l\'escadron', c) + '</div>'
+                + '<div class="bgs-sec" style="margin-top:16px;">D\'OÙ VIENNENT LES MÉRITES <span style="color:#777; letter-spacing:0;">· répartition des mérites de l\'escadron sur ce système (« non identifiée » : gains que le jeu ne rattache à aucune action)</span></div><div style="display:flex; flex-direction:column; gap:7px;">' + lignesOrig + '</div>'
+                + '<div class="bgs-sec" style="margin-top:16px;">PARTICIPANTS <span style="color:#777; letter-spacing:0;">· ' + (m.nb_pilotes || 0) + ' pilote' + (m.nb_pilotes > 1 ? 's' : '') + ' · tu pèses ' + part + ' %</span></div><div style="border:1px solid ' + c + '55; margin-top:6px;">' + pil + '</div>'
                 + '</div></div>'
-                + '<div class="bgs-col-jeu"><div class="bgs-cadre"><div class="bgs-cadre-t">ÉTAT DU SYSTÈME DANS LE JEU' + (etat ? ' <small>· observé ' + age(etat.observe_le) + (etat.observe_par ? ' par ' + esc(String(etat.observe_par).toUpperCase()) : '') + '</small>' : '') + '</div>' + blocEtat + '</div>'
-                + '<div class="bgs-cadre"><div class="bgs-cadre-t">RELEVÉ HEBDOMADAIRE</div><div style="font-size:.88em; color:#bbb; line-height:1.6;">Prochain relevé du jeu : <b style="color:#fff;">' + prochainReleve() + '</b>. Les résultats officiels sont dans le classement Powerplay du jeu ; EDTEAM affiche ce que ses pilotes ont constaté.</div></div>'
+                + '<div class="bgs-col-jeu"><div class="bgs-cadre"><div class="bgs-cadre-t">OÙ EN EST CE SYSTÈME DANS LE JEU ?</div>' + blocEtat + '</div>'
                 + (boutons ? '<div style="display:flex; gap:8px; flex-wrap:wrap;">' + boutons + '</div>' : '') + '</div></div>'
-                + '<div style="color:#777; font-size:.75em; line-height:1.5; margin-top:14px;">ⓘ CP estimés = mérites ÷ 4 (estimation, non confirmée par le jeu). Les mérites sont rattachés au système où se trouvait le pilote ; l\'état du système vient du journal de jeu des pilotes de l\'escadron.</div>';
+                + '<div style="color:#777; font-size:.75em; line-height:1.5; margin-top:14px;">ⓘ 1 mérite ≈ 1/4 point de contrôle (estimation, non confirmée par le jeu). Les mérites sont rattachés au système où se trouvait le pilote. L\'état du système vient du journal de jeu des pilotes de l\'escadron : les résultats officiels sont dans le classement Powerplay du jeu.</div>';
             var mo = document.getElementById('modal-ordre-resultat'); if (!mo) return;
             mo.querySelector('.modal-content').style.borderColor = c;
             mo.querySelector('.modal-content').style.boxShadow = '0 0 40px ' + c + '30';

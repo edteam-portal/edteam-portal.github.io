@@ -24,7 +24,7 @@
             '.camp-pli { background:transparent; border:0; color:#9aa; font-size:1.1em; cursor:pointer; padding:0 4px 0 0; line-height:1; transition:transform .2s; } .camp-pli:hover { color:#fff; } .camp-carte.repliee .camp-pli { transform:rotate(-90deg); }',
             '.camp-carte.repliee .camp-lignes { display:none; } .camp-carte.repliee .camp-tete { margin-bottom:0; }',
             '.camp-tete:hover { filter:brightness(1.15); }',
-            '.camp-nom { color:#cfd8dc; font-weight:normal; letter-spacing:2px; font-size:.95em; }',
+            '.camp-nom { min-width:0; overflow:hidden; text-overflow:ellipsis; color:#cfd8dc; font-weight:normal; letter-spacing:2px; font-size:.95em; }',
             '.camp-pastille { background:#0b0b0b !important; border:1px solid; padding:2px 9px; border-radius:3px; font-weight:bold; letter-spacing:2px; font-size:.72em; white-space:nowrap; }',
             '.camp-barre { position:relative; height:12px; background:#111; border:1px solid #333; border-radius:2px; overflow:hidden; }',
             '.camp-barre i { display:block; height:100%; }',
@@ -52,16 +52,41 @@
             '.camp-ligne .txt .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:0 1 auto; }',
             '.camp-ligne .txt b { color:#fff; } .camp-ligne .txt em { color:#888; font-style:normal; }',
             '.camp-ligne .txt b.pct, .camp-tete b.pct { flex:none; font-size:1.35em; letter-spacing:1px; text-shadow:0 0 10px currentColor; }',
-            '.camp-tete { position:relative; overflow:hidden; display:flex; align-items:center; gap:12px; margin:0 -10px 6px; padding:6px 10px; border-radius:3px; white-space:nowrap; }',
+            '.camp-tete { position:relative; overflow:hidden; display:flex; align-items:center; gap:12px; margin:0 -10px 6px; padding:6px 16px 6px 10px; border-radius:3px; white-space:nowrap; }',
             '.camp-tete > .camp-neon { border-radius:3px 0 0 3px; }',
             '.camp-avs .dir-avs { margin-left:0; }',
             '.camp-info { display:flex; align-items:center; gap:10px; justify-content:flex-end; white-space:nowrap; font-size:.85em; }',
             '.camp-info .inf { color:#fff; font-weight:bold; }',
             '.qj-c2 { display:inline-flex; justify-content:flex-end; min-width:178px; margin-left:8px; flex:none; }',
+            // lignes « resultat » : fond sombre teinte + barre coloree a gauche (au lieu d'un aplat), jauge d'influence avec le mouvement du tick
+            '.camp-carte { --wg:200px; --wi:480px; --wa:116px; }',
+            '.camp-ligne.rn { grid-template-columns:max-content minmax(0,1fr) var(--wg) var(--wi) 20px var(--wa); border-top:0; margin-bottom:4px; background:linear-gradient(90deg, color-mix(in srgb, var(--k) 15%, #0a0c10), #0a0c10 72%); box-shadow:inset 4px 0 0 var(--k), inset 0 0 0 1px rgba(255,255,255,.05); }',
+            '.camp-ligne.rn.pale { background:linear-gradient(90deg, color-mix(in srgb, var(--k) 8%, #0a0c10), #0a0c10 72%); }',
+            '.camp-info .ce { display:inline-flex; align-items:center; justify-content:flex-end; gap:10px; width:120px; flex:none; } .camp-info .ca { display:inline-flex; align-items:center; width:150px; flex:none; overflow:hidden; }',
+            '.camp-ligne.rn .camp-info { width:var(--wi); justify-content:flex-end; } .camp-ligne.rn .camp-ics, .camp-ligne.al .camp-ics { min-width:var(--wa); justify-content:flex-end; }',
+            '.camp-ligne.al { grid-template-columns:max-content minmax(0,1fr) var(--wg) var(--wi) 20px var(--wa); } .camp-ligne.al .al-i { grid-column:3 / 5; min-width:0; justify-content:flex-end; } .al-t { flex:1; min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:10px; overflow:hidden; }',
+            '.camp-h-g { width:var(--wg); flex:none; display:flex; } .camp-h-i { width:var(--wi); flex:none; display:flex; justify-content:space-between; align-items:center; } .camp-h-i span small { display:block; margin-top:3px; font-size:1.15em; letter-spacing:1px; color:#678; } .camp-h-i em { font-style:normal; color:#888; font-size:.78em; white-space:nowrap; padding-left:6px; } .camp-h-i span { width:140px; text-align:center; font-size:.62em; letter-spacing:3px; color:#8aa; } .camp-h-c { width:20px; flex:none; }',
+            '.cd-act { display:flex; flex-direction:column; align-items:flex-start; gap:5px; } .cd-act small { font-size:.62em; letter-spacing:2px; color:#8aa; white-space:nowrap; }',
+            '@media (max-width:1300px) { .camp-carte { --wg:140px; --wi:420px; } .camp-info .ce { width:100px; } .camp-info .ca { width:110px; } }',
+            '.camp-ligne.rn .camp-ics, .camp-ligne.al .camp-ics { opacity:.35; transition:opacity .2s; } .camp-ligne.rn:hover .camp-ics, .camp-ligne.al:hover .camp-ics { opacity:1; }',
+            '.camp-jg { position:relative; display:block; height:14px; cursor:help; background:#12151b; align-self:center; } .camp-jg > * { position:absolute; top:3px; bottom:3px; display:block; }',
+            '.camp-jg i { left:0; background:#6f8196; } .camp-jg b { min-width:3px; } .camp-jg b.h { background:repeating-linear-gradient(135deg, var(--s) 0 3px, color-mix(in srgb, var(--s) 30%, transparent) 3px 6px); border:1px solid var(--s); box-sizing:border-box; } .camp-jg b.m { background:var(--s); box-shadow:0 0 8px var(--s); }',
+            '.camp-jg u { top:1px; bottom:1px; width:4px; background-clip:content-box; padding:0 1px; box-sizing:border-box; background:#fff; opacity:.85; }',
+            '.camp-vue { display:flex; justify-content:flex-end; align-items:center; gap:0; margin:0 2px 10px; font-size:.8em; color:#9ab; letter-spacing:3px; } .camp-vue > span { margin-right:12px; }',
+            '.camp-vue .camp-btn { font-size:1em; padding:8px 22px; letter-spacing:2px; border-color:#3a4a55; color:#9ab; } .camp-vue .camp-btn + .camp-btn { margin-left:-1px; }',
+            '.camp-vue .camp-btn.actif { border-color:#00F0FF; color:#00F0FF; background:rgba(0,240,255,.16); box-shadow:0 0 14px rgba(0,240,255,.35), inset 0 0 10px rgba(0,240,255,.15); position:relative; z-index:1; }',
+            '.camp-grille { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:14px; padding:4px 0 8px; }',
+            '.camp-cd { --k:#6f8196; position:relative; padding:14px 14px 10px; cursor:pointer; white-space:normal; background:linear-gradient(160deg, color-mix(in srgb, var(--k) 13%, #0b0d12), #080a0e 65%); border:1px solid color-mix(in srgb, var(--k) 50%, transparent); box-shadow:0 0 14px color-mix(in srgb, var(--k) 16%, transparent); clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%); transition:transform .2s, box-shadow .2s; }',
+            '.camp-cd:hover { transform:translateY(-3px); box-shadow:0 0 22px color-mix(in srgb, var(--k) 35%, transparent); } .camp-cd.pale { background:linear-gradient(160deg, color-mix(in srgb, var(--k) 7%, #0b0d12), #080a0e 65%); }',
+            '.camp-cd[draggable=true] { cursor:grab; } .camp-cd.glisse { opacity:.35; } .camp-cd.veille { opacity:.55; } .camp-cd.gris { opacity:.4; filter:grayscale(1); cursor:not-allowed; }',
+            '.camp-cd .cd-nm { margin:8px 0 10px; } .camp-cd .cd-nm b { display:block; color:#fff; font-size:1.2em; letter-spacing:3px; } .camp-cd .cd-nm em { display:block; color:#778; font-style:normal; font-size:.72em; letter-spacing:1px; margin-top:2px; }',
+            '.camp-cd .cd-info { justify-content:flex-start; flex-wrap:wrap; margin-bottom:8px; } .camp-cd .cd-info .inf { font-size:1.9em; } .camp-cd .cd-info .camp-score { font-size:2.2em; } .camp-cd .qj-c2 { min-width:0; margin-left:0; }',
+            '.camp-cd .cd-pied { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:12px; min-height:28px; } .camp-cd .camp-ics { opacity:.5; } .camp-cd:hover .camp-ics { opacity:1; }',
+            '@media (max-width:900px) { .camp-ligne.rn, .camp-ligne.al { grid-template-columns:max-content minmax(0,1fr) 14px auto; } .camp-ligne.al .al-i { grid-column:auto; } .camp-ligne.rn .camp-jg, .camp-ligne.rn .pp-zb { display:none; } .camp-cd .cd-info { display:flex !important; } .camp-h-g { width:auto; } .camp-h-i { width:auto; } .camp-h-i span, .camp-h-c { display:none; } }',
             '.camp-vide { padding:10px 6px; border-top:1px dashed #2a2a2a; color:#777; font-size:.85em; font-style:italic; }',
             '.camp-btn { background:transparent; border:1px solid #555; color:#bbb; padding:3px 10px; font-family:inherit; font-size:.72em; letter-spacing:1px; cursor:pointer; }',
             '.camp-btn:hover { border-color:#00F0FF; color:#00F0FF; } .camp-btn.rouge:hover { border-color:#FF3333; color:#FF3333; }',
-            '.camp-actions { display:flex; gap:6px; margin-left:4px; }',
+            '.camp-actions { display:flex; gap:6px; margin-left:4px; margin-left:0; width:var(--wa); flex:none; justify-content:flex-end; }',
             '@media (max-width:900px) { .camp-ligne { grid-template-columns:max-content minmax(0,1fr) 14px auto; gap:8px; } .camp-info { display:none !important; } .camp-carte { padding:12px 12px 6px; } }',
             '#modal-campagne .cmd-pills { display:flex; gap:8px; flex-wrap:wrap; }',
             '#btn-campagne-ok { background:rgba(255,51,51,.1); border:1px solid #FF3333; color:#FF3333; padding:12px; width:100%; font-family:"Share Tech Mono",monospace; font-size:1.05em; letter-spacing:3px; cursor:pointer; transition:.2s; text-transform:uppercase; font-weight:bold; }',
@@ -102,15 +127,59 @@
         if (!P || !liste || !liste.length) return '';
         return '<span class="camp-avs"><span class="dir-avs">' + liste.slice(0, 7).map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 28 }); }).join('') + '</span></span>';
     }
+    // jauge d'influence : gris = influence qui n'a pas bouge depuis le dernier tick (ou sur 48 h), plein = gain, raye = perte ; couleur = resultat de la directive ; trait blanc = valeur avant le tick
+    function jauge(o, res) {
+        var U = window.EdteamUtile;
+        if (!U || !res || !res.donnees || res.conflit || res.influence == null) return '';
+        var cur = Math.max(0, Math.min(100, Number(res.influence) * 100));
+        var vt = U.variation ? U.variation(o, res) : null;
+        if (!vt) return '';
+        var d = vt.v, prev = Math.max(0, Math.min(100, cur - d)), bas = Math.min(cur, prev);
+        var fm = function (v) { return Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); };
+        var fen = vt.pale ? 'sur 48 h' : 'depuis le dernier tick', col = U.COUL[vt.sens] || '#6f8196';
+        var tip = function (t) { return ' data-tip="' + esc(t) + '" data-tc="' + col + '"'; };
+        var h = '<span class="camp-jg" style="--s:' + col + ';"' + tip('Influence de la faction dans le système : ' + fm(cur) + ' %. Gris = la part qui n\'a pas bougé ' + fen + ', plein = un gain, rayé = une perte.') + '><i style="width:' + bas + '%;"' + tip('Influence inchangée ' + fen + ' : ' + fm(bas) + ' %') + '></i>';
+        if (Math.abs(d) >= 0.05) {
+            h += '<b class="' + (d > 0 ? 'm' : 'h') + '" style="left:' + bas + '%; width:' + Math.abs(cur - prev) + '%;"' + tip((d > 0 ? 'Influence en hausse de +' : 'Influence en baisse de −') + fm(d) + ' point' + (Math.abs(d) >= 1.95 ? 's' : '') + ' ' + fen) + '></b>'
+                + '<u style="left:' + prev + '%;"' + tip('Influence avant ' + (vt.pale ? 'ces 48 h' : 'le dernier tick') + ' : ' + fm(prev) + ' %') + '></u>';
+        }
+        return h + '</span>';
+    }
+    function actionsM(m) {
+        var a = function (act) { return 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'' + act + '\',' + m.id + ')'; };
+        return estCommandement() && m.domaine ? '<span class="camp-ics">' + ic('Modifier la mission', '✎', a('edit'))
+            + ic('Clôturer la mission', '📦', a('close')) + ic('Supprimer la mission', '🗑', a('delete'), true) + '</span>' : '<span></span>';
+    }
+    function attrM(m) {
+        return m.gris ? ' title="' + esc(m.titre || '') + '"' : ' onclick="' + m.clic + '" onmouseenter="if(typeof sonHover===\'function\') sonHover()"' + (m.legendeTitre && !m.sig ? ' title="' + esc(m.legendeTitre) + '"' : '');
+    }
+    function glisserM(m) { return estAmiral() && m.domaine && !m.gris ? ' draggable="true" data-mdom="' + m.domaine + '" data-mid="' + m.id + '"' : ''; }
+    // couleur de resultat d'une mission (vert / rouge / bleu) ; sinon la couleur de sa categorie
+    function coulM(m) { return m.sig && window.EdteamUtile ? (window.EdteamUtile.COUL[m.sig.sens] || m.couleur) : m.couleur; }
+    // vue en cartes : meme contenu qu'une ligne, en deck
+    function carte(m) {
+        return '<div class="camp-cd' + (m.sig && m.sig.pale ? ' pale' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisserM(m) + attrM(m) + ' style="--k:' + coulM(m) + '; --c:' + m.couleur + ';">'
+            + pastille(m.tag, coulM(m)) + '<div class="cd-nm">' + m.texte + '</div>'
+            + '<div class="camp-info cd-info">' + (m.infoE != null ? m.infoE : (m.info || '')) + '</div>' + (m.jauge || '') + (m.infoP ? '<div class="cd-act"><small>TES ACTIONS · AUJOURD’HUI</small>' + m.infoP + '</div>' : '')
+            + '<div class="cd-pied">' + (m.avatars || '<span></span>') + actionsM(m) + '</div></div>';
+    }
+    // rang d'une carte : la ou l'aide est utile d'abord (rouge, puis inchange, puis sans mesure, puis vert)
+    // resultat d'une mission pour la carte : vert (dans le sens voulu), rouge (a contre-sens), bleu (inchange ou pas encore mesure)
+    function resCarte(m) {
+        if (m.sig) return m.sig.sens;
+        if (m.conflit) { var c = String(m.conflit).toLowerCase(); return c === '#2fe07a' ? 'up' : c === '#4da3ff' ? 'fl' : 'dn'; }
+        return 'fl';
+    }
+    function rangCarte(m) { var s = m.sig && m.sig.sens; return s === 'dn' ? 0 : s === 'fl' ? 1 : s === 'up' ? 3 : 2; }
     function ligne(m) {
         // pas de pourcentage par mission : la barre de fond parle d'elle-meme ; son explication passe en infobulle de la ligne
-        var attr = m.gris ? ' title="' + esc(m.titre || '') + '"' : ' onclick="' + m.clic + '" onmouseenter="if(typeof sonHover===\'function\') sonHover()"' + (m.legendeTitre ? ' title="' + esc(m.legendeTitre) + '"' : '');
-        var actions = estCommandement() && m.domaine ? '<span class="camp-ics">' + ic('Modifier la mission', '✎', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'edit\',' + m.id + ')')
-            + ic('Clôturer la mission', '📦', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'close\',' + m.id + ')') + ic('Supprimer la mission', '🗑', 'edteamCampagnes.actionMission(\'' + m.domaine + '\',\'delete\',' + m.id + ')', true) + '</span>' : '<span></span>';
-        var glisser = estAmiral() && m.domaine && !m.gris ? ' draggable="true" data-mdom="' + m.domaine + '" data-mid="' + m.id + '"' : '';
-        return '<div class="camp-ligne' + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + (m.fondRes || fond(m.couleur, m.pct)) + '; --c:' + m.couleur + ';">' + neon(m.couleur, m.pct, m.vous)
-            + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span>' + (m.avatars || '') + '</div>'
-            + '<div class="camp-info">' + (m.info || '') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
+        var attr = attrM(m), actions = actionsM(m), glisser = glisserM(m);
+        if (m.sig) return '<div class="camp-ligne rn' + (m.sig.pale ? ' pale' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="--k:' + coulM(m) + '; --c:' + m.couleur + ';">'
+            + pastille(m.tag, coulM(m)) + '<div class="txt"><span class="nm">' + m.texte + '</span></div>'
+            + (m.jauge || '<span></span>') + '<div class="camp-info">' + (m.infoE != null ? '<span class="ce">' + m.infoE + '</span><span class="ca">' + (m.avatars || '') + '</span>' + (m.infoP || m.infoM || '<span class="qj-c2"></span>') : (m.info || '') + (m.avatars || '')) + '</div><span style="color:#666;">›</span>' + actions + '</div>';
+        return '<div class="camp-ligne al' + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + (m.fondRes || fond(m.couleur, m.pct)) + '; --c:' + m.couleur + ';">' + neon(m.couleur, m.pct, m.vous)
+            + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span></div>'
+            + '<div class="camp-info al-i"><span class="al-t">' + (m.infoE != null ? m.infoE : (m.info || '')) + '</span><span class="ca">' + (m.avatars || '') + '</span>' + (m.infoP || m.infoM || '<span class="qj-c2"></span>') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
     }
 
     // lignes triées par système : en-tête « ◈ SYSTÈME · n missions » quand un système en a plusieurs
@@ -126,7 +195,7 @@
     }
 
     // Les missions BGS d'une campagne : directives actives (en veille grisees)
-    // influence de la faction en %, evolution depuis la directive (fleche) et etats actifs (guerre, election, epidemie, crise...), d'apres les releves EDSM
+    // influence de la faction en %, evolution depuis la directive (fleche), d'apres les releves EDSM ; les etats actifs (guerre, expansion...) ne sont plus sur cette page : ils sont dans la fenetre de la directive
     function infoFaction(o) {
         var R = window.cacheResultatsBgs, res = R && R.dir && R.dir[o.id];
         if (!res || !res.donnees) return '<span style="color:#666;" title="Résultat du jeu : en attente du prochain relevé">—</span>';
@@ -136,8 +205,7 @@
         var cK = o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null;
         if (cK && res.conflit) {
             var fc = String(o.faction_cible || '').trim().toLowerCase(), e1 = String(res.conflit.f1 || '').trim().toLowerCase() === fc;
-            var etc = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
-            return '<span class="camp-score" style="--k:' + cK + ';" title="' + (o.type_ordre === 'GUERRE' ? 'Score de la guerre' : 'Score de l élection') + ' (jours gagnés), votre faction en premier">' + (e1 ? res.conflit.s1 : res.conflit.s2) + ' – ' + (e1 ? res.conflit.s2 : res.conflit.s1) + '</span>' + (etc ? '<span style="display:inline-flex;">' + etc + '</span>' : '');
+            return '<span class="camp-score" style="--k:' + cK + ';" title="' + (o.type_ordre === 'GUERRE' ? 'Score de la guerre' : 'Score de l élection') + ' (jours gagnés), votre faction en premier">' + (e1 ? res.conflit.s1 : res.conflit.s2) + ' – ' + (e1 ? res.conflit.s2 : res.conflit.s1) + '</span>';
         }
         var h = '<span class="inf" title="Influence actuelle de la faction (relevé EDSM)">' + fm(Number(res.influence) * 100, false) + ' %</span>';
         var vt = window.EdteamUtile && window.EdteamUtile.variation ? window.EdteamUtile.variation(o, res) : null;
@@ -150,8 +218,7 @@
             var f = String(o.faction_cible || '').trim().toLowerCase(), estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
             h += '<span style="color:#ccc;" title="Score du conflit (jours gagnés)">' + (estF1 ? res.conflit.s1 : res.conflit.s2) + '–' + (estF1 ? res.conflit.s2 : res.conflit.s1) + '</span>';
         }
-        var etats = window.edteamEtats ? window.edteamEtats.badges(res, true) : '';
-        return h + (etats ? '<span style="display:inline-flex;">' + etats + '</span>' : '');
+        return h;
     }
     // couleur d'une guerre ou d'une election selon le score du jeu (votre faction en premier) : vert si elle gagne, rouge si elle perd, bleu a egalite ou sans score releve
     function couleurConflit(o) {
@@ -161,13 +228,20 @@
         var moi = Number(e1 ? res.conflit.s1 : res.conflit.s2), adv = Number(e1 ? res.conflit.s2 : res.conflit.s1);
         return moi > adv ? '#2fe07a' : moi < adv ? '#FF3B3B' : '#4DA3FF';
     }
+    // signal de resultat (vert / rouge / bleu, net ou pale) d'une directive BGS ; null sans mesure ou sans suivi du jour
+    function sigM(o, mt) {
+        if (!mt.jour || !window.EdteamUtile) return null;
+        var res = (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null;
+        return window.EdteamUtile.signalLigne(o, res, typeof bgsSens === 'function' ? bgsSens : null);
+    }
     function missionsBgs(ordres, veilleIds, resume, meta) {
         return ordres.map(function (o) {
             var rs = resume[o.id] || {}; var mt = meta[o.id] || { global: 0 };
             var veille = veilleIds.has(String(o.id));
             var typeFr = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' }[o.type_ordre] || String(o.type_ordre || '').toUpperCase();
-            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
-                clic: "ouvrirDetailResultat('" + o.id + "')", info: infoFaction(o) + (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
+            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, sig: sigM(o, mt), jauge: sigM(o, mt) ? jauge(o, ((window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null)) : '', fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: mt.jour ? '' : 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
+                clic: "ouvrirDetailResultat('" + o.id + "')", infoE: infoFaction(o), infoP: (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
+                info: infoFaction(o) + (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
                 texte: '<b>' + esc(String(o.systeme_cible || '').toUpperCase()) + '</b> <em>· ' + esc(String(o.faction_cible || '').toUpperCase()) + (veille ? ' · EN VEILLE' : '') + '</em>' };
         });
     }
@@ -177,7 +251,10 @@
     function lirePli() { try { var v = JSON.parse(localStorage.getItem(clefPli()) || '[]'); return Array.isArray(v) ? v.map(String) : []; } catch (e) { return []; } }
     function ecrirePli(l) { try { localStorage.setItem(clefPli(), JSON.stringify(l)); } catch (e) { /* stockage indisponible : le repli ne sera pas memorise */ } }
     // Rendu complet de la zone des campagnes
+    var dernier = null;
+    function vueCourante() { try { var v = localStorage.getItem('edteam_camp_vue'); return v === 'cartes' || v === 'carte' ? v : 'lignes'; } catch (e) { return 'lignes'; } }
     function rendre(opts) {
+        dernier = opts;
         var zone = document.getElementById('bgs-campagnes'); if (!zone) return;
         css();
         var camps = (opts.campagnes || []).slice();
@@ -196,7 +273,10 @@
         // bande « Aujourd'hui » : quotas du jour faits et directives a traiter en premier (quotas-jour.js, SQL 110) ; vide si la fonction serveur est absente
         var mapC = {}; camps.forEach(function (c) { mapC[c.id] = c; });
         var bande = window.EdteamUtile && window.cacheQuotasBgs && typeof bgsSens === 'function' ? window.EdteamUtile.legende() : '';
-        zone.innerHTML = titre + bande + '<div style="display:grid; gap:12px;">' + camps.map(function (c) {
+        var vue = vueCourante();
+        var bascule = '<div class="camp-vue"><span>AFFICHAGE</span><button type="button" class="camp-btn' + (vue === 'lignes' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;lignes&quot;)">☰ LIGNES</button><button type="button" class="camp-btn' + (vue === 'cartes' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;cartes&quot;)">▦ CARTES</button><button type="button" class="camp-btn' + (vue === 'carte' ? ' actif' : '') + '" onclick="edteamCampagnes.vue(&quot;carte&quot;)">◉ CARTE GALACTIQUE</button></div>';
+        var datCarte = [];
+        var htmlCamps = camps.map(function (c) {
             var col = COUL[c.type_campagne] || '#aaa', pr = PRIO[c.priorite] || PRIO[3];
             var ordres = c.synthetique ? orphelines : (opts.ordres || []).filter(function (o) { return String(o.campagne_id) === String(c.id); });
             var lignes = missionsBgs(ordres, opts.veilleIds || new Set(), opts.resume || {}, opts.meta || {});
@@ -204,6 +284,8 @@
             if (window.edteamCampagnesCOL && !c.synthetique) lignes = lignes.concat(window.edteamCampagnesCOL.lignes(c.id));
             // tri alphabétique par système (puis par type, stable) ; un système qui a plusieurs missions est regroupé sous un en-tête
             lignes = lignes.map(function (l, i) { l.o = i; return l; }).sort(function (a, b) { return String(a.sys || '').localeCompare(String(b.sys || ''), 'fr') || (a.o - b.o); });
+            // donnees de la carte galactique (carte-campagnes.js) : missions actives avec un systeme, resultat du dernier tick
+            datCarte.push({ id: c.id, nom: c.nom, type: LIB[c.type_campagne] || c.type_campagne, couleur: col, prio: c.priorite, lignes: lignes.filter(function (l) { return !l.gris && l.sys; }).map(function (l) { return { sys: l.sys, domaine: l.domaine, id: l.id, tag: l.tag, res: resCarte(l), clic: l.clic, carte: carte(l) }; }) });
             var mesurees = lignes.filter(function (l) { return l.pct != null; });
             var av = mesurees.length ? Math.round(mesurees.reduce(function (s, l) { return s + (Number(l.pct) || 0); }, 0) / mesurees.length) : 0;
             var avous = lignes.filter(function (l) { return l.vous != null && l.pct != null; });
@@ -217,21 +299,38 @@
             }
             var actions = c.synthetique ? '' : '<span class="camp-ics">' + (cmd ? ic('Ajouter une mission à cette campagne', '＋', 'edteamCampagnes.ajouter(' + c.id + ')') : '')
                 + (amiral ? ic('Modifier la campagne', '✎', 'edteamCampagnes.ouvrir(' + c.id + ')') + ic('Clôturer la campagne et ses missions', '📦', 'edteamCampagnes.cloturer(' + c.id + ')') + ic('Supprimer la campagne (seulement si elle est vide)', '🗑', 'edteamCampagnes.supprimer(' + c.id + ')', true) : '') + '</span>';
-            return '<div class="bloc camp-carte' + (repliees.indexOf(String(c.id)) >= 0 ? ' repliee' : '') + '" id="camp-' + c.id + '" style="--bdc:' + col + 'bf; --accent:' + col + '; --teinte:' + col + '12; --lueur:' + col + '14; border:1px solid ' + col + '99; box-shadow: inset 4px 0 0 ' + col + ', 0 0 18px ' + col + '18;">'
+            return '<div class="bloc camp-carte' + (repliees.indexOf(String(c.id)) >= 0 ? ' repliee' : '') + '" id="camp-' + c.id + '" style="--wa:' + (cmd ? '116px' : '0px') + '; --bdc:' + col + 'bf; --accent:' + col + '; --teinte:' + col + '12; --lueur:' + col + '14; border:1px solid ' + col + '99; box-shadow: inset 4px 0 0 ' + col + ', 0 0 18px ' + col + '18;">'
                 + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + (sansPct ? 'none' : fond(col, av)) + '; --c:' + col + ';">' + (sansPct ? '' : neon(col, av, vAv)) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, mesurees.length && !sansPct ? av : null, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
-                + (info ? '<span style="color:#888; font-size:.78em;">' + info + '</span>' : '') + pastille('PRIORITÉ ' + pr[0], pr[1])
-                + (actions ? '<span class="camp-actions">' + actions + '</span>' : '') + '</div>'
-                + '<div class="camp-lignes">' + (lignes.length ? groupes(lignes) : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
+                + '<span class="camp-h-g">' + pastille('PRIORITÉ ' + pr[0], pr[1]) + '</span>'
+                + '<span class="camp-h-i"><em>' + info + '</em>' + (vue !== 'cartes' && lignes.some(function (l) { return l.infoP; }) ? '<span>TES ACTIONS<small>Aujourd’hui</small></span>' : '') + '</span><span class="camp-h-c"></span>'
+                + '<span class="camp-actions">' + actions + '</span></div>'
+                + '<div class="camp-lignes">' + (lignes.length ? (vue === 'cartes' ? '<div class="camp-grille">' + lignes.slice().sort(function (a, b) { return rangCarte(a) - rangCarte(b) || a.o - b.o; }).map(carte).join('') + '</div>' : groupes(lignes)) : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
                 + '</div>';
-        }).join('') + '</div>';
+        }).join('');
+        zone.innerHTML = titre + bascule + bande + (vue === 'carte' ? '<div id="camp-carte"></div>' : '<div style="display:grid; gap:12px; grid-template-columns:minmax(0,1fr);">' + htmlCamps + '</div>');
+        if (vue === 'carte' && window.EdteamCarteCampagnes) window.EdteamCarteCampagnes.monter(document.getElementById('camp-carte'), { campagnes: datCarte });
         brancherGlisser(zone);
+        brancherInfobulles(zone);
+    }
+    // plusieurs lignes : la premiere sert de titre
+    function texteBulle(t, col) {
+        var l = String(t).split('\n');
+        return '<div style="white-space:normal; max-width:320px; line-height:1.5; color:#ddd;">' + (l.length > 1 ? '<strong style="color:' + col + ';">' + esc(l[0]) + '</strong><br>' + l.slice(1).map(esc).join('<br>') : esc(l[0])) + '</div>';
+    }
+    function brancherInfobulles(zone) {
+        if (zone.dataset.tips) return;
+        zone.dataset.tips = '1';
+        var vers = function (ev) { var e = ev.target.closest && ev.target.closest('[data-tip]'); return e && zone.contains(e) ? e : null; };
+        zone.addEventListener('mouseover', function (ev) { var e = vers(ev); if (e && typeof showHoloTooltip === 'function') showHoloTooltip(ev, texteBulle(e.dataset.tip, e.dataset.tc || '#00F0FF'), e.dataset.tc || '#00F0FF'); });
+        zone.addEventListener('mousemove', function (ev) { if (vers(ev)) { if (typeof moveHoloTooltip === 'function') moveHoloTooltip(ev); } else if (!(ev.target.closest && ev.target.closest('.cc-svg')) && typeof hideHoloTooltip === 'function') hideHoloTooltip(); });   // plus de bulle oubliee quand la souris n'est plus sur un element expliqué (la carte galactique gère la sienne)
+        zone.addEventListener('mouseout', function (ev) { if (vers(ev) && typeof hideHoloTooltip === 'function') hideHoloTooltip(); });
     }
 
     // ===== GLISSER-DEPOSER (Amiral) : une mission d'une campagne a l'autre ; une campagne a une autre place =====
     var glisse = null;
     function nettoyerGlisse() {
         glisse = null;
-        document.querySelectorAll('.camp-carte.depot, .camp-carte.glisse, .camp-ligne.glisse').forEach(function (e) { e.classList.remove('depot', 'glisse'); });
+        document.querySelectorAll('.camp-carte.depot, .camp-carte.glisse, .camp-ligne.glisse, .camp-cd.glisse').forEach(function (e) { e.classList.remove('depot', 'glisse'); });
         document.querySelectorAll('.camp-trait').forEach(function (e) { e.remove(); });
     }
     function brancherGlisser(zone) {
@@ -239,7 +338,7 @@
         zone.dataset.glisser = '1';
         zone.addEventListener('dragstart', function (ev) {
             if (!estAmiral()) return;
-            var l = ev.target.closest && ev.target.closest('.camp-ligne[data-mid]');
+            var l = ev.target.closest && ev.target.closest('.camp-ligne[data-mid], .camp-cd[data-mid]');
             var t = ev.target.closest && ev.target.closest('.camp-tete[data-cid]');
             var carte = ev.target.closest && ev.target.closest('.camp-carte');
             if (l) { glisse = { type: 'M', dom: l.dataset.mdom, id: l.dataset.mid, de: carte ? carte.id.replace('camp-', '') : null }; l.classList.add('glisse'); }
@@ -471,6 +570,7 @@
                 m.style.display = 'flex';
             });
         },
+        vue: function (v) { if (typeof sonClic === 'function') sonClic(); try { localStorage.setItem('edteam_camp_vue', v); } catch (e) { /* stockage indisponible : le choix ne sera pas memorise */ } if (dernier) rendre(dernier); },
         rafraichir: async function () {
             if (typeof window.chargerOrdresAmiraute === 'function') window.chargerOrdresAmiraute();
             if (typeof window.afficherOrdresBGS === 'function') await window.afficherOrdresBGS();

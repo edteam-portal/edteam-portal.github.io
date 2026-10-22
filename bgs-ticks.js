@@ -99,15 +99,29 @@
             try { await window.EdteamTick.assurer(); } catch (e) { /* ticks du cache */ }
             const racine = o.zone || o.zoneBilan || o.zoneHero; if (!racine || !racine.isConnected) return;
             const now = Date.now(), ticks = window.EdteamTick.liste(now - 32 * JOUR, now).slice(-59), ticksSec = ticks.map(k => Math.floor(k.t / 1000));
-            const data = await charger(o.ordre.id, ticksSec); if (!data || !racine.isConnected) return;
+            const data = await charger(o.ordre.id, ticksSec); if (!racine.isConnected) return;
+            if (!data && !o.v2) return;
             css();
             const Q = window.EdteamQuotas, avecQuota = false;      // aucun statut de quota montre aux pilotes : les barres par tick comptent seulement les pilotes ayant agi
-            if (o.zoneHero) {
-                const p = Q.participants(data, o.moiId, o.mobile ? 30 : 34); o.zoneHero.innerHTML = p.html;
-                if (o.zoneResume) o.zoneResume.innerHTML = "<b style=\"color:#2fe07a;font-weight:normal;\">" + p.na + "</b> / " + p.n + " <span style=\"font-size:.5em;color:#8a8a8a;letter-spacing:1px;\">ont joué aujourd’hui</span>";
+            if (o.v2 && window.EdteamBgsParticipants) {
+                // fenetre PC : participants, activites cumulees et ticks joues (bgs-participants.js)
+                let per = [], presence = null, labels = [];
+                if (data) {
+                    per = periodes(data, ticks, ticksSec, now); if (per.length) per[0].premiere = true; labels = per.map(titre);
+                    if (Array.isArray(data.actifs)) {
+                        const base = ticksSec.filter(t => t * 1000 <= data.depuis * 1000).length; presence = {};
+                        data.actifs.forEach(r => { const j = Math.min(per.length - 1, Math.max(0, Number(r[0]) - base)); (presence[r[1]] = presence[r[1]] || new Set()).add(j); });
+                    }
+                }
+                window.EdteamBgsParticipants.monter({ ordre: o.ordre, data, classement: o.classement || [], per, presence, labels, moiId: o.moiId, zones: { tuiles: o.zoneHero, activite: o.zoneBilan, part: o.zonePart }, Q });
+            } else {
+                if (o.zoneHero) {
+                    const p = Q.participants(data, o.moiId, o.mobile ? 30 : 34); o.zoneHero.innerHTML = p.html;
+                    if (o.zoneResume) o.zoneResume.innerHTML = "<b style=\"color:#2fe07a;font-weight:normal;\">" + p.na + "</b> / " + p.n + " <span style=\"font-size:.5em;color:#8a8a8a;letter-spacing:1px;\">ont joué aujourd’hui</span>";
+                }
+                if (o.zoneBilan) o.zoneBilan.innerHTML = Q.bilan(o.ordre, data, o.moiId);
             }
-            if (o.zoneBilan) o.zoneBilan.innerHTML = Q.bilan(o.ordre, data, o.moiId);
-            if (o.zone && o.res && o.res.courbe && o.res.courbe.length >= 2) {
+            if (data && o.zone && o.res && o.res.courbe && o.res.courbe.length >= 2) {
                 const per = periodes(data, ticks, ticksSec, now); if (per.length) per[0].premiere = true;
                 const emisSec = data.depuis, jeune = (now / 1000 - emisSec) < 10 * 86400;
                 const etat = { courbe: o.res.courbe, emisSec, couleur: o.couleur, periodes: per, ticks, mobile: !!o.mobile, zoom: jeune, avecQuota };

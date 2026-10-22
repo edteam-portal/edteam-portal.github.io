@@ -5,6 +5,24 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-carte-galactique', date: '2026-10-22T15:53:33Z', type: 'NOUVEAU',
+        titre: 'Carte galactique des campagnes : où agir, et ce qui s’approche',
+        texte: 'Troisième affichage de la page Engagement : chaque système de mission est placé sur une carte (vue de dessus ou de côté), coloré selon le résultat, la participation ou la priorité. Survolez pour voir la directive, cliquez pour l’ouvrir, clic droit pour copier le nom dans le jeu. Un filtre « À renforcer » montre où l’aide est utile, et les systèmes de votre faction, vos colonies et la puissance défendue apparaissent en fond. Des alarmes signalent ce qui s’approche : puissance ennemie en place ou en conquête (Powerplay) et expansion d’une faction rivale vers vos systèmes (BGS, avec la route). Le bouton « Aide » de la carte explique tout en 8 pages. Sur PC et tablette.',
+        important: true
+    },
+    {
+        id: '2026-10-fenetres-directives', date: '2026-10-22T15:53:32Z', type: 'NOUVEAU',
+        titre: 'Fenêtres des directives refaites : participants, ticks et mérites',
+        texte: 'La fenêtre d’une directive BGS montre qui participe (avatar, part de l’effort, ticks joués), une barre cumulée par activité et le résultat du jeu. La fenêtre Powerplay montre le portrait de la puissance, l’état du système avec la barre du jeu, ce qui change au prochain tick, d’où viennent les mérites et la part de chaque pilote.',
+        important: false
+    },
+    {
+        id: '2026-10-engagement-lifting', date: '2026-10-22T15:53:31Z', type: 'AMELIORE',
+        titre: 'Page Engagement : lignes plus lisibles, barres du jeu pour le Powerplay',
+        texte: 'Chaque ligne se lit d’un coup d’œil : la couleur donne le résultat du dernier tick, une jauge montre l’influence (gris = inchangé, plein = gain, rayé = perte), et « Tes actions · aujourd’hui » montre ce que vous avez fait. Pour le Powerplay, la ligne reprend la barre du jeu (Inoccupé, Exploité, Consolidé, Défendu) avec la position au dernier tick (▼ blanc) et maintenant (▲ orange). Choisissez l’affichage : lignes, cartes ou carte galactique.',
+        important: true
+    },
+    {
         id: '2026-10-directive-efficacite', date: '2026-10-21T23:50:26Z', type: 'NOUVEAU',
         titre: 'Directives : où votre effort est le plus efficace, participants et bilan',
         texte: 'Le jeu applique des rendements décroissants : au-delà d’un certain volume par tick, une activité fait de moins en moins bouger l’influence. Dans la fenêtre d’une directive de hausse ou de baisse, chaque barre d’activité montre votre quota personnel du tick (« 8 / 15 INF · encore ~7 à plein effet », puis « ✓ plein effet atteint » : le surplus compte toujours pour votre rang BGS) ; elle repart de zéro à chaque tick. C’est un repère, pas une obligation. Les seuils dépendent de la population du système et viennent d’un guide communautaire (non officiel) ; les guerres et les élections n’ont pas de limite d’effet. La fenêtre affiche aussi les avatars des participants (un point vert : a joué aujourd’hui) et un bilan depuis l’émission : total de l’escadron, votre part, votre rythme sur les cinq derniers ticks et classement des pilotes par activité. Sous la courbe d’influence, chaque tick montre combien de pilotes ont agi.',

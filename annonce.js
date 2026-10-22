@@ -203,8 +203,126 @@
             lien: 'hangar.html',
             escadron: false,
             mobile: false
+        },
+        {
+            id: 'bgs-pp-lifting-2026-10',
+            couleur: '#FF7100',
+            etiquette: '★ MISE À JOUR EXCEPTIONNELLE',
+            titre: 'LE MODULE BGS / POWERPLAY FAIT PEAU NEUVE',
+            pages: [
+                {
+                    titre: 'UN NOUVEAU REGARD SUR VOS MISSIONS',
+                    sous: 'BGS et Powerplay : lifting complet de la page Engagement',
+                    intro: 'Les directives de votre escadron se lisent maintenant <b>d’un coup d’œil</b>. Plus d’objectif ni de pourcentage d’avancement : <b>la couleur dit le résultat</b> du dernier tick du jeu, et pour le Powerplay vous retrouvez <b>les barres que le jeu affiche lui-même</b>.',
+                    visuelHtml: anvVisuel1,
+                    colonnes: 2,
+                    etapes: [
+                        { n: '1', t: 'LE RÉSULTAT EN COULEUR', d: '<b style="color:#2fe07a">Vert</b> : l’influence va dans le sens de la directive. <b style="color:#ff4d4d">Rouge</b> : à contre-sens, c’est là que l’aide est utile. <b style="color:#4DA3FF">Bleu</b> : inchangé ou pas encore mesuré. Une couleur pâle signifie « pas de mesure depuis le tick ».' },
+                        { n: '2', t: 'LA JAUGE D’INFLUENCE', d: 'Gris : la part qui n’a pas bougé depuis le dernier tick. Plein : un gain. Rayé : une perte. Le trait blanc marque la valeur d’avant le tick. Survolez la jauge pour l’explication.' },
+                        { n: '3', t: 'LES BARRES DU JEU, POUR LE POWERPLAY', d: 'La même barre que la carte galactique du jeu : Inoccupé, Exploité, Consolidé, Défendu. <b>▼ blanc</b> : position au dernier tick, <b style="color:#ffb000">▲ orange</b> : position maintenant. On voit si le système monte ou descend d’état.' },
+                        { n: '4', t: 'TES ACTIONS, AUJOURD’HUI', d: 'Quatre pastilles par directive : ce que vous avez déjà fait aujourd’hui et ce qui reste utile. Les avatars montrent qui joue sur la directive.' }
+                    ],
+                    avis: '<b>Les mesures Powerplay viennent des journaux de jeu des pilotes de l’escadron</b> : plus vous êtes nombreux à jouer, plus elles sont à jour. Le jeu change l’état d’un système chaque jeudi à 07:00 UTC.'
+                },
+                {
+                    titre: 'DES FENÊTRES REFAITES',
+                    sous: 'Qui joue, qui apporte quoi, tick après tick',
+                    intro: 'Cliquez sur une directive : <b>la fenêtre a été entièrement repensée</b>, pour le BGS comme pour le Powerplay, avec le même style que le reste du site.',
+                    visuelHtml: anvVisuel2,
+                    colonnes: 4,
+                    etapes: [
+                        { n: '1', t: 'QUI PARTICIPE', d: 'Chaque pilote avec son avatar, sa part de l’effort, et les ticks où il a joué (un carré vert par tick).' },
+                        { n: '2', t: 'L’EFFORT PAR ACTIVITÉ', d: 'Une barre cumulée par pilote sur toute la durée de la directive : missions, commerce, primes, science.' },
+                        { n: '3', t: 'POWERPLAY : OÙ EN EST LE SYSTÈME', d: 'Le portrait de la puissance, l’état, la barre du jeu, et ce qui change au prochain tick.' },
+                        { n: '4', t: 'D’OÙ VIENNENT LES MÉRITES', d: 'La répartition des mérites par origine (primes, missions, livraisons…), pour l’escadron puis pilote par pilote.' }
+                    ],
+                    avis: 'Les fenêtres affichent aussi le résultat du jeu sur 30 jours et les états de la faction (guerre, expansion…).'
+                },
+                {
+                    titre: 'LA CARTE GALACTIQUE STRATÉGIQUE',
+                    sous: 'Trois affichages : lignes, cartes et carte galactique',
+                    intro: 'Choisissez l’affichage de vos missions : <b>lignes</b> pour agir vite, <b>cartes</b> pour un survol visuel, ou la toute nouvelle <b>carte galactique</b> pour voir <b>où</b> se joue la campagne et <b>ce qui s’en approche</b>.',
+                    visuelHtml: anvVisuel3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'VOS CIBLES SUR LA CARTE', d: 'Chaque système de mission est placé (vue de dessus ou de côté). La couleur donne le résultat, la participation ou la priorité. Survolez : les infos de la directive. Cliquez : sa fenêtre.' },
+                        { n: '2', t: 'OÙ RENFORCER', d: 'Un filtre « À renforcer » éclaire les systèmes rouges où presque personne n’a joué depuis le dernier tick.' },
+                        { n: '3', t: 'VOTRE TERRITOIRE', d: 'Les systèmes de la faction apparaissent en fond. Vos colonies sont en or, et un losange violet marque les systèmes sous la puissance que vous défendez.' },
+                        { n: '4', t: 'TROIS NIVEAUX D’ALARME', d: '<b style="color:#ff2d2d">Powerplay</b> : les systèmes pris par une puissance ennemie (points fixes) et ses conquêtes en cours (orange). <b style="color:#ff4fd8">BGS</b> : une faction rivale en Expansion vers l’un de vos systèmes (rose, avec la route). Seul ce qui est imminent clignote.' },
+                        { n: '5', t: 'ZOOM ET REPÈRES', d: 'En dézoomant, les cibles se regroupent en bulles. Le menu « Aller à… » cadre une campagne ou un système, et « Depuis ma position » donne vos distances.' },
+                        { n: '6', t: 'COPIER UN NOM, ET UNE AIDE', d: 'Clic droit sur un système (ou Ctrl+C en le survolant) : son nom est copié, prêt à coller dans le jeu. Le bouton ❓ AIDE de la carte explique tout, en 8 pages.' }
+                    ],
+                    avis: '<b>Rien à installer.</b> Les positions viennent d’EDSM et les systèmes de la faction et des puissances de Spansh, relevés chaque jour : ils peuvent avoir quelques jours de retard.'
+                }
+            ],
+            cta: 'OUVRIR LA CARTE GALACTIQUE',
+            aide: 'Page Engagement (menu BGS) : bouton AFFICHAGE · à utiliser sur PC ou tablette',
+            action: function () { try { localStorage.setItem('edteam_camp_vue', 'carte'); } catch (e) { /* tant pis */ } window.location.href = 'bgs.html'; },
+            mobile: false
         }
     ];
+
+    // ---- visuels de l'annonce « lifting BGS / Powerplay » : dessines en HTML / SVG (aucune capture d'ecran, aucune donnee reelle ; noms et chiffres fictifs) ----
+    function anvPips(f) {
+        var ic = ['📝', '💰', '✴', '🔬'];
+        return '<span class="anv-pips">' + ic.map(function (x, i) { return '<i class="' + (f[i] ? 'ok' : '') + '">' + (f[i] ? '✓' : x) + '</i>'; }).join('') + '</span>';
+    }
+    // jauge d'influence : base = part inchangee (gris), gain ou perte = segment plein ou raye, trait blanc = valeur avant le tick
+    function anvJauge(base, gain, perte) {
+        return '<span class="anv-jg"><i style="width:' + base + '%"></i>' + (gain ? '<b class="g" style="left:' + base + '%;width:' + gain + '%"></b>' : '') + (perte ? '<b class="p" style="left:' + base + '%;width:' + perte + '%"></b>' : '') + '<u style="left:' + (base + (perte || 0)) + '%"></u></span>';
+    }
+    function anvLigne(k, tag, nom, jauge, val, pips) {
+        return '<div class="anv-lg" style="--k:' + k + '"><span class="anv-tag">' + tag + '</span><span class="anv-nm">' + nom + '</span>' + jauge + '<span class="anv-val">' + val + '</span>' + pips + '</div>';
+    }
+    // barre du jeu a 4 zones (Inoccupe / Exploite / Consolide / Defendu) ; triangle blanc = position au dernier tick, orange = maintenant
+    function anvZones(blanc, orange) {
+        return '<span class="anv-zb"><span class="z" style="--c:#4a4f55"></span><span class="z" style="--c:#b04a47"></span><span class="z" style="--c:#4a944a"></span><span class="z" style="--c:#8f5ab5"></span><em class="b" style="left:' + blanc + '%">▼</em><em class="o" style="left:' + orange + '%">▲</em></span>';
+    }
+    function anvPart(ini, nom, pts, segs, ticks) {
+        return '<div class="anv-pa"><span class="anv-av">' + ini + '</span><div class="anv-pm"><div class="anv-l1"><b>CMDR ' + nom + '</b><span>' + pts + '</span></div><span class="anv-bar">' + segs.map(function (s) { return '<i style="flex:' + s[1] + ';background:' + s[0] + '"></i>'; }).join('') + '</span>'
+            + (ticks ? '<span class="anv-tk">' + ticks.map(function (t) { return '<i class="' + (t ? 'ok' : '') + '"></i>'; }).join('') + '</span>' : '') + '</div></div>';
+    }
+    function anvTuile(k, t, v, s) { return '<div class="anv-ti" style="--k:' + k + '"><small>' + t + '</small><b>' + v + '</b><span>' + s + '</span></div>'; }
+    function anvVisuel1() {
+        return '<div class="anv-ecran"><div class="anv-cap">VOS MISSIONS · EXEMPLE</div><div class="anv-tete"><span>TES ACTIONS · AUJOURD’HUI</span></div>'
+            + anvLigne('#2fe07a', 'BGS #1 · HAUSSE', '<b>AZURE PRIME</b> · FACTION ALPHA', anvJauge(46, 9, 0), '34,2 % <em style="color:#2fe07a">▲ +1,4</em>', anvPips([true, true, false, false]))
+            + anvLigne('#ff4d4d', 'BGS #2 · HAUSSE', '<b>KORVEN</b> · FACTION ALPHA', anvJauge(33, 0, 9), '28,7 % <em style="color:#ff4d4d">▼ −2,1</em>', anvPips([true, false, false, false]))
+            + anvLigne('#4DA3FF', 'BGS #3 · BAISSE', '<b>HELIOS 12</b> · FACTION BÊTA', '<span class="anv-jg"><i style="width:52%"></i><u style="left:52%"></u></span>', '41,0 % <em style="color:#4DA3FF">= inchangé</em>', anvPips([false, false, true, false]))
+            + '<div class="anv-lg pp" style="--k:#8A7CFF"><span class="anv-tag">PP · RENFORCEMENT</span><span class="anv-nm"><b>NYX 7</b> · Puissance exemple</span>' + anvZones(58, 66) + '<span class="anv-val">Consolidé <em style="color:#b6adff">▲ monte</em></span><span class="anv-pips"><i class="ok">✓</i></span></div>'
+            + '</div>';
+    }
+    function anvVisuel2() {
+        var bgs = '<div class="anv-fen"><div class="anv-cap">FENÊTRE BGS · EXEMPLE</div><div class="anv-tuiles">' + anvTuile('#FF7100', 'PARTICIPANTS', '4', 'pilotes') + anvTuile('#2fe07a', 'AUJOURD’HUI', '3 / 4', 'ont joué') + anvTuile('#FFB000', 'TA PART', '18 %', 'de l’effort') + '</div>'
+            + '<div class="anv-t">PAR ACTIVITÉ</div><span class="anv-bar big"><i style="flex:52;background:#FF7100"></i><i style="flex:18;background:#2fe07a"></i><i style="flex:26;background:#00F0FF"></i><i style="flex:4;background:#a855f7"></i></span>'
+            + '<div class="anv-t">PARTICIPANTS</div>'
+            + anvPart('OR', 'ORION', '412 PTS · 58 %', [['#FF7100', 60], ['#2fe07a', 20], ['#00F0FF', 20]], [true, true, false, true, true, true, true])
+            + anvPart('VE', 'VEGA', '176 PTS · 25 %', [['#FF7100', 30], ['#00F0FF', 70]], [false, true, true, false, true, false, true])
+            + anvPart('LY', 'LYRA', '98 PTS · 14 %', [['#2fe07a', 100]], [false, false, true, false, false, true, true]) + '</div>';
+        var pp = '<div class="anv-fen pp"><div class="anv-cap">FENÊTRE POWERPLAY · EXEMPLE</div><div class="anv-ent"><span class="anv-por">◈</span><div><span class="anv-badge">DÉFENDU</span><div class="anv-sm">Contrôlé par Puissance exemple</div></div></div>'
+            + '<div class="anv-ph">Au prochain tick, le système devrait rester Défendu.</div>' + anvZones(70, 78)
+            + '<div class="anv-t">D’OÙ VIENNENT LES MÉRITES</div><span class="anv-bar big"><i style="flex:46;background:#8a949c"></i><i style="flex:30;background:#8A7CFF"></i><i style="flex:24;background:#ff6a6a"></i></span>'
+            + '<div class="anv-t">PARTICIPANTS</div>'
+            + anvPart('OR', 'ORION', '9 400 MÉRITES · 61 %', [['#8a949c', 50], ['#8A7CFF', 30], ['#ff6a6a', 20]], null)
+            + anvPart('VE', 'VEGA', '4 150 MÉRITES · 27 %', [['#8A7CFF', 70], ['#ff6a6a', 30]], null) + '</div>';
+        return '<div class="anv-duo">' + bgs + pp + '</div>';
+    }
+    function anvVisuel3() {
+        var s = 7, a = function () { s = (s * 9301 + 49297) % 233280; return s / 233280; }, W = 760, H = 290, o = '';
+        for (var x = 40; x < W; x += 80) o += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="' + H + '" stroke="#0f2330"/>';
+        for (var y = 30; y < H; y += 60) o += '<line x1="0" y1="' + y + '" x2="' + W + '" y2="' + y + '" stroke="#0f2330"/>';
+        for (var i = 0; i < 70; i++) o += '<circle cx="' + (20 + a() * 720).toFixed(0) + '" cy="' + (12 + a() * 266).toFixed(0) + '" r="2.2" fill="#7fb8d0" opacity=".22"/>';
+        [[110, 70], [150, 215], [300, 40], [440, 235], [640, 190], [690, 60], [500, 40]].forEach(function (p) { o += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.6" fill="#FFD700" opacity=".7"/>'; });
+        [[205, 245], [380, 100], [612, 245], [60, 150], [470, 160]].forEach(function (p) { o += '<path d="M' + p[0] + ' ' + (p[1] - 8) + ' l7 8 l-7 8 l-7 -8z" fill="none" stroke="#8A7CFF" stroke-width="1.4" opacity=".8"/>'; });
+        o += '<g opacity=".16" fill="#00F0FF"><circle cx="250" cy="130" r="48"/><circle cx="300" cy="160" r="40"/></g><g opacity=".5" fill="none" stroke="#00F0FF" stroke-dasharray="3 4"><circle cx="250" cy="130" r="48"/><circle cx="300" cy="160" r="40"/></g>'
+            + '<line x1="250" y1="130" x2="300" y2="160" stroke="#00F0FF" stroke-opacity=".45"/>';
+        [[250, 130, '#ff4d4d', 'KORVEN'], [300, 160, '#2fe07a', 'AZURE PRIME'], [425, 118, '#4DA3FF', 'HELIOS 12']].forEach(function (p) { o += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="14" fill="none" stroke="' + (p[3] === 'HELIOS 12' ? '#cfd8dc' : '#00F0FF') + '" stroke-width="2"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="9" fill="' + p[2] + '" stroke="#000"/><text x="' + (p[0] + 20) + '" y="' + (p[1] + 4) + '" fill="#e6eef2" font-size="11.5" letter-spacing="1">' + p[3] + '</text>'; });
+        o += '<circle cx="590" cy="95" r="22" fill="none" stroke="#cfd8dc" stroke-width="2" stroke-dasharray="5 3"/><circle cx="590" cy="95" r="17" fill="#ff4d4d" stroke="#000"/><text x="590" y="100" text-anchor="middle" font-size="14" font-weight="bold" fill="#04070a">12</text><text x="540" y="136" fill="#e6eef2" font-size="11">12 systèmes · 5 campagnes</text>';
+        [[330, 205, 0.7], [375, 188, 1], [210, 170, 1.4]].forEach(function (p) { o += '<g class="anv-al" style="--d:' + p[2] + 's"><circle class="rg" cx="' + p[0] + '" cy="' + p[1] + '" r="6" fill="none" stroke="#ff2d2d" stroke-width="1.6"/><circle class="pt" cx="' + p[0] + '" cy="' + p[1] + '" r="4.4" fill="#ff2d2d" stroke="#fff" stroke-width=".8"/></g>'; });
+        o += '<text x="345" y="224" fill="#ff8a8a" font-size="9.5">SYSTÈME ENNEMI · NOUVEAU</text><text x="30" y="276" fill="#7fb8d0" font-size="10">20 al</text><line x1="30" y1="282" x2="110" y2="282" stroke="#7fb8d0" stroke-width="2"/><text x="740" y="22" text-anchor="end" fill="#3d7490" font-size="10" letter-spacing="2">▲ VERS LE CENTRE GALACTIQUE</text>';
+        return '<div class="anv-ecran"><div class="anv-vues"><span>☰ LIGNES</span><span>▦ CARTES</span><span class="on">◉ CARTE GALACTIQUE</span></div>'
+            + '<svg class="anv-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Exemple de carte galactique des campagnes">' + o + '</svg>'
+            + '<div class="anv-leg"><span><i style="background:#2fe07a"></i>va dans le sens voulu</span><span><i style="background:#ff4d4d"></i>à contre-sens : à renforcer</span><span><i style="background:#4DA3FF"></i>inchangé</span><span><i style="background:#FFD700"></i>colonies de l’escadron</span><span><i class="lz"></i>puissance défendue</span><span><i style="background:#ff2d2d" class="clig"></i>puissance ennemie proche</span></div></div>';
+    }
 
     function lire(uid) { try { var v = JSON.parse(localStorage.getItem(PREFIXE + uid) || 'null'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
     function ecrire(uid, liste) { try { localStorage.setItem(PREFIXE + uid, JSON.stringify(liste.slice(-50))); } catch (e) { /* stockage indisponible : elle pourra se rejouer, sans consequence */ } }
@@ -249,9 +367,78 @@
             '@keyframes ancFond{from{opacity:0}to{opacity:1}}',
             '@keyframes ancEntree{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:none}}',
             '@media (max-width:640px){#edteam-annonce{align-items:flex-start}#edteam-annonce .anc-boite{padding:16px 14px 14px}#edteam-annonce .anc-eti{letter-spacing:2px;font-size:.7em;padding:3px 10px}#edteam-annonce .anc-titre{font-size:1.1em;letter-spacing:1.5px;margin:12px 0 4px}#edteam-annonce .anc-sous{font-size:.8em;letter-spacing:1px}#edteam-annonce .anc-intro{font-size:.82em;margin-top:10px;line-height:1.5}#edteam-annonce .anc-etapes{grid-template-columns:minmax(0,1fr);gap:8px;margin-top:14px}#edteam-annonce .anc-etape{display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:10px;padding:8px 10px}#edteam-annonce .anc-n{grid-row:1/3}#edteam-annonce .anc-et{margin-top:0;font-size:.76em}#edteam-annonce .anc-ed{margin-top:3px;font-size:.74em;line-height:1.4}#edteam-annonce .anc-actions{margin-top:14px;gap:8px}#edteam-annonce .anc-btn{width:100%;padding:11px 10px;font-size:.9em}#edteam-annonce .anc-aide{margin-top:8px;font-size:.68em}}',
+            '#edteam-annonce .anc-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:22px;flex-wrap:wrap}',
+            '#edteam-annonce .anc-pts{display:flex;gap:8px} #edteam-annonce .anc-pts i{width:10px;height:10px;border-radius:50%;border:1px solid var(--anc);background:transparent;transition:.2s} #edteam-annonce .anc-pts i.on{background:var(--anc);box-shadow:0 0 10px var(--anc)}',
+            '#edteam-annonce .anc-page{animation:ancEntree .35s ease both} #edteam-annonce .anc-page[hidden]{display:none}',
+            '#edteam-annonce .anv-ecran{margin-top:18px;border:1px solid color-mix(in srgb,var(--anc) 35%,transparent);background:#070a0e;padding:12px 14px;text-align:left;font-size:.8em}',
+            '#edteam-annonce .anv-cap{color:#667;letter-spacing:3px;font-size:.72em;margin-bottom:8px} #edteam-annonce .anv-t{color:#00F0FF;letter-spacing:3px;font-size:.7em;margin:10px 0 5px}',
+            '#edteam-annonce .anv-tete{text-align:right;color:#889;font-size:.68em;letter-spacing:2px;margin:-6px 4px 4px}',
+            '#edteam-annonce .anv-lg{display:grid;grid-template-columns:150px minmax(0,1fr) 150px 120px 110px;gap:12px;align-items:center;padding:9px 12px;margin-top:5px;border-left:4px solid var(--k);background:linear-gradient(90deg,color-mix(in srgb,var(--k) 15%,#0a0c10),#0a0c10 72%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}',
+            '#edteam-annonce .anv-tag{border:1px solid var(--k);color:var(--k);padding:2px 8px;font-size:.78em;letter-spacing:1px;white-space:nowrap;text-align:center} #edteam-annonce .anv-nm{color:#8a949c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #edteam-annonce .anv-nm b{color:#fff;letter-spacing:2px}',
+            '#edteam-annonce .anv-val{color:#fff;white-space:nowrap} #edteam-annonce .anv-val em{font-style:normal}',
+            '#edteam-annonce .anv-jg{position:relative;display:block;height:10px;background:#0c1116;border:1px solid #1f2a31} #edteam-annonce .anv-jg i{position:absolute;left:0;top:0;bottom:0;background:#6f8196;opacity:.75} #edteam-annonce .anv-jg b{position:absolute;top:0;bottom:0} #edteam-annonce .anv-jg b.g{background:#2fe07a;box-shadow:0 0 8px #2fe07a} #edteam-annonce .anv-jg b.p{background:repeating-linear-gradient(45deg,#ff4d4d 0 3px,#7a2020 3px 6px)} #edteam-annonce .anv-jg u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff;text-decoration:none}',
+            '#edteam-annonce .anv-zb{position:relative;display:flex;height:10px;margin:4px 0} #edteam-annonce .anv-zb .z{flex:1;background:var(--c);opacity:.8;margin-right:2px} #edteam-annonce .anv-zb em{position:absolute;font-style:normal;font-size:12px;line-height:1;transform:translateX(-50%)} #edteam-annonce .anv-zb em.b{top:-13px;color:#fff} #edteam-annonce .anv-zb em.o{top:10px;color:#ffb000}',
+            '#edteam-annonce .anv-lg.pp .anv-zb{margin:10px 0 12px}',
+            '#edteam-annonce .anv-pips{display:flex;gap:4px;justify-content:flex-end} #edteam-annonce .anv-pips i{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:1px solid #2a3540;background:#0c1116;font-style:normal;font-size:.8em;color:#778} #edteam-annonce .anv-pips i.ok{background:#1f9d55;border-color:#2fe07a;color:#fff}',
+            '#edteam-annonce .anv-duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;text-align:left} #edteam-annonce .anv-fen{border:1px solid #FF7100;background:#0b0907;padding:12px 14px;font-size:.8em} #edteam-annonce .anv-fen.pp{border-color:#8A7CFF}',
+            '#edteam-annonce .anv-tuiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px} #edteam-annonce .anv-ti{padding:8px 10px;border-left:4px solid var(--k);background:linear-gradient(135deg,color-mix(in srgb,var(--k) 16%,#0a0c10),#0a0c10 80%)} #edteam-annonce .anv-ti small{display:block;color:#889;letter-spacing:2px;font-size:.66em} #edteam-annonce .anv-ti b{display:block;color:var(--k);font-size:1.5em;margin:2px 0} #edteam-annonce .anv-ti span{color:#889;font-size:.72em}',
+            '#edteam-annonce .anv-bar{display:flex;height:5px;gap:0;margin-top:5px;background:#111} #edteam-annonce .anv-bar.big{height:14px;margin:0 0 4px} #edteam-annonce .anv-bar i{display:block}',
+            '#edteam-annonce .anv-pa{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-top:6px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02)} #edteam-annonce .anv-av{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid #FF7100;background:radial-gradient(circle,#2a1608,#0a0603);color:#FF9A1F;display:flex;align-items:center;justify-content:center;font-weight:bold;letter-spacing:1px} #edteam-annonce .anv-fen.pp .anv-av{border-color:#8A7CFF;color:#b6adff;background:radial-gradient(circle,#1a1330,#08060f)}',
+            '#edteam-annonce .anv-pm{flex:1;min-width:0} #edteam-annonce .anv-l1{display:flex;justify-content:space-between;gap:8px;color:#8a949c;font-size:.9em} #edteam-annonce .anv-l1 b{color:#fff;letter-spacing:1px}',
+            '#edteam-annonce .anv-tk{display:flex;gap:3px;margin-top:5px} #edteam-annonce .anv-tk i{width:9px;height:9px;border:1px solid #3a4650;background:#0a0f13} #edteam-annonce .anv-tk i.ok{background:#2fe07a;border-color:#2fe07a}',
+            '#edteam-annonce .anv-ent{display:flex;align-items:center;gap:12px;margin-bottom:6px} #edteam-annonce .anv-por{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid #9a5fc0;background:radial-gradient(circle,#241338,#08060f);color:#b6adff;display:flex;align-items:center;justify-content:center;font-size:1.4em} #edteam-annonce .anv-badge{border:1px solid #9a5fc0;background:#9a5fc033;color:#fff;padding:2px 12px;letter-spacing:3px;font-weight:bold} #edteam-annonce .anv-sm{color:#aab;margin-top:5px;font-size:.9em}',
+            '#edteam-annonce .anv-ph{padding:8px 12px;margin:8px 0 14px;border-left:4px solid #2fe07a;background:linear-gradient(90deg,#2fe07a22,#0a0c10 72%);color:#e6eef2}',
+            '#edteam-annonce .anv-vues{display:flex;justify-content:center;gap:0;margin-bottom:10px} #edteam-annonce .anv-vues span{border:1px solid #3a4a55;color:#9ab;padding:6px 16px;letter-spacing:2px;font-size:.78em;margin-left:-1px} #edteam-annonce .anv-vues span.on{border-color:#00F0FF;color:#00F0FF;background:rgba(0,240,255,.16);box-shadow:0 0 14px rgba(0,240,255,.35);position:relative}',
+            '#edteam-annonce .anv-svg{width:100%;height:auto;display:block;background:radial-gradient(ellipse at 50% 45%,#0b1722 0%,#05080c 70%);border:1px solid #16303d} #edteam-annonce .anv-svg text{font-family:inherit}',
+            '#edteam-annonce .anv-leg{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:center;margin-top:10px;color:#9ab;font-size:.74em} #edteam-annonce .anv-leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px} #edteam-annonce .anv-leg i.lz{background:transparent;border:1.5px solid #8A7CFF;border-radius:0;transform:rotate(45deg) scale(.8)} #edteam-annonce .anv-leg i.clig{animation:anvBlink 1s ease-in-out infinite}',
+            '@keyframes anvBlink{0%,100%{opacity:1}50%{opacity:.22}} @keyframes anvPulse{0%{transform:scale(.7);opacity:.9}100%{transform:scale(2.8);opacity:0}}',
+            '#edteam-annonce .anv-al .pt{animation:anvBlink var(--d,1s) ease-in-out infinite} #edteam-annonce .anv-al .rg{transform-box:fill-box;transform-origin:center;animation:anvPulse var(--d,1s) ease-out infinite}',
+            '@media (max-width:900px){#edteam-annonce .anv-lg{grid-template-columns:110px minmax(0,1fr) 90px}#edteam-annonce .anv-lg .anv-jg,#edteam-annonce .anv-lg .anv-zb,#edteam-annonce .anv-lg .anv-pips{display:none}#edteam-annonce .anv-duo{grid-template-columns:1fr}}',
+            '@media (prefers-reduced-motion:reduce){#edteam-annonce .anv-al .pt,#edteam-annonce .anv-al .rg,#edteam-annonce .anv-leg i.clig,#edteam-annonce .anc-page{animation:none}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce,#edteam-annonce .anc-boite{animation:none}}'
         ].join('\n');
         document.head.appendChild(st);
+    }
+
+    // annonce a plusieurs pages : une page visible a la fois, boutons PRECEDENT / SUIVANT, points de progression ; le bouton principal et « J'AI COMPRIS » sont a la derniere page
+    function monterPages(ov, a, uid, aller) {
+        var n = a.pages.length, cur = 0;
+        var pages = a.pages.map(function (p, i) {
+            return '<div class="anc-page" data-p="' + i + '"' + (i ? ' hidden' : '') + '>'
+                + '<span class="anc-eti">' + esc(a.etiquette) + ' · ' + (i + 1) + ' / ' + n + '</span>'
+                + '<div class="anc-titre">' + esc(p.titre) + '</div><div class="anc-sous">' + esc(p.sous) + '</div><div class="anc-intro">' + p.intro + '</div>'
+                + (p.visuelHtml ? '<div class="anc-visuel">' + (typeof p.visuelHtml === 'function' ? p.visuelHtml() : p.visuelHtml) + '</div>' : '')
+                + '<div class="anc-etapes" style="--anc-cols:' + (p.colonnes || 3) + '">' + p.etapes.map(function (e) { return '<div class="anc-etape"><span class="anc-n">' + esc(e.n) + '</span><div class="anc-et">' + esc(e.t) + '</div><div class="anc-ed">' + e.d + '</div></div>'; }).join('') + '</div>'
+                + (p.avis ? '<div class="anc-avis">' + p.avis + '</div>' : '') + '</div>';
+        }).join('');
+        ov.innerHTML = '<div class="anc-boite plein">' + pages
+            + '<div class="anc-nav"><button type="button" class="anc-btn gris" data-a="prec">◀ PRÉCÉDENT</button><span class="anc-pts">' + a.pages.map(function (p, i) { return '<i data-i="' + i + '"></i>'; }).join('') + '</span><button type="button" class="anc-btn" data-a="suiv">SUIVANT ▶</button><button type="button" class="anc-btn" data-a="go">' + esc(a.cta) + '</button></div>'
+            + '<div class="anc-actions" style="margin-top:12px"><button type="button" class="anc-btn gris" data-a="fermer">J’AI COMPRIS</button></div><div class="anc-aide">' + esc(a.aide) + '</div></div>';
+        var boite = ov.querySelector('.anc-boite');
+        function afficher(i) {
+            cur = Math.max(0, Math.min(n - 1, i));
+            [].forEach.call(ov.querySelectorAll('.anc-page'), function (e) { e.hidden = Number(e.getAttribute('data-p')) !== cur; });
+            [].forEach.call(ov.querySelectorAll('.anc-pts i'), function (e) { e.className = Number(e.getAttribute('data-i')) === cur ? 'on' : ''; });
+            ov.querySelector('[data-a="prec"]').style.visibility = cur === 0 ? 'hidden' : 'visible';
+            ov.querySelector('[data-a="suiv"]').style.display = cur === n - 1 ? 'none' : '';
+            ov.querySelector('[data-a="go"]').style.display = cur === n - 1 ? '' : 'none';
+            boite.scrollTop = 0;
+        }
+        function fermer(vaVoir) {
+            var vues = lire(uid); if (vues.indexOf(a.id) < 0) vues.push(a.id); ecrire(uid, vues);
+            document.removeEventListener('keydown', clavier);
+            if (ov.parentNode) ov.parentNode.removeChild(ov);
+            if (vaVoir) { if (typeof a.action === 'function') a.action(); else if (a.lien) window.location.href = a.lien; else if (typeof aller === 'function') aller(); }
+        }
+        function clavier(e) { if (e.key === 'Escape') fermer(false); else if (e.key === 'ArrowRight') afficher(cur + 1); else if (e.key === 'ArrowLeft') afficher(cur - 1); }
+        ov.querySelector('[data-a="prec"]').addEventListener('click', function () { afficher(cur - 1); });
+        ov.querySelector('[data-a="suiv"]').addEventListener('click', function () { afficher(cur + 1); });
+        ov.querySelector('[data-a="go"]').addEventListener('click', function () { fermer(true); });
+        ov.querySelector('[data-a="fermer"]').addEventListener('click', function () { fermer(false); });
+        [].forEach.call(ov.querySelectorAll('.anc-pts i'), function (e) { e.style.cursor = 'pointer'; e.addEventListener('click', function () { afficher(Number(e.getAttribute('data-i'))); }); });
+        document.addEventListener('keydown', clavier);
+        afficher(0);
+        document.body.appendChild(ov);
     }
 
     function monter(a, uid, aller) {
@@ -261,6 +448,7 @@
         ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', a.titre);
         ov.style.setProperty('--anc', a.couleur);
         if (a.colonnes) ov.style.setProperty('--anc-cols', a.colonnes);
+        if (a.pages) { monterPages(ov, a, uid, aller); return; }
         ov.innerHTML = '<div class="anc-boite' + (a.plein ? ' plein' : '') + '">'
             + '<span class="anc-eti">' + esc(a.etiquette) + '</span>'
             + '<div class="anc-titre">' + esc(a.titre) + '</div>'

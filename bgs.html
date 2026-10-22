@@ -21,11 +21,14 @@
     <script src="navigation.js?v=39"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=21"></script>
-    <script src="quotas-jour.js?v=9"></script>
+    <script src="campagnes.js?v=34"></script>
+    <script src="quotas-jour.js?v=11"></script>
     <script src="utile-bgs.js?v=9"></script>
-    <script src="bgs-ticks.js?v=5"></script>
-    <script src="campagnes-pp.js?v=9"></script>
+    <script src="bgs-ticks.js?v=6"></script>
+    <script src="bgs-participants.js?v=1"></script>
+    <script src="pp-etat.js?v=5"></script>
+    <script src="carte-campagnes.js?v=32"></script>
+    <script src="campagnes-pp.js?v=19"></script>
     <script src="campagnes-col.js?v=7"></script>
     <script src="vitrine-module.js?v=1"></script>
 
@@ -1418,6 +1421,7 @@
 
         window.ouvrirDetailResultat = function(ordreId) {
             if (typeof sonClic === 'function') sonClic();
+            if (window.EdteamBgsParticipants && window.EdteamBgsParticipants.css) window.EdteamBgsParticipants.css();
             const ordre = (window.cacheOrdresBgs || []).find(o => String(o.id) === String(ordreId));
             if (!ordre) return;
             const res = (window.cacheResultatsBgs.dir || {})[ordre.id] || null;
@@ -1441,17 +1445,22 @@
                 const cb = res.courbe || [];
                 const sur30 = cb.length >= 2 ? (cb[cb.length - 1][1] - cb[0][1]) * 100 : null;
                 const colVar = v => v === null || Math.abs(v) < 0.05 ? '#aaa' : ((ordre.type_ordre === 'BAISSE' ? v < 0 : v > 0) ? BGS_SENS_COUL.up : BGS_SENS_COUL.dn);
-                stats = `<div style="display: flex; gap: 6px 20px; margin-top: 10px; font-size: 0.9em; flex-wrap: wrap;">
-                    <span style="color: #aaa;">Maintenant <b style="color: #fff;">${bgsPct(res.influence)} %</b></span>
-                    ${res.variation !== null ? `<span style="color: #aaa;">Depuis la directive <b style="color: ${colVar(res.variation)};">${res.variation > 0 ? '▲' : res.variation < 0 ? '▼' : ''} ${bgsPts(res.variation)} pts</b></span>` : ''}
-                    ${sur30 !== null ? `<span style="color: #aaa;">Sur la période <b style="color: ${colVar(sur30)};">${sur30 > 0 ? '▲' : sur30 < 0 ? '▼' : ''} ${bgsPts(sur30)} pts</b></span>` : ''}
-                </div>`;
+                const vt = window.EdteamUtile && window.EdteamUtile.variation ? window.EdteamUtile.variation(ordre, res) : null;
+                const fpts = x => Math.abs(x).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                const kv = vt ? BGS_SENS_COUL[vt.sens === 'fl' ? 'att' : vt.sens] || '#8a949c' : '#8a949c';
+                const fenTxt = vt ? (vt.pale ? 'sur 48 h (aucune mesure du jeu depuis le dernier tick)' : 'depuis le dernier tick') : '';
+                const phrase = vt ? 'Influence ' + fenTxt + ' : <b style="color: ' + kv + ';">' + (Math.abs(vt.v) < 0.05 ? 'inchangée' : (vt.v > 0 ? '▲ +' : '▼ −') + fpts(vt.v) + ' pts') + '</b>' + (vt.sens === 'up' ? ' : dans le sens de la directive.' : vt.sens === 'dn' ? ' : à contre-sens de la directive.' : '.') : 'Pas encore de mesure du jeu depuis le dernier tick.';
+                const tuileS = (t, v, k, sous) => '<div class="bp-t" style="--k:' + k + ';"><div class="t">' + t + '</div><div class="v">' + v + '</div><div class="s">' + sous + '</div></div>';
+                stats = '<div style="background: linear-gradient(90deg, color-mix(in srgb, ' + kv + ' 15%, #0a0c10), #0a0c10 72%); border-left: 4px solid ' + kv + '; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05); padding: 10px 14px; margin-top: 12px; font-size: 0.98em; line-height: 1.5; color: #eee;">' + phrase + '</div>'
+                    + '<div class="bp-tuiles" style="margin-top: 10px;">' + tuileS('MAINTENANT', bgsPct(res.influence) + ' %', '#00F0FF', 'influence de la faction (relevé du jeu)')
+                    + (res.variation !== null ? tuileS('DEPUIS LA DIRECTIVE', (res.variation > 0 ? '▲ +' : res.variation < 0 ? '▼ −' : '') + fpts(res.variation), colVar(res.variation), 'points d’influence depuis son émission') : '')
+                    + (sur30 !== null ? tuileS('SUR LA PÉRIODE', (sur30 > 0 ? '▲ +' : sur30 < 0 ? '▼ −' : '') + fpts(sur30), colVar(sur30), 'points d’influence sur la courbe affichée') : '') + '</div>';
             }
             let conflit = '';
             if (donnees && res.conflit) {
                 const estF1 = String(res.conflit.f1 || '').trim().toLowerCase() === f;
                 const moi = estF1 ? res.conflit.s1 : res.conflit.s2, adv = estF1 ? res.conflit.s2 : res.conflit.s1;
-                conflit = `<div style="margin-top: 10px; border: 1px dashed ${c}; padding: 8px 12px; font-size: 0.9em; color: #ccc;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE DU CONFLIT : <b style="color: ${cs}; font-size: 1.2em;">${moi} – ${adv}</b> <span style="color: #777;">vs</span> <b style="color: #aaa;">${escapeHtml(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</b> <span style="color: #666; font-size: 0.8em;">· relevé ${bgsAge(res.conflit.maj)}</span></div>`;
+                conflit = `<div style="margin-top: 10px; background: linear-gradient(90deg, color-mix(in srgb, ${cs} 15%, #0a0c10), #0a0c10 72%); border-left: 4px solid ${cs}; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05); padding: 10px 14px; font-size: 0.95em; color: #ccc;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE DU CONFLIT : <b style="color: ${cs}; font-size: 1.2em;">${moi} – ${adv}</b> <span style="color: #777;">vs</span> <b style="color: #aaa;">${escapeHtml(String(estF1 ? res.conflit.f2 : res.conflit.f1).toUpperCase())}</b> <span style="color: #666; font-size: 0.8em;">· relevé ${bgsAge(res.conflit.maj)}</span></div>`;
             }
             else if (donnees && (ordre.type_ordre === 'GUERRE' || ordre.type_ordre === 'ELECTION')) conflit = `<div style="margin-top: 10px; border: 1px dashed #555; padding: 8px 12px; font-size: 0.85em; color: #888;">${ordre.type_ordre === 'GUERRE' ? '⚔' : '🗳'} SCORE DU CONFLIT : <b style="color: #aaa;">non relevé</b> · il vient du journal d'un pilote présent dans le système : un pilote doit y passer (saut ou reconnexion) avec le plugin à jour.</div>`;
             const tableVoisines = voisines.length ? `<table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">${voisines.map(x => {
@@ -1497,14 +1506,12 @@
                 <div class="bgs-paysage">
                 <div class="bgs-col-effort">
                 <!-- 1. L'EFFORT : le cœur de l'application -->
-                <div class="bgs-cadre"><div class="bgs-cadre-t">EFFORT</div>
-                ${meta.jour ? `<div class="bgs-bande" style="border-color: ${c}66;">
-                    <div id="bt-hero" class="av">${bgsAvatars(meta.pilotes, 10, 34)}</div>
-                    <div class="qui"><span id="bt-hero-n"><b>${(meta.pilotes || []).length}</b></span></div>
-                    <div class="part"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b></div>
-                </div>
-                <div class="bgs-sec" style="margin-top: 14px;">BILAN DEPUIS L'ÉMISSION DE LA DIRECTIVE <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· total de l'escadron et ce que tu as fait</span></div>
-                <div id="bt-bilan"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement du bilan…</div></div>` : `<div class="bgs-hero" style="border-color: ${c}; margin-top: 0;">
+                <div class="bgs-cadre"><div class="bgs-cadre-t">${meta.jour ? 'QUI PARTICIPE ET COMMENT' : 'EFFORT'}</div>
+                ${meta.jour ? `<div id="bt-hero"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement…</div></div>
+                <div class="bgs-sec" style="margin-top: 16px;">PAR ACTIVITÉ <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· l'effort de l'escadron depuis l'émission</span></div>
+                <div id="bt-bilan"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement…</div></div>
+                <div class="bgs-sec" style="margin-top: 16px;">PARTICIPANTS <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· part de l'effort, activités et ticks quotidiens joués</span></div>
+                <div id="bt-part"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement…</div></div>` : `<div class="bgs-hero" style="border-color: ${c}; margin-top: 0;">
                     <div class="h1"><span>EFFORT DE L'ESCADRON</span><span style="display:inline-flex;align-items:center;gap:10px;align-self:center"><b style="color: #fff;white-space:nowrap;">${meta.global} %</b>${bgsAvatars(meta.pilotes, 6, 40)}</span></div>
                     <div class="h2"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b></div>
                     <div class="jgh"><i style="width: ${meta.global}%; opacity: 0.5; background: ${c};"></i><i style="width: ${meta.vous}%; background: ${c}; box-shadow: 0 0 9px ${c}, 0 0 2px ${c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
@@ -1535,7 +1542,7 @@
             document.getElementById('ordre-resultat-corps').innerHTML = html;
             m.style.display = 'flex';
             // mesures de la directive (bgs-ticks.js, SQL 111) : avatars des participants, bilan depuis l'emission, pilotes par tick sous la courbe ; sans le SQL la fenetre reste telle quelle
-            if (meta.jour && window.EdteamBgsTicks) { const corps = document.getElementById('ordre-resultat-corps'); window.EdteamBgsTicks.monter({ ordre, res: donnees ? res : null, couleur: cs, zone: corps.querySelector('.bt-zone'), zoneBilan: corps.querySelector('#bt-bilan'), zoneHero: corps.querySelector('#bt-hero'), zoneResume: corps.querySelector('#bt-hero-n'), moiId: profilCommandant ? profilCommandant.user_id : null, mobile: false }); }
+            if (meta.jour && window.EdteamBgsTicks) { const corps = document.getElementById('ordre-resultat-corps'); window.EdteamBgsTicks.monter({ ordre, res: donnees ? res : null, couleur: cs, zone: corps.querySelector('.bt-zone'), zoneBilan: corps.querySelector('#bt-bilan'), zoneHero: corps.querySelector('#bt-hero'), zonePart: corps.querySelector('#bt-part'), v2: true, classement: (((window.cacheResumeBgs || {})[ordre.id] || {}).pilotes) || [], moiId: profilCommandant ? profilCommandant.user_id : null, mobile: false }); }
         };
 
         // --- AFFICHAGE DYNAMIQUE DES ORDRES BGS SUR LE TABLEAU DE BORD ---
