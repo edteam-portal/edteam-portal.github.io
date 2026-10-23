@@ -216,9 +216,9 @@
     window.regrouperRafalesJournal = function (lignes, taille) {
         const N = taille || 5, PAUSE_RAFALE = 30 * 60000, PAUSE = 5 * 60000;
         const RAFALE = { MEURTRES: 1, PIRATAGE: 1, ECHECS: 1 }, ESPION = { RENSEIGNEMENT: 1, SCAN_JOUEUR: 1, MAJ_DONNEE: 1 },
-              GENERAL = { ECONOMIE: 1, SECURITE: 1, SCIENCE: 1, CONTREBANDE: 1, MISSIONS: 1, ELECTION_MISSIONS: 1, GUERRE_MISSIONS: 1, CZ_VICTOIRES: 1, VOLS: 1 };
+              GENERAL = { ECONOMIE: 1, SECURITE: 1, SCIENCE: 1, CONTREBANDE: 1, VENTE_PERTE: 1, MISSIONS: 1, ELECTION_MISSIONS: 1, GUERRE_MISSIONS: 1, CZ_VICTOIRES: 1, VOLS: 1 };
         const ts = e => { const t = new Date(String(e.date_action || '').replace(' ', 'T')).getTime(); return isNaN(t) ? 0 : t; };
-        const sortie = [], ouverts = {};
+        const sortie = [], ouverts = {}, venteDe = e => { const m = /Vente\s*:\s*(\d+)/.exec(String(e.details || '')); return m ? Number(m[1]) : 0; };
         const fermer = c => {
             const r = Object.assign({}, c.derniere, { valeur: c.somme, regroupe: c.n, date_action: c.derniere.date_action });
             if (c.espion && c.n > 1) {
@@ -227,6 +227,7 @@
                 if (c.derniere.type_action === 'MAJ_DONNEE') r.details = Object.keys(c.kinds).join(' · ');
                 else if (c.derniere.type_action === 'SCAN_JOUEUR') { const j = Object.keys(c.noms); r.details = j.slice(0, 3).join(', ') + (j.length > 3 ? ' +' + (j.length - 3) : ''); }
             }
+            if (c.derniere.type_action === 'ECONOMIE' && c.vente > 0) r.details = 'Vente : ' + Math.round(c.vente) + ' CR';   // total des ventes reunies (le benefice est dans valeur)
             sortie.push(r);
         };
         lignes.slice().sort((a, b) => ts(a) - ts(b)).forEach(e => {
@@ -235,8 +236,8 @@
             const cle = (espion ? [e.user_id, T] : [e.user_id, T, e.ordre_id || '', e.faction || '', e.systeme || '']).join('|'), t = ts(e), v = Number(e.valeur) || (rafale ? 1 : 0);
             let c = ouverts[cle];
             if (c && t - c.t > (rafale ? PAUSE_RAFALE : PAUSE)) { fermer(c); c = null; }
-            if (!c) c = ouverts[cle] = { somme: 0, n: 0, t: t, derniere: e, espion: espion, systemes: {}, kinds: {}, noms: {} };
-            c.somme += v; c.n += 1; c.t = t; c.derniere = e;
+            if (!c) c = ouverts[cle] = { somme: 0, n: 0, t: t, derniere: e, espion: espion, systemes: {}, kinds: {}, noms: {}, vente: 0 };
+            c.somme += v; c.vente += venteDe(e); c.n += 1; c.t = t; c.derniere = e;
             if (espion) {
                 c.systemes[String(e.systeme || '')] = 1;
                 String(e.details || '').split(' · ').forEach(k => { if (k) c.kinds[k] = 1; });
@@ -251,7 +252,7 @@
     // Specialite d'une action BGS = le titre que cette action fait progresser (meme correspondance que le calcul serveur des titres) ;
     // sert a colorer le journal des exploits (PC et mobile). Un echec ne fait progresser aucun titre : gris neutre.
     const SPEC_DE_ACTION = { SECURITE: 'SEC', MISSIONS: 'LOG', ELECTION_MISSIONS: 'LOG', GUERRE_MISSIONS: 'LOG', ECONOMIE: 'ECO', COLONISATION: 'BAT', SCIENCE: 'SCI',
-                             MEURTRES: 'EXE', VOLS: 'EXE', PIRATAGE: 'EXE', CONTREBANDE: 'EXE', CZ_VICTOIRES: 'GUE', RENSEIGNEMENT: 'ESP', SCAN_JOUEUR: 'ESP', MAJ_DONNEE: 'ESP' };
+                             MEURTRES: 'EXE', VOLS: 'EXE', PIRATAGE: 'EXE', CONTREBANDE: 'EXE', VENTE_PERTE: 'EXE', CZ_VICTOIRES: 'GUE', RENSEIGNEMENT: 'ESP', SCAN_JOUEUR: 'ESP', MAJ_DONNEE: 'ESP' };
     window.specialiteAction = function (type, typeOrdre) {
         const T = String(type || '').toUpperCase();
         // un echec n'a pas de specialite, SAUF sous une directive de BAISSE (action offensive : script SQL 66)

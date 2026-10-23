@@ -18,13 +18,13 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="photos.js?v=2"></script>
     <script src="annonce.js?v=15"></script>
-    <script src="revelations.js?v=6"></script>
+    <script src="revelations.js?v=8"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagnes-mobile.js?v=17"></script>
-    <script src="quotas-jour.js?v=12"></script>
+    <script src="quotas-jour.js?v=14"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
-    <script src="bgs-participants.js?v=1"></script>
+    <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
     <script src="campagnes-pp.js?v=19"></script>
     <script src="engagement-mobile.js?v=1"></script>
@@ -32,7 +32,7 @@
     <script src="qgsuivi.js?v=38"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=2"></script>
-    <script src="medailles.js?v=14"></script>
+    <script src="medailles.js?v=16"></script>
     <script src="etats-faction.js?v=4"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
@@ -1745,7 +1745,7 @@
             return {
                 MISSIONS: Math.round(15 * m), ELECTION_MISSIONS: Math.round(25 * m), GUERRE_BONDS: Math.round(20000000 * m), GUERRE_MISSIONS: Math.round(20 * m),
                 ECONOMIE: Math.round(25000000 * m), SECURITE: Math.round(10000000 * m), SCIENCE: Math.round(15000000 * m), MEURTRES: Math.round(5 * m),
-                VOLS: Math.round(10 * m), CONTREBANDE: Math.round(5000000 * m), ECHECS: Math.round(3 * m), CZ_VICTOIRES: Math.round(5 * m)
+                VOLS: Math.round(10 * m), CONTREBANDE: Math.round(5000000 * m), VENTE_PERTE: Math.round(5000000 * m), ECHECS: Math.round(3 * m), CZ_VICTOIRES: Math.round(5 * m)
             };
         }
 
@@ -1766,7 +1766,7 @@
                 pe = S('MISSIONS') + (S('ECONOMIE') + S('SECURITE') + S('SCIENCE')) / 2000000; pm = M('MISSIONS') + (M('ECONOMIE') + M('SECURITE') + M('SCIENCE')) / 2000000;
             } else if (o.type_ordre === 'BAISSE') {
                 somme = R(S('MEURTRES'), cap.MEURTRES) + R(S('CONTREBANDE'), cap.CONTREBANDE) + R(S('ECHECS'), cap.ECHECS); div = 3;   // regulateurs/donnees : rang BGS seulement
-                pe = S('MEURTRES') + S('CONTREBANDE') / 2000000 + S('ECHECS'); pm = M('MEURTRES') + M('CONTREBANDE') / 2000000 + M('ECHECS');
+                pe = S('MEURTRES') + (S('CONTREBANDE') + S('VENTE_PERTE')) / 2000000 + S('ECHECS'); pm = M('MEURTRES') + (M('CONTREBANDE') + M('VENTE_PERTE')) / 2000000 + M('ECHECS');
             } else if (o.type_ordre === 'GUERRE') {
                 const capB = cap.GUERRE_BONDS || cap.SECURITE, capM = cap.GUERRE_MISSIONS || cap.MISSIONS, capC = cap.CZ_VICTOIRES || (5 * nb);
                 const nbCz = Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0;
@@ -1912,10 +1912,10 @@
             const cr = new Intl.NumberFormat('fr-FR', { notation: 'compact', compactDisplay: 'short' });
             const fC = v => cr.format(v) + ' CR', fN = v => Number(v).toLocaleString('fr-FR');
             let L = [];
-            if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Commerce & Minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Cartographie)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
-            else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
+            if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Bénéfices du commerce & minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Cartographie)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
+            else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['📉 VENTES À PERTE (perte)', '#ff9f43', M('VENTE_PERTE'), S('VENTE_PERTE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
             else if (o.type_ordre === 'GUERRE') L = [['🏆 VICTOIRES EN CZ', '#FFD700', Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.nm) || 0, Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0, cap.CZ_VICTOIRES || (5 * nb), fN, ''], ['⚔️ OBLIGATIONS DE COMBAT (Bons)', '#FF7100', M('SECURITE'), S('SECURITE'), cap.GUERRE_BONDS || cap.SECURITE, fC, ''], ['🎯 MISSIONS MILITAIRES', '#FF3333', M('MISSIONS'), S('MISSIONS'), cap.GUERRE_MISSIONS || cap.MISSIONS, fN, ' CONTRATS']];
-            else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF'], ['💰 COMMERCE (Économie)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['🔬 EXPLORATION (Ventes de données)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
+            else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF'], ['💰 COMMERCE (Bénéfices)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['🔬 EXPLORATION (Ventes de données)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
             return L.map(([titre, c, moi, esc, plafond, f, u]) => {
                 const tot = plafond > 0 ? Math.min(100, 100 * esc / plafond) : 0, vous = plafond > 0 ? Math.min(tot, 100 * moi / plafond) : 0;
                 return { titre, c: tot >= 100 ? '#4CAF50' : c, moi, esc, plafond, f, u, tot, vous };
@@ -1928,14 +1928,14 @@
                     return `<div style="background: linear-gradient(to right, ${col}66 0%, ${col}66 ${l.prog}%, rgba(0,0,0,0.5) ${l.prog}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
                         <div style="color: #fff; font-weight: bold;"><span>${m.titre}</span></div>
                         <div style="color: #bbb; margin-top: 3px;">${EQ.texteMarge(l.ty, l)}</div>
-                    </div>`; }).join('') + (o.type_ordre === 'BAISSE' ? '<div style="color:#777; font-size:0.9em; line-height:1.5; margin-top:6px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive.</div>' : '');
+                    </div>`; }).join('') + (o.type_ordre === 'BAISSE' ? (() => { const P = EQ.perte(QJ); return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;border:1px solid rgba(255,255,255,0.05);border-radius:8px;background:rgba(0,0,0,0.5);padding:8px 10px;font-size:0.74em;"><span style="color:#fff;">📉 Ventes à perte</span><span style="color:#fff;">' + P.n + ' vente' + (P.n > 1 ? 's' : '') + ' · PERTE <b style="color:#ff9f43;">' + EQ.val('SCIENCE', P.s) + '</b></span></div>'; })() : '') + (o.type_ordre === 'BAISSE' ? '<div style="color:#777; font-size:0.9em; line-height:1.5; margin-top:6px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive.</div>' : '');
             }
             if (CJ) {
                 const M = CJ.moi || {}, nfr = n => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n);
                 const cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;border:1px solid rgba(255,255,255,0.05);border-radius:8px;background:rgba(0,0,0,0.5);padding:8px 10px;font-size:0.78em;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
                 const lignes = o.type_ordre === 'GUERRE'
                     ? cell('🏆', 'Victoires en CZ', '<b>' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">· ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>') + cell('⚔️', 'Bons de combat', '<b>' + EQ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>') + cell('🎯', 'Missions militaires', '<b>' + Math.round((M.MISSIONS || {}).n || 0) + '</b>')
-                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>') + cell('💰', 'Commerce (économie)', '<b>' + EQ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>') + cell('🔬', 'Données d\'exploration', '<b>' + EQ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
+                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>') + cell('💰', 'Commerce (bénéfices)', '<b>' + EQ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>') + cell('🔬', 'Données d\'exploration', '<b>' + EQ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
                 return lignes + '<div style="color:#777; font-size:0.66em; line-height:1.5; margin-top:4px;">Guerres et élections : aucune limite, faites-en le plus possible (pas de quota).</div>';
             }
             return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
@@ -2473,7 +2473,7 @@
             while (c.getUTCDay() !== 4 || c.getTime() > Date.now()) c.setUTCDate(c.getUTCDate() - 1);
             return c.getTime();
         }
-        const X_SPEC_TYPES = { SEC: ['SECURITE'], LOG: ['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'], ECO: ['ECONOMIE'], SCI: ['SCIENCE'], GUE: ['CZ_VICTOIRES'], EXE: ['MEURTRES', 'VOLS', 'PIRATAGE', 'CONTREBANDE', 'ECHECS'], ESP: ['RENSEIGNEMENT', 'SCAN_JOUEUR', 'MAJ_DONNEE'], ECH: ['ECHECS'] };
+        const X_SPEC_TYPES = { SEC: ['SECURITE'], LOG: ['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'], ECO: ['ECONOMIE'], SCI: ['SCIENCE'], GUE: ['CZ_VICTOIRES'], EXE: ['MEURTRES', 'VOLS', 'PIRATAGE', 'CONTREBANDE', 'VENTE_PERTE', 'ECHECS'], ESP: ['RENSEIGNEMENT', 'SCAN_JOUEUR', 'MAJ_DONNEE'], ECH: ['ECHECS'] };
 
         async function chargerExploitsMobile(force) {
             const cont = xEl('m-exploits-container');
@@ -2552,7 +2552,7 @@
                 const v = Math.abs(Number(valeur) || 0);
                 if (type === 'ECHECS') return echecBaisse ? v : 0;   // un echec ne rapporte rien, sauf sous une directive de baisse
                 if (type === 'COLONISATION') return v / 400;
-                if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
+                if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE', 'VENTE_PERTE'].includes(type)) return v / 2000000;
                 return v > 10000 ? v / 2000000 : v;
             };
             const coloNomJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
@@ -2605,9 +2605,11 @@
                 const lieu = XESC(lieuSys) + (lieuFac ? ' // ' + XESC(lieuFac) : '');
                 const pr = pointsRang(action, e.valeur, action === 'ECHECS' && !!ordre && String(ordre.type_ordre).toUpperCase() === 'BAISSE');
                 const ptsTxt = !(pr > 0) ? '' : `${pr < 0.1 ? '< 0,1' : '+' + (pr < 10 ? Math.round(pr * 10) / 10 : Math.round(pr)).toLocaleString('fr-FR')} PTS BGS`;
-                let q = e.valeur;
+                let q = e.valeur, venteTxt = '';
                 if (action === 'COLONISATION') q = `+${Number(e.valeur).toLocaleString('fr-FR')} T${e.details ? ' (' + String(e.details).replace(/^Livraison de colonisation\s*:\s*/i, '') + ')' : ''}`;
-                else if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) q = '+' + compact.format(e.valeur) + ' CR';
+                else if (action === 'VENTE_PERTE') q = 'PERTE ' + compact.format(e.valeur) + ' CR';
+                else if (action === 'ECONOMIE') { const mv = /Vente\s*:\s*(\d+)/.exec(String(e.details || '')); if (mv) { q = 'BÉNÉFICE +' + compact.format(e.valeur) + ' CR'; venteTxt = 'VENTE ' + compact.format(Number(mv[1])) + ' CR'; } else q = 'VENTE ' + compact.format(e.valeur) + ' CR'; }   // ancienne ligne (avant le plugin 2.46) : valeur = total de la vente
+                else if (['SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(action)) q = '+' + compact.format(e.valeur) + ' CR';
                 else if (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].includes(action)) q = `+${e.valeur} INF`;
                 else if (action === 'ECHECS') q = `${e.valeur} ÉCHEC${e.valeur > 1 ? 'S' : ''}`;
                 else if (action === 'MEURTRES') q = `${e.valeur} MEURTRE${e.valeur > 1 ? 'S' : ''}`;
@@ -2617,7 +2619,7 @@
                 else if (action === 'RENSEIGNEMENT') q = `+${e.valeur} SYSTÈME${e.valeur > 1 ? 'S' : ''} REPÉRÉ${e.valeur > 1 ? 'S' : ''}`;
                 else if (action === 'SCAN_JOUEUR') q = '+' + (e.regroupe || 1) + ' JOUEUR' + ((e.regroupe || 1) > 1 ? 'S' : '') + ' SCANNÉ' + ((e.regroupe || 1) > 1 ? 'S' : '');
                 else if (action === 'MAJ_DONNEE') q = '+' + (e.regroupe || 1) + ' MISE' + ((e.regroupe || 1) > 1 ? 'S' : '') + ' À JOUR';
-                return carte(col, 'CMDR ' + cmdr, quand, XESC(etiquette), XESC(String(q)), (lieu.trim() || ptsTxt) ? ligneBas(lieu, ptsTxt) : '');
+                return carte(col, 'CMDR ' + cmdr, quand, XESC(etiquette), XESC(String(q)), (lieu.trim() || ptsTxt || venteTxt) ? ligneBas(lieu + (venteTxt ? (lieu.trim() ? ' · ' : '') + venteTxt : ''), ptsTxt) : '');
             }).join('');
             if (tout.length > limite) h += `<button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="expPlusMobile()">AFFICHER LES SUIVANTES (${tout.length - limite})</button>`;
             cont.innerHTML = h;
@@ -4038,7 +4040,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=44', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=45', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

@@ -18,14 +18,14 @@
     <script src="shared-utils.js?v=4"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=40"></script>
+    <script src="navigation.js?v=42"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
     <script src="campagnes.js?v=61"></script>
-    <script src="quotas-jour.js?v=12"></script>
+    <script src="quotas-jour.js?v=14"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
-    <script src="bgs-participants.js?v=1"></script>
+    <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
     <script src="carte-campagnes.js?v=47"></script>
     <script src="campagnes-pp.js?v=20"></script>
@@ -1942,8 +1942,8 @@
                             capsTotal[cle] = val * nbParticipants;
                         }
 
-                        const totauxG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
-                        const totauxMoiG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, ECHECS: 0 };
+                        const totauxG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, VENTE_PERTE: 0, ECHECS: 0 };
+                        const totauxMoiG = { MISSIONS: 0, ECONOMIE: 0, SECURITE: 0, SCIENCE: 0, CZ_VICTOIRES: 0, MEURTRES: 0, VOLS: 0, PIRATAGE: 0, CONTREBANDE: 0, VENTE_PERTE: 0, ECHECS: 0 };
 
                         Object.entries(rs.types || {}).forEach(([t, x]) => { if (totauxG[t] !== undefined) { totauxG[t] += Number(x.s) || 0; totauxMoiG[t] += Number(x.m) || 0; } });
 
@@ -1973,7 +1973,7 @@
 
                             htmlJauges =
                                 genererJaugeHTML('📝 LOGISTIQUE (Missions)', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capsTotal['MISSIONS']), 'INF'), 'var(--ed-orange)', getRatio('MISSIONS'), getRatioVous('MISSIONS'), getRatio('MISSIONS') >= 100) +
-                                genererJaugeHTML('💰 ÉCONOMIE (Commerce & Minage)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '') +
+                                genererJaugeHTML('💰 ÉCONOMIE (Bénéfices du commerce & minage)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '') +
                                 genererJaugeHTML('💥 SÉCURITÉ (Primes & Conflits)', fmtDual(formatCR(totauxMoiG['SECURITE']), formatCR(totauxG['SECURITE']), formatCR(capsTotal['SECURITE'])), 'var(--ed-blue)', getRatio('SECURITE'), getRatioVous('SECURITE'), getRatio('SECURITE') >= 100) +
                                 genererJaugeHTML('🔬 SCIENCE (Cartographie)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
 
@@ -1987,6 +1987,7 @@
                             htmlJauges =
                                 genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiG['MEURTRES']), formatNum(totauxG['MEURTRES']), formatNum(capsTotal['MEURTRES'])), 'var(--ed-red)', getRatio('MEURTRES'), getRatioVous('MEURTRES'), getRatio('MEURTRES') >= 100) +
                                 genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiG['CONTREBANDE']), formatCR(totauxG['CONTREBANDE']), formatCR(capsTotal['CONTREBANDE'])), 'var(--ed-red)', getRatio('CONTREBANDE'), getRatioVous('CONTREBANDE'), getRatio('CONTREBANDE') >= 100, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '') +
+                                `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin:6px 0;"><span style="color:#fff;">📉 Ventes à perte</span><span style="color:#fff;">PERTE : <b>${formatCR(totauxMoiG['VENTE_PERTE'])}</b> <span style="color:#888;">· escadron ${formatCR(totauxG['VENTE_PERTE'])}</span></span></div>` +
                                 genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiG['ECHECS']), formatNum(totauxG['ECHECS']), formatNum(capsTotal['ECHECS'])), 'var(--ed-red)', getRatio('ECHECS'), getRatioVous('ECHECS'), getRatio('ECHECS') >= 100) +
                                 `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>`;
 
@@ -2028,7 +2029,7 @@
                             poidsTotalMoi = totauxMoiG['MISSIONS'] + (totauxMoiG['ECONOMIE']/2000000) + (totauxMoiG['SCIENCE']/2000000);
 
                             htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capElec), 'INF'), 'var(--ed-blue)', ratioElec, ratioElecVous, ratioElec >= 100) +
-                                genererJaugeHTML('💰 COMMERCE (Économie)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100) +
+                                genererJaugeHTML('💰 COMMERCE (Bénéfices)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100) +
                                 genererJaugeHTML('🔬 EXPLORATION (Ventes de données)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
                         }
 
@@ -2044,7 +2045,7 @@
                                 htmlJauges = QJ.lignes(ordre.type_ordre, Qd).map(l => {
                                     const m = QJ.META[l.ty];
                                     return genererJaugeHTML(m.titre, QJ.texteMarge(l.ty, l), m.c, l.prog, l.prog, l.reduit, '', '', '', (l.ty === 'ECONOMIE' || l.ty === 'CONTREBANDE') && window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '');
-                                }).join('') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
+                                }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd); return `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-top:6px;"><span style="color:#fff;">📉 Ventes à perte <span style="color:#888;font-size:0.85em;">(station de la faction visée)</span></span><span style="color:#fff;">${P.n} vente${P.n > 1 ? 's' : ''} · PERTE <b style="font-size:1.1em;color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b></span></div>`; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
                                 modeJour = true;
                             } else if (QJ.compteur(ordre.type_ordre, Qd)) {
                                 const M = Qd.moi || {}, cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
@@ -2055,7 +2056,7 @@
                                         + cell('🎯', 'Missions militaires', '<b style="font-size:1.2em;">' + Math.round((M.MISSIONS || {}).n || 0) + '</b> <span style="color:#888;">contrats</span>');
                                 } else {
                                     htmlJauges = cell('🗳️', 'Logistique électorale', '<b style="font-size:1.2em;">' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>')
-                                        + cell('💰', 'Commerce (économie)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>')
+                                        + cell('💰', 'Commerce (bénéfices)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>')
                                         + cell('🔬', 'Données d\'exploration (science)', '<b style="font-size:1.2em;">' + QJ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
                                 }
                                 htmlJauges += '<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:6px;">Les guerres et les élections sont les seules activités sans rendement décroissant : faites-en le plus possible, il n\'y a pas de quota.</div>';
@@ -2522,7 +2523,7 @@
             const v = Math.abs(Number(valeur) || 0);
             if (type === 'ECHECS') return echecBaisse ? v : 0;   // un échec ne rapporte rien, sauf sous une directive de baisse (1 point, 10 par jour au plus)
             if (type === 'COLONISATION') return v / 400;
-            if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].includes(type)) return v / 2000000;
+            if (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE', 'VENTE_PERTE'].includes(type)) return v / 2000000;
             return v > 10000 ? v / 2000000 : v;
         }
 
@@ -2849,11 +2850,17 @@
                                 badgeOrdreTexte = "RENSEIGNEMENT";
                             }
 
-                            let formatValeur = a.valeur;
+                            let formatValeur = a.valeur, formatSous = '';
                             if (a.type_action === 'COLONISATION') {
                                 const detailMarchandise = a.details ? ` (${String(a.details).replace(/^Livraison de colonisation\s*:\s*/i, '')})` : '';
                                 formatValeur = `+${new Intl.NumberFormat('fr-FR').format(a.valeur)} T${detailMarchandise}`;
-                            } else if (['ECONOMIE', 'CONTREBANDE'].includes(a.type_action)) {
+                            } else if (a.type_action === 'VENTE_PERTE') {
+                                formatValeur = "PERTE " + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
+                            } else if (a.type_action === 'ECONOMIE') {
+                                const cc = n => new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(n) + " CR", mv = /Vente\s*:\s*(\d+)/.exec(String(a.details || ''));
+                                if (mv) { formatValeur = "BÉNÉFICE +" + cc(a.valeur); formatSous = "VENTE " + cc(Number(mv[1])); }
+                                else formatValeur = "VENTE " + cc(a.valeur);   // ancienne ligne (avant le plugin 2.46) : valeur = total de la vente
+                            } else if (a.type_action === 'CONTREBANDE') {
                                 formatValeur = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
                             } else if (a.type_action === 'SECURITE') {
                                 formatValeur = "+" + new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(a.valeur) + " CR";
@@ -2909,7 +2916,7 @@
                                     <span style="color: #555; margin: 0 6px;">//</span>
                                     <span style="color: #aaa;">${cibleFac}</span>
                                 </div>
-                                <span title="${String(formatValeur).replace(/"/g, '&quot;')}" style="text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${colorOrdre}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}</span>
+                                <span title="${String(formatValeur + (formatSous ? ' · ' + formatSous : '')).replace(/"/g, '&quot;')}" style="text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${colorOrdre}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colorOrdre}40;">${formatValeur}${formatSous ? `<br><span style="color:#8a8f98; font-size:0.78em; font-weight:normal; text-shadow:none;">${formatSous}</span>` : ''}</span>
                                 <span style="text-align: right; color: ${colorOrdre}; font-size: 0.85em; font-weight: bold; text-transform: uppercase;" title="${spec.nom ? 'Spécialité : ' + spec.nom : 'Ne fait progresser aucun titre'}">[ ${vecteurTexte} ]</span>
                                 ${celluleRangBgs(a, echecBaisse)}
                             </div>`;
@@ -3170,10 +3177,10 @@
         };
     </script>
 
-    <script src="medailles.js?v=14"></script>
+    <script src="medailles.js?v=16"></script>
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=4"></script>
     <script src="commerce.js?v=7"></script>
-    <script src="footer.js?v=33"></script>
+    <script src="footer.js?v=34"></script>
 </body>
 </html>

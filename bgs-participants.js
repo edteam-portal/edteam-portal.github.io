@@ -9,9 +9,9 @@
     const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const fr = (n, d) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: d == null ? 1 : d }).format(Number(n) || 0);
     const JOUR = 86400000;
-    const COUL = { MISSIONS: "#FF7100", ECONOMIE: "#00FF66", SECURITE: "#00F0FF", SCIENCE: "#B026FF", MEURTRES: "#ff4d4d", CONTREBANDE: "#ff9f43", ECHECS: "#8a949c", CZ_VICTOIRES: "#FFD700" };
-    const ICO = { MISSIONS: "📝", ECONOMIE: "💰", SECURITE: "💥", SCIENCE: "🔬", MEURTRES: "☠️", CONTREBANDE: "📦", ECHECS: "❌", CZ_VICTOIRES: "🏆" };
-    const ENCREDITS = { ECONOMIE: 1, SECURITE: 1, SCIENCE: 1, CONTREBANDE: 1 };
+    const COUL = { MISSIONS: "#FF7100", ECONOMIE: "#00FF66", SECURITE: "#00F0FF", SCIENCE: "#B026FF", MEURTRES: "#ff4d4d", CONTREBANDE: "#ff9f43", VENTE_PERTE: "#ff9f43", ECHECS: "#8a949c", CZ_VICTOIRES: "#FFD700" };
+    const ICO = { MISSIONS: "📝", ECONOMIE: "💰", SECURITE: "💥", SCIENCE: "🔬", MEURTRES: "☠️", CONTREBANDE: "📦", VENTE_PERTE: "📉", ECHECS: "❌", CZ_VICTOIRES: "🏆" };
+    const ENCREDITS = { ECONOMIE: 1, SECURITE: 1, SCIENCE: 1, CONTREBANDE: 1, VENTE_PERTE: 1 };
     const pts = (ty, v) => { v = Math.abs(Number(v) || 0); return ENCREDITS[ty] ? v / 2000000 : v; };
     const jj = ms => { const d = new Date(ms); return String(d.getUTCDate()).padStart(2, "0") + "/" + String(d.getUTCMonth() + 1).padStart(2, "0"); };
     const tip = (t, col) => " data-pptip=\"" + E(t) + "\" data-tc=\"" + (col || "#FF7100") + "\"";

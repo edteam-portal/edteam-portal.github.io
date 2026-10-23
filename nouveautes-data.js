@@ -5,6 +5,20 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-commerce-benefices', date: '2026-10-23T11:03:36Z', type: 'AMELIORE',
+        titre: 'Commerce : seul le bénéfice compte, et il s’affiche à côté du montant de la vente',
+        texte: 'Dans le jeu, seul le bénéfice d’une vente fait monter l’influence d’une faction, pas le chiffre d’affaires. EDTEAM compte donc désormais le BÉNÉFICE (vente moins prix payé) pour l’économie : directives de hausse, titre du Magnat, points de rang. Une cargaison minée ou récupérée, dont le prix payé est nul, compte en entier. Une vente à perte ou à prix coûtant ne compte plus en économie. Le journal des exploits et la fenêtre d’une directive indiquent « BÉNÉFICE » avec le montant de la VENTE à côté. Les anciennes lignes, enregistrées avant, gardent leur ancien montant (marqué « VENTE »).',
+        important: false,
+        action: 'Plugin 2.46 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois.'
+    },
+    {
+        id: '2026-10-baisse-vente-a-perte', date: '2026-10-23T10:52:56Z', type: 'NOUVEAU',
+        titre: 'Baisse : la vente à perte compte, et la perte s’affiche',
+        texte: 'Vendre une marchandise moins cher que vous ne l’avez payée, dans une station contrôlée par la faction visée par une directive de baisse, fait baisser son influence. Cette action compte maintenant : elle rapporte des points de rang BGS (la perte divisée par 2 millions de crédits, comme la contrebande) et une opération pour l’Exécuteur. La fenêtre d’une directive de baisse (PC et mobile) affiche « Ventes à perte » avec le nombre de ventes et la PERTE en crédits, et le journal des exploits montre « PERTE … CR ». Il faut le plugin 2.46 ; les ventes à perte sans directive de baisse restent du commerce normal.',
+        important: false,
+        action: 'Plugin 2.46 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois.'
+    },
+    {
         id: '2026-10-election-commerce-exploration', date: '2026-10-23T10:42:05Z', type: 'AMELIORE',
         titre: 'Élections : le commerce et les ventes de données d’exploration comptent aussi',
         texte: 'Pour gagner une élection dans un système, les missions de la faction ne sont pas la seule voie : vendre de la marchandise (commerce) et vendre des données d’exploration (science) à une station de la faction comptent aussi. La fenêtre d’une directive Élection (PC et mobile) affiche maintenant trois lignes : logistique électorale, commerce et données d’exploration, avec votre total du jour. Comme pour les guerres, il n’y a aucune limite : faites-en le plus possible. Rien à mettre à jour : le plugin envoyait déjà ces ventes.',

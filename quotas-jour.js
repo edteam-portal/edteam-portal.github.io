@@ -13,7 +13,7 @@
     const TYPES = { HAUSSE: ["MISSIONS", "ECONOMIE", "SECURITE", "SCIENCE"], BAISSE: ["MEURTRES", "CONTREBANDE", "ECHECS"] };
     const META = {
         MISSIONS: { e: "📝", court: "missions", unite: "INF", titre: "📝 LOGISTIQUE (Missions)", c: "var(--ed-orange)", ch: "#FF7100" },
-        ECONOMIE: { e: "💰", court: "économie", unite: "CR", titre: "💰 ÉCONOMIE (Commerce & Minage)", c: "#00FF66", ch: "#00FF66" },
+        ECONOMIE: { e: "💰", court: "économie", unite: "CR", titre: "💰 ÉCONOMIE (Bénéfices du commerce & minage)", c: "#00FF66", ch: "#00FF66" },
         SECURITE: { e: "💥", court: "sécurité", unite: "CR", titre: "💥 SÉCURITÉ (Primes & Conflits)", c: "var(--ed-blue)", ch: "#00F0FF" },
         SCIENCE: { e: "🔬", court: "science", unite: "CR", titre: "🔬 SCIENCE (Cartographie)", c: "#B026FF", ch: "#B026FF" },
         MEURTRES: { e: "☠️", court: "meurtres", unite: "", titre: "☠️ MEURTRES (Vaisseaux & Sol)", c: "var(--ed-red)", ch: "#FF3333" },
@@ -61,6 +61,8 @@
             return { ty, q, s, reste: Math.max(0, q - s), prog: q > 0 ? Math.min(100, 100 * s / q) : 0, marge: q > 0 ? Math.max(0, 100 * (1 - s / q)) : 0, reduit: q > 0 && s >= q, surplus: q > 0 ? Math.max(0, s - q) : 0 };
         });
     }
+    // ventes a perte d'un pilote depuis le dernier tick (directive de BAISSE) : { perte en CR, nombre de ventes } ; pas de quota
+    const perte = entree => { const x = (entree && entree.moi && entree.moi.VENTE_PERTE) || {}; return { s: Number(x.s) || 0, n: Math.round(Number(x.n) || 0) }; };
     const compteur = (typeOrdre, entree) => {
         const m = (entree && entree.moi) || {}, T = String(typeOrdre || "").toUpperCase();
         if (T === "GUERRE") return { n: Math.round(Number(m.CZ_VICTOIRES && m.CZ_VICTOIRES.n) || 0), mot: "victoire", suff: "s" };
@@ -134,12 +136,12 @@
     }
 
     // ---- bilan depuis l'emission de la directive (tableau + classement des pilotes par type) ----
-    const TYPES_BILAN = { HAUSSE: ["MISSIONS", "ECONOMIE", "SECURITE", "SCIENCE"], BAISSE: ["MEURTRES", "CONTREBANDE", "ECHECS"], GUERRE: ["CZ_VICTOIRES", "SECURITE", "MISSIONS"], ELECTION: ["MISSIONS", "ECONOMIE", "SCIENCE"] };
-    const META2 = Object.assign({}, META, { CZ_VICTOIRES: { e: "🏆", court: "victoires en CZ", unite: "pts", c: "#FFD700" } });
-    const NOMS = { MISSIONS: "Logistique (missions)", ECONOMIE: "Économie (commerce et minage)", SECURITE: "Sécurité (primes et conflits)", SCIENCE: "Science (cartographie)", MEURTRES: "Meurtres", CONTREBANDE: "Contrebande (marché noir)", ECHECS: "Missions échouées", CZ_VICTOIRES: "Victoires en CZ" };
+    const TYPES_BILAN = { HAUSSE: ["MISSIONS", "ECONOMIE", "SECURITE", "SCIENCE"], BAISSE: ["MEURTRES", "CONTREBANDE", "VENTE_PERTE", "ECHECS"], GUERRE: ["CZ_VICTOIRES", "SECURITE", "MISSIONS"], ELECTION: ["MISSIONS", "ECONOMIE", "SCIENCE"] };
+    const META2 = Object.assign({}, META, { CZ_VICTOIRES: { e: "🏆", court: "victoires en CZ", unite: "pts", c: "#FFD700" }, VENTE_PERTE: { e: "📉", court: "ventes à perte", unite: "CR", c: "#ff9f43" } });
+    const NOMS = { MISSIONS: "Logistique (missions)", ECONOMIE: "Économie (bénéfices du commerce et du minage)", SECURITE: "Sécurité (primes et conflits)", SCIENCE: "Science (cartographie)", MEURTRES: "Meurtres", CONTREBANDE: "Contrebande (marché noir)", ECHECS: "Missions échouées", CZ_VICTOIRES: "Victoires en CZ", VENTE_PERTE: "Ventes à perte (perte en CR)" };
     function fmtBilan(ty, typeOrdre, x) {
         x = Number(x) || 0;
-        if (ty === "ECONOMIE" || ty === "SECURITE" || ty === "SCIENCE" || ty === "CONTREBANDE") return cr(x);
+        if (ty === "ECONOMIE" || ty === "SECURITE" || ty === "SCIENCE" || ty === "CONTREBANDE" || ty === "VENTE_PERTE") return cr(x);
         if (ty === "MISSIONS") return fr(x) + (String(typeOrdre).toUpperCase() === "GUERRE" ? " contrats" : " INF");
         if (ty === "CZ_VICTOIRES") return fr(x) + " pts";
         return fr(x);
@@ -169,5 +171,5 @@
     }
     function bascule(ligne) { const n = ligne.nextElementSibling; if (n && n.classList.contains("qj-rang")) { if (typeof sonClic === "function") sonClic(); n.classList.toggle("ouv"); } }
 
-    window.EdteamQuotas = { charger, types, META, lignes, compteur, texteMarge, pips, val, ticksEnvoi, assurerTicks, participants, bilan, bascule, css2, av, fmtBilan, NOMS, TYPES_BILAN };
+    window.EdteamQuotas = { charger, types, META, lignes, compteur, perte, texteMarge, pips, val, ticksEnvoi, assurerTicks, participants, bilan, bascule, css2, av, fmtBilan, NOMS, TYPES_BILAN };
 })();
