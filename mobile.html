@@ -1820,6 +1820,9 @@
                 if (r.error) { console.error('Erreur résultats BGS (mobile) :', r.error.message); return { dir: {}, sys: {} }; }
                 const out = { dir: {}, sys: (r.data && r.data.systemes) || {}, act: (r.data && r.data.activite) || {}, tick: (r.data && r.data.tick) || null };
                 ((r.data && r.data.directives) || []).forEach(x => { out.dir[x.ordre_id] = x; });
+                // passages des pilotes DE L'ESCADRON dans les systemes cibles (SQL 135) : nombres seulement ; null sans la fonction serveur
+                out.pass = null;
+                try { const rp = await supabaseApp.rpc('bgs_passages_escadron'); if (!rp.error && rp.data) out.pass = rp.data; } catch (e) { /* sans cette ligne */ }
                 return out;
             }, force);
         }
@@ -1866,7 +1869,15 @@
             if (genre === 'morts') return jour === 0 ? { txt: 'AUCUN MORT', coul: '#2fe07a' } : r > 1.5 && jour >= 2 ? { txt: 'ÉLEVÉ', coul: '#ff4d4d' } : r > 1.15 ? { txt: 'AU-DESSUS DE L\'HABITUDE', coul: '#FFB000' } : { txt: 'HABITUEL', coul: '#9fb0b8' };
             return r < 0.6 ? { txt: 'CALME', coul: '#6fa8ff' } : r > 1.4 ? { txt: 'ANIMÉ', coul: '#00F0FF' } : { txt: 'HABITUEL', coul: '#9fb0b8' };
         }
-        function xActivite(a) {
+        // « N pilotes de l'escadron relevés ici ces 24 h » (SQL 135) : seulement les pilotes dont EDMC tourne, par ESCADRON ; aucun nom
+        function xPassages(systeme) {
+            const P = (window.cacheResultatsBgs || {}).pass; if (!P) return '';
+            const v = (P.sys || {})[String(systeme || '').toUpperCase()] || { p: 0, a: 0 }, p = Number(v.p) || 0, n = Number(v.a) || 0;
+            const h = P.depuis ? (Date.now() / 1000 - P.depuis) / 3600 : 0;
+            const debut = !P.depuis || h < 24 ? ' · comptage incomplet (commencé ' + (!P.depuis ? 'à l’instant' : 'il y a ' + Math.max(1, Math.round(h)) + ' h') + ')' : '';
+            return `<div style="margin-top: 6px; padding-top: 5px; border-top: 1px dashed rgba(0,240,255,.25); color: #9fb0ba; font-size: 0.66em; line-height: 1.45;">👥 <b style="color: #fff; font-size: 1.25em; font-weight: normal;">${p}</b> pilote${p > 1 ? 's' : ''} de l'escadron ici / 24 h${n > p ? ' (' + n + ' arrivées)' : ''}<div style="color: #666;">EDMC allumé seulement${debut}</div></div>`;
+        }
+        function xActivite(a, systeme) {
             if (!a) return '';
             const carte = (titre, icone, jour, semaine, col, coul, unite, genre) => {
                 if (jour === null || jour === undefined) return '';
@@ -1876,7 +1887,7 @@
                     <div style="color: ${coul}; letter-spacing: 2px; font-size: 0.68em; font-weight: bold;">${icone} ${titre}</div>
                     <div style="margin-top: 3px;"><b style="font-size: 2.1em; line-height: 1; color: #fff; text-shadow: 0 0 12px ${coul};">${Number(jour).toLocaleString('fr-FR')}</b> <span style="color: #888; font-size: 0.68em;">${unite}</span></div>
                     <div style="color: ${n.coul}; font-size: 0.62em; letter-spacing: 1px; margin-top: 4px;">${n.txt}</div>
-                    <div style="color: #888; font-size: 0.68em; min-height: 1.2em;">${l2}</div>${xSpark((a.c || []).filter(p => p[col] !== null).map(p => [p[0], p[col]]), coul)}</div>`;
+                    <div style="color: #888; font-size: 0.68em; min-height: 1.2em;">${l2}</div>${xSpark((a.c || []).filter(p => p[col] !== null).map(p => [p[0], p[col]]), coul)}${genre === 'trafic' ? xPassages(systeme) : ''}</div>`;
             };
             const t1 = carte('TRAFIC', '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux / 24 h', 'trafic'), t2 = carte('MORTS', '☠', a.mj, a.ms, 2, '#ff4d4d', 'morts / 24 h', 'morts');
             if (!t1 && !t2) return '';
@@ -2352,7 +2363,7 @@
                     }).join('') + (masquees > 0 ? `<div style="color: #666; font-size: 0.68em; margin-top: 6px;">${masquees} faction${masquees > 1 ? 's' : ''} à 0 % masquée${masquees > 1 ? 's' : ''} (encore listée${masquees > 1 ? 's' : ''} par EDSM)</div>` : '');
                 }
                 if (donnees && window.edteamEtats) corps += `<div class="mdet-sec" style="margin-top: 12px;">ÉTATS DE LA FACTION</div>` + window.edteamEtats.bloc(res) + window.edteamEtats.conseilsBloc(ordre.type_ordre, res, 'mdet-sec');
-                if (donnees) corps += xActivite(((window.cacheResultatsBgs || {}).act || {})[String(ordre.systeme_cible || '').toUpperCase()]);
+                if (donnees) corps += xActivite(((window.cacheResultatsBgs || {}).act || {})[String(ordre.systeme_cible || '').toUpperCase()], ordre.systeme_cible);
                 const rsJ = (window.cacheResumeBgs || {})[ordre.id] || { types: {}, pilotes: [] };
                 const avJ = xAvancementOrdre(ordre, rsJ);
                 const vousJ = Math.round(avJ.pct * avJ.part / 100);

@@ -1239,6 +1239,9 @@
             if (r.error) { console.error('Erreur résultats BGS :', r.error.message); return m ? m.data : { dir: {}, sys: {} }; }
             const data = { dir: {}, sys: (r.data && r.data.systemes) || {}, act: (r.data && r.data.activite) || {}, tick: (r.data && r.data.tick) || null };
             ((r.data && r.data.directives) || []).forEach(d => { data.dir[d.ordre_id] = d; });
+            // passages des pilotes DE L'ESCADRON dans les systemes cibles (SQL 135) : nombres seulement ; null sans la fonction serveur
+            data.pass = null;
+            try { const rp = await supabaseApp.rpc('bgs_passages_escadron'); if (!rp.error && rp.data) data.pass = rp.data; } catch (e) { /* sans cette ligne */ }
             window.memoResultatsBgs = { ts: Date.now(), data };
             return data;
         }
@@ -1285,7 +1288,15 @@
             if (genre === 'morts') return jour === 0 ? { txt: 'AUCUN MORT', coul: '#2fe07a', max, med } : r > 1.5 && jour >= 2 ? { txt: 'ÉLEVÉ', coul: '#ff4d4d', max, med } : r > 1.15 ? { txt: 'AU-DESSUS DE L\'HABITUDE', coul: '#FFB000', max, med } : { txt: 'HABITUEL', coul: '#9fb0b8', max, med };
             return r < 0.6 ? { txt: 'CALME', coul: '#6fa8ff', max, med } : r > 1.4 ? { txt: 'ANIMÉ', coul: '#00F0FF', max, med } : { txt: 'HABITUEL', coul: '#9fb0b8', max, med };
         }
-        function bgsActiviteHtml(a) {
+        // « N pilotes de l'escadron relevés ici ces 24 h » (SQL 135) : seulement les pilotes dont EDMC tourne, par ESCADRON (jamais tout EDTEAM) ; aucun nom
+        function bgsPassagesHtml(systeme) {
+            const P = (window.cacheResultatsBgs || {}).pass; if (!P) return '';
+            const v = (P.sys || {})[String(systeme || '').toUpperCase()] || { p: 0, a: 0 }, p = Number(v.p) || 0, n = Number(v.a) || 0;
+            const h = P.depuis ? (Date.now() / 1000 - P.depuis) / 3600 : 0;
+            const debut = !P.depuis || h < 24 ? ` · comptage commencé ${!P.depuis ? 'à l’instant' : 'il y a ' + Math.max(1, Math.round(h)) + ' h'} : incomplet` : '';
+            return `<div style="margin-top: 8px; padding-top: 7px; border-top: 1px dashed rgba(0,240,255,.25); color: #9fb0ba; font-size: 0.78em; line-height: 1.5;" title="Pilotes de l'escadron arrivés dans ce système ces 24 dernières heures, avec EDMC allumé. Un pilote qui joue sans EDMC n'est pas vu."><span style="color: #00F0FF;">👥</span> <b style="color: #fff; font-size: 1.3em; font-weight: normal;">${p}</b> pilote${p > 1 ? 's' : ''} de l'escadron relevé${p > 1 ? 's' : ''} ici ces 24 h${n > p ? ' <span style="color: #777;">(' + n + ' arrivées)</span>' : ''}<div style="color: #666; font-size: 0.9em;">EDMC allumé seulement${debut}</div></div>`;
+        }
+        function bgsActiviteHtml(a, systeme) {
             if (!a) return '';
             const carte = (titre, icone, jour, semaine, col, coul, unite, genre) => {
                 if (jour === null || jour === undefined) return '';
@@ -1297,10 +1308,10 @@
                     <div style="display: flex; align-items: flex-end; gap: 6px 14px; margin-top: 6px; flex-wrap: wrap;">
                         <div style="white-space: nowrap;"><b style="font-size: 2.8em; line-height: 1; color: #fff; text-shadow: 0 0 14px ${coul};">${Number(jour).toLocaleString('fr-FR')}</b><div style="color: #888; font-size: 0.78em;">${unite}</div></div>
                         <div style="flex: 1 1 90px; min-width: 0; max-width: 100%; padding-bottom: 2px;">${bgsSpark((a.c || []).filter(p => p[col] !== null).map(p => [p[0], p[col]]), coul)}</div>
-                    </div>${jauge}<div style="color: #888; font-size: 0.78em; margin-top: 6px;">${l2}</div></div>`;
+                    </div>${jauge}<div style="color: #888; font-size: 0.78em; margin-top: 6px;">${l2}</div>${genre === 'trafic' ? bgsPassagesHtml(systeme) : ''}</div>`;
             };
-            const vide = (titre, icone, coul, txt) => `<div style="border: 1px dashed #333; border-left: 3px solid ${coul}55; background: rgba(0,0,0,.3); padding: 12px 16px; min-width: 0;"><span style="color: ${coul}99; letter-spacing: 3px; font-size: 0.8em; font-weight: bold;">${icone} ${titre}</span><div style="color: #777; font-size: 0.8em; margin-top: 6px;">${txt}</div></div>`;
-            const t1 = carte('TRAFIC', '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux ces dernières 24 h', 'trafic') || vide('TRAFIC', '✈', '#00F0FF', 'Aucune donnée de trafic pour ce système chez EDSM.');
+            const vide = (titre, icone, coul, txt, extra = '') => `<div style="border: 1px dashed #333; border-left: 3px solid ${coul}55; background: rgba(0,0,0,.3); padding: 12px 16px; min-width: 0;"><span style="color: ${coul}99; letter-spacing: 3px; font-size: 0.8em; font-weight: bold;">${icone} ${titre}</span><div style="color: #777; font-size: 0.8em; margin-top: 6px;">${txt}</div>${extra}</div>`;
+            const t1 = carte('TRAFIC', '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux ces dernières 24 h', 'trafic') || vide('TRAFIC', '✈', '#00F0FF', 'Aucune donnée de trafic pour ce système chez EDSM.', bgsPassagesHtml(systeme));
             const t2 = carte('MORTS', '☠', a.mj, a.ms, 2, '#ff4d4d', 'morts ces dernières 24 h', 'morts') || vide('MORTS', '☠', '#ff4d4d', 'Aucun mort enregistré par EDSM dans ce système.');
             return `<div class="bgs-cadre"><div class="bgs-cadre-t">ACTIVITÉ DU SYSTÈME <small>· relevé ${bgsAge(a.t)}</small></div>
                 <div class="bgs-act" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">${t1}${t2}</div>
@@ -1534,7 +1545,7 @@
                         ${tableVoisines}
                         ${donnees ? `<div class="bgs-sec" style="margin-top: 16px;">ÉTATS DE LA FACTION</div>${window.edteamEtats ? window.edteamEtats.bloc(res) : ''}${window.edteamEtats ? window.edteamEtats.conseilsBloc(ordre.type_ordre, res, 'bgs-sec') : ''}` : ''}
                     </div>
-                    ${donnees ? bgsActiviteHtml(((window.cacheResultatsBgs || {}).act || {})[String(ordre.systeme_cible || '').toUpperCase()]) : ''}
+                    ${donnees ? bgsActiviteHtml(((window.cacheResultatsBgs || {}).act || {})[String(ordre.systeme_cible || '').toUpperCase()], ordre.systeme_cible) : ''}
                 </div>
                 </div>
                 <div style="color: #777; font-size: 0.68em; line-height: 1.4; margin-top: 6px;">ⓘ Résultat constaté dans le jeu (source EDSM), relevé deux fois par jour. D'autres escadrons et des PNJ agissent aussi dans ce système : ce chiffre n'est pas la preuve que nos seules actions en sont la cause. Le vert signifie « va dans le sens de la directive ». L'exobiologie compte pour votre rang BGS (en soutien libre), pas pour les directives : elle ne change pas l'influence.</div>`;

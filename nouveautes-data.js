@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-passages-escadron', date: '2026-10-23T12:29:16Z', type: 'AMELIORE',
+        titre: 'Trafic d’un système : combien de pilotes de l’escadron y sont passés',
+        texte: 'Sous le trafic EDSM, la carte « Trafic » de la fenêtre d’une directive indique maintenant combien de pilotes de votre escadron ont été relevés dans ce système ces 24 dernières heures. Seuls les pilotes dont EDMC est allumé sont vus (un pilote qui joue sans EDMC n’apparaît pas), aucun nom n’est affiché, et seul votre escadron est compté. Le comptage a commencé au lancement de cette fonction : il est incomplet pendant les 24 premières heures. Le chiffre EDSM reste un minimum.',
+        important: false
+    },
+    {
         id: '2026-10-election-ou-vendre', date: '2026-10-23T12:12:05Z', type: 'AMELIORE',
         titre: 'Élections : le bouton « Où vendre ? » est là aussi',
         texte: 'Dans une directive d’élection, la ligne « Commerce (bénéfices) » a maintenant son bouton « Où vendre ? », comme dans une directive de hausse : la fenêtre propose où acheter et où vendre, dans une station de la faction, pour le plus gros bénéfice avec votre soute.',
