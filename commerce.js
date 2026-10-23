@@ -1,4 +1,5 @@
 // ROUTES COMMERCIALES D'UNE DIRECTIVE DE HAUSSE (« Où vendre ? ») ET ROUTES DE CONTREBANDE D'UNE DIRECTIVE DE BAISSE : fenêtre commune au PC (bgs.html) et au mobile (mobile.html).
+// Baisse, vente a perte : rpc routes_perte (script SQL 133) = achat PLUS CHER que le prix de reprise d'une station de la faction ; la PERTE (prix paye - prix de reprise) est le seul montant affiche ; classement au choix du pilote (perte la plus faible / la plus forte).
 // Baisse : rpc routes_contrebande (script SQL 73) = stations de la faction avec marché noir + où acheter de la marchandise généralement illégale ; aucun bénéfice calculé (prix du marché noir inconnus).
 // Données : rpc routes_commerce(ordre, rayon) (script SQL 72) = marchandises que les stations de la faction achètent dans le système cible + stations proches où les acheter,
 //   tirées de Spansh, gardées 2 h côté serveur pour tout l'escadron. Si rien n'est en mémoire, la base lance la recherche en tâche de fond (EN_COURS) : on relit toutes les 4 s.
@@ -96,6 +97,8 @@
     .ec-avert{border:1px solid rgba(232,163,90,.5);background:rgba(232,163,90,.07);color:#e8a35a;padding:8px 14px;font-size:.76em;line-height:1.55;margin-bottom:16px}
     .ec-cout{color:#FFD700;font-size:1.5em;line-height:1}.ec-cout small{font-size:.42em;color:#8a9;letter-spacing:2px;display:block;margin-top:3px}
     .ec-px2{color:#e8a35a;font-size:1.02em;line-height:1.4}
+    .ec-perte{color:#ff9f43;font-size:1.9em;text-shadow:0 0 14px rgba(255,159,67,.5);line-height:1}.ec-perte small{font-size:.36em;color:#c99;letter-spacing:2px;display:block;margin-top:3px}
+    .ec-rc .l1 span.p{color:#ff9f43}.ec-tri{display:inline-flex;align-items:center;gap:8px}
     .ec-msg{padding:34px 18px;text-align:center;color:#aaa;line-height:1.7}
     .ec-msg b{color:#FFD700;letter-spacing:2px;font-weight:normal;display:block;margin-bottom:6px}
     .ec-msg .ec-elargir{margin-top:6px;background:rgba(0,240,255,.1);border:1px solid #00F0FF;color:#00F0FF;font-family:inherit;font-size:.95em;letter-spacing:1.5px;padding:8px 18px;cursor:pointer}.ec-msg .ec-elargir:hover{background:rgba(0,240,255,.22)}
@@ -115,7 +118,8 @@
     const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, heures: (() => { const v = parseInt(lire('edteam_com_h') || '', 10); return [24, 168, 4320].includes(v) ? v : (lire('edteam_com_h24') === '1' ? 24 : 168); })(), stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
-        grande: () => lire('edteam_com_grande') !== '0'
+        grande: () => lire('edteam_com_grande') !== '0',
+        tri: () => (lire('edteam_perte_tri') === 'forte' ? 'forte' : 'faible')      // vente a perte : perte la plus faible (defaut) ou la plus forte
     };
 
     function jours(maj) { const t = Date.parse(maj || ''); return isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000)); }
@@ -172,8 +176,36 @@
         return routes;
     }
 
+    // vente a perte : pour chaque marchandise, la paire (source, station de la faction) dont le prix paye depasse le prix de reprise ; perte par tonne = prix paye - prix de reprise
+    // (une perte stricte seulement : un prix coutant ne compte pas). Classement : perte totale pour la soute, la plus faible ou la plus forte selon le choix du pilote.
+    function calculerPerte(donnees) {
+        const soute = prefs.soute(), grande = prefs.grande(), forte = prefs.tri() === 'forte';
+        const okStation = s => !(grande && !s.grande);
+        const routes = [];
+        ((donnees && donnees.marchandises) || []).forEach(m => {
+            let choix = null;
+            (m.ventes || []).filter(okStation).forEach(v => (m.sources || []).filter(okStation).forEach(s => {
+                const perte = (Number(s.prix) || 0) - (Number(v.prix) || 0);
+                if (perte <= 0) return;
+                const qte = Math.min(soute, Number(v.demande) || 0, Number(s.stock) || 0);
+                if (qte <= 0) return;
+                const r = { m, v, s, perte, qte, total: perte * qte };
+                if (!choix || (forte ? r.total > choix.total : r.total < choix.total)) choix = r;
+            }));
+            if (choix) routes.push(choix);
+        });
+        routes.sort((a, b) => (forte ? b.total - a.total : a.total - b.total));
+        return routes;
+    }
+
     // ----- affichage -----
     function entete() {
+        if (etat.mode === 'perte') {
+            return '<div class="ec-tete"><div><small>DIRECTIVE #' + E(etat.ordre) + ' · BAISSE · VENTE À PERTE</small>'
+                + '<h2>OÙ VENDRE À PERTE ?<span>' + cp(etat.systeme, String(etat.systeme).toUpperCase()) + ' · ' + E(String(etat.faction).toUpperCase()) + '</span></h2>'
+                + '<div class="ec-pas"><b>1</b>ACHETEZ CHER<i>›</i><b>2</b>TRANSPORTEZ<i>›</i><b>3</b>VENDEZ MOINS CHER À UNE STATION DE LA FACTION</div></div>'
+                + '<span class="ec-x" onclick="edteamCommerce.fermer()">✕</span></div>';
+        }
         const c = etat.mode === 'contrebande';
         return '<div class="ec-tete"><div><small>DIRECTIVE #' + E(etat.ordre) + (c ? ' · BAISSE · CONTREBANDE' : ' · HAUSSE · COMMERCE') + '</small>'
             + '<h2>' + (c ? 'ROUTE DE CONTREBANDE' : 'ROUTE COMMERCIALE') + '<span>' + cp(etat.systeme, String(etat.systeme).toUpperCase()) + ' · ' + E(String(etat.faction).toUpperCase()) + '</span></h2>'
@@ -186,7 +218,11 @@
             + '<span>RAYON D\'ACHAT' + seg(RAYONS, etat.rayon, 'rayon', ' al') + '</span>'
             + '<span title="Ne cherche que les stations qui ont au moins ce stock">STOCK MINI À L\'ACHAT' + seg(STOCKS, etat.stock, 'stock', ' t') + '</span>'
             + '<button type="button" class="ec-tg ' + (prefs.grande() ? 'on' : '') + '" onclick="edteamCommerce.bascule(\'grande\')"><i></i>GRANDE PISTE</button>'
-            + '<span title="Âge maximal du relevé d\'un marché chez Spansh. Par défaut 7 jours ; 6 mois si les stations de la faction ne sont plus visitées.">RELEVÉS DE MOINS DE' + [[24, '24 h'], [168, '7 j'], [4320, '6 mois']].reduce((a, x) => a + '<button type="button" class="' + (x[0] === etat.heures ? 'on' : '') + '" onclick="edteamCommerce.fraicheur(' + x[0] + ')">' + x[1] + '</button>', '<span class="ec-seg">') + '</span></span></div>';
+            + '<span title="Âge maximal du relevé d\'un marché chez Spansh. Par défaut 7 jours ; 6 mois si les stations de la faction ne sont plus visitées.">RELEVÉS DE MOINS DE' + [[24, '24 h'], [168, '7 j'], [4320, '6 mois']].reduce((a, x) => a + '<button type="button" class="' + (x[0] === etat.heures ? 'on' : '') + '" onclick="edteamCommerce.fraicheur(' + x[0] + ')">' + x[1] + '</button>', '<span class="ec-seg">') + '</span></span>' + (etat.mode === 'perte' ? triPerte() : '') + '</div>';
+    }
+    function triPerte() {
+        const t = prefs.tri(), b = (v, lib) => '<button type="button" class="' + (v === t ? 'on' : '') + '" onclick="edteamCommerce.tri(\'' + v + '\')">' + lib + '</button>';
+        return '<span class="ec-tri" title="Classe les routes par perte totale pour votre soute">CLASSER PAR<span class="ec-seg">' + b('faible', 'PERTE LA PLUS FAIBLE') + b('forte', 'PERTE LA PLUS FORTE') + '</span></span>';
     }
     function msg(titre, texte, spin) { return '<div class="ec-msg"><b>' + (spin ? '<span class="ec-spin"></span>' : '') + E(titre) + '</b>' + texte + '</div>'; }
     function copier(texte, el, ev) {
@@ -238,6 +274,41 @@
         }
         return h;
     }
+    // ----- vente a perte (directive de baisse) : la PERTE seule est affichee, jamais le montant de la vente -----
+    function corpsPerte(d) {
+        const faction = d.faction || etat.faction, systeme = d.systeme || etat.systeme, dest = d.destinations || [], forte = prefs.tri() === 'forte';
+        if (!dest.length) return msg('AUCUNE STATION DE LA FACTION AVEC UN MARCHÉ', 'Spansh ne connaît aucune station contrôlée par ' + E(faction) + ' avec un marché relevé dans ' + E(systeme) + '.<br>Vendre à perte ailleurs ne ferait pas baisser cette faction : l\'effet touche la faction qui contrôle la station où l\'on vend. Cette directive ne peut donc pas utiliser la vente à perte tant qu\'une station de la faction n\'a pas de marché relevé.');
+        if (!(d.marchandises || []).length) {
+            const ages = dest.map(x => ageHeures(x.maj)).filter(x => x !== null), frais = ages.length ? Math.min.apply(null, ages) : null;
+            const aide = etat.heures < 4320 && dest.length ? '<br><br>Chez Spansh, le relevé le plus récent d\'une station de ' + E(faction) + ' date de <strong style="color:#fff">' + E(ageTxtH(frais).replace(/^il y a /, '')) + '</strong> : personne ne s\'y est amarré depuis.<br><button type="button" class="ec-elargir" onclick="edteamCommerce.fraicheur(4320)">ESSAYER AVEC LES RELEVÉS DE MOINS DE 6 MOIS</button>' : '';
+            return msg('AUCUNE ROUTE À PERTE', E(faction) + ' n\'a aucune station avec un marché relevé depuis moins de ' + libH(etat.heures) + ' chez Spansh dans ' + E(systeme) + ', ou aucune marchandise n\'y est vendue plus cher à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand ou un stock minimal plus faible.' + aide);
+        }
+        const routes = calculerPerte(d);
+        if (!routes.length) return msg('AUCUNE ROUTE À PERTE AVEC CES RÉGLAGES', 'Aucune marchandise ne se vend moins cher dans ' + E(systeme) + ' que son prix d\'achat proche, avec votre soute, la taille de piste et la fraîcheur choisies.<br>Essayez d\'élargir les relevés (7 jours, 6 mois), de désactiver « Grande piste » ou d\'agrandir le rayon.');
+        const best = routes[0], autres = routes.slice(1, 7), coul = ['#ff9f43', '#c9ccd1', '#00F0FF', '#FF7100', '#FF4FD8', '#FFD700'];
+        const jv = ageHeures(best.v.maj), vFrais = jv !== null && jv <= 48;
+        let h = '<div class="ec-s">DESTINATION <b>· là où vendre à perte fait baisser ' + E(faction) + '</b></div>'
+          + '<div class="ec-dest"><div><div class="lib">STATION DE LA FACTION · LA MIEUX PLACÉE POUR CETTE ROUTE</div><div class="nom">' + cp(best.v.station, String(best.v.station).toUpperCase()) + '</div>'
+          + '<div class="sous">' + E(String(systeme).toUpperCase()) + ' · ' + (best.v.planetaire ? 'planétaire' : 'orbitale') + (best.v.grande ? ' · grande piste' : ' · petite piste') + ' · ' + dest.length + ' station' + (dest.length > 1 ? 's' : '') + ' de la faction avec marché dans le système</div></div>'
+          + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (24 h, 7 jours ou 6 mois).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>'
+          + etatsLigne()
+          + '<div class="ec-avert">⚠ Vous <b>perdez de l\'argent</b> sur cette vente : c\'est le but. Seule une vente <b>à perte stricte</b> compte (un prix coûtant ne compte pas). Les prix bougent : vérifiez le prix de reprise à l\'arrivée, il doit rester inférieur à ce que vous avez payé.</div>'
+          + '<div class="ec-s">' + (forte ? 'LA ROUTE À LA PERTE LA PLUS FORTE POUR ' : 'LA ROUTE LA MOINS COÛTEUSE POUR ') + '<b>' + prefs.soute() + ' t</b></div>'
+          + '<div class="ec-vd" style="border-color:#ff9f43"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + '</span></div>'
+          + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(systeme) + '</div>'
+          + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
+          + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecp" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#ff9f43"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#ff9f43" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecp)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
+          + '<div class="ec-perte">−' + fmt(best.perte) + '<small>CR DE PERTE PAR TONNE</small></div></div>'
+          + '<div class="ec-n ec-ven"><div class="e">③ VENDRE ICI</div><div class="st">' + cp(best.v.station) + '</div><div class="sy">' + cp(systeme) + ' · destination</div>'
+          + '<div class="px">' + fmt(best.v.prix) + '<small>CR / t</small></div><div class="de">la station en achète ' + fmt(best.v.demande) + ' t · vous en portez ' + fmt(best.qte) + ' t</div></div></div>'
+          + '<div class="ec-bas"><div class="ec-tot">② TRANSPORTEZ ' + fmt(best.qte) + ' t · perte estimée<b style="color:#ff9f43">' + mil(best.total) + ' cr</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(best.s.systeme) + boutonCopie(systeme) + '</div></div></div>';
+        if (autres.length) {
+            h += '<div class="ec-s">AUTRES ROUTES POSSIBLES <b style="color:#666;letter-spacing:1px;font-size:.95em">· classées par perte ' + (forte ? 'décroissante' : 'croissante') + ' pour votre soute</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span class="p">−' + fmt(r.perte) + ' / t</span></div>'
+                + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u style="color:#ff9f43">' + cp(r.v.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
+                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt" style="color:#ff9f43">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div></div>').join('') + '</div>';
+        }
+        return h;
+    }
     function corps() {
         const d = etat.donnees;
         let h = '';
@@ -248,6 +319,7 @@
             return h + msg('AUCUN RÉSULTAT', 'La recherche n\'a rien donné pour le moment. Réessayez dans quelques minutes.');
         }
         if (etat.mode === 'contrebande') return h + corpsContre(d);
+        if (etat.mode === 'perte') return h + corpsPerte(d);
         const dest = d.destinations || [];
         if (!dest.length || !(d.marchandises || []).length) {
             const ages = dest.map(x => ageHeures(x.maj)).filter(x => x !== null), frais = ages.length ? Math.min.apply(null, ages) : null;
@@ -286,8 +358,8 @@
     }
     function rendre() {
         const o = assurerDom();
-        o.innerHTML = '<div class="ec-m' + (etat.mode === 'contrebande' ? ' ec-rouge' : '') + '">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
-            + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : 'Routes classées par bénéfice total pour votre soute')
+        o.innerHTML = '<div class="ec-m' + (etat.mode === 'contrebande' || etat.mode === 'perte' ? ' ec-rouge' : '') + '">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
+            + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : etat.mode === 'perte' ? 'Routes classées par perte ' + (prefs.tri() === 'forte' ? 'décroissante' : 'croissante') + ' pour votre soute. La PERTE est le seul chiffre compté pour la directive : le montant de la vente ne compte pas.' : 'Routes classées par bénéfice total pour votre soute')
             + (etat.calc_le ? ' · recherche faite ' + E(ageTxtH(ageHeures(etat.calc_le))) : '') + ' · marchés relevés depuis moins de ' + libH(etat.heures) + '.</div></div>';
         o.style.display = 'flex';
     }
@@ -299,7 +371,7 @@
         const c = db();
         if (!c) { etat.statut = 'ERREUR'; etat.message = 'Connexion indisponible.'; rendre(); return; }
         let r;
-        try { r = await c.rpc(etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon, p_stock: etat.stock, p_heures: etat.heures }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
+        try { r = await c.rpc(etat.mode === 'perte' ? 'routes_perte' : etat.mode === 'contrebande' ? 'routes_contrebande' : 'routes_commerce', { p_ordre: Number(etat.ordre), p_rayon: etat.rayon, p_stock: etat.stock, p_heures: etat.heures }); } catch (e) { r = { error: { message: 'Connexion impossible.' } }; }
         if (jeton !== etat.jeton || !ouvert()) return;
         if (r.error || !r.data) { etat.statut = 'ERREUR'; etat.message = (r.error && r.error.message) || 'Réponse vide.'; etat.donnees = null; rendre(); return; }
         const j = r.data;
@@ -314,7 +386,7 @@
     const api = {
         ouvrir(ordreId, systeme, faction, mode) {
             if (typeof sonClic === 'function') sonClic();
-            Object.assign(etat, { mode: mode === 'contrebande' ? 'contrebande' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
+            Object.assign(etat, { mode: mode === 'contrebande' ? 'contrebande' : mode === 'perte' ? 'perte' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
             if (!RAYONS.includes(etat.rayon)) etat.rayon = 40;
             if (!STOCKS.includes(etat.stock)) etat.stock = 100;
             rendre(); charger();
@@ -325,13 +397,19 @@
         stock(v) { if (v === etat.stock) return; etat.stock = v; ecrire('edteam_com_stock', String(v)); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
         fraicheur(h) { if (![24, 168, 4320].includes(h) || h === etat.heures) return; etat.heures = h; ecrire('edteam_com_h', String(h)); etat.donnees = null; etat.statut = 'EN_COURS'; etat.essais = 0; rendre(); charger(); },
         bascule(k) { ecrire('edteam_com_grande', prefs.grande() ? '0' : '1'); rendre(); },
+        tri(v) { ecrire('edteam_perte_tri', v === 'forte' ? 'forte' : 'faible'); rendre(); },      // classement des routes a perte (calcule ici, sans nouvel appel)
         copie(el, txt, ev) { copier(String(txt), el, ev); },
         // bouton « Où vendre ? » d'une directive de hausse en cours ; vide pour les autres
-        bouton(ordre, classe) {
+        // mode 'perte' (directive de baisse) : bouton « Où vendre à perte ? » de la ligne des ventes à perte
+        bouton(ordre, classe, modeDemande) {
             const type = ordre ? String(ordre.type_ordre || '').toUpperCase() : '';
             if (!ordre || (type !== 'HAUSSE' && type !== 'BAISSE') || String(ordre.statut || 'ACTIF').toUpperCase() !== 'ACTIF') return '';
-            const baisse = type === 'BAISSE';
-            const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || '', baisse ? 'contrebande' : 'commerce'].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
+            const baisse = type === 'BAISSE', perte = baisse && modeDemande === 'perte';
+            const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || '', perte ? 'perte' : baisse ? 'contrebande' : 'commerce'].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
+            if (perte) {
+                const padP = classe === 'compact' ? 'padding: 2px 8px; font-size: 0.85em; letter-spacing: 0;' : 'padding: 7px 14px; font-size: 0.8em; letter-spacing: 2px;';
+                return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: rgba(255,159,67,0.1); border: 1px solid #ff9f43; color: #ff9f43; ' + padP + ' font-family: inherit; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(255,159,67,0.2);">📉 OÙ VENDRE À PERTE ?</button>';
+            }
             const compact = classe === 'compact';
             const pad = compact ? 'padding: 2px 8px; font-size: 0.85em; letter-spacing: 0;' : 'padding: 7px 14px; font-size: 0.8em; letter-spacing: 2px;';
             return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: ' + (baisse ? 'rgba(255,51,51,0.1); border: 1px solid #FF3333; color: #FF3333' : 'rgba(255,215,0,0.1); border: 1px solid #FFD700; color: #FFD700') + '; ' + pad + ' font-family: inherit; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px ' + (baisse ? 'rgba(255,51,51,0.2)' : 'rgba(255,215,0,0.2)') + ';">' + (baisse ? (compact ? '🏴 OÙ VENDRE ?' : '🏴 ROUTE DE CONTREBANDE') : '💰 OÙ VENDRE ?') + '</button>';

@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ou-vendre-a-perte', date: '2026-10-23T12:01:49Z', type: 'NOUVEAU',
+        titre: 'Baisse : une fenêtre « Où vendre à perte ? »',
+        texte: 'Dans une directive de baisse, la ligne « Ventes à perte » a maintenant son bouton « Où vendre à perte ? », sur le modèle de « Où vendre ? » et de la route de contrebande. Elle propose où acheter une marchandise plus cher que le prix de reprise d’une station de la faction visée, où la lui vendre, et la PERTE par tonne et pour votre soute (le montant de la vente n’est pas affiché). Vous choisissez le classement : perte la plus faible (la moins coûteuse) ou perte la plus forte. Mêmes réglages que « Où vendre ? » : soute, rayon, stock minimal, grande piste, fraîcheur des relevés. La ligne « Ventes à perte » n’affiche plus que la perte.',
+        important: false
+    },
+    {
         id: '2026-10-conflits-debut-fin', date: '2026-10-23T11:42:31Z', type: 'NOUVEAU',
         titre: 'Guerres et élections : un bandeau annonce le début et la fin',
         texte: 'Quand une guerre ou une élection démarre sur une faction qui fait l’objet d’une directive, quel que soit le type de la directive (une hausse par exemple), un bandeau « LA GUERRE A COMMENCÉ » ou « L’ÉLECTION A COMMENCÉ » s’affiche au-dessus de sa ligne jusqu’au tick suivant, sur PC et sur mobile. L’Amiral et les officiers y trouvent un bouton pour passer la directive en guerre ou en élection. Quand le conflit se termine, le bandeau annonce « GUERRE GAGNÉE », « PERDUE » ou « TERMINÉE » (d’après le dernier score relevé : si aucun vainqueur net n’est connu, le bandeau le dit). L’heure affichée est celle de la détection : le jeu n’est connu que lorsqu’un joueur visite le système ou à chaque relevé EDSM.',

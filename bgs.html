@@ -1991,7 +1991,7 @@
                             htmlJauges =
                                 genererJaugeHTML('☠️ MEURTRES (Vaisseaux & Sol)', fmtDual(formatNum(totauxMoiG['MEURTRES']), formatNum(totauxG['MEURTRES']), formatNum(capsTotal['MEURTRES'])), 'var(--ed-red)', getRatio('MEURTRES'), getRatioVous('MEURTRES'), getRatio('MEURTRES') >= 100) +
                                 genererJaugeHTML('📦 CONTREBANDE (Marché Noir)', fmtDual(formatCR(totauxMoiG['CONTREBANDE']), formatCR(totauxG['CONTREBANDE']), formatCR(capsTotal['CONTREBANDE'])), 'var(--ed-red)', getRatio('CONTREBANDE'), getRatioVous('CONTREBANDE'), getRatio('CONTREBANDE') >= 100, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '') +
-                                `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin:6px 0;"><span style="color:#fff;">📉 Ventes à perte</span><span style="color:#fff;">PERTE : <b>${formatCR(totauxMoiG['VENTE_PERTE'])}</b> <span style="color:#888;">· escadron ${formatCR(totauxG['VENTE_PERTE'])}</span></span></div>` +
+                                (() => { const jc = window.__jc; window.__jc = null; const l = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${formatCR(totauxMoiG['VENTE_PERTE'])}</b> <span style="color:#888;">· escadron ${formatCR(totauxG['VENTE_PERTE'])}</span>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return `<div style="margin:6px 0;">${l}</div>`; })() +
                                 genererJaugeHTML('❌ MISSIONS ÉCHOUÉES', fmtDual(formatNum(totauxMoiG['ECHECS']), formatNum(totauxG['ECHECS']), formatNum(capsTotal['ECHECS'])), 'var(--ed-red)', getRatio('ECHECS'), getRatioVous('ECHECS'), getRatio('ECHECS') >= 100) +
                                 `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>`;
 
@@ -2049,7 +2049,7 @@
                                 htmlJauges = QJ.lignes(ordre.type_ordre, Qd).map(l => {
                                     const m = QJ.META[l.ty];
                                     return genererJaugeHTML(m.titre, QJ.texteMarge(l.ty, l), m.c, l.prog, l.prog, l.reduit, '', '', '', (l.ty === 'ECONOMIE' || l.ty === 'CONTREBANDE') && window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '');
-                                }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd); return `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-top:6px;"><span style="color:#fff;">📉 Ventes à perte <span style="color:#888;font-size:0.85em;">(station de la faction visée)</span></span><span style="color:#fff;">${P.n} vente${P.n > 1 ? 's' : ''} · PERTE <b style="font-size:1.1em;color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b></span></div>`; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
+                                }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd), jc = window.__jc; window.__jc = null; const lignePerte = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return `<div style="margin-top:6px;">${lignePerte}</div>`; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
                                 modeJour = true;
                             } else if (QJ.compteur(ordre.type_ordre, Qd)) {
                                 const M = Qd.moi || {}, cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
@@ -3184,7 +3184,7 @@
     <script src="medailles.js?v=16"></script>
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=4"></script>
-    <script src="commerce.js?v=7"></script>
+    <script src="commerce.js?v=9"></script>
     <script src="footer.js?v=35"></script>
 </body>
 </html>
