@@ -115,7 +115,7 @@
     }`;
 
     const STOCKS = [100, 500, 1000, 2000], RAYONS = [20, 40, 80, 120, 200];
-    const etat = { mode: 'commerce', ordre: null, systeme: '', faction: '', rayon: 40, heures: (() => { const v = parseInt(lire('edteam_com_h') || '', 10); return [24, 168, 4320].includes(v) ? v : (lire('edteam_com_h24') === '1' ? 24 : 168); })(), stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
+    const etat = { mode: 'commerce', type: 'HAUSSE', ordre: null, systeme: '', faction: '', rayon: 40, heures: (() => { const v = parseInt(lire('edteam_com_h') || '', 10); return [24, 168, 4320].includes(v) ? v : (lire('edteam_com_h24') === '1' ? 24 : 168); })(), stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
         grande: () => lire('edteam_com_grande') !== '0',
@@ -207,7 +207,7 @@
                 + '<span class="ec-x" onclick="edteamCommerce.fermer()">✕</span></div>';
         }
         const c = etat.mode === 'contrebande';
-        return '<div class="ec-tete"><div><small>DIRECTIVE #' + E(etat.ordre) + (c ? ' · BAISSE · CONTREBANDE' : ' · HAUSSE · COMMERCE') + '</small>'
+        return '<div class="ec-tete"><div><small>DIRECTIVE #' + E(etat.ordre) + (c ? ' · BAISSE · CONTREBANDE' : etat.type === 'ELECTION' ? ' · ÉLECTION · COMMERCE' : ' · HAUSSE · COMMERCE') + '</small>'
             + '<h2>' + (c ? 'ROUTE DE CONTREBANDE' : 'ROUTE COMMERCIALE') + '<span>' + cp(etat.systeme, String(etat.systeme).toUpperCase()) + ' · ' + E(String(etat.faction).toUpperCase()) + '</span></h2>'
             + '<div class="ec-pas">' + (c ? '<b>1</b>ACHETEZ DE L\'ILLÉGAL<i>›</i><b>2</b>TRANSPORTEZ<i>›</i><b>3</b>VENDEZ AU MARCHÉ NOIR DE LA FACTION' : '<b>1</b>ACHETEZ<i>›</i><b>2</b>TRANSPORTEZ<i>›</i><b>3</b>VENDEZ À UNE STATION DE LA FACTION') + '</div></div>'
             + '<span class="ec-x" onclick="edteamCommerce.fermer()">✕</span></div>';
@@ -384,9 +384,9 @@
     }
 
     const api = {
-        ouvrir(ordreId, systeme, faction, mode) {
+        ouvrir(ordreId, systeme, faction, mode, type) {
             if (typeof sonClic === 'function') sonClic();
-            Object.assign(etat, { mode: mode === 'contrebande' ? 'contrebande' : mode === 'perte' ? 'perte' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
+            Object.assign(etat, { type: type === 'ELECTION' ? 'ELECTION' : mode === 'commerce' ? 'HAUSSE' : 'BAISSE', mode: mode === 'contrebande' ? 'contrebande' : mode === 'perte' ? 'perte' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
             if (!RAYONS.includes(etat.rayon)) etat.rayon = 40;
             if (!STOCKS.includes(etat.stock)) etat.stock = 100;
             rendre(); charger();
@@ -399,13 +399,13 @@
         bascule(k) { ecrire('edteam_com_grande', prefs.grande() ? '0' : '1'); rendre(); },
         tri(v) { ecrire('edteam_perte_tri', v === 'forte' ? 'forte' : 'faible'); rendre(); },      // classement des routes a perte (calcule ici, sans nouvel appel)
         copie(el, txt, ev) { copier(String(txt), el, ev); },
-        // bouton « Où vendre ? » d'une directive de hausse en cours ; vide pour les autres
+        // bouton « Où vendre ? » d'une directive de hausse ou d'election en cours ; vide pour les autres
         // mode 'perte' (directive de baisse) : bouton « Où vendre à perte ? » de la ligne des ventes à perte
         bouton(ordre, classe, modeDemande) {
             const type = ordre ? String(ordre.type_ordre || '').toUpperCase() : '';
-            if (!ordre || (type !== 'HAUSSE' && type !== 'BAISSE') || String(ordre.statut || 'ACTIF').toUpperCase() !== 'ACTIF') return '';
+            if (!ordre || (type !== 'HAUSSE' && type !== 'BAISSE' && type !== 'ELECTION') || String(ordre.statut || 'ACTIF').toUpperCase() !== 'ACTIF') return '';
             const baisse = type === 'BAISSE', perte = baisse && modeDemande === 'perte';
-            const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || '', perte ? 'perte' : baisse ? 'contrebande' : 'commerce'].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
+            const arg = [ordre.id, ordre.systeme_cible || '', ordre.faction_cible || '', perte ? 'perte' : baisse ? 'contrebande' : 'commerce', type].map(x => E(JSON.stringify(x)).replace(/&quot;/g, '&#34;')).join(', ');
             if (perte) {
                 const padP = classe === 'compact' ? 'padding: 2px 8px; font-size: 0.85em; letter-spacing: 0;' : 'padding: 7px 14px; font-size: 0.8em; letter-spacing: 2px;';
                 return '<button type="button" class="' + (classe || '') + '" onclick="event.stopPropagation(); edteamCommerce.ouvrir(' + arg + ')" style="background: rgba(255,159,67,0.1); border: 1px solid #ff9f43; color: #ff9f43; ' + padP + ' font-family: inherit; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(255,159,67,0.2);">📉 OÙ VENDRE À PERTE ?</button>';

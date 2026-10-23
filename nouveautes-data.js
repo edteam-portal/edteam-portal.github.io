@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-election-ou-vendre', date: '2026-10-23T12:12:05Z', type: 'AMELIORE',
+        titre: 'Élections : le bouton « Où vendre ? » est là aussi',
+        texte: 'Dans une directive d’élection, la ligne « Commerce (bénéfices) » a maintenant son bouton « Où vendre ? », comme dans une directive de hausse : la fenêtre propose où acheter et où vendre, dans une station de la faction, pour le plus gros bénéfice avec votre soute.',
+        important: false
+    },
+    {
         id: '2026-10-ou-vendre-a-perte', date: '2026-10-23T12:01:49Z', type: 'NOUVEAU',
         titre: 'Baisse : une fenêtre « Où vendre à perte ? »',
         texte: 'Dans une directive de baisse, la ligne « Ventes à perte » a maintenant son bouton « Où vendre à perte ? », sur le modèle de « Où vendre ? » et de la route de contrebande. Elle propose où acheter une marchandise plus cher que le prix de reprise d’une station de la faction visée, où la lui vendre, et la PERTE par tonne et pour votre soute (le montant de la vente n’est pas affiché). Vous choisissez le classement : perte la plus faible (la moins coûteuse) ou perte la plus forte. Mêmes réglages que « Où vendre ? » : soute, rayon, stock minimal, grande piste, fraîcheur des relevés. La ligne « Ventes à perte » n’affiche plus que la perte.',

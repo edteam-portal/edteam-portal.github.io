@@ -2033,7 +2033,7 @@
                             poidsTotalMoi = totauxMoiG['MISSIONS'] + (totauxMoiG['ECONOMIE']/2000000) + (totauxMoiG['SCIENCE']/2000000);
 
                             htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capElec), 'INF'), 'var(--ed-blue)', ratioElec, ratioElecVous, ratioElec >= 100) +
-                                genererJaugeHTML('💰 COMMERCE (Bénéfices)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100) +
+                                genererJaugeHTML('💰 COMMERCE (Bénéfices)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '') +
                                 genererJaugeHTML('🔬 EXPLORATION (Ventes de données)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
                         }
 
@@ -2052,7 +2052,7 @@
                                 }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd), jc = window.__jc; window.__jc = null; const lignePerte = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return `<div style="margin-top:6px;">${lignePerte}</div>`; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
                                 modeJour = true;
                             } else if (QJ.compteur(ordre.type_ordre, Qd)) {
-                                const M = Qd.moi || {}, cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
+                                const M = Qd.moi || {}, cell = (e, t, v, a) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><span style="color:#fff;">${e} ${t}</span><span style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;justify-content:flex-end;">${a || ''}<span style="color:#fff;">${v}</span></span></div>`;
                                 const nfr = n => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n);
                                 if (ordre.type_ordre === 'GUERRE') {
                                     htmlJauges = cell('🏆', 'Victoires en CZ', '<b style="font-size:1.2em;">' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">victoires · ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>')
@@ -2060,7 +2060,7 @@
                                         + cell('🎯', 'Missions militaires', '<b style="font-size:1.2em;">' + Math.round((M.MISSIONS || {}).n || 0) + '</b> <span style="color:#888;">contrats</span>');
                                 } else {
                                     htmlJauges = cell('🗳️', 'Logistique électorale', '<b style="font-size:1.2em;">' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>')
-                                        + cell('💰', 'Commerce (bénéfices)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>')
+                                        + cell('💰', 'Commerce (bénéfices)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '')
                                         + cell('🔬', 'Données d\'exploration (science)', '<b style="font-size:1.2em;">' + QJ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
                                 }
                                 htmlJauges += '<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:6px;">Les guerres et les élections sont les seules activités sans rendement décroissant : faites-en le plus possible, il n\'y a pas de quota.</div>';
@@ -3184,7 +3184,7 @@
     <script src="medailles.js?v=16"></script>
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=4"></script>
-    <script src="commerce.js?v=9"></script>
+    <script src="commerce.js?v=10"></script>
     <script src="footer.js?v=35"></script>
 </body>
 </html>
