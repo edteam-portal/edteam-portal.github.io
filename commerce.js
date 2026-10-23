@@ -356,10 +356,16 @@
         }
         return h;
     }
+    // sources des prix : Spansh seul, ou Spansh + Ardent recoupes (SQL 137 : pour une meme station, le releve le plus recent des deux est gardé)
+    function sourcesPrix() {
+        const f = etat.donnees && etat.donnees.fusion;
+        if (etat.mode === 'contrebande' || !f) return 'Spansh';
+        return f.ardent ? 'Spansh et Ardent, recoupés (le relevé le plus récent de chaque station est gardé)' : 'Spansh (Ardent n’a pas répondu)';
+    }
     function rendre() {
         const o = assurerDom();
         o.innerHTML = '<div class="ec-m' + (etat.mode === 'contrebande' || etat.mode === 'perte' ? ' ec-rouge' : '') + '">' + entete() + reglages() + '<div class="ec-corps">' + corps() + '</div>'
-            + '<div class="ec-pied">ⓘ Prix tirés de Spansh (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : etat.mode === 'perte' ? 'Routes classées par perte ' + (prefs.tri() === 'forte' ? 'décroissante' : 'croissante') + ' pour votre soute. La PERTE est le seul chiffre compté pour la directive : le montant de la vente ne compte pas.' : 'Routes classées par bénéfice total pour votre soute')
+            + '<div class="ec-pied">ⓘ Prix tirés de ' + sourcesPrix() + ' (relevés des joueurs, via EDDN) : ils bougent, vérifiez le marché à l\'arrivée. Plus l\'escadron s\'amarre dans ces stations, plus les relevés sont frais. ' + (etat.mode === 'contrebande' ? 'Routes classées par distance d\'achat (le prix de reprise du marché noir n\'est pas connu).' : etat.mode === 'perte' ? 'Routes classées par perte ' + (prefs.tri() === 'forte' ? 'décroissante' : 'croissante') + ' pour votre soute. La PERTE est le seul chiffre compté pour la directive : le montant de la vente ne compte pas.' : 'Routes classées par bénéfice total pour votre soute')
             + (etat.calc_le ? ' · recherche faite ' + E(ageTxtH(ageHeures(etat.calc_le))) : '') + ' · marchés relevés depuis moins de ' + libH(etat.heures) + '.</div></div>';
         o.style.display = 'flex';
     }

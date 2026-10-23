@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-tick-seconde-source', date: '2026-10-23T13:36:54Z', type: 'CORRIGE',
+        titre: 'Tick BGS : une seconde source quand le détecteur habituel se tait',
+        texte: 'Le détecteur de tick que nous utilisions (tick.edcd.io) n’a plus rien enregistré depuis le 17 octobre : l’en-tête affichait donc un tick estimé. Le serveur interroge maintenant aussi un second détecteur communautaire toutes les 15 minutes et garde les ticks des deux ; l’en-tête retrouve l’heure exacte du dernier tick dès qu’une des deux sources le détecte. Les ticks des 18 au 21 octobre n’ont été notés par aucune source : ils restent estimés.',
+        important: false
+    },
+    {
+        id: '2026-10-ou-vendre-ardent', date: '2026-10-23T13:36:54Z', type: 'AMELIORE',
+        titre: '« Où vendre ? » croise maintenant deux sources de prix',
+        texte: 'Les fenêtres « Où vendre ? » et « Où vendre à perte ? » interrogent Spansh et Ardent (deux bases communautaires de prix tirées d’EDDN) et gardent, pour chaque station, le relevé le plus récent. Les stations de la faction sont aussi recoupées avec EDSM. Si l’une des sources est en panne, l’autre prend le relais. Le pied de la fenêtre indique les sources utilisées.',
+        important: false
+    },
+    {
         id: '2026-10-trafic-minimum', date: '2026-10-23T12:57:11Z', type: 'AMELIORE',
         titre: 'Trafic d’un système : « minimum », avec une explication',
         texte: 'La carte « Trafic » de la fenêtre d’une directive s’appelle maintenant « Trafic minimum » et porte un bouton « ? » : il ouvre une fenêtre qui explique pourquoi ce chiffre (celui d’EDSM, qui ne compte que les commandants dont l’outil lui envoie le journal de vol) est plus petit que le trafic réel affiché par le jeu dans les stations, et comment lire le repère « calme / habituel / animé ».',

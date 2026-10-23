@@ -1,7 +1,9 @@
 // TICK BGS dans l'en-tete : heure du dernier tick + compte a rebours du prochain.
 // Source : tick.edcd.io (detecteur communautaire alimente par EDDN). UN petit appel /api/ticks?start=... (une quinzaine de jours, < 1 Ko), directement depuis le navigateur :
 //   AUCUNE requete Supabase, donc aucun egress. Resultat garde dans le navigateur (localStorage), partage entre les pages et les onglets.
-// Si le detecteur ne repond plus ou ne detecte plus de tick (cas constate le 21/10 : aucun tick enregistre pendant 4 jours alors que le jeu en fait un par jour), on ESTIME :
+// SECOURS (SQL 136) : quand le dernier tick connu a plus de 20 h, on demande aussi la liste de NOTRE serveur (ticks_liste : tick.edcd.io + tick.infomancer.uk relevés toutes les 15 minutes), au plus une fois par 3 h et seulement si la page a une session ;
+//   tant que tick.edcd.io marche, aucune requete Supabase.
+// Si aucun detecteur ne detecte plus de tick (cas constate le 21/10 : aucun tick enregistre pendant 4 jours alors que le jeu en fait un par jour), on ESTIME :
 //   le tick a lieu chaque jour a peu pres a la meme heure : on affiche une FOURCHETTE (jamais une heure unique) calculee sur les derniers jours reels, marquee « estime ».
 // Sans aucune donnee (premier chargement et site injoignable), le bloc reste cache.
 (function () {
@@ -27,6 +29,12 @@
     function lire() { try { const c = JSON.parse(localStorage.getItem(CLE) || "null"); return c && Array.isArray(c.l) ? c : null; } catch (e) { return null; } }
     function ecrire(c) { try { localStorage.setItem(CLE, JSON.stringify(c)); } catch (e) { /* stockage indisponible : pas de memoire entre les pages */ } }
     const jour = d => d.toISOString().slice(0, 10);
+    // reunit deux listes de ticks (chaines ISO) : tries, un tick a moins de 3 h d'un autre est le meme tick vu par une autre source
+    function unir(a, b) {
+        const t = (a || []).concat(b || []).filter(x => typeof x === "string" && isFinite(Date.parse(x))).sort(), out = [];
+        t.forEach(x => { if (!out.length || Date.parse(x) - Date.parse(out[out.length - 1]) >= 3 * HEURE) out.push(x); });
+        return out;
+    }
 
     // FOURCHETTE habituelle : l'heure du tick varie de quelques dizaines de minutes d'un jour a l'autre, donc on ne donne jamais une heure unique pour un tick estime.
     // Bornes = environ 15 % et 85 % des heures (UTC) des 14 derniers ticks reels : la fourchette contient la grande majorite des jours.
@@ -70,7 +78,7 @@
             val = s.etat === "fenetre" ? "<small>d’ici </small>" + hms(sec(s.fin)) + "<small> au plus</small>"
                 : '<small class="p1">dans </small><small class="p2">dans ~</small>' + hms(sec(milieu)) + '<small class="fin"> ± ' + marge + " min</small>";
             tip = (s.estime
-                ? "Le détecteur communautaire (tick.edcd.io) n’a plus enregistré de tick depuis le " + new Date(c.l[c.l.length - 1]).toLocaleString("fr-FR", { timeZone: "UTC" }) + " UTC : on ne connaît donc pas l’heure exacte. Le tick a lieu chaque jour à peu près à la même heure ; la fourchette de dernier tick estimé est " + hhmm(s.dernierFen[0]) + " à " + hhmm(s.dernierFen[1]) + " UTC. Dès qu’un vrai tick est détecté, l’heure exacte revient."
+                ? "Les détecteurs communautaires n’ont plus enregistré de tick depuis le " + new Date(c.l[c.l.length - 1]).toLocaleString("fr-FR", { timeZone: "UTC" }) + " UTC : on ne connaît donc pas l’heure exacte. Le tick a lieu chaque jour à peu près à la même heure ; la fourchette de dernier tick estimé est " + hhmm(s.dernierFen[0]) + " à " + hhmm(s.dernierFen[1]) + " UTC. Dès qu’un vrai tick est détecté, l’heure exacte revient."
                 : "Dernier tick détecté à " + hhmm(s.dernier) + " UTC (il y a " + hmin(Math.round((now - s.dernier) / 60000)) + ").")
                 + " Prochain tick attendu vers " + hhmm(milieu) + " UTC ± " + marge + " min (entre " + four + ") : l’heure varie d’un jour à l’autre, ce n’est pas une heure exacte.";
         }
@@ -90,13 +98,26 @@
             const c = lire(), now = Date.now();
             const frais = c && c.l.length && (now - Date.parse(c.l[c.l.length - 1]) < 20 * HEURE) ? 3 * HEURE : 10 * 60000;
             if (c && (now - c.ts < frais || now - (c.essai || 0) < 600000)) return;
-            ecrire({ ts: c ? c.ts : 0, essai: now, l: c ? c.l : [] });          // note l'essai tout de suite : jamais plus d'un appel toutes les 10 minutes, meme en cas d'echec
-            const r = await fetch("https://tick.edcd.io/api/ticks?start=" + jour(new Date(now - 16 * JOUR)), { cache: "no-store" });
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            const j = await r.json();
-            const l = (Array.isArray(j) ? j : []).map(x => x && x.TIME).filter(t => typeof t === "string" && isFinite(Date.parse(t))).sort();
-            if (l.length) ecrire({ ts: now, essai: now, l: l.slice(-40) });       // reponse vide : on garde l'ancien releve
-        } catch (e) { /* injoignable : le releve garde reste affiche (estime), nouvel essai dans 10 minutes */
+            ecrire({ ts: c ? c.ts : 0, essai: now, l: c ? c.l : [], srv: c ? c.srv : 0 });          // note l'essai tout de suite : jamais plus d'un appel toutes les 10 minutes, meme en cas d'echec
+            let l = c ? c.l.slice() : [], srv = c ? (c.srv || 0) : 0, ok = false;
+            try {
+                const r = await fetch("https://tick.edcd.io/api/ticks?start=" + jour(new Date(now - 16 * JOUR)), { cache: "no-store" });
+                if (!r.ok) throw new Error("HTTP " + r.status);
+                const j = await r.json();
+                const l2 = (Array.isArray(j) ? j : []).map(x => x && x.TIME).filter(t => typeof t === "string" && isFinite(Date.parse(t))).sort();
+                if (l2.length) { l = unir(l, l2); ok = true; }       // reponse vide : on garde l'ancien releve
+            } catch (e) { /* injoignable : on garde le releve et on essaie le secours */ }
+            // secours : notre serveur, seulement si le dernier tick connu est ancien (le detecteur communautaire est muet) ; au plus une fois par 3 h
+            const dern = l.length ? Date.parse(l[l.length - 1]) : 0, sb = window.supabaseApp;
+            if (now - dern > 20 * HEURE && sb && now - srv > 3 * HEURE) {
+                srv = now;
+                try {
+                    const rs = await sb.rpc("ticks_liste");
+                    if (rs && !rs.error && Array.isArray(rs.data) && rs.data.length) { l = unir(l, rs.data); ok = true; }
+                } catch (e) { /* sans la fonction serveur : estimation comme avant */ }
+            }
+            if (ok) ecrire({ ts: now, essai: now, l: l.slice(-40), srv });
+            else ecrire({ ts: c ? c.ts : 0, essai: now, l: c ? c.l : [], srv });
         } finally { enCours = false; }
     }
 
