@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-election-commerce-exploration', date: '2026-10-23T10:42:05Z', type: 'AMELIORE',
+        titre: 'Élections : le commerce et les ventes de données d’exploration comptent aussi',
+        texte: 'Pour gagner une élection dans un système, les missions de la faction ne sont pas la seule voie : vendre de la marchandise (commerce) et vendre des données d’exploration (science) à une station de la faction comptent aussi. La fenêtre d’une directive Élection (PC et mobile) affiche maintenant trois lignes : logistique électorale, commerce et données d’exploration, avec votre total du jour. Comme pour les guerres, il n’y a aucune limite : faites-en le plus possible. Rien à mettre à jour : le plugin envoyait déjà ces ventes.',
+        important: false
+    },
+    {
         id: '2026-10-mobile-reperage-directives', date: '2026-10-23T00:02:59Z', type: 'AMELIORE',
         titre: 'Mobile : repérage, jauges et fenêtres des directives et missions Powerplay comme sur le PC',
         texte: 'Le mobile rattrape le PC. L’onglet CAMPAGNES affiche le bandeau « N systèmes à repérer » : il ouvre la route de repérage en plein écran (chemin le plus court depuis votre position, systèmes déjà repérés par vos camarades avec leur avatar et le tampon « REPÉRÉ », systèmes écartés, votre compteur L’ESPION, règles et message d’EDTEAM). Les lignes de directive perdent leurs barres de progression d’effort, comme sur le PC : fond de résultat net ou pâle et jauge d’influence (gris : inchangé depuis le dernier tick, plein : gain, rayé : perte, trait blanc : valeur d’avant). Les lignes Powerplay reçoivent la barre du jeu à 4 zones avec l’état et le net du cycle. La fenêtre d’une directive reprend « Qui participe et comment » (participants, activités cumulées, ticks joués), le verdict et les trois tuiles du résultat du jeu ; la fenêtre d’une mission Powerplay affiche le même contenu que sur le PC (apport de l’escadron, d’où viennent les mérites, participants, état du système dans le jeu). Le quota du tick et les bilans par tick sont désormais bien chargés sur mobile.',

@@ -134,7 +134,7 @@
     }
 
     // ---- bilan depuis l'emission de la directive (tableau + classement des pilotes par type) ----
-    const TYPES_BILAN = { HAUSSE: ["MISSIONS", "ECONOMIE", "SECURITE", "SCIENCE"], BAISSE: ["MEURTRES", "CONTREBANDE", "ECHECS"], GUERRE: ["CZ_VICTOIRES", "SECURITE", "MISSIONS"], ELECTION: ["MISSIONS"] };
+    const TYPES_BILAN = { HAUSSE: ["MISSIONS", "ECONOMIE", "SECURITE", "SCIENCE"], BAISSE: ["MEURTRES", "CONTREBANDE", "ECHECS"], GUERRE: ["CZ_VICTOIRES", "SECURITE", "MISSIONS"], ELECTION: ["MISSIONS", "ECONOMIE", "SCIENCE"] };
     const META2 = Object.assign({}, META, { CZ_VICTOIRES: { e: "🏆", court: "victoires en CZ", unite: "pts", c: "#FFD700" } });
     const NOMS = { MISSIONS: "Logistique (missions)", ECONOMIE: "Économie (commerce et minage)", SECURITE: "Sécurité (primes et conflits)", SCIENCE: "Science (cartographie)", MEURTRES: "Meurtres", CONTREBANDE: "Contrebande (marché noir)", ECHECS: "Missions échouées", CZ_VICTOIRES: "Victoires en CZ" };
     function fmtBilan(ty, typeOrdre, x) {

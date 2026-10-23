@@ -22,7 +22,7 @@
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
     <script src="campagnes.js?v=61"></script>
-    <script src="quotas-jour.js?v=11"></script>
+    <script src="quotas-jour.js?v=12"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
     <script src="bgs-participants.js?v=1"></script>
@@ -2022,12 +2022,14 @@
                             const capElec = capsTotal['ELECTION_MISSIONS'] || capsTotal['MISSIONS'];
                             const ratioElec = Math.min(100, (totauxG['MISSIONS'] / capElec) * 100);
                             const ratioElecVous = Math.min(100, (totauxMoiG['MISSIONS'] / capElec) * 100);
-                            sommeRatios = ratioElec;
-                            diviseur = 1;
-                            poidsTotalEscadron = totauxG['MISSIONS'];
-                            poidsTotalMoi = totauxMoiG['MISSIONS'];
+                            sommeRatios = ratioElec + getRatio('ECONOMIE') + getRatio('SCIENCE');
+                            diviseur = 3;
+                            poidsTotalEscadron = totauxG['MISSIONS'] + (totauxG['ECONOMIE']/2000000) + (totauxG['SCIENCE']/2000000);
+                            poidsTotalMoi = totauxMoiG['MISSIONS'] + (totauxMoiG['ECONOMIE']/2000000) + (totauxMoiG['SCIENCE']/2000000);
 
-                            htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capElec), 'INF'), 'var(--ed-blue)', ratioElec, ratioElecVous, ratioElec >= 100);
+                            htmlJauges = genererJaugeHTML('🗳️ LOGISTIQUE ÉLECTORALE', fmtDual(formatNum(totauxMoiG['MISSIONS']), formatNum(totauxG['MISSIONS']), formatNum(capElec), 'INF'), 'var(--ed-blue)', ratioElec, ratioElecVous, ratioElec >= 100) +
+                                genererJaugeHTML('💰 COMMERCE (Économie)', fmtDual(formatCR(totauxMoiG['ECONOMIE']), formatCR(totauxG['ECONOMIE']), formatCR(capsTotal['ECONOMIE'])), '#00FF66', getRatio('ECONOMIE'), getRatioVous('ECONOMIE'), getRatio('ECONOMIE') >= 100) +
+                                genererJaugeHTML('🔬 EXPLORATION (Ventes de données)', fmtDual(formatCR(totauxMoiG['SCIENCE']), formatCR(totauxG['SCIENCE']), formatCR(capsTotal['SCIENCE'])), '#B026FF', getRatio('SCIENCE'), getRatioVous('SCIENCE'), getRatio('SCIENCE') >= 100);
                         }
 
                         // QUOTAS DU JOUR (SQL 110) :
@@ -2052,7 +2054,9 @@
                                         + cell('⚔️', 'Bons de combat', '<b style="font-size:1.2em;">' + QJ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>')
                                         + cell('🎯', 'Missions militaires', '<b style="font-size:1.2em;">' + Math.round((M.MISSIONS || {}).n || 0) + '</b> <span style="color:#888;">contrats</span>');
                                 } else {
-                                    htmlJauges = cell('🗳️', 'Logistique électorale', '<b style="font-size:1.2em;">' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>');
+                                    htmlJauges = cell('🗳️', 'Logistique électorale', '<b style="font-size:1.2em;">' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>')
+                                        + cell('💰', 'Commerce (économie)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>')
+                                        + cell('🔬', 'Données d\'exploration (science)', '<b style="font-size:1.2em;">' + QJ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
                                 }
                                 htmlJauges += '<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:6px;">Les guerres et les élections sont les seules activités sans rendement décroissant : faites-en le plus possible, il n\'y a pas de quota.</div>';
                                 modeJour = true;

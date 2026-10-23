@@ -21,7 +21,7 @@
     <script src="revelations.js?v=6"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagnes-mobile.js?v=17"></script>
-    <script src="quotas-jour.js?v=11"></script>
+    <script src="quotas-jour.js?v=12"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
     <script src="bgs-participants.js?v=1"></script>
@@ -1774,7 +1774,8 @@
                 pe = S('SECURITE') / 2000000 + S('MISSIONS') + S('CZ_VICTOIRES'); pm = M('SECURITE') / 2000000 + M('MISSIONS') + M('CZ_VICTOIRES');
             } else if (o.type_ordre === 'ELECTION') {
                 const capE = cap.ELECTION_MISSIONS || cap.MISSIONS;
-                somme = R(S('MISSIONS'), capE); div = 1; pe = S('MISSIONS'); pm = M('MISSIONS');
+                somme = R(S('MISSIONS'), capE) + R(S('ECONOMIE'), cap.ECONOMIE) + R(S('SCIENCE'), cap.SCIENCE); div = 3;
+                pe = S('MISSIONS') + (S('ECONOMIE') + S('SCIENCE')) / 2000000; pm = M('MISSIONS') + (M('ECONOMIE') + M('SCIENCE')) / 2000000;
             }
             return { pct: Math.min(100, Math.round(somme / div)), part: pe > 0 ? Math.min(100, Math.round(100 * pm / pe)) : 0 };
         }
@@ -1914,7 +1915,7 @@
             if (o.type_ordre === 'HAUSSE') L = [['📝 LOGISTIQUE (Missions)', '#FF7100', M('MISSIONS'), S('MISSIONS'), cap.MISSIONS, fN, ' INF'], ['💰 ÉCONOMIE (Commerce & Minage)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['💥 SÉCURITÉ (Primes & Conflits)', '#00F0FF', M('SECURITE'), S('SECURITE'), cap.SECURITE, fC, ''], ['🔬 SCIENCE (Cartographie)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
             else if (o.type_ordre === 'BAISSE') L = [['☠️ MEURTRES', '#FF3333', M('MEURTRES'), S('MEURTRES'), cap.MEURTRES, fN, ''], ['📦 CONTREBANDE', '#FF3333', M('CONTREBANDE'), S('CONTREBANDE'), cap.CONTREBANDE, fC, ''], ['❌ MISSIONS ÉCHOUÉES', '#FF3333', M('ECHECS'), S('ECHECS'), cap.ECHECS, fN, '']];
             else if (o.type_ordre === 'GUERRE') L = [['🏆 VICTOIRES EN CZ', '#FFD700', Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.nm) || 0, Number(T.CZ_VICTOIRES && T.CZ_VICTOIRES.n) || 0, cap.CZ_VICTOIRES || (5 * nb), fN, ''], ['⚔️ OBLIGATIONS DE COMBAT (Bons)', '#FF7100', M('SECURITE'), S('SECURITE'), cap.GUERRE_BONDS || cap.SECURITE, fC, ''], ['🎯 MISSIONS MILITAIRES', '#FF3333', M('MISSIONS'), S('MISSIONS'), cap.GUERRE_MISSIONS || cap.MISSIONS, fN, ' CONTRATS']];
-            else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF']];
+            else if (o.type_ordre === 'ELECTION') L = [['🗳️ LOGISTIQUE ÉLECTORALE', '#00F0FF', M('MISSIONS'), S('MISSIONS'), cap.ELECTION_MISSIONS || cap.MISSIONS, fN, ' INF'], ['💰 COMMERCE (Économie)', '#00FF66', M('ECONOMIE'), S('ECONOMIE'), cap.ECONOMIE, fC, ''], ['🔬 EXPLORATION (Ventes de données)', '#B026FF', M('SCIENCE'), S('SCIENCE'), cap.SCIENCE, fC, '']];
             return L.map(([titre, c, moi, esc, plafond, f, u]) => {
                 const tot = plafond > 0 ? Math.min(100, 100 * esc / plafond) : 0, vous = plafond > 0 ? Math.min(tot, 100 * moi / plafond) : 0;
                 return { titre, c: tot >= 100 ? '#4CAF50' : c, moi, esc, plafond, f, u, tot, vous };
@@ -1934,7 +1935,7 @@
                 const cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;border:1px solid rgba(255,255,255,0.05);border-radius:8px;background:rgba(0,0,0,0.5);padding:8px 10px;font-size:0.78em;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
                 const lignes = o.type_ordre === 'GUERRE'
                     ? cell('🏆', 'Victoires en CZ', '<b>' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">· ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>') + cell('⚔️', 'Bons de combat', '<b>' + EQ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>') + cell('🎯', 'Missions militaires', '<b>' + Math.round((M.MISSIONS || {}).n || 0) + '</b>')
-                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>');
+                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>') + cell('💰', 'Commerce (économie)', '<b>' + EQ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>') + cell('🔬', 'Données d\'exploration', '<b>' + EQ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
                 return lignes + '<div style="color:#777; font-size:0.66em; line-height:1.5; margin-top:4px;">Guerres et élections : aucune limite, faites-en le plus possible (pas de quota).</div>';
             }
             return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">
