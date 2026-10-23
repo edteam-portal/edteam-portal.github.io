@@ -27,6 +27,9 @@
         + '.ft-son:hover{color:var(--ed-blue,#00F0FF);border-color:var(--ed-blue,#00F0FF)}'
         + '.ft-alerte{padding:3px 9px;color:#999;background:transparent;border:1px solid #444;letter-spacing:1px}'
         + '.ft-alerte:hover{color:var(--ed-blue,#00F0FF);border-color:var(--ed-blue,#00F0FF)}'
+        + '.ft-sonsjeu{padding:3px 9px;color:var(--ed-blue,#00F0FF);background:transparent;border:1px solid rgba(0,240,255,.45);letter-spacing:1px}'
+        + '.ft-sonsjeu.ft-sj-off{color:#999;border-color:#444}'
+        + '.ft-sonsjeu:hover{color:#fff;border-color:var(--ed-blue,#00F0FF)}'
         + '.ft-nouv{position:relative;color:#FFD700;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.45)}'
         + '.ft-nouv:hover{background:rgba(255,215,0,.16);box-shadow:0 0 12px rgba(255,215,0,.45);color:#fff}'
         + '.ft-point{width:8px;height:8px;border-radius:50%;background:#FF7100;box-shadow:0 0 8px #FF7100;position:absolute;top:-3px;right:-3px}'
@@ -84,11 +87,56 @@
     (function () {
         try { var o = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); if (o && o.on && !/tableau-de-bord/i.test(location.pathname)) { var s = document.createElement('script'); s.src = 'alerte-combat.js?v=1'; document.head.appendChild(s); } } catch (e) { /* stockage indisponible */ }
     })();
+    // Sons du jeu sur toutes les pages (son-jeu.js) : SEULEMENT dans l'application installee (le navigateur n'autorise le son sans clic que la) ; le tableau de bord garde son propre moteur.
+    // Navigateur simple : le bouton explique comment installer. Aucune connexion tant que l'option est coupee ; le moteur n'est charge que si l'option est active.
+    var CLE_SONS_JEU = 'edteam_sons_jeu';
+    function appInstallee() { try { return !!((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true); } catch (e) { return false; } }
+    function sonsJeuOn() { try { return localStorage.getItem(CLE_SONS_JEU) !== 'off'; } catch (e) { return true; } }
+    function majBoutonSonsJeu() {
+        var txt = !appInstallee() ? '🎧 SONS DU JEU : APPLICATION REQUISE' : (sonsJeuOn() ? '🎧 SONS DU JEU : ACTIVÉS' : '🎧 SONS DU JEU : DÉSACTIVÉS');
+        var tip = !appInstallee() ? 'Les sons du jeu (ambiance de cabine, annonces, éliminations…) se jouent sur toutes les pages dans l’application EDTEAM installée. Cliquer pour voir comment l’installer.' : 'Sons du jeu sur toutes les pages (passagers, soute, ventes, saut, éliminations). Cliquer pour activer ou couper.';
+        document.querySelectorAll('[data-sonsjeu-toggle]').forEach(function (b) { b.textContent = txt; b.title = tip; b.classList.toggle('ft-sj-off', !appInstallee() || !sonsJeuOn()); });
+    }
+    function chargerSonsJeu(cb) {
+        if (window.EdteamSonJeu) { if (cb) cb(); return; }
+        var s = document.createElement('script'); s.src = 'son-jeu.js?v=1'; s.onload = function () { if (cb) cb(); }; document.head.appendChild(s);
+    }
+    function fermerSonsJeu() { var o = document.getElementById('ft-sonsjeu-overlay'); if (o) o.style.display = 'none'; }
+    window.edteamSonsJeuBasculer = function () {
+        if (!appInstallee()) {
+            var o = document.getElementById('ft-sonsjeu-overlay');
+            if (!o) {
+                o = el('div', { id: 'ft-sonsjeu-overlay', class: 'ft-overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Sons du jeu' });
+                o.innerHTML = ''
+                    + '<div class="ft-modal">'
+                    +   '<div class="ft-x" title="Fermer">X</div>'
+                    +   '<h3>🎧 SONS DU JEU</h3>'
+                    +   '<p>Quand vous prenez une mission de passagers, vendez, sautez ou éliminez un vaisseau, l’ambiance de cabine, les annonces et les voix se jouent <strong style="color:#fff;">sur toutes les pages</strong>, sans aucun clic, <strong style="color:#fff;">dans l’application EDTEAM installée</strong>.</p>'
+                    +   '<p style="font-size:.85rem;color:#bbb;">Dans un simple navigateur, ces sons ne sont disponibles que sur le tableau de bord (après un clic dans la page).</p>'
+                    +   '<p style="font-size:.85rem;color:#bbb;"><strong style="color:#fff;">Installer l’application</strong> (Chrome ou Edge sur PC ou Android) : cliquez sur l’icône d’installation à droite de la barre d’adresse, ou ouvrez le menu du navigateur et choisissez « Installer EDTEAM » (Chrome : « Enregistrer et partager » puis « Installer la page en tant qu’application »). Lancez ensuite EDTEAM depuis l’application installée.</p>'
+                    +   '<p style="font-size:.8rem;color:#999;">Une tablette ou un second écran avec l’application ouverte sur le tableau de bord fonctionne aussi.</p>'
+                    + '</div>';
+                o.addEventListener('click', function (e) { if (e.target === o) fermerSonsJeu(); });
+                o.querySelector('.ft-x').addEventListener('click', fermerSonsJeu);
+                document.body.appendChild(o);
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fermerSonsJeu(); });
+            }
+            o.style.display = 'flex';
+            return;
+        }
+        var actif = sonsJeuOn(); try { localStorage.setItem(CLE_SONS_JEU, actif ? 'off' : 'on'); } catch (e) { /* stockage indisponible : le choix ne sera pas retenu */ }
+        majBoutonSonsJeu();
+        if (actif) { if (window.EdteamSonJeu) window.EdteamSonJeu.arreter(); }
+        else chargerSonsJeu(function () { if (window.EdteamSonJeu) window.EdteamSonJeu.demarrer(); });
+    };
+    function autoSonsJeu() {      // appelee une fois la page montee (#main-ui existe) : charge le moteur seulement dans l'application, option active, hors tableau de bord et hors page publique
+        try { if (appInstallee() && sonsJeuOn() && !/tableau-de-bord|presentation|mobile\.html/i.test(location.pathname) && dansApp()) chargerSonsJeu(); } catch (e) { /* stockage indisponible */ }
+    }
     // L'aide (FAQ) est chargee a la premiere ouverture seulement : aide.js
     window.edteamOuvrirAide = function (section) {
         if (window.edteamAide) { window.edteamAide.ouvrir(section); return; }
         var s = document.createElement('script');
-        s.src = 'aide.js?v=46';
+        s.src = 'aide.js?v=47';
         s.onload = function () { if (window.edteamAide) window.edteamAide.ouvrir(section); };
         document.head.appendChild(s);
     };
@@ -183,6 +231,7 @@
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
             +   (visiteur || /tableau-de-bord/i.test(location.pathname) ? '' : '<button type="button" class="ft-btn ft-alerte" data-alerte-toggle onclick="edteamAlerteBasculer()">⚠ ALERTE COMBAT : DÉSACTIVÉE</button>')
+            +   (visiteur || /tableau-de-bord/i.test(location.pathname) ? '' : '<button type="button" class="ft-btn ft-sonsjeu" data-sonsjeu-toggle onclick="edteamSonsJeuBasculer()"></button>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')
             + '</div>'
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>'; }
@@ -194,6 +243,7 @@
         });
 
         if (window.edteamSon) window.edteamSon.majUI();
+        majBoutonSonsJeu(); autoSonsJeu();
         // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
         if (!visiteur && /[?&]nouveautes(=|&|$)/.test(location.search)) setTimeout(function () { window.edteamOuvrirNouveautes(); }, 800);
         if (dansApp()) charger(urlDonnees(), function () { window.edteamMajPointNouveautes(); });

@@ -532,6 +532,8 @@
     function ambMaj(caisses, passagers, combat) { AMB.c = AMB_DEPOT && !!caisses; AMB.p = passagers || 0; AMB.k = !!combat; ambSync(); }
     if (!window.__tbmAmbInit) {
         window.__tbmAmbInit = true;
+        // application installee : le navigateur autorise le son sans geste, donc pas de clic exige (le contexte audio relance le son s'il est quand meme refuse)
+        try { if ((window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true) AMB.geste = true; } catch (e) { /* navigateur ancien : clic exige comme avant */ }
         const geste = () => { AMB.geste = true; ambIndice(false); ambSync(); };
         document.addEventListener("pointerdown", geste, { once: true }); document.addEventListener("keydown", geste, { once: true });
         document.addEventListener("visibilitychange", ambSync);

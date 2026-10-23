@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-sons-du-jeu-partout', date: '2026-10-23T14:48:34Z', type: 'NOUVEAU',
+        titre: 'Sons du jeu sur toutes les pages, dans l’application installée',
+        texte: 'Quand vous prenez une mission de passagers, chargez ou vendez, sautez, êtes intercepté ou éliminez un vaisseau, les ambiances de cabine, les annonces et les voix se jouent maintenant sur TOUTES les pages du site, sans aucun clic, tant que votre jeu est en ligne, quel que soit l’onglet du tableau de bord affiché. Cela fonctionne dans l’application EDTEAM installée (Chrome ou Edge : icône d’installation à droite de la barre d’adresse) : un simple navigateur garde les sons du tableau de bord seulement. Le bouton « Sons du jeu » du pied de page les active ou les coupe ; les sons du minage restent dans l’onglet Minage.',
+        important: false,
+        action: 'Installer l’application EDTEAM (Chrome ou Edge) pour entendre les sons sur toutes les pages.'
+    },
+    {
         id: '2026-10-tick-seconde-source', date: '2026-10-23T13:36:54Z', type: 'CORRIGE',
         titre: 'Tick BGS : une seconde source quand le détecteur habituel se tait',
         texte: 'Le détecteur de tick que nous utilisions (tick.edcd.io) n’a plus rien enregistré depuis le 17 octobre : l’en-tête affichait donc un tick estimé. Le serveur interroge maintenant aussi un second détecteur communautaire toutes les 15 minutes et garde les ticks des deux ; l’en-tête retrouve l’heure exacte du dernier tick dès qu’une des deux sources le détecte. Les ticks des 18 au 21 octobre n’ont été notés par aucune source : ils restent estimés.',
