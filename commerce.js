@@ -312,10 +312,10 @@
     function corps() {
         const d = etat.donnees;
         let h = '';
-        if (etat.statut === 'EN_COURS') h += '<div class="ec-bandeau"><span class="ec-spin"></span>MISE À JOUR EN COURS CHEZ SPANSH…' + (d ? ' (les résultats ci-dessous datent de la dernière recherche)' : '') + '</div>';
+        if (etat.statut === 'EN_COURS') h += '<div class="ec-bandeau"><span class="ec-spin"></span>MISE À JOUR EN COURS CHEZ ' + (etat.mode === 'contrebande' ? 'SPANSH' : 'SPANSH ET ARDENT') + '…' + (d ? ' (les résultats ci-dessous datent de la dernière recherche)' : '') + '</div>';
         if (etat.statut === 'ERREUR') h += '<div class="ec-bandeau" style="border-color:#e8a35a;color:#e8a35a;">' + E(etat.message || 'Recherche impossible pour le moment.') + '</div>';
         if (!d) {
-            if (etat.statut === 'EN_COURS') return h + msg('RECHERCHE EN COURS', 'La base interroge Spansh pour la première fois sur cette directive (environ 15 à 30 secondes).<br>Le résultat sera ensuite gardé 2 heures pour tout l\'escadron.', true);
+            if (etat.statut === 'EN_COURS') return h + msg('RECHERCHE EN COURS', 'La base interroge ' + (etat.mode === 'contrebande' ? 'Spansh' : 'Spansh et Ardent (deux bases de prix, recoupées)') + ' pour la première fois sur cette directive (environ 15 à 45 secondes).<br>Le résultat sera ensuite gardé 2 heures pour tout l\'escadron.', true);
             return h + msg('AUCUN RÉSULTAT', 'La recherche n\'a rien donné pour le moment. Réessayez dans quelques minutes.');
         }
         if (etat.mode === 'contrebande') return h + corpsContre(d);
@@ -358,8 +358,10 @@
     }
     // sources des prix : Spansh seul, ou Spansh + Ardent recoupes (SQL 137 : pour une meme station, le releve le plus recent des deux est gardé)
     function sourcesPrix() {
-        const f = etat.donnees && etat.donnees.fusion;
-        if (etat.mode === 'contrebande' || !f) return 'Spansh';
+        if (etat.mode === 'contrebande') return 'Spansh';
+        if (!etat.donnees) return 'Spansh et Ardent';          // recherche en cours : les deux sont interrogés
+        const f = etat.donnees.fusion;
+        if (!f) return 'Spansh';                                  // resultat garde d'avant le script 137
         return f.ardent ? 'Spansh et Ardent, recoupés (le relevé le plus récent de chaque station est gardé)' : 'Spansh (Ardent n’a pas répondu)';
     }
     function rendre() {
