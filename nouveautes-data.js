@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-trafic-minimum', date: '2026-10-23T12:57:11Z', type: 'AMELIORE',
+        titre: 'Trafic d’un système : « minimum », avec une explication',
+        texte: 'La carte « Trafic » de la fenêtre d’une directive s’appelle maintenant « Trafic minimum » et porte un bouton « ? » : il ouvre une fenêtre qui explique pourquoi ce chiffre (celui d’EDSM, qui ne compte que les commandants dont l’outil lui envoie le journal de vol) est plus petit que le trafic réel affiché par le jeu dans les stations, et comment lire le repère « calme / habituel / animé ».',
+        important: false
+    },
+    {
         id: '2026-10-passages-escadron', date: '2026-10-23T12:29:16Z', type: 'AMELIORE',
         titre: 'Trafic d’un système : combien de pilotes de l’escadron y sont passés',
         texte: 'Sous le trafic EDSM, la carte « Trafic » de la fenêtre d’une directive indique maintenant combien de pilotes de votre escadron ont été relevés dans ce système ces 24 dernières heures. Seuls les pilotes dont EDMC est allumé sont vus (un pilote qui joue sans EDMC n’apparaît pas), aucun nom n’est affiché, et seul votre escadron est compté. Le comptage a commencé au lancement de cette fonction : il est incomplet pendant les 24 premières heures. Le chiffre EDSM reste un minimum.',

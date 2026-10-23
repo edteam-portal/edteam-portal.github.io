@@ -23,6 +23,7 @@
     <script src="campagnes-mobile.js?v=18"></script>
     <script src="quotas-jour.js?v=14"></script>
     <script src="conflit-evenements.js?v=1"></script>
+    <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
     <script src="bgs-participants.js?v=2"></script>
@@ -1889,7 +1890,8 @@
                     <div style="color: ${n.coul}; font-size: 0.62em; letter-spacing: 1px; margin-top: 4px;">${n.txt}</div>
                     <div style="color: #888; font-size: 0.68em; min-height: 1.2em;">${l2}</div>${xSpark((a.c || []).filter(p => p[col] !== null).map(p => [p[0], p[col]]), coul)}${genre === 'trafic' ? xPassages(systeme) : ''}</div>`;
             };
-            const t1 = carte('TRAFIC', '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux / 24 h', 'trafic'), t2 = carte('MORTS', '☠', a.mj, a.ms, 2, '#ff4d4d', 'morts / 24 h', 'morts');
+            const qT = window.edteamTraficInfo ? window.edteamTraficInfo.bouton() : '';
+            const t1 = carte('TRAFIC MINIMUM' + qT, '✈', a.tj, a.ts, 1, '#00F0FF', 'vaisseaux / 24 h', 'trafic'), t2 = carte('MORTS', '☠', a.mj, a.ms, 2, '#ff4d4d', 'morts / 24 h', 'morts');
             if (!t1 && !t2) return '';
             return `<div class="mdet-sec" style="margin-top: 12px;">ACTIVITÉ DU SYSTÈME <span style="color: #777; letter-spacing: 0;">· relevé ${xAge(a.t)}</span></div>
                 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">${t1}${t2}</div>
