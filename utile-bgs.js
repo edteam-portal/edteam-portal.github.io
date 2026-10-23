@@ -53,7 +53,7 @@
     function legende() {
         const i = c => "<i style=\"display:inline-block;width:14px;height:7px;margin-right:5px;vertical-align:middle;border:1px solid " + c + ";background:" + c + "33\"></i>";
         return "<div style=\"display:flex;gap:14px;justify-content:flex-end;flex-wrap:wrap;color:#6f7c84;font-size:.6em;margin:0 2px 8px;font-family:'Share Tech Mono',monospace\"><span>" + i(COUL.up) + "objectif atteint</span><span>" + i(COUL.dn) + "pas atteint</span><span>" + i(COUL.fl) + "inchangé</span>"
-            + "<span>· fond net : variation depuis le dernier tick · fond pâle : aucune mesure depuis le tick, variation sur 48 h</span></div>";
+            + "<span>· fond net : variation depuis le dernier tick · fond pâle : aucune mesure depuis le tick, variation sur 48 h</span><span>· jauge : gris = influence inchangée, plein = gain, rayé = perte, trait blanc = avant le tick</span></div>";
     }
 
     window.EdteamUtile = { fond, fondLigne, signalLigne, variation, deltaTick, delta48, dernierTick, legende, COUL };

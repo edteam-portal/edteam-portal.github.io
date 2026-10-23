@@ -42,6 +42,8 @@
             return vue;
         },
         vue: function () { return vue; },
+        // le mobile lit deja pp_missions_vue : il fournit ici sa lecture (aucun second appel serveur)
+        definir: function (v) { vue = v; window.cachePP = v; },
 
         // lignes d'une campagne (format de campagnes.js)
         lignes: function (campagneId) {
@@ -100,7 +102,8 @@
         },
 
         // ===== FENETRE D'UNE MISSION POWERPLAY =====
-        ouvrir: function (id) {
+        // mobile = true : renvoie { html, couleur, estIni, peutCloturer } au lieu d'ouvrir la fenetre du PC (le contenu est le meme, les boutons de cloture sont ceux du mobile)
+        ouvrir: function (id, mobile) {
             if (typeof sonClic === 'function') sonClic();
             var m = trouver(id); if (!m) return;
             if (!aPuissance()) return;
@@ -159,7 +162,7 @@
                     + ((etat.powers || []).length ? '<div class="bgs-sec" style="margin-top:14px;">PUISSANCES EN PRÉSENCE</div><div style="font-size:.88em; line-height:1.6; color:#bbb; margin-top:6px;">' + etat.powers.map(function (p) { var ctl = p === etat.controlling; return '<span style="display:inline-flex; align-items:center; gap:7px; margin:0 14px 6px 0; white-space:nowrap;">' + (E ? E.portrait(p, 28, ctl ? ce : '#444') : '') + (ctl ? '★ <b style="color:#fff;">' + esc(p) + '</b>' : esc(p)) + '</span>'; }).join('') + '</div>' : '')
                 : '<div style="color:#999; font-size:.92em; line-height:1.6; padding:14px 4px;">Ce système n\'a pas encore été observé : son état sera relevé dès qu\'un pilote de l\'escadron y passera.</div>';
             var peutCloturer = estCmd() || (estIni && String(m.auteur_id) === String(moi().user_id));
-            var boutons = (peutCloturer ? '<button class="ini-btn gris" onclick="edteamCampagnesPP.cloturer(' + m.id + ', ' + (estIni && !estCmd()) + ')">' + (estIni ? (estCmd() ? 'RETIRER L\'INITIATIVE' : 'CLÔTURER MON INITIATIVE') : 'CLÔTURER LA MISSION') + '</button>' : '')
+            var boutons = mobile ? '' : (peutCloturer ? '<button class="ini-btn gris" onclick="edteamCampagnesPP.cloturer(' + m.id + ', ' + (estIni && !estCmd()) + ')">' + (estIni ? (estCmd() ? 'RETIRER L\'INITIATIVE' : 'CLÔTURER MON INITIATIVE') : 'CLÔTURER LA MISSION') + '</button>' : '')
                 + (estIni && estCmd() ? '<button class="ini-btn" onclick="edteamCampagnesPP.adopter(' + m.id + ')">TRANSFORMER EN MISSION DE CAMPAGNE</button>' : '');
             var tuileG = function (titre, val, sous, coul) { return '<div style="flex:1; min-width:130px; background:linear-gradient(90deg, color-mix(in srgb, ' + c + ' 15%, #0a0c10), #0a0c10 72%); border-left:4px solid ' + c + '; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); padding:10px 12px;"><div style="color:#9ab; font-size:.68em; letter-spacing:2px;">' + titre + '</div><div style="color:' + (coul || '#fff') + '; font-size:1.8em; font-weight:bold; line-height:1.15; margin:3px 0;">' + val + '</div><div style="color:#8a949c; font-size:.74em; line-height:1.4;">' + sous + '</div></div>'; };
             var html = '<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-right:30px;">' + pastille('POWERPLAY', PPC) + ' ' + pastille(t[0].toUpperCase(), t[1])
@@ -175,6 +178,7 @@
                 + '<div class="bgs-col-jeu"><div class="bgs-cadre"><div class="bgs-cadre-t">OÙ EN EST CE SYSTÈME DANS LE JEU ?</div>' + blocEtat + '</div>'
                 + (boutons ? '<div style="display:flex; gap:8px; flex-wrap:wrap;">' + boutons + '</div>' : '') + '</div></div>'
                 + '<div style="color:#777; font-size:.75em; line-height:1.5; margin-top:14px;">ⓘ 1 mérite ≈ 1/4 point de contrôle (estimation, non confirmée par le jeu). Les mérites sont rattachés au système où se trouvait le pilote. L\'état du système vient du journal de jeu des pilotes de l\'escadron : les résultats officiels sont dans le classement Powerplay du jeu.</div>';
+            if (mobile) return { html: html, couleur: c, estIni: estIni, peutCloturer: peutCloturer, estCmd: estCmd() };
             var mo = document.getElementById('modal-ordre-resultat'); if (!mo) return;
             mo.querySelector('.modal-content').style.borderColor = c;
             mo.querySelector('.modal-content').style.boxShadow = '0 0 40px ' + c + '30';

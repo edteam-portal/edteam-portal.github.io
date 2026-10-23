@@ -19,6 +19,7 @@
     const couleurDir = it => COUL_RES[(window.__edtResDirectives || {})[String(it.s || "").toUpperCase()]] || COUL_RES.fl;
     const couleurMotif = it => { const m = it.m || []; if (m.indexOf("DIRECTIVE") >= 0) return couleurDir(it); return (MOTIFS[ORDRE_MOTIFS.find(k => m.indexOf(k) >= 0)] || ["", "#00F0FF"])[1]; };
     const moi = () => window.profilCommandant || {};
+    const db = () => window.supabaseApp || (typeof supabaseApp !== "undefined" ? supabaseApp : null);
     const estAmiral = () => !!(moi().est_amiral || moi().est_directeur);
     const estDirecteur = () => !!moi().est_directeur;      // seul le directeur definit les parametres du reperage (l'Amiral peut ecarter des systemes)
 
@@ -27,7 +28,7 @@
         if (enCours) return enCours;
         enCours = (async () => {
             try {
-                const r = await window.supabaseApp.rpc("reperage_liste");
+                const r = await db().rpc("reperage_liste");
                 if (r.error || !r.data) { return memo ? memo.d : null; }
                 memo = { t: Date.now(), d: r.data }; return r.data;
             } catch (e) { return memo ? memo.d : null; }
@@ -39,8 +40,8 @@
     async function maPosition() {
         if (pos && Date.now() - pos.lu < 60000) return pos.v;
         try {
-            const uid = moi().user_id; if (!uid || !window.supabaseApp) return null;
-            const r = await window.supabaseApp.from("session_live").select("pos:etat->pos,systeme:etat->>systeme").eq("user_id", uid).maybeSingle();
+            const uid = moi().user_id; if (!uid || !db()) return null;
+            const r = await db().from("session_live").select("pos:etat->pos,systeme:etat->>systeme").eq("user_id", uid).maybeSingle();
             const d = r && r.data; const v = d && Array.isArray(d.pos) && d.pos.length === 3 ? { x: Number(d.pos[0]), y: Number(d.pos[1]), z: Number(d.pos[2]), systeme: d.systeme || "" } : null;
             pos = { lu: Date.now(), v }; return v;
         } catch (e) { return null; }
@@ -272,7 +273,7 @@
         ov.querySelectorAll(".rp-lg[data-s]").forEach(l => l.onclick = () => { copier(l.dataset.s, null); const t = l.querySelector("b"); if (t) { const v = t.textContent; t.textContent = "COPIÉ ✓"; setTimeout(() => { t.textContent = v; }, 1200); } });
         ov.querySelectorAll("[data-rp=copier]").forEach(b => b.onclick = () => { if (rt.etapes[0]) copier(rt.etapes[0].s, b); });
         const agir = async (rpc, systeme) => {
-            const r = await window.supabaseApp.rpc(rpc, { p_systeme: systeme });
+            const r = await db().rpc(rpc, { p_systeme: systeme });
             if (r.error) { const m = ov.querySelector(".rp-liste .rp-note:last-child") || ov.querySelector(".rp-liste"); if (m) m.insertAdjacentHTML("afterbegin", "<div class=\"rp-note\" style=\"color:#ff8a8a\">" + E(r.error.message || "refusé") + "</div>"); return; }
             memo = null; const n = await charger(true); const np = await maPosition();
             if (n && document.getElementById("rp-modale")) { p = np; d = n; dessiner(n, np); }
@@ -287,11 +288,13 @@
         ov.querySelectorAll("[data-rp=actualiser]").forEach(b => b.onclick = async () => { b.textContent = "…"; pos = null; const n = await charger(true); const np = await maPosition(); if (n && document.getElementById("rp-modale")) { p = np; d = n; dessiner(n, np); } });
         ov.querySelectorAll("[data-rp=enregistrer]").forEach(b => b.onclick = async () => {
             const v = k => Number((ov.querySelector("#rp-" + k) || {}).value), msg = ov.querySelector("[data-rp=msg]");
-            const r = await window.supabaseApp.rpc("reperage_reglages_ecrire", { p_age_directive: v("age_directive_h"), p_age_expansion: v("age_expansion_h"), p_age_place_libre: (d.reglages || {}).age_place_libre_h || 72, p_age_conquete: v("age_conquete_h") || 48, p_age_conquete_forte: (d.reglages || {}).age_conquete_forte_h || 24, p_actif: !!((ov.querySelector("#rp-mode-bgs") || {}).checked || (ov.querySelector("#rp-mode-pp") || {}).checked), p_bgs: !!(ov.querySelector("#rp-mode-bgs") || {}).checked, p_pp: !!(ov.querySelector("#rp-mode-pp") || {}).checked, p_rayon: Number((ov.querySelector("#rp-rayon_max_al") || {}).value) || 500, p_seuil: v("seuil_conquete_pct") || 25 });
+            const r = await db().rpc("reperage_reglages_ecrire", { p_age_directive: v("age_directive_h"), p_age_expansion: v("age_expansion_h"), p_age_place_libre: (d.reglages || {}).age_place_libre_h || 72, p_age_conquete: v("age_conquete_h") || 48, p_age_conquete_forte: (d.reglages || {}).age_conquete_forte_h || 24, p_actif: !!((ov.querySelector("#rp-mode-bgs") || {}).checked || (ov.querySelector("#rp-mode-pp") || {}).checked), p_bgs: !!(ov.querySelector("#rp-mode-bgs") || {}).checked, p_pp: !!(ov.querySelector("#rp-mode-pp") || {}).checked, p_rayon: Number((ov.querySelector("#rp-rayon_max_al") || {}).value) || 500, p_seuil: v("seuil_conquete_pct") || 25 });
             if (r.error) { if (msg) msg.textContent = r.error.message || "refusé"; return; }
             memo = null; const n = await charger(true); if (n && document.getElementById("rp-modale")) dessiner(n);
             const bande = document.getElementById("reperage-bande"); if (bande) monter(bande);
         });
     }
-    window.EdteamReperage = { monter, ouvrir, route, invalider: () => { memo = null; } };
+    window.EdteamReperage = { monter, ouvrir, route, invalider: () => { memo = null; pos = null; } };
+    // briques reutilisees par la version mobile (reperage-mobile.js)
+    window.EdteamReperage._ui = { charger, maPosition, filtrer, route, carte, copier, css, MOTIFS, ORDRE_MOTIFS, RISQUES, couleurMotif, couleurDir, age, depuis, nom, E, estAmiral, estDirecteur, photos, avatar, logo, messageAmiral, db, vider: () => { memo = null; pos = null; } };
 })();

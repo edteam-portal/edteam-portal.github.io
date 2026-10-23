@@ -68,14 +68,23 @@
         if (!P || !liste || !liste.length) return '';
         return '<span class="mc-avs">' + liste.slice(0, 5).map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 22 }); }).join('') + '</span>';
     }
+    // jauge d'influence (comme sur le PC) : gris = influence qui n'a pas bouge depuis le dernier tick (ou sur 48 h), plein = gain, raye = perte ; couleur = resultat de la directive ; trait blanc = valeur avant le tick
+    function jaugeMob(o, res) {
+        var U = window.EdteamUtile;
+        if (!U || !res || !res.donnees || res.conflit || res.influence == null) return '';
+        var cur = Math.max(0, Math.min(100, Number(res.influence) * 100)), vt = U.variation ? U.variation(o, res) : null;
+        if (!vt) return '';
+        var d = vt.v, prev = Math.max(0, Math.min(100, cur - d)), bas = Math.min(cur, prev), col = U.COUL[vt.sens] || '#6f8196';
+        var h = '<span class="mc-jg" style="--s:' + col + ';"><i style="width:' + bas + '%;"></i>';
+        if (Math.abs(d) >= 0.05) h += '<b class="' + (d > 0 ? 'm' : 'h') + '" style="left:' + bas + '%; width:' + Math.abs(cur - prev) + '%;"></b><u style="left:' + prev + '%;"></u>';
+        return h + '</span>';
+    }
     function ligneMob(o) {
-        var pct = Math.max(0, Math.min(100, Number(o.pct) || 0)), vous = o.vous == null ? 0 : Math.max(0, Math.min(pct, Number(o.vous) || 0)), c = o.c;
-        var fond = o.fondRes || (pct > 0 ? 'linear-gradient(90deg,' + c + '3a 0,' + c + '3a ' + pct + '%, rgba(0,0,0,0) ' + pct + '%)' : 'none');
+        var c = o.c, fond = o.fondRes || 'none';      // plus de barre de progression ni de pourcentage d'effort (supprimes sur le PC) : seul le fond de resultat reste
         var l3 = (o.avs || '') + (o.etats ? '<span class="mc-et">' + o.etats + '</span>' : '') + (o.pips ? '<span style="margin-left:auto;">' + o.pips + '</span>' : '');
         return '<div class="mc-row' + (o.k ? ' conf' : '') + (o.gris ? ' gris' : '') + '" style="--c:' + c + ';' + (o.k ? ' --k:' + o.k + ';' : '') + ' background:' + fond + ';"' + (o.clic ? ' onclick="' + o.clic + '"' : '') + '>'
-            + (vous > 0 ? '<i class="mc-neon" style="width:' + vous + '%;"></i>' : '')
-            + '<div class="l1"><span class="mc-tag" style="color:' + c + '; border-color:' + c + ';">' + o.tag + '</span><b class="mc-sys">' + o.sys + '</b>' + (o.pct == null ? '' : '<span class="mc-pc" style="color:' + c + ';">' + Math.round(pct) + ' %</span>') + '</div>'
-            + '<div class="l2"><span class="mc-g">' + (o.g || '') + '</span><span class="mc-d">' + (o.d || '') + '</span></div>'
+            + '<div class="l1"><span class="mc-tag" style="color:' + c + '; border-color:' + c + ';">' + o.tag + '</span><b class="mc-sys">' + o.sys + '</b></div>'
+            + '<div class="l2"><span class="mc-g">' + (o.g || '') + '</span><span class="mc-d">' + (o.d || '') + '</span></div>' + (o.jg || '')
             + (l3 ? '<div class="l3">' + l3 + '</div>' : '') + '</div>';
     }
     function ligneBgsMob(o, index, ctx) {
@@ -95,19 +104,21 @@
         } else d = '<span style="color:#666;">—</span>';
         var typeFr = o.type_ordre === 'ELECTION' ? 'ÉLECTION' : String(o.type_ordre || '');
         return ligneMob({ c: COUL_BGS, k: kk, tag: '#' + o.id + ' · ' + typeFr, sys: esc(String(o.systeme_cible || '').toUpperCase()), pct: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? null : av.pct, vous: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? 0 : vous, g: esc(String(o.faction_cible || '').toUpperCase()), d: d,
-            avs: avatarsMob(rs.pilotes), etats: window.edteamEtats && donnees ? window.edteamEtats.badges(res, true) : '', fondRes: window.EdteamUtile && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? window.EdteamUtile.fondLigne(o, res, ctx.sens) : '',
+            jg: donnees ? jaugeMob(o, res) : '', avs: avatarsMob(rs.pilotes), etats: window.edteamEtats && donnees ? window.edteamEtats.badges(res, true) : '', fondRes: window.EdteamUtile ? window.EdteamUtile.fondLigne(o, res, ctx.sens) : '',
             pips: window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) : '', clic: 'ouvrirModalOrdre(' + index + ', \'' + COUL_BGS + '\')' });
     }
+    // ligne Powerplay comme sur le PC : barre du jeu (4 zones, triangle blanc = au dernier tick, orange = maintenant), etat et net du cycle, fond de resultat (net / pale) ; un appui ouvre la feuille de la mission
     function lignePPMob(m) {
-        var t = TYPE_PP[m.type_pp] || [m.type_pp, '#aaa'], pc = m.etat && m.etat.progres != null ? Math.round(Number(m.etat.progres) * 100) : null, gris = !aPuissance();
-        var pl = Number(m.plafond_cp) || 0, fait = cp(m.merites_total), pct = pc, vous = null, d;
-        if (pl > 0) { pct = Math.min(100, Math.round(100 * fait / pl)); vous = Math.min(pct, Math.round(100 * cp(m.merites_moi) / pl)); d = '<b style="color:#fff;">≈ ' + fmt(fait) + ' / ' + fmt(pl) + ' CP</b>' + (fait >= pl ? ' <span style="color:#2fe07a;">atteint</span>' : ''); }
-        else d = pc == null ? '<span style="color:#888;">pas encore observé</span>' : '<span style="color:#ccc;">contrôle ' + pc + ' %</span>';
-        var id = 'mcd-pp' + m.id;
-        return '<div class="mc-w">' + ligneMob({ c: PPC, tag: 'PP #' + m.id + ' · ' + t[0].toUpperCase(), sys: esc(String(m.systeme).toUpperCase()), pct: pct == null ? 0 : pct, vous: vous, gris: gris,
-            g: t[0] + ' · ' + (m.nb_pilotes || 0) + ' pilote' + (m.nb_pilotes > 1 ? 's' : ''), d: d, avs: gris ? '' : avatarsMob((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })),
-            clic: gris ? '' : 'edteamCampagnesMob.deplier(\'' + id + '\')' })
-            + (gris ? '' : '<div class="mc-det" id="' + id + '" style="display:none;">' + detailPP(m) + '</div>') + '</div>';
+        var t = TYPE_PP[m.type_pp] || [m.type_pp, '#aaa'], gris = !aPuissance(), E = window.EdteamPPEtat;
+        var c = E && !gris && m.type_pp !== 'ACQUISITION' ? E.calc(m) : null, pc = m.etat && m.etat.progres != null ? Math.round(Number(m.etat.progres) * 100) : null, d;
+        if (c) d = E.resume(c);
+        else d = m.etat ? '<span style="color:#9ab; letter-spacing:1px; text-transform:uppercase;">' + (ETAT[m.etat.etat] || esc(m.etat.etat || 'sans état')) + (pc != null ? ' · ' + pc + ' %' : '') + '</span>' : '<span style="color:#888;">pas encore observé</span>';
+        var pl = Number(m.plafond_cp) || 0;
+        return '<div class="mc-w">' + ligneMob({ c: PPC, tag: 'PP #' + m.id + ' · ' + t[0].toUpperCase(), sys: esc(String(m.systeme).toUpperCase()), gris: gris,
+            g: t[0] + ' · ' + fmt(m.merites_total) + ' mérites' + (pl > 0 ? ' · objectif ≈ ' + fmt(cp(m.merites_total)) + ' / ' + fmt(pl) + ' CP' : ''), d: d,
+            jg: c ? '<div style="margin-top:6px;">' + E.barre(c, false) + '</div>' : '', fondRes: c && window.EdteamUtile ? window.EdteamUtile.fond(c.sens, c.pale) : '',
+            avs: gris ? '' : avatarsMob((m.pilotes || []).map(function (x) { return { u: x.u, nom: x.nom }; })),
+            clic: gris ? '' : 'edteamCampagnesMob.ouvrirPP(' + m.id + ')' }) + '</div>';
     }
     function ligneCOLMob(m) {
         var lib = m.type_col === 'CHANTIERS' ? fmt(m.tonnes_livrees) + ' / ' + fmt(m.tonnes_requises) + ' t' : ETAPE_COURT[m.etape_fait];
@@ -145,9 +156,9 @@
         var replie = lirePli().indexOf(String(c.id)) >= 0;
         var info = c.echeance ? '⏳ jusqu\'au ' + String(c.echeance).slice(8, 10) + '/' + String(c.echeance).slice(5, 7) : '';
         return '<div class="mc-camp' + (replie ? ' rep' : '') + '" id="mcc-' + c.id + '" style="--cc:' + cc + ';">'
-            + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '3a 0,' + cc + '3a ' + (pcts.length && !actif ? moy : 0) + '%, rgba(0,0,0,0) ' + (pcts.length && !actif ? moy : 0) + '%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
+            + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '22 0, rgba(0,0,0,0) 70%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
             + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
-            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span><span class="mc-pc" style="color:' + cc + ';">' + (pcts.length && !actif ? moy + ' %' : '') + '</span><span class="mc-fl">▾</span></div>'
+            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span><span class="mc-fl">▾</span></div>'
             + (info ? '<div class="r3">' + info + '</div>' : '') + '</div>'
             + '<div class="mc-lignes">' + (lignes.join('') || '<div class="mc-vide">Aucune mission dans cette campagne.</div>') + '</div></div>';
     }
@@ -178,6 +189,17 @@
             '.mc-row .l3 { display: flex; align-items: center; gap: 8px; margin-top: 7px; flex-wrap: wrap; }',
             '.mc-avs { display: inline-flex; } .mc-avs > * { margin-left: -7px; } .mc-avs > *:first-child { margin-left: 0; }',
             '.mc-et { display: inline-flex; flex-wrap: wrap; gap: 3px; }',
+            '#mc-pp { position: fixed; inset: 0; z-index: 9300; display: flex; flex-direction: column; background: #07060d; color: #cfd8dc; font-family: inherit; animation: rmMonte .22s ease-out; } @keyframes rmMonte { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }',
+            '#mc-pp .mc-pp-tete { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(12px + env(safe-area-inset-top)) 14px 12px; border-bottom: 1px solid var(--c); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 22%, #07060d), #07060d); letter-spacing: 4px; color: #fff; }',
+            '#mc-pp .mc-pp-tete button { width: 42px; height: 42px; border-radius: 14px; border: 1px solid #3a4a55; background: transparent; color: #9ab; font-size: 1.2em; font-family: inherit; }',
+            '#mc-pp .mc-pp-corps { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 12px calc(30px + env(safe-area-inset-bottom)); }',
+            '#mc-pp .bgs-cadre { border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); background: rgba(255,255,255,.02); border-radius: 14px; padding: 12px; margin-top: 14px; } #mc-pp .bgs-cadre-t { color: var(--c); letter-spacing: 3px; font-size: .74em; margin-bottom: 10px; }',
+            '#mc-pp .bgs-sec { color: #00F0FF; letter-spacing: 2px; font-size: .7em; } #mc-pp .bgs-paysage { display: block; } #mc-pp [style*="min-width:150px"] { min-width: 0 !important; } #mc-pp [style*="min-width:130px"], #mc-pp [style*="min-width:140px"] { min-width: calc(50% - 6px) !important; }',
+            '#mc-pp .mc-pp-act { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; } #mc-pp .mcp-btn { padding: 12px; border-radius: 12px; border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); color: #fff; font-family: inherit; letter-spacing: 2px; font-size: .78em; } #mc-pp .mcp-btn.gris { border-color: #555; background: transparent; color: #aaa; }',
+            '.mc-w .pp-zb { display: block; }',
+            '.mc-jg { position: relative; display: block; height: 12px; margin-top: 7px; background: #12151b; border-radius: 3px; overflow: hidden; } .mc-jg > * { position: absolute; top: 2px; bottom: 2px; display: block; }',
+            '.mc-jg i { left: 0; background: #6f8196; } .mc-jg b { min-width: 3px; } .mc-jg b.h { background: repeating-linear-gradient(135deg, var(--s) 0 3px, color-mix(in srgb, var(--s) 30%, transparent) 3px 6px); border: 1px solid var(--s); box-sizing: border-box; } .mc-jg b.m { background: var(--s); box-shadow: 0 0 8px var(--s); }',
+            '.mc-jg u { top: 1px; bottom: 1px; width: 4px; background: #fff; opacity: .85; }',
             '.mc-row.gris { opacity: .4; filter: grayscale(1); }',
             ".mc-row.conf { padding-top: 13px; padding-bottom: 13px; }",
             ".mc-score { font-family: 'Rajdhani', 'Share Tech Mono', sans-serif; font-weight: 700; font-size: 1.9em; letter-spacing: 2px; color: var(--k); text-shadow: 0 0 12px var(--k); line-height: 1; }",
@@ -195,6 +217,7 @@
             try {
                 var r = await Promise.all([db().rpc('pp_missions_vue'), db().rpc('col_missions_vue')]);
                 pp = r[0].error ? null : (r[0].data || null);
+                if (window.edteamCampagnesPP && window.edteamCampagnesPP.definir) window.edteamCampagnesPP.definir(pp);
                 col = r[1].error ? null : (r[1].data || null);
             } catch (e) { pp = null; col = null; }
         },
@@ -218,6 +241,19 @@
             if (i >= 0) l.splice(i, 1); else l.push(String(id));
             e.classList.toggle('rep', i < 0); ecrirePli(l);
         },
+        // feuille plein ecran d'une mission Powerplay : le MEME contenu que la fenetre du PC (campagnes-pp.js : apport de l'escadron, d'ou viennent les merites, participants, etat du systeme dans le jeu)
+        ouvrirPP: function (id) {
+            var API_PP = window.edteamCampagnesPP; if (!API_PP || !API_PP.ouvrir) return;
+            var r = API_PP.ouvrir(id, true); if (!r) return;
+            if (typeof sonClic === 'function') sonClic();
+            var f = document.getElementById('mc-pp'); if (f) f.remove();
+            f = document.createElement('div'); f.id = 'mc-pp'; f.style.setProperty('--c', r.couleur);
+            var cmd = r.peutCloturer ? '<div class="mc-pp-act">' + '<button type="button" class="mcp-btn gris" onclick="edteamCampagnesMob.cloturer(\'pp\',' + id + '); edteamCampagnesMob.fermerPP();">' + (r.estIni ? (r.estCmd ? 'RETIRER L’INITIATIVE' : 'CLÔTURER MON INITIATIVE') : 'CLÔTURER LA MISSION') + '</button>'
+                + (r.estIni && r.estCmd ? '<button type="button" class="mcp-btn" onclick="edteamCampagnesMob.adopter(\'pp\',' + id + ');">TRANSFORMER EN MISSION DE CAMPAGNE</button>' : '') + '</div>' : '';
+            f.innerHTML = '<div class="mc-pp-tete"><span>MISSION POWERPLAY</span><button type="button" aria-label="Fermer" onclick="edteamCampagnesMob.fermerPP()">✕</button></div><div class="mc-pp-corps">' + r.html + cmd + '</div>';
+            document.body.appendChild(f); document.documentElement.style.overflow = 'hidden';
+        },
+        fermerPP: function () { var f = document.getElementById('mc-pp'); if (f) f.remove(); document.documentElement.style.overflow = ''; },
         deplier: function (id) { var d = document.getElementById(id); if (!d) return; if (typeof sonClic === 'function') sonClic(); d.style.display = d.style.display === 'none' ? 'block' : 'none'; },
         // lignes d'une campagne (ancien rendu, gardé en repli)
         lignes: function (campagneId) {

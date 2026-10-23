@@ -322,7 +322,7 @@
         if (!esc || esc === 'INDEPENDANT') { el.remove(); return; }
         if (window.EdteamReperage) { window.EdteamReperage.monter(el); return; }
         if (window.__reperageCharge) return; window.__reperageCharge = true;
-        var sc = document.createElement('script'); sc.src = 'reperage.js?v=26';
+        var sc = document.createElement('script'); sc.src = 'reperage.js?v=27';
         sc.onload = function () { var e2 = document.getElementById('reperage-bande'); if (e2 && window.EdteamReperage) window.EdteamReperage.monter(e2); };
         sc.onerror = function () { window.__reperageCharge = false; };
         document.head.appendChild(sc);
