@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-conflits-debut-fin', date: '2026-10-23T11:42:31Z', type: 'NOUVEAU',
+        titre: 'Guerres et élections : un bandeau annonce le début et la fin',
+        texte: 'Quand une guerre ou une élection démarre sur une faction qui fait l’objet d’une directive, quel que soit le type de la directive (une hausse par exemple), un bandeau « LA GUERRE A COMMENCÉ » ou « L’ÉLECTION A COMMENCÉ » s’affiche au-dessus de sa ligne jusqu’au tick suivant, sur PC et sur mobile. L’Amiral et les officiers y trouvent un bouton pour passer la directive en guerre ou en élection. Quand le conflit se termine, le bandeau annonce « GUERRE GAGNÉE », « PERDUE » ou « TERMINÉE » (d’après le dernier score relevé : si aucun vainqueur net n’est connu, le bandeau le dit). L’heure affichée est celle de la détection : le jeu n’est connu que lorsqu’un joueur visite le système ou à chaque relevé EDSM.',
+        important: false
+    },
+    {
         id: '2026-10-commerce-benefices', date: '2026-10-23T11:03:36Z', type: 'AMELIORE',
         titre: 'Commerce : seul le bénéfice compte, et il s’affiche à côté du montant de la vente',
         texte: 'Dans le jeu, seul le bénéfice d’une vente fait monter l’influence d’une faction, pas le chiffre d’affaires. EDTEAM compte donc désormais le BÉNÉFICE (vente moins prix payé) pour l’économie : directives de hausse, titre du Magnat, points de rang. Une cargaison minée ou récupérée, dont le prix payé est nul, compte en entier. Une vente à perte ou à prix coûtant ne compte plus en économie. Le journal des exploits et la fenêtre d’une directive indiquent « BÉNÉFICE » avec le montant de la VENTE à côté. Les anciennes lignes, enregistrées avant, gardent leur ancien montant (marqué « VENTE »).',

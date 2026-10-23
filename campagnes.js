@@ -159,7 +159,7 @@
     // vue en cartes : meme contenu qu'une ligne, en deck
     function carte(m) {
         return '<div class="camp-cd' + (m.sig && m.sig.pale ? ' pale' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisserM(m) + attrM(m) + ' style="--k:' + coulM(m) + '; --c:' + m.couleur + ';">'
-            + pastille(m.tag, coulM(m)) + '<div class="cd-nm">' + m.texte + '</div>'
+            + (m.bandeauC || '') + pastille(m.tag, coulM(m)) + '<div class="cd-nm">' + m.texte + '</div>'
             + '<div class="camp-info cd-info">' + (m.infoE != null ? m.infoE : (m.info || '')) + '</div>' + (m.jauge || '') + (m.infoP ? '<div class="cd-act"><small>TES ACTIONS · AUJOURD’HUI</small>' + m.infoP + '</div>' : '')
             + '<div class="cd-pied">' + (m.avatars || '<span></span>') + actionsM(m) + '</div></div>';
     }
@@ -171,7 +171,8 @@
         return 'fl';
     }
     function rangCarte(m) { var s = m.sig && m.sig.sens; return s === 'dn' ? 0 : s === 'fl' ? 1 : s === 'up' ? 3 : 2; }
-    function ligne(m) {
+    function ligne(m) { return (m.bandeau || '') + ligneUne(m); }
+    function ligneUne(m) {
         // pas de pourcentage par mission : la barre de fond parle d'elle-meme ; son explication passe en infobulle de la ligne
         var attr = attrM(m), actions = actionsM(m), glisser = glisserM(m);
         if (m.sig) return '<div class="camp-ligne rn' + (m.sig.pale ? ' pale' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="--k:' + coulM(m) + '; --c:' + m.couleur + ';">'
@@ -239,7 +240,8 @@
             var rs = resume[o.id] || {}; var mt = meta[o.id] || { global: 0 };
             var veille = veilleIds.has(String(o.id));
             var typeFr = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' }[o.type_ordre] || String(o.type_ordre || '').toUpperCase();
-            return { sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, sig: sigM(o, mt), jauge: sigM(o, mt) ? jauge(o, ((window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null)) : '', fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: mt.jour ? '' : 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
+            var EV = window.EdteamConflitEvt;      // debut / fin de guerre ou d'election (SQL 132), jusqu'au tick suivant
+            return { bandeau: EV ? EV.bandeau(o, { commande: estCommandement() }) : '', bandeauC: EV ? EV.bandeau(o, { commande: estCommandement(), compact: true }) : '', sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, sig: sigM(o, mt), jauge: sigM(o, mt) ? jauge(o, ((window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null)) : '', fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: mt.jour ? '' : 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
                 clic: "ouvrirDetailResultat('" + o.id + "')", infoE: infoFaction(o), infoP: (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
                 info: infoFaction(o) + (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
                 texte: '<b>' + esc(String(o.systeme_cible || '').toUpperCase()) + '</b> <em>· ' + esc(String(o.faction_cible || '').toUpperCase()) + (veille ? ' · EN VEILLE' : '') + '</em>' };

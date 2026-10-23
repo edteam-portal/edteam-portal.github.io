@@ -20,8 +20,9 @@
     <script src="annonce.js?v=15"></script>
     <script src="revelations.js?v=8"></script>
     <script src="initiatives-mode.js?v=1"></script>
-    <script src="campagnes-mobile.js?v=17"></script>
+    <script src="campagnes-mobile.js?v=18"></script>
     <script src="quotas-jour.js?v=14"></script>
+    <script src="conflit-evenements.js?v=1"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
     <script src="bgs-participants.js?v=2"></script>
@@ -1806,6 +1807,8 @@
                 const campagnes = rc.error ? [] : (rc.data || []);
                 // quotas du jour (SQL 110, quotas-jour.js) : un seul appel pour toutes les directives ; sans la fonction serveur, l'affichage d'avant est conserve
                 if (window.EdteamQuotas && ordres && ordres.length) { try { await window.EdteamQuotas.charger(!!force); } catch (e) { /* affichage d'avant */ } }
+                // debut / fin de guerre ou d'election depuis le dernier tick (SQL 132, conflit-evenements.js)
+                if (window.EdteamConflitEvt && ordres && ordres.length) { try { await window.EdteamConflitEvt.charger(!!force); } catch (e) { window.cacheEvtConflits = null; } }
                 return { ordres: ordres || [], resume, infos, veille, campagnes };
             }, force);
         }
@@ -4040,7 +4043,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=45', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=46', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

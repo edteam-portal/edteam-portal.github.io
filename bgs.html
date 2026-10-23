@@ -21,8 +21,9 @@
     <script src="navigation.js?v=42"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=61"></script>
+    <script src="campagnes.js?v=62"></script>
     <script src="quotas-jour.js?v=14"></script>
+    <script src="conflit-evenements.js?v=1"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=6"></script>
     <script src="bgs-participants.js?v=2"></script>
@@ -1848,6 +1849,9 @@
                 const quotasJour = (ordresData.length > 0 && window.EdteamQuotas) ? await window.EdteamQuotas.charger(false) : null;
                 window.cacheQuotasBgs = quotasJour;
 
+                // DEBUT / FIN DE GUERRE OU D'ELECTION depuis le dernier tick (SQL 132, conflit-evenements.js) ; null sans la fonction serveur
+                try { window.cacheEvtConflits = (ordresData.length > 0 && window.EdteamConflitEvt) ? await window.EdteamConflitEvt.charger(false) : null; } catch (e) { window.cacheEvtConflits = null; }
+
                 window.cacheOrdresBgs = ordresData;
                 window.cacheResumeBgs = resume;
 
@@ -3181,6 +3185,6 @@
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=4"></script>
     <script src="commerce.js?v=7"></script>
-    <script src="footer.js?v=34"></script>
+    <script src="footer.js?v=35"></script>
 </body>
 </html>
