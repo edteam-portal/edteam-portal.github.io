@@ -109,6 +109,19 @@
     @media (prefers-reduced-motion:reduce){.ec-clig{animation:none}}
     .ec-ret{margin:12px 0 0;padding:10px 14px;border:1px dashed #00F0FF;background:rgba(0,240,255,.06);font-size:.84em;line-height:1.7;color:#bcd}.ec-ret b{color:#fff;font-weight:normal}.ec-ret u{text-decoration:none;color:#FFD700}
     .ec-ret .e{color:#00F0FF;letter-spacing:2px;font-size:.9em}.ec-ret .bil{margin-top:4px;padding-top:4px;border-top:1px dashed rgba(0,240,255,.25);letter-spacing:1px;color:#8a9}.ec-ret .bil b{font-size:1.15em}
+    .ec-double{border:1px solid #00FF66;border-left:4px solid #00FF66;background:linear-gradient(135deg,rgba(0,255,102,.14),rgba(0,0,0,.5));animation:ecDbl 2.2s ease-in-out infinite}
+    @keyframes ecDbl{0%,100%{box-shadow:0 0 0 rgba(0,255,102,0)}50%{box-shadow:0 0 18px rgba(0,255,102,.55)}}
+    .ec-dbl{margin:8px 0 4px;padding:6px 10px;background:rgba(0,255,102,.16);border:1px solid #00FF66;color:#00FF66;font-size:.74em;letter-spacing:1.5px;line-height:1.5}
+    .ec-dbl b{color:#fff;font-weight:normal;animation:ecClig 1.4s ease-in-out infinite}.ec-dbl small{display:block;color:#c9f5da;letter-spacing:.2px;font-size:1em;margin-top:3px}.ec-dbl em{font-style:normal;color:#FFD700}
+    @media (prefers-reduced-motion:reduce){.ec-double,.ec-dbl b{animation:none}}
+    .ec-jt{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:16px 0 6px;font-size:.8em;letter-spacing:2px}.ec-jt b{padding:2px 10px;border:1px solid var(--j);color:var(--j);background:rgba(0,0,0,.4);font-weight:normal}.ec-jt .m{color:#fff}.ec-jt .eff{margin-left:auto;color:#999;letter-spacing:.4px;font-size:.95em;text-align:right}.ec-jt .eff em{font-style:normal;color:#FFD700}.ec-jt.a{--j:#00F0FF}.ec-jt.r{--j:#FFB000}.ec-jt.r.ok .eff{color:#00FF66}
+    .ec-rt .ec-ach{border-left-color:#FFB000}.ec-rt .ec-ven{border-right-color:#FFB000}
+    .ec-vd-double{border-color:#00FF66!important;animation:ecDbl 2.2s ease-in-out infinite}.ec-dbl2{margin:10px 0 0;padding:8px 12px;background:rgba(0,255,102,.16);border:1px solid #00FF66;color:#c9f5da;letter-spacing:1.5px;font-size:.8em;text-align:center}.ec-dbl2 b{color:#00FF66;font-weight:normal;animation:ecClig 1.4s ease-in-out infinite}
+    .ec-bil{display:flex;flex-direction:column;gap:2px}.ec-bil small{color:#8a9;letter-spacing:2px;font-size:.7em}.ec-bil b{font-size:1.9em;font-weight:normal;letter-spacing:1px}.ec-bil span{color:#9ab;font-size:.76em}
+    .ec-leg{margin:0 0 10px;padding:7px 12px;border-left:3px solid #00FF66;background:rgba(0,255,102,.07);color:#bfe;font-size:.76em;line-height:1.6}.ec-leg u{text-decoration:none;color:#fff}
+    .ec-jr{margin:7px 0 0;padding-left:8px;border-left:2px solid var(--j)}.ec-jr.a{--j:#00F0FF}.ec-jr.r{--j:#FFB000}.ec-jr .r1{display:flex;align-items:baseline;gap:8px}.ec-jr .r1 i{font-style:normal;color:var(--j);font-size:.7em;letter-spacing:2px;white-space:nowrap}.ec-jr .r1 b{color:#fff;font-weight:normal;letter-spacing:1.5px;font-size:.92em}.ec-jr .r1 .t{margin-left:auto;color:#FFD700;white-space:nowrap}.ec-jr .r2{font-size:.72em;color:#9aa;margin-top:2px;line-height:1.55}
+    .ec-note{margin:3px 0 0 10px;font-size:.7em;color:#777;letter-spacing:.3px}.ec-dbl3{margin:7px 0 2px;padding:3px 8px;background:rgba(0,255,102,.16);border:1px solid #00FF66;color:#c9f5da;font-size:.7em;letter-spacing:1.5px}.ec-dbl3 b{color:#00FF66;font-weight:normal;animation:ecClig 1.4s ease-in-out infinite}.ec-rc .mt{white-space:nowrap}
+    @media (prefers-reduced-motion:reduce){.ec-vd-double,.ec-dbl2 b,.ec-dbl3 b{animation:none}}
     .ec-rc .ret{margin-top:5px;padding-top:4px;border-top:1px dashed rgba(0,240,255,.25);display:flex;justify-content:space-between;gap:8px;color:#00F0FF;font-size:.82em}
     .ec-bandeau{border:1px solid rgba(255,215,0,.45);background:rgba(255,215,0,.07);color:#FFD700;padding:7px 12px;font-size:.76em;margin-bottom:14px;letter-spacing:1px}
     .ec-etats{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin:-8px 0 16px;padding:8px 14px;border:1px solid #2c2c2c;background:rgba(0,0,0,.35)}
@@ -193,26 +206,50 @@
         const x = r.ret, gaucheB = r.v.station, droiteA = r.s.station;
         const bilan = etat.mode === 'perte' ? x.total - r.total : etat.mode === 'contrebande' ? x.total : r.total + x.total;
         const lib = etat.mode === 'perte' ? 'BILAN DE LA BOUCLE (retour moins perte)' : etat.mode === 'contrebande' ? 'BÉNÉFICE DU RETOUR' : 'BILAN DE LA BOUCLE (aller + retour)';
-        return '<div class="ec-ret"><div class="e">↩ ALLER-RETOUR · AU RETOUR, ACHETEZ <b>' + E(nomFr(x.n).toUpperCase()) + '</b></div>'
+        return routeDouble(r) + '<div class="ec-ret"><div class="e">↩ ALLER-RETOUR · AU RETOUR, ACHETEZ <b>' + E(nomFr(x.n).toUpperCase()) + '</b></div>'
             + 'achat <u>' + fmt(x.a) + ' cr / t</u> à ' + cp(gaucheB) + ' (stock ' + fmt(x.s) + ' t) · revente <u>' + fmt(x.v) + ' cr / t</u> à ' + cp(droiteA) + ' (demande ' + fmt(x.d) + ' t)'
             + '<br>+' + fmt(x.gain) + ' cr / t · ' + fmt(x.qte) + ' t · bénéfice du retour <b>' + mil(x.total) + ' cr</b>'
             + '<div class="bil">' + lib + ' <b style="color:' + (bilan >= 0 ? '#00FF66' : '#ff9f43') + '">' + (bilan >= 0 ? '+' : '−') + mil(Math.abs(bilan)) + ' cr</b></div></div>';
     }
     // prix tres eloigne de la mediane de la zone (etat de la faction, penurie...) : signale, jamais ecarte
+    // route double : le trajet retour fait aussi monter la faction d'une AUTRE directive (ou de la meme) : un seul voyage, deux directives
+    function routeDouble(r) {
+        if (!etat.retour || !r.dir || r.dir.type === 'BAISSE') return '';
+        const aller = etat.mode === 'perte' ? 'vous faites baisser ' : 'vous faites monter ';
+        return '<div class="ec-dbl"><b>★ ROUTE DOUBLE · 2 DIRECTIVES EN UN SEUL VOYAGE</b><small>Aller : ' + aller + '<em>' + E(String(etat.faction).toUpperCase()) + '</em> (directive #' + E(etat.ordre) + ') à ' + E(r.v.station)
+            + '.<br>Retour : en revendant à <em>' + E(r.s.station) + '</em> (' + E(r.s.systeme) + '), vous faites aussi monter <em>' + E(String(r.dir.faction).toUpperCase()) + '</em> (directive #' + E(r.dir.id) + ').</small></div>';
+    }
     function inhab(r) {
+        const dp = !r.dir ? '' : r.dir.type === 'BAISSE'
+            ? '<span class="ec-pill ec-vx" title="La revente de retour se fait dans le système de la directive de BAISSE #' + E(r.dir.id) + ' (' + E(r.dir.faction) + ') : elle renforcerait cette faction, à éviter.">⚠ LE RETOUR RENFORCE LA DIRECTIVE DE BAISSE #' + E(r.dir.id) + '</span>'
+            : '';
         const p = (txt, qui) => '<span class="ec-pill ec-vx" title="Ce prix est très différent de la médiane de la zone pour cette marchandise (un état, une pénurie ou un relevé ancien peuvent l’expliquer) : vérifiez-le en jeu avant de partir.">' + txt + ' ' + qui + '</span>';
-        return (r.s && r.s.inhab ? p('PRIX D’ACHAT', 'INHABITUEL') : '') + (r.v && r.v.inhab ? p('PRIX DE VENTE', 'INHABITUEL') : '');
+        return dp + (r.s && r.s.inhab ? p('PRIX D’ACHAT', 'INHABITUEL') : '') + (r.v && r.v.inhab ? p('PRIX DE VENTE', 'INHABITUEL') : '');
     }
     function retourPetit(r) {
         if (!etat.retour || !r.ret) return '';
         return '<div class="ret"><span>↩ ' + E(nomFr(r.ret.n)) + ' · +' + fmt(r.ret.gain) + ' / t</span><span>' + mil(r.ret.total) + ' cr</span></div>';
+    }
+    // directive de l'escadron concernee par la VENTE faite dans la station s (le retour de l'aller-retour) : meme systeme et meme faction.
+    // HAUSSE / ELECTION : la revente de retour fait aussi monter cette faction (route utile) ; BAISSE : elle la renforcerait (a eviter)
+    function directiveDe(s) {
+        const L = window.cacheOrdresBgs || [], sy = String(s.systeme || '').trim().toLowerCase(), fa = String(s.faction || '').trim().toLowerCase();
+        if (!sy || !fa) return null;
+        const o = L.find(x => String(x.systeme_cible || '').trim().toLowerCase() === sy && String(x.faction_cible || '').trim().toLowerCase() === fa && ['HAUSSE', 'ELECTION', 'BAISSE'].includes(String(x.type_ordre || '').toUpperCase()));
+        return o ? { id: o.id, type: String(o.type_ordre).toUpperCase(), faction: o.faction_cible, systeme: o.systeme_cible } : null;
+    }
+    const utile = r => !!(r.dir && r.dir.type !== 'BAISSE');
+    // routes doubles (le retour sert une directive de l'escadron) EN TETE, classees entre elles par bilan ; ensuite toutes les autres, classees comme avant
+    function ordonner(routes) {
+        if (!etat.retour) return routes;
+        return routes.filter(utile).concat(routes.filter(r => !utile(r)));
     }
     function calculer(donnees) {
         const soute = prefs.soute(), grande = prefs.grande();
         const okStation = s => !(grande && !s.grande) && okL(s);
         const routes = [];
         ((donnees && donnees.marchandises) || []).forEach(m => {
-            let meilleure = null;
+            let meilleure = null, bonus = null;
             (m.ventes || []).filter(okStation).forEach(v => (m.sources || []).filter(okStation).forEach(s => {
                 const gain = (Number(v.prix) || 0) - (Number(s.prix) || 0);
                 if (gain <= 0) return;
@@ -220,13 +257,15 @@
                 if (qte <= 0) return;
                 const ret = etat.retour ? retourDe(s, v, soute) : null;
                 if (etat.retour && !ret) return;
-                const r = { m, v, s, gain, qte, total: gain * qte, ret, global: gain * qte + (ret ? ret.total : 0) };
+                const r = { m, v, s, gain, qte, total: gain * qte, ret, dir: ret ? directiveDe(s) : null, global: gain * qte + (ret ? ret.total : 0) };
                 if (!meilleure || r.global > meilleure.global) meilleure = r;
+                if (utile(r) && (!bonus || r.global > bonus.global)) bonus = r;
             }));
             if (meilleure) routes.push(meilleure);
+            if (bonus && bonus !== meilleure) routes.push(bonus);      // aussi la meilleure route dont le retour sert une directive
         });
         routes.sort((a, b) => b.global - a.global);
-        return routes;
+        return ordonner(routes);
     }
 
     // vente a perte : pour chaque marchandise, la paire (source, station de la faction) dont le prix paye depasse le prix de reprise ; perte par tonne = prix paye - prix de reprise
@@ -235,8 +274,9 @@
         const soute = prefs.soute(), grande = prefs.grande(), forte = prefs.tri() === 'forte';
         const okStation = s => !(grande && !s.grande) && okL(s);
         const routes = [];
+        const mieux = (r, c) => !c || (forte ? r.total > c.total : (etat.retour ? r.net > c.net : r.total < c.total));
         ((donnees && donnees.marchandises) || []).forEach(m => {
-            let choix = null;
+            let choix = null, bonus = null;
             (m.ventes || []).filter(okStation).forEach(v => (m.sources || []).filter(okStation).forEach(s => {
                 const perte = (Number(s.prix) || 0) - (Number(v.prix) || 0);
                 if (perte <= 0) return;
@@ -244,13 +284,15 @@
                 if (qte <= 0) return;
                 const ret = etat.retour ? retourDe(s, v, soute) : null;
                 if (etat.retour && !ret) return;
-                const r = { m, v, s, perte, qte, total: perte * qte, ret, net: (ret ? ret.total : 0) - perte * qte };
-                if (!choix || (forte ? r.total > choix.total : (etat.retour ? r.net > choix.net : r.total < choix.total))) choix = r;
+                const r = { m, v, s, perte, qte, total: perte * qte, ret, dir: ret ? directiveDe(s) : null, net: (ret ? ret.total : 0) - perte * qte };
+                if (mieux(r, choix)) choix = r;
+                if (utile(r) && mieux(r, bonus)) bonus = r;
             }));
             if (choix) routes.push(choix);
+            if (bonus && bonus !== choix) routes.push(bonus);
         });
         routes.sort((a, b) => (forte ? b.total - a.total : etat.retour ? b.net - a.net : a.total - b.total));
-        return routes;
+        return ordonner(routes);
     }
 
     // ----- affichage -----
@@ -291,6 +333,86 @@
     function cp(nom, affichage) { return '<span class="ec-cp" title="Cliquer pour copier" onclick="edteamCommerce.copie(this, ' + E(JSON.stringify(String(nom))).replace(/&quot;/g, '&#34;') + ', event)">' + E(affichage == null ? nom : affichage) + '</span>'; }
     function boutonCopie(txt) { return '<button type="button" class="ec-bt" onclick="edteamCommerce.copie(this, ' + E(JSON.stringify(txt)).replace(/&quot;/g, '&#34;') + ', event)">COPIER « ' + E(String(txt)) + ' »</button>'; }
 
+    // ===== AFFICHAGE D'UNE ROUTE : ALLER SIMPLE OU ALLER-RETOUR (meme mise en page pour les trois modes) =====
+    // c = { mode : 'commerce' | 'perte' | 'contre', sysF : systeme de la directive, faction : faction visee, couleur : couleur de la fleche de l'aller }
+    const typeSt = s => (s.planetaire ? 'planétaire' : 'orbitale') + (s.grande ? ' · grande piste' : ' · petite piste');
+    const boite = (cls, o) => '<div class="ec-n ' + cls + '"><div class="e">' + o.titre + '</div><div class="st">' + cp(o.station) + '</div><div class="sy">' + o.sy + '</div>'
+        + (o.prix == null ? (o.libre || '') : '<div class="px">' + fmt(o.prix) + '<small>CR / t</small></div>') + '<div class="de">' + o.de + '</div></div>';
+    const fleche = (coul, centre) => '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecm' + coul.slice(1) + '" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="' + coul + '"/></marker></defs>'
+        + '<line x1="6" y1="20" x2="198" y2="20" stroke="' + coul + '" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecm' + coul.slice(1) + ')"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>' + centre + '</div>';
+    const arOn = r => !!(etat.retour && r.ret);
+    const bilanDe = (r, c) => (c.mode === 'perte' ? r.net : c.mode === 'contre' ? r.ret.total : r.global);
+    const montantTxt = v => (v >= 0 ? '+' : '−') + mil(Math.abs(v)) + ' cr';
+    const effetAller = c => (c.mode === 'commerce' ? 'fait monter ' : 'fait baisser ') + '<em>' + E(String(c.faction).toUpperCase()) + '</em> (directive #' + E(etat.ordre) + ')';
+    const effetRetour = r => !r.dir ? 'crédits seulement : cette revente ne sert aucune de vos directives'
+        : r.dir.type === 'BAISSE' ? '⚠ renforcerait <em>' + E(String(r.dir.faction).toUpperCase()) + '</em> (directive de BAISSE #' + E(r.dir.id) + ') : à éviter'
+        : 'fait aussi monter <em>' + E(String(r.dir.faction).toUpperCase()) + '</em> (directive #' + E(r.dir.id) + ')';
+    // etape ALLER : acheter a la source, vendre a la station de la faction
+    function grilleAller(r, c, num) {
+        const ach = { titre: (num ? '' : '① ') + 'ACHETER ICI', station: r.s.station, sy: cp(r.s.systeme) + ' · ' + E(r.s.distance) + ' al de ' + E(c.sysF), prix: r.s.prix,
+                      de: 'stock ' + fmt(r.s.stock) + ' t · ' + typeSt(r.s) + (r.s.arrivee ? ' · ' + fmt(r.s.arrivee) + ' Ls' : '') };
+        const ven = c.mode === 'contre'
+            ? { titre: (num ? '' : '③ ') + 'VENDRE ICI', station: r.v.station, sy: cp(c.sysF) + ' · marché noir', prix: null, libre: '<div class="ec-px2">prix de reprise : à voir en jeu</div>', de: 'vendez au marché noir, pas au marché normal' }
+            : { titre: (num ? '' : '③ ') + 'VENDRE ICI', station: r.v.station, sy: cp(c.sysF) + ' · destination', prix: r.v.prix, de: ligneDemande(r.v, r.qte) };
+        const centre = c.mode === 'perte' ? '<div class="ec-perte">−' + fmt(r.perte) + '<small>CR DE PERTE PAR TONNE</small></div>'
+            : c.mode === 'contre' ? '<div class="ec-cout">' + fmt(r.cout) + ' cr<small>COÛT D\'ACHAT POUR ' + fmt(r.qte) + ' t</small></div>'
+            : '<div class="ec-gain">+' + fmt(r.gain) + '<small>CR GAGNÉS PAR TONNE</small></div>';
+        return '<div class="ec-route">' + boite('ec-ach', ach) + fleche(c.couleur, centre) + boite('ec-ven', ven) + '</div>';
+    }
+    // etape RETOUR : acheter a la station de la faction, revendre a la station d'achat de l'aller
+    function grilleRetour(r, c) {
+        const x = r.ret;
+        const ach = { titre: 'ACHETER ICI', station: r.v.station, sy: cp(c.sysF) + ' · station de la faction', prix: x.a, de: 'stock ' + fmt(x.s) + ' t' };
+        const ven = { titre: 'VENDRE ICI', station: r.s.station, sy: cp(r.s.systeme) + (r.s.faction ? ' · ' + E(String(r.s.faction).toUpperCase()) : ''), prix: x.v, de: 'demande ' + fmt(x.d) + ' t · vous en portez ' + fmt(x.qte) + ' t' };
+        return '<div class="ec-route ec-rt">' + boite('ec-ach', ach) + fleche('#FFB000', '<div class="ec-gain" style="color:#FFB000;text-shadow:0 0 14px rgba(255,176,0,.5)">+' + fmt(x.gain) + '<small>CR GAGNÉS PAR TONNE</small></div>') + boite('ec-ven', ven) + '</div>';
+    }
+    // grande carte : la route mise en avant
+    function carteGrande(r, c) {
+        const ar = arOn(r), dbl = ar && utile(r);
+        const bord = c.mode === 'perte' ? ' style="border-color:#ff9f43"' : '';
+        let h = '<div class="ec-vd' + (dbl ? ' ec-vd-double' : '') + '"' + bord + '><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(r.m.nom)) + '</div><div><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span>' + E(String(r.m.categorie || '').toUpperCase()) + '</span></div></div>'
+              + '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(r.m) + pastilleAge(r.s.maj) + inhab(r) + '</span></div>';
+        if (dbl) h += '<div class="ec-dbl2"><b>★ ROUTE DOUBLE</b> · 2 directives en un seul voyage : #' + E(etat.ordre) + ' + #' + E(r.dir.id) + '</div>';
+        if (!ar) {
+            h += grilleAller(r, c, false);
+            const lib = c.mode === 'perte' ? 'perte estimée<b style="color:#ff9f43">' + mil(r.total) : c.mode === 'contre' ? 'à emporter<b>' + mil(r.cout) : 'bénéfice estimé<b>' + mil(r.total);
+            return h + '<div class="ec-bas"><div class="ec-tot">② TRANSPORTEZ ' + fmt(r.qte) + ' t · ' + lib + ' cr</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(r.s.systeme) + boutonCopie(c.sysF) + '</div></div></div>';
+        }
+        const aller = c.mode === 'perte' ? '−' + mil(r.total) : c.mode === 'contre' ? mil(r.cout) + ' d\'achat' : '+' + mil(r.total), b = bilanDe(r, c);
+        h += '<div class="ec-jt a"><b>1 · ALLER</b><span class="m">' + E(nomFr(r.m.nom).toUpperCase()) + '</span><span class="eff">' + effetAller(c) + '</span></div>' + grilleAller(r, c, true);
+        h += '<div class="ec-jt r' + (r.dir && r.dir.type !== 'BAISSE' ? ' ok' : '') + '"><b>2 · RETOUR</b><span class="m">' + E(nomFr(r.ret.n).toUpperCase()) + '</span><span class="eff">' + effetRetour(r) + '</span></div>' + grilleRetour(r, c);
+        const detail = c.mode === 'perte' ? 'retour +' + mil(r.ret.total) + ' − perte ' + mil(r.total) : c.mode === 'contre' ? 'bénéfice du retour · coût d\'achat à l\'aller ' + mil(r.cout) : 'aller +' + mil(r.total) + ' · retour +' + mil(r.ret.total);
+        return h + '<div class="ec-bas"><div class="ec-bil"><small>BILAN DE L\'ALLER-RETOUR · ' + fmt(r.qte) + ' t</small><b style="color:' + (b >= 0 ? '#00FF66' : '#ff9f43') + '">' + montantTxt(b) + '</b><span>' + detail + '</span></div>'
+            + '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(r.s.systeme) + boutonCopie(c.sysF) + '</div></div></div>';
+    }
+    // une ligne d'etape dans une petite carte
+    const etapeP = (cls, lib, nom, de, vers, prix, gain, qte, tot, col) => '<div class="ec-jr ' + cls + '">' + (lib || tot ? '<div class="r1"><i>' + lib + '</i>' + (nom ? '<b>' + E(nomFr(nom).toUpperCase()) + '</b>' : '') + '<span class="t"' + (col ? ' style="color:' + col + '"' : '') + '>' + tot + '</span></div>' : '')
+        + '<div class="r2">' + de + ' ► ' + vers + ' · ' + prix + (gain ? ' · ' + gain : '') + ' · ' + fmt(qte) + ' t</div></div>';
+    function cartePetite(r, c, coul, sc, maxT) {
+        const ar = arOn(r), dbl = ar && utile(r), b = ar ? bilanDe(r, c) : null;
+        const totA = c.mode === 'perte' ? '−' + mil(r.total) + ' cr' : c.mode === 'contre' ? mil(r.cout) + ' cr' : '+' + mil(r.total) + ' cr';
+        const colA = c.mode === 'perte' ? '#ff9f43' : c.mode === 'contre' ? '#c9ccd1' : '#00FF66';
+        const prixA = c.mode === 'contre' ? fmt(r.s.prix) + ' cr / t (à l\'achat)' : fmt(r.s.prix) + ' → ' + fmt(r.v.prix) + ' cr / t';
+        const gainA = c.mode === 'perte' ? '−' + fmt(r.perte) + ' / t' : c.mode === 'contre' ? '' : '+' + fmt(r.gain) + ' / t';
+        let h = '<div class="ec-rc' + (dbl ? ' ec-double' : '') + '" style="--c:' + coul + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b>'
+              + (ar ? '<span class="mt" style="color:' + (b >= 0 ? '#00FF66' : '#ff9f43') + '" title="Bilan estimé de l’aller-retour">BILAN ' + montantTxt(b) + '</span>' : '<span class="mt" style="color:' + colA + '">' + totA + '</span>') + '</div>';
+        if (dbl) h += '<div class="ec-dbl3"><b>★ ROUTE DOUBLE</b> · directives #' + E(etat.ordre) + ' + #' + E(r.dir.id) + '</div>';
+        h += etapeP('a', ar ? '1 · ALLER' : '', '', cp(r.s.systeme), cp(r.v.station), prixA, gainA, r.qte, ar ? totA : '', colA);
+        if (ar) h += etapeP('r', '2 · RETOUR', r.ret.n, cp(r.v.station), cp(r.s.systeme), fmt(r.ret.a) + ' → ' + fmt(r.ret.v) + ' cr / t', '+' + fmt(r.ret.gain) + ' / t', r.ret.qte, '+' + mil(r.ret.total) + ' cr', '#FFB000')
+              + (r.dir ? '' : '<div class="ec-note">retour : crédits seulement, aucune de vos directives</div>');
+        h += '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + inhab(r) + ' ' + cp(r.s.station) + ' · ' + E(r.s.distance) + ' al</span></div>';
+        if (c.mode === 'commerce') h += '<div class="ba" title="Comparé à la meilleure route"><i style="width:' + Math.max(4, Math.min(100, Math.round(100 * sc(r) / maxT))) + '%"></i></div>';
+        return h + '</div>';
+    }
+    // liste des autres routes (+ legende unique des routes doubles)
+    function cartesAutres(autres, c, best, titre, sous) {
+        if (!autres.length) return '';
+        const sc = x => (etat.retour && x.global ? x.global : x.total), maxT = Math.max(1, sc(best), ...autres.map(sc));
+        const coulP = ['#FFD700', '#c9ccd1', '#00F0FF', '#FF7100', '#FF4FD8', '#00FF66'];
+        const leg = etat.retour && autres.concat([best]).some(utile) ? '<div class="ec-leg"><b style="color:#00FF66">★ ROUTE DOUBLE</b> : l’aller fait ' + (c.mode === 'commerce' ? 'monter' : 'baisser') + ' la faction de la directive de cette fenêtre, et la revente du retour fait monter <u>une autre directive</u> de l’escadron. Un seul voyage, deux directives. Sans ★, le retour ne rapporte que des crédits.</div>' : '';
+        return '<div class="ec-s">' + titre + ' <b style="color:#666;letter-spacing:1px;font-size:.95em">' + sous + '</b></div>' + leg + '<div class="ec-gr">' + autres.map((r, i) => cartePetite(r, c, coulP[i % coulP.length], sc, maxT)).join('') + '</div>';
+    }
+
     // ----- contrebande (directive de baisse) : marché noir de la faction + où acheter de l'illégal, SANS bénéfice calculé -----
     function corpsContre(d) {
         const soute = prefs.soute(), grande = prefs.grande(), faction = d.faction || etat.faction, systeme = d.systeme || etat.systeme;
@@ -306,7 +428,7 @@
                 const ret = etat.retour ? retourDe(x, dest[0], soute) : null;
                 if (etat.retour && !ret) continue;      // aller-retour : la source la plus proche dont le retour est rentable
                 const qte = Math.min(soute, Number(x.stock) || 0);
-                routes.push({ m, s: x, v: dest[0], qte, cout: qte * (Number(x.prix) || 0), ret });
+                routes.push({ m, s: x, v: dest[0], qte, cout: qte * (Number(x.prix) || 0), ret, dir: ret ? directiveDe(x) : null });
                 break;
             }
         });
@@ -320,21 +442,10 @@
             + etatsLigne() + '<div class="ec-avert">⚠ Le prix de reprise du marché noir n\'est relevé par personne : vous le verrez à l\'arrivée. Une marchandise n\'est de la contrebande que si elle est <b>illégale dans ce système</b> : dans le jeu, elle doit apparaître comme telle. Vendre expose à une amende ou une prime si vous êtes scanné.</div>';
         if (!routes.length && etat.retour) return h + msg('AUCUNE ROUTE ALLER-RETOUR', 'Aucune marchandise illégale proche ne permet un retour rentable depuis ' + E(st.station) + ' avec ces réglages (stations relevées par Spansh seulement).<br>Désactivez « Aller-retour », élargissez le rayon ou les relevés, ou changez le type de station.');
         if (!routes.length) return h + msg('AUCUNE MARCHANDISE À PROXIMITÉ', 'Aucune marchandise généralement illégale n\'est en vente à moins de ' + etat.rayon + ' années-lumière avec au moins ' + fmt(etat.stock) + ' t en stock.<br>Essayez un rayon plus grand, un stock minimal plus faible, ou élargissez les relevés (7 jours, 6 mois) ou désactivez « Grande piste ».');
-        const best = routes[0], autres = routes.slice(1, 7), coul = ['#FF7100', '#FF3333', '#FFD700', '#00F0FF', '#FF4FD8', '#c9ccd1'];
-        h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>'
-          + '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + pastilleAge(best.s.maj) + '</div>'
-          + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(systeme) + '</div>'
-          + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
-          + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecr" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#FF3333"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#FF3333" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecr)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
-          + '<div class="ec-cout">' + fmt(best.cout) + ' cr<small>COÛT D\'ACHAT POUR ' + fmt(best.qte) + ' t</small></div></div>'
-          + '<div class="ec-n ec-ven"><div class="e">③ VENDRE ICI</div><div class="st">' + cp(st.station) + '</div><div class="sy">' + cp(systeme) + ' · marché noir</div>'
-          + '<div class="ec-px2">prix de reprise : à voir en jeu</div><div class="de">vendez la marchandise au marché noir, pas au marché normal</div></div></div>'
-          + retourBloc(best) + '<div class="ec-bas"><div class="ec-tot">② TRANSPORTEZ ' + fmt(best.qte) + ' t · à emporter<b>' + mil(best.cout) + ' cr</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(best.s.systeme) + boutonCopie(systeme) + '</div></div></div>';
-        if (autres.length) {
-            h += '<div class="ec-s">AUTRES MARCHANDISES <b style="color:#666;letter-spacing:1px;font-size:.95em">· la source la plus proche de chacune</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span style="color:#FFD700">' + fmt(r.s.prix) + ' cr / t</span></div>'
-                + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u style="color:#FF3333">' + cp(st.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
-                + '<div class="l3"><span>' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · stock ' + fmt(r.s.stock) + ' t' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.cout) + ' cr · ' + fmt(r.qte) + ' t</span></div>' + retourPetit(r) + '</div>').join('') + '</div>';
-        }
+        const c = { mode: 'contre', sysF: systeme, faction, couleur: '#FF3333' };
+        const best = routes[0], autres = routes.slice(1, 7);
+        h += '<div class="ec-s">LA ROUTE LA PLUS PROCHE POUR <b>' + soute + ' t</b></div>' + carteGrande(best, c);
+        h += cartesAutres(autres, c, best, 'AUTRES MARCHANDISES', '· la source la plus proche de chacune');
         return h;
     }
     // ----- vente a perte (directive de baisse) : la PERTE seule est affichee, jamais le montant de la vente -----
@@ -348,7 +459,8 @@
         }
         const routes = calculerPerte(d);
         if (!routes.length) return msg('AUCUNE ROUTE À PERTE AVEC CES RÉGLAGES', 'Aucune marchandise ne se vend moins cher dans ' + E(systeme) + ' que son prix d\'achat proche, avec votre soute, la taille de piste, le type de station' + (etat.retour ? ', un retour rentable' : '') + ' et la fraîcheur choisis.<br>Essayez d\'élargir les relevés (7 jours, 6 mois), de désactiver « Grande piste »' + (etat.retour ? ' ou « Aller-retour »' : '') + ' ou d\'agrandir le rayon.');
-        const best = routes[0], autres = routes.slice(1, 7), coul = ['#ff9f43', '#c9ccd1', '#00F0FF', '#FF7100', '#FF4FD8', '#FFD700'];
+        const best = routes[0], autres = routes.slice(1, 7);
+        const c = { mode: 'perte', sysF: systeme, faction, couleur: '#ff9f43' };
         const jv = ageHeures(best.v.maj), vFrais = jv !== null && jv <= 48;
         let h = '<div class="ec-s">DESTINATION <b>· là où vendre à perte fait baisser ' + E(faction) + '</b></div>'
           + '<div class="ec-dest"><div><div class="lib">STATION DE LA FACTION · LA MIEUX PLACÉE POUR CETTE ROUTE</div><div class="nom">' + cp(best.v.station, String(best.v.station).toUpperCase()) + '</div>'
@@ -357,19 +469,8 @@
           + etatsLigne()
           + '<div class="ec-avert">⚠ Vous <b>perdez de l\'argent</b> sur cette vente : c\'est le but. Seule une vente <b>à perte stricte</b> compte (un prix coûtant ne compte pas). Les prix bougent : vérifiez le prix de reprise à l\'arrivée, il doit rester inférieur à ce que vous avez payé.</div>'
           + '<div class="ec-s">' + (forte ? 'LA ROUTE À LA PERTE LA PLUS FORTE POUR ' : 'LA ROUTE LA MOINS COÛTEUSE POUR ') + '<b>' + prefs.soute() + ' t</b></div>'
-          + '<div class="ec-vd" style="border-color:#ff9f43"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + inhab(best) + '</span></div>'
-          + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(systeme) + '</div>'
-          + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
-          + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecp" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#ff9f43"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#ff9f43" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecp)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
-          + '<div class="ec-perte">−' + fmt(best.perte) + '<small>CR DE PERTE PAR TONNE</small></div></div>'
-          + '<div class="ec-n ec-ven"><div class="e">③ VENDRE ICI</div><div class="st">' + cp(best.v.station) + '</div><div class="sy">' + cp(systeme) + ' · destination</div>'
-          + '<div class="px">' + fmt(best.v.prix) + '<small>CR / t</small></div><div class="de">' + ligneDemande(best.v, best.qte) + '</div></div></div>'
-          + retourBloc(best) + '<div class="ec-bas"><div class="ec-tot">② TRANSPORTEZ ' + fmt(best.qte) + ' t · perte estimée<b style="color:#ff9f43">' + mil(best.total) + ' cr</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(best.s.systeme) + boutonCopie(systeme) + '</div></div></div>';
-        if (autres.length) {
-            h += '<div class="ec-s">AUTRES ROUTES POSSIBLES <b style="color:#666;letter-spacing:1px;font-size:.95em">· classées par perte ' + (forte ? 'décroissante' : 'croissante') + ' pour votre soute</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span class="p">−' + fmt(r.perte) + ' / t</span></div>'
-                + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u style="color:#ff9f43">' + cp(r.v.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
-                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + inhab(r) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt" style="color:#ff9f43">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>' + retourPetit(r) + '</div>').join('') + '</div>';
-        }
+          + carteGrande(best, c);
+        h += cartesAutres(autres, c, best, 'AUTRES ROUTES POSSIBLES', '· classées par perte ' + (forte ? 'décroissante' : 'croissante') + ' pour votre soute');
         return h;
     }
     function corps() {
@@ -401,22 +502,9 @@
           + '<div class="sous">' + E(String(d.systeme || etat.systeme).toUpperCase()) + ' · ' + (best.v.planetaire ? 'planétaire' : 'orbitale') + (best.v.grande ? ' · grande piste' : ' · petite piste') + ' · ' + nbDest + ' station' + (nbDest > 1 ? 's' : '') + ' de la faction avec marché dans le système</div></div>'
           + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (24 h, 7 jours ou 6 mois).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
         h += etatsLigne();
-        h += '<div class="ec-s">LA MEILLEURE ROUTE POUR <b>' + prefs.soute() + ' t</b></div>';
-        h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + inhab(best) + '</span>' + '</div>'
-          + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(d.systeme || etat.systeme) + '</div>'
-          + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
-          + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecf" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00FF66"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#00FF66" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecf)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
-          + '<div class="ec-gain">+' + fmt(best.gain) + '<small>CR GAGNÉS PAR TONNE</small></div></div>'
-          + '<div class="ec-n ec-ven"><div class="e">③ VENDRE ICI</div><div class="st">' + cp(best.v.station) + '</div><div class="sy">' + cp(d.systeme || etat.systeme) + ' · destination</div>'
-          + '<div class="px">' + fmt(best.v.prix) + '<small>CR / t</small></div><div class="de">' + ligneDemande(best.v, best.qte) + '</div></div></div>'
-          + retourBloc(best) + '<div class="ec-bas"><div class="ec-tot">② TRANSPORTEZ ' + fmt(best.qte) + ' t · bénéfice estimé<b>' + mil(best.total) + ' cr</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + boutonCopie(best.s.systeme) + boutonCopie(d.systeme || etat.systeme) + '</div></div></div>';
-        if (autres.length) {
-            const maxT = best.total || 1, coul = ['#FFD700', '#c9ccd1', '#00F0FF', '#FF7100', '#FF4FD8', '#00FF66'];
-            h += '<div class="ec-s">AUTRES ROUTES POSSIBLES <b style="color:#666;letter-spacing:1px;font-size:.95em">· la barre compare chaque bénéfice total à celui de la meilleure route</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span>+' + fmt(r.gain) + ' / t</span></div>'
-                + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u>' + cp(r.v.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
-                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + inhab(r) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>'
-                + retourPetit(r) + '<div class="ba" title="Bénéfice total comparé à la meilleure route"><i style="width:' + Math.max(4, Math.round(100 * r.total / maxT)) + '%"></i></div></div>').join('') + '</div>';
-        }
+        const c = { mode: 'commerce', sysF: d.systeme || etat.systeme, faction: d.faction || etat.faction, couleur: '#00FF66' };
+        h += '<div class="ec-s">LA MEILLEURE ROUTE POUR <b>' + prefs.soute() + ' t</b></div>' + carteGrande(best, c);
+        h += cartesAutres(autres, c, best, 'AUTRES ROUTES POSSIBLES', '· la barre compare chaque bénéfice total à celui de la meilleure route');
         return h;
     }
     // sources des prix : Spansh seul, ou Spansh + Ardent recoupes (SQL 137 : pour une meme station, le releve le plus recent des deux est gardé)

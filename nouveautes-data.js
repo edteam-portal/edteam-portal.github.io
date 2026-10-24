@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-retour-utile-directive', date: '2026-10-24T22:00:00Z', type: 'AMELIORE',
+        titre: 'Aller-retour : les routes dont le retour sert une autre directive passent devant',
+        texte: 'Avec « Aller-retour », la revente de retour se fait dans la station d’achat : si elle est dans le système et chez la faction d’une directive de hausse ou d’élection en cours, ce bénéfice fait aussi monter cette faction. Ces « routes doubles » sont mises en évidence (cadre vert qui clignote et bandeau « ★ ROUTE DOUBLE : 2 directives en un seul voyage » qui explique l’aller et le retour) et passent en tête, avant même la route la plus rentable en crédits. Chaque route est présentée en deux étapes claires (1 · ALLER, 2 · RETOUR) avec le bilan de la boucle. À l’inverse, un retour qui renforcerait une faction visée par une directive de BAISSE est signalé par « ⚠ LE RETOUR RENFORCE LA DIRECTIVE DE BAISSE ».',
+        important: false
+    },
+    {
         id: '2026-10-ou-vendre-minerais', date: '2026-10-24T21:00:00Z', type: 'CORRIGE',
         titre: 'Où vendre ? : les minerais (Gallite, Indite…) sont enfin proposés',
         texte: 'Les fenêtres « Où vendre ? » et « Où vendre à perte ? » écartaient d’office les minerais. Or plusieurs stations les vendent et la faction les rachète très cher : à Carini, la Gallite et l’Indite rapportent plus de trois fois le bénéfice de l’ancienne « meilleure route ». Ils sont maintenant proposés comme n’importe quelle marchandise (seuls les esclaves et le butin restent écartés), y compris pour le trajet retour de l’aller-retour.',
