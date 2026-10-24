@@ -208,13 +208,13 @@
 
     // Journal des exploits : les actions de MEME TYPE d'un meme pilote faites a moins de 5 minutes l'une de l'autre sont presentees sur UNE ligne, valeurs additionnees
     // (ex. 5 ventes de marchandises = la somme des CR). Seul l'affichage change : la valeur de la ligne regroupee est la SOMME, donc les points de la colonne RANG BGS sont ceux de la somme.
-    //  - actions repetitives (MEURTRES, PIRATAGE, ECHECS : 1 point chacune) : 5 par ligne, une pause de plus de 30 min ouvre une nouvelle ligne (regle d'origine) ;
+    //  - actions repetitives (MEURTRES, PIRATAGE, ECHECS : 1 point chacune) : meme regle que les autres (5 minutes entre deux actions) mais lignes comptees en nombre d'actions, sans limite (avant 25/10 : 5 par ligne, pause de 30 min) ;
     //  - renseignement (RENSEIGNEMENT, SCAN_JOUEUR, MAJ_DONNEE) : 5 par ligne, 5 minutes entre deux actions, systemes differents reunis (la ligne indique « N systemes ») ;
     //  - autres actions (economie, securite, science, missions, victoires, vols, contrebande) : meme directive (ou soutien libre), meme faction et meme systeme, 5 minutes entre deux actions, sans limite de nombre.
     // La colonisation (une ligne par livraison, details propres) et les lignes du Powerplay ne sont pas regroupees. Champ ajoute : regroupe (nombre d'actions reunies).
     // Entree et sortie : lignes du journal triees de la plus recente a la plus ancienne.
     window.regrouperRafalesJournal = function (lignes, taille) {
-        const N = taille || 5, PAUSE_RAFALE = 30 * 60000, PAUSE = 5 * 60000;
+        const N = taille || 5, PAUSE = 5 * 60000;
         const RAFALE = { MEURTRES: 1, PIRATAGE: 1, ECHECS: 1 }, ESPION = { RENSEIGNEMENT: 1, SCAN_JOUEUR: 1, MAJ_DONNEE: 1 },
               GENERAL = { ECONOMIE: 1, SECURITE: 1, SCIENCE: 1, CONTREBANDE: 1, VENTE_PERTE: 1, MISSIONS: 1, ELECTION_MISSIONS: 1, GUERRE_MISSIONS: 1, CZ_VICTOIRES: 1, VOLS: 1 };
         const ts = e => { const t = new Date(String(e.date_action || '').replace(' ', 'T')).getTime(); return isNaN(t) ? 0 : t; };
@@ -235,7 +235,7 @@
             if (!rafale && !espion && !GENERAL[T]) { sortie.push(e); return; }
             const cle = (espion ? [e.user_id, T] : [e.user_id, T, e.ordre_id || '', e.faction || '', e.systeme || '']).join('|'), t = ts(e), v = Number(e.valeur) || (rafale ? 1 : 0);
             let c = ouverts[cle];
-            if (c && t - c.t > (rafale ? PAUSE_RAFALE : PAUSE)) { fermer(c); c = null; }
+            if (c && t - c.t > PAUSE) { fermer(c); c = null; }
             if (!c) c = ouverts[cle] = { somme: 0, n: 0, t: t, derniere: e, espion: espion, systemes: {}, kinds: {}, noms: {}, vente: 0 };
             c.somme += v; c.vente += venteDe(e); c.n += 1; c.t = t; c.derniere = e;
             if (espion) {
@@ -243,7 +243,7 @@
                 String(e.details || '').split(' · ').forEach(k => { if (k) c.kinds[k] = 1; });
                 if (T === 'SCAN_JOUEUR') c.noms[String(e.details || '').split(' · ')[0].replace(/^CMDR /i, '')] = 1;
             }
-            if ((rafale || espion) && c.n >= N) { fermer(c); delete ouverts[cle]; }
+            if (espion && c.n >= N) { fermer(c); delete ouverts[cle]; }
         });
         Object.keys(ouverts).forEach(k => fermer(ouverts[k]));
         return sortie.sort((a, b) => ts(b) - ts(a));

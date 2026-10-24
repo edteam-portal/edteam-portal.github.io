@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-journal-rafales-5-minutes', date: '2026-10-24T23:12:41Z', type: 'AMELIORE',
+        titre: 'Journal des exploits : meurtres, piratage et missions échouées regroupés sur une ligne',
+        texte: 'Tant que moins de 5 minutes séparent deux meurtres, deux actes de piratage ou deux missions échouées, le journal les réunit sur une seule ligne, sans limite de nombre (avant : 5 par ligne). Un long combat ne remplit plus le journal ; les points restent de 1 par action.',
+        important: false
+    },
+    {
         id: '2026-10-combat-meurtres', date: '2026-10-24T22:44:08Z', type: 'CORRIGE',
         titre: 'Onglet Combat : tes meurtres comptent enfin',
         texte: 'Quand tu tues des civils ou des vaisseaux sans prime, à pied ou en vaisseau, l’onglet Combat ouvre maintenant un combat et ajoute chaque victime au tableau de chasse, avec son nom. Ces meurtres ne rapportent aucun crédit. Avant, rien ne s’affichait. À pied, le verrouillage d’une cible reste invisible : le jeu ne transmet rien à ce moment-là.',
