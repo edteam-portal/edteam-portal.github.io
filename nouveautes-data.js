@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ordre-systemes-campagne', date: '2026-10-24T11:30:00Z', type: 'AMELIORE',
+        titre: 'Campagnes : l’Amiral choisit l’ordre des systèmes',
+        texte: 'Dans une campagne de la page BGS, les systèmes restent classés par ordre alphabétique par défaut, mais l’Amiral peut maintenant les remettre dans l’ordre qu’il veut : il suffit de glisser une ligne (ou un système regroupé) au-dessus ou au-dessous d’un autre système de la même campagne. Tous les pilotes de l’escadron voient cet ordre, sur PC comme sur mobile. Les bandeaux de début et de fin de guerre ou d’élection sont aussi plus compacts sur téléphone.',
+        important: false
+    },
+    {
         id: '2026-10-sons-du-jeu-partout', date: '2026-10-23T14:48:34Z', type: 'NOUVEAU',
         titre: 'Sons du jeu sur toutes les pages, dans l’application installée',
         texte: 'Quand vous prenez une mission de passagers, chargez ou vendez, sautez, êtes intercepté ou éliminez un vaisseau, les ambiances de cabine, les annonces et les voix se jouent maintenant sur TOUTES les pages du site, sans aucun clic, tant que votre jeu est en ligne, quel que soit l’onglet du tableau de bord affiché. Cela fonctionne dans l’application EDTEAM installée (Chrome ou Edge : icône d’installation à droite de la barre d’adresse) : un simple navigateur garde les sons du tableau de bord seulement. Le bouton « Sons du jeu » du pied de page les active ou les coupe ; les sons du minage restent dans l’onglet Minage.',

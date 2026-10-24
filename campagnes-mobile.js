@@ -129,8 +129,9 @@
             + '<div class="mc-det" id="' + id + '" style="display:none;">' + detailCOL(m) + '</div></div>';
     }
     // tri alphabétique par système ; un système qui a plusieurs missions est regroupé sous un en-tête « ◈ SYSTÈME · n missions »
-    function groupesSys(l) {
-        l = l.map(function (x, i) { x.o = i; return x; }).sort(function (a, b) { return a.s.localeCompare(b.s, 'fr') || (a.o - b.o); });
+    function groupesSys(l, ordre) {
+        var ord = (ordre || []).map(function (x) { return String(x).toUpperCase(); }), rg = function (x) { var k = ord.indexOf(x.s); return k < 0 ? 1e9 : k; };   // ordre choisi par l'Amiral sur PC, puis alphabetique
+        l = l.map(function (x, i) { x.o = i; return x; }).sort(function (a, b) { return (rg(a) - rg(b)) || a.s.localeCompare(b.s, 'fr') || (a.o - b.o); });
         var out = [], i = 0;
         while (i < l.length) {
             var j = i; while (j < l.length && l[j].s === l[i].s) j++;
@@ -151,7 +152,7 @@
             var pl = Number(m.plafond_cp) || 0, pc = pl > 0 ? Math.min(100, 100 * cp(m.merites_total) / pl) : (m.etat && m.etat.progres != null ? Number(m.etat.progres) * 100 : null); if (pc != null) pcts.push(pc);
         });
         ((col && col.missions) || []).filter(function (m) { return m.origine === 'AMIRAL' && String(m.campagne_id) === String(c.id); }).forEach(function (m) { lignes.push({ s: String(m.systeme || '').toUpperCase(), h: ligneCOLMob(m) }); if (m.pct != null) pcts.push(Number(m.pct)); });
-        lignes = groupesSys(lignes);
+        lignes = groupesSys(lignes, c.ordre_systemes);
         var moy = pcts.length ? Math.round(pcts.reduce(function (s, v) { return s + v; }, 0) / pcts.length) : 0;
         var replie = lirePli().indexOf(String(c.id)) >= 0;
         var info = c.echeance ? '⏳ jusqu\'au ' + String(c.echeance).slice(8, 10) + '/' + String(c.echeance).slice(5, 7) : '';

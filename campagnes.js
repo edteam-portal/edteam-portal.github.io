@@ -44,7 +44,7 @@
             '.camp-grip { color:#666; font-size:1.1em; letter-spacing:-3px; user-select:none; padding:0 2px; } .camp-tete:hover .camp-grip { color:#ddd; }',
             '.camp-carte { position:relative; } .camp-carte.glisse { opacity:.45; } .camp-carte.depot { outline:2px dashed #fff; outline-offset:-3px; background:rgba(255,255,255,.04); }',
             '.camp-trait { position:absolute; left:0; right:0; height:4px; background:#fff; box-shadow:0 0 12px #fff; z-index:20; pointer-events:none; } .camp-ligne.glisse { opacity:.35; }',
-            '.camp-sys { border-top:1px solid rgba(255,255,255,.22); } .camp-sys > .camp-ligne:first-of-type { border-top:0; }',
+            '.camp-sysb { position:relative; } .camp-sys { border-top:1px solid rgba(255,255,255,.22); } .camp-sys > .camp-ligne:first-of-type { border-top:0; }',
             '.camp-sys-t { padding:7px 8px 4px; font-size:.78em; letter-spacing:3px; color:#cfe; background:rgba(255,255,255,.04); } .camp-sys-t span { color:#778; letter-spacing:1px; }',
             '.camp-ligne.veille { opacity:.55; }',
             '.camp-ligne.gris { opacity:.4; filter:grayscale(1); cursor:not-allowed; }',
@@ -189,7 +189,8 @@
         while (i < lignes.length) {
             var j = i; while (j < lignes.length && lignes[j].sys === lignes[i].sys) j++;
             var lot = lignes.slice(i, j).map(ligne).join('');
-            out += (j - i > 1 && lignes[i].sys) ? '<div class="camp-sys"><div class="camp-sys-t">◈ ' + esc(lignes[i].sys) + ' <span>· ' + (j - i) + ' missions</span></div>' + lot + '</div>' : lot;
+            var bloc = (j - i > 1 && lignes[i].sys) ? '<div class="camp-sys"><div class="camp-sys-t">◈ ' + esc(lignes[i].sys) + ' <span>· ' + (j - i) + ' missions</span></div>' + lot + '</div>' : lot;
+            out += '<div class="camp-sysb" data-sys="' + esc(String(lignes[i].sys || '').toUpperCase()) + '">' + bloc + '</div>';   // un bloc par systeme : l'Amiral le deplace par glisser-deposer
             i = j;
         }
         return out;
@@ -285,7 +286,8 @@
             if (window.edteamCampagnesPP && !c.synthetique) lignes = lignes.concat(window.edteamCampagnesPP.lignes(c.id));
             if (window.edteamCampagnesCOL && !c.synthetique) lignes = lignes.concat(window.edteamCampagnesCOL.lignes(c.id));
             // tri alphabétique par système (puis par type, stable) ; un système qui a plusieurs missions est regroupé sous un en-tête
-            lignes = lignes.map(function (l, i) { l.o = i; return l; }).sort(function (a, b) { return String(a.sys || '').localeCompare(String(b.sys || ''), 'fr') || (a.o - b.o); });
+            var ordSys = (c.ordre_systemes || []).map(function (x) { return String(x).toUpperCase(); }), rgSys = function (l) { var k = ordSys.indexOf(String(l.sys || '').toUpperCase()); return k < 0 ? 1e9 : k; };   // ordre choisi par l'Amiral (glisser-deposer), puis alphabetique
+            lignes = lignes.map(function (l, i) { l.o = i; return l; }).sort(function (a, b) { return (rgSys(a) - rgSys(b)) || String(a.sys || '').localeCompare(String(b.sys || ''), 'fr') || (a.o - b.o); });
             // donnees de la carte galactique (carte-campagnes.js) : missions actives avec un systeme, resultat du dernier tick
             datCarte.push({ id: c.id, nom: c.nom, type: LIB[c.type_campagne] || c.type_campagne, couleur: col, prio: c.priorite, lignes: lignes.filter(function (l) { return !l.gris && l.sys; }).map(function (l) { return { sys: l.sys, domaine: l.domaine, id: l.id, tag: l.tag, res: resCarte(l), clic: l.clic, carte: carte(l) }; }) });
             var mesurees = lignes.filter(function (l) { return l.pct != null; });
@@ -358,7 +360,7 @@
             var l = ev.target.closest && ev.target.closest('.camp-ligne[data-mid], .camp-cd[data-mid]');
             var t = ev.target.closest && ev.target.closest('.camp-tete[data-cid]');
             var carte = ev.target.closest && ev.target.closest('.camp-carte');
-            if (l) { glisse = { type: 'M', dom: l.dataset.mdom, id: l.dataset.mid, de: carte ? carte.id.replace('camp-', '') : null }; l.classList.add('glisse'); }
+            if (l) { var sb = l.closest('.camp-sysb'); glisse = { type: 'M', dom: l.dataset.mdom, id: l.dataset.mid, de: carte ? carte.id.replace('camp-', '') : null, sys: sb ? sb.dataset.sys : '' }; l.classList.add('glisse'); }
             else if (t) { glisse = { type: 'C', id: t.dataset.cid }; if (carte) carte.classList.add('glisse'); }
             else return;
             try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', JSON.stringify(glisse)); } catch (e) { /* navigateur sans dataTransfer */ }
@@ -370,7 +372,16 @@
             document.querySelectorAll('.camp-carte.depot').forEach(function (e) { if (e !== carte) e.classList.remove('depot'); });
             document.querySelectorAll('.camp-trait').forEach(function (e) { e.remove(); });
             if (glisse.type === 'M') {
-                if (cid === 'sans' || String(cid) === String(glisse.de)) return;
+                if (cid === 'sans') return;
+                if (String(cid) === String(glisse.de)) {   // meme campagne : on remet le SYSTEME a une autre place
+                    var sb = ev.target.closest('.camp-sysb');
+                    if (!sb || !glisse.sys || !sb.dataset.sys || sb.dataset.sys === glisse.sys) return;
+                    ev.preventDefault();
+                    var rb = sb.getBoundingClientRect(), av = ev.clientY < rb.top + rb.height / 2;
+                    var tb = document.createElement('div'); tb.className = 'camp-trait'; tb.style[av ? 'top' : 'bottom'] = '0'; sb.appendChild(tb);
+                    sb.dataset.pos = av ? 'avant' : 'apres';
+                    return;
+                }
                 ev.preventDefault(); carte.classList.add('depot');
             } else {
                 if (cid === 'sans' || String(cid) === String(glisse.id)) return;
@@ -388,7 +399,18 @@
             nettoyerGlisse();
             if (cible === 'sans') return;
             if (g.type === 'M') {
-                if (String(cible) === String(g.de)) return;
+                if (String(cible) === String(g.de)) {   // meme campagne : nouvel ordre des systemes
+                    var sbc = ev.target.closest && ev.target.closest('.camp-sysb'); if (!sbc || !g.sys || sbc.dataset.sys === g.sys) return;
+                    var av2 = sbc.dataset.pos === 'avant';
+                    var ordre = Array.prototype.map.call(carte.querySelectorAll('.camp-sysb'), function (e) { return e.dataset.sys; }).filter(function (x) { return x && x !== g.sys; });
+                    var k = ordre.indexOf(sbc.dataset.sys); if (k < 0) return;
+                    ordre.splice(av2 ? k : k + 1, 0, g.sys);
+                    var r3 = await db().rpc('ordonner_systemes', { p_id: Number(cible), p_systemes: ordre });
+                    if (r3.error) { console.error(r3.error); alert(r3.error.message || 'Déplacement impossible (le script SQL 139 est-il lancé ?).'); return; }
+                    if (typeof sonSucces === 'function') sonSucces();
+                    await window.edteamCampagnes.rafraichir();
+                    return;
+                }
                 var r1 = await db().rpc('deplacer_mission', { p_domaine: g.dom, p_id: Number(g.id), p_campagne_id: Number(cible) });
                 if (r1.error) { console.error(r1.error); alert(r1.error.message || 'Déplacement impossible (le script SQL 102 est-il lancé ?).'); return; }
                 if (typeof sonSucces === 'function') sonSucces();
