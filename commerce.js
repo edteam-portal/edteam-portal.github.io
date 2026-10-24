@@ -194,6 +194,7 @@
             const gain = (Number(b.v) || 0) - (Number(b.a) || 0);
             if (gain <= 0) return;
             const stock = Number(b.s) || 0, dem = Number(b.d) || 0, de = demEff();
+            if (stock < etat.stock) return;      // le stock mini s'applique aussi a l'achat du retour
             const qte = de === 0 ? Math.min(soute, stock) : Math.min(soute, stock, dem);
             if (qte <= 0) return;
             const x = { n: b.n, a: b.a, v: b.v, s: stock, d: dem, gain, qte, total: gain * qte };
@@ -363,7 +364,7 @@
     function grilleRetour(r, c) {
         const x = r.ret;
         const ach = { titre: 'ACHETER ICI', station: r.v.station, sy: cp(c.sysF) + ' · station de la faction', prix: x.a, de: 'stock ' + fmt(x.s) + ' t' };
-        const ven = { titre: 'VENDRE ICI', station: r.s.station, sy: cp(r.s.systeme) + (r.s.faction ? ' · ' + E(String(r.s.faction).toUpperCase()) : ''), prix: x.v, de: 'demande ' + fmt(x.d) + ' t · vous en portez ' + fmt(x.qte) + ' t' };
+        const ven = { titre: 'VENDRE ICI', station: r.s.station, sy: cp(r.s.systeme) + (r.s.faction ? ' · ' + E(String(r.s.faction).toUpperCase()) : ''), prix: x.v, de: 'demande ' + fmt(x.d) + ' t · vous en portez ' + fmt(x.qte) + ' t' + (x.qte < prefs.soute() ? '<br><b style="color:#ff9f43">retour partiel : ' + fmt(x.qte) + ' t sur ' + fmt(prefs.soute()) + ' t de soute</b>' : '') };
         return '<div class="ec-route ec-rt">' + boite('ec-ach', ach) + fleche('#FFB000', '<div class="ec-gain" style="color:#FFB000;text-shadow:0 0 14px rgba(255,176,0,.5)">+' + fmt(x.gain) + '<small>CR GAGNÉS PAR TONNE</small></div>') + boite('ec-ven', ven) + '</div>';
     }
     // grande carte : la route mise en avant
