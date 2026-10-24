@@ -198,6 +198,11 @@
             + '<br>+' + fmt(x.gain) + ' cr / t · ' + fmt(x.qte) + ' t · bénéfice du retour <b>' + mil(x.total) + ' cr</b>'
             + '<div class="bil">' + lib + ' <b style="color:' + (bilan >= 0 ? '#00FF66' : '#ff9f43') + '">' + (bilan >= 0 ? '+' : '−') + mil(Math.abs(bilan)) + ' cr</b></div></div>';
     }
+    // prix tres eloigne de la mediane de la zone (etat de la faction, penurie...) : signale, jamais ecarte
+    function inhab(r) {
+        const p = (txt, qui) => '<span class="ec-pill ec-vx" title="Ce prix est très différent de la médiane de la zone pour cette marchandise (un état, une pénurie ou un relevé ancien peuvent l’expliquer) : vérifiez-le en jeu avant de partir.">' + txt + ' ' + qui + '</span>';
+        return (r.s && r.s.inhab ? p('PRIX D’ACHAT', 'INHABITUEL') : '') + (r.v && r.v.inhab ? p('PRIX DE VENTE', 'INHABITUEL') : '');
+    }
     function retourPetit(r) {
         if (!etat.retour || !r.ret) return '';
         return '<div class="ret"><span>↩ ' + E(nomFr(r.ret.n)) + ' · +' + fmt(r.ret.gain) + ' / t</span><span>' + mil(r.ret.total) + ' cr</span></div>';
@@ -352,7 +357,7 @@
           + etatsLigne()
           + '<div class="ec-avert">⚠ Vous <b>perdez de l\'argent</b> sur cette vente : c\'est le but. Seule une vente <b>à perte stricte</b> compte (un prix coûtant ne compte pas). Les prix bougent : vérifiez le prix de reprise à l\'arrivée, il doit rester inférieur à ce que vous avez payé.</div>'
           + '<div class="ec-s">' + (forte ? 'LA ROUTE À LA PERTE LA PLUS FORTE POUR ' : 'LA ROUTE LA MOINS COÛTEUSE POUR ') + '<b>' + prefs.soute() + ' t</b></div>'
-          + '<div class="ec-vd" style="border-color:#ff9f43"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + '</span></div>'
+          + '<div class="ec-vd" style="border-color:#ff9f43"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + inhab(best) + '</span></div>'
           + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(systeme) + '</div>'
           + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
           + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecp" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#ff9f43"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#ff9f43" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecp)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
@@ -363,7 +368,7 @@
         if (autres.length) {
             h += '<div class="ec-s">AUTRES ROUTES POSSIBLES <b style="color:#666;letter-spacing:1px;font-size:.95em">· classées par perte ' + (forte ? 'décroissante' : 'croissante') + ' pour votre soute</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span class="p">−' + fmt(r.perte) + ' / t</span></div>'
                 + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u style="color:#ff9f43">' + cp(r.v.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
-                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt" style="color:#ff9f43">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>' + retourPetit(r) + '</div>').join('') + '</div>';
+                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + inhab(r) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt" style="color:#ff9f43">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>' + retourPetit(r) + '</div>').join('') + '</div>';
         }
         return h;
     }
@@ -397,7 +402,7 @@
           + '<div class="ec-fr"><div class="t" title="Barre pleine : relevé à l\'instant. Barre vide : limite de fraîcheur choisie (24 h, 7 jours ou 6 mois).">FRAÎCHEUR DU MARCHÉ</div><div class="b"><i style="width:' + Math.max(4, Math.min(100, jv === null ? 4 : Math.round(100 - jv / etat.heures * 100))) + '%;background:' + (vFrais ? '#00FF66' : 'linear-gradient(90deg,#e8a35a,#c0392b)') + '"></i></div><div class="v" style="color:' + (vFrais ? '#00FF66' : '#e8a35a') + '">' + (vFrais ? '' : '⚠ ') + 'relevé ' + E(ageTxtH(jv)) + (vFrais ? '' : ' — vérifiez à l\'arrivée') + '</div></div></div>';
         h += etatsLigne();
         h += '<div class="ec-s">LA MEILLEURE ROUTE POUR <b>' + prefs.soute() + ' t</b></div>';
-        h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + '</span>' + '</div>'
+        h += '<div class="ec-vd"><div class="ec-vh"><div class="m"><div class="ec-gl">' + E(initiales(best.m.nom)) + '</div><div><b>' + E(nomFr(best.m.nom).toUpperCase()) + '</b><span>' + E(String(best.m.categorie || '').toUpperCase()) + '</span></div></div>' + '<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + etiquetteRoute(best.m) + pastilleAge(best.s.maj) + inhab(best) + '</span>' + '</div>'
           + '<div class="ec-route"><div class="ec-n ec-ach"><div class="e">① ACHETER ICI</div><div class="st">' + cp(best.s.station) + '</div><div class="sy">' + cp(best.s.systeme) + ' · ' + E(best.s.distance) + ' al de ' + E(d.systeme || etat.systeme) + '</div>'
           + '<div class="px">' + fmt(best.s.prix) + '<small>CR / t</small></div><div class="de">stock ' + fmt(best.s.stock) + ' t · ' + (best.s.planetaire ? 'planétaire' : 'orbitale') + (best.s.grande ? ' · grande piste' : ' · petite piste') + (best.s.arrivee ? ' · ' + fmt(best.s.arrivee) + ' Ls' : '') + '</div></div>'
           + '<div class="ec-lien"><svg viewBox="0 0 210 40"><defs><marker id="ecf" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#00FF66"/></marker></defs><line x1="6" y1="20" x2="198" y2="20" stroke="#00FF66" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ecf)"/><circle cx="104" cy="20" r="4" fill="#FFD700"/></svg>'
@@ -409,7 +414,7 @@
             const maxT = best.total || 1, coul = ['#FFD700', '#c9ccd1', '#00F0FF', '#FF7100', '#FF4FD8', '#00FF66'];
             h += '<div class="ec-s">AUTRES ROUTES POSSIBLES <b style="color:#666;letter-spacing:1px;font-size:.95em">· la barre compare chaque bénéfice total à celui de la meilleure route</b></div><div class="ec-gr">' + autres.map((r, i) => '<div class="ec-rc" style="--c:' + coul[i % coul.length] + '"><div class="l1"><b>' + E(nomFr(r.m.nom).toUpperCase()) + '</b><span>+' + fmt(r.gain) + ' / t</span></div>'
                 + '<div class="tr"><em>' + cp(r.s.systeme) + '</em><span class="f">─────►</span><u>' + cp(r.v.station) + '</u> <span style="color:#666">' + E(r.s.distance) + ' al</span></div>'
-                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>'
+                + '<div class="l3"><span>' + etiquetteRoute(r.m) + ' ' + pastilleAge(r.s.maj) + ' ' + inhab(r) + ' ' + cp(r.s.station) + ' · ' + fmt(r.s.prix) + ' cr' + (r.s.grande ? '' : ' · petite piste') + '</span><span class="tt">' + mil(r.total) + ' cr · ' + fmt(r.qte) + ' t</span></div>'
                 + retourPetit(r) + '<div class="ba" title="Bénéfice total comparé à la meilleure route"><i style="width:' + Math.max(4, Math.round(100 * r.total / maxT)) + '%"></i></div></div>').join('') + '</div>';
         }
         return h;

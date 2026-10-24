@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-balayage-zone-ou-vendre', date: '2026-10-24T18:00:00Z', type: 'AMELIORE',
+        titre: 'Où vendre ? : toute la zone est examinée, les prix inhabituels sont signalés',
+        texte: 'Pour les rayons de 15, 20 et 40 al, « Où vendre ? » et « Où vendre à perte ? » lisent maintenant d’un coup les marchés de toutes les stations récentes de la zone et calculent la marge exacte de chaque marchandise, au lieu de ne regarder que les marchandises les mieux payées : de bonnes routes jusque-là manquées apparaissent, et les routes proposées sont mieux classées. Quand un prix est très différent de la médiane de la zone (un état, une pénurie, un relevé ancien), une pastille « PRIX INHABITUEL » le signale : la route reste proposée, à vous de vérifier en jeu. Les rayons plus grands gardent l’ancienne recherche.',
+        important: false
+    },
+    {
         id: '2026-10-aller-retour-type-station', date: '2026-10-24T16:00:00Z', type: 'NOUVEAU',
         titre: 'Où vendre ? : aller-retour rentable et choix orbitale / planétaire',
         texte: 'Les fenêtres « Où vendre ? », « Où vendre à perte ? » et « Route de contrebande » des directives ont deux nouveaux réglages. « STATIONS » : toutes (par défaut), orbitales (stations spatiales) ou planétaires (au sol), pour l’achat comme pour la vente. « ALLER-RETOUR » : ne garde que les routes dont le trajet retour est rentable, et affiche ce qu’il faut acheter à la station de la faction pour le revendre à la station d’achat, avec le bilan de la boucle (pour une vente à perte : le bénéfice du retour moins la perte). Le détail du retour n’existe que pour les stations relevées par Spansh. Dans l’onglet Commerce du tableau de bord : « Vendre ce que je transporte » propose aussi le type de station, et la feuille de route peut admettre les stations planétaires en plus des orbitales (Spansh ne sait pas les exiger seules).',
