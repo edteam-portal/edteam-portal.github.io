@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-combat-meurtres', date: '2026-10-24T22:44:08Z', type: 'CORRIGE',
+        titre: 'Onglet Combat : tes meurtres comptent enfin',
+        texte: 'Quand tu tues des civils ou des vaisseaux sans prime, à pied ou en vaisseau, l’onglet Combat ouvre maintenant un combat et ajoute chaque victime au tableau de chasse, avec son nom. Ces meurtres ne rapportent aucun crédit. Avant, rien ne s’affichait. À pied, le verrouillage d’une cible reste invisible : le jeu ne transmet rien à ce moment-là.',
+        action: 'Mettre à jour le plugin vers la version 2.47.',
+        important: false
+    },
+    {
         id: '2026-10-directives-corrections-tablette', date: '2026-10-24T19:20:43Z', type: 'CORRIGE',
         titre: 'Directives : fenêtre plus grande sur tablette, ordre des systèmes respecté, échecs de mission comptés',
         texte: 'La fenêtre d’une directive occupe maintenant presque tout l’écran sur tablette et sur un portable de 14 pouces. Dans une campagne, l’affichage en cartes suit enfin l’ordre des systèmes choisi par l’Amiral. Sous une directive de baisse, les missions échouées comptent dans l’effort de la directive (1 point chacune, 10 par jour au plus) : elles affichaient « plein effet » avec 0 point. Enfin, la page BGS se met à jour toute seule quand tu reviens dessus (tablette qui se rallume) et juste après une de tes actions en jeu.',

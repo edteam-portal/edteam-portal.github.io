@@ -107,7 +107,7 @@
 
     // ---------------------------------------------------------------- petits utilitaires d'affichage
     const modeDe = e => e && e.mode ? e.mode : "secu";
-    const typeCombi = k => { const m = String(k || "").match(/^([a-z]+suitai)_class(\d)/); return m ? (COMBI_TYPES[m[1]] || "Soldat") + " · classe " + m[2] : (String(k || "") || "Ennemi"); };
+    const typeCombi = k => { const m = String(k || "").match(/^([a-z]+suitai)_class(\d)/); return m ? (COMBI_TYPES[m[1]] || "Soldat") + " · classe " + m[2] : k === "civil" ? "Civil" : (String(k || "") || "Ennemi"); };
     const intensite = z => z === "H" ? ["FORTE INTENSITÉ", "fo"] : z === "M" ? ["INTENSITÉ MOYENNE", "mo"] : z === "S" ? ["FAIBLE INTENSITÉ", ""] : null;
     const dureeCombat = e => { const fin = e.actif ? Date.now() / 1000 : (e.fin || (e.maj ? new Date(e.maj).getTime() / 1000 : Date.now() / 1000)); return Math.max(0, fin - (e.t0 || fin)); };
     const minutes = s => s < 60 ? Math.round(s) + " s" : Math.round(s / 60) + " min";
@@ -298,6 +298,7 @@
         kills.slice(0, (max || 60) - (c && !c.m ? 1 : 0)).forEach((k, i) => {
             const [t, cle, nom, fac, rec, code] = k, heure = hh(t0 + t), r = rec ? FR(rec) + " cr" : "—", id = "k" + i;
             if (code === "P") L.push(fiche("mort", miniHolo("", id, true), "CMD " + E(nom), "joueur", r, null, "✕ " + heure, "DUEL GAGNÉ"));
+            else if (code === "M") L.push(fiche("mort", miniHolo("", id, true), E(nom || "Civil"), E(fac || "meurtre"), "—", null, "✕ " + heure, "MEURTRE"));
             else if (code === "B") L.push(fiche("mort", miniHolo(/suitai/.test(cle) ? "" : cle, id, true), E(/suitai/.test(cle) ? typeCombi(cle) : (nomVaisseau(cle) || cle || "Ennemi")), E((nom || "") + (fac ? " · " + fac : "")), r, pal(rec), "✕ " + heure));
             else if (cle) L.push(fiche("mort", miniHolo(cle, id, true), E(nomVaisseau(cle) || cle) + ' <span class="pb" title="Un bon de guerre ne donne que la faction : le vaisseau est le dernier verrouillé de cette faction (probable)">≈</span>', E((nom ? nom + " · " : "") + (fac || "")), r, pal(rec), "✕ " + heure));
             else L.push(fiche("mort", miniHolo("", id, true), "Ennemi", E(fac || "ennemi de la zone"), r, pal(rec), "✕ " + heure));
@@ -424,7 +425,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
         const rel = r => ("0" + Math.floor(r / 60)).slice(-2) + ":" + ("0" + (r % 60)).slice(-2);
         const L = (e.jr || []).filter(r => !(r[1] === "x" && K.some(k => Math.abs(k[0] - r[0]) <= 1))).map(r => ({ t: r[0], c: r[1], x: r[2] }));
         K.forEach(k => { const [t, cle, nom, fac, rec, code] = k; const cr = rec ? " · " + FR(rec) + " cr" : "";
-            L.push({ t, c: "x", x: code === "G" && cle ? (nomVaisseau(cle) || cle) + " ≈ éliminé" + (fac ? " · " + fac : "") + cr : code === "P" ? "CMD " + nom + " éliminé" : code === "B" ? ((nom || (/suitai/.test(cle) ? typeCombi(cle) : (nomVaisseau(cle) || "Ennemi"))) + " éliminé" + (fac ? " · " + fac : "") + cr) : "Ennemi éliminé" + (fac && fac !== e.ennemi ? " · " + fac : "") + cr }); });
+            L.push({ t, c: "x", x: code === "G" && cle ? (nomVaisseau(cle) || cle) + " ≈ éliminé" + (fac ? " · " + fac : "") + cr : code === "P" ? "CMD " + nom + " éliminé" : code === "M" ? (nom || "Civil") + " tué" + (fac ? " · " + fac : "") : code === "B" ? ((nom || (/suitai/.test(cle) ? typeCombi(cle) : (nomVaisseau(cle) || "Ennemi"))) + " éliminé" + (fac ? " · " + fac : "") + cr) : "Ennemi éliminé" + (fac && fac !== e.ennemi ? " · " + fac : "") + cr }); });
         K.forEach((k, i) => { const num = nb - K.length + i + 1; if ([1, 10, 25, 50, 75, 100, 150, 200, 300, 500].indexOf(num) >= 0) L.push({ t: k[0], c: "j", x: num === 1 ? "Premier ennemi éliminé" : num + "e ennemi éliminé" }); });
         if (T && T.pic >= 3 && K.length >= 6) L.push({ t: T.dep + T.iPic * T.pas, c: "p", x: "Pic d’activité : " + T.pic + " éliminations en " + (T.pas === 60 ? "1 minute" : T.pas / 60 + " minutes") });
         L.sort((a, b) => a.t - b.t);
