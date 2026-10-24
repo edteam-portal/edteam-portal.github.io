@@ -2209,8 +2209,15 @@
 
                 // REFRESH TEMPOREL RÉTABLI (10 min au lieu de 5 : les ordres BGS changent rarement
                 // a cette echelle de temps, ca divise par 2 l'egress recurrent de ce polling)
+                window.bgsDernierAff = Date.now();
                 if (!window.bgsLoopActive) {
                     window.bgsLoopActive = true;
+                    // Retour sur la page (tablette : minuteries gelees quand l'ecran s'eteint ou l'appli passe en arriere-plan) : on rafraichit si le dernier affichage a plus d'une minute
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.hidden || Date.now() - (window.bgsDernierAff || 0) < 60000) return;
+                        const t = document.getElementById('bgs-tab-ordres');
+                        if (t && t.style.display !== 'none') afficherOrdresBGS();
+                    });
                     setInterval(() => {
                         if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
                             afficherOrdresBGS();
@@ -3195,6 +3202,14 @@
                     filter: `user_id=eq.${profilCommandant.user_id}` 
                 }, payload => {
                     window.sonBgsUpdate();
+                    // un effort du pilote vient d'arriver : quotas et directives se mettent a jour (regroupe les rafales, jamais onglet cache)
+                    clearTimeout(window.bgsRtTimer);
+                    window.bgsRtTimer = setTimeout(async () => {
+                        const t = document.getElementById('bgs-tab-ordres');
+                        if (document.hidden || !t || t.style.display === 'none' || typeof afficherOrdresBGS !== 'function') return;
+                        try { if (window.EdteamQuotas) await window.EdteamQuotas.charger(true); } catch (e) {}
+                        afficherOrdresBGS();
+                    }, 4000);
                 })
                 .subscribe();
         };
