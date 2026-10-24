@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ou-rendre-hausse', date: '2026-10-24T19:14:09Z', type: 'NOUVEAU',
+        titre: 'Directive de hausse : « Où vendre l’exploration ? » et « Où rendre les bons ? »',
+        texte: 'Sur une directive de hausse, deux boutons s’ouvrent à côté des lignes Science et Sécurité. « Où vendre l’exploration ? » liste les stations de la faction soutenue qui ont la cartographie universelle (les données comptent pour la faction qui tient la station où tu les vends). « Où rendre les bons ? » liste les stations du système avec « contacts » (un bon compte pour la faction qui l’a émis, dans le système où tu le rends) : ports et avant-postes d’abord, colonies au sol repliées. Les chiffres viennent de Spansh. Les fenêtres ne disent pas où gagner les données ni les bons.',
+        important: false
+    },
+    {
+        id: '2026-10-ou-destabiliser', date: '2026-10-24T19:03:05Z', type: 'NOUVEAU',
+        titre: 'Directive de baisse : « Où déstabiliser ? » sur la ligne des meurtres',
+        texte: 'Sur une directive de baisse, un bouton « Où déstabiliser ? » s’ouvre à côté des meurtres : la liste des installations de la faction ciblée dans le système (type, planète, distance, plateformes, services, économie, ancienneté du relevé) et le contexte du système (états de la faction, conflits, sécurité, Powerplay). Les chiffres viennent de Spansh. Le niveau de menace des installations n’est pas publié par le jeu : il reste à lire dans le panneau de la station. Le quota quotidien de meurtres passe aussi à 25 par pilote, et les échecs de mission comptent maintenant dans l’effort d’une directive de baisse.',
+        important: false
+    },
+    {
         id: '2026-10-retour-utile-directive', date: '2026-10-24T22:00:00Z', type: 'AMELIORE',
         titre: 'Aller-retour : les routes dont le retour sert une autre directive passent devant',
         texte: 'Avec « Aller-retour », la revente de retour se fait dans la station d’achat : si elle est dans le système et chez la faction d’une directive de hausse ou d’élection en cours, ce bénéfice fait aussi monter cette faction. Ces « routes doubles » sont mises en évidence (cadre vert qui clignote et bandeau « ★ ROUTE DOUBLE : 2 directives en un seul voyage » qui explique l’aller et le retour) et passent en tête, avant même la route la plus rentable en crédits. Chaque route est présentée en deux étapes claires (1 · ALLER, 2 · RETOUR) avec le bilan de la boucle. À l’inverse, un retour qui renforcerait une faction visée par une directive de BAISSE est signalé par « ⚠ LE RETOUR RENFORCE LA DIRECTIVE DE BAISSE ».',

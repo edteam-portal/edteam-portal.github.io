@@ -2064,7 +2064,7 @@
                             if (QJ.types(ordre.type_ordre)) {
                                 htmlJauges = QJ.lignes(ordre.type_ordre, Qd).map(l => {
                                     const m = QJ.META[l.ty];
-                                    return genererJaugeHTML(m.titre, QJ.texteMarge(l.ty, l), m.c, l.prog, l.prog, l.reduit, '', '', '', (l.ty === 'ECONOMIE' || l.ty === 'CONTREBANDE') && window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '');
+                                    return genererJaugeHTML(m.titre, QJ.texteMarge(l.ty, l), m.c, l.prog, l.prog, l.reduit, '', '', '', (l.ty === 'ECONOMIE' || l.ty === 'CONTREBANDE') && window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : (l.ty === 'MEURTRES' && window.edteamDestab ? window.edteamDestab.bouton(ordre, 'compact') : (l.ty === 'SCIENCE' && window.edteamRendre ? window.edteamRendre.bouton(ordre, 'explo', 'compact') : (l.ty === 'SECURITE' && window.edteamRendre ? window.edteamRendre.bouton(ordre, 'bons', 'compact') : ''))));
                                 }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd), jc = window.__jc; window.__jc = null; const lignePerte = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return lignePerte; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
                                 modeJour = true;
                             } else if (QJ.compteur(ordre.type_ordre, Qd)) {
@@ -3219,6 +3219,8 @@
     <script src="rubans.js?v=1"></script>
     <script src="etats-faction.js?v=4"></script>
     <script src="commerce.js?v=23"></script>
+    <script src="destabiliser.js?v=1"></script>
+    <script src="rendre.js?v=1"></script>
     <script src="footer.js?v=41"></script>
 </body>
 </html>
