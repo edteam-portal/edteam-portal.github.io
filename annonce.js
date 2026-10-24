@@ -260,6 +260,56 @@
             action: function () { try { localStorage.setItem('edteam_camp_vue', 'carte'); } catch (e) { /* tant pis */ } window.location.href = 'bgs.html'; },
             mobile: false
         }
+        ,{
+            id: 'route-double-2026-10',
+            couleur: '#00FF66',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'LA ROUTE DOUBLE : UN VOYAGE, DEUX DIRECTIVES',
+            pages: [
+                {
+                    titre: 'UN SEUL VOYAGE, DEUX DIRECTIVES',
+                    sous: 'Aller-retour : l’aller et le retour font chacun monter une faction',
+                    intro: 'Quand vous <b>vendez avec bénéfice</b> dans une station, la faction qui la contrôle gagne de l’influence. Avec le nouveau réglage <b>ALLER-RETOUR</b> de la fenêtre « Où vendre ? », EDTEAM cherche les trajets où <b>l’aller sert une directive et le retour en sert une autre</b> : vous ne rentrez plus jamais à vide.',
+                    visuelHtml: anvDouble1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'L’ALLER', d: 'Vous achetez une marchandise à la station A et vous la vendez avec bénéfice à la station de la faction visée : <b style="color:#00F0FF">la directive #178 avance</b>.' },
+                        { n: '2', t: 'LE RETOUR', d: 'Vous rachetez une autre marchandise à cette station et vous la revendez à A : si A est dans le système d’une autre directive, <b style="color:#FFB000">la #175 avance aussi</b>.' },
+                        { n: '3', t: 'LE BILAN', d: 'EDTEAM calcule le bénéfice de la boucle entière et met <b style="color:#00FF66">en tête les routes doubles</b>, avec un cadre vert qui clignote.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms et des chiffres fictifs.'
+                },
+                {
+                    titre: 'COMMENT L’UTILISER',
+                    sous: 'Trois gestes dans la fenêtre « Où vendre ? »',
+                    intro: 'Ouvrez une <b>directive de hausse</b> (ou d’élection) sur la page BGS, puis le bouton <b>« OÙ VENDRE ? »</b>.',
+                    visuelHtml: anvDouble2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'ACTIVEZ « ALLER-RETOUR »', d: 'Le réglage est dans la barre du haut de la fenêtre. Il ne garde que les routes dont le retour est rentable.' },
+                        { n: '2', t: 'REPÉREZ LE CADRE VERT', d: 'Les routes doubles passent <b>avant toutes les autres</b>, avec le bandeau <b style="color:#00FF66">★ ROUTE DOUBLE</b> qui clignote.' },
+                        { n: '3', t: 'SUIVEZ LES DEUX ÉTAPES', d: '<b style="color:#00F0FF">1 · ALLER</b> en cyan, <b style="color:#FFB000">2 · RETOUR</b> en orange : stations, prix, quantités et effet sur chaque directive. Le bilan de la boucle est en gros en bas.' }
+                    ]
+                },
+                {
+                    titre: 'BON À SAVOIR',
+                    sous: 'Pour ne pas se tromper',
+                    intro: 'Quelques règles du jeu, que la fenêtre respecte pour vous.',
+                    colonnes: 2,
+                    etapes: [
+                        { n: '1', t: 'SEULE LA VENTE COMPTE', d: 'Acheter ne fait pas monter une faction ; <b>vendre avec bénéfice</b> dans une de ses stations, oui. Un retour qui ne rapporte rien n’est pas proposé.' },
+                        { n: '2', t: 'MÊME SYSTÈME, MÊME FACTION', d: 'Le retour sert une directive seulement si la station d’achat est <b>dans le système de cette directive et contrôlée par sa faction</b>. Sinon la fenêtre écrit « crédits seulement ».' },
+                        { n: '3', t: 'ATTENTION AUX BAISSES', d: 'Si votre retour renforçait une faction visée par une directive de <b style="color:#ff9f43">BAISSE</b>, la route est signalée en orange « ⚠ à éviter ».' },
+                        { n: '4', t: 'LES PRIX BOUGENT', d: 'Prix et stocks viennent des relevés des joueurs (Spansh) : vérifiez-les en arrivant. Une route double peut rapporter un peu moins de crédits qu’une autre : c’est voulu, <b>deux directives avancent</b>.' }
+                    ],
+                    avis: '<b>Rien à installer.</b> Fonction disponible sur PC et tablette, dans les fenêtres « Où vendre ? », « Où vendre à perte ? » et « Route de contrebande ».'
+                }
+            ],
+            cta: 'OUVRIR LA PAGE BGS',
+            aide: 'Page BGS · une directive de hausse · bouton « OÙ VENDRE ? » · réglage ALLER-RETOUR · à utiliser sur PC ou tablette',
+            lien: 'bgs.html',
+            mobile: false
+        }
     ];
 
     // ---- visuels de l'annonce « lifting BGS / Powerplay » : dessines en HTML / SVG (aucune capture d'ecran, aucune donnee reelle ; noms et chiffres fictifs) ----
@@ -283,6 +333,37 @@
             + (ticks ? '<span class="anv-tk">' + ticks.map(function (t) { return '<i class="' + (t ? 'ok' : '') + '"></i>'; }).join('') + '</span>' : '') + '</div></div>';
     }
     function anvTuile(k, t, v, s) { return '<div class="anv-ti" style="--k:' + k + '"><small>' + t + '</small><b>' + v + '</b><span>' + s + '</span></div>'; }
+    // ---- visuels de l'annonce « route double » : dessines en HTML / SVG (noms et chiffres fictifs) ----
+    function anvDouble1() {
+        var t = function (x, y, s, c, txt, extra) { return '<text x="' + x + '" y="' + y + '" text-anchor="middle" fill="' + c + '" font-size="' + s + '" letter-spacing="1.5"' + (extra || '') + '>' + txt + '</text>'; };
+        var noeud = function (x, nom, sous, dir, coul) {
+            return '<rect x="' + x + '" y="95" width="280" height="135" rx="6" fill="#071218" stroke="' + coul + '" stroke-width="2"/>'
+                + t(x + 140, 128, 16, '#fff', nom) + t(x + 140, 150, 12, '#8fd6e3', sous)
+                + '<rect x="' + (x + 30) + '" y="170" width="220" height="30" rx="3" fill="rgba(0,255,102,.16)" stroke="#00FF66"/>' + t(x + 140, 190, 13, '#00FF66', dir)
+                + t(x + 140, 218, 11, '#9ab', 'faction qui monte ▲');
+        };
+        return '<div class="anvd"><svg class="anvd-svg" viewBox="0 0 1000 340" role="img" aria-label="Schéma d’une route double : un aller et un retour qui servent chacun une directive">'
+            + '<defs><marker id="anvdA" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#00F0FF"/></marker><marker id="anvdR" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#FFB000"/></marker></defs>'
+            + noeud(20, 'SCHWEICKART ENTERPRISE', 'KAYIMALI · station d’achat', 'DIRECTIVE #175 · HAUSSE', '#00F0FF')
+            + noeud(700, 'MALKENDORF', 'CARINI · faction visée', 'DIRECTIVE #178 · HAUSSE', '#FFB000')
+            + '<path class="anvd-fl" d="M305 130 C420 56,580 56,692 130" fill="none" stroke="#00F0FF" stroke-width="3" marker-end="url(#anvdA)"/>'
+            + t(500, 24, 14, '#00F0FF', '1 · ALLER : INDITE', ' font-weight="bold"') + t(500, 44, 12, '#bfeaf2', 'vendue avec bénéfice à Carini : +2,80 M cr · la #178 monte ▲')
+            + '<path class="anvd-fl" d="M695 196 C580 280,420 280,308 196" fill="none" stroke="#FFB000" stroke-width="3" marker-end="url(#anvdR)"/>'
+            + t(500, 306, 14, '#FFB000', '2 · RETOUR : ARGENT', ' font-weight="bold"') + t(500, 326, 12, '#ffe2a8', 'revendue avec bénéfice à Kayimali : +1,25 M cr · la #175 monte ▲')
+            + '<circle class="anvd-pl" cx="500" cy="165" r="76" fill="rgba(0,255,102,.10)" stroke="#00FF66" stroke-width="2"/>'
+            + t(500, 142, 12, '#c9f5da', '★ UN VOYAGE') + t(500, 172, 20, '#00FF66', '+4,05 M cr', ' font-weight="bold"') + t(500, 196, 12, '#c9f5da', '2 DIRECTIVES')
+            + '</svg>'
+            + '<div class="anvd-cmp"><div class="non"><b>SANS ALLER-RETOUR</b><span>L’aller fait avancer <u>une</u> directive, puis vous rentrez à vide ou pour des crédits seulement.</span></div>'
+            + '<div class="oui"><b>AVEC LA ROUTE DOUBLE</b><span>Le même trajet fait avancer <u>deux</u> directives : l’efficacité de l’escadron double, sans effort de plus.</span></div></div></div>';
+    }
+    function anvDouble2() {
+        return '<div class="anvd"><div class="anvd-ui"><div class="anvd-tg"><i></i><b>ALLER-RETOUR</b><span>← activez-le</span></div>'
+            + '<div class="anvd-rt"><div class="b"><b>★ ROUTE DOUBLE</b> · 2 directives en un seul voyage : #178 + #175</div>'
+            + '<div class="l a"><i>1 · ALLER</i><b>INDITE</b><span>fait monter <em>ICE STORM SQUADRON</em> (directive #178)</span></div>'
+            + '<div class="l r"><i>2 · RETOUR</i><b>ARGENT</b><span>fait aussi monter <em>ICE STORM SQUADRON</em> (directive #175)</span></div>'
+            + '<div class="bil"><small>BILAN DE L’ALLER-RETOUR · 704 t</small><b>+4,05 M cr</b></div></div></div></div>';
+    }
+
     function anvVisuel1() {
         return '<div class="anv-ecran"><div class="anv-cap">VOS MISSIONS · EXEMPLE</div><div class="anv-tete"><span>TES ACTIONS · AUJOURD’HUI</span></div>'
             + anvLigne('#2fe07a', 'BGS #1 · HAUSSE', '<b>AZURE PRIME</b> · FACTION ALPHA', anvJauge(46, 9, 0), '34,2 % <em style="color:#2fe07a">▲ +1,4</em>', anvPips([true, true, false, false]))
@@ -395,6 +476,16 @@
             '#edteam-annonce .anv-al .pt{animation:anvBlink var(--d,1s) ease-in-out infinite} #edteam-annonce .anv-al .rg{transform-box:fill-box;transform-origin:center;animation:anvPulse var(--d,1s) ease-out infinite}',
             '@media (max-width:900px){#edteam-annonce .anv-lg{grid-template-columns:110px minmax(0,1fr) 90px}#edteam-annonce .anv-lg .anv-jg,#edteam-annonce .anv-lg .anv-zb,#edteam-annonce .anv-lg .anv-pips{display:none}#edteam-annonce .anv-duo{grid-template-columns:1fr}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce .anv-al .pt,#edteam-annonce .anv-al .rg,#edteam-annonce .anv-leg i.clig,#edteam-annonce .anc-page{animation:none}}',
+            '#edteam-annonce .anvd-svg{width:100%;height:auto;display:block;background:radial-gradient(ellipse at 50% 50%,#08161a 0%,#04080a 75%);border:1px solid #14343a} #edteam-annonce .anvd-svg text{font-family:inherit}',
+            '#edteam-annonce .anvd-fl{stroke-dasharray:10 8;animation:anvdFl 1.1s linear infinite} @keyframes anvdFl{to{stroke-dashoffset:-18}}',
+            '#edteam-annonce .anvd-pl{transform-box:fill-box;transform-origin:center;animation:anvdPl 2.2s ease-in-out infinite} @keyframes anvdPl{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}',
+            '#edteam-annonce .anvd-cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;text-align:left;font-size:.82em} #edteam-annonce .anvd-cmp>div{padding:10px 14px;border:1px solid #2a3540;background:#0a0e12} #edteam-annonce .anvd-cmp b{display:block;letter-spacing:2px;font-size:.9em;margin-bottom:4px} #edteam-annonce .anvd-cmp .non b{color:#8a949c} #edteam-annonce .anvd-cmp .oui{border-color:#00FF66;background:rgba(0,255,102,.10)} #edteam-annonce .anvd-cmp .oui b{color:#00FF66} #edteam-annonce .anvd-cmp u{text-decoration:none;color:#fff;font-weight:bold}',
+            '#edteam-annonce .anvd-ui{max-width:760px;margin:0 auto;text-align:left;font-size:.84em} #edteam-annonce .anvd-tg{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:#9ab} #edteam-annonce .anvd-tg i{width:30px;height:16px;border-radius:9px;background:rgba(0,255,102,.35);position:relative;display:inline-block} #edteam-annonce .anvd-tg i:after{content:"";position:absolute;top:2px;left:16px;width:12px;height:12px;border-radius:50%;background:#00FF66} #edteam-annonce .anvd-tg b{color:#00FF66;letter-spacing:2px;font-weight:normal} #edteam-annonce .anvd-tg span{color:#FFD700}',
+            '#edteam-annonce .anvd-rt{border:2px solid #00FF66;background:linear-gradient(135deg,rgba(0,255,102,.14),#050806 70%);padding:12px 14px;animation:anvdGlow 2.2s ease-in-out infinite} @keyframes anvdGlow{0%,100%{box-shadow:0 0 0 rgba(0,255,102,0)}50%{box-shadow:0 0 22px rgba(0,255,102,.55)}}',
+            '#edteam-annonce .anvd-rt .b{padding:7px 10px;background:rgba(0,255,102,.16);border:1px solid #00FF66;color:#c9f5da;letter-spacing:1px;text-align:center} #edteam-annonce .anvd-rt .b b{color:#00FF66;font-weight:normal;animation:anvBlink 1.4s ease-in-out infinite}',
+            '#edteam-annonce .anvd-rt .l{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:10px;padding-left:10px;border-left:3px solid var(--j)} #edteam-annonce .anvd-rt .l.a{--j:#00F0FF} #edteam-annonce .anvd-rt .l.r{--j:#FFB000} #edteam-annonce .anvd-rt .l i{font-style:normal;color:var(--j);border:1px solid var(--j);padding:1px 8px;letter-spacing:2px;font-size:.85em} #edteam-annonce .anvd-rt .l b{color:#fff;font-weight:normal;letter-spacing:2px} #edteam-annonce .anvd-rt .l span{margin-left:auto;color:#00FF66} #edteam-annonce .anvd-rt .l em{font-style:normal;color:#FFD700}',
+            '#edteam-annonce .anvd-rt .bil{margin-top:12px;padding-top:8px;border-top:1px dashed rgba(0,255,102,.35)} #edteam-annonce .anvd-rt .bil small{display:block;color:#8a9;letter-spacing:2px;font-size:.8em} #edteam-annonce .anvd-rt .bil b{color:#00FF66;font-size:1.9em;font-weight:normal;letter-spacing:1px}',
+            '@media (max-width:900px){#edteam-annonce .anvd-cmp{grid-template-columns:1fr}} @media (prefers-reduced-motion:reduce){#edteam-annonce .anvd-fl,#edteam-annonce .anvd-pl,#edteam-annonce .anvd-rt,#edteam-annonce .anvd-rt .b b{animation:none}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce,#edteam-annonce .anc-boite{animation:none}}'
         ].join('\n');
         document.head.appendChild(st);
