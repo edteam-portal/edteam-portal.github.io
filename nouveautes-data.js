@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-aller-retour-type-station', date: '2026-10-24T16:00:00Z', type: 'NOUVEAU',
+        titre: 'Où vendre ? : aller-retour rentable et choix orbitale / planétaire',
+        texte: 'Les fenêtres « Où vendre ? », « Où vendre à perte ? » et « Route de contrebande » des directives ont deux nouveaux réglages. « STATIONS » : toutes (par défaut), orbitales (stations spatiales) ou planétaires (au sol), pour l’achat comme pour la vente. « ALLER-RETOUR » : ne garde que les routes dont le trajet retour est rentable, et affiche ce qu’il faut acheter à la station de la faction pour le revendre à la station d’achat, avec le bilan de la boucle (pour une vente à perte : le bénéfice du retour moins la perte). Le détail du retour n’existe que pour les stations relevées par Spansh. Dans l’onglet Commerce du tableau de bord : « Vendre ce que je transporte » propose aussi le type de station, et la feuille de route peut admettre les stations planétaires en plus des orbitales (Spansh ne sait pas les exiger seules).',
+        important: false
+    },
+    {
+        id: '2026-10-demande-mini-ou-vendre', date: '2026-10-24T14:00:00Z', type: 'AMELIORE',
+        titre: 'Où vendre ? : vendre même quand la station n’a plus de demande',
+        texte: 'Dans le jeu, tout bénéfice compte en influence, même si la station n’a plus de demande pour la marchandise. Les fenêtres « Où vendre ? » (hausse, élection) et « Où vendre à perte ? » (baisse) ont donc un nouveau réglage, « Demande mini à la vente » : 0 t par défaut (il clignote pour vous rappeler qu’il sert aux directives), puis 100, 500, 1 000 ou 2 000 t pour ne garder que les stations qui ont vraiment de la demande. À 0, la quantité n’est limitée que par votre soute et le stock à l’achat. Même idée dans l’onglet Commerce du tableau de bord : « Vendre ce que je transporte » a un réglage « Demande » (suffisante par défaut, ou 0).',
+        important: false
+    },
+    {
         id: '2026-10-ordre-systemes-campagne', date: '2026-10-24T11:30:00Z', type: 'AMELIORE',
         titre: 'Campagnes : l’Amiral choisit l’ordre des systèmes',
         texte: 'Dans une campagne de la page BGS, les systèmes restent classés par ordre alphabétique par défaut, mais l’Amiral peut maintenant les remettre dans l’ordre qu’il veut : il suffit de glisser une ligne (ou un système regroupé) au-dessus ou au-dessous d’un autre système de la même campagne. Tous les pilotes de l’escadron voient cet ordre, sur PC comme sur mobile. Les bandeaux de début et de fin de guerre ou d’élection sont aussi plus compacts sur téléphone.',

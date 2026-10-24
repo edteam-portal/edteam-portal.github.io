@@ -317,6 +317,7 @@
         .tb-regl .g { display:flex; flex-direction:column; gap:5px; }
         .tb-regl label { font-size:.72em; letter-spacing:2px; color:#8a9; }
         .tb-regl small { font-size:.72em; color:#667; }
+        .tb-dem { display:inline-flex; align-items:center; gap:8px; margin-left:10px; font-size:.82em; color:#889; letter-spacing:1px; } .tb-dem .tb-seg { align-self:center; }
         .tb-seg { display:inline-flex; border:1px solid #444; align-self:flex-start; }
         .tb-seg button { background:transparent; border:0; border-right:1px solid #333; color:#999; font:inherit; font-size:.95em; padding:6px 13px; cursor:pointer; }
         .tb-seg button:last-child { border:0; } .tb-seg button.on { background:rgba(0,240,255,.15); color:#00F0FF; box-shadow:inset 0 0 8px rgba(0,240,255,.25); }
@@ -1606,14 +1607,14 @@
         //  FEUILLE DE ROUTE : tournee de plusieurs etapes calculee a la demande chez Spansh (script SQL 78, rpc tournee_commerce)
         //  Le calcul prend ~1 min cote serveur : on relit toutes les 4 s. Resultat garde 30 min par le serveur (partage). Les durees sont des ESTIMATIONS.
         // ---------------------------------------------------------------
-        const REGL = { etapes: [4, 6, 8, 10].includes(Number(lire("edteam_tb_etapes"))) ? Number(lire("edteam_tb_etapes")) : 8, heures: Number(lire("edteam_tb_heures")) || 72, grande: lire("edteam_tb_grande") !== "0", saut: Number(lire("edteam_tb_saut")) || 0 };
+        const REGL = { etapes: [4, 6, 8, 10].includes(Number(lire("edteam_tb_etapes"))) ? Number(lire("edteam_tb_etapes")) : 8, heures: Number(lire("edteam_tb_heures")) || 72, grande: lire("edteam_tb_grande") !== "0", saut: Number(lire("edteam_tb_saut")) || 0, planetaires: lire("edteam_tb_planetaires") === "1" ? 1 : 0 };
         const TOURNEE = { statut: "vide", donnees: null, message: "", calcule: null, essais: 0, minuteur: null, jeton: 0, t0: lire("edteam_tb_t0") || null, regl: null };
         const CLE_STOCK = "edteam_tb_tournee", CLE_ATTENTE = "edteam_tb_attente";
         // un porte-vaisseaux (indicatif du type ABC-123) n'est pas un depart valable pour la recherche de tournee (Spansh ne trouve rien) : le serveur choisit alors la station la plus proche
         const estPorteVaisseaux = n => /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(String(n || "").trim().toUpperCase());
         const sautAuto = () => { const v = S && S.vaisseau && Number(S.vaisseau.saut); return v ? Math.max(8, Math.floor(v * 0.85)) : 30; };
         const sautUtilise = () => REGL.saut || sautAuto();
-        const reglCourants = () => ({ etapes: REGL.etapes, heures: REGL.heures, grande: REGL.grande, saut: sautUtilise() });
+        const reglCourants = () => Object.assign({ etapes: REGL.etapes, heures: REGL.heures, grande: REGL.grande, saut: sautUtilise() }, REGL.planetaires ? { planetaires: 1 } : {});
         const reglModifies = () => !!(TOURNEE.regl && JSON.stringify(TOURNEE.regl) !== JSON.stringify(reglCourants()));
         // la tournee calculee est GARDEE dans le navigateur (3 h) : un rechargement de la page ou un changement de reglage ne l'efface plus
         function sauverTournee() {
@@ -1653,7 +1654,7 @@
             if (jeton !== TOURNEE.jeton || !S) return;
             const so = S.soute || {};
             const args = { p_systeme: S.systeme, p_station: S.amarre && S.station && !estPorteVaisseaux(S.station) ? S.station : null, p_cap: Number(so.cap) || 100, p_capital: Number(S.credits) || 50000000,
-                p_saut: sautUtilise(), p_etapes: REGL.etapes, p_grande: REGL.grande, p_heures: REGL.heures };
+                p_saut: sautUtilise(), p_etapes: REGL.etapes, p_grande: REGL.grande, p_heures: REGL.heures, p_planetaires: !!REGL.planetaires };
             let r;
             try { r = await supabaseApp.rpc("tournee_commerce", args); } catch (e) { r = { error: { message: "Connexion impossible." } }; }
             if (jeton !== TOURNEE.jeton) return;
@@ -1708,7 +1709,8 @@
                 <div class="g"><label>NOMBRE D'ÉTAPES</label>${seg("etapes", [[4, "4"], [6, "6"], [8, "8"], [10, "10"]], REGL.etapes)}<small>8 ≈ 1 heure</small></div>
                 <div class="g"><label>RELEVÉS DES MARCHÉS</label>${seg("heures", [[24, "1 j"], [72, "3 j"], [168, "7 j"]], REGL.heures)}<small>âge maximal</small></div>
                 <div class="g"><label>PORTÉE DE SAUT</label>${seg("saut", [[20, "20"], [30, "30"], [40, "40"], [50, "50"]], saut, " al")}<small>${REGL.saut ? "réglée à la main" : (S && S.vaisseau && S.vaisseau.saut ? "lue dans le jeu" : "par défaut")}</small></div>
-                <div class="g"><label>PISTE</label><button type="button" class="tb-tg ${REGL.grande ? "on" : ""}" onclick="reglage('grande', ${!REGL.grande})"><i></i>GRANDE PISTE</button><small>vaisseaux de grande taille</small></div></div>`;
+                <div class="g"><label>PISTE</label><button type="button" class="tb-tg ${REGL.grande ? "on" : ""}" onclick="reglage('grande', ${!REGL.grande})"><i></i>GRANDE PISTE</button><small>vaisseaux de grande taille</small></div>
+                <div class="g"><label>STATIONS</label>${seg("planetaires", [[0, "ORBITALES"], [1, "+ PLANÉTAIRES"]], REGL.planetaires ? 1 : 0)}<small>Spansh ne sait pas exiger « planétaires seulement »</small></div></div>`;
         }
         const REGLOUV = { set: false, v: false };
         function basculerReglages(v) { REGLOUV.set = true; REGLOUV.v = !!v; if (typeof sonClic === "function") sonClic(); rendre(); }
@@ -1939,7 +1941,7 @@
         //  VENDRE CE QUE JE TRANSPORTE (script SQL 79, rpc vente_soute) : pour chaque marchandise en soute, les meilleures stations acheteuses autour du pilote,
         //  quelle que soit l'origine de la marchandise. Se lance TOUT SEUL quand la soute ou la position change (au plus une recherche toutes les 20 s) ; memoire de 15 min cote serveur.
         // ---------------------------------------------------------------
-        const VENTE = { statut: "vide", donnees: null, message: "", essais: 0, minuteur: null, relance: null, jeton: 0, sig: "", dernier: 0, enAttente: null, force: false, rayon: [20, 40, 80, 120].includes(Number(lire("edteam_tb_rayon"))) ? Number(lire("edteam_tb_rayon")) : 40 };
+        const VENTE = { statut: "vide", donnees: null, message: "", essais: 0, minuteur: null, relance: null, jeton: 0, sig: "", dernier: 0, enAttente: null, force: false, rayon: [20, 40, 80, 120].includes(Number(lire("edteam_tb_rayon"))) ? Number(lire("edteam_tb_rayon")) : 40, sansDemande: lire("edteam_tb_sdem") === "1", lieu: ["O", "P"].includes(lire("edteam_tb_lieu")) ? lire("edteam_tb_lieu") : "T" };
         const PALIERS_Q = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000];
         const palierQ = q => PALIERS_Q.find(p => p >= q) || 5000;
         // noms internes du journal qui ne se rapprochent pas tout seuls de ceux de Spansh (le prefixe « usscargo » est retire : usscargoblackbox -> blackbox)
@@ -1950,7 +1952,17 @@
         const sansCle = () => vendables().some(x => !x.k);
         function signatureVente() {
             const it = vendables().filter(x => x.k).map(x => cleSpansh(x.k) + ":" + palierQ(Number(x.q))).sort().join(",");
-            return it ? [S.systeme || "", REGL.heures, REGL.grande ? 1 : 0, VENTE.rayon, it].join("|") : "";
+            return it ? [S.systeme || "", REGL.heures, REGL.grande ? 1 : 0, VENTE.rayon, VENTE.sansDemande ? 1 : 0, VENTE.lieu, it].join("|") : "";
+        }
+        function lieuVente(v) {
+            VENTE.lieu = ["O", "P"].includes(v) ? v : "T"; ecrire("edteam_tb_lieu", VENTE.lieu);
+            if (typeof sonClic === "function") sonClic();
+            rendre();       // pas de recherche automatique : le bouton « chercher » relance
+        }
+        function demandeVente(v) {
+            VENTE.sansDemande = !!v; ecrire("edteam_tb_sdem", v ? "1" : "0");
+            if (typeof sonClic === "function") sonClic();
+            rendre();       // pas de recherche automatique : le bouton « chercher » relance
         }
         function rayonVente(v) {
             VENTE.rayon = v; ecrire("edteam_tb_rayon", String(v));
@@ -1986,7 +1998,7 @@
             if (jeton !== VENTE.jeton || !S) return;
             const items = vendables().filter(x => x.k).map(x => ({ k: cleSpansh(x.k), q: palierQ(Number(x.q)) }));
             let r;
-            try { r = await supabaseApp.rpc("vente_soute", { p_systeme: S.systeme, p_items: items, p_rayon: VENTE.rayon, p_grande: REGL.grande, p_heures: REGL.heures }); } catch (e) { r = { error: { message: "Connexion impossible." } }; }
+            try { r = await supabaseApp.rpc("vente_soute", { p_systeme: S.systeme, p_items: items, p_rayon: VENTE.rayon, p_grande: REGL.grande, p_heures: REGL.heures, p_sans_demande: VENTE.sansDemande, p_lieu: VENTE.lieu }); } catch (e) { r = { error: { message: "Connexion impossible." } }; }
             if (jeton !== VENTE.jeton) return;
             if (r.error || !r.data) { VENTE.statut = "ERREUR"; VENTE.message = (r.error && r.error.message) || "Réponse vide."; rendre(); return; }
             const j = r.data;
@@ -2002,6 +2014,7 @@
             const perime = !!(VENTE.donnees && VENTE.sig !== signatureVente());
             const enCours = VENTE.statut === "EN_COURS";
             const seg = `<span class="tb-seg">${[20, 40, 80, 120].map(v => `<button type="button" class="${v === VENTE.rayon ? "on" : ""}" onclick="rayonVente(${v})">${v}</button>`).join("")}</span>`;
+            const dem = `<span class="tb-dem" title="SUFFISANTE : seules les stations dont la demande couvre toute la quantité transportée. 0 : toute station qui liste la marchandise avec un prix de reprise, même sans demande (dans le jeu, tout bénéfice compte en influence).">DEMANDE <span class="tb-seg"><button type="button" class="${VENTE.sansDemande ? "" : "on"}" onclick="demandeVente(false)">SUFFISANTE</button><button type="button" class="${VENTE.sansDemande ? "on" : ""}" onclick="demandeVente(true)">0</button></span></span><span class="tb-dem" title="Type de station proposé : toutes, en orbite (stations spatiales) ou planétaires (au sol)">STATIONS <span class="tb-seg">${[["T", "TOUTES"], ["O", "ORBITALES"], ["P", "PLANÉTAIRES"]].map(x => `<button type="button" class="${VENTE.lieu === x[0] ? "on" : ""}" onclick="lieuVente('${x[0]}')">${x[1]}</button>`).join("")}</span></span>`;
             const bouton = `<button type="button" class="tb-btn" ${enCours || sansCle() ? "disabled" : ""} onclick="lancerVente()">${VENTE.donnees ? "↻ CHERCHER À NOUVEAU" : "▶ CHERCHER OÙ VENDRE"}</button>`;
             const puces = items.map(x => `<span class="tb-puce">${esc(x.n)} · ${fmtN(x.q)} t</span>`).join("");
             let corps = "";
@@ -2015,8 +2028,8 @@
                 const vieux = perime && !enCours ? `<div class="tb-banner">La soute, la position ou les réglages ont changé depuis la dernière recherche : cliquez sur « CHERCHER À NOUVEAU ».</div>` : "";
                 corps += maj + vieux + items.filter(x => x.k).map(x => blocMarchandise(x, res[cleSpansh(x.k)])).join("");
             }
-            return `<div class="bloc or"${enPlace ? ' style="margin-bottom:12px;"' : ""}><h2>${enPlace ? "VENDRE MES SOUTES" : "VENDRE CE QUE JE TRANSPORTE"}${enPlace ? "" : ` <em>autour de ${cp(S.systeme || "?")} · ${seg} al</em>`}</h2>${enPlace ? selecteurMode() + `<div class="tb-rayon"><span>RECHERCHE AUTOUR DE <b>${cp(S.systeme || "?")}</b></span>${seg}<span>al</span></div>` : ""}<div class="tb-barre" style="margin-bottom:10px;padding-bottom:10px;"><span class="tb-mut" style="font-size:.85em;">à utiliser quand vous ne savez pas où vendre une marchandise</span><div class="tb-cta">${bouton}</div></div>${corps}
-                ${noteRepliee("vente", "COMMENT LES STATIONS SONT CHOISIES", `<div class="bloc-note">Meilleures stations qui <b>achètent</b> chaque marchandise de la soute (demande suffisante pour toute la quantité), d'après les relevés des joueurs de moins de ${REGL.heures === 24 ? "1 jour" : REGL.heures / 24 + " jours"} (réglage de la feuille de route). Les prix sont ceux du relevé indiqué : vérifiez-les à l'arrivée.</div>`)}</div>`;
+            return `<div class="bloc or"${enPlace ? ' style="margin-bottom:12px;"' : ""}><h2>${enPlace ? "VENDRE MES SOUTES" : "VENDRE CE QUE JE TRANSPORTE"}${enPlace ? "" : ` <em>autour de ${cp(S.systeme || "?")} · ${seg} al · ${dem}</em>`}</h2>${enPlace ? selecteurMode() + `<div class="tb-rayon"><span>RECHERCHE AUTOUR DE <b>${cp(S.systeme || "?")}</b></span>${seg}<span>al</span>${dem}</div>` : ""}<div class="tb-barre" style="margin-bottom:10px;padding-bottom:10px;"><span class="tb-mut" style="font-size:.85em;">à utiliser quand vous ne savez pas où vendre une marchandise</span><div class="tb-cta">${bouton}</div></div>${corps}
+                ${noteRepliee("vente", "COMMENT LES STATIONS SONT CHOISIES", `<div class="bloc-note">Meilleures stations qui <b>achètent</b> chaque marchandise de la soute (par défaut avec une demande suffisante pour toute la quantité ; réglage « DEMANDE » : 0 pour proposer aussi les stations sans demande), d'après les relevés des joueurs de moins de ${REGL.heures === 24 ? "1 jour" : REGL.heures / 24 + " jours"} (réglage de la feuille de route). Les prix sont ceux du relevé indiqué : vérifiez-les à l'arrivée.</div>`)}</div>`;
         }
         function blocMarchandise(x, r) {
             const q = Number(x.q) || 0, paye = Number(x.paye) || 0;
@@ -2027,10 +2040,10 @@
             if (!c.length) return `<div class="tb-vm">${tete}<div class="rien">Aucune station proche n'achète ${fmtN(q)} t de ${esc(x.n)} dans ce rayon avec ces relevés. Essayez un rayon plus grand ou des relevés plus anciens.</div></div>`;
             const lignes = c.slice(0, 4).map((s, i) => {
                 const total = s.prix * q, gain = paye ? (s.prix - paye) * q : null;
-                return `<div class="cd${i === 0 ? " best" : ""}"><span class="st"><b>${cp(s.station)}</b><small>${cp(s.systeme)} · ${s.distance > 0 ? esc(String(s.distance)) + " al" : "même système"} · ${fmtN(s.arrivee)} Ls${s.grande ? "" : " · petite piste"}</small></span>
+                return `<div class="cd${i === 0 ? " best" : ""}"><span class="st"><b>${cp(s.station)}</b><small>${cp(s.systeme)} · ${s.distance > 0 ? esc(String(s.distance)) + " al" : "même système"} · ${fmtN(s.arrivee)} Ls · ${s.planetaire ? "planétaire" : "orbitale"}${s.grande ? "" : " · petite piste"}</small></span>
                     <span class="px">${fmtN(s.prix)} <small>cr/t</small></span>
                     <span class="gn"><b class="tb-up">${fmtM(total)}</b><small>${gain === null ? "pour " + fmtN(q) + " t" : (gain >= 0 ? "+ " : "− ") + fmtM(Math.abs(gain)) + " vs payé"}</small></span>
-                    <span class="ag"><small>demande ${fmtN(s.demande)} t</small>${fraicheur(s.maj)}</span></div>`;
+                    <span class="ag"><small>demande ${fmtN(s.demande)} t${(Number(s.demande) || 0) < q ? "<br>le bénéfice compte quand même" : ""}</small>${fraicheur(s.maj)}</span></div>`;
             }).join("");
             return `<div class="tb-vm">${tete}${lignes}</div>`;
         }
