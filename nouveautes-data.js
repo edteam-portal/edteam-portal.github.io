@@ -7,7 +7,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-balayage-zone-ou-vendre', date: '2026-10-24T18:00:00Z', type: 'AMELIORE',
         titre: 'Où vendre ? : toute la zone est examinée, les prix inhabituels sont signalés',
-        texte: 'Pour les rayons de 15, 20 et 40 al, « Où vendre ? » et « Où vendre à perte ? » lisent maintenant d’un coup les marchés de toutes les stations récentes de la zone et calculent la marge exacte de chaque marchandise, au lieu de ne regarder que les marchandises les mieux payées : de bonnes routes jusque-là manquées apparaissent, et les routes proposées sont mieux classées. Quand un prix est très différent de la médiane de la zone (un état, une pénurie, un relevé ancien), une pastille « PRIX INHABITUEL » le signale : la route reste proposée, à vous de vérifier en jeu. Les rayons plus grands gardent l’ancienne recherche.',
+        texte: 'Pour les rayons de 15 et 20 al (20 al est maintenant le rayon proposé par défaut), « Où vendre ? » et « Où vendre à perte ? » lisent maintenant d’un coup les marchés de toutes les stations récentes de la zone et calculent la marge exacte de chaque marchandise, au lieu de ne regarder que les marchandises les mieux payées : de bonnes routes jusque-là manquées apparaissent, et les routes proposées sont mieux classées. Quand un prix est très différent de la médiane de la zone (un état, une pénurie, un relevé ancien), une pastille « PRIX INHABITUEL » le signale : la route reste proposée, à vous de vérifier en jeu. Les rayons plus grands gardent l’ancienne recherche.',
         important: false
     },
     {

@@ -121,7 +121,7 @@
     }`;
 
     const STOCKS = [100, 500, 1000, 2000], RAYONS = [15, 20, 40, 80, 120, 200], DEMANDES = [0, 100, 500, 1000, 2000];
-    const etat = { mode: 'commerce', type: 'HAUSSE', ordre: null, systeme: '', faction: '', rayon: 40, heures: (() => { const v = parseInt(lire('edteam_com_h') || '', 10); return [24, 168, 4320].includes(v) ? v : (lire('edteam_com_h24') === '1' ? 24 : 168); })(), stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), demande: (() => { const v = parseInt(lire('edteam_com_dem') || '0', 10); return DEMANDES.includes(v) ? v : 0; })(), lieu: (() => { const v = lire('edteam_com_lieu'); return v === 'O' || v === 'P' ? v : 'T'; })(), retour: lire('edteam_com_ar') === '1', donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
+    const etat = { mode: 'commerce', type: 'HAUSSE', ordre: null, systeme: '', faction: '', rayon: 20, heures: (() => { const v = parseInt(lire('edteam_com_h') || '', 10); return [24, 168, 4320].includes(v) ? v : (lire('edteam_com_h24') === '1' ? 24 : 168); })(), stock: (() => { const v = parseInt(lire('edteam_com_stock') || '100', 10); return [100, 500, 1000, 2000].includes(v) ? v : 100; })(), demande: (() => { const v = parseInt(lire('edteam_com_dem') || '0', 10); return DEMANDES.includes(v) ? v : 0; })(), lieu: (() => { const v = lire('edteam_com_lieu'); return v === 'O' || v === 'P' ? v : 'T'; })(), retour: lire('edteam_com_ar') === '1', donnees: null, statut: '', message: '', calc: null, essais: 0, minuteur: null, jeton: 0 };
     const prefs = {
         soute: () => Math.max(10, Math.min(5000, parseInt(lire('edteam_com_soute') || '200', 10) || 200)),
         grande: () => lire('edteam_com_grande') !== '0',
@@ -458,7 +458,7 @@
         ouvrir(ordreId, systeme, faction, mode, type) {
             if (typeof sonClic === 'function') sonClic();
             Object.assign(etat, { type: type === 'ELECTION' ? 'ELECTION' : mode === 'commerce' ? 'HAUSSE' : 'BAISSE', mode: mode === 'contrebande' ? 'contrebande' : mode === 'perte' ? 'perte' : 'commerce', ordre: ordreId, systeme: systeme || '', faction: faction || '', donnees: null, statut: 'EN_COURS', message: '', essais: 0, calc_le: null });
-            if (!RAYONS.includes(etat.rayon)) etat.rayon = 40;
+            if (!RAYONS.includes(etat.rayon)) etat.rayon = 20;
             if (!STOCKS.includes(etat.stock)) etat.stock = 100;
             if (!DEMANDES.includes(etat.demande)) etat.demande = 0;
             rendre(); charger();
