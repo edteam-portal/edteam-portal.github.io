@@ -56,8 +56,8 @@
         + ".cev .tampon{border:2px solid var(--c);color:var(--c);padding:3px 10px;letter-spacing:3px;font-size:13px;font-weight:bold;transform:rotate(-4deg);animation:cev-cachet .5s cubic-bezier(.2,1.6,.4,1) both;flex:none}"
         + "@keyframes cev-cachet{from{transform:rotate(-4deg) scale(2.3);opacity:0}to{transform:rotate(-4deg) scale(1);opacity:1}}"
         + ".cev.lose.perdue{filter:saturate(.35);animation:cev-glitch 7s steps(1) infinite}@keyframes cev-glitch{0%,95%,100%{transform:none}96%{transform:translateX(-3px)}97%{transform:translateX(3px) skewX(-2deg)}98%{transform:none}}"
-        + ".cev.m{padding:9px 11px;gap:10px;flex-wrap:wrap}.cev.m .t{font-size:12.5px;letter-spacing:2px}.cev.m .ico{font-size:20px}.cev.m .s{font-size:10.5px}.cev.m .score{font-size:16px}.cev.m .tampon{font-size:11px;padding:2px 8px}.cev.m .fin{display:none}"
-        + "@media (max-width:760px){.cev{flex-wrap:wrap}.cev .cta{width:100%}}"
+        + ".cev .aside{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}.cev .s .l{display:block}.cev.m{padding:8px 10px;gap:9px}.cev.m .aside{gap:4px}.cev.m .s{margin-top:2px;line-height:1.35}.cev.m .s .l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cev.m .src{display:none}.cev.m .t{font-size:12.5px;letter-spacing:2px}.cev.m .ico{font-size:20px}.cev.m .s{font-size:10.5px}.cev.m .score{font-size:16px}.cev.m .tampon{font-size:11px;padding:2px 8px}.cev.m .fin{display:none}"
+        + "@media (max-width:760px){.cev:has(.cta){flex-wrap:wrap}.cev .cta{width:100%}}"
         + "@media (prefers-reduced-motion:reduce){.cev,.cev *,.cev::before{animation:none!important}}";
     function css() { if (document.getElementById("cev-css")) return; var st = document.createElement("style"); st.id = "cev-css"; st.textContent = CSS; document.head.appendChild(st); }
 
@@ -89,7 +89,7 @@
             var cta = opts.commande && passer && !opts.mobile ? "<button type=\"button\" class=\"cta\" onclick=\"event.stopPropagation(); EdteamConflitEvt.passer(" + Number(o.id) + ",'" + (guerre ? "GUERRE" : "ELECTION") + "')\">PASSER EN " + (guerre ? "GUERRE" : "ÉLECTION") + "</button>" : "";
             if (!guerre) haut = BULLETINS.map(function (b) { return "<span class=\"bul\" style=\"left:" + b[0] + ";animation-delay:" + b[1] + "\"></span>"; }).join("");
             h = "<div class=\"" + cls + " " + (guerre ? "war" : "vote") + "\">" + haut + "<span class=\"ico\">" + ico + "</span><div class=\"tx\"><div class=\"t\">" + titre + "</div>"
-                + "<div class=\"s\">" + lieu + " · <b>" + fac + "</b> · détectée " + quand + " (" + src + ") · directive en cours : <b>" + typeFr + " #" + Number(o.id) + "</b></div></div>" + cta + "<span class=\"fin\">jusqu’au tick</span></div>";
+                + "<div class=\"s\"><span class=\"l\">" + lieu + " · <b>" + fac + "</b></span><span class=\"l\">détectée " + quand + "<span class=\"src\"> (" + src + ")</span> · directive : <b>" + typeFr + " #" + Number(o.id) + "</b></span></div></div>" + cta + "<span class=\"fin\">jusqu’au tick</span></div>";
             return h;
         }
         // FIN : resultat d'apres le dernier score releve
@@ -102,7 +102,7 @@
         else if (perdue) { t = nom + (guerre ? " PERDUE" : " PERDUE"); cl = "lose perdue"; tampon = "<span class=\"tampon\">DÉFAITE</span>"; sousRes = "d’après le dernier score relevé"; }
         else { t = nom + " TERMINÉE"; cl = "lose"; sousRes = "résultat non confirmé" + (pour != null ? " : dernier score relevé " + Number(pour) + " – " + Number(contre) : " : aucun score relevé"); }
         return "<div class=\"" + cls + " " + cl + "\">" + haut + "<span class=\"ico\">" + (gagnee && !cible ? "🏆" : ico) + "</span><div class=\"tx\"><div class=\"t\">" + t + "</div>"
-            + "<div class=\"s\">" + lieu + " · <b>" + fac + "</b>" + adv + " · " + sousRes + " · détectée " + quand + " (" + src + ")</div></div>" + (cible ? "" : score) + tampon + "<span class=\"fin\">jusqu’au tick</span></div>";
+            + "<div class=\"s\"><span class=\"l\">" + lieu + " · <b>" + fac + "</b>" + adv + "</span><span class=\"l\">" + sousRes + " · " + quand + "<span class=\"src\"> (" + src + ")</span></span></div></div>" + (score || tampon ? "<div class=\"aside\">" + (cible ? "" : score) + tampon + "</div>" : "") + "<span class=\"fin\">jusqu’au tick</span></div>";
     }
 
     // bouton du commandement : ouvre l'edition de la directive avec le type propose
