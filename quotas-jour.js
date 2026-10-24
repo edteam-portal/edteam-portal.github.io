@@ -81,11 +81,19 @@
     // une icone par activite de la directive (hausse : missions, economie, securite, science ; baisse : meurtres, contrebande, echecs) ; elle se remplit avec la progression du jour, un ✓ quand le volume efficace du tick est atteint
     function pips(ordre, entree) {
         const L = lignes(ordre.type_ordre, entree); if (!L) return ""; css2();
-        return "<span class=\"qj-pips\">" + L.map(l => {
+        // directive de BAISSE : une icone « ventes a perte » s'intercale avant les echecs (pas de quota : elle s'allume des qu'une vente a perte a ete faite depuis le dernier tick)
+        const vp = String(ordre.type_ordre || "").toUpperCase() === "BAISSE" ? (() => {
+            const x = perte(entree), fait = x.s > 0, c = "#ff9f43";
+            const tip = "📉 VENTES À PERTE (marché de la faction)\nTa perte depuis le dernier tick : " + cr(x.s) + " (" + x.n + " vente" + (x.n > 1 ? "s" : "") + ").\n" + (fait ? "✓ Chaque vente à perte compte pour ton rang et fait baisser la faction. Pas de quota." : "Aucune vente à perte pour l'instant : vends moins cher que ton prix d'achat dans une station de la faction (bouton « Où vendre à perte ? »).");
+            return "<span class=\"qj-pip" + (fait ? " p" : "") + "\" style=\"--c:" + c + "\" data-tip=\"" + E(tip) + "\" data-tc=\"" + c + "\"><s style=\"width:" + (fait ? 100 : 0) + "%\"></s><span>📉</span></span>";
+        })() : "";
+        const cases = L.map(l => {
             const M = META[l.ty], ok = l.q > 0 && l.s >= l.q, pc = l.q > 0 ? Math.min(100, Math.round(100 * l.s / l.q)) : 0;
             const tip = M.titre + "\nTon action depuis le dernier tick : " + val(l.ty, l.s) + " sur " + val(l.ty, l.q) + " d'effet plein.\n" + (ok ? "✓ Plein effet atteint : le surplus compte pour ton rang." : "Encore ~" + val(l.ty, l.reste) + " avant que l'effet diminue.");
             return "<span class=\"qj-pip" + (ok ? " ok" : pc > 0 ? " p" : "") + "\" style=\"--c:" + M.ch + "\" data-tip=\"" + E(tip) + "\" data-tc=\"" + M.ch + "\"><s style=\"width:" + pc + "%\"></s><span>" + (ok ? "✓" : M.e) + "</span></span>";
-        }).join("") + "</span>";
+        });
+        if (vp) cases.splice(Math.min(2, cases.length), 0, vp);
+        return "<span class=\"qj-pips\">" + cases.join("") + "</span>";
     }
 
     // ---------------- MESURES NEUTRES (SQL 111) ----------------
