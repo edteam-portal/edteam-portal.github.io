@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-croises-ennemi-journal-allege', date: '2026-10-24T20:00:00Z', type: 'AMELIORE',
+        titre: 'Joueurs croisés : filtre ENNEMI ; journal tactique allégé',
+        texte: 'Dans la fenêtre des joueurs croisés (QG, onglet Combat et mobile), un nouveau filtre « ENNEMI » n’affiche que les joueurs en rouge : camp rival, recherchés et primes. Le journal tactique est aussi plus lisible : plus de ligne quand un pilote espionne un système de la liste (le point BGS et la ligne du journal des exploits restent) et plus de ligne quand le vaisseau scanné est celui d’un membre de l’escadron. Ces scans de membres ne comptent plus non plus dans le journal des exploits, ni pour la distinction L’ESPION.',
+        important: false
+    },
+    {
         id: '2026-10-balayage-zone-ou-vendre', date: '2026-10-24T18:00:00Z', type: 'AMELIORE',
         titre: 'Où vendre ? : toute la zone est examinée, les prix inhabituels sont signalés',
         texte: 'Pour les rayons de 15 et 20 al (20 al est maintenant le rayon proposé par défaut), « Où vendre ? » et « Où vendre à perte ? » lisent maintenant d’un coup les marchés de toutes les stations récentes de la zone et calculent la marge exacte de chaque marchandise, au lieu de ne regarder que les marchandises les mieux payées : de bonnes routes jusque-là manquées apparaissent, et les routes proposées sont mieux classées. Quand un prix est très différent de la médiane de la zone (un état, une pénurie, un relevé ancien), une pastille « PRIX INHABITUEL » le signale : la route reste proposée, à vous de vérifier en jeu. Les rayons plus grands gardent l’ancienne recherche.',

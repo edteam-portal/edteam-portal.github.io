@@ -73,7 +73,7 @@
     function filtrer() {
         const q = ST.q.trim().toLowerCase();
         return (ST.liste || []).filter(x => (!q || [x.n, x.sl, x.s, x.rg, x.f, x.e, x.pw, x.sys, x.par].some(v => String(v || '').toLowerCase().includes(q)))
-            && (ST.f === 'tous' || (ST.f === 'recherches' && estRecherche(x)) || (ST.f === 'revus' && x.nb > 1) || (ST.f === 'escadron' && x.e)));
+            && (ST.f === 'tous' || (ST.f === 'ennemi' && ton(x) === 'r') || (ST.f === 'recherches' && estRecherche(x)) || (ST.f === 'revus' && x.nb > 1) || (ST.f === 'escadron' && x.e)));
     }
     function carte(x, i) {
         const t = ton(x);
@@ -90,7 +90,7 @@
         el.innerHTML = '<div class="cm-hero"><small>COMBAT · ESCADRON</small><div class="n">' + FR(ST.total) + '</div><div class="s">joueur' + (ST.total > 1 ? 's' : '') + ' verrouillé' + (ST.total > 1 ? 's' : '') + ' par l’escadron' + (L.length ? ' · dernier ' + il(L[0].d) : '') + '</div>'
             + '<div class="cm-tl"><div><i>7 JOURS</i><b>' + FR(sem) + semPlus + '</b></div><div class="r"><i>RECHERCHÉS</i><b>' + FR(rech) + '</b></div><div><i>REVUS</i><b>' + FR(revus) + '</b></div></div></div>'
             + '<div class="xsearch" style="margin-top:12px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="cm-q" maxlength="60" placeholder="Nom, vaisseau, faction, escadron…" value="' + E(ST.q) + '" oninput="croisesMobile.filtre(this.value)"></div>'
-            + '<div class="cm-fl" id="cm-fl" style="margin-top:10px">' + [['tous', 'TOUS'], ['recherches', 'RECHERCHÉS'], ['revus', 'REVUS'], ['escadron', 'AVEC ESCADRON']].map(f => '<button data-f="' + f[0] + '" class="' + (ST.f === f[0] ? 'on' : '') + '" onclick="croisesMobile.cat(\'' + f[0] + '\')">' + f[1] + '</button>').join('') + '</div>'
+            + '<div class="cm-fl" id="cm-fl" style="margin-top:10px">' + [['tous', 'TOUS'], ['ennemi', 'ENNEMI'], ['recherches', 'RECHERCHÉS'], ['revus', 'REVUS'], ['escadron', 'AVEC ESCADRON']].map(f => '<button data-f="' + f[0] + '" class="' + (ST.f === f[0] ? 'on' : '') + '" onclick="croisesMobile.cat(\'' + f[0] + '\')">' + f[1] + '</button>').join('') + '</div>'
             + '<div id="cm-liste" style="display:flex;flex-direction:column;gap:9px;margin-top:12px"></div>'
             + '<div class="cm-bas" style="margin-top:12px"><span id="cm-maj"></span><button type="button" onclick="croisesMobile.ouvrir(true)">ACTUALISER</button></div>'
             + '<div class="cm-note" style="margin-top:10px">Joueurs que les pilotes de l’escadron ont verrouillés dans l’onglet Combat, conservés 30 jours. Les ' + LIMITE + ' derniers sont affichés. Statut légal, prime et puissance n’apparaissent qu’après un scan complet.</div>';

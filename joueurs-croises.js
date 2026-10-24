@@ -217,7 +217,7 @@
     function filtrer() {
         const q = ST.q.trim().toLowerCase();
         let L = ST.liste.filter(x => (!q || [x.n, x.sl, x.s, x.rg, x.f, x.e, x.pw, x.sys, x.par].some(v => String(v || '').toLowerCase().includes(q)))
-            && (ST.filtre === 'tous' || (ST.filtre === 'recherches' && estRecherche(x)) || (ST.filtre === 'revus' && x.nb > 1) || (ST.filtre === 'escadron' && x.e)));
+            && (ST.filtre === 'tous' || (ST.filtre === 'ennemi' && tonDe(x) === 'r') || (ST.filtre === 'recherches' && estRecherche(x)) || (ST.filtre === 'revus' && x.nb > 1) || (ST.filtre === 'escadron' && x.e)));
         return L.slice().sort(ST.tri === 'nb' ? (a, b) => (b.nb - a.nb) || (b.d - a.d) : (a, b) => b.d - a.d);
     }
     function holo(x, i, grand) {
@@ -275,7 +275,7 @@
         m.innerHTML = '<div class="jc-p" role="dialog" aria-modal="true"><div class="jc-h"><div><small>COMBAT · ESCADRON</small><b>JOUEURS CROISÉS</b></div><button type="button" class="jc-x" onclick="JCroises.fermer()">FERMER</button></div>'
             + '<div class="jc-st" id="jc-st"></div>'
             + '<div class="jc-b"><input id="jc-q" class="jc-q" type="search" placeholder="Filtrer : nom, vaisseau, faction, escadron, système…" oninput="JCroises.filtre(this.value)">'
-            + '<div class="jc-f"><button type="button" class="on" onclick="JCroises.cat(\'tous\',this)">TOUS</button><button type="button" onclick="JCroises.cat(\'recherches\',this)">RECHERCHÉS</button><button type="button" onclick="JCroises.cat(\'revus\',this)">REVUS</button><button type="button" onclick="JCroises.cat(\'escadron\',this)">AVEC ESCADRON</button></div>'
+            + '<div class="jc-f"><button type="button" class="on" onclick="JCroises.cat(\'tous\',this)">TOUS</button><button type="button" title="Camp rival, recherchés et primes : uniquement les rouges" onclick="JCroises.cat(\'ennemi\',this)">ENNEMI</button><button type="button" onclick="JCroises.cat(\'recherches\',this)">RECHERCHÉS</button><button type="button" onclick="JCroises.cat(\'revus\',this)">REVUS</button><button type="button" onclick="JCroises.cat(\'escadron\',this)">AVEC ESCADRON</button></div>'
             + '<select class="jc-s" onchange="JCroises.tri(this.value)"><option value="recent">Les plus récents</option><option value="nb">Les plus croisés</option></select><span class="jc-n" id="jc-n"></span></div>'
             + '<div class="jc-c" id="jc-c"><div class="jc-vide">Chargement…</div></div>'
             + '<div class="jc-note">Joueurs que les pilotes de l’escadron ont verrouillés dans l’onglet Combat. Une fiche par joueur, conservée 30 jours après la dernière fois qu’il est croisé. Les membres de l’escadron n’y figurent pas. Statut légal et prime n’apparaissent qu’après un scan assez long. Rouge : camp rival (puissance d’un autre camp que la vôtre : Fédération, Empire, Alliance ; deux puissances indépendantes différentes sont rivales), recherché ou prime · vert : allié, même puissance ou même camp · bleu : neutre ou puissance inconnue.</div></div>';
