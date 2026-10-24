@@ -28,6 +28,13 @@ function injecterArchitectureGlobale() {
     }
     const path = window.location.pathname;
     const page = path.split("/").pop() || "index.html";
+    // bouton « ALERTE COMBAT » du menu : il CLIGNOTE DISCRETEMENT (orange, lent) tant que l'alerte n'est pas activee, pour que le pilote comprenne qu'un joueur verrouille ne sera pas signale ; pastille : grise = desactivee, verte = active, orange = en veille
+    if (!document.getElementById('nav-alerte-css')) {
+        const sa = document.createElement('style'); sa.id = 'nav-alerte-css';
+        sa.textContent = "#nav-alerte .nav-text { font-size: .8em; letter-spacing: 1px; } #nav-alerte .al-pt { position: absolute; right: -4px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: #55606a; border: 1px solid #0b0b0b; } #nav-alerte .al-pt.on { background: #00FF66; box-shadow: 0 0 7px #00FF66; } #nav-alerte .al-pt.ve { background: #FF9A1F; } #nav-alerte.al-off .nav-icon svg { color: #FF9A1F; animation: alNavPulse 2.4s ease-in-out infinite; } #nav-alerte.al-off .nav-text { color: #d9a25a; } @keyframes alNavPulse { 0%, 100% { opacity: 1; filter: none; } 50% { opacity: .4; filter: drop-shadow(0 0 6px #FF9A1F); } } @media (prefers-reduced-motion: reduce) { #nav-alerte.al-off .nav-icon svg { animation: none; } }";
+        document.head.appendChild(sa);
+    }
+    let alerteOn = false; try { const oa = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); alerteOn = !!(oa && oa.on && !oa.veille); } catch (e) {}
 
     // Pilote sans escadron : BGS et Escadron restent visibles (avec un cadenas) et ouvrent une page de presentation (vitrine-module.js)
     let indep = false; try { indep = localStorage.getItem('edteam_independant') === 'true'; } catch (e) {}
@@ -77,6 +84,10 @@ function injecterArchitectureGlobale() {
             <span class="nav-text">PHOTOS DES PILOTES</span>
         </a>
         <div id="nav-bas">
+        ${page === 'tableau-de-bord.html' ? '' : `<a href="#" id="nav-alerte" class="nav-link${alerteOn ? '' : ' al-off'}" data-alerte-menu title="Alerte combat : quand elle est désactivée, EDTEAM ne vous signale pas qu'un joueur est verrouillé en jeu, et vous ne pourrez pas le scanner. Cliquez pour l'activer (valable pour la session de jeu en cours)." onclick="event.preventDefault(); if (typeof edteamAlerteBasculer === 'function') edteamAlerteBasculer()" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;"><svg viewBox="0 0 24 24"><path d="M12 3l9.5 17h-19z"></path><line x1="12" y1="10" x2="12" y2="14.5"></line><circle cx="12" cy="17.2" r=".6"></circle></svg><span class="al-pt${alerteOn ? ' on' : ''}" data-alerte-point></span></div>
+            <span class="nav-text" data-alerte-label>ALERTE COMBAT · ${alerteOn ? 'ON' : 'OFF'}</span>
+        </a>`}
         <a href="#" id="nav-nouveautes" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);" onclick="event.preventDefault(); if(typeof edteamOuvrirNouveautes==='function') edteamOuvrirNouveautes()" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'NOUVEAUTÉS<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Ce qui vient d\\'être ajouté à EDTEAM</span>', '#FFD700')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
             <div class="nav-icon" style="position: relative;"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="ft-point" style="display: none; position: absolute; top: -3px; right: -4px; width: 9px; height: 9px; border-radius: 50%; background: #FF7100; box-shadow: 0 0 8px #FF7100;"></span></div>
             <span class="nav-text">NOUVEAUTÉS</span>

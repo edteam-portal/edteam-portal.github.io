@@ -310,6 +310,27 @@
             lien: 'bgs.html',
             mobile: false
         }
+        ,{
+            id: 'alerte-combat-menu-2026-10',
+            couleur: '#00F0FF',
+            etiquette: '★ À CONNAÎTRE',
+            titre: 'L’ALERTE COMBAT : NE RATEZ PLUS UN SCAN',
+            sous: 'Un cadre clignotant sur votre second écran dès qu’un joueur est verrouillé',
+            intro: 'Quand vous verrouillez un joueur en jeu, EDTEAM vous le signale <b>sur la page où vous êtes</b> : un cadre clignotant et un bip. Un clic ouvre l’onglet Combat, et <b>scanner ce joueur fait gagner un point de renseignement</b> (distinction L’ESPION) s’il n’est pas de votre escadron. Le bouton est dans le <b>menu latéral</b>.',
+            visuel: function () { return Promise.resolve(anvAlerte()); },
+            colonnes: 3,
+            etapes: [
+                { n: '1', t: 'ACTIVEZ-LA', d: 'Dans le menu de gauche, <b style="color:#FF9A1F">ALERTE COMBAT clignote doucement en orange</b> tant qu’elle est désactivée : cliquez dessus, la pastille passe au vert. Si votre jeu n’est pas détecté, un message vous dit quoi lancer (EDMC et le jeu). À refaire à chaque nouvelle session de jeu.' },
+                { n: '2', t: 'JOUEZ', d: 'Quand vous verrouillez un joueur, un cadre clignote au milieu de la page où vous êtes (second écran, tablette ou autre onglet), avec un bip.' },
+                { n: '3', t: 'UN CLIC', d: 'Le clic ouvre le Combat avec la fiche du joueur, son vaisseau et son camp. Le tableau de bord, lui, bascule tout seul sur le Combat.' }
+            ],
+            avis: '<b>Aucun coût tant qu’elle est désactivée.</b> Elle ne vaut que pour la session de jeu en cours, avec EDMC et le jeu lancés. Le bip est fiable dans l’application EDTEAM installée ; dans un simple navigateur il peut rester muet, le cadre clignotant s’affiche toujours.',
+            cta: 'ACTIVER L’ALERTE MAINTENANT',
+            aide: 'Menu latéral · ALERTE COMBAT · à utiliser sur PC ou tablette',
+            action: function () { if (typeof window.edteamAlerteBasculer === 'function') window.edteamAlerteBasculer(); },
+            escadron: false,
+            mobile: false
+        }
     ];
 
     // ---- visuels de l'annonce « lifting BGS / Powerplay » : dessines en HTML / SVG (aucune capture d'ecran, aucune donnee reelle ; noms et chiffres fictifs) ----
@@ -334,6 +355,15 @@
     }
     function anvTuile(k, t, v, s) { return '<div class="anv-ti" style="--k:' + k + '"><small>' + t + '</small><b>' + v + '</b><span>' + s + '</span></div>'; }
     // ---- visuels de l'annonce « route double » : dessines en HTML / SVG (noms et chiffres fictifs) ----
+    // ---- visuel de l'annonce « alerte combat » : menu lateral + cadre d'alerte (HTML, noms fictifs) ----
+    function anvAlerte() {
+        return '<div class="anva"><div class="anva-menu"><div class="anva-it">QUARTIER GÉNÉRAL</div><div class="anva-it">TABLEAU DE BORD</div><div class="anva-it">ENGAGEMENT</div>'
+            + '<div class="anva-it hot"><span class="ic">⚠<i></i></span>ALERTE COMBAT<em>← ici</em></div><div class="anva-it">NOUVEAUTÉS</div></div>'
+            + '<div class="anva-fl">►</div>'
+            + '<div class="anva-bt"><b>⚠ JOUEUR VERROUILLÉ</b><span>CMDR DEMO · ANACONDA MK II</span><small>Cliquez : ouvrir le Combat</small></div></div>';
+    }
+
+
     function anvDouble1() {
         var t = function (x, y, s, c, txt, extra) { return '<text x="' + x + '" y="' + y + '" text-anchor="middle" fill="' + c + '" font-size="' + s + '" letter-spacing="1.5"' + (extra || '') + '>' + txt + '</text>'; };
         var noeud = function (x, nom, sous, dir, coul) {
@@ -486,6 +516,9 @@
             '#edteam-annonce .anvd-rt .l{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:10px;padding-left:10px;border-left:3px solid var(--j)} #edteam-annonce .anvd-rt .l.a{--j:#00F0FF} #edteam-annonce .anvd-rt .l.r{--j:#FFB000} #edteam-annonce .anvd-rt .l i{font-style:normal;color:var(--j);border:1px solid var(--j);padding:1px 8px;letter-spacing:2px;font-size:.85em} #edteam-annonce .anvd-rt .l b{color:#fff;font-weight:normal;letter-spacing:2px} #edteam-annonce .anvd-rt .l span{margin-left:auto;color:#00FF66} #edteam-annonce .anvd-rt .l em{font-style:normal;color:#FFD700}',
             '#edteam-annonce .anvd-rt .bil{margin-top:12px;padding-top:8px;border-top:1px dashed rgba(0,255,102,.35)} #edteam-annonce .anvd-rt .bil small{display:block;color:#8a9;letter-spacing:2px;font-size:.8em} #edteam-annonce .anvd-rt .bil b{color:#00FF66;font-size:1.9em;font-weight:normal;letter-spacing:1px}',
             '@media (max-width:900px){#edteam-annonce .anvd-cmp{grid-template-columns:1fr}} @media (prefers-reduced-motion:reduce){#edteam-annonce .anvd-fl,#edteam-annonce .anvd-pl,#edteam-annonce .anvd-rt,#edteam-annonce .anvd-rt .b b{animation:none}}',
+            '#edteam-annonce .anva{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;margin:6px 0} #edteam-annonce .anva-menu{width:230px;border:1px solid #1d3b44;background:#071015;padding:8px 0;text-align:left;font-size:.78em;letter-spacing:2px} #edteam-annonce .anva-it{padding:9px 16px;color:#7f9aa3;border-left:3px solid transparent} #edteam-annonce .anva-it.hot{color:#fff;border-left-color:#00F0FF;background:rgba(0,240,255,.12);display:flex;align-items:center;gap:10px;animation:anvaPl 2.4s ease-in-out infinite} #edteam-annonce .anva-it .ic{position:relative;color:#00F0FF;font-size:1.3em} #edteam-annonce .anva-it .ic i{position:absolute;right:-5px;top:-2px;width:9px;height:9px;border-radius:50%;background:#00FF66;box-shadow:0 0 7px #00FF66} #edteam-annonce .anva-it em{margin-left:auto;font-style:normal;color:#FFD700;letter-spacing:1px}',
+            '@keyframes anvaPl{0%,100%{box-shadow:0 0 0 rgba(0,240,255,0)}50%{box-shadow:0 0 18px rgba(0,240,255,.5)}} #edteam-annonce .anva-fl{color:#00F0FF;font-size:2em} #edteam-annonce .anva-bt{width:290px;padding:18px 20px;text-align:center;border:2px solid #00F0FF;background:linear-gradient(180deg,rgba(0,40,48,.97),rgba(2,10,14,.98));animation:anvaBt 1.2s ease-in-out infinite} #edteam-annonce .anva-bt b{display:block;color:#00F0FF;letter-spacing:3px;font-size:1.05em} #edteam-annonce .anva-bt span{display:block;color:#fff;margin:8px 0 4px;letter-spacing:1.5px;font-size:.85em} #edteam-annonce .anva-bt small{color:#FF9A1F;letter-spacing:1px} @keyframes anvaBt{0%,100%{box-shadow:0 0 8px rgba(0,240,255,.4);border-color:#00F0FF}50%{box-shadow:0 0 28px rgba(255,154,31,.7);border-color:#FF9A1F}}',
+            '@media (prefers-reduced-motion:reduce){#edteam-annonce .anva-it.hot,#edteam-annonce .anva-bt{animation:none}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce,#edteam-annonce .anc-boite{animation:none}}'
         ].join('\n');
         document.head.appendChild(st);

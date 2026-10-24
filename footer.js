@@ -82,10 +82,10 @@
     window.edteamAlerteBasculer = function () {
         function go() { if (window.EdteamAlerte) window.EdteamAlerte.basculer(); }
         if (window.EdteamAlerte) { go(); return; }
-        var s = document.createElement('script'); s.src = 'alerte-combat.js?v=1'; s.onload = go; document.head.appendChild(s);
+        var s = document.createElement('script'); s.src = 'alerte-combat.js?v=5'; s.onload = go; document.head.appendChild(s);
     };
     (function () {
-        try { var o = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); if (o && o.on && !/tableau-de-bord/i.test(location.pathname)) { var s = document.createElement('script'); s.src = 'alerte-combat.js?v=1'; document.head.appendChild(s); } } catch (e) { /* stockage indisponible */ }
+        try { var o = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); if (o && o.on && !/tableau-de-bord/i.test(location.pathname)) { var s = document.createElement('script'); s.src = 'alerte-combat.js?v=5'; document.head.appendChild(s); } } catch (e) { /* stockage indisponible */ }
     })();
     // Sons du jeu sur toutes les pages (son-jeu.js) : SEULEMENT dans l'application installee (le navigateur n'autorise le son sans clic que la) ; le tableau de bord garde son propre moteur.
     // Navigateur simple : le bouton explique comment installer. Aucune connexion tant que l'option est coupee ; le moteur n'est charge que si l'option est active.
@@ -230,7 +230,6 @@
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
-            +   (visiteur || /tableau-de-bord/i.test(location.pathname) ? '' : '<button type="button" class="ft-btn ft-alerte" data-alerte-toggle onclick="edteamAlerteBasculer()">⚠ ALERTE COMBAT : DÉSACTIVÉE</button>')
             +   (visiteur || /tableau-de-bord/i.test(location.pathname) ? '' : '<button type="button" class="ft-btn ft-sonsjeu" data-sonsjeu-toggle onclick="edteamSonsJeuBasculer()"></button>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')
             + '</div>'
