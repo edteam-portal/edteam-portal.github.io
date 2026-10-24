@@ -304,6 +304,7 @@
         .tb-pa.ici.seul { padding:8px 14px; } .tb-pa.ici.seul .tete { margin-bottom:0; }
         .tb-pa.prochain { border-color:#fff; border-left-color:#00F0FF; } .tb-pa.prochain .eti { color:#fff; font-weight:bold; }
         .tb-pa.passe { border-left-color:#FFB000; border-style:dashed; border-left-style:solid; background:rgba(255,176,0,.05); } .tb-pa.passe .num { border-color:#FFB000; color:#FFB000; border-style:dashed; } .tb-pa.passe .eti { color:#FFB000; }
+        .tb-pa.rech { border-color:#FF3B30; border-left-color:#FF3B30; border-left-width:7px; background:rgba(255,59,48,.08); box-shadow:0 0 22px rgba(255,59,48,.35); } .tb-pa.rech .num { border-color:#FF3B30; color:#FF3B30; } .tb-pa.rech.prochain .num, .tb-pa.rech.ici .num { background:#FF3B30; color:#000; } .tb-pa.rech .eti { color:#FF6B61; }
         @keyframes tbPouls { 0%,100% { box-shadow:0 0 10px rgba(255,79,216,.15); } 50% { box-shadow:0 0 26px rgba(255,79,216,.5); } }
         .tb-lgp { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.78em; color:#99a; margin:0 0 10px; } .tb-lgp span { display:inline-flex; align-items:center; gap:6px; } .tb-lgp i { width:11px; height:11px; border-radius:50%; background:var(--c); display:inline-block; } .tb-lgp i.tr { background:none; border:2px dashed var(--c); box-sizing:border-box; }
         .tb-rp { display:grid; grid-template-columns:minmax(110px,1.2fr) 2fr 36px minmax(80px,1fr); gap:10px; align-items:center; padding:7px 0; border-bottom:1px solid #161616; font-size:.92em; }
@@ -431,11 +432,12 @@
         .tbmm span { display:block; text-align:right; color:#00F0FF; font-size:.7em; letter-spacing:2px; margin-top:2px; } .tbmm .tb-carte { height:auto; }
         @media (prefers-reduced-motion:reduce) { .tbm-sw button.clig { animation:none; } }
         .tb-mlst { display:flex; flex-direction:column; } .tb-ml { border-top:1px solid #1a1f23; border-left:3px solid var(--cl2,#00FF66); }
-        .tb-role.rech { color:#FF3B30; font-weight:bold; border:1px solid #FF3B30; padding:0 5px; }
-        .tb-ml.rech { --cl2:#FF3B30; background:rgba(255,59,48,.08); }
-        .tb-rech { margin-bottom:12px; padding:10px 14px; border:1px solid #FF3B30; border-left:4px solid #FF3B30; background:rgba(255,59,48,.1); color:#ddd; font-size:.9em; }
-        .tb-rech .t { color:#FF3B30; font-weight:bold; letter-spacing:1px; } .tb-rech .s { color:#aab; margin:3px 0 6px; } .tb-rech .l b { color:#fff; }
         .tb-ml.ko { --cl2:#FF3333; } .tb-ml.wa { --cl2:#FFD700; } .tb-ml.ok { --cl2:#00FF66; } .tb-ml.ouvert { background:rgba(255,215,0,.04); }
+        .tb-ml.rech { --cl2:#FF3B30; background:linear-gradient(90deg,rgba(255,59,48,.26),rgba(255,59,48,.07)); border-left-width:5px; }
+        .tb-ml.rech .lg { grid-template-columns:24px 96px minmax(0,1fr) auto 66px 14px; } .tb-ml.rech .ty { border-color:#FF3B30; color:#FF6B61; } .tb-ml.rech .ti { color:#FF8A80; font-weight:bold; } .tb-ml.rech .ic { filter:hue-rotate(-40deg) saturate(2); }
+        .tb-ml.rech .det { position:relative; min-height:96px; }
+        .tb-tampon { position:absolute; right:22px; top:50%; margin-top:-34px; z-index:2; pointer-events:none; display:flex; flex-direction:column; align-items:center; line-height:1; padding:9px 18px 7px; color:#FF3B30; font-weight:bold; font-size:1.35em; letter-spacing:5px; text-transform:uppercase; border:3px solid #FF3B30; outline:1px solid rgba(255,59,48,.7); outline-offset:3px; border-radius:6px; transform:rotate(7deg); background:rgba(40,0,0,.45); box-shadow:0 0 14px rgba(255,59,48,.6), inset 0 0 10px rgba(255,59,48,.4); text-shadow:0 0 8px rgba(255,59,48,.85); white-space:nowrap; opacity:.94; }
+        .tb-tampon i { font-style:normal; margin-right:6px; } .tb-tampon small { font-size:.55em; letter-spacing:7px; margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,59,48,.75); align-self:stretch; text-align:center; }
         .tb-ml .lg { display:grid; grid-template-columns:24px 96px minmax(0,1fr) auto 66px 14px; gap:10px; align-items:center; padding:6px 10px; cursor:pointer; font-size:.9em; color:#bbb; } .tb-ml .lg:hover { background:rgba(0,240,255,.07); }
         .tb-ml .ty { border:1px solid #FFD700; color:#FFD700; padding:1px 6px; font-size:.72em; letter-spacing:1px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .tb-ml .ti { color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .tb-ml .ti .tb-role { margin-left:8px; }
@@ -449,7 +451,7 @@
         .tb-lien::before, .tb-lien::after { content:""; position:absolute; left:50%; height:20px; border-left:2px dashed #00F0FF; } .tb-lien::before { bottom:100%; } .tb-lien::after { top:100%; }
         .tb-lien b { font-size:1.15em; margin-right:8px; color:#00F0FF; font-weight:normal; } .tb-lien.pro { border-color:rgba(0,240,255,.7); color:#8a98a0; }
         .tb-lien.fait { border-color:#444; background:none; color:#667; } .tb-lien.fait::before, .tb-lien.fait::after { border-left-color:#555; }
-        @media (max-width:700px) { .tb-ml .lg { grid-template-columns:22px minmax(0,1fr) auto 60px 12px; } .tb-ml .ty { display:none; } }
+        @media (max-width:700px) { .tb-ml .lg { grid-template-columns:22px minmax(0,1fr) auto 60px 12px; } .tb-ml.rech .lg { grid-template-columns:22px minmax(0,1fr) auto 60px 12px; } .tb-tampon { font-size:1em; letter-spacing:2px; padding:6px 10px 5px; right:8px; } .tb-ml .ty { display:none; } }
         .tb-noteo { margin-top:10px; } .tb-noteo button { background:none; border:0; color:#778; font:inherit; font-size:.78em; letter-spacing:2px; cursor:pointer; padding:2px 0; } .tb-noteo button:hover { color:#00F0FF; }
         /* Commerce : reglages replies, indicateurs sur une ligne, arret deplie lisible, trajets en pastilles */
         .tb-barre.cp { margin-bottom:10px; padding-bottom:10px; align-items:center; flex-wrap:nowrap; } .tb-barre.cp .tb-rg { flex:1 1 160px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -1062,13 +1064,6 @@
         }
         // mission avec des passagers recherchés, prisonniers ou criminels à bord (même règle que le rouge de l'hologramme) : risque en cas de scan
         const estRecherche = m => estPassagers(m) && famPassagers(m) === "sens";
-        function alerteRecherches(act) {
-            const L = act.filter(estRecherche);
-            if (!L.length) return "";
-            const n = L.reduce((a, m) => a + Number(m.pas), 0);
-            const lignes = L.map(m => `<div class="l"><b>${Number(m.pas)} passager${Number(m.pas) > 1 ? "s" : ""}</b> · ${esc(m.nom || "Mission")} → ${m.sys ? sysListe(m.sys).map(x => cp(x)).join(" · ") + (m.st ? " / " + cp(m.st) : "") : "destination inconnue"}</div>`).join("");
-            return `<div class="tb-rech"><div class="t">⚠ PASSAGERS RECHERCHÉS À BORD · ${n} passager${n > 1 ? "s" : ""} · ${L.length} mission${L.length > 1 ? "s" : ""}</div><div class="s">Un scan avec eux à bord est dangereux : déposez-les en priorité (ces arrêts passent en premier dans le parcours).</div>${lignes}</div>`;
-        }
         function panneauMissions() {
             const act = (S.missions || []).slice().sort((a, b) => String(a.exp || "9999").localeCompare(String(b.exp || "9999")));
             const fin = S.terminees || [];
@@ -1077,7 +1072,6 @@
             const encaisse = fin.reduce((a, m) => a + (Number(m.rec) || 0), 0);
             EFFETS_DANS_CADRE = false;
             const bandeau = `<div class="tbx-strip">${tbChip("#00F0FF", "MISSIONS EN COURS", String(act.length), act.length ? "à faire ou à rendre" : "aucune pour l'instant")}${tbChip("#00FF66", "TERMINÉES · SESSION", `<span style="color:#00FF66">${fin.length}</span>`, `${fmtM(encaisse)} encaissés`)}${tbChip("#FFD700", "À ENCAISSER", `<span style="color:#FFD700">${encaisser ? "≈ " + fmtM(encaisser) : "—"}</span>`, `${connues} mission${connues > 1 ? "s" : ""} avec récompense connue`)}${tbChip("#00F0FF", "PROCHAINE ÉCHÉANCE", prochaine ? duree(restant(prochaine)) : "—", prochaine ? esc(prochaine.nom) : "aucune mission à échéance", "", prochaine ? `data-cd="${esc(prochaine.exp)}"` : "")}</div>`;
-            const alerte = alerteRecherches(act);
             if (!act.length) {
                 memoireTrajet(act); ecrire(FAITS_CLE, JSON.stringify(MEMF));     // plus aucune mission : on repart d'un parcours vierge
                 const vide = `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>`;
@@ -1086,14 +1080,14 @@
                 return bandeau + (holo ? `<div class="tbp-duo${S && S.pied && S.pied.on || holo.indexOf("tbm-bloc") >= 0 ? " tbs" : ""}"><div>${vide}</div>${holo}</div>` : vide) + noteVaisseaux() + boutonEffets();
             }
             const plan = planTrajet(act);
-            return bandeau + alerte + carteEtCabines(plan, act) + noteVaisseaux() + boutonEffets();
+            return bandeau + carteEtCabines(plan, act) + noteVaisseaux() + boutonEffets();
         }
         // une mission = UNE ligne (type, titre, recompense, echeance) ; les details s'ouvrent dessous au clic (le premier arret a faire est ouvert d'office)
         const MOUV = {};
         function basculerMission(id, defOuvert) { const k = String(id); MOUV[k] = !(k in MOUV ? MOUV[k] : defOuvert); if (typeof sonClic === "function") sonClic(); rendre(); }
         function carteMission(m, role, defOuvert) {
             const [ic, lib] = TYPES[m.type] || TYPES.autre;
-            const s = restant(m), u = urgence(s), id = String(m.id), ouvert = id in MOUV ? MOUV[id] : !!defOuvert;
+            const s = restant(m), u = urgence(s), id = String(m.id), rech = estRecherche(m), ouvert = id in MOUV ? MOUV[id] : (!!defOuvert || rech);
             const rang = (t, v) => v ? `<div class="r"><span>${t}</span><div>${v}</div></div>` : "";
             const paire = (t, v) => v ? `<span class="p"><i>${t}</i> ${v}</span>` : "";
             const lieu = role === "rendre" ? "à rendre à " + cp(m.os || "") + (m.ost ? " / " + cp(m.ost) : "") : m.sys ? sysListe(m.sys).map(x => cp(x)).join(" · ") + (m.st ? " / " + cp(m.st) : "") : "aucun trajet";
@@ -1105,10 +1099,10 @@
             else if (posIci && posM) { const d = dist3(posIci, posM), sa = Math.max(1, Math.ceil(d / Math.max(8, sautUtilise()))); loin = d.toFixed(1) + " al · " + sa + " saut" + (sa > 1 ? "s" : ""); }
             const charge = m.pas ? m.pas + " passager" + (m.pas > 1 ? "s" : "") : m.q ? (m.type === "courrier" ? m.q + " colis" : "soute " + fmtN(m.q) + " t") : "";
             const paires = [paire("DISTANCE", loin), paire("CHARGE", charge), paire("DON", m.don ? fmtM(m.don) : ""), paire("RÉPUTATION", m.rep ? esc(m.rep) : ""), paire("INFLUENCE", m.inf ? esc(m.inf) : ""), paire("RENDEMENT", m.rec && s !== null && s >= 1800 ? "≈ " + fmtM(m.rec / (s / 3600)) + " / h" : "")].join("");
-            const det = ouvert ? `<div class="det"><div class="full">${esc(m.nom || lib)}</div>${rang("FACTION", cp(m.faction || ""))}${rang("DESTINATION", lieu)}${rang("PRISE", prise)}${paires ? `<div class="pr">${paires}</div>` : ""}</div>` : "";
-            const rech = estRecherche(m);
-            const tag = (rech ? `<span class="tb-role rech">RECHERCHÉS À BORD</span>` : "") + (role === "passe" ? `<span class="tb-role pas">DÉJÀ PASSÉ</span>` : role === "rendre" ? `<span class="tb-role pas" style="color:#00FF66;border-color:#00FF66;">À RENDRE</span>` : "");
-            return `<div class="tb-ml ${u}${rech ? " rech" : ""}${ouvert ? " ouvert" : ""}"><div class="lg" onclick="basculerMission('${esc(id)}', ${defOuvert ? "true" : "false"})" title="${ouvert ? "Replier" : "Voir"} les détails">
+            const tampon = rech ? `<span class="tb-tampon" title="Passagers recherchés, prisonniers ou criminels à bord : un scan est dangereux"><i>⚠</i>RECHERCHÉS<small>À BORD</small></span>` : "";
+            const det = ouvert ? `<div class="det">${tampon}<div class="full">${esc(m.nom || lib)}</div>${rang("FACTION", cp(m.faction || ""))}${rang("DESTINATION", lieu)}${rang("PRISE", prise)}${paires ? `<div class="pr">${paires}</div>` : ""}</div>` : "";
+            const tag = (role === "passe" ? `<span class="tb-role pas">DÉJÀ PASSÉ</span>` : role === "rendre" ? `<span class="tb-role pas" style="color:#00FF66;border-color:#00FF66;">À RENDRE</span>` : "");
+            return `<div class="tb-ml ${u}${rech ? " rech" : ""}${ouvert ? " ouvert" : ""}"><div class="lg" onclick="basculerMission('${esc(id)}', ${defOuvert || rech ? "true" : "false"})" title="${ouvert ? "Replier" : "Voir"} les détails">
                 <span class="ic">${ic}</span><span class="ty">${esc(lib)}</span><span class="ti">${esc(m.nom || lib)}${tag}</span><span class="rec">${m.rec != null ? fmtM(m.rec) : ""}</span>
                 <span class="cd" ${m.exp ? `data-cd="${esc(m.exp)}"` : ""}>${s === null ? "" : duree(s)}</span><span class="ch">${ouvert ? "▾" : "▸"}</span></div>${det}</div>`;
         }
@@ -1568,7 +1562,7 @@
                 const ms = a.ms.slice().sort((x, y) => estRecherche(y) - estRecherche(x) || String(x.exp || "9999").localeCompare(String(y.exp || "9999")));
                 const role = m => k === "passe" ? "passe" : a.fin && aRendre(m) && cle(m.os) === cle(a.sys) ? "rendre" : aRendre(m) ? "place" : "";
                 const badge = a.dejaPasse ? `<span class="tb-role pas">DÉJÀ PASSÉ ICI · MISSION PAS TERMINÉE</span>` : "";
-                h += `<div class="tb-pa ${k}${a.fin ? " fin" : ""}"><div class="tete"><span class="num">${a.fin ? "⚑" : a.num}</span><span class="nom">${cp(a.sys, String(a.sys).toUpperCase())}</span><span class="eti">${eti}${k === "ici" || k === "prochain" ? etiPlus : ""}</span>${badge}</div>
+                h += `<div class="tb-pa ${k}${a.fin ? " fin" : ""}${k !== "fait" && a.ms.some(estRecherche) ? " rech" : ""}"><div class="tete"><span class="num">${a.fin ? "⚑" : a.num}</span><span class="nom">${cp(a.sys, String(a.sys).toUpperCase())}</span><span class="eti">${eti}${k === "ici" || k === "prochain" ? etiPlus : ""}</span>${badge}</div>
                     ${grilleMissions(ms.map((m, j) => carteMission(m, role(m), j === 0 && (k === "prochain" || (k === "ici" && a.ms.length)))))}${(() => { const fl = a.faits && a.faits.length ? a.faits : a.lignes || []; return fl.length ? `<div class="fl">${fl.map(t => "✔ " + t).join("<br>")}</div>` : ""; })()}</div>`;
             });
             const sans = act.filter(m => !m.sys);

@@ -6,8 +6,8 @@
 window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-missions-passagers-recherches', date: '2026-10-24T23:36:12Z', type: 'NOUVEAU',
-        titre: 'Missions : tes passagers recherchés sont signalés et passent en premier',
-        texte: 'Si une mission de passagers transporte des criminels, des prisonniers ou des personnes recherchées (les silhouettes rouges de l’hologramme), l’onglet Missions affiche un bandeau rouge en haut avec la destination, une pastille « RECHERCHÉS À BORD » sur la mission, et place leur arrêt en premier dans le parcours, avant l’ordre le plus court. Un scan avec eux à bord est dangereux : le tableau de bord te dit où les déposer d’abord.',
+        titre: 'Missions : tes passagers recherchés sont tamponnés en rouge et passent en premier',
+        texte: 'Si une mission de passagers transporte des criminels, des prisonniers ou des personnes recherchées (les silhouettes rouges de l’hologramme), sa ligne passe en rouge dans l’onglet Missions avec un tampon « RECHERCHÉS À BORD », et son arrêt passe en premier dans le parcours, avant l’ordre le plus court. Un scan avec eux à bord est dangereux : le tableau de bord te montre quoi déposer d’abord.',
         important: false
     },
     {
