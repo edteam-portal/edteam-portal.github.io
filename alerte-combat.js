@@ -66,17 +66,17 @@
     // ---- activation / desactivation (bouton du menu lateral) ----
     async function basculer() {
         var o = lire();
-        if (o && o.on && !o.veille) { ecrire(null); arreter(); etat.vue = null; majBouton(); message('Alerte combat désactivée : un joueur verrouillé ne vous sera plus signalé.', 4000); return; }
+        if (o && o.on && !o.veille) { ecrire(null); arreter(); etat.vue = null; majBouton(); message('Alerte désarmée : vous ne serez plus prévenu quand vous verrouillez un joueur (les scans comptent toujours).', 5000); return; }
         if (!db()) return;
         message('Vérification de votre jeu…', 8000);
         var s = await session();
         if (!enLigne(s)) {
-            message('Alerte non activée : EDTEAM ne reçoit aucun signal de votre jeu. Lancez le jeu et EDMC (avec le plugin SYS_EDTEAM à jour), attendez une minute, puis cliquez de nouveau.', 14000);
+            message('Alerte non armée : EDTEAM ne reçoit aucun signal de votre jeu. Lancez le jeu et EDMC (avec le plugin SYS_EDTEAM à jour), attendez une minute, puis cliquez de nouveau.', 14000);
             return;
         }
         ecrire({ on: true, debut: s.debut == null ? null : String(s.debut), depuis: Date.now(), derniere: Date.now() });
         etat.vue = 'actif'; await ouvrirCanal(); majBouton();
-        message('Alerte combat activée pour cette session de jeu : quand vous verrouillerez un joueur, un cadre clignotant vous préviendra.', 6000);
+        message('Alerte armée pour cette session de jeu. Jouez normalement : dès que vous verrouillerez un joueur, un cadre clignotant vous préviendra sur cette page.', 7000);
     }
     // message visible a cote du menu (le bouton du pied de page n'existe plus)
     function message(t, ms) {
@@ -89,7 +89,7 @@
             z.addEventListener('click', function () { z.remove(); });
             document.body.appendChild(z);
         }
-        z.style.borderColor = /non activée/.test(t) ? '#FF9A1F' : '#00F0FF'; z.style.borderLeftColor = z.style.borderColor;
+        z.style.borderColor = /non armée/.test(t) ? '#FF9A1F' : '#00F0FF'; z.style.borderLeftColor = z.style.borderColor;
         z.textContent = t;
         etat.msgT = setTimeout(function () { var e = document.getElementById('edteam-alerte-msg'); if (e) e.remove(); }, ms || 6000);
     }
@@ -100,15 +100,15 @@
         if (etat.vue === 'attente') return 'attente';
         return 'on';
     }
-    var AIDE = { off: 'Alerte désactivée : EDTEAM ne vous signale pas qu’un joueur est verrouillé en jeu, et vous ne pourrez pas le scanner. Cliquez pour l’activer (valable pour la session de jeu en cours, avec EDMC et le jeu lancés).',
-                 on: 'Alerte active : quand vous verrouillez un joueur, un cadre clignotant s’affiche sur la page où vous êtes. Cliquez pour la désactiver.',
-                 veille: 'Alerte en veille (aucun signal depuis plus de 3 heures) : cliquez pour la réactiver.',
-                 attente: 'Alerte activée, mais votre jeu n’envoie plus de signal : lancez EDMC et le jeu. L’alerte repartira toute seule.' };
+    var AIDE = { off: 'Alerte à ARMER une fois en début de session de jeu (EDMC et le jeu lancés). Armée, elle vous prévient par un cadre clignotant dès que vous verrouillez un joueur, pour ne pas manquer un scan. Cliquez pour l’armer.',
+                 on: 'Alerte armée : quand vous verrouillez un joueur, un cadre clignotant s’affiche sur la page où vous êtes. Cliquez pour la désarmer.',
+                 veille: 'Alerte en veille (aucun signal depuis plus de 3 heures) : cliquez pour la réarmer.',
+                 attente: 'Alerte armée, mais votre jeu n’envoie plus de signal : lancez EDMC et le jeu. L’alerte repartira toute seule.' };
     function majBouton() {
         var e = etatAlerte();
         [].forEach.call(document.querySelectorAll('[data-alerte-point]'), function (p) { p.className = 'al-pt' + (e === 'on' ? ' on' : e === 'off' ? '' : ' ve'); });
         [].forEach.call(document.querySelectorAll('[data-alerte-menu]'), function (m) { m.classList.toggle('al-off', e === 'off' || e === 'veille'); m.title = AIDE[e]; });
-        [].forEach.call(document.querySelectorAll('[data-alerte-label]'), function (l) { l.textContent = ({ off: 'ALERTE COMBAT · OFF', on: 'ALERTE COMBAT · ON', veille: 'ALERTE COMBAT · VEILLE', attente: 'ALERTE · ATTENTE JEU' })[e]; });
+        [].forEach.call(document.querySelectorAll('[data-alerte-label]'), function (l) { l.textContent = ({ off: 'ALERTE COMBAT · ARMER', on: 'ALERTE COMBAT · ARMÉE', veille: 'ALERTE COMBAT · VEILLE', attente: 'ALERTE · ATTENTE JEU' })[e]; });
     }
 
     // ---- le bouton d'urgence ----
