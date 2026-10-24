@@ -66,7 +66,10 @@
     function avatarsMob(liste) {
         var P = window.EDTEAMPhotos;
         if (!P || !liste || !liste.length) return '';
-        return '<span class="mc-avs">' + liste.slice(0, 5).map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 22 }); }).join('') + '</span>';
+        // 5 emplacements au plus : au-dela, 4 avatars et une pastille « +N »
+        var tous = liste.length <= 5, vus = tous ? liste : liste.slice(0, 4), reste = tous ? [] : liste.slice(4);
+        return '<span class="mc-avs">' + vus.map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 22 }); }).join('')
+            + (reste.length ? '<span style="width:22px;height:22px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#1a1a1a;border:1px solid #555;color:#ccc;font-size:.62em;font-weight:bold;box-shadow:0 0 0 2px #0a0a0a;">+' + reste.length + '</span>' : '') + '</span>';
     }
     // jauge d'influence (comme sur le PC) : gris = influence qui n'a pas bouge depuis le dernier tick (ou sur 48 h), plein = gain, raye = perte ; couleur = resultat de la directive ; trait blanc = valeur avant le tick
     function jaugeMob(o, res) {

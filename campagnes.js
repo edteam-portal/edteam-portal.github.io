@@ -125,7 +125,11 @@
     function avatars(liste) {
         var P = window.EDTEAMPhotos;
         if (!P || !liste || !liste.length) return '';
-        return '<span class="camp-avs"><span class="dir-avs">' + liste.slice(0, 7).map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 28 }); }).join('') + '</span></span>';
+        // la colonne des avatars est etroite (150 px, 110 px sous 1300 px de large ; la vue cartes a plus de place) : ce qui ne tient pas est resume par une pastille « +N » (survol = les noms)
+        var cap = vueCourante() === 'cartes' ? 8 : (window.innerWidth <= 1300 ? 4 : 6);
+        var tous = liste.length <= cap, vus = tous ? liste : liste.slice(0, cap - 1), reste = tous ? [] : liste.slice(cap - 1);
+        return '<span class="camp-avs"><span class="dir-avs">' + vus.map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 28 }); }).join('')
+            + (reste.length ? '<span class="plus" style="width:28px;height:28px" title="' + esc(reste.length + ' autre' + (reste.length > 1 ? 's' : '') + ' : ' + reste.map(function (x) { return x.nom || '?'; }).join(', ')) + '">+' + reste.length + '</span>' : '') + '</span></span>';
     }
     // jauge d'influence : gris = influence qui n'a pas bouge depuis le dernier tick (ou sur 48 h), plein = gain, raye = perte ; couleur = resultat de la directive ; trait blanc = valeur avant le tick
     function jauge(o, res) {
