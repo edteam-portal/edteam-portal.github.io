@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-directives-corrections-tablette', date: '2026-10-24T19:20:43Z', type: 'CORRIGE',
+        titre: 'Directives : fenêtre plus grande sur tablette, ordre des systèmes respecté, échecs de mission comptés',
+        texte: 'La fenêtre d’une directive occupe maintenant presque tout l’écran sur tablette et sur un portable de 14 pouces. Dans une campagne, l’affichage en cartes suit enfin l’ordre des systèmes choisi par l’Amiral. Sous une directive de baisse, les missions échouées comptent dans l’effort de la directive (1 point chacune, 10 par jour au plus) : elles affichaient « plein effet » avec 0 point. Enfin, la page BGS se met à jour toute seule quand tu reviens dessus (tablette qui se rallume) et juste après une de tes actions en jeu.',
+        important: false
+    },
+    {
         id: '2026-10-ou-rendre-hausse', date: '2026-10-24T19:14:09Z', type: 'NOUVEAU',
         titre: 'Directive de hausse : « Où vendre l’exploration ? » et « Où rendre les bons ? »',
         texte: 'Sur une directive de hausse, deux boutons s’ouvrent à côté des lignes Science et Sécurité. « Où vendre l’exploration ? » liste les stations de la faction soutenue qui ont la cartographie universelle (les données comptent pour la faction qui tient la station où tu les vends). « Où rendre les bons ? » liste les stations du système avec « contacts » (un bon compte pour la faction qui l’a émis, dans le système où tu le rends) : ports et avant-postes d’abord, colonies au sol repliées. Les chiffres viennent de Spansh. Les fenêtres ne disent pas où gagner les données ni les bons.',
