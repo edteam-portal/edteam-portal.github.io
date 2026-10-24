@@ -21,7 +21,7 @@
     <script src="navigation.js?v=49"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=64"></script>
+    <script src="campagnes.js?v=65"></script>
     <script src="quotas-jour.js?v=16"></script>
     <script src="conflit-evenements.js?v=3"></script>
     <script src="trafic-info.js?v=2"></script>
@@ -289,8 +289,11 @@
         #modal-ordre-resultat .bgs-act { gap: 8px !important; }
         #modal-ordre-resultat .bgs-act > div { padding: 8px 12px !important; }
         #modal-ordre-resultat .bgs-act b { font-size: 2em !important; }
-        @media (max-height: 860px) { #modal-ordre-resultat .modal-content { zoom: 0.86; } }
-        @media (max-height: 760px) { #modal-ordre-resultat .modal-content { zoom: 0.76; } }
+        /* fenetre agrandie : presque tout l'ecran (tablette, 14 pouces) ; la reduction (zoom) est compensee pour que la boite occupe toujours la meme place a l'ecran */
+        #modal-ordre-resultat { padding: 8px; }
+        #modal-ordre-resultat .modal-content { width: 98vw !important; max-width: 1760px !important; max-height: 97vh !important; }
+        @media (max-height: 860px) { #modal-ordre-resultat .modal-content { zoom: 0.86; width: calc(98vw / 0.86) !important; max-height: calc(97vh / 0.86) !important; } }
+        @media (max-height: 760px) { #modal-ordre-resultat .modal-content { zoom: 0.76; width: calc(98vw / 0.76) !important; max-height: calc(97vh / 0.76) !important; } }
         #modal-ordre-resultat .bgs-cadre { background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.18); border-top: 2px solid rgba(0,240,255,0.6); box-shadow: 0 2px 14px rgba(0,0,0,0.25); }
         #modal-ordre-resultat .bgs-cadre-t { border-bottom-color: rgba(255,255,255,0.14); }
         #modal-ordre-resultat .bgs-sec { margin-top: 12px; }

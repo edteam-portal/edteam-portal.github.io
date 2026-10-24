@@ -312,7 +312,7 @@
                 + '<span class="camp-h-g">' + pastille('PRIORITÉ ' + pr[0], pr[1]) + '</span>'
                 + '<span class="camp-h-i"><em>' + info + '</em>' + (vue !== 'cartes' && lignes.some(function (l) { return l.infoP; }) ? '<span>TES ACTIONS<small>Aujourd’hui</small></span>' : '') + '</span><span class="camp-h-c"></span>'
                 + '<span class="camp-actions">' + actions + '</span></div>'
-                + '<div class="camp-lignes">' + (lignes.length ? (vue === 'cartes' ? '<div class="camp-grille">' + lignes.slice().sort(function (a, b) { return rangCarte(a) - rangCarte(b) || a.o - b.o; }).map(carte).join('') + '</div>' : groupes(lignes)) : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
+                + '<div class="camp-lignes">' + (lignes.length ? (vue === 'cartes' ? '<div class="camp-grille">' + lignes.slice().sort(function (a, b) { return (rgSys(a) - rgSys(b)) || rangCarte(a) - rangCarte(b) || a.o - b.o; }).map(carte).join('') + '</div>' : groupes(lignes)) : '<div class="camp-vide">Aucune mission dans cette campagne' + (cmd ? ' : utilisez le bouton ＋ de la campagne.' : ' pour le moment.') + '</div>') + '</div>'
                 + '</div>';
         }).join('');
         zone.innerHTML = titre + bascule + bande + (vue === 'carte' ? '<div id="camp-carte"></div>' : '<div style="display:grid; gap:12px; grid-template-columns:minmax(0,1fr);">' + htmlCamps + '</div>');
