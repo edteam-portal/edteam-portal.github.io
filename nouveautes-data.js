@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-missions-passagers-recherches', date: '2026-10-24T23:36:12Z', type: 'NOUVEAU',
+        titre: 'Missions : tes passagers recherchés sont signalés et passent en premier',
+        texte: 'Si une mission de passagers transporte des criminels, des prisonniers ou des personnes recherchées (les silhouettes rouges de l’hologramme), l’onglet Missions affiche un bandeau rouge en haut avec la destination, une pastille « RECHERCHÉS À BORD » sur la mission, et place leur arrêt en premier dans le parcours, avant l’ordre le plus court. Un scan avec eux à bord est dangereux : le tableau de bord te dit où les déposer d’abord.',
+        important: false
+    },
+    {
         id: '2026-10-journal-rafales-5-minutes', date: '2026-10-24T23:12:41Z', type: 'AMELIORE',
         titre: 'Journal des exploits : meurtres, piratage et missions échouées regroupés sur une ligne',
         texte: 'Tant que moins de 5 minutes séparent deux meurtres, deux actes de piratage ou deux missions échouées, le journal les réunit sur une seule ligne, sans limite de nombre (avant : 5 par ligne). Un long combat ne remplit plus le journal ; les points restent de 1 par action.',

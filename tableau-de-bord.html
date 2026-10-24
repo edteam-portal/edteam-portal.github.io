@@ -431,6 +431,10 @@
         .tbmm span { display:block; text-align:right; color:#00F0FF; font-size:.7em; letter-spacing:2px; margin-top:2px; } .tbmm .tb-carte { height:auto; }
         @media (prefers-reduced-motion:reduce) { .tbm-sw button.clig { animation:none; } }
         .tb-mlst { display:flex; flex-direction:column; } .tb-ml { border-top:1px solid #1a1f23; border-left:3px solid var(--cl2,#00FF66); }
+        .tb-role.rech { color:#FF3B30; font-weight:bold; border:1px solid #FF3B30; padding:0 5px; }
+        .tb-ml.rech { --cl2:#FF3B30; background:rgba(255,59,48,.08); }
+        .tb-rech { margin-bottom:12px; padding:10px 14px; border:1px solid #FF3B30; border-left:4px solid #FF3B30; background:rgba(255,59,48,.1); color:#ddd; font-size:.9em; }
+        .tb-rech .t { color:#FF3B30; font-weight:bold; letter-spacing:1px; } .tb-rech .s { color:#aab; margin:3px 0 6px; } .tb-rech .l b { color:#fff; }
         .tb-ml.ko { --cl2:#FF3333; } .tb-ml.wa { --cl2:#FFD700; } .tb-ml.ok { --cl2:#00FF66; } .tb-ml.ouvert { background:rgba(255,215,0,.04); }
         .tb-ml .lg { display:grid; grid-template-columns:24px 96px minmax(0,1fr) auto 66px 14px; gap:10px; align-items:center; padding:6px 10px; cursor:pointer; font-size:.9em; color:#bbb; } .tb-ml .lg:hover { background:rgba(0,240,255,.07); }
         .tb-ml .ty { border:1px solid #FFD700; color:#FFD700; padding:1px 6px; font-size:.72em; letter-spacing:1px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -1056,6 +1060,15 @@
                 default: return esc(m.nom || "Mission") + lieu;
             }
         }
+        // mission avec des passagers recherchés, prisonniers ou criminels à bord (même règle que le rouge de l'hologramme) : risque en cas de scan
+        const estRecherche = m => estPassagers(m) && famPassagers(m) === "sens";
+        function alerteRecherches(act) {
+            const L = act.filter(estRecherche);
+            if (!L.length) return "";
+            const n = L.reduce((a, m) => a + Number(m.pas), 0);
+            const lignes = L.map(m => `<div class="l"><b>${Number(m.pas)} passager${Number(m.pas) > 1 ? "s" : ""}</b> · ${esc(m.nom || "Mission")} → ${m.sys ? sysListe(m.sys).map(x => cp(x)).join(" · ") + (m.st ? " / " + cp(m.st) : "") : "destination inconnue"}</div>`).join("");
+            return `<div class="tb-rech"><div class="t">⚠ PASSAGERS RECHERCHÉS À BORD · ${n} passager${n > 1 ? "s" : ""} · ${L.length} mission${L.length > 1 ? "s" : ""}</div><div class="s">Un scan avec eux à bord est dangereux : déposez-les en priorité (ces arrêts passent en premier dans le parcours).</div>${lignes}</div>`;
+        }
         function panneauMissions() {
             const act = (S.missions || []).slice().sort((a, b) => String(a.exp || "9999").localeCompare(String(b.exp || "9999")));
             const fin = S.terminees || [];
@@ -1064,6 +1077,7 @@
             const encaisse = fin.reduce((a, m) => a + (Number(m.rec) || 0), 0);
             EFFETS_DANS_CADRE = false;
             const bandeau = `<div class="tbx-strip">${tbChip("#00F0FF", "MISSIONS EN COURS", String(act.length), act.length ? "à faire ou à rendre" : "aucune pour l'instant")}${tbChip("#00FF66", "TERMINÉES · SESSION", `<span style="color:#00FF66">${fin.length}</span>`, `${fmtM(encaisse)} encaissés`)}${tbChip("#FFD700", "À ENCAISSER", `<span style="color:#FFD700">${encaisser ? "≈ " + fmtM(encaisser) : "—"}</span>`, `${connues} mission${connues > 1 ? "s" : ""} avec récompense connue`)}${tbChip("#00F0FF", "PROCHAINE ÉCHÉANCE", prochaine ? duree(restant(prochaine)) : "—", prochaine ? esc(prochaine.nom) : "aucune mission à échéance", "", prochaine ? `data-cd="${esc(prochaine.exp)}"` : "")}</div>`;
+            const alerte = alerteRecherches(act);
             if (!act.length) {
                 memoireTrajet(act); ecrire(FAITS_CLE, JSON.stringify(MEMF));     // plus aucune mission : on repart d'un parcours vierge
                 const vide = `<div class="bloc cy" style="margin-bottom:14px;"><h2>MISSIONS EN COURS</h2><div class="tb-vide">Aucune mission en cours. Dès que vous en acceptez une, elle apparaît ici avec son échéance, sa destination et le trajet conseillé.</div></div>`;
@@ -1072,7 +1086,7 @@
                 return bandeau + (holo ? `<div class="tbp-duo${S && S.pied && S.pied.on || holo.indexOf("tbm-bloc") >= 0 ? " tbs" : ""}"><div>${vide}</div>${holo}</div>` : vide) + noteVaisseaux() + boutonEffets();
             }
             const plan = planTrajet(act);
-            return bandeau + carteEtCabines(plan, act) + noteVaisseaux() + boutonEffets();
+            return bandeau + alerte + carteEtCabines(plan, act) + noteVaisseaux() + boutonEffets();
         }
         // une mission = UNE ligne (type, titre, recompense, echeance) ; les details s'ouvrent dessous au clic (le premier arret a faire est ouvert d'office)
         const MOUV = {};
@@ -1092,8 +1106,9 @@
             const charge = m.pas ? m.pas + " passager" + (m.pas > 1 ? "s" : "") : m.q ? (m.type === "courrier" ? m.q + " colis" : "soute " + fmtN(m.q) + " t") : "";
             const paires = [paire("DISTANCE", loin), paire("CHARGE", charge), paire("DON", m.don ? fmtM(m.don) : ""), paire("RÉPUTATION", m.rep ? esc(m.rep) : ""), paire("INFLUENCE", m.inf ? esc(m.inf) : ""), paire("RENDEMENT", m.rec && s !== null && s >= 1800 ? "≈ " + fmtM(m.rec / (s / 3600)) + " / h" : "")].join("");
             const det = ouvert ? `<div class="det"><div class="full">${esc(m.nom || lib)}</div>${rang("FACTION", cp(m.faction || ""))}${rang("DESTINATION", lieu)}${rang("PRISE", prise)}${paires ? `<div class="pr">${paires}</div>` : ""}</div>` : "";
-            const tag = role === "passe" ? `<span class="tb-role pas">DÉJÀ PASSÉ</span>` : role === "rendre" ? `<span class="tb-role pas" style="color:#00FF66;border-color:#00FF66;">À RENDRE</span>` : "";
-            return `<div class="tb-ml ${u}${ouvert ? " ouvert" : ""}"><div class="lg" onclick="basculerMission('${esc(id)}', ${defOuvert ? "true" : "false"})" title="${ouvert ? "Replier" : "Voir"} les détails">
+            const rech = estRecherche(m);
+            const tag = (rech ? `<span class="tb-role rech">RECHERCHÉS À BORD</span>` : "") + (role === "passe" ? `<span class="tb-role pas">DÉJÀ PASSÉ</span>` : role === "rendre" ? `<span class="tb-role pas" style="color:#00FF66;border-color:#00FF66;">À RENDRE</span>` : "");
+            return `<div class="tb-ml ${u}${rech ? " rech" : ""}${ouvert ? " ouvert" : ""}"><div class="lg" onclick="basculerMission('${esc(id)}', ${defOuvert ? "true" : "false"})" title="${ouvert ? "Replier" : "Voir"} les détails">
                 <span class="ic">${ic}</span><span class="ty">${esc(lib)}</span><span class="ti">${esc(m.nom || lib)}${tag}</span><span class="rec">${m.rec != null ? fmtM(m.rec) : ""}</span>
                 <span class="cd" ${m.exp ? `data-cd="${esc(m.exp)}"` : ""}>${s === null ? "" : duree(s)}</span><span class="ch">${ouvert ? "▾" : "▸"}</span></div>${det}</div>`;
         }
@@ -1196,6 +1211,9 @@
                 const tous = avec.concat(retAvec), ord = meilleurOrdre(posDep, tous.map(posDe), avec.length);
                 seq = ord.filter(k => k < avec.length).map(k => tous[k]).concat(sans, ord.filter(k => k >= avec.length).map(k => tous[k]), retSans);
             } else seq = avec.slice().sort((a, b) => String(a.exp).localeCompare(String(b.exp))).concat(sans, retAvec, retSans);
+            // passagers recherchés à bord : leurs arrêts passent AVANT les autres (le reste garde l'ordre le plus court)
+            const prio = x => !x.fin && x.ms.some(estRecherche);
+            seq = seq.filter(prio).concat(seq.filter(x => !prio(x)));
             let arrets = ici.map(x => ({ ...x, pos: posDep, d: 0, sauts: 0 })), cur = posDep;
             seq.forEach(x => {
                 const p = posDe(x), d = p && cur ? dist3(cur, p) : null;
@@ -1533,7 +1551,7 @@
         function parcoursHtml(plan, act) {
             const { suite, iciIdx, ici0 } = suiteParcours(plan), depart = plan.depart.sys;
             const trajet = a => a.d === null || a.d === undefined ? "distance inconnue" : a.d === 0 ? "même système" : `${a.d.toFixed(1)} al · ${a.sauts} saut${a.sauts > 1 ? "s" : ""} · ≈ ${duree(a.min * 60)}`;
-            let h = `<div class="bloc cy" style="margin-bottom:12px;"><h2>PARCOURS ET MISSIONS <em>${plan.arrets.length ? "ordre le plus court en distance" + (plan.hasFin ? ", terminé là où rendre les missions" : "") : ""}</em></h2>${legendeParcours()}<div class="tb-parcours">`;
+            let h = `<div class="bloc cy" style="margin-bottom:12px;"><h2>PARCOURS ET MISSIONS <em>${plan.arrets.length ? "ordre le plus court en distance" + (act.some(estRecherche) ? ", passagers recherchés d'abord" : "") + (plan.hasFin ? ", terminé là où rendre les missions" : "") : ""}</em></h2>${legendeParcours()}<div class="tb-parcours">`;
             suite.forEach((a, i) => {
                 const k = a.kind;
                 if (i > 0) h += k === "fait" || k === "passe" || i <= iciIdx ? `<div class="tb-lien fait"><b>↓</b></div>` : `<div class="tb-lien${k === "prochain" ? " pro" : ""}"><b>↓</b>${trajet(a)}</div>`;
@@ -1547,7 +1565,7 @@
                 }
                 const eti = { passe: "DÉJÀ PASSÉ · MISSION PAS TERMINÉE", ici: "VOUS ÊTES ICI" + (S.station ? " · " + S.station : "") + (a.ms.length ? " · À FAIRE ICI" : " · TERMINÉ ICI"), prochain: "PROCHAIN ARRÊT · OÙ ALLER", venir: "À FAIRE", fin: "FIN DU PARCOURS · RENDRE LES MISSIONS" }[k];
                 const etiPlus = k === "ici" && a.fin ? " · FIN DU PARCOURS : RENDRE LES MISSIONS" : (k === "prochain" && a.fin ? " · FIN DU PARCOURS : RENDRE LES MISSIONS" : "");
-                const ms = a.ms.slice().sort((x, y) => String(x.exp || "9999").localeCompare(String(y.exp || "9999")));
+                const ms = a.ms.slice().sort((x, y) => estRecherche(y) - estRecherche(x) || String(x.exp || "9999").localeCompare(String(y.exp || "9999")));
                 const role = m => k === "passe" ? "passe" : a.fin && aRendre(m) && cle(m.os) === cle(a.sys) ? "rendre" : aRendre(m) ? "place" : "";
                 const badge = a.dejaPasse ? `<span class="tb-role pas">DÉJÀ PASSÉ ICI · MISSION PAS TERMINÉE</span>` : "";
                 h += `<div class="tb-pa ${k}${a.fin ? " fin" : ""}"><div class="tete"><span class="num">${a.fin ? "⚑" : a.num}</span><span class="nom">${cp(a.sys, String(a.sys).toUpperCase())}</span><span class="eti">${eti}${k === "ici" || k === "prochain" ? etiPlus : ""}</span>${badge}</div>
