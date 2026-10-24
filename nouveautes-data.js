@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-ou-vendre-minerais', date: '2026-10-24T21:00:00Z', type: 'CORRIGE',
+        titre: 'Où vendre ? : les minerais (Gallite, Indite…) sont enfin proposés',
+        texte: 'Les fenêtres « Où vendre ? » et « Où vendre à perte ? » écartaient d’office les minerais. Or plusieurs stations les vendent et la faction les rachète très cher : à Carini, la Gallite et l’Indite rapportent plus de trois fois le bénéfice de l’ancienne « meilleure route ». Ils sont maintenant proposés comme n’importe quelle marchandise (seuls les esclaves et le butin restent écartés), y compris pour le trajet retour de l’aller-retour.',
+        important: false
+    },
+    {
         id: '2026-10-croises-ennemi-journal-allege', date: '2026-10-24T20:00:00Z', type: 'AMELIORE',
         titre: 'Joueurs croisés : filtre ENNEMI ; journal tactique allégé',
         texte: 'Dans la fenêtre des joueurs croisés (QG, onglet Combat et mobile), un nouveau filtre « ENNEMI » n’affiche que les joueurs en rouge : camp rival, recherchés et primes. Le journal tactique est aussi plus lisible : plus de ligne quand un pilote espionne un système de la liste (le point BGS et la ligne du journal des exploits restent) et plus de ligne quand le vaisseau scanné est celui d’un membre de l’escadron. Ces scans de membres ne comptent plus non plus dans le journal des exploits, ni pour la distinction L’ESPION.',
