@@ -125,13 +125,37 @@
         } finally { enCours = false; }
     }
 
+    // ANNONCE SONORE du tick : quand un NOUVEAU tick reel apparait, sons/tick-annonce.mp3 est joue une seule fois par appareil (cle edteam_tick_annonce = dernier tick annonce).
+    // Jamais pour un tick de plus de 3 h (page ouverte longtemps apres) ; le premier passage sur un appareil note le tick en cours sans le jouer ; coupee par l'interrupteur de son ; onglet masque : pas de son.
+    // Si le navigateur refuse la lecture automatique, on retente au premier geste (dans les 10 minutes).
+    const CLE_ANNONCE = "edteam_tick_annonce", FICHIER_ANNONCE = "sons/tick-annonce.mp3";
+    function annoncer() {
+        try {
+            const c = lire(); if (!c || !c.l.length) return;
+            const t = c.l[c.l.length - 1], tms = Date.parse(t); if (!isFinite(tms)) return;
+            let vu = null; try { vu = localStorage.getItem(CLE_ANNONCE); } catch (e) { return; }
+            if (vu && Date.parse(vu) >= tms) return;
+            if (document.hidden) return;                       // on attend que la page soit visible : le tick de moins de 3 h sera encore annonce
+            try { localStorage.setItem(CLE_ANNONCE, t); } catch (e) { return; }      // note tout de suite : un autre onglet ne le rejoue pas
+            if (!vu || Date.now() - tms > 3 * HEURE) return;
+            if (window.edteamSon && window.edteamSon.estMuet && window.edteamSon.estMuet()) return;
+            const el = new Audio(FICHIER_ANNONCE); el.volume = 0.8;
+            const lancer = () => { try { const p = el.play(); if (p && p.catch) p.catch(attendre); } catch (e) { /* pas de son */ } };
+            const attendre = () => {
+                const fin = Date.now() + 10 * 60000, geste = () => { document.removeEventListener("pointerdown", geste, true); document.removeEventListener("keydown", geste, true); if (Date.now() < fin) lancer(); };
+                document.addEventListener("pointerdown", geste, true); document.addEventListener("keydown", geste, true);
+            };
+            lancer();
+        } catch (e) { /* une annonce ne doit jamais gener la page */ }
+    }
+
     function demarrer() {
         if (!document.getElementById("header-tick")) return;
         if (!document.getElementById("hd-tick-css")) { const st = document.createElement("style"); st.id = "hd-tick-css"; st.textContent = CSS; document.head.appendChild(st); }
         dessiner();
-        rafraichir().then(dessiner);
+        rafraichir().then(() => { dessiner(); annoncer(); });
         let n = 0;
-        setInterval(() => { if (document.hidden) return; dessiner(); if (++n % 30 === 0) rafraichir().then(dessiner); }, 1000);      // compteur a la seconde ; test du reseau toutes les 30 s (l'appel reel reste limite a un par 10 min ou 3 h)
+        setInterval(() => { if (document.hidden) return; dessiner(); if (++n % 30 === 0) rafraichir().then(() => { dessiner(); annoncer(); }); }, 1000);      // compteur a la seconde ; test du reseau toutes les 30 s (l'appel reel reste limite a un par 10 min ou 3 h)
     }
     // Ticks passes entre deux instants (ms) pour les graphiques (barres « effort par tick » des directives) : [{ t (ms), est (bool) }].
     // Les ticks reels sont ceux du detecteur ; un jour sans tick reel (detecteur muet) recoit un tick ESTIME au milieu de la fourchette habituelle, jamais dans le futur.

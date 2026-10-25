@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-tick-annonce-sonore", date: "2026-10-25T19:30:00Z", type: "NOUVEAU",
+        titre: "Le tick s’annonce à voix haute",
+        texte: "Quand EDTEAM détecte le tick de la galaxie, une courte annonce sonore retentit, une seule fois par appareil. Elle ne se rejoue pas si tu ouvres le site longtemps après le tick, et elle est coupée par l’interrupteur de son du site.",
+        important: false
+    },
+    {
         id: "2026-10-conflit-en-cours", date: "2026-10-25T19:00:00Z", type: "AMELIORE",
         titre: "Directive sur une guerre ou une élection déjà commencée",
         texte: "Quand l’Amiral crée une directive sur une faction qui est déjà en guerre ou en élection, la fenêtre plein écran s’ouvre quand même, avec « GUERRE EN COURS » ou « ÉLECTION EN COURS » et le score actuel s’il est connu. Le bandeau de la directive dit lui aussi « en cours » au lieu de « a commencé ».",
