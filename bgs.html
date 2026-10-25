@@ -24,6 +24,7 @@
     <script src="campagnes.js?v=65"></script>
     <script src="quotas-jour.js?v=17"></script>
     <script src="conflit-evenements.js?v=3"></script>
+    <script src="conflit-modale.js?v=1"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=7"></script>
@@ -1867,6 +1868,8 @@
 
                 // DEBUT / FIN DE GUERRE OU D'ELECTION depuis le dernier tick (SQL 132, conflit-evenements.js) ; null sans la fonction serveur
                 try { window.cacheEvtConflits = (ordresData.length > 0 && window.EdteamConflitEvt) ? await window.EdteamConflitEvt.charger(false) : null; } catch (e) { window.cacheEvtConflits = null; }
+                // fenetre plein ecran pour chaque debut / fin de guerre ou d'election non encore vu (conflit-modale.js)
+                try { if (window.EdteamConflitModale && window.cacheEvtConflits) window.EdteamConflitModale.verifier(profilCommandant, window.cacheEvtConflits, { ouvrir: function (id) { window.ouvrirDetailResultat(id); } }); } catch (e) { /* sans fenetre */ }
 
                 window.cacheOrdresBgs = ordresData;
                 window.cacheResumeBgs = resume;

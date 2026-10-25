@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-fenetre-conflits-plein-ecran', date: '2026-10-25T13:45:00Z', type: 'NOUVEAU',
+        titre: 'Guerres et élections : une fenêtre plein écran quand elles démarrent ou se terminent',
+        texte: 'Quand une guerre ou une élection démarre sur une faction suivie par une directive de ton escadron, une fenêtre plein écran t’appelle à te mobiliser, avec les activités qui comptent. Quand elle se termine, tu vois le résultat : victoire en fête, défaite avec un mot pour repartir, ou « terminée » si le score n’a pas pu être confirmé. Elle s’affiche une seule fois par événement sur chaque appareil (page BGS et mobile), et pas pour les directives de baisse.',
+        important: false
+    },
+    {
         id: '2026-10-paliers-guerre-election', date: '2026-10-25T00:11:44Z', type: 'NOUVEAU',
         titre: 'Guerres et élections : tes actions du jour s’affichent en pastilles et en paliers',
         texte: 'Sur une directive de guerre ou d’élection, la ligne, la carte et la fenêtre montrent maintenant ce que tu as fait depuis le dernier tick : une pastille par activité (victoires en CZ, bons de combat, missions militaires ; logistique, commerce, exploration). Il n’y a pas de quota : la pastille s’allume dès que tu agis, puis le palier te situe par rapport aux pilotes de l’escadron qui ont agi : lancé, bon (au moins la médiane) ou excellent (au moins deux fois la médiane, avec une étoile). Pas de pourcentage ni de « à faire » : c’est juste un repère.',

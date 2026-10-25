@@ -23,6 +23,7 @@
     <script src="campagnes-mobile.js?v=20"></script>
     <script src="quotas-jour.js?v=17"></script>
     <script src="conflit-evenements.js?v=3"></script>
+    <script src="conflit-modale.js?v=1"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=7"></script>
@@ -1810,6 +1811,8 @@
                 if (window.EdteamQuotas && ordres && ordres.length) { try { await window.EdteamQuotas.charger(!!force); } catch (e) { /* affichage d'avant */ } }
                 // debut / fin de guerre ou d'election depuis le dernier tick (SQL 132, conflit-evenements.js)
                 if (window.EdteamConflitEvt && ordres && ordres.length) { try { await window.EdteamConflitEvt.charger(!!force); } catch (e) { window.cacheEvtConflits = null; } }
+                // fenetre plein ecran pour chaque debut / fin de guerre ou d'election non encore vu (conflit-modale.js)
+                try { if (window.EdteamConflitModale && window.cacheEvtConflits) window.EdteamConflitModale.verifier(profilCommandant, window.cacheEvtConflits, { ouvrir: function (id) { if (typeof switchMobileTab === 'function') switchMobileTab('bgs'); if (window.edteamCampagnesMob) window.edteamCampagnesMob.ouvrirOrdre(id); } }); } catch (e) { /* sans fenetre */ }
                 return { ordres: ordres || [], resume, infos, veille, campagnes };
             }, force);
         }
