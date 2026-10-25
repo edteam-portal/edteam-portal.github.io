@@ -87,6 +87,7 @@
 .qs-flogo #banner-gazette{background:rgba(3,12,16,.94)!important;box-shadow:0 0 10px rgba(0,0,0,.6);position:absolute!important;left:8px;bottom:8px;width:calc(122px - 16px);min-width:0!important;padding:5px 7px!important;gap:6px!important;z-index:5;box-sizing:border-box}.qs-flogo #banner-gazette>span:first-child{font-size:1.05em!important}.qs-flogo #banner-gazette>div{min-width:0}.qs-flogo #banner-gazette>div>div:last-child{white-space:normal;line-height:1.15;font-size:.52em!important;letter-spacing:0}
 @media (max-width:1500px){.qs-carte.qs-flogo{grid-template-columns:104px minmax(0,1fr)}.qs-flogo #banner-gazette{width:calc(104px - 16px)}}
 @media (max-width:640px){.qs-carte.qs-flogo{grid-template-columns:84px minmax(0,1fr)}}
+.qs-ednews{display:flex;align-items:center;gap:6px;border:1px solid rgba(0,240,255,.5);background:rgba(3,12,16,.94);box-shadow:0 0 10px rgba(0,0,0,.6);padding:5px 7px;cursor:pointer;box-sizing:border-box;min-width:0}.qs-ednews>span{font-size:1.05em}.qs-ednews .t{color:#00F0FF;font-weight:bold;letter-spacing:2px;font-size:.62em}.qs-ednews .d{color:#aaa;font-size:.52em;line-height:1.15;margin-top:1px}.qs-portrait .qs-ednews{position:absolute;left:6px;right:6px;bottom:6px;z-index:5}.qs-ednews.qs-solo{padding:9px 12px;gap:10px}.qs-ednews.qs-solo>span{font-size:1.4em}.qs-ednews.qs-solo .t{font-size:.74em}.qs-ednews.qs-solo .d{font-size:.64em}
 .qs-mid{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0}
 .qs-corps{flex:1;min-width:0;padding:11px 14px 8px;display:flex;flex-direction:column;gap:7px}
 @media (max-width:640px){.qs-hx{width:48px;height:53px}.qs-carte{padding:12px}.qs-carte.qs-pf{padding:0}.qs-portrait{width:84px}}
@@ -153,14 +154,19 @@
         return '<span style="white-space:nowrap">SOURCE : SPANSH' + frais + '</span><span style="white-space:nowrap">RELEVÉ DU ' + esc(jj(f.releve_le)) + '</span>';
     }
 
+    // Bouton EDNEWS du compagnon mobile : sous le logo de l’escadron (ou seul si la carte faction n’existe pas). Date et pastille rouge : mobile.html (appliquerEtatGazetteMobile)
+    function boutonEdnews(solo) {
+        return '<div id="m-btn-gazette" class="qs-ednews' + (solo ? ' qs-solo' : '') + '" onclick="ouvrirGazetteMobile()" title="EDNews de l’escadron : dernière édition"><span>📰</span><div style="min-width:0;"><div class="t">EDNEWS</div><div class="d" id="m-gazette-date">Archives…</div></div></div>';
+    }
+
     // Carte « Ma faction » du compagnon mobile : logo en colonne a gauche (comme le portrait), nom, 4 tuiles, source
     function carteFactionMobile(f, logo) {
         const url = logo && logo.chemin ? logoUrl(logo) : '';
         const hex = url ? '' : '<div class="qs-hx">' + ICONE_FACTION + '</div>';
         const corps = '<div class="qs-cap">' + hex + '<div style="min-width:0;"><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">' + esc(String(f.nom).toUpperCase()) + '</div></div></div>'
-            + statsFaction(f) + '<div class="qs-src">' + ligneSourceFaction(f) + '</div>';
+            + statsFaction(f) + '<div class="qs-src">' + ligneSourceFaction(f) + '</div>' + (url ? '' : boutonEdnews(true));
         if (!url) return '<div class="qs-carte qs-fm" style="--c:#FF7100;">' + corps + '</div>';
-        return '<div class="qs-carte qs-pf qs-fm" style="--c:#FF7100;"><div class="qs-portrait"><img src="' + esc(url) + '" alt="Logo de l’escadron" loading="lazy" style="object-position:center;"></div><div class="qs-corps">' + corps + '</div></div>';
+        return '<div class="qs-carte qs-pf qs-fm" style="--c:#FF7100;"><div class="qs-portrait"><img src="' + esc(url) + '" alt="Logo de l’escadron" loading="lazy" style="object-position:center;">' + boutonEdnews(false) + '</div><div class="qs-corps">' + corps + '</div></div>';
     }
 
     async function charger() {
@@ -248,8 +254,9 @@
             const membre = !!(d && d.acces && (d.faction || (moi.escadron_id && String(moi.escadron_id).toUpperCase() !== 'INDEPENDANT')));
             let h = '';
             if (d && d.puissance) h += cartePuissance(d.puissance);
-            if (membre && d && d.faction) h += carteFactionMobile(d.faction, d.logo);
-            el.innerHTML = h; el.style.display = h ? 'flex' : 'none';
+            if (membre && d && d.faction) h += carteFactionMobile(d.faction, d.logo); else h += boutonEdnews(true);
+            el.innerHTML = h; el.style.display = 'flex';
+            if (typeof window.appliquerEtatGazetteMobile === 'function') window.appliquerEtatGazetteMobile();
         } catch (e) { console.error('Suivi puissance / faction (mobile) :', e); }
     };
     injecterStyle();

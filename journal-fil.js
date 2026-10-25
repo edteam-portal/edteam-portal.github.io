@@ -3,7 +3,7 @@
 //   - trois niveaux : grandes cartes (titre, rang, distinction, station), cartes courantes, groupes (joueurs croises, missions, directives modifiees)
 //   - separateurs de jour, filtres, bandeau « AUJOURD HUI » (PC), « charger les plus anciennes »
 //   - reactions : 1 seule par pilote et par ligne, lues en UN appel avec la page (journal_reactions_lire), ecrites par journal_reagir ; sans le SQL 158 elles disparaissent
-// Usage : EdteamFil.monter(element, { db, escadron, mode: 'pc' | 'mob', estLu(id), marquerLu(id), photo(user_id, nom) -> url ou '' }) puis EdteamFil.donner(lignes) a chaque changement. Pas de fenetre de detail : le texte est affiche en entier.
+// Usage : EdteamFil.monter(element, { max (nombre de lignes : apercu sans filtres ni « plus anciennes »), db, escadron, mode: 'pc' | 'mob', estLu(id), marquerLu(id), photo(user_id, nom) -> url ou '' }) puis EdteamFil.donner(lignes) a chaque changement. Pas de fenetre de detail : le texte est affiche en entier.
 (function () {
     "use strict";
     if (window.EdteamFil) return;
@@ -245,7 +245,7 @@
         return n;
     }
     function listeHtml() {
-        var all = filtrees(), vis = all.slice(0, st.nb), h = "", jour = "", i = 0;
+        var all = filtrees(), vis = all.slice(0, st.o.max || st.nb), h = "", jour = "", i = 0;
         if (!all.length) return "<div class=\"fil-vide\">> AUCUNE TRANSMISSION</div>";
         while (i < vis.length) {
             var l = vis[i], c = categorie(l), d = new Date(l.created_at), jc = jourCle(d);
@@ -257,7 +257,7 @@
             }
             h += carte(l, c, presenter(l, c)); i++;
         }
-        return h + (all.length > vis.length ? "<button type=\"button\" class=\"fil-mr\" data-a=\"plus\">CHARGER LES PLUS ANCIENNES ▾</button>" : "");
+        return h + (!st.o.max && all.length > vis.length ? "<button type=\"button\" class=\"fil-mr\" data-a=\"plus\">CHARGER LES PLUS ANCIENNES ▾</button>" : "");
     }
     function bandeau() {
         var recent = st.data.filter(function (x) { return Date.now() - new Date(x.created_at).getTime() < 86400000; });     // bandeau AUJOURD HUI = les dernieres 24 h seulement
@@ -272,7 +272,7 @@
     }
     function squelette() {
         var m = st.o.mode === "mob";
-        st.el.innerHTML = "<div class=\"fil-jr " + (m ? "mob" : "pc") + "\">"
+        st.el.innerHTML = "<div class=\"fil-jr " + (m ? "mob" : "pc") + (st.o.max ? " ap" : "") + "\">"
             + (m ? "" : "<div class=\"fil-hd\"><div class=\"fil-ti\">Fil de l’escadron<small>" + esc(String(st.o.escadron || "").toUpperCase()) + " · TRANSMISSIONS</small></div><div class=\"fil-live\"><i></i>EN DIRECT</div></div><div class=\"fil-tk\"></div>")
             + "<div class=\"fil-fl\"></div><div class=\"fil-liste\"></div></div>";
         st.vue = { liste: st.el.querySelector(".fil-liste"), fl: st.el.querySelector(".fil-fl"), tk: st.el.querySelector(".fil-tk") };
@@ -284,6 +284,7 @@
         if (!st.el) return;
         if (!st.vue || !st.el.contains(st.vue.liste)) squelette();
         var pos = st.vue.liste.scrollTop, n = compter();
+        st.vue.fl.style.display = st.o.max ? "none" : "";
         st.vue.fl.innerHTML = [["tout", "Tout"], ["bgs", "BGS"], ["dist", "Distinctions"], ["esc", "Escadron"], ["cro", "Joueurs croisés"]].map(function (f) {
             return "<button type=\"button\" data-a=\"f\" data-f=\"" + f[0] + "\" class=\"" + (st.filtre === f[0] ? "on" : "") + "\">" + f[1] + "<em>" + n[f[0]] + "</em></button>";
         }).join("");
@@ -382,6 +383,8 @@
         + ".fil-jr.mob{background:transparent}.fil-jr.mob .fil-fl{padding:6px 0 10px}.fil-jr.mob .fil-liste{padding:0}"
         + "@media(max-width:700px){.fil-hd{padding:12px 16px}.fil-ti{font-size:15px;letter-spacing:3px}.fil-live{display:none}.fil-fl{padding:10px 14px}.fil-liste{padding:2px 14px 12px}.fil-it,.fil-it.maj{grid-template-columns:40px 1fr;padding:11px 12px}.fil-it .fil-tm{grid-column:2;text-align:left;margin-top:5px}.fil-it .fil-hex,.fil-it.maj .fil-hex{width:40px;height:44px;font-size:18px}.fil-it.maj .fil-tt{font-size:17px}.fil-rx{grid-column:1/3}.fil-p.ajt{opacity:1}.fil-tk{font-size:11.5px}}"
         + ".fil-jr.mob .fil-it,.fil-jr.mob .fil-it.maj{grid-template-columns:40px 1fr;padding:10px}.fil-jr.mob .fil-it .fil-tm{grid-column:2;text-align:left;margin-top:5px}.fil-jr.mob .fil-it .fil-hex,.fil-jr.mob .fil-it.maj .fil-hex{width:40px;height:44px;font-size:18px}.fil-jr.mob .fil-it.maj .fil-tt{font-size:17px}.fil-jr.mob .fil-rx{grid-column:1/3}.fil-jr.mob .fil-p.ajt{opacity:1}.fil-jr.mob .fil-fl{padding-left:0;padding-right:0}"
+        + ".fil-jr.mob:not(.ap) .fil-it,.fil-jr.mob:not(.ap) .fil-it.maj{grid-template-columns:40px 1fr auto}.fil-jr.mob:not(.ap) .fil-it .fil-hex{grid-column:1;grid-row:1/3;align-self:start}.fil-jr.mob:not(.ap) .fil-it .fil-cx{grid-column:2;grid-row:1}.fil-jr.mob:not(.ap) .fil-it .fil-tm{grid-column:3;grid-row:1;margin-top:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}.fil-jr.mob:not(.ap) .fil-it .fil-rx{grid-column:2/4;grid-row:2;margin-top:6px}"
+        + ".fil-jr.ap .fil-it,.fil-jr.ap .fil-it.maj{grid-template-columns:40px 1fr auto;padding:8px 11px;gap:11px;margin-bottom:5px;align-items:center}.fil-jr.ap .fil-it .fil-hex,.fil-jr.ap .fil-it.maj .fil-hex{width:40px;height:44px;font-size:18px}.fil-jr.ap .fil-cat{font-size:9.5px;letter-spacing:2px}.fil-jr.ap .fil-tt,.fil-jr.ap .fil-it.maj .fil-tt{font-size:15px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fil-jr.ap .fil-cx{min-width:0}.fil-jr.ap .fil-sb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}.fil-jr.ap .fil-rx,.fil-jr.ap .fil-tm i,.fil-jr.ap .fil-new{display:none}.fil-jr.ap .fil-it .fil-tm{grid-column:3;grid-row:1;margin-top:0;font-size:11px;align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:4px}.fil-jr.ap .fil-jour{padding:3px 0;font-size:10px}"
         + "@media (prefers-reduced-motion:reduce){.fil-jr *{animation:none!important}}";
     function css() { if (document.getElementById("edteam-fil-css")) return; var s = document.createElement("style"); s.id = "edteam-fil-css"; s.textContent = CSS; document.head.appendChild(s); }
 

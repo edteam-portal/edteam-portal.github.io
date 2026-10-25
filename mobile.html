@@ -24,7 +24,7 @@
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=5"></script>
     <script src="conflit-modale.js?v=3"></script>
-    <script src="journal-fil.js?v=5"></script>
+    <script src="journal-fil.js?v=13"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -33,7 +33,7 @@
     <script src="campagnes-pp.js?v=19"></script>
     <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=3"></script>
-    <script src="qgsuivi.js?v=38"></script>
+    <script src="qgsuivi.js?v=39"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=2"></script>
     <script src="medailles.js?v=17"></script>
@@ -679,6 +679,12 @@
                     </div>
                 </div>
 
+                <!-- FIL DE L'ESCADRON, juste sous le bloc CMDR (journal-fil.js, rempli par chargerFilMobile) -->
+                <div id="x-fil" class="xc" style="padding: 0; overflow: hidden; display: none; cursor: pointer;">
+                    <div id="x-fil-liste" style="padding: 10px 10px 0;"></div>
+                    <div style="text-align: center; padding: 9px 10px 11px; color: var(--ed-blue); font-size: 0.7em; letter-spacing: 1.5px;">VOIR TOUT LE FIL ›</div>
+                </div>
+
                 <!-- MA PUISSANCE (Powerplay) et MA FACTION (BGS) : releve quotidien Spansh, rempli par qgsuivi.js -->
                 <div id="m-suivi" style="display: none; flex-direction: column; gap: 12px;"></div>
 
@@ -701,16 +707,6 @@
                     <div class="xc b" id="x-elan" style="display: none;"></div>
                     <div class="xc click" id="x-escsem" onclick="switchMobileTab('bgs')"></div>
                     <div id="x-anecdote" style="display: none;"></div>
-                </div>
-
-                <div class="xh2">COMMUNICATIONS</div>
-                <div class="xtiles">
-                    <div id="m-btn-journal-tactique" class="xtile" onclick="ouvrirJournalTactiqueMobile()">
-                        <span class="e">📋</span><span class="l" style="color: var(--ed-blue);">JOURNAL</span><span class="d">Escadron</span>
-                    </div>
-                    <div id="m-btn-gazette" class="xtile" onclick="ouvrirGazetteMobile()">
-                        <span class="e">📰</span><span class="l" style="color: var(--ed-blue);">EDNEWS</span><span class="d" id="m-gazette-date">Archives...</span>
-                    </div>
                 </div>
 
             </div>
@@ -1280,7 +1276,8 @@
             initNouveautesMobile();
             if (window.QGSuivi) QGSuivi.monterMobile('m-suivi');
             // pastilles (gazette, notes, livraisons, exploits) : lues apres l'accueil, pas en meme temps que lui
-            xApres(chargerGazetteListMobile, 1800); xApres(verifierNouvellesNotesMobile, 2300); xApres(verifierNouvellesLivraisonsMobile, 2800);
+            chargerFilMobile();
+            xApres(chargerGazetteListMobile, 1800); xApres(verifierNouvellesLivraisonsMobile, 2800);
             setTimeout(xMajCloche, 3000); setTimeout(xMajCloche, 9000); // <--- NOUVELLE LIGNE AJOUTÉE ICI
             // Annonce d'une grande nouvelle fonction (une seule fois par pilote et par appareil) : annonce.js
             if (window.edteamAnnonce) window.edteamAnnonce.proposer(profilCommandant, { mobile: true, aller: () => { switchMobileTab('bgs'); bgsVue('dir'); } });
@@ -1428,7 +1425,6 @@
             if (nn) n.push({ e: '✨', t: nn + ' nouveauté' + (nn > 1 ? 's' : ''), s: 'Ce qui a changé sur le site', a: 'ouvrirNouveautesMobile()' });
             const rouge = id => { const e = xEl(id); return !!(e && /alerteBoutonRouge/.test(e.style.animation || '')); };
             if (xAccesBgs()) { const p = xEl('x-exp-pt'); if (p && p.style.display === 'block') n.push({ e: '📜', t: 'Nouveaux exploits', s: 'Journal des exploits BGS', a: "switchMobileTab('bgs'); bgsVue('exp')" }); }
-            if (rouge('m-btn-journal-tactique')) n.push({ e: '📋', t: 'Nouvelle note au journal', s: "Journal de l'escadron", a: 'ouvrirJournalTactiqueMobile()' });
             if (rouge('m-btn-gazette')) n.push({ e: '📰', t: 'Nouvelle édition EDNews', s: "Gazette de l'escadron", a: 'ouvrirGazetteMobile()' });
             { const jp = xEl('x-jr-pt'); if (jp && jp.style.display === 'block') n.push({ e: '📦', t: 'Nouvelles livraisons', s: 'Journal de colonisation', a: "switchMobileTab('batir'); batirVue('jour')" }); }
             const al = xEl('x-alertes');
@@ -2852,89 +2848,68 @@
         // SYSTÈME DE NOTIFICATIONS VISUELLES
         // ==========================================
 
-        // 1. VÉRIFICATION DES NOTES D'INFO (QG)
-        async function verifierNouvellesNotesMobile() {
-            if (!profilCommandant) return;
-            try {
-                const { data } = await supabaseApp.from('journal_activite').select('created_at').in('escadron_id', [profilCommandant.escadron_id || '', 'GLOBAL']).order('created_at', { ascending: false }).limit(1);
-                if (data && data.length > 0) {
-                    const derniereNoteDate = new Date(data[0].created_at).getTime();
-                    const dateDerniereLecture = parseInt(localStorage.getItem('edteam_last_read_notes') || '0');
-                    const btn = document.getElementById('m-btn-journal-tactique');
-                    if (btn && derniereNoteDate > dateDerniereLecture) {
-                        btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
-                        btn.style.borderColor = '#FF3333'; // Passe en rouge !
-                        
-                        // Allume l'onglet QG en bas si on n'y est pas
-                        if (document.getElementById('tab-qg').style.display !== 'flex') {
-                            document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
-                        }
-                    }
-                }
-            } catch (e) {}
+        // FIL DE L'ESCADRON : affiche en direct tout en haut de l'accueil (comme sur PC), journal-fil.js (reactions SQL 158)
+        // Accueil : les 6 dernieres lignes ; un toucher ouvre la fenetre complete (defilement, filtres, plus anciennes)
+        let filMobileLignes = [], filMobileTs = 0;
+        const FIL_OPTS = { mode: 'mob', puissance: () => (window.profilCommandant && window.profilCommandant.puissance_nom) || '' };
+        async function monterFilApercu() {
+            const cont = document.getElementById('x-fil-liste');
+            cont.innerHTML = '';
+            window.EdteamFil.monter(cont, Object.assign({ db: supabaseApp, max: 6 }, FIL_OPTS));
+            await window.EdteamFil.donner(filMobileLignes, true);
         }
-
-        // 2. OUVERTURE DU JOURNAL DES NOTES (ÉTEINT L'ALERTE)
-        async function ouvrirJournalTactiqueMobile() {
+        async function ouvrirFilMobile() {
             if (typeof sonClic === 'function') sonClic();
-            
-            // On valide la lecture et on remet le bouton en bleu
-            localStorage.setItem('edteam_last_read_notes', Date.now().toString());
-            const btn = document.getElementById('m-btn-journal-tactique');
-            if (btn) {
-                btn.style.animation = 'none';
-                btn.style.borderColor = '';
-            }
-
-            document.getElementById('modal-journal-tactique').style.display = 'flex';
-            
-            const cont = document.getElementById('m-journal-tactique-content');
-            cont.innerHTML = '<div style="color: var(--ed-blue); font-size: 0.85em; text-align: center; margin-top: 20px; animation: alertPulse 1.5s infinite;">Téléchargement des notes...</div>';
-
+            const cont = document.getElementById('m-fil-contenu');
+            cont.innerHTML = '';
+            document.getElementById('modal-fil').style.display = 'flex';
+            window.EdteamFil.monter(cont, Object.assign({ db: supabaseApp }, FIL_OPTS));
+            await window.EdteamFil.donner(filMobileLignes, true);
+        }
+        function fermerFilMobile() {
+            if (typeof sonClic === 'function') sonClic();
+            document.getElementById('modal-fil').style.display = 'none';
+            monterFilApercu();
+        }
+        async function chargerFilMobile() {
+            const cont = document.getElementById('x-fil');
+            if (!cont || !profilCommandant || !window.EdteamFil) return;
             try {
                 const { data, error } = await supabaseApp.from('journal_activite')
                     .select('*')
                     .in('escadron_id', [profilCommandant.escadron_id || '', 'GLOBAL'])
                     .order('created_at', { ascending: false })
                     .limit(40);
-
                 if (error) throw error;
-
-                if (data && data.length > 0 && window.EdteamFil) {
-                    // Fil de l'escadron (journal-fil.js) : cartes, groupes, filtres et reactions (SQL 158)
-                    cont.innerHTML = '';
-                    window.EdteamFil.monter(cont, { db: supabaseApp, mode: 'mob', puissance: () => (window.profilCommandant && window.profilCommandant.puissance_nom) || '' });
-                    await window.EdteamFil.donner(data, true);
-                } else if (data && data.length > 0) {
-                    let html = '';
-                    data.forEach(item => {
-                        const d = new Date(item.created_at);
-                        const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                        const col = item.couleur || 'var(--ed-blue)';
-                        
-                        html += `
-                        <div style="background: rgba(0,0,0,0.6); border-left: 3px solid ${col}; padding: 10px 12px; border-radius: 0 4px 4px 0; margin-bottom: 5px;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
-                                <span style="color: ${col}; font-weight: bold; font-size: 0.85em; letter-spacing: 1px;">[ ${escapeHtml(item.type_action)} ]</span>
-                                <span style="color: #888; font-size: 0.75em;">${dateStr}</span>
-                            </div>
-                            <div style="color: #ddd; font-size: 0.9em; line-height: 1.4; margin-bottom: 8px;">
-                                ${escapeHtml(item.details)}
-                            </div>
-                            <div style="color: #555; font-size: 0.75em; text-align: right; font-style: italic;">
-                                CMDR ${escapeHtml(item.cmdr_nom.toUpperCase())}
-                            </div>
-                        </div>`;
-                    });
-                    cont.innerHTML = html;
-                } else {
-                    cont.innerHTML = '<div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Aucune note d\'information enregistrée.</div>';
+                filMobileTs = Date.now();
+                if (!data || !data.length) { cont.style.display = 'none'; return; }
+                filMobileLignes = data;
+                if (!cont.getAttribute('data-fil-ok')) {
+                    cont.setAttribute('data-fil-ok', '1');
+                    // en capture : un toucher sur une ligne ou un bouton de l'apercu ouvre la fenetre au lieu d'agir
+                    cont.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); ouvrirFilMobile(); }, true);
                 }
-            } catch (e) {
-                console.error(e);
-                cont.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 20px;">Erreur de liaison.</div>';
-            }
+                cont.style.display = 'block';
+                if (document.getElementById('modal-fil').style.display === 'flex') await window.EdteamFil.donner(data, true);
+                else await monterFilApercu();
+            } catch (e) { console.error(e); }
         }
+        // au retour sur l'appli : on relit le fil, au plus une fois toutes les 2 minutes
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && filMobileTs && Date.now() - filMobileTs > 120000) chargerFilMobile(); });
+
+        // Bouton EDNEWS (sous le logo de la faction, qgsuivi.js) : date de la derniere edition + pastille rouge si non lue. Rappelee aussi quand la carte est (re)dessinee.
+        window.appliquerEtatGazetteMobile = function () {
+            const g = cacheGazettesMobile[0];
+            if (!g) return;
+            const dt = document.getElementById('m-gazette-date');
+            if (dt) dt.innerText = new Date(g.created_at).toLocaleDateString('fr-FR');
+            const btn = document.getElementById('m-btn-gazette');
+            if (btn && new Date(g.created_at).getTime() > parseInt(localStorage.getItem('edteam_last_read_gazette') || '0')) {
+                btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
+                btn.style.borderColor = '#FF3333';
+                if (document.getElementById('tab-qg').style.display !== 'flex') document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
+            }
+        };
 
         // Gazette : alerte de nouvelle edition
         async function chargerGazetteListMobile() {
@@ -2944,8 +2919,6 @@
 
                 if (data && data.length > 0) {
                     cacheGazettesMobile = data;
-                    const d = new Date(data[0].created_at).toLocaleDateString('fr-FR');
-                    document.getElementById('m-gazette-date').innerText = "DERNIÈRE ÉDITION : " + d;
                     
                     const select = document.getElementById('m-gazette-selector');
                     select.innerHTML = '';
@@ -2956,21 +2929,9 @@
                         select.appendChild(opt);
                     });
 
-                    // Alerte Gazette
-                    const articleTs = new Date(data[0].created_at).getTime();
-                    const lastRead = parseInt(localStorage.getItem('edteam_last_read_gazette') || '0');
-                    const btn = document.getElementById('m-btn-gazette');
-                    if (btn && articleTs > lastRead) {
-                        btn.style.animation = 'alerteBoutonRouge 1.5s infinite';
-                        btn.style.borderColor = '#FF3333';
-                        
-                        // Allume l'onglet QG en bas si on n'y est pas
-                        if (document.getElementById('tab-qg').style.display !== 'flex') {
-                            document.getElementById('nav-btn-qg').classList.add('alerte-nav-rouge');
-                        }
-                    }
+                    appliquerEtatGazetteMobile();
                 } else {
-                    document.getElementById('m-gazette-date').innerText = "Aucune archive disponible.";
+                    const gd = document.getElementById('m-gazette-date'); if (gd) gd.innerText = "Aucune archive disponible.";
                     document.getElementById('m-gazette-selector').innerHTML = '<option>Archives vides</option>';
                 }
             } catch(e) {}
@@ -4108,19 +4069,14 @@
         initAnalyticsMobile();
     </script>
 
-    <!-- MODAL JOURNAL TACTIQUE (NOTES D'INFOS) AVEC EFFET CRT -->
-    <div class="modal-overlay" id="modal-journal-tactique" onclick="document.getElementById('modal-journal-tactique').style.display='none'" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6500; padding: 20px;">
-        <div class="card crt-container" style="width: 100%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
-            <div class="crt-scan-beam"></div>
-            
-            <div style="padding: 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.1); z-index: 2;">
-                <span style="color: var(--ed-blue); font-weight: bold; font-size: 1.1em; letter-spacing: 1px;">📋 JOURNAL D'ACTIVITÉ</span>
-                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em;" onclick="document.getElementById('modal-journal-tactique').style.display='none'; if(typeof sonClic==='function') sonClic();">✕</span>
+    <!-- FENETRE DU FIL DE L'ESCADRON (liste complete avec defilement) -->
+    <div class="modal-overlay" id="modal-fil" onclick="fermerFilMobile()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 6500; padding: 14px;">
+        <div class="card" style="width: 100%; max-width: 450px; max-height: 88vh; display: flex; flex-direction: column; padding: 0; border-color: var(--ed-blue);" onclick="event.stopPropagation()">
+            <div style="padding: 14px 15px; border-bottom: 1px solid var(--ed-blue); display: flex; justify-content: space-between; align-items: center; background: rgba(0,240,255,0.1);">
+                <span style="color: var(--ed-blue); font-weight: bold; font-size: 1.05em; letter-spacing: 1px;">FIL DE L'ESCADRON</span>
+                <span style="color: var(--ed-blue); font-weight: bold; cursor: pointer; font-size: 1.2em; padding: 0 4px;" onclick="fermerFilMobile()">✕</span>
             </div>
-            
-            <div id="m-journal-tactique-content" class="crt-screen" style="padding: 15px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; z-index: 1;">
-                <div style="color: #666; font-size: 0.85em; text-align: center; padding: 20px;">Connexion à la base de données...</div>
-            </div>
+            <div id="m-fil-contenu" style="padding: 12px; overflow-y: auto; flex-grow: 1;"></div>
         </div>
     </div>
 

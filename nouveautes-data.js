@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-mobile-fil-en-haut", date: "2026-10-25T23:19:00Z", type: "AMELIORE",
+        titre: "Mobile : le fil de l’escadron s’affiche en premier",
+        texte: "Sur l’accueil du téléphone, les 6 dernières actualités de l’escadron s’affichent juste sous ton bloc de commandant. Un toucher ouvre le fil complet, que tu peux faire défiler (plus besoin du bouton Journal). Le bouton EDNEWS se trouve désormais sous le logo de ton escadron.",
+        important: false
+    },
+    {
         id: "2026-10-fil-bandeau-aujourdhui", date: "2026-10-25T19:10:00Z", type: "AMELIORE",
         titre: "Fil de l’escadron : le bandeau montre la journée",
         texte: "Le bandeau défilant en haut du fil s’appelle maintenant « AUJOURD’HUI » et fait défiler toutes les nouvelles des dernières 24 heures, plus rapidement. Il n’affiche plus de vieilles nouvelles : s’il n’y en a aucune, il dit « Aucune actualité pour l’instant ».",
