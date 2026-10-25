@@ -225,6 +225,7 @@
         { const cr = campR(c, e), col = { r: "var(--rg)", v: "#00FF66", b: "#6FA8FF" }[cr[0]];
           h += boite("right", 405, "PUISSANCE DÉFENDUE", st >= 3 || c.pw ? E(c.pw || "AUCUNE") : att(""), E(cr[1]), "", col); }
         h += campCible(c, e) === "r" ? menaceHtml(c) + tamponHtml(c) : "";
+        if (j && c.p) h += `<a class="cb-ina" href="https://inara.cz/elite/search/?search=${encodeURIComponent(c.p)}" target="_blank" rel="noopener noreferrer" title="Chercher ce commandant sur Inara">CHERCHER SUR INARA ↗</a>`;
         return h;
     }
     // niveau de menace ESTIME (rang du pilote, classe du vaisseau, prime) : le jeu ne donne pas de niveau de menace
@@ -614,6 +615,7 @@ ${p.n ? `<div class="cr"><b>${FR(p.cr)} cr</b></div><div class="mini">${pcr} % d
 .cb-vus .v b{font-size:clamp(13px,1.15vw,18px);letter-spacing:1px}.cb-vus .v small{font-size:clamp(11px,.95vw,14px)}.cb-vus .v small.rg{font-size:clamp(11px,.9vw,13px)}
 .cb-bx .att{color:var(--rg);font-size:13px;letter-spacing:2px}.cb-bx .att:after{content:none}
 .cb-men .seg{display:flex;gap:4px;margin:5px 0 3px;justify-content:flex-end}.cb-men .seg i{display:block;width:34px;height:7px;background:rgba(255,255,255,.1)}
+.cb-ina{position:absolute;left:12px;top:408px;z-index:5;border:1px solid #FF9A1F;color:#FF9A1F;background:rgba(2,6,8,.8);font-size:11px;letter-spacing:2px;padding:7px 12px;text-decoration:none;white-space:nowrap}.cb-ina:hover{background:rgba(255,154,31,.2);color:#fff}.cb-cible.est-mort .cb-ina{opacity:.4}
 .cb-stamp{position:absolute;left:226px;top:408px;z-index:3;transform:rotate(-13deg);border:3px solid #FF3B30;color:#FF3B30;padding:2px 16px 3px;text-align:center;background:rgba(40,0,0,.5);box-shadow:0 0 18px rgba(255,59,48,.55),inset 0 0 12px rgba(255,59,48,.25);animation:cbStamp .55s cubic-bezier(.2,1.4,.4,1) both;pointer-events:none}
 .cb-stamp b{display:block;font-weight:bold;font-size:28px;letter-spacing:8px;line-height:1.15;color:#FF3B30;text-shadow:0 0 10px rgba(255,59,48,.8)}.cb-stamp small{display:block;font-size:11px;letter-spacing:3px;color:#FFB4AC}
 @keyframes cbStamp{from{opacity:0;transform:rotate(-13deg) scale(2.6)}to{opacity:1;transform:rotate(-13deg) scale(1)}}

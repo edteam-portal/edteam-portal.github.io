@@ -35,6 +35,7 @@
 .jc-l .nm{color:#fff;font-size:.98em;letter-spacing:1px;overflow-wrap:anywhere}.jc-l .nm small{display:block;color:#8fb7bf;font-size:.74em;letter-spacing:.5px}
 .jc-l .fa{color:#b9c8ce;font-size:.8em;overflow-wrap:anywhere}.jc-l .fa i{font-style:normal;color:#FFD700;letter-spacing:1px}.jc-l .fa .pw{color:#8fd3ff}.jc-l .fa .pw0{color:#6f7c84;font-style:italic}
 .jc-l .vu{color:#9aa7ad;font-size:.76em}.jc-l .nm .mt{display:none}.jc-l .nb{color:#00F0FF;text-align:right;font-size:.9em}
+.jc-inara{display:inline-block;margin-left:10px;border:1px solid #FF9A1F;color:#FF9A1F;font-size:.66em;letter-spacing:2px;padding:2px 10px;text-decoration:none;white-space:nowrap}.jc-inara:hover{background:rgba(255,154,31,.18);color:#fff}
 .jc-chip{display:inline-block;border:1px solid var(--t);color:var(--t);font-size:.66em;letter-spacing:2px;padding:2px 8px;white-space:nowrap}
 .jc-l .pc{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}.jc-l .pc .jc-sy{color:#9fd3e0;font-size:.84em;letter-spacing:.5px;overflow-wrap:anywhere}
 .jc-d{display:none;padding:6px 14px 16px 14px;gap:16px 22px;grid-template-columns:minmax(0,290px) minmax(0,1fr);align-items:center}.jc-r.ouv .jc-d{display:grid}.jc-r.ouv .jc-l{background:color-mix(in srgb,var(--t) 9%,transparent)}
@@ -240,7 +241,7 @@
             + '<div class="nm">CMD ' + E(x.n.toUpperCase()) + '<small>' + E(String(nom)) + (x.rg ? ' · ' + E(String(x.rg).toUpperCase()) : '') + '<span class="mt"> · ' + il(x.d) + (x.pm > 0 ? ' · PRIME ' + FR(x.pm) + ' CR' : '') + '</span></small></div>'
             + '<div class="fa">' + (x.f ? '<div>' + E(x.f) + '</div>' : '') + '<div>' + pwHtml(x) + '</div>' + (x.e ? '<div><i>[' + E(x.e) + ']</i></div>' : '') + '</div><div class="pc">' + pc + '</div>'
             + '<div class="vu">' + il(x.d) + '</div><div class="nb" title="Croisements : un verrouillage séparé du précédent d’au moins 10 minutes">×' + x.nb + '</div></div>'
-            + '<div class="jc-d"><div class="jc-g">' + (ouv ? holo(x, i, true) : '') + '</div><div class="jc-dt"><div class="tt"><span class="jc-chip">' + campDe(x)[1] + '</span></div>'
+            + '<div class="jc-d"><div class="jc-g">' + (ouv ? holo(x, i, true) : '') + '</div><div class="jc-dt"><div class="tt"><span class="jc-chip">' + campDe(x)[1] + '</span><a class="jc-inara" href="' + 'https://inara.cz/elite/search/?search=' + encodeURIComponent(x.n) + '" target="_blank" rel="noopener noreferrer" title="Chercher ce commandant sur Inara">INARA ↗</a></div>'
             + det('PREMIÈRE VUE', date(x.p)) + det('DERNIÈRE VUE', date(x.d)) + det('DERNIER SYSTÈME', E(x.sys)) + det('VU PAR', x.par ? 'CMDR ' + E(String(x.par).toUpperCase()) : '')
             + det('VAISSEAU', E(String(nom))) + det('RANG', E(x.rg)) + det('FACTION', E(x.f)) + det('ESCADRON DU JOUEUR', E(x.e)) + det('PUISSANCE', x.pw ? E(x.pw) : (x.l ? 'Aucune puissance soutenue' : 'Non relevée (scan incomplet)')) + det('STATUT LÉGAL', E(x.l))
             + det('PRIME', x.pm > 0 ? FR(x.pm) + ' cr' : '', 'pr') + det('CROISEMENTS', x.nb) + '</div></div></div>';

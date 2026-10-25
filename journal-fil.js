@@ -118,14 +118,15 @@
     // ------------------------------------------------------------------------------------------------------------
     // REACTIONS
     // ------------------------------------------------------------------------------------------------------------
-    function rxHtml(id, compact) {
-        if (!st.rxDispo) return "";
+    function inaraHtml(nom) { return nom ? "<a class=\"fil-ina\" href=\"https://inara.cz/elite/search/?search=" + encodeURIComponent(nom) + "\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"Chercher ce commandant sur Inara\">INARA ↗</a>" : ""; }
+    function rxHtml(id, compact, extra) {
+        if (!st.rxDispo) return extra ? "<div class=\"fil-rx" + (compact ? " c" : "") + "\">" + extra + "</div>" : "";
         var n = st.rx.n[id] || {}, moi = st.rx.moi[id], h = "";
         REACTS.forEach(function (r) { if (n[r[0]] > 0) h += "<button type=\"button\" class=\"fil-p" + (moi === r[0] ? " moi" : "") + "\" data-a=\"rx\" data-id=\"" + id + "\" data-e=\"" + r[0] + "\" title=\"" + (moi === r[0] ? "Retirer ma réaction" : "Réagir") + "\">" + r[1] + "<span>" + n[r[0]] + "</span></button>"; });
         if (String(st.picker) === String(id)) h += "<span class=\"fil-pick\">" + REACTS.map(function (r) { return "<b data-a=\"rx\" data-id=\"" + id + "\" data-e=\"" + r[0] + "\">" + r[1] + "</b>"; }).join("") + "</span>";
         else h += "<button type=\"button\" class=\"fil-p ajt\" data-a=\"pk\" data-id=\"" + id + "\" aria-label=\"Réagir\">☺ +</button>";
         if (REACTS.some(function (r) { return n[r[0]] > 0; })) h += "<button type=\"button\" class=\"fil-qui\" data-a=\"qui\" data-id=\"" + id + "\">" + (String(st.qui) === String(id) ? "▴ QUI ?" : "QUI ?") + "</button>";
-        return "<div class=\"fil-rx" + (compact ? " c" : "") + "\">" + h + "</div>" + (String(st.qui) === String(id) ? quiHtml(id) : "");
+        return "<div class=\"fil-rx" + (compact ? " c" : "") + "\">" + h + (extra || "") + "</div>" + (String(st.qui) === String(id) ? quiHtml(id) : "");
     }
     // qui a reagi (noms lus a la demande : SQL 159, jamais avec le chargement du fil)
     function quiHtml(id) {
@@ -201,7 +202,7 @@
         var tp = p.stamp ? { t: p.stamp.t, c: p.stamp.c } : tampon(l, c), col = p.stamp ? p.stamp.c : c.col;
         return "<div class=\"fil-it" + (c.maj ? " maj" : "") + (nl ? " nl" : "") + (st.fresh && st.fresh[l.id] ? " arr" : "") + (bk ? " bk" : "") + "\" style=\"--k:" + col + "\" id=\"fil-" + l.id + "\">" + (nl ? "<span class=\"fil-new\">NOUVEAU</span>" : "") + hex
             + "<div class=\"fil-cx\"><div class=\"fil-cat\">" + (bk ? "<b class=\"fil-flash\">⚡ FLASH INFO</b>" : "") + esc(c.nom) + "</div><div class=\"fil-tt\">" + p.tit + "</div>" + (p.sb ? "<div class=\"fil-sb\">" + p.sb + "</div>" : "") + "</div>"
-            + "<div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i>" + tpHtml(tp) + "</div>" + rxHtml(l.id) + "</div>";
+            + "<div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i>" + tpHtml(tp) + "</div>" + rxHtml(l.id, false, c.k === "cr" ? inaraHtml(p.cr) : "") + "</div>";
     }
     function groupe(g, c) {
         var cle = "g" + g[0].id, ouvert = !!st.ouverts[cle], d = new Date(g[0].created_at), n = g.length, titre, corps = "";
@@ -217,7 +218,7 @@
         } else {
             corps = "<div class=\"fil-sous\">" + g.map(function (l) {
                 var x = c.k === "cr" ? ligneCroise(l) : null, dd = new Date(l.created_at), sc = x ? statutDe(x.nom) : null;
-                return "<div class=\"fil-sl\"><div class=\"fil-slt\"><span class=\"fil-slh\">" + heure(dd) + "</span> " + (x ? "<b>" + esc(x.nom) + "</b> <em>" + esc(x.v) + " · " + esc(x.s) + (sc && sc.why ? " · " + esc(sc.why) : "") + "</em>" + (sc ? tpHtml({ t: sc.t, c: sc.c }, true) : "") : esc(l.details)) + "</div>" + rxHtml(l.id, true) + "</div>";
+                return "<div class=\"fil-sl\"><div class=\"fil-slt\"><span class=\"fil-slh\">" + heure(dd) + "</span> " + (x ? "<b>" + esc(x.nom) + "</b> <em>" + esc(x.v) + " · " + esc(x.s) + (sc && sc.why ? " · " + esc(sc.why) : "") + "</em>" + (sc ? tpHtml({ t: sc.t, c: sc.c }, true) : "") : esc(l.details)) + "</div>" + rxHtml(l.id, true, x ? inaraHtml(x.nom) : "") + "</div>";
             }).join("") + "</div>";
         }
         var nbEn = c.k === "cr" ? g.filter(function (l) { var x = ligneCroise(l), s = x ? statutDe(x.nom) : null; return s && s.k === "r"; }).length : 0;
@@ -369,7 +370,7 @@
         + ".fil-p{font:inherit;font-size:13px;line-height:1;background:rgba(255,255,255,.035);border:1px solid var(--ln);color:#c9d6de;padding:4px 9px;border-radius:14px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}.fil-p:hover{border-color:var(--am)}.fil-p.moi{border-color:var(--am);background:rgba(255,154,31,.13);color:#fff}.fil-p.ajt{color:var(--mu);font-size:12px;letter-spacing:1px;padding:4px 10px;opacity:.75}.fil-it:hover .fil-p.ajt,.fil-p.ajt:focus{opacity:1}"
         + ".fil-qui{font:inherit;font-size:10.5px;letter-spacing:2px;color:var(--cy);background:transparent;border:0;cursor:pointer;padding:4px 6px;opacity:.8}.fil-qui:hover{opacity:1;text-decoration:underline}"
         + ".fil-who{grid-column:2/4;margin-top:8px;padding:8px 12px;background:#0a1219;border:1px solid var(--ln);border-left:2px solid var(--am);font-size:13px;line-height:1.7;color:#b8c7d0}.fil-who div{overflow-wrap:anywhere}.fil-who b{color:#e8f1f6;font-weight:500}.fil-who span:first-child{margin-right:4px}.fil-wc{color:var(--mu);font-style:italic}"
-        + ".fil-pick{display:flex;gap:2px;background:#0a1017;border:1px solid var(--am);padding:3px 5px;border-radius:16px;box-shadow:0 6px 22px rgba(0,0,0,.6)}.fil-pick b{font-weight:400;font-size:19px;padding:2px 6px;cursor:pointer;border-radius:10px;transition:transform .12s}.fil-pick b:hover{background:rgba(255,154,31,.25);transform:scale(1.2)}"
+        + ".fil-ina{margin-left:auto;font-size:10.5px;letter-spacing:2px;color:var(--am);text-decoration:none;border:1px solid rgba(255,154,31,.5);padding:3px 9px;white-space:nowrap}.fil-ina:hover{background:rgba(255,154,31,.16);color:#fff}.fil-pick{display:flex;gap:2px;background:#0a1017;border:1px solid var(--am);padding:3px 5px;border-radius:16px;box-shadow:0 6px 22px rgba(0,0,0,.6)}.fil-pick b{font-weight:400;font-size:19px;padding:2px 6px;cursor:pointer;border-radius:10px;transition:transform .12s}.fil-pick b:hover{background:rgba(255,154,31,.25);transform:scale(1.2)}"
         + ".fil-mr{display:block;margin:10px auto 4px;font:inherit;font-size:11.5px;letter-spacing:3px;color:var(--cy);background:transparent;border:1px solid rgba(0,229,245,.4);padding:8px 18px;cursor:pointer}.fil-mr:hover{background:rgba(0,229,245,.1)}"
         + ".fil-vide{color:#667;font-size:13px;letter-spacing:3px;text-align:center;padding:30px}"
         + ".fil-jr.mob{background:transparent}.fil-jr.mob .fil-fl{padding:6px 0 10px}.fil-jr.mob .fil-liste{padding:0}"

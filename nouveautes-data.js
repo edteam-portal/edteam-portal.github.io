@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-bouton-inara', date: '2026-10-25T15:25:00Z', type: 'NOUVEAU',
+        titre: 'Joueurs croisés : un bouton pour les chercher sur Inara',
+        texte: 'Quand tu as croisé un joueur, un bouton « INARA ↗ » ouvre la recherche d’Inara avec son nom, dans un nouvel onglet : tu vois en un clic s’il a un profil (rangs, escadron, puissance…). Il est dans la fenêtre « Joueurs croisés » du QG, sur la fiche mobile, sur les lignes de joueurs croisés du Fil de l’escadron, et dans l’onglet Combat pour la cible verrouillée. Le nom n’est envoyé à Inara qu’au clic. Si plusieurs commandants portent un nom proche, tu choisis dans la liste ; si le joueur n’a pas de compte Inara, la recherche reste vide.',
+        important: false
+    },
+    {
         id: '2026-10-fil-escadron-reactions', date: '2026-10-25T16:00:00Z', type: 'NOUVEAU',
         titre: 'Le journal tactique devient le « Fil de l’escadron » : cartes, filtres et réactions',
         texte: 'Le journal tactique change de look : les grands moments (titre de spécialiste, rang BGS, distinction, station terminée) ont leur propre carte avec le texte en entier, les joueurs croisés et les séries de missions ou de directives sont regroupés, les jours sont séparés, et un bandeau « Dernière minute » défile en haut. Tu peux filtrer (BGS, distinctions, escadron, joueurs croisés) et réagir à chaque ligne avec 👏 🔥 ⚔️ 🎉 ❤️ 👍 : une seule réaction par ligne, un nouveau clic la retire. Même chose dans le journal d’activité du mobile.',

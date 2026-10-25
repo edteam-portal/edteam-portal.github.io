@@ -43,7 +43,7 @@
 .cm-sh .x{color:#888;font-size:1.2em;padding:4px 6px;cursor:pointer}
 .cm-sb{overflow-y:auto;padding:12px 16px 18px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .cm-g{border:1px solid color-mix(in srgb,var(--t) 42%,transparent);border-radius:16px;background:radial-gradient(circle,color-mix(in srgb,var(--t) 20%,transparent),rgba(0,0,0,.55) 75%);padding:8px;margin-bottom:12px}.cm-g svg{display:block;width:100%;height:auto;max-height:190px}
-.cm-dt{display:grid;grid-template-columns:1fr 1fr;gap:11px 14px}.cm-dt div small{display:block;color:#7d8a92;font-size:.56em;letter-spacing:2px}.cm-dt div b{display:block;font-weight:normal;color:#e6f0f3;font-size:.86em;overflow-wrap:anywhere;margin-top:1px}.cm-dt .l{grid-column:1/-1}.cm-dt .pr b{color:#FF6B5F}
+.cm-dt{display:grid;grid-template-columns:1fr 1fr;gap:11px 14px}.cm-dt div small{display:block;color:#7d8a92;font-size:.56em;letter-spacing:2px}.cm-dt div b{display:block;font-weight:normal;color:#e6f0f3;font-size:.86em;overflow-wrap:anywhere;margin-top:1px}.cm-dt .l{grid-column:1/-1}.cm-inara{display:block;text-align:center;border:1px solid #FF9A1F;color:#FF9A1F;letter-spacing:2px;font-size:.7em;padding:10px;text-decoration:none;margin-top:4px}.cm-dt .pr b{color:#FF6B5F}
 @media (prefers-reduced-motion:reduce){.cm-c,.cm-c *{transition:none}}`;
     function style() { if (!document.getElementById('cm-css')) { const s = document.createElement('style'); s.id = 'cm-css'; s.textContent = CSS; document.head.appendChild(s); } }
     const charger = src => new Promise(ok => { const s = document.createElement('script'); s.src = src; s.onload = () => ok(true); s.onerror = () => ok(false); document.head.appendChild(s); });
@@ -117,7 +117,7 @@
             + '<div class="cm-sb"><div class="cm-g">' + holo(x, 'cmg') + '</div><div class="cm-dt">'
             + det('VAISSEAU', E(nomDe(x))) + det('RANG', E(x.rg)) + det('FACTION', E(x.f)) + det('ESCADRON DU JOUEUR', E(x.e))
             + det('PUISSANCE', x.pw ? E(x.pw) : (x.l ? 'Aucune puissance soutenue' : 'Non relevée (scan incomplet)'), 'l') + det('STATUT LÉGAL', E(x.l)) + det('PRIME', x.pm > 0 ? FR(x.pm) + ' cr' : '', 'pr')
-            + det('PREMIÈRE VUE', date(x.p)) + det('DERNIÈRE VUE', date(x.d)) + det('DERNIER SYSTÈME', E(x.sys)) + det('VU PAR', x.par ? 'CMDR ' + E(String(x.par).toUpperCase()) : '') + det('CROISEMENTS', x.nb) + '</div></div></div>';
+            + det('PREMIÈRE VUE', date(x.p)) + det('DERNIÈRE VUE', date(x.d)) + det('DERNIER SYSTÈME', E(x.sys)) + det('VU PAR', x.par ? 'CMDR ' + E(String(x.par).toUpperCase()) : '') + det('CROISEMENTS', x.nb) + '<div class="l"><a class="cm-inara" href="' + 'https://inara.cz/elite/search/?search=' + encodeURIComponent(x.n) + '" target="_blank" rel="noopener noreferrer">CHERCHER SUR INARA ↗</a></div></div></div></div>';
         m.style.display = 'flex';
     };
 
