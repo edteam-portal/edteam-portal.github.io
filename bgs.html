@@ -25,6 +25,7 @@
     <script src="quotas-jour.js?v=17"></script>
     <script src="conflit-evenements.js?v=3"></script>
     <script src="conflit-modale.js?v=1"></script>
+    <script src="rapport-discord.js?v=1"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=7"></script>
@@ -440,6 +441,7 @@
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button id="btn-journal-bgs" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirJournalBGS(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ JOURNAL DES EXPLOITS ]</button>
                         <button id="btn-nouvelle-campagne" style="display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="edteamCampagnes.ouvrir(null)" onmouseenter="if(typeof sonHover === 'function') sonHover()">[ + NOUVELLE CAMPAGNE ]</button>
+                        <button id="btn-rapport-discord" style="display: none; background: rgba(88, 101, 242, 0.12); border: 1px solid #5865F2; color: #8ea1ff; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="EdteamRapport.ouvrir()" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#5865F2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(88, 101, 242, 0.12)'; this.style.color='#8ea1ff';" title="Rapport de l'Amirauté prêt à coller sur Discord">[ 📋 RAPPORT DISCORD ]</button>
                         <button id="btn-initiative" style="display: none; background: rgba(255, 79, 216, 0.1); border: 1px solid #FF4FD8; color: #FF4FD8; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirInitiative(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF4FD8'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 79, 216, 0.1)'; this.style.color='#FF4FD8';" title="Lancez un objectif BGS pour inviter l'escadron à vous rejoindre">[ + LANCER UNE INITIATIVE ]</button>
 
                     </div>
@@ -872,6 +874,8 @@
                 if (data.est_amiral || data.est_directeur) {
                     const btnCamp = document.getElementById('btn-nouvelle-campagne');
                     if (btnCamp) btnCamp.style.display = '';
+                    const btnRap = document.getElementById('btn-rapport-discord');
+                    if (btnRap) btnRap.style.display = '';
                 }
                 // initiatives : ouvertes a tout pilote approuve d'un vrai escadron
                 if (data.escadron_id && String(data.escadron_id).trim() !== '' && String(data.escadron_id).trim().toUpperCase() !== 'INDEPENDANT') {

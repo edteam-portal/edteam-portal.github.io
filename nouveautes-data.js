@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-rapport-amiraute-discord', date: '2026-10-25T16:40:00Z', type: 'NOUVEAU',
+        titre: 'Amiral : un rapport de l’Amirauté prêt à coller sur Discord',
+        texte: 'Sur la page BGS, le bouton « RAPPORT DISCORD » (Amiral) produit un rapport mis en page pour Discord : pour chaque système sous directive, l’influence et son évolution, le score des guerres et des élections, et tout ce qui a été fait (logistique, commerce, primes, exploration, victoires en CZ, meurtres, mérites Powerplay), en totaux anonymes. Tu choisis la période (depuis le dernier tick, 24 heures, 7 jours ou depuis l’émission), tu retires les lignes ou les systèmes que tu ne veux pas, et tu copies message par message (le rapport est découpé pour respecter la limite de Discord).',
+        important: false
+    },
+    {
         id: '2026-10-bouton-inara', date: '2026-10-25T15:25:00Z', type: 'NOUVEAU',
         titre: 'Joueurs croisés : un bouton pour les chercher sur Inara',
         texte: 'Quand tu as croisé un joueur, un bouton « INARA ↗ » ouvre la recherche d’Inara avec son nom, dans un nouvel onglet : tu vois en un clic s’il a un profil (rangs, escadron, puissance…). Il est dans la fenêtre « Joueurs croisés » du QG, sur la fiche mobile, sur les lignes de joueurs croisés du Fil de l’escadron, et dans l’onglet Combat pour la cible verrouillée. Le nom n’est envoyé à Inara qu’au clic. Si plusieurs commandants portent un nom proche, tu choisis dans la liste ; si le joueur n’a pas de compte Inara, la recherche reste vide.',
