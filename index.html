@@ -2535,6 +2535,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     db: supabaseApp, escadron: profilCommandant && profilCommandant.escadron_id, mode: 'pc',
                     estLu: id => { try { const r = localStorage.getItem('edteam_read_logs') || '[]'; if (r !== _luBrut) { _luBrut = r; _luEns = new Set(JSON.parse(r)); } return _luEns.has(String(id)); } catch (e) { return true; } },
                     marquerLu: id => window.marquerLigneLue(id),
+                    puissance: () => (window.profilCommandant && window.profilCommandant.puissance_nom) || '',
                     photo: (uid, nom) => { try { return window.EDTEAMPhotos ? window.EDTEAMPhotos.url(uid, nom) : ''; } catch (e) { return ''; } }
                 });
                 // les photos arrivent apres le journal : on redessine quand elles sont la

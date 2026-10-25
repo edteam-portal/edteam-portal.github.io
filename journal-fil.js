@@ -10,7 +10,7 @@
     var REACTS = [["applaudir", "👏"], ["feu", "🔥"], ["epee", "⚔️"], ["fete", "🎉"], ["coeur", "❤️"], ["pouce", "👍"]], GLY = {};
     REACTS.forEach(function (r) { GLY[r[0]] = r[1]; });
     var PAS = 25, GROUPE_MIN = 3, NOUVEAU_H = 48;
-    var st = { el: null, o: {}, data: [], filtre: "tout", nb: PAS, rx: { n: {}, moi: {} }, rxDispo: true, picker: null, ouverts: {}, vue: null, qui: null, noms: {} };
+    var st = { el: null, o: {}, data: [], filtre: "tout", nb: PAS, rx: { n: {}, moi: {} }, rxDispo: true, picker: null, ouverts: {}, vue: null, qui: null, noms: {}, statuts: {}, crDispo: true };
 
     function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
     function sec(s) { return s.replace(/<[^>]+>/g, ""); }
@@ -30,6 +30,7 @@
         if (t.indexOf("NOUVELLE MISSION") >= 0) return { k: "nm", f: "bgs", nom: t, ic: "✦", col: "#FF7100", grp: 1 };
         if (t.indexOf("NOUVELLE CAMPAGNE") >= 0 || t.indexOf("DIRECTIVE BGS") >= 0 || t.indexOf("INITIATIVE") >= 0) return { k: "nc", f: "bgs", nom: t, ic: "✦", col: "#FF7100" };
         if (t.indexOf("DIRECTIVE MODIFIÉE") >= 0) return { k: "dm", f: "bgs", nom: t, ic: "⚑", col: "#00E5F5", grp: 1 };
+        if (t.indexOf("ANNULÉE") >= 0 || t.indexOf("SUPPRIMÉE") >= 0) return { k: "ax", f: "bgs", nom: t, ic: "⚑", col: "#FF6A5C" };
         if (t.indexOf("CLÔTURÉE") >= 0) return { k: "cl", f: "bgs", nom: t, ic: "⚑", col: "#2FE07A" };
         if (t.indexOf("DIRECTIVE") >= 0 || t.indexOf("CAMPAGNE") >= 0) return { k: "dr", f: "bgs", nom: t, ic: "⚑", col: "#00E5F5" };
         if (t.indexOf("RECRUE") >= 0 || t.indexOf("NOUVEAU SUR") >= 0 || t.indexOf("RECRUTEMENT") >= 0 || t.indexOf("ROLE") >= 0 || t.indexOf("COMMANDEMENT") >= 0) return { k: "rc", f: "esc", nom: t, ic: "✚", col: "#2FE07A" };
@@ -38,6 +39,40 @@
         if (t.indexOf("BILAN") >= 0 || t.indexOf("EDNEWS") >= 0) return { k: "bi", f: "esc", nom: t, ic: "◈", col: "#00E5F5" };
         return { k: "xx", f: "esc", nom: t || "TRANSMISSION", ic: "◇", col: /^#[0-9a-fA-F]{6}$/.test(c) ? c : "#00E5F5" };
     }
+    // TAMPONS des lignes de directives / campagnes (page BGS) : NOUVELLE, MODIFIEE, CLOTUREE, ANNULEE
+    function tampon(l, c) {
+        if (c.f !== "bgs") return null;
+        var t = String(l.type_action || "").toUpperCase();
+        if (t.indexOf("ANNULÉE") >= 0 || t.indexOf("SUPPRIMÉE") >= 0) return { t: "ANNULÉE", c: c.col };         // le tampon prend toujours la couleur de la bande verticale de la carte
+        if (t.indexOf("CLÔTURÉE") >= 0) return { t: "CLÔTURÉE", c: c.col };
+        if (t.indexOf("MODIFIÉE") >= 0) return { t: "MODIFIÉE", c: c.col };
+        if (t.indexOf("NOUVELLE") >= 0 || t.indexOf("DIRECTIVE BGS") >= 0) return { t: "NOUVELLE", c: c.col };
+        return null;
+    }
+    function tpHtml(tp, petit) { return tp ? "<span class=\"fil-tp" + (petit ? " pt" : "") + "\" style=\"--t:" + tp.c + "\">" + esc(tp.t) + "</span>" : ""; }
+    // CAMP d'un joueur croise : meme regle que la fenetre « Joueurs croises » (statut legal allie, puissance de la fiche du lecteur contre la sienne, recherche ou prime = ennemi)
+    var COUL = { v: "#2FE07A", b: "#4DA3FF", r: "#FF6A5C" };
+    function campDe(x) {
+        var P = window.EdteamPuissances, moi = "", rel = "";
+        try { moi = st.o.puissance ? st.o.puissance() || "" : ""; } catch (e) { moi = ""; }
+        if (/\b(ami|amie|friend|ally|allie|allié)\b/i.test(x.l || "")) return { k: "v", t: "ALLIÉ", c: COUL.v, why: "statut légal allié" };
+        try { rel = P && x.pw && moi ? P.relation(moi, x.pw) : ""; } catch (e) { rel = ""; }
+        if (rel === "meme") return { k: "v", t: "ALLIÉ", c: COUL.v, why: "même puissance" };
+        if (rel === "bloc") return { k: "v", t: "ALLIÉ", c: COUL.v, why: "même camp : " + P.nomCamp(x.pw) };
+        if (rel === "rival") return { k: "r", t: "ENNEMI", c: COUL.r, why: P.independantes(moi, x.pw) ? "puissance rivale" : "camp rival" + (P.nomCamp(x.pw) ? " : " + P.nomCamp(x.pw) : "") };
+        if (x.pm > 0 || /wanted|recherch|outlaw|hors.la.loi/i.test(x.l || "")) return { k: "r", t: "ENNEMI", c: COUL.r, why: "recherché" + (x.pm > 0 ? " · prime " + Number(x.pm).toLocaleString("fr-FR") + " CR" : "") };
+        return { k: "b", t: "NEUTRE", c: COUL.b, why: x.pw ? "puissance : " + x.pw : "" };
+    }
+    function holoDe(nom, id, camp) {
+        var x = st.statuts[String(nom || "").toLowerCase()], H = window.HoloVaisseau;
+        if (!x || x._ || !x.s || !H || typeof SILHOUETTES === "undefined") return "";
+        try { var t = camp ? (camp.k === "r" ? true : camp.k) : "c"; return H.mini(x.s, id, t).replace("<svg ", "<svg class=\"v\" "); } catch (e) { return ""; }
+    }
+    function chargerScript(src) { return new Promise(function (ok) { var s = document.createElement("script"); s.src = src; s.onload = function () { ok(true); }; s.onerror = function () { ok(false); }; document.head.appendChild(s); }); }
+    async function assurerHolos() {
+        try { if (typeof SILHOUETTES === "undefined") await chargerScript("silhouettes-data.js?v=2"); if (!window.HoloVaisseau) await chargerScript("holo-vaisseau.js?v=2"); } catch (e) { /* sans hologramme : l'icone reste */ }
+    }
+    function statutDe(nom) { var x = st.statuts[String(nom || "").toLowerCase()]; return x && !x._ ? campDe(x) : null; }
     function ini(n) { var s = String(n || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase(); return s.slice(0, 2) || "?"; }
     // titre / sous-titre d'une ligne (tout est echappe ; seuls les noms sont mis en gras)
     function presenter(l, c) {
@@ -46,10 +81,15 @@
             return { tit: "<b>" + esc(m[1]) + "</b> " + (m[5] ? "ravit" : "décroche") + " le titre « " + esc(m[3]) + " »", sb: "Spécialité <b>" + esc(m[4]) + "</b>" + (m[5] ? " · il le reprend à <b>" + esc(m[5]) + "</b>" : ""), av: ini(m[1]), nom: m[1] };
         if (c.k === "rg" && (m = /^Le CMDR (.+?) atteint le rang BGS (\d+)/.exec(d)))
             return { tit: "<b>" + esc(m[1]) + "</b> atteint le rang BGS " + esc(m[2]), sb: "Un nouveau palier pour la carrière BGS", av: ini(m[1]), nom: m[1] };
-        if (c.k === "st" && (m = /^Construction terminée : (.+?) est opérationnelle dans le système (.+?)\.?$/.exec(d)))
-            return { tit: "<b>" + esc(m[1]) + "</b> est opérationnelle", sb: "Construction terminée dans le système <b>" + esc(m[2]) + "</b>", av: "" };
+        if (c.k === "st" && ((m = /^Construction terminée : (.+?) est opérationnelle dans le système (.+?)\. Architecte : (.+?)\.?$/.exec(d)) || (m = /^Construction terminée : (.+?) est opérationnelle dans le système (.+?)\.?$/.exec(d))))
+            return { tit: "<b>" + esc(m[1]) + "</b> est opérationnelle", sb: "Construction terminée dans le système <b>" + esc(m[2]) + "</b>" + (m[3] ? " · architecte <b>" + esc(m[3]) + "</b>" : ""), av: m[3] ? ini(m[3]) : "", nom: m[3] || "" };
+        if (c.k === "cr" && (m = /Nouveau joueur croisé : CMDR (.+?) \((.+?)\) à (.+?), relevé par (.+?)\.?$/.exec(d))) {
+            var sc = statutDe(m[1]);
+            return { tit: "Nouveau joueur croisé : <b>" + esc(m[1]) + "</b>", sb: esc(m[2]) + " · " + esc(m[3]) + " · relevé par <b>" + esc(m[4]) + "</b>" + (sc && sc.why ? " · " + esc(sc.why) : ""), av: "", stamp: sc, cr: m[1] };
+        }
         var par = String(l.cmdr_nom || ""), sys = par.toUpperCase() === "SYS.EDTEAM" || !par;
-        return { tit: esc(d), sb: sys ? "" : "par <b>" + esc(par) + "</b>", av: c.maj ? ini(par) : "" };
+        var av = (c.maj || c.f === "bgs") && !sys;       // lignes de directives et de campagnes : l'avatar du pilote qui les a faites
+        return { tit: esc(d), sb: sys ? "" : "par <b>" + esc(par) + "</b>", av: av ? ini(par) : "", nom: av ? par : "" };
     }
     function ligneCroise(l) {
         var m = /Nouveau joueur croisé : CMDR (.+?) \((.+?)\) à (.+?), relevé par (.+?)\.?$/.exec(String(l.details || ""));
@@ -111,6 +151,28 @@
             else if (r.data && typeof r.data === "object") { st.rx = { n: r.data.n || {}, moi: r.data.moi || {} }; st.rxDispo = true; }
         } catch (e) { st.rxDispo = false; }
     }
+    function assurerPuissances() {
+        if (window.EdteamPuissances) return Promise.resolve();
+        return new Promise(function (ok) { var s = document.createElement("script"); s.src = "puissances.js?v=2"; s.onload = ok; s.onerror = ok; document.head.appendChild(s); });
+    }
+    async function chargerStatuts() {
+        var db = st.o.db; if (!db || st.crDispo === false) return;
+        var noms = [], vu = {};
+        st.data.slice(0, 80).forEach(function (l) {
+            if (String(l.type_action || "").toUpperCase().indexOf("JOUEUR CROISÉ") < 0) return;
+            var x = ligneCroise(l); if (!x) return;
+            var k = x.nom.toLowerCase(); if (!vu[k] && !(k in st.statuts)) { vu[k] = 1; noms.push(x.nom); }
+        });
+        if (!noms.length) { if (Object.keys(st.statuts).length) await assurerHolos(); return; }
+        try {
+            await assurerPuissances();
+            var r = await db.rpc("joueurs_croises_statuts", { p_noms: noms.slice(0, 60) });
+            if (r.error) { st.crDispo = false; return; }
+            var d = r.data && typeof r.data === "object" ? r.data : {};
+            noms.slice(0, 60).forEach(function (n) { var k = n.toLowerCase(); st.statuts[k] = d[k] || { _: 1 }; });
+            await assurerHolos();
+        } catch (e) { st.crDispo = false; }
+    }
     async function reagir(id, code) {
         var db = st.o.db; if (!db) return;
         var avant = { n: JSON.parse(JSON.stringify(st.rx.n[id] || {})), moi: st.rx.moi[id] };
@@ -133,11 +195,13 @@
     function carte(l, c, p) {
         var d = new Date(l.created_at), nl = st.o.estLu && !st.o.estLu(l.id) && Date.now() - d.getTime() < NOUVEAU_H * 3600000;
         var bk = !!(st.flashIds && st.flashIds[l.id]);
-        var photo = ""; try { if (c.maj && p.nom && st.o.photo) photo = st.o.photo(l.user_id, p.nom) || ""; } catch (e) { /* initiales */ }      // photo du pilote (EDTEAMPhotos) ; sans photo ou si elle ne charge pas : les initiales restent
-        var hex = "<div class=\"fil-hex\"><span>" + (c.maj && p.av ? esc(p.av) : c.ic) + "</span>" + (photo ? "<img src=\"" + esc(photo) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" onerror=\"this.remove()\">" : "") + "</div>";
-        return "<div class=\"fil-it" + (c.maj ? " maj" : "") + (nl ? " nl" : "") + (st.fresh && st.fresh[l.id] ? " arr" : "") + (bk ? " bk" : "") + "\" style=\"--k:" + c.col + "\" id=\"fil-" + l.id + "\">" + (nl ? "<span class=\"fil-new\">NOUVEAU</span>" : "") + hex
+        var photo = ""; try { if (p.nom && st.o.photo) photo = st.o.photo(l.user_id, p.nom) || ""; } catch (e) { /* initiales */ }      // photo du pilote (EDTEAMPhotos) ; sans photo ou si elle ne charge pas : les initiales restent
+        var holo = c.k === "cr" && p.cr ? holoDe(p.cr, "fh" + l.id, p.stamp) : "";        // hologramme du vaisseau croise, teinte par le camp
+        var hex = holo ? "<div class=\"fil-hex holo\">" + holo + "</div>" : "<div class=\"fil-hex\"><span>" + (p.av ? esc(p.av) : c.ic) + "</span>" + (photo ? "<img src=\"" + esc(photo) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" onerror=\"this.remove()\">" : "") + "</div>";
+        var tp = p.stamp ? { t: p.stamp.t, c: p.stamp.c } : tampon(l, c), col = p.stamp ? p.stamp.c : c.col;
+        return "<div class=\"fil-it" + (c.maj ? " maj" : "") + (nl ? " nl" : "") + (st.fresh && st.fresh[l.id] ? " arr" : "") + (bk ? " bk" : "") + "\" style=\"--k:" + col + "\" id=\"fil-" + l.id + "\">" + (nl ? "<span class=\"fil-new\">NOUVEAU</span>" : "") + hex
             + "<div class=\"fil-cx\"><div class=\"fil-cat\">" + (bk ? "<b class=\"fil-flash\">⚡ FLASH INFO</b>" : "") + esc(c.nom) + "</div><div class=\"fil-tt\">" + p.tit + "</div>" + (p.sb ? "<div class=\"fil-sb\">" + p.sb + "</div>" : "") + "</div>"
-            + "<div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i></div>" + rxHtml(l.id) + "</div>";
+            + "<div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i>" + tpHtml(tp) + "</div>" + rxHtml(l.id) + "</div>";
     }
     function groupe(g, c) {
         var cle = "g" + g[0].id, ouvert = !!st.ouverts[cle], d = new Date(g[0].created_at), n = g.length, titre, corps = "";
@@ -147,17 +211,27 @@
         if (!ouvert) {
             var vus = g.slice(0, c.k === "cr" ? 4 : 3);
             corps = "<div class=\"fil-puces\">" + vus.map(function (l) {
-                var x = c.k === "cr" ? ligneCroise(l) : null;
-                return x ? "<span>" + esc(x.nom) + "<em>" + esc(x.v) + " · " + esc(x.s) + "</em></span>" : "<span>" + esc(l.details) + "</span>";
+                var x = c.k === "cr" ? ligneCroise(l) : null, sc = x ? statutDe(x.nom) : null;
+                return x ? "<span" + (sc ? " style=\"border-left:3px solid " + sc.c + "\"" : "") + ">" + esc(x.nom) + "<em>" + esc(x.v) + " · " + esc(x.s) + "</em>" + (sc ? tpHtml({ t: sc.t, c: sc.c }, true) : "") + "</span>" : "<span>" + esc(l.details) + "</span>";
             }).join("") + (n > vus.length ? "<span class=\"fil-cmpt\">+ " + (n - vus.length) + " autres</span>" : "") + "</div>";
         } else {
             corps = "<div class=\"fil-sous\">" + g.map(function (l) {
-                var x = c.k === "cr" ? ligneCroise(l) : null, dd = new Date(l.created_at);
-                return "<div class=\"fil-sl\"><div class=\"fil-slt\"><span class=\"fil-slh\">" + heure(dd) + "</span> " + (x ? "<b>" + esc(x.nom) + "</b> <em>" + esc(x.v) + " · " + esc(x.s) + "</em>" : esc(l.details)) + "</div>" + rxHtml(l.id, true) + "</div>";
+                var x = c.k === "cr" ? ligneCroise(l) : null, dd = new Date(l.created_at), sc = x ? statutDe(x.nom) : null;
+                return "<div class=\"fil-sl\"><div class=\"fil-slt\"><span class=\"fil-slh\">" + heure(dd) + "</span> " + (x ? "<b>" + esc(x.nom) + "</b> <em>" + esc(x.v) + " · " + esc(x.s) + (sc && sc.why ? " · " + esc(sc.why) : "") + "</em>" + (sc ? tpHtml({ t: sc.t, c: sc.c }, true) : "") : esc(l.details)) + "</div>" + rxHtml(l.id, true) + "</div>";
             }).join("") + "</div>";
         }
-        return "<div class=\"fil-it gr" + (g.some(function (l) { return st.fresh && st.fresh[l.id]; }) ? " arr" : "") + "\" style=\"--k:" + c.col + "\"><div class=\"fil-hex\"><span>" + c.ic + "</span></div><div class=\"fil-cx\"><div class=\"fil-cat\">" + esc(c.k === "cr" ? "JOUEURS CROISÉS" : c.k === "nm" ? "NOUVELLES MISSIONS BGS" : "DIRECTIVES MODIFIÉES") + "</div><div class=\"fil-tt\">" + titre + "</div>" + corps
-            + "<div class=\"fil-plus\" data-a=\"tg\" data-g=\"" + cle + "\">" + (ouvert ? "▴ RÉDUIRE" : "▾ TOUT VOIR ET RÉAGIR") + "</div></div><div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i></div></div>";
+        var nbEn = c.k === "cr" ? g.filter(function (l) { var x = ligneCroise(l), s = x ? statutDe(x.nom) : null; return s && s.k === "r"; }).length : 0;
+        var colg = c.k === "cr" && nbEn ? COUL.r : c.col;       // groupe de joueurs croises : bande rouge s'il compte un ennemi
+        var tpg = c.k === "cr" ? (nbEn ? { t: nbEn + " ENNEMI" + (nbEn > 1 ? "S" : ""), c: colg } : null) : c.k === "nm" ? { t: "NOUVELLES", c: colg } : { t: "MODIFIÉES", c: colg };
+        var hexg = "<div class=\"fil-hex\"><span>" + c.ic + "</span></div>";
+        if (c.k === "cr") { var x0 = ligneCroise(g[0]), h0 = x0 ? holoDe(x0.nom, "fg" + g[0].id, statutDe(x0.nom) || null) : ""; if (h0) hexg = "<div class=\"fil-hex holo\">" + h0 + "</div>"; }
+        else {
+            var auteurs = {}; g.forEach(function (l) { var a = String(l.cmdr_nom || ""); if (a && a.toUpperCase() !== "SYS.EDTEAM") auteurs[a] = 1; });
+            var an = Object.keys(auteurs);
+            if (an.length === 1) { var ph = ""; try { ph = st.o.photo ? st.o.photo(g[0].user_id, an[0]) || "" : ""; } catch (e) { ph = ""; } hexg = "<div class=\"fil-hex\"><span>" + esc(ini(an[0])) + "</span>" + (ph ? "<img src=\"" + esc(ph) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" onerror=\"this.remove()\">" : "") + "</div>"; }
+        }
+        return "<div class=\"fil-it gr" + (g.some(function (l) { return st.fresh && st.fresh[l.id]; }) ? " arr" : "") + "\" style=\"--k:" + colg + "\">" + hexg + "<div class=\"fil-cx\"><div class=\"fil-cat\">" + esc(c.k === "cr" ? "JOUEURS CROISÉS" : c.k === "nm" ? "NOUVELLES MISSIONS BGS" : "DIRECTIVES MODIFIÉES") + "</div><div class=\"fil-tt\">" + titre + "</div>" + corps
+            + "<div class=\"fil-plus\" data-a=\"tg\" data-g=\"" + cle + "\">" + (ouvert ? "▴ RÉDUIRE" : "▾ TOUT VOIR ET RÉAGIR") + "</div></div><div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i>" + tpHtml(tpg) + "</div></div>";
     }
     function filtrees() {
         return st.data.filter(function (l) { return st.filtre === "tout" || categorie(l).f === st.filtre; });
@@ -273,12 +347,15 @@
         + ".fil-jour{display:flex;align-items:center;gap:14px;font-size:11px;letter-spacing:5px;color:var(--mu);margin:14px 0 10px}.fil-jour::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--ln),transparent)}"
         + ".fil-it{--k:#00E5F5;position:relative;display:grid;grid-template-columns:46px 1fr auto;gap:0 16px;padding:11px 14px;margin-bottom:8px;background:#0b1017;border:1px solid var(--ln);border-left:3px solid var(--k);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);cursor:default}"
         + ".fil-it:hover{background:#0e151d}.fil-it.nl{box-shadow:inset 0 0 26px color-mix(in srgb,var(--k) 14%,transparent)}"
-        + ".fil-hex{width:44px;height:48px;display:grid;place-items:center;font-size:20px;color:var(--k);background:color-mix(in srgb,var(--k) 22%,#05080c);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.fil-hex::before{content:'';position:absolute;inset:1px;background:#070b10;clip-path:inherit}.fil-hex span{position:relative;text-shadow:0 0 10px var(--k)}.fil-hex img{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);object-fit:cover;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}"
+        + ".fil-hex{width:44px;height:48px;display:grid;place-items:center;font-size:20px;color:var(--k);background:color-mix(in srgb,var(--k) 22%,#05080c);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.fil-hex::before{content:'';position:absolute;inset:1px;background:#070b10;clip-path:inherit}.fil-hex span{position:relative;text-shadow:0 0 10px var(--k)}.fil-hex.holo svg{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);z-index:1}.fil-hex .tbs-balai{animation:fil-bal 4s linear infinite}@keyframes fil-bal{from{transform:translateY(0)}to{transform:translateY(var(--h))}}.fil-hex.holo::before{background:#04080c}.fil-hex img{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);object-fit:cover;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}"
         + ".fil-cat{font-size:10.5px;letter-spacing:3px;color:var(--k);text-transform:uppercase}.fil-tt{font-size:16.5px;line-height:1.3;color:#f1f6f8;margin-top:3px;letter-spacing:.3px;overflow-wrap:anywhere}.fil-tt b{color:var(--k);font-weight:600}"
         + ".fil-sb{font-size:13px;color:#93a3ae;margin-top:3px;line-height:1.45}.fil-sb b{color:#cfdbe2;font-weight:500}"
         + ".fil-tm{font-size:11.5px;color:var(--mu);letter-spacing:1px;white-space:nowrap;text-align:right;font-family:'Share Tech Mono',Consolas,monospace}.fil-tm i{display:block;font-style:normal;opacity:.65;margin-top:3px;font-size:10.5px}"
         + ".fil-it.maj{grid-template-columns:76px 1fr auto;padding:15px 16px;background:linear-gradient(90deg,color-mix(in srgb,var(--k) 11%,#0b1017),#0b1017 62%)}.fil-it.maj .fil-hex{width:70px;height:76px;font-size:28px}.fil-it.maj .fil-tt{font-size:22px;letter-spacing:.5px;font-weight:600}.fil-it.maj .fil-sb{font-size:14px}"
-        + ".fil-it.nl .fil-tm{padding-top:14px}.fil-it.arr{animation:fil-arr 1.1s cubic-bezier(.2,.8,.2,1) both}@keyframes fil-arr{0%{opacity:0;transform:translateY(-22px);box-shadow:0 0 0 0 transparent}35%{opacity:1;box-shadow:0 0 34px 2px color-mix(in srgb,var(--k) 55%,transparent),inset 0 0 30px color-mix(in srgb,var(--k) 25%,transparent)}100%{transform:none}}.fil-it.bk{border-left-width:5px;background:linear-gradient(90deg,color-mix(in srgb,var(--k) 22%,#0b1017),#0b1017 70%);animation:fil-arr 1.1s cubic-bezier(.2,.8,.2,1) both,fil-bk 1.6s ease-in-out 1.1s 4}"
+        + ".fil-it.nl .fil-tm{padding-top:14px}.fil-tm .fil-tp{margin-top:9px;float:right}"
+        + ".fil-tp{display:inline-block;border:2px solid var(--t);color:var(--t);padding:2px 9px;letter-spacing:3px;font-size:11px;font-weight:700;text-transform:uppercase;background:color-mix(in srgb,var(--t) 10%,transparent);box-shadow:0 0 12px color-mix(in srgb,var(--t) 22%,transparent);white-space:nowrap;font-family:Bahnschrift,'Segoe UI',system-ui,sans-serif}"
+        + ".fil-tp.pt{font-size:9px;padding:0 5px;border-width:1px;letter-spacing:2px;margin-left:8px;vertical-align:1px;box-shadow:none}"
+        + ".fil-it.arr .fil-tp,.fil-it.bk .fil-tp{animation:fil-cachet .45s cubic-bezier(.2,1.6,.4,1) .35s both}@keyframes fil-cachet{from{transform:scale(2.2);opacity:0}to{transform:none;opacity:1}}.fil-it.arr{animation:fil-arr 1.1s cubic-bezier(.2,.8,.2,1) both}@keyframes fil-arr{0%{opacity:0;transform:translateY(-22px);box-shadow:0 0 0 0 transparent}35%{opacity:1;box-shadow:0 0 34px 2px color-mix(in srgb,var(--k) 55%,transparent),inset 0 0 30px color-mix(in srgb,var(--k) 25%,transparent)}100%{transform:none}}.fil-it.bk{border-left-width:5px;background:linear-gradient(90deg,color-mix(in srgb,var(--k) 22%,#0b1017),#0b1017 70%);animation:fil-arr 1.1s cubic-bezier(.2,.8,.2,1) both,fil-bk 1.6s ease-in-out 1.1s 4}"
         + ".fil-it.bk::after{content:'';position:absolute;top:0;bottom:0;width:90px;left:-120px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:fil-glisse 1.8s ease-in-out .3s 4;pointer-events:none}"
         + "@keyframes fil-bk{50%{box-shadow:0 0 26px color-mix(in srgb,var(--k) 55%,transparent),inset 0 0 26px color-mix(in srgb,var(--k) 22%,transparent)}}@keyframes fil-glisse{0%{left:-120px}70%,100%{left:calc(100% + 40px)}}"
         + ".fil-flash{display:inline-block;background:#FF9A1F;color:#1a0d00;font-weight:700;letter-spacing:3px;font-size:10px;padding:2px 8px;margin-right:10px;animation:fil-clig 1s steps(1) infinite}@keyframes fil-clig{50%{background:#fff3c4}}"
@@ -287,7 +364,7 @@
         + ".fil-new{position:absolute;right:30px;top:-1px;background:#FF7100;color:#1a0900;font-size:9.5px;letter-spacing:2.5px;padding:2px 8px}"
         + ".fil-puces{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.fil-puces span{font-size:12px;background:#0a1219;border:1px solid var(--ln);padding:3px 9px;color:#b8c7d0;overflow-wrap:anywhere}.fil-puces em{font-style:normal;color:var(--mu);margin-left:6px}.fil-puces .fil-cmpt{opacity:.55}"
         + ".fil-plus{color:var(--cy);font-size:12px;letter-spacing:2px;margin-top:9px;cursor:pointer;display:inline-block}.fil-plus:hover{color:#fff}"
-        + ".fil-sous{margin-top:8px;border-top:1px solid var(--ln)}.fil-sl{padding:7px 0;border-bottom:1px solid var(--ln)}.fil-slt{font-size:13.5px;color:#c4d1d8;overflow-wrap:anywhere}.fil-slt b{color:var(--k);font-weight:600}.fil-slt em{font-style:normal;color:var(--mu)}.fil-slh{font-family:'Share Tech Mono',Consolas,monospace;font-size:11px;color:var(--mu);margin-right:6px}"
+        + ".fil-sous{margin-top:8px;border-top:1px solid var(--ln)}.fil-sl{padding:7px 0;border-bottom:1px solid var(--ln)}.fil-slt{font-size:13.5px;color:#c4d1d8;overflow-wrap:anywhere}.fil-slt b{color:#00E5F5;font-weight:600}.fil-slt em{font-style:normal;color:var(--mu)}.fil-slh{font-family:'Share Tech Mono',Consolas,monospace;font-size:11px;color:var(--mu);margin-right:6px}"
         + ".fil-rx{grid-column:2/4;display:flex;align-items:center;gap:6px;margin-top:9px;flex-wrap:wrap}.fil-rx.c{margin-top:6px}"
         + ".fil-p{font:inherit;font-size:13px;line-height:1;background:rgba(255,255,255,.035);border:1px solid var(--ln);color:#c9d6de;padding:4px 9px;border-radius:14px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}.fil-p:hover{border-color:var(--am)}.fil-p.moi{border-color:var(--am);background:rgba(255,154,31,.13);color:#fff}.fil-p.ajt{color:var(--mu);font-size:12px;letter-spacing:1px;padding:4px 10px;opacity:.75}.fil-it:hover .fil-p.ajt,.fil-p.ajt:focus{opacity:1}"
         + ".fil-qui{font:inherit;font-size:10.5px;letter-spacing:2px;color:var(--cy);background:transparent;border:0;cursor:pointer;padding:4px 6px;opacity:.8}.fil-qui:hover{opacity:1;text-decoration:underline}"
@@ -319,7 +396,10 @@
             var nbf = 0; Object.keys(st.fresh).forEach(function (id) { var l = st.data.filter(function (x) { return String(x.id) === id; })[0]; if (l && categorie(l).k !== "cr") { st.flashIds[id] = 1; nbf++; } });
             if (nbf) { st.flashOn = true; clearTimeout(st.tFlash); st.tFlash = setTimeout(function () { st.flashOn = false; st.flashIds = {}; rendre(); }, 9000); }
             clearTimeout(st.tFresh); st.tFresh = setTimeout(function () { st.fresh = {}; }, 2500);
-            if (avecReactions !== false) await chargerRx(st.data.map(function (l) { return Number(l.id); }).filter(function (x) { return x > 0; }));
+            await Promise.all([
+                avecReactions !== false ? chargerRx(st.data.map(function (l) { return Number(l.id); }).filter(function (x) { return x > 0; })) : null,
+                chargerStatuts()
+            ]);
             rendre();
         },
         rendre: rendre

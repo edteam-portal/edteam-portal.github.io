@@ -2903,7 +2903,7 @@
                 if (data && data.length > 0 && window.EdteamFil) {
                     // Fil de l'escadron (journal-fil.js) : cartes, groupes, filtres et reactions (SQL 158)
                     cont.innerHTML = '';
-                    window.EdteamFil.monter(cont, { db: supabaseApp, mode: 'mob' });
+                    window.EdteamFil.monter(cont, { db: supabaseApp, mode: 'mob', puissance: () => (window.profilCommandant && window.profilCommandant.puissance_nom) || '' });
                     await window.EdteamFil.donner(data, true);
                 } else if (data && data.length > 0) {
                     let html = '';
