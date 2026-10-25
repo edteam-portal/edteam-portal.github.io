@@ -84,12 +84,13 @@
         var quand = ilYa(Number(e.detecte)), typeFr = o.type_ordre === "ELECTION" ? "ÉLECTION" : esc(String(o.type_ordre || ""));
         var cls = "cev" + (opts.mobile || opts.compact ? " m" : ""), h, haut = "";
         if (e.evenement === "DEBUT") {
-            var titre = guerre ? "LA GUERRE A COMMENCÉ" : "L’ÉLECTION A COMMENCÉ";
+            var encours = e.source === "EN_COURS", titre = encours ? (guerre ? "GUERRE EN COURS" : "ÉLECTION EN COURS") : (guerre ? "LA GUERRE A COMMENCÉ" : "L’ÉLECTION A COMMENCÉ");
+            if (encours) { src = "d’après le dernier relevé"; quand = ilYa(Number(e.detecte)); }
             var passer = o.type_ordre !== (guerre ? "GUERRE" : "ELECTION");
             var cta = opts.commande && passer && !opts.mobile ? "<button type=\"button\" class=\"cta\" onclick=\"event.stopPropagation(); EdteamConflitEvt.passer(" + Number(o.id) + ",'" + (guerre ? "GUERRE" : "ELECTION") + "')\">PASSER EN " + (guerre ? "GUERRE" : "ÉLECTION") + "</button>" : "";
             if (!guerre) haut = BULLETINS.map(function (b) { return "<span class=\"bul\" style=\"left:" + b[0] + ";animation-delay:" + b[1] + "\"></span>"; }).join("");
             h = "<div class=\"" + cls + " " + (guerre ? "war" : "vote") + "\">" + haut + "<span class=\"ico\">" + ico + "</span><div class=\"tx\"><div class=\"t\">" + titre + "</div>"
-                + "<div class=\"s\"><span class=\"l\">" + lieu + " · <b>" + fac + "</b></span><span class=\"l\">détectée " + quand + "<span class=\"src\"> (" + src + ")</span> · directive : <b>" + typeFr + " #" + Number(o.id) + "</b></span></div></div>" + cta + "<span class=\"fin\">jusqu’au tick</span></div>";
+                + "<div class=\"s\"><span class=\"l\">" + lieu + " · <b>" + fac + "</b></span><span class=\"l\">" + (encours ? "directive posée " : "détectée ") + quand + "<span class=\"src\"> (" + src + ")</span> · directive : <b>" + typeFr + " #" + Number(o.id) + "</b></span></div></div>" + cta + "<span class=\"fin\">jusqu’au tick</span></div>";
             return h;
         }
         // FIN : resultat d'apres le dernier score releve

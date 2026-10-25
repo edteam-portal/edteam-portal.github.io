@@ -110,6 +110,20 @@
         if (e.evenement === "DEBUT") {
             d.pied = "DIRECTIVE #" + Number(e.ordre_id) + " · " + (guerre ? "GUERRE" : "ÉLECTION");
             d.b1 = "VOIR LA DIRECTIVE"; d.b2 = "FERMER"; d.ouvre = true;
+            var encours = e.source === "EN_COURS", sc = e.pour != null && e.contre != null ? [Number(e.pour), Number(e.contre), e.adversaire ? "contre " + esc(String(e.adversaire).toUpperCase()) : ""] : null;
+            if (encours) {      // directive posee apres le debut du conflit : meme fenetre, texte « en cours » et score connu
+                d.score = sc; d.pied = "DIRECTIVE #" + Number(e.ordre_id) + " · " + (guerre ? "GUERRE" : "ÉLECTION") + " · D’APRÈS LE DERNIER SCORE RELEVÉ";
+                if (guerre) {
+                    d.k = "war"; d.kick = "GUERRE · <b>EN COURS</b>"; d.h = "LE <em>FRONT</em> TIENT";
+                    d.msg = "Une guerre fait déjà rage ici. " + (sc ? "Score actuel : <b>" + sc[0] + " – " + sc[1] + "</b>. " : "") + "Chaque <b>victoire en zone de conflit</b>, chaque <b>bon de combat</b> et chaque <b>mission militaire</b> fait pencher la balance. L’escadron compte sur toi : <b>embarque, et rejoins le front</b>.";
+                    d.puces = ["⚔ VICTOIRES EN CZ", "🎯 BONS DE COMBAT", "📜 MISSIONS MILITAIRES"];
+                } else {
+                    d.k = "vote"; d.kick = "ÉLECTION · <b>EN COURS</b>"; d.h = "LE SCRUTIN <em>EST OUVERT</em>";
+                    d.msg = "Une élection est déjà en cours ici. " + (sc ? "Score actuel : <b>" + sc[0] + " – " + sc[1] + "</b>. " : "") + "Elle se gagne <b>jour après jour</b> : <b>logistique</b>, <b>commerce</b> et <b>exploration</b> pèsent dans le scrutin. Chaque contrat remis dans le système est <b>un vote pour nous</b>.";
+                    d.puces = ["📦 LOGISTIQUE", "💱 COMMERCE", "🧭 EXPLORATION"];
+                }
+                return d;
+            }
             if (guerre) {
                 d.k = "war"; d.kick = "GUERRE · <b>ALERTE</b>"; d.h = "AUX <em>ARMES</em> !";
                 d.msg = "La guerre vient d’éclater. Chaque <b>victoire en zone de conflit</b>, chaque <b>bon de combat</b> et chaque <b>mission militaire</b> fait pencher la balance. L’escadron compte sur toi : <b>embarque, et rejoins le front</b>.";

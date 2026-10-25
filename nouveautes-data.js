@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-conflit-en-cours", date: "2026-10-25T19:00:00Z", type: "AMELIORE",
+        titre: "Directive sur une guerre ou une élection déjà commencée",
+        texte: "Quand l’Amiral crée une directive sur une faction qui est déjà en guerre ou en élection, la fenêtre plein écran s’ouvre quand même, avec « GUERRE EN COURS » ou « ÉLECTION EN COURS » et le score actuel s’il est connu. Le bandeau de la directive dit lui aussi « en cours » au lieu de « a commencé ».",
+        important: false
+    },
+    {
         id: "2026-10-tick-heure-locale", date: "2026-10-25T18:10:00Z", type: "AMELIORE",
         titre: "Tick BGS : l’heure du tick dans ton fuseau",
         texte: "L’infobulle de l’en-tête (dernier tick, prochain tick attendu) donne maintenant l’heure de ton appareil, avec l’heure UTC du jeu entre parenthèses. Le passage à l’heure d’été ou d’hiver est pris en compte tout seul.",
