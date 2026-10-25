@@ -24,6 +24,7 @@
     <script src="quotas-jour.js?v=17"></script>
     <script src="conflit-evenements.js?v=3"></script>
     <script src="conflit-modale.js?v=1"></script>
+    <script src="journal-fil.js?v=1"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=7"></script>
@@ -2899,7 +2900,12 @@
 
                 if (error) throw error;
 
-                if (data && data.length > 0) {
+                if (data && data.length > 0 && window.EdteamFil) {
+                    // Fil de l'escadron (journal-fil.js) : cartes, groupes, filtres et reactions (SQL 158)
+                    cont.innerHTML = '';
+                    window.EdteamFil.monter(cont, { db: supabaseApp, mode: 'mob' });
+                    await window.EdteamFil.donner(data, true);
+                } else if (data && data.length > 0) {
                     let html = '';
                     data.forEach(item => {
                         const d = new Date(item.created_at);

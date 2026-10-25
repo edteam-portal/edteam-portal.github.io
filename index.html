@@ -43,6 +43,7 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="anecdotes.js?v=3"></script>
+    <script src="journal-fil.js?v=1"></script>
     <script src="navigation.js?v=49"></script>
 
     <script>
@@ -237,7 +238,31 @@
             -webkit-animation: alerteLigneRouge 1.5s infinite !important;
             animation: alerteLigneRouge 1.5s infinite !important;
         }
-
+        /* MISE EN PAGE DU QG : rangee d'entree en haut ; dessous, colonne de gauche (anecdote, Pilier, Elan) et le fil de l'escadron, aussi haut que cette colonne.
+           Tablette (< 1100 px, le fil a alors toute la largeur) : anecdote en bande, fil, puis Pilier et Elan cote a cote ; petit ecran (< 620 px) : tout en une colonne. */
+        #qg-grille { display: grid; gap: 12px; align-items: stretch; grid-template-columns: minmax(340px, 420px) minmax(0, 1fr); grid-template-areas: "top top" "anec fil" "pil fil" "elan fil"; }
+        #qg-grille > .qg-toprow { grid-area: top; display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; min-width: 0; }
+        #qg-anecdote { grid-area: anec; min-width: 0; align-self: start; }
+        #qg-colonne-distinctions { display: contents; }
+        #qg-pilier { grid-area: pil; min-width: 0; }
+        #qg-elan { grid-area: elan; min-width: 0; }
+        #qg-fil { grid-area: fil; position: relative; min-width: 0; min-height: 560px; cursor: default; margin-bottom: 0; padding: 0; }
+        #qg-fil > #fil-racine { position: absolute; inset: 0; display: flex; flex-direction: column; min-width: 0; }
+        /* l'anecdote dans la colonne de gauche : le cadre est coupe en deux comme Ma puissance et Ma faction, le portrait du pilote occupe toute la moitie gauche */
+        @media (min-width: 1100px) {
+            #qg-anecdote .an-port { width: 44%; max-width: 190px; min-width: 150px; font-size: 3.4em; }
+            #qg-anecdote .an-port img { object-position: center 15%; }
+            #qg-anecdote .an-port:after { background: linear-gradient(90deg, transparent 62%, rgba(5,3,1,.75)), linear-gradient(0deg, rgba(5,3,1,.5), transparent 30%); }
+            #qg-anecdote .an-ap { -webkit-line-clamp: 7; }
+            #qg-anecdote .an-corps { padding: 12px 14px; }
+        }
+        @media (max-width: 1099px) {
+            #qg-grille { grid-template-columns: 1fr 1fr; grid-template-areas: "top top" "anec anec" "fil fil" "pil elan"; }
+            #qg-fil { height: 640px; min-height: 0; }
+        }
+        @media (max-width: 620px) {
+            #qg-grille { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "anec" "fil" "pil" "elan"; }
+        }
     </style>
 
     <!-- Favicon pour les onglets et la barre de favoris du navigateur -->
@@ -422,7 +447,8 @@
                 <div id="qg-rejoindre-escadron" style="display: none;"></div>
 
                 <!-- RANGEE D'ENTREE : MA PUISSANCE (Powerplay) | MA FACTION (BGS, avec la bande EDNews) | JOUEURS CROISES. Cartes de puissance et de faction : qgsuivi.js. -->
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch;">
+                <div id="qg-grille">
+                <div class="qg-toprow">
 
                     <div id="qg-carte-puissance" style="flex: 1.15 1 320px; min-width: 0; display: none;"></div>
 
@@ -445,48 +471,21 @@
                 </div>
                 <!-- FIN RANGEE D'ENTREE -->
 
-                <!-- ANECDOTE DE L'ESCADRON (bande compacte, remplie par chargerAnecdoteQG ; masquee tant qu'il n'y en a pas) -->
+                <!-- ANECDOTE DE L'ESCADRON (colonne de gauche, en haut ; remplie par chargerAnecdoteQG ; masquee tant qu'il n'y en a pas) -->
                 <div id="qg-anecdote" style="display: none;"></div>
 
-                <!-- LIGNE GLOBALE (2 COLONNES) -->
-                <div style="display: flex; gap: 12px; align-items: stretch;">
-                    
-                    <!-- COLONNE GAUCHE : DISTINCTIONS DE LA SEMAINE (Pilier BGS + Élan Powerplay) -->
-                    <div id="qg-colonne-distinctions" style="flex: 0.75; min-width: 380px; max-width: 440px; display: flex; flex-direction: column; gap: 12px;">
-                        <div id="qg-pilier" style="flex: 1; display: flex; flex-direction: column;"><div class="bloc" style="padding: 24px; color: #666; font-style: italic; flex: 1;">&gt; CHARGEMENT...</div></div>
-                        <div id="qg-elan" style="flex: 1; display: flex; flex-direction: column;"></div>
+                <!-- COLONNE GAUCHE : DISTINCTIONS DE LA SEMAINE (Pilier BGS + Élan Powerplay) -->
+                    <div id="qg-colonne-distinctions">
+                        <div id="qg-pilier" style="display: flex; flex-direction: column;"><div class="bloc" style="padding: 24px; color: #666; font-style: italic; flex: 1;">&gt; CHARGEMENT...</div></div>
+                        <div id="qg-elan" style="display: flex; flex-direction: column;"></div>
                     </div>
 
                     <!-- COLONNE DROITE (FLUX D'ACTIVITÉ HOLOGRAPHIQUE) -->
-                    <div class="data-row bloc holo" style="flex: 1.6; min-width: 0; cursor: default; margin-bottom: 0; display: flex; flex-direction: column; padding: 0;">
-                        <!-- lignes de balayage sur tout l ecran -->
-                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 51;"></div>
-                        <div style="border-bottom: 1px dashed rgba(0, 240, 255, 0.35); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(0,240,255,0.05) 0%, transparent 100%); position: relative; z-index: 52;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <span style="color: #aaa; font-size: 1.1em; letter-spacing: 2px; font-weight: bold;">> JOURNAL TACTIQUE (FLUX EN DIRECT)</span>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <span id="flux-status-live" class="pulse-halo" style="display: inline-block; color: #00FF66; font-size: 0.7em; font-weight: bold; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 3px;">EN LIGNE</span>
-                            </div>
-                        </div>
-                        
-                        <!-- L'Écran du Flux -->
-                        <div style="display: flex; flex-direction: column; flex-grow: 1; padding: 15px; position: relative; overflow: hidden; height: 490px;">
-                            
-                            <!-- Conteneur des messages -->
-                            <div id="flux-activite-container" style="display: flex; flex-direction: column; gap: 8px; overflow-y: hidden; flex-grow: 1; padding-right: 10px; padding-bottom: 50px; z-index: 20; position: relative;">
-                                <div style="color: #666; font-size: 0.85em; font-style: italic; text-align: center; padding: 20px;">Synchronisation des journaux réseau...</div>
-                            </div>
-
-                            <!-- CONTRÔLES DE PAGINATION (ÉPINGLÉS EN BAS - Z-INDEX 60 pour pouvoir cliquer) -->
-                            <div id="flux-pagination" style="display: none; justify-content: space-between; align-items: center; position: absolute; bottom: 15px; left: 15px; right: 15px; padding-top: 10px; border-top: 1px dashed rgba(0, 240, 255, 0.35); background: rgba(3, 14, 20, 0.92); z-index: 60;">
-                                <button onclick="changerPageJournal(-1)" style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 0.8em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.color='var(--ed-blue)';">◀ RETOUR</button>
-                                <span id="flux-page-indic" style="color: #888; font-size: 0.8em; font-weight: bold; letter-spacing: 1px;">PAGE 1 / X</span>
-                                <button onclick="changerPageJournal(1)" style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 4px 12px; cursor: pointer; font-family: inherit; font-size: 0.8em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.05)'; this.style.color='var(--ed-blue)';">SUITE ▶</button>
-                            </div>
-                        </div>
+                    <div id="qg-fil" class="data-row bloc cy">
+                        <!-- FIL DE L'ESCADRON (journal-fil.js : journal tactique + reactions) -->
+                        <div id="fil-racine"><div style="color: #666; font-size: 0.85em; font-style: italic; text-align: center; padding: 20px;">Synchronisation des journaux réseau...</div></div>
                     </div> <!-- FIN DE LA COLONNE DROITE DU FLUX -->
-                </div> <!-- FIN DE LA LIGNE GLOBALE HAUTE -->
+                </div> <!-- FIN DE LA GRILLE DU QG (rangee d'entree, anecdote, distinctions, fil) -->
 
                             </div>
             <!-- FIN DE L'ONGLET DOSSIER COMMANDANT -->
@@ -536,51 +535,6 @@
             <div id="alerte-titre" style="font-size: 1.5em; border-bottom: 1px dashed; padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px; font-weight: bold;">INFORMATION</div>
             <p id="alerte-message" style="color: #ccc; font-size: 1.1em; margin-bottom: 30px; line-height: 1.5;"></p>
             <button id="btn-alerte-ok" class="auth-btn" style="width: auto; padding: 10px 40px; font-weight: bold; margin: 0 auto;" onclick="fermerAlerte()" onmouseenter="if(typeof sonHover==='function') sonHover()">ACQUITTER</button>
-        </div>
-    </div>
-
-    <!-- MODALE : DÉTAIL DU JOURNAL TACTIQUE (ENRICHIE) -->
-    <div class="modal-overlay" id="modal-detail-journal" onclick="fermerModal('modal-detail-journal', event)" style="z-index: 4800; backdrop-filter: blur(5px);">
-        <div class="modal-content" style="max-width: 650px; width: 95%; background-color: #03080A; border: 1px solid var(--ed-blue); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); position: relative; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
-            
-            <!-- LE FILTRE ÉCRAN TACTIQUE -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; z-index: 50;"></div>
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; pointer-events: none; z-index: 51;"></div>
-
-            <!-- CROIX DE FERMETURE -->
-            <div class="modal-close" style="position: absolute; z-index: 9999; top: 15px; right: 20px; color: #ccc; cursor: pointer; font-size: 1.5em; font-weight: bold; transition: 0.2s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='#ccc';" onclick="fermerModal('modal-detail-journal')">X</div>
-            
-            <!-- EN-TÊTE MILITAIRE -->
-            <div style="padding: 20px 30px; border-bottom: 1px dashed #333; background: rgba(255,255,255,0.02); position: relative; z-index: 20;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div id="detail-journal-id" style="color: #888; font-size: 0.8em; letter-spacing: 2px; margin-bottom: 5px;">RAPPORT TACTIQUE #----</div>
-                        <div id="detail-journal-type" style="font-size: 1.4em; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px currentColor;">[ TYPE ]</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div id="detail-journal-date" style="color: #ccc; font-family: 'Share Tech Mono', monospace; font-size: 1em; letter-spacing: 1px;">00/00 - 00:00:00</div>
-                        <div id="detail-journal-class" style="color: #00FF66; font-size: 0.7em; font-weight: bold; letter-spacing: 1px; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 2px; display: inline-block; margin-top: 5px; background: rgba(0,255,102,0.1);">CLASSIFICATION : ---</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- CORPS DU MESSAGE -->
-            <div style="padding: 30px; position: relative; z-index: 20; max-height: 50vh; overflow-y: auto;">
-                
-                <div style="color: #fff; font-weight: bold; letter-spacing: 1px; font-size: 1.1em; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: #888; font-size: 0.85em;">> SOURCE :</span> 
-                    <span id="detail-journal-cmdr" style="color: var(--ed-blue); font-size: 1.2em; text-shadow: 0 0 5px currentColor;">CMDR ...</span>
-                    <span style="color: #00FF66; font-size: 0.7em; border: 1px solid #00FF66; padding: 2px 6px; border-radius: 2px; margin-left: auto;">VÉRIFIÉE</span>
-                </div>
-
-                <div id="detail-journal-box" style="background: rgba(0,0,0,0.4); border: 1px solid #333; border-left: 3px solid var(--ed-blue); padding: 15px; border-radius: 0 4px 4px 0; margin-bottom: 25px;">
-                    <div id="detail-journal-texte" style="color: #ccc; font-size: 1.05em; line-height: 1.6; white-space: pre-wrap; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 2px currentColor;">
-                        Chargement des données cryptées...
-                    </div>
-                </div>
-                
-                <button class="auth-btn" style="width: 100%; margin: 0; background: rgba(255,255,255,0.05); border-color: #555; color: #aaa; position: relative; z-index: 60; transition: 0.2s;" onmouseover="this.style.background='#333'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#aaa';" onclick="fermerModal('modal-detail-journal')" onmouseenter="if(typeof sonHover==='function') sonHover()">[ FERMER LE RAPPORT ]</button>
-            </div>
         </div>
     </div>
 
@@ -2528,7 +2482,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         window.journalItemsPerPage = 5; // On bloque à 5 messages par page pour une taille parfaite
 
         window.chargerFluxActivite = async function(force) {
-            const conteneur = document.getElementById('flux-activite-container');
+            const conteneur = document.getElementById('fil-racine');
             if (!conteneur || !profilCommandant) return;
             // Le temps réel (realtime-journal) tient déjà la liste à jour : pas de relecture avant 2 minutes (clic répété sur l'onglet), sauf force
             if (!force && window.journalDataCache && window.journalDataCache.length > 0 && (Date.now() - (window.journalTs || 0)) < 120000) return;
@@ -2550,7 +2504,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const maxPage = Math.max(1, Math.ceil(window.journalDataCache.length / window.journalItemsPerPage));
                 if (window.journalCurrentPage > maxPage) window.journalCurrentPage = maxPage;
                 
-                window.afficherPageJournal();
+                window.afficherPageJournal(true);
 
             } catch (e) {
                 conteneur.innerHTML = '<div style="color: #FF3333; font-size: 0.85em; text-align: center; padding: 20px;">Erreur de lecture du journal.</div>';
@@ -2571,113 +2525,33 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (row) row.classList.remove('ligne-non-lue');
         };
 
-        // --- AFFICHAGE DU JOURNAL (TRONCATURE GARANTIE) ---
-        window.afficherPageJournal = function() {
-            const readLogs = JSON.parse(localStorage.getItem('edteam_read_logs') || '[]');
-            const conteneur = document.getElementById('flux-activite-container');
-            const pagination = document.getElementById('flux-pagination');
-            const indic = document.getElementById('flux-page-indic');
-            
-            if (!conteneur) return;
-
-            conteneur.style.padding = '10px';
-            window.journalItemsPerPage = 10;
-
-            if (window.journalDataCache.length === 0) {
-                conteneur.innerHTML = '<div style="color: #666; font-size: 0.9em; font-style: italic; text-align: center; padding: 20px;">> AUCUNE TRANSMISSION RÉCENTE.</div>';
-                if (pagination) pagination.style.display = 'none';
-                return;
+        // --- AFFICHAGE DU JOURNAL : « Fil de l'escadron » (journal-fil.js, reactions SQL 158) ---
+        let _luBrut = null, _luEns = new Set();
+        window.afficherPageJournal = function(avecReactions) {
+            const racine = document.getElementById('fil-racine');
+            if (!racine || !window.EdteamFil) return;
+            if (!racine.getAttribute('data-fil')) {
+                window.EdteamFil.monter(racine, {
+                    db: supabaseApp, escadron: profilCommandant && profilCommandant.escadron_id, mode: 'pc',
+                    estLu: id => { try { const r = localStorage.getItem('edteam_read_logs') || '[]'; if (r !== _luBrut) { _luBrut = r; _luEns = new Set(JSON.parse(r)); } return _luEns.has(String(id)); } catch (e) { return true; } },
+                    marquerLu: id => window.marquerLigneLue(id),
+                    photo: (uid, nom) => { try { return window.EDTEAMPhotos ? window.EDTEAMPhotos.url(uid, nom) : ''; } catch (e) { return ''; } }
+                });
+                // les photos arrivent apres le journal : on redessine quand elles sont la
+                window.addEventListener('edteam-photos', () => { if (window.EdteamFil) window.EdteamFil.rendre(); });
+                try { if (window.EDTEAMPhotos && window.EDTEAMPhotos.charger) window.EDTEAMPhotos.charger().then(() => { if (window.EdteamFil) window.EdteamFil.rendre(); }); } catch (e) { /* initiales */ }
             }
-
-            const totalItems = window.journalDataCache.length;
-            const totalPages = Math.max(1, Math.ceil(totalItems / window.journalItemsPerPage));
-            
-            if (window.journalCurrentPage < 1) window.journalCurrentPage = 1;
-            if (window.journalCurrentPage > totalPages) window.journalCurrentPage = totalPages;
-
-            const startIndex = (window.journalCurrentPage - 1) * window.journalItemsPerPage;
-            const itemsToShow = window.journalDataCache.slice(startIndex, startIndex + window.journalItemsPerPage);
-
-            let html = '';
-            itemsToShow.forEach(log => {
-                const dateObj = new Date(log.created_at);
-                const jour = dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-                const heure = dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                let typeAction = log.type_action ? log.type_action.toUpperCase().replace(/DIRECTIVE/g, 'MISSION BGS') : "INCONNU";
-                let col = 'var(--ed-blue)';
-
-                if (typeAction.includes('M.A.J') || typeAction.includes('SYSTÈME')) col = '#B026FF';
-                else if (typeAction.includes('MISSION BGS')) col = '#FF7100';
-                else if (typeAction.includes('RECRUE') || typeAction.includes('NOUVEAU SUR') || typeAction.includes('COMMANDEMENT')) col = '#00FF66';
-                else if (typeAction.includes('COMMUNIQUÉ')) col = '#FFD700';
-                else if (typeAction.includes('BILAN RÉSEAU')) col = '#00F0FF';
-                else if (typeAction.includes('DISTINCTION')) col = '#FFD700';
-                else if (typeAction.includes('RENSEIGNEMENT') || typeAction.includes('ALERTE SÉCURITÉ')) col = '#FF3333';
-                else if (typeAction.includes('RÉPUTATION')) col = '#00F0FF';
-                else if (typeAction.includes('STATUT LÉGAL')) col = '#00FF66';
-                else if (typeAction.includes('SÉCURITÉ')) col = '#FF7100';
-                else if (typeAction.includes('EDNEWS')) col = '#00F0FF';
-                
-                // Versions "surete JS" (protegent le litteral de chaine dans l'attribut onclick,
-                // les destinations finales -- innerText/textContent -- n'ont plus besoin d'echappement HTML)
-                const cmdrJs = (log.cmdr_nom || '').toUpperCase().replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const typeActionJs = typeAction.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const safeDetails = log.details ? log.details.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '') : '';
-
-                // Versions "surete HTML" (destination directe : conteneur.innerHTML = html)
-                const cmdrHtml = escapeHtml((log.cmdr_nom || '').toUpperCase());
-                const typeActionHtml = escapeHtml(typeAction);
-
-                // Tronquage strict à 75 caractères pour la ligne du flux (supprime tout risque d'étirement)
-                let apercu = log.details ? log.details.replace(/[\r\n]+/g, ' ').trim() : '';
-                if (apercu.length > 120) {
-                    apercu = apercu.substring(0, 120) + '...';
-                }
-                apercu = escapeHtml(apercu);
-
-                // --- NOUVEAU : GESTION DE L'ALERTE NON-LUE ---
-                const estNonLu = !readLogs.includes(String(log.id)); // Forcer la comparaison en texte
-                const classNonLue = estNonLu ? 'ligne-non-lue' : '';
-
-                const evtClic = `marquerLigneLue('${log.id}'); ouvrirDetailJournal('${typeActionJs}', 'CMDR ${cmdrJs}', '${jour} ${heure}', '${safeDetails}', '${col}', '${log.id}')`;
-
-                html += `
-                <div id="log-row-${log.id}" class="${classNonLue}" onclick="${evtClic}" style="cursor: pointer; display: block; width: 100%; box-sizing: border-box; padding: 5px 8px; font-family: 'Share Tech Mono', monospace; font-size: 0.95em; line-height: 1.5; letter-spacing: 0.5px; transition: 0.2s; border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 2px currentColor;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="if(!this.classList.contains('ligne-non-lue')) this.style.background='transparent';">
-                    <span style="color: #666;">[${jour} ${heure}]</span>
-                    <strong style="color: var(--ed-blue);">CMDR ${cmdrHtml}</strong>
-                    <span style="color: #555; font-weight: bold; margin: 0 4px;">></span>
-                    <span style="color: ${col}; font-weight: bold;">[ ${typeActionHtml} ]</span>
-                    <span style="color: #555; font-weight: bold; margin: 0 4px;">:</span>
-                    <span style="color: #ccc;">${apercu}</span>
-                </div>`;
-            });
-            
-            conteneur.innerHTML = html;
-
-            if (pagination) {
-                if (totalPages > 1) {
-                    pagination.style.display = 'flex';
-                    indic.innerText = `PAGE ${window.journalCurrentPage} / ${totalPages}`;
-                } else {
-                    pagination.style.display = 'none';
-                }
-            }
+            window.EdteamFil.donner(window.journalDataCache, avecReactions === true);
         };
 
-        // --- BOUTONS PRÉCÉDENT / SUIVANT ---
-        window.changerPageJournal = function(direction) {
-            if (typeof sonClic === 'function') sonClic();
-            window.journalCurrentPage += direction;
-            window.afficherPageJournal();
-        };
+        // l'ancienne pagination n'existe plus (le fil se charge par paquets) ; la fonction reste pour les anciens appels
+        window.changerPageJournal = function() {};
 
         // NOTE : l'abonnement Realtime au journal (table journal_activite, filtre
         // escadron_id=in.(...,GLOBAL)) est maintenant mis en place dans window.onload,
         // une fois profilCommandant/escadron_id effectivement charges (cf. plus haut) --
         // le placer ici, au chargement du script, provoquait un TypeError (profilCommandant
-        // encore null) qui empechait toutes les definitions suivantes (dont
-        // window.ouvrirDetailJournal) de s'executer.
+        // encore null) qui empechait toutes les definitions suivantes de s'executer.
 
         // --- DÉPLOIEMENT DES MISES À JOUR (RÉSERVÉ DIRECTEUR) ---
         window.publierMiseAJourEDTEAM = async function() {
@@ -2754,57 +2628,6 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             gain.connect(audioCtx.destination);
             osc.start(t);
             osc.stop(t + 0.05);
-        };
-
-        // --- VISIONNEUSE DE TRANSMISSION ENRICHIE ---
-        window.ouvrirDetailJournal = function(type, cmdr, date, texte, couleur, id) {
-            if (typeof sonClic === 'function') sonClic();
-            const modal = document.getElementById('modal-detail-journal');
-            
-            // Éléments
-            const elType = document.getElementById('detail-journal-type');
-            const elId = document.getElementById('detail-journal-id');
-            const elClass = document.getElementById('detail-journal-class');
-            const elCmdr = document.getElementById('detail-journal-cmdr');
-            const elBox = document.getElementById('detail-journal-box');
-            
-            // Stylisation principale (Bordures et Titres)
-            elType.textContent = `> ${type}`;
-            elType.style.color = couleur;
-            modal.querySelector('.modal-content').style.borderColor = couleur;
-            modal.querySelector('.modal-content').style.boxShadow = `0 0 30px ${couleur}40`;
-            elBox.style.borderLeftColor = couleur;
-            
-            // RP : ID unique
-            elId.innerText = `RAPPORT TACTIQUE #${id || 'XXXX'}`;
-            
-            // RP : Moteur de classification basé sur la couleur d'alerte
-            let classifText = "STANDARD";
-            let classifCol = "#00FF66"; // Vert par défaut
-            
-            if (couleur === '#FF3333' || couleur === 'var(--ed-red)') {
-                classifText = "SÉCURITÉ MAXIMALE"; classifCol = "#FF3333";
-            } else if (couleur === '#FF7100' || couleur === '#FFD700' || couleur === 'var(--ed-orange)') {
-                classifText = "PRIORITÉ HAUTE"; classifCol = "#FF7100";
-            } else if (couleur === '#B026FF') {
-                classifText = "SYSTÈME / DIRECTIVE"; classifCol = "#B026FF";
-            } else if (couleur === '#00F0FF' || couleur === 'var(--ed-blue)') {
-                classifText = "INFORMATIONS SENSIBLES"; classifCol = "#00F0FF";
-            }
-
-            elClass.innerText = `CLASSIFICATION : ${classifText}`;
-            elClass.style.color = classifCol;
-            elClass.style.borderColor = classifCol;
-            // Astuce pour générer un fond très léger avec la couleur Hex
-            elClass.style.background = classifCol.length === 7 ? `${classifCol}20` : 'rgba(255,255,255,0.1)';
-            
-            // Injection des textes
-            elCmdr.innerText = cmdr;
-            elCmdr.style.color = couleur;
-            document.getElementById('detail-journal-date').innerText = date;
-            document.getElementById('detail-journal-texte').innerText = texte;
-            
-            modal.style.display = 'flex';
         };
 
         // --- SON DE VALIDATION D'EFFORT BGS ---

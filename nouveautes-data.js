@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-fil-escadron-reactions', date: '2026-10-25T16:00:00Z', type: 'NOUVEAU',
+        titre: 'Le journal tactique devient le « Fil de l’escadron » : cartes, filtres et réactions',
+        texte: 'Le journal tactique change de look : les grands moments (titre de spécialiste, rang BGS, distinction, station terminée) ont leur propre carte avec le texte en entier, les joueurs croisés et les séries de missions ou de directives sont regroupés, les jours sont séparés, et un bandeau « Dernière minute » défile en haut. Tu peux filtrer (BGS, distinctions, escadron, joueurs croisés) et réagir à chaque ligne avec 👏 🔥 ⚔️ 🎉 ❤️ 👍 : une seule réaction par ligne, un nouveau clic la retire. Même chose dans le journal d’activité du mobile.',
+        important: false
+    },
+    {
         id: '2026-10-fenetre-conflits-plein-ecran', date: '2026-10-25T13:45:00Z', type: 'NOUVEAU',
         titre: 'Guerres et élections : une fenêtre plein écran quand elles démarrent ou se terminent',
         texte: 'Quand une guerre ou une élection démarre sur une faction suivie par une directive de ton escadron, une fenêtre plein écran t’appelle à te mobiliser, avec les activités qui comptent. Quand elle se termine, tu vois le résultat : victoire en fête, défaite avec un mot pour repartir, ou « terminée » si le score n’a pas pu être confirmé. Elle s’affiche une seule fois par événement sur chaque appareil (page BGS et mobile), et pas pour les directives de baisse.',
