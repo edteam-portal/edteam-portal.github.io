@@ -268,7 +268,7 @@
             l = f.concat(l.slice(0, 4));
         }
         var t = l.join("<span>◆</span>");
-        return "<b>" + (st.flashOn ? "⚡ FLASH INFO" : "AUJOURD’HUI") + "</b><div class=\"rl\"><div style=\"animation-duration:" + Math.max(25, l.length * 7) + "s\">" + t + "<span>◆</span>" + t + "<span>◆</span></div></div>";
+        return "<b>" + (st.flashOn ? "⚡ FLASH INFO" : "AUJOURD’HUI") + "</b><div class=\"rl\"><div style=\"animation-duration:" + Math.max(32, l.length * 9) + "s\">" + t + "<span>◆</span>" + t + "<span>◆</span></div></div>";
     }
     function squelette() {
         var m = st.o.mode === "mob";
