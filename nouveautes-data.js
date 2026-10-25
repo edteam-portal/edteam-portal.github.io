@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-tick-heure-locale", date: "2026-10-25T18:10:00Z", type: "AMELIORE",
+        titre: "Tick BGS : l’heure du tick dans ton fuseau",
+        texte: "L’infobulle de l’en-tête (dernier tick, prochain tick attendu) donne maintenant l’heure de ton appareil, avec l’heure UTC du jeu entre parenthèses. Le passage à l’heure d’été ou d’hiver est pris en compte tout seul.",
+        important: false
+    },
+    {
         id: "2026-10-tick-reveil", date: "2026-10-25T17:55:00Z", type: "CORRIGE",
         titre: "Tick BGS : l’en-tête retrouve le tick plus vite",
         texte: "Quand le tick du jour était attendu mais pas encore noté, l’en-tête pouvait afficher « pas encore détecté » pendant des heures alors que le serveur l’avait déjà. Il redemande maintenant toutes les 15 minutes tant que le tick est attendu.",

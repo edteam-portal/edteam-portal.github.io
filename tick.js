@@ -59,6 +59,9 @@
     }
 
     const hhmm = ms => { const d = new Date(ms); return String(d.getUTCHours()).padStart(2, "0") + ":" + String(d.getUTCMinutes()).padStart(2, "0"); };
+    // heure LOCALE du pilote (le navigateur applique tout seul l’heure d’été ou d’hiver de la date du tick) suivie de l’UTC entre parentheses
+    const loc = ms => new Date(ms).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const hh2 = ms => loc(ms) + " (" + hhmm(ms) + " UTC)";
     const hmin = m => m < 60 ? m + " min" : Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0");
     const hms = sec => { sec = Math.max(0, Math.round(sec)); const p = n => String(n).padStart(2, "0"); return Math.floor(sec / 3600) + ":" + p(Math.floor(sec % 3600 / 60)) + ":" + p(sec % 60); };      // 18:57:12
     const ICONE = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2.5h6"></path></svg>';
@@ -67,20 +70,20 @@
         const el = document.getElementById("header-tick"); if (!el) return;
         const c = lire(); if (!c || !c.l.length) { el.innerHTML = ""; return; }
         const now = Date.now(), s = calculer(c.l, now), sec = ms => Math.max(0, (ms - now) / 1000);
-        const four = hhmm(s.debut) + " et " + hhmm(s.fin) + " UTC", milieu = (s.debut + s.fin) / 2, marge = Math.round((s.fin - s.debut) / 120000);      // marge : demi-largeur de la fourchette, en minutes
+        const four = loc(s.debut) + " et " + loc(s.fin) + " (" + hhmm(s.debut) + " et " + hhmm(s.fin) + " UTC)", milieu = (s.debut + s.fin) / 2, marge = Math.round((s.fin - s.debut) / 120000);      // marge : demi-largeur de la fourchette, en minutes
         let cls = "hd-tick", lab, val, tip;
         if (s.etat === "attendu") {
             cls += " att"; lab = "TICK BGS · ATTENDU"; val = "pas encore détecté";
-            tip = "Le tick du jour n’est pas encore détecté : il a lieu d’habitude entre " + four + ". Le détecteur peut avoir quelques minutes de retard. Dernier tick détecté : " + hhmm(s.dernier) + " UTC.";
+            tip = "Le tick du jour n’est pas encore détecté : il a lieu d’habitude entre " + four + ". Le détecteur peut avoir quelques minutes de retard. Dernier tick détecté : " + hh2(s.dernier) + ".";
         } else {
             if (s.estime) cls += " est";
             lab = (s.etat === "fenetre" ? "TICK IMMINENT" : "PROCHAIN TICK") + (s.estime ? " · ESTIMÉ" : "");
             val = s.etat === "fenetre" ? "<small>d’ici </small>" + hms(sec(s.fin)) + "<small> au plus</small>"
                 : '<small class="p1">dans </small><small class="p2">dans ~</small>' + hms(sec(milieu)) + '<small class="fin"> ± ' + marge + " min</small>";
             tip = (s.estime
-                ? "Les détecteurs communautaires n’ont plus enregistré de tick depuis le " + new Date(c.l[c.l.length - 1]).toLocaleString("fr-FR", { timeZone: "UTC" }) + " UTC : on ne connaît donc pas l’heure exacte. Le tick a lieu chaque jour à peu près à la même heure ; la fourchette de dernier tick estimé est " + hhmm(s.dernierFen[0]) + " à " + hhmm(s.dernierFen[1]) + " UTC. Dès qu’un vrai tick est détecté, l’heure exacte revient."
-                : "Dernier tick détecté à " + hhmm(s.dernier) + " UTC (il y a " + hmin(Math.round((now - s.dernier) / 60000)) + ").")
-                + " Prochain tick attendu vers " + hhmm(milieu) + " UTC ± " + marge + " min (entre " + four + ") : l’heure varie d’un jour à l’autre, ce n’est pas une heure exacte.";
+                ? "Les détecteurs communautaires n’ont plus enregistré de tick depuis le " + new Date(c.l[c.l.length - 1]).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) + " (" + new Date(c.l[c.l.length - 1]).toLocaleString("fr-FR", { timeZone: "UTC", dateStyle: "short", timeStyle: "short" }) + " UTC) : on ne connaît donc pas l’heure exacte. Le tick a lieu chaque jour à peu près à la même heure ; la fourchette de dernier tick estimé est " + loc(s.dernierFen[0]) + " à " + loc(s.dernierFen[1]) + " (" + hhmm(s.dernierFen[0]) + " à " + hhmm(s.dernierFen[1]) + " UTC). Dès qu’un vrai tick est détecté, l’heure exacte revient."
+                : "Dernier tick détecté à " + hh2(s.dernier) + " (il y a " + hmin(Math.round((now - s.dernier) / 60000)) + ").")
+                + " Prochain tick attendu vers " + hh2(milieu) + " ± " + marge + " min (entre " + four + ") : l’heure varie d’un jour à l’autre, ce n’est pas une heure exacte.";
         }
         // meme structure qu'a la seconde precedente : seul le compteur change (l'infobulle n'est pas reconstruite, elle ne clignote pas au survol)
         const cle = cls + "|" + lab + "|" + tip + "|" + s.etat;
