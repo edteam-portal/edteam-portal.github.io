@@ -21,7 +21,7 @@
     <script src="revelations.js?v=8"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagnes-mobile.js?v=20"></script>
-    <script src="quotas-jour.js?v=16"></script>
+    <script src="quotas-jour.js?v=17"></script>
     <script src="conflit-evenements.js?v=3"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
@@ -1948,10 +1948,11 @@
             }
             if (CJ) {
                 const M = CJ.moi || {}, nfr = n => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n);
-                const cell = (e, t, v) => `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;border:1px solid rgba(255,255,255,0.05);border-radius:8px;background:rgba(0,0,0,0.5);padding:8px 10px;font-size:0.78em;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>`;
+                const CF = EQ.conflit(o.type_ordre, CJ) || [], pal = i => CF[i] ? EQ.palierHtml(CF[i]) : '';
+                const cell = (e, t, v, p) => `<div style="border:1px solid rgba(255,255,255,0.05);border-radius:8px;background:rgba(0,0,0,0.5);padding:8px 10px;font-size:0.78em;"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><span style="color:#fff;">${e} ${t}</span><span style="color:#fff;">${v}</span></div>${p || ''}</div>`;
                 const lignes = o.type_ordre === 'GUERRE'
-                    ? cell('🏆', 'Victoires en CZ', '<b>' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">· ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>') + cell('⚔️', 'Bons de combat', '<b>' + EQ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>') + cell('🎯', 'Missions militaires', '<b>' + Math.round((M.MISSIONS || {}).n || 0) + '</b>')
-                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>') + cell('💰', 'Commerce (bénéfices)', '<b>' + EQ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>') + cell('🔬', 'Données d\'exploration', '<b>' + EQ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
+                    ? cell('🏆', 'Victoires en CZ', '<b>' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">· ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>', pal(0)) + cell('⚔️', 'Bons de combat', '<b>' + EQ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>', pal(1)) + cell('🎯', 'Missions militaires', '<b>' + Math.round((M.MISSIONS || {}).n || 0) + '</b>', pal(2))
+                    : cell('🗳️', 'Logistique électorale', '<b>' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>', pal(0)) + cell('💰', 'Commerce (bénéfices)', '<b>' + EQ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>', pal(1)) + cell('🔬', 'Données d\'exploration', '<b>' + EQ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>', pal(2));
                 return lignes + '<div style="color:#777; font-size:0.66em; line-height:1.5; margin-top:4px;">Guerres et élections : aucune limite, faites-en le plus possible (pas de quota).</div>';
             }
             return xJaugesDonnees(o, rs).map(({ titre, c: col, moi, esc, plafond, f, u, tot, vous }) => `<div style="background: linear-gradient(to right, ${col}4d 0%, ${col}4d ${vous}%, ${col}22 ${vous}%, ${col}22 ${tot}%, rgba(0,0,0,0.5) ${tot}%); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 10px; font-size: 0.74em;">

@@ -77,9 +77,45 @@
         return mien + sep + "<span style=\"color:#aaa;\">encore ~" + val(ty, l.reste) + " à plein effet</span>";
     }
 
+    // ---------------- PALIERS D'UNE GUERRE OU D'UNE ELECTION (SQL 157) ----------------
+    // Aucun quota la-bas : le palier situe MON effort du tick par rapport a la MEDIANE des pilotes de l'escadron qui ont agi sur ce type (5 derniers ticks termines, champ « reperes »).
+    //   0 rien  |  1 lance (sous la mediane)  |  2 bon (au moins la mediane)  |  3 excellent (au moins 2 x la mediane) ; sans repere (debut de directive) : allume sans palier.
+    // mesure : « n » = nombre d'actions (victoires, contrats), « s » = valeur (INF, CR).
+    const CONFLIT = {
+        GUERRE: [{ ty: "CZ_VICTOIRES", m: "n", e: "🏆", ch: "#FFD700", titre: "🏆 VICTOIRES EN CZ", mot: "victoire" }, { ty: "SECURITE", m: "s", e: "⚔️", ch: "#00F0FF", titre: "⚔️ BONS DE COMBAT" }, { ty: "MISSIONS", m: "n", e: "🎯", ch: "#FF3333", titre: "🎯 MISSIONS MILITAIRES", mot: "contrat" }],
+        ELECTION: [{ ty: "MISSIONS", m: "s", e: "🗳️", ch: "#4DA3FF", titre: "🗳️ LOGISTIQUE ÉLECTORALE" }, { ty: "ECONOMIE", m: "s", e: "💰", ch: "#00FF66", titre: "💰 COMMERCE (BÉNÉFICES)" }, { ty: "SCIENCE", m: "s", e: "🔬", ch: "#B026FF", titre: "🔬 EXPLORATION (DONNÉES)" }]
+    };
+    const MOTS_PALIER = ["RIEN POUR L’INSTANT", "LANCÉ", "BON", "★ EXCELLENT"];
+    function fmtConf(L, x) { return L.m === "n" ? fr(x) + " " + L.mot + (Math.round(x) > 1 ? "s" : "") : val(L.ty, x); }
+    function conflit(typeOrdre, entree) {
+        const C = CONFLIT[String(typeOrdre || "").toUpperCase()]; if (!C || !entree) return null;
+        const moi = entree.moi || {}, rep = entree.reperes || {};
+        return C.map(L => {
+            const x = Number(moi[L.ty] && moi[L.ty][L.m]) || 0, r = rep[L.ty] ? Number(rep[L.ty][L.m]) || 0 : 0;
+            const sansRepere = !(r > 0), niveau = x <= 0 ? 0 : sansRepere ? 1 : x >= 2 * r ? 3 : x >= r ? 2 : 1;
+            return Object.assign({}, L, { x, med: r, sansRepere, niveau, seuil: 2 * r });
+        });
+    }
+    function texteRepere(l) { return l.sansRepere ? "pas encore de repère dans l’escadron" : "médiane des pilotes actifs : " + fmtConf(l, l.med) + " par tick · excellent à partir de " + fmtConf(l, l.seuil); }
+    // palier sous un compteur de la modale : trois segments et le mot
+    function palierHtml(l) {
+        css2();
+        const seg = [1, 2, 3].map(k => "<i" + (l.niveau >= k && !l.sansRepere ? " class=\"on\"" : (l.sansRepere && l.niveau > 0 ? " class=\"on\"" : "")) + "></i>").join("");
+        return "<div class=\"qj-seg\" style=\"--c:" + l.ch + "\">" + seg + "</div><div class=\"qj-pal\" style=\"--c:" + (l.niveau ? l.ch : "#777") + "\">" + (l.sansRepere && l.niveau > 0 ? "EN COURS" : MOTS_PALIER[l.niveau]) + "<small>" + texteRepere(l) + "</small></div>";
+    }
+    function pipsConflit(L) {
+        css2();
+        return "<span class=\"qj-pips\">" + L.map(l => {
+            const tip = l.titre + "\nTon action depuis le dernier tick : " + (l.x > 0 ? fmtConf(l, l.x) : "rien") + ".\n" + (l.niveau === 0 ? "Rien pour l’instant. Pas de quota : plus tu en fais, mieux c’est." : l.sansRepere ? "Pas encore de repère dans l’escadron." : "Palier : " + MOTS_PALIER[l.niveau].replace("★ ", "") + " (médiane des pilotes actifs : " + fmtConf(l, l.med) + " ; excellent à partir de " + fmtConf(l, l.seuil) + ").");
+            const w = l.niveau === 0 ? 0 : l.sansRepere ? 100 : [0, 34, 67, 100][l.niveau];
+            return "<span class=\"qj-pip" + (l.niveau === 3 ? " p3" : l.niveau > 0 ? " p" : "") + "\" style=\"--c:" + l.ch + "\" data-tip=\"" + E(tip) + "\" data-tc=\"" + l.ch + "\"><s style=\"width:" + w + "%\"></s><span>" + l.e + "</span></span>";
+        }).join("") + "</span>";
+    }
+
     // ---------------- ICONES D'ACTIVITES D'UNE LIGNE ----------------
     // une icone par activite de la directive (hausse : missions, economie, securite, science ; baisse : meurtres, contrebande, echecs) ; elle se remplit avec la progression du jour, un ✓ quand le volume efficace du tick est atteint
     function pips(ordre, entree) {
+        const CF = conflit(ordre.type_ordre, entree); if (CF) return pipsConflit(CF);
         const L = lignes(ordre.type_ordre, entree); if (!L) return ""; css2();
         // directive de BAISSE : une icone « ventes a perte » s'intercale avant les echecs (pas de quota : elle s'allume des qu'une vente a perte a ete faite depuis le dernier tick)
         const vp = String(ordre.type_ordre || "").toUpperCase() === "BAISSE" ? (() => {
@@ -102,6 +138,9 @@
 .qj-pip{cursor:help;position:relative;width:34px;height:24px;border:1px solid #3a3a3a;background:#111;font-size:.82em;display:grid;place-items:center;overflow:hidden;opacity:.6}
 .qj-pip s{position:absolute;left:0;top:0;bottom:0;background:var(--c);opacity:.7;text-decoration:none}.qj-pip span{position:relative}
 .qj-pip.p{border-color:var(--c);opacity:1}.qj-pip.ok{border-color:#2fe07a;opacity:1}.qj-pip.ok s{background:#1c8a4a;opacity:1}.qj-pip.ok span{color:#fff;font-weight:bold}
+.qj-pip.p3{border-color:#FFD700;opacity:1;overflow:visible;box-shadow:0 0 6px rgba(255,215,0,.45)}.qj-pip.p3 s{opacity:.95}.qj-pip.p3::after{content:'★';position:absolute;right:-4px;top:-8px;font-size:.75em;color:#FFD700}
+.qj-seg{display:flex;gap:4px;margin:8px 0 4px}.qj-seg i{flex:1;height:7px;background:#1c1c1c}.qj-seg i.on{background:var(--c)}
+.qj-pal{font-size:.7em;letter-spacing:2px;color:var(--c)}.qj-pal small{color:#777;letter-spacing:0;margin-left:8px}
 .qj-p{position:relative;display:inline-flex;margin:0 8px 6px 0;line-height:0}
 .qj-p.on::after{content:'';position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#2fe07a;border:2px solid #0a0603}
 .qj-p.moi::before{content:'TOI';position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;line-height:1.2;background:#FF7100;color:#000;padding:0 4px;letter-spacing:1px;font-family:'Share Tech Mono',monospace;z-index:2}
@@ -179,5 +218,5 @@
     }
     function bascule(ligne) { const n = ligne.nextElementSibling; if (n && n.classList.contains("qj-rang")) { if (typeof sonClic === "function") sonClic(); n.classList.toggle("ouv"); } }
 
-    window.EdteamQuotas = { charger, types, META, lignes, compteur, perte, texteMarge, pips, val, ticksEnvoi, assurerTicks, participants, bilan, bascule, css2, av, fmtBilan, NOMS, TYPES_BILAN };
+    window.EdteamQuotas = { charger, types, META, lignes, conflit, palierHtml, compteur, perte, texteMarge, pips, val, ticksEnvoi, assurerTicks, participants, bilan, bascule, css2, av, fmtBilan, NOMS, TYPES_BILAN };
 })();

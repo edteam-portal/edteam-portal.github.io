@@ -22,7 +22,7 @@
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
     <script src="campagnes.js?v=65"></script>
-    <script src="quotas-jour.js?v=16"></script>
+    <script src="quotas-jour.js?v=17"></script>
     <script src="conflit-evenements.js?v=3"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
@@ -2068,21 +2068,21 @@
                                 }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd), jc = window.__jc; window.__jc = null; const lignePerte = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return lignePerte; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
                                 modeJour = true;
                             } else if (QJ.compteur(ordre.type_ordre, Qd)) {
-                                const M = Qd.moi || {}, cell = (e, t, v, a) => a
+                                const M = Qd.moi || {}, CF = QJ.conflit(ordre.type_ordre, Qd) || [], pal = i => CF[i] ? QJ.palierHtml(CF[i]) : '', cell = (e, t, v, a, p) => a
                                     // avec un bouton : DEUX lignes (titre et bouton en haut, chiffre dessous), comme les autres activités : aucun saut de ligne imprévu
-                                    ? `<div style="border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><span style="color:#fff;min-width:0;">${e} ${t}</span><span style="flex-shrink:0;">${a}</span></div><div style="margin-top:6px;color:#fff;white-space:nowrap;overflow-x:auto;">${v}</div></div>`
-                                    : `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><span style="color:#fff;min-width:0;">${e} ${t}</span><span style="color:#fff;white-space:nowrap;">${v}</span></div>`;
+                                    ? `<div style="border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><span style="color:#fff;min-width:0;">${e} ${t}</span><span style="flex-shrink:0;">${a}</span></div><div style="margin-top:6px;color:#fff;white-space:nowrap;overflow-x:auto;">${v}</div>${p || ''}</div>`
+                                    : `<div style="border:1px solid #1d1d1d;background:#050505;padding:8px 11px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;"><span style="color:#fff;min-width:0;">${e} ${t}</span><span style="color:#fff;white-space:nowrap;">${v}</span></div>${p || ''}</div>`;
                                 const nfr = n => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n);
                                 if (ordre.type_ordre === 'GUERRE') {
-                                    htmlJauges = cell('🏆', 'Victoires en CZ', '<b style="font-size:1.2em;">' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">victoires · ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>')
-                                        + cell('⚔️', 'Bons de combat', '<b style="font-size:1.2em;">' + QJ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>')
-                                        + cell('🎯', 'Missions militaires', '<b style="font-size:1.2em;">' + Math.round((M.MISSIONS || {}).n || 0) + '</b> <span style="color:#888;">contrats</span>');
+                                    htmlJauges = cell('🏆', 'Victoires en CZ', '<b style="font-size:1.2em;">' + Math.round((M.CZ_VICTOIRES || {}).n || 0) + '</b> <span style="color:#888;">victoires · ' + nfr((M.CZ_VICTOIRES || {}).s || 0) + ' pts</span>', '', pal(0))
+                                        + cell('⚔️', 'Bons de combat', '<b style="font-size:1.2em;">' + QJ.val('SECURITE', (M.SECURITE || {}).s || 0) + '</b>', '', pal(1))
+                                        + cell('🎯', 'Missions militaires', '<b style="font-size:1.2em;">' + Math.round((M.MISSIONS || {}).n || 0) + '</b> <span style="color:#888;">contrats</span>', '', pal(2));
                                 } else {
-                                    htmlJauges = cell('🗳️', 'Logistique électorale', '<b style="font-size:1.2em;">' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>')
-                                        + cell('💰', 'Commerce (bénéfices)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '')
-                                        + cell('🔬', 'Données d\'exploration (science)', '<b style="font-size:1.2em;">' + QJ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>');
+                                    htmlJauges = cell('🗳️', 'Logistique électorale', '<b style="font-size:1.2em;">' + nfr((M.MISSIONS || {}).s || 0) + '</b> <span style="color:#888;">INF</span>', '', pal(0))
+                                        + cell('💰', 'Commerce (bénéfices)', '<b style="font-size:1.2em;">' + QJ.val('ECONOMIE', (M.ECONOMIE || {}).s || 0) + '</b>', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : '', pal(1))
+                                        + cell('🔬', 'Données d\'exploration (science)', '<b style="font-size:1.2em;">' + QJ.val('SCIENCE', (M.SCIENCE || {}).s || 0) + '</b>', '', pal(2));
                                 }
-                                htmlJauges += '<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:6px;">Les guerres et les élections sont les seules activités sans rendement décroissant : faites-en le plus possible, il n\'y a pas de quota.</div>';
+                                htmlJauges += '<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:6px;">Les guerres et les élections sont les seules activités sans rendement décroissant : faites-en le plus possible, il n\'y a pas de quota. Les paliers situent ton effort du tick par rapport à la médiane des pilotes actifs de l\'escadron : lancé, bon, excellent (2 × la médiane).</div>';
                                 modeJour = true;
                             }
                         }
