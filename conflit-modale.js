@@ -142,9 +142,56 @@
     }
 
     // ------------------------------------------------------------------------------------------------------------
+    // MUSIQUE (courte, en boucle le temps de lire la fenetre ; fichiers dans sons/, absents = silence)
+    // war : appel aux armes · vote : aventure · win : victoire epique · lose : remobilisation · fin : pas de musique
+    // ------------------------------------------------------------------------------------------------------------
+    var MUSIQUES = { war: "sons/conflit-guerre.mp3", vote: "sons/conflit-election.mp3", win: "sons/conflit-victoire.mp3", lose: "sons/conflit-defaite.mp3" };
+    var VOLUME = .65, FONDU_ENTREE = 1800, FONDU_SORTIE = 700;
+    var musique = (function () {
+        var a = null, pas = null;
+        function muet() { try { return !!(window.edteamSon && window.edteamSon.estMuet()); } catch (e) { return false; } }
+        function fondu(el, vers, ms, fin) {
+            clearInterval(el.__fondu);
+            var de = el.volume, t0 = Date.now();
+            el.__fondu = setInterval(function () {
+                var p = Math.min(1, (Date.now() - t0) / ms);
+                try { el.volume = Math.max(0, Math.min(1, de + (vers - de) * p)); } catch (e) { /* volume refuse */ }
+                if (p >= 1) { clearInterval(el.__fondu); if (fin) fin(); }
+            }, 40);
+        }
+        function arreter() {
+            var el = a; a = null;
+            if (pas) { document.removeEventListener("pointerdown", pas, true); document.removeEventListener("keydown", pas, true); pas = null; }
+            if (!el) return;
+            fondu(el, 0, FONDU_SORTIE, function () { try { el.pause(); el.removeAttribute("src"); el.load(); } catch (e) { /* rien */ } });
+        }
+        function jouer(k) {
+            arreter();
+            var src = MUSIQUES[k];
+            if (!src || window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+            try {
+                var el = new Audio(src); a = el; el.loop = true; el.volume = 0; el.preload = "auto"; el.muted = muet();
+                el.addEventListener("error", function () { if (a === el) a = null; });   // fichier absent : silence
+                function lancer() {
+                    var r; try { r = el.play(); } catch (e) { return; }
+                    if (r && r.then) r.then(function () { if (a === el) fondu(el, VOLUME, FONDU_ENTREE); }, function () {
+                        // lecture automatique refusee par le navigateur : on retente au premier geste dans la fenetre
+                        if (a !== el || pas) return;
+                        pas = function () { document.removeEventListener("pointerdown", pas, true); document.removeEventListener("keydown", pas, true); pas = null; if (a === el) lancer(); };
+                        document.addEventListener("pointerdown", pas, true); document.addEventListener("keydown", pas, true);
+                    });
+                }
+                lancer();
+            } catch (e) { /* pas de musique, la fenetre reste normale */ }
+        }
+        window.addEventListener("edteam-son", function () { if (a) a.muted = muet(); });
+        return { jouer: jouer, arreter: arreter };
+    })();
+
+    // ------------------------------------------------------------------------------------------------------------
     // AFFICHAGE
     // ------------------------------------------------------------------------------------------------------------
-    function fermer() { var ov = document.getElementById("edteam-cflt"); if (ov) ov.remove(); document.removeEventListener("keydown", surTouche, true); }
+    function fermer() { musique.arreter(); var ov = document.getElementById("edteam-cflt"); if (ov) ov.remove(); document.removeEventListener("keydown", surTouche, true); }
     var courant = null;
     function surTouche(ev) { if (ev.key === "Escape" && courant) { ev.stopPropagation(); courant("suivant"); } }
 
@@ -168,6 +215,7 @@
                     + (d.b2 ? "<button type=\"button\" class=\"ec-bt s\" data-a=\"suivant\">" + d.b2 + "</button>" : "") + "</div></div>"
                     + "<div class=\"ec-pied\">" + d.pied + "</div>";
                 document.body.appendChild(ov);
+                musique.jouer(d.k);
                 function agir(a) {
                     courant = null;
                     if (a === "tout") { for (var j = i; j < n; j++) marquer(liste[j].cle); fermer(); fini(); return; }

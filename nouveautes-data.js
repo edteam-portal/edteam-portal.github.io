@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: '2026-10-musiques-conflits', date: '2026-10-25T17:45:00Z', type: 'NOUVEAU',
+        titre: 'Guerres et élections : une musique pour chaque grand moment',
+        texte: 'Quand la fenêtre plein écran s’ouvre, une musique l’accompagne le temps de la lire : un appel aux armes épique pour une guerre, une musique d’aventure pour une élection (voyages et interceptions en vue), un thème triomphal pour une victoire, et un thème qui remobilise les troupes après une défaite. Elle s’arrête à la fermeture de la fenêtre, et le bouton haut-parleur du site la coupe comme les autres sons.',
+        important: false
+    },
+    {
         id: '2026-10-rapport-amiraute-discord', date: '2026-10-25T16:40:00Z', type: 'NOUVEAU',
         titre: 'Amiral : un rapport de l’Amirauté prêt à coller sur Discord',
         texte: 'Sur la page BGS, le bouton « RAPPORT DISCORD » (Amiral) produit un rapport mis en page pour Discord : pour chaque système sous directive, l’influence et son évolution, le score des guerres et des élections, et tout ce qui a été fait (logistique, commerce, primes, exploration, victoires en CZ, meurtres, mérites Powerplay), en totaux anonymes. Tu choisis la période (depuis le dernier tick, 24 heures, 7 jours ou depuis l’émission), tu retires les lignes ou les systèmes que tu ne veux pas, et tu copies message par message (le rapport est découpé pour respecter la limite de Discord).',
