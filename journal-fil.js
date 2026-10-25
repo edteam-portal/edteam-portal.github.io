@@ -1,7 +1,7 @@
 // « FIL DE L'ESCADRON » : affichage du journal tactique (PC : index.html ; mobile : mobile.html), avec reactions emoji (SQL 158).
 // Les donnees restent celles de journal_activite (100 dernieres lignes, temps reel) : ce fichier ne fait que les presenter.
 //   - trois niveaux : grandes cartes (titre, rang, distinction, station), cartes courantes, groupes (joueurs croises, missions, directives modifiees)
-//   - separateurs de jour, filtres, bandeau « DERNIERE MINUTE » (PC), « charger les plus anciennes »
+//   - separateurs de jour, filtres, bandeau « AUJOURD HUI » (PC), « charger les plus anciennes »
 //   - reactions : 1 seule par pilote et par ligne, lues en UN appel avec la page (journal_reactions_lire), ecrites par journal_reagir ; sans le SQL 158 elles disparaissent
 // Usage : EdteamFil.monter(element, { db, escadron, mode: 'pc' | 'mob', estLu(id), marquerLu(id), photo(user_id, nom) -> url ou '' }) puis EdteamFil.donner(lignes) a chaque changement. Pas de fenetre de detail : le texte est affiche en entier.
 (function () {
@@ -260,14 +260,15 @@
         return h + (all.length > vis.length ? "<button type=\"button\" class=\"fil-mr\" data-a=\"plus\">CHARGER LES PLUS ANCIENNES ▾</button>" : "");
     }
     function bandeau() {
-        var l = st.data.filter(function (x) { return categorie(x).maj; }).slice(0, 6).map(function (x) { return sec(presenter(x, categorie(x)).tit); });     // deja echappe : on retire seulement les balises
-        if (!l.length) l = st.data.slice(0, 5).map(function (x) { return esc(x.details); });
+        var recent = st.data.filter(function (x) { return Date.now() - new Date(x.created_at).getTime() < 86400000; });     // bandeau AUJOURD HUI = les dernieres 24 h seulement
+        if (!recent.length) return "<b>AUJOURD’HUI</b><div class=\"rl\"><div style=\"animation:none;color:#667\">Aucune actualité pour l’instant</div></div>";
+        var l = recent.slice(0, 12).map(function (x) { return sec(presenter(x, categorie(x)).tit); });     // toutes les lignes du jour, les plus recentes d'abord ; deja echappe : on retire seulement les balises
         if (st.flashOn) {       // flash info : les lignes qui viennent d'arriver passent en tete du bandeau, en blanc
             var f = st.data.filter(function (x) { return st.flashIds && st.flashIds[x.id]; }).map(function (x) { return "<strong>" + sec(presenter(x, categorie(x)).tit) + "</strong>"; });
             l = f.concat(l.slice(0, 4));
         }
         var t = l.join("<span>◆</span>");
-        return "<b>" + (st.flashOn ? "⚡ FLASH INFO" : "DERNIÈRE MINUTE") + "</b><div class=\"rl\"><div>" + t + "<span>◆</span>" + t + "<span>◆</span></div></div>";
+        return "<b>" + (st.flashOn ? "⚡ FLASH INFO" : "AUJOURD’HUI") + "</b><div class=\"rl\"><div style=\"animation-duration:" + Math.max(25, l.length * 7) + "s\">" + t + "<span>◆</span>" + t + "<span>◆</span></div></div>";
     }
     function squelette() {
         var m = st.o.mode === "mob";
@@ -275,6 +276,9 @@
             + (m ? "" : "<div class=\"fil-hd\"><div class=\"fil-ti\">Fil de l’escadron<small>" + esc(String(st.o.escadron || "").toUpperCase()) + " · TRANSMISSIONS</small></div><div class=\"fil-live\"><i></i>EN DIRECT</div></div><div class=\"fil-tk\"></div>")
             + "<div class=\"fil-fl\"></div><div class=\"fil-liste\"></div></div>";
         st.vue = { liste: st.el.querySelector(".fil-liste"), fl: st.el.querySelector(".fil-fl"), tk: st.el.querySelector(".fil-tk") };
+        if (!st.tTk) st.tTk = setInterval(function () {      // une actualite sort du bandeau a l'heure pile, meme sans nouvelle ligne
+            if (st.vue && st.vue.tk && st.el && st.el.contains(st.vue.tk)) { var bh = st.data.length ? bandeau() : ""; if (st.tkHtml !== bh) { st.vue.tk.innerHTML = bh; st.tkHtml = bh; } }
+        }, 60000);
     }
     function rendre() {
         if (!st.el) return;
@@ -343,7 +347,7 @@
         + ".fil-tk{display:flex;align-items:stretch;border-bottom:1px solid var(--ln);background:rgba(255,154,31,.045);font-size:12.5px;overflow:hidden;height:34px;flex:none}.fil-tk:empty{display:none}"
         + ".fil-tk>b{flex:none;background:var(--am);color:#1a0d00;letter-spacing:3px;font-size:11px;padding:0 22px 0 14px;display:flex;align-items:center;clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%)}"
         + ".fil-tk .rl{flex:1;overflow:hidden;display:flex;align-items:center;-webkit-mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}"
-        + ".fil-tk .rl div{white-space:nowrap;animation:fil-def 70s linear infinite;color:#c9d6de;will-change:transform}.fil-tk .rl:hover div{animation-play-state:paused}.fil-tk .rl span{color:var(--am);margin:0 14px}@keyframes fil-def{to{transform:translateX(-50%)}}"
+        + ".fil-tk .rl div{white-space:nowrap;animation:fil-def 35s linear infinite;color:#c9d6de;will-change:transform}.fil-tk .rl:hover div{animation-play-state:paused}.fil-tk .rl span{color:var(--am);margin:0 14px}@keyframes fil-def{to{transform:translateX(-50%)}}"
         + ".fil-fl{display:flex;gap:8px;padding:12px 26px;flex-wrap:wrap;flex:none}.fil-fl button{font:inherit;font-size:11.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--mu);background:transparent;border:1px solid var(--ln);padding:6px 13px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}"
         + ".fil-fl button.on{color:#1a0d00;background:var(--am);border-color:var(--am)}.fil-fl button:not(.on):hover{color:#fff;border-color:var(--mu)}.fil-fl em{font-style:normal;opacity:.6;margin-left:6px}"
         + ".fil-liste{flex:1;min-height:0;overflow-y:auto;padding:2px 26px 14px;scrollbar-width:thin;scrollbar-color:#3a4a57 transparent}"
