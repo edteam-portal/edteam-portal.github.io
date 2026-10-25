@@ -28,7 +28,7 @@
     // ---- ticks envoyes au serveur (instants en secondes, 60 au plus) ----
     function chargerScript(src) { return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); }); }
     async function assurerTicks() {
-        try { if (!window.EdteamTick) await chargerScript("tick.js?v=7"); await window.EdteamTick.assurer(); } catch (e) { /* ticks du cache */ }
+        try { if (!window.EdteamTick) await chargerScript("tick.js?v=8"); await window.EdteamTick.assurer(); } catch (e) { /* ticks du cache */ }
         return !!window.EdteamTick;
     }
     function ticksEnvoi() {

@@ -24,7 +24,7 @@
         var c = window.supabaseApp; if (!c) return null;
         var map = null;
         try {
-            if (!window.EdteamTick) { try { await chargerScript("tick.js?v=7"); } catch (e) { /* tick du cache */ } }
+            if (!window.EdteamTick) { try { await chargerScript("tick.js?v=8"); } catch (e) { /* tick du cache */ } }
             if (window.EdteamTick && window.EdteamTick.assurer) { try { await window.EdteamTick.assurer(); } catch (e) { /* tick du cache */ } }
             var r = await c.rpc("bgs_evenements_conflit", { p_depuis: new Date(dernierTick()).toISOString() });
             if (r && !r.error && Array.isArray(r.data)) { map = {}; r.data.forEach(function (x) { (map[x.ordre_id] = map[x.ordre_id] || []).push(x); }); }

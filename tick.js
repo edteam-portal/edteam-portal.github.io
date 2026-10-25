@@ -1,7 +1,7 @@
 // TICK BGS dans l'en-tete : heure du dernier tick + compte a rebours du prochain.
 // Source : tick.edcd.io (detecteur communautaire alimente par EDDN). UN petit appel /api/ticks?start=... (une quinzaine de jours, < 1 Ko), directement depuis le navigateur :
 //   AUCUNE requete Supabase, donc aucun egress. Resultat garde dans le navigateur (localStorage), partage entre les pages et les onglets.
-// SECOURS (SQL 136) : quand le dernier tick connu a plus de 20 h, on demande aussi la liste de NOTRE serveur (ticks_liste : tick.edcd.io + tick.infomancer.uk relevés toutes les 15 minutes), au plus une fois par 3 h et seulement si la page a une session ;
+// SECOURS (SQL 136) : quand le dernier tick connu a plus de 20 h, on demande aussi la liste de NOTRE serveur (ticks_liste : tick.edcd.io + tick.infomancer.uk relevés toutes les 15 minutes), au plus une fois par 3 h (15 min tant que le tick du jour est attendu et pas encore note) et seulement si la page a une session ;
 //   tant que tick.edcd.io marche, aucune requete Supabase.
 // Si aucun detecteur ne detecte plus de tick (cas constate le 21/10 : aucun tick enregistre pendant 4 jours alors que le jeu en fait un par jour), on ESTIME :
 //   le tick a lieu chaque jour a peu pres a la meme heure : on affiche une FOURCHETTE (jamais une heure unique) calculee sur les derniers jours reels, marquee « estime ».
@@ -109,7 +109,8 @@
             } catch (e) { /* injoignable : on garde le releve et on essaie le secours */ }
             // secours : notre serveur, seulement si le dernier tick connu est ancien (le detecteur communautaire est muet) ; au plus une fois par 3 h
             const dern = l.length ? Date.parse(l[l.length - 1]) : 0, sb = window.supabaseApp;
-            if (now - dern > 20 * HEURE && sb && now - srv > 3 * HEURE) {
+            const attendu = l.length && calculer(l, now).etat === "attendu";      // tick du jour attendu mais pas encore note : on redemande toutes les 15 min (sinon, la limite de 3 h pouvait tomber juste avant le tick et le masquer des heures)
+            if (now - dern > 20 * HEURE && sb && now - srv > (attendu ? 15 * 60000 : 3 * HEURE)) {
                 srv = now;
                 try {
                     const rs = await sb.rpc("ticks_liste");

@@ -95,7 +95,7 @@
     async function monter(o) {
         try {
             if (!window.EdteamQuotas) return;
-            if (!window.EdteamTick) { try { await chargerScript("tick.js?v=7"); } catch (e) { return; } }
+            if (!window.EdteamTick) { try { await chargerScript("tick.js?v=8"); } catch (e) { return; } }
             try { await window.EdteamTick.assurer(); } catch (e) { /* ticks du cache */ }
             const racine = o.zone || o.zoneBilan || o.zoneHero; if (!racine || !racine.isConnected) return;
             const now = Date.now(), ticks = window.EdteamTick.liste(now - 32 * JOUR, now).slice(-59), ticksSec = ticks.map(k => Math.floor(k.t / 1000));
