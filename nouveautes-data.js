@@ -8,13 +8,15 @@ window.EDTEAM_NOUVEAUTES = [
         id: "2026-10-reperage-boom-installations", date: "2026-10-26T22:40:00Z", type: "AMELIORE",
         titre: "Repérage : les systèmes en Boom à visiter",
         texte: "La mission de repérage (bandeau Renseignement) propose maintenant les systèmes où la faction d’une de vos directives de hausse est en Boom et où personne n’a encore vu d’installation : c’est là que peuvent se lancer les raids de « Défense d’installation ». Arrive dans l’un de ces systèmes avec le plugin lancé : tu gagnes 1 point BGS (Renseignement) et 1 point pour la distinction L’ESPION, comme pour un autre repérage, et le plugin repère tout seul les installations du système. Un système visité sort de la liste pendant 7 jours.",
-        important: false
+        important: false,
+        action: 'Plugin 2.50 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois (nécessaire pour repérer les installations).'
     },
     {
         id: "2026-10-defense-installation", date: "2026-10-26T20:10:00Z", type: "NOUVEAU",
         titre: "Directives de hausse : « Défense d’installation »",
         texte: "Une nouvelle ligne apparaît dans ton quota du tick, sous les directives de hausse : Défense d’installation, avec le bouton « Où défendre ? ». Quand la faction de la directive est en Boom, un scénario de raid peut se lancer sur ses installations (dans le système de la directive ou dans n’importe quel autre) : en choisissant la défense, tu fais monter son influence dans le système de l’installation, et les bons de combat que tu gagnes comptent pour ta Sécurité si tu les rends dans le système de la directive. La fenêtre liste tous les systèmes où la faction est en Boom. Les installations n’apparaissent qu’après le passage d’un pilote de l’escadron, et le jeu n’indique pas à qui elles appartiennent : un pilote passé sur place (plugin 2.50) regarde la fiche dans le jeu et répond OUI (elle passe au vert) ou NON (elle est barrée). Pas encore de quota ni de mesure du scénario.",
-        important: false
+        important: false,
+        action: 'Plugin 2.50 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois (nécessaire pour repérer les installations et répondre OUI ou NON).'
     },
     {
         id: "2026-10-mobile-fil-en-haut", date: "2026-10-25T23:19:00Z", type: "AMELIORE",
