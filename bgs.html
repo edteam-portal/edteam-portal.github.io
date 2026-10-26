@@ -1870,6 +1870,9 @@
                 const quotasJour = (ordresData.length > 0 && window.EdteamQuotas) ? await window.EdteamQuotas.charger(false) : null;
                 window.cacheQuotasBgs = quotasJour;
 
+                // DEFENSE D'INSTALLATION (SQL 166, defense.js) : un seul appel ; la ligne du quota n'apparait que s'il y a un Boom avec une installation non ecartee
+                try { if (ordresData.length > 0 && window.edteamDefense) await window.edteamDefense.precharger(false); } catch (e) { /* ligne cachee */ }
+
                 // DEBUT / FIN DE GUERRE OU D'ELECTION depuis le dernier tick (SQL 132, conflit-evenements.js) ; null sans la fonction serveur
                 try { window.cacheEvtConflits = (ordresData.length > 0 && window.EdteamConflitEvt) ? await window.EdteamConflitEvt.charger(false) : null; } catch (e) { window.cacheEvtConflits = null; }
                 // fenetre plein ecran pour chaque debut / fin de guerre ou d'election non encore vu (conflit-modale.js)
@@ -2072,7 +2075,7 @@
                                 htmlJauges = QJ.lignes(ordre.type_ordre, Qd).map(l => {
                                     const m = QJ.META[l.ty];
                                     return genererJaugeHTML(m.titre, QJ.texteMarge(l.ty, l), m.c, l.prog, l.prog, l.reduit, '', '', '', (l.ty === 'ECONOMIE' || l.ty === 'CONTREBANDE') && window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact') : (l.ty === 'MEURTRES' && window.edteamDestab ? window.edteamDestab.bouton(ordre, 'compact') : (l.ty === 'SCIENCE' && window.edteamRendre ? window.edteamRendre.bouton(ordre, 'explo', 'compact') : (l.ty === 'SECURITE' && window.edteamRendre ? window.edteamRendre.bouton(ordre, 'bons', 'compact') : ''))));
-                                }).join('') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd), jc = window.__jc; window.__jc = null; const lignePerte = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return lignePerte; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
+                                }).join('') + (ordre.type_ordre === 'HAUSSE' && window.edteamDefense && window.edteamDefense.bouton(ordre) ? (() => { const jc = window.__jc; window.__jc = null; const nbDef = window.edteamDefense.nb(ordre); const ligneDefense = genererJaugeHTML('🛡️ DÉFENSE D\'INSTALLATION (Raids)', '<span style="color:#aaa;">' + (nbDef > 0 ? '<b style="color:#fff;">' + nbDef + '</b> système' + (nbDef > 1 ? 's' : '') + ' où la faction est en Boom' : (window.edteamDefense.connu() ? 'aucun système en Boom pour l\'instant' : 'systèmes où la faction est en Boom')) + '</span>', '#FFD23F', 0, 0, false, '', '', '', window.edteamDefense.bouton(ordre, 'compact')); window.__jc = jc; return ligneDefense; })() : '') + (ordre.type_ordre === 'BAISSE' ? (() => { const P = QJ.perte(Qd), jc = window.__jc; window.__jc = null; const lignePerte = genererJaugeHTML('📉 Ventes à perte', `PERTE <b style="color:#ff9f43;">${QJ.val('SCIENCE', P.s)}</b>`, '#ff9f43', 0, 0, false, '', '', '', window.edteamCommerce ? window.edteamCommerce.bouton(ordre, 'compact', 'perte') : ''); window.__jc = jc; return lignePerte; })() : '') + (ordre.type_ordre === 'BAISSE' ? `<div style="color:#777; font-size:0.75em; line-height:1.5; margin-top:10px;">ⓘ Le vol de régulateurs et le piratage de données comptent pour votre rang BGS, pas pour cette directive : rien ne confirme qu'ils fassent baisser l'influence.</div>` : '');
                                 modeJour = true;
                             } else if (QJ.compteur(ordre.type_ordre, Qd)) {
                                 const M = Qd.moi || {}, CF = QJ.conflit(ordre.type_ordre, Qd) || [], pal = i => CF[i] ? QJ.palierHtml(CF[i]) : '', cell = (e, t, v, a, p) => a
@@ -3228,6 +3231,7 @@
     <script src="commerce.js?v=23"></script>
     <script src="destabiliser.js?v=1"></script>
     <script src="rendre.js?v=1"></script>
+    <script src="defense.js?v=7"></script>
     <script src="footer.js?v=41"></script>
 </body>
 </html>

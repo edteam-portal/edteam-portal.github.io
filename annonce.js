@@ -331,6 +331,57 @@
             escadron: false,
             mobile: false
         }
+        ,{
+            id: 'defense-installation-2026-10',
+            couleur: '#FFD23F',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'DÉFENSE D’INSTALLATION : UN RAID, DEUX BÉNÉFICES',
+            pages: [
+                {
+                    titre: 'SOUTENIR UNE FACTION PAR LES RAIDS',
+                    sous: 'Une nouvelle activité sur les directives de hausse',
+                    intro: 'Quand la faction d’une directive est en <b>Boom</b> et possède une <b>installation</b>, un <b>raid</b> peut s’y lancer. Le jeu vous demande de choisir votre camp : en prenant la <b>défense</b>, vous soutenez la faction de la directive.',
+                    visuelHtml: anvDf1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'LA FACTION EST EN BOOM', d: 'Dans un système, pas forcément celui de la directive. EDTEAM relève l’état des factions toutes les 6 heures.' },
+                        { n: '2', t: 'UNE INSTALLATION LUI APPARTIENT', d: 'Une installation de la faction se trouve dans ce système. C’est elle qui déclenche le scénario.' },
+                        { n: '3', t: 'VOUS CHOISISSEZ LA DÉFENSE', d: 'Dans le signal de détresse de l’installation, prenez <b style="color:#FFD23F">Défense contre le raid</b> : vous êtes du côté de la faction.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'UNE PIERRE, DEUX COUPS',
+                    sous: 'Influence d’un côté, Sécurité de l’autre',
+                    intro: 'Le scénario fait monter l’<b>influence</b> de la faction là où il se joue, et les <b>bons de combat</b> que vous gagnez sont émis par cette faction : ils comptent pour votre activité <b>Sécurité</b>, à condition de les rendre au bon endroit.',
+                    visuelHtml: anvDf2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: 'A', t: 'DANS LE SYSTÈME DE LA DIRECTIVE', d: 'L’influence de la faction <b style="color:#00FF66">monte dans le système visé</b>, et vous rendez vos bons à la station du système : tout compte.' },
+                        { n: 'B', t: 'DANS UN AUTRE SYSTÈME EN BOOM', d: 'Vous soutenez la faction, mais l’influence monte <b>là-bas</b>, pas dans le système de la directive. Gardez vos bons…' },
+                        { n: '→', t: 'RENDEZ-LES DANS LE SYSTÈME DE LA DIRECTIVE', d: 'C’est là qu’ils comptent pour votre <b style="color:#00F0FF">Sécurité</b>. Rendus ailleurs, ils ne comptent pas pour cette directive. Le bouton « Où rendre les bons ? » vous y emmène.' }
+                    ]
+                },
+                {
+                    titre: 'COMMENT L’UTILISER',
+                    sous: 'Un bouton, une liste, un avis',
+                    intro: 'Sur la page BGS, ouvrez une <b>directive de hausse</b> : la ligne <b>DÉFENSE D’INSTALLATION</b> et son bouton <b>OÙ DÉFENDRE ?</b> sont dans votre quota du tick.',
+                    visuelHtml: anvDf3,
+                    colonnes: 4,
+                    etapes: [
+                        { n: '1', t: 'CHOISISSEZ UN SYSTÈME', d: 'Tous les systèmes où la faction est en Boom, du plus proche au plus lointain.' },
+                        { n: '2', t: 'ARRIVEZ SUR PLACE', d: 'Le plugin repère <b>tout seul</b> les installations du système. Rien à saisir.' },
+                        { n: '3', t: 'LISEZ LA FICHE', d: 'Le jeu n’écrit pas le propriétaire dans son journal : regardez-le dans le jeu.' },
+                        { n: '4', t: 'RÉPONDEZ OUI OU NON', d: '<b style="color:#00FF66">✓ OUI</b> : l’installation passe au vert pour tout l’escadron. <b style="color:#ff6b6b">✗ NON</b> : elle est barrée.' }
+                    ],
+                    avis: '<b>Plugin v2.50 ou plus récent</b> : relancez EDMC une fois. La liste ne dit pas si un raid est en cours et ne mesure pas encore l’effort du scénario. Fonction pour PC et tablette. Exemple avec des noms fictifs.'
+                }
+            ],
+            cta: 'OUVRIR LA PAGE BGS',
+            aide: 'Page BGS · une directive de hausse · ligne DÉFENSE D’INSTALLATION · bouton « OÙ DÉFENDRE ? » · à utiliser sur PC ou tablette',
+            lien: 'bgs.html',
+            mobile: false
+        }
     ];
 
     // ---- visuels de l'annonce « lifting BGS / Powerplay » : dessines en HTML / SVG (aucune capture d'ecran, aucune donnee reelle ; noms et chiffres fictifs) ----
@@ -354,6 +405,29 @@
             + (ticks ? '<span class="anv-tk">' + ticks.map(function (t) { return '<i class="' + (t ? 'ok' : '') + '"></i>'; }).join('') + '</span>' : '') + '</div></div>';
     }
     function anvTuile(k, t, v, s) { return '<div class="anv-ti" style="--k:' + k + '"><small>' + t + '</small><b>' + v + '</b><span>' + s + '</span></div>'; }
+    // ---- visuels de l'annonce « defense d'installation » : dessines en HTML (aucune capture, aucune donnee reelle ; noms fictifs) ----
+    function anvDf1() {
+        var puce = function (c, t) { return '<span class="anvdf-chip" style="--k:' + c + '">' + t + '</span>'; };
+        return '<div class="anvdf"><div class="anvdf-chaine">' + puce('#00FF66', '▲ FACTION ALPHA EN BOOM') + '<span class="fl">+</span>' + puce('#FFD23F', '🏛 UNE INSTALLATION À ELLE') + '<span class="fl">►</span>' + puce('#FF6B5A', '⚔ UN RAID SE LANCE') + '</div>'
+            + '<div class="anvdf-jeu"><div class="h">SIGNAL DE DÉTRESSE · DIRECTION DE L’INSTALLATION · FACTION ALPHA</div>'
+            + '<div class="ch on"><u>✔ TON CHOIX</u><b>FACTION ALPHA</b><span>SÉCURITÉ ▲ · INFLUENCE ▲ · RÉPUTATION ▲</span><em>DÉFENSE CONTRE LE RAID</em></div>'
+            + '<div class="ch"><b>FACTION BÊTA</b><span>ÉCONOMIE ▲ · INFLUENCE ▲ · RÉPUTATION ▲</span><em>SOUTIEN DU RAID</em></div></div></div>';
+    }
+    function anvDf2() {
+        var sys = function (cl, t, nom, l1, l2, l3) { return '<div class="anvdf-sys ' + cl + '"><div class="t">' + t + '</div><div class="nom">' + nom + '</div><div class="l"><i>⚔</i> raid sur une installation de la faction</div>' + l1 + l2 + (l3 || '') + '</div>'; };
+        return '<div class="anvdf"><div class="anvdf-ab">'
+            + sys('a', 'A · SYSTÈME DE LA DIRECTIVE', 'SYSTÈME EXEMPLE', '<div class="g"><b>▲ INFLUENCE</b> monte ici</div>', '<div class="g"><b>💥 BONS</b> à rendre à la station</div>')
+            + '<div class="anvdf-fl">◄</div>'
+            + sys('b', 'B · UN AUTRE SYSTÈME EN BOOM', 'AUTRE SYSTÈME', '<div class="g n"><b>influence</b> : monte là-bas seulement</div>', '<div class="g"><b>💥 BONS</b> à rapporter dans le système de la directive</div>')
+            + '</div><div class="anvdf-bil"><span>BONS RENDUS DANS LE SYSTÈME DE LA DIRECTIVE</span><b>► ✓ SÉCURITÉ DE LA DIRECTIVE</b></div></div>';
+    }
+    function anvDf3() {
+        return '<div class="anvdf"><div class="anvdf-q"><span>🛡️ DÉFENSE D’INSTALLATION (Raids)</span><button type="button" tabindex="-1">🛡️ OÙ DÉFENDRE ?</button></div>'
+            + '<div class="anvdf-fiche"><div class="e"><b>SYSTÈME EXEMPLE</b><span class="tg b">▲ BOOM</span><span class="tg d">BONS SEULEMENT</span><em>12,1 al</em></div>'
+            + '<div class="i"><b>COLLECTIVE EXEMPLE</b><span class="ok">✓ CONFIRMÉE · CMDR DEMO</span></div>'
+            + '<div class="i"><b>SECOND EXEMPLE</b><span class="q">À FACTION ALPHA ?<u class="o">✓ OUI</u><u class="n">✗ NON</u></span></div>'
+            + '<div class="i no"><b>TROISIÈME EXEMPLE</b><span class="ko">✗ PAS À FACTION ALPHA</span></div></div></div>';
+    }
     // ---- visuels de l'annonce « route double » : dessines en HTML / SVG (noms et chiffres fictifs) ----
     // ---- visuel de l'annonce « alerte combat » : menu lateral + cadre d'alerte (HTML, noms fictifs) ----
     function anvAlerte() {
@@ -519,6 +593,21 @@
             '#edteam-annonce .anva{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;margin:6px 0} #edteam-annonce .anva-menu{width:310px;border:1px solid #1d3b44;background:#071015;padding:8px 0;text-align:left;font-size:.78em;letter-spacing:2px} #edteam-annonce .anva-it{padding:9px 16px;color:#7f9aa3;border-left:3px solid transparent} #edteam-annonce .anva-it.hot{white-space:nowrap;color:#fff;border-left-color:#00F0FF;background:rgba(0,240,255,.12);display:flex;align-items:center;gap:10px;animation:anvaPl 2.4s ease-in-out infinite} #edteam-annonce .anva-it .ic{position:relative;color:#00F0FF;font-size:1.3em} #edteam-annonce .anva-it .ic i{position:absolute;right:-5px;top:-2px;width:9px;height:9px;border-radius:50%;background:#00FF66;box-shadow:0 0 7px #00FF66} #edteam-annonce .anva-it em{margin-left:auto;font-style:normal;color:#FFD700;letter-spacing:1px}',
             '@keyframes anvaPl{0%,100%{box-shadow:0 0 0 rgba(0,240,255,0)}50%{box-shadow:0 0 18px rgba(0,240,255,.5)}} #edteam-annonce .anva-fl{color:#00F0FF;font-size:2em} #edteam-annonce .anva-bt{width:290px;padding:18px 20px;text-align:center;border:2px solid #00F0FF;background:linear-gradient(180deg,rgba(0,40,48,.97),rgba(2,10,14,.98));animation:anvaBt 1.2s ease-in-out infinite} #edteam-annonce .anva-bt b{display:block;color:#00F0FF;letter-spacing:3px;font-size:1.05em} #edteam-annonce .anva-bt span{display:block;color:#fff;margin:8px 0 4px;letter-spacing:1.5px;font-size:.85em} #edteam-annonce .anva-bt small{color:#FF9A1F;letter-spacing:1px} @keyframes anvaBt{0%,100%{box-shadow:0 0 8px rgba(0,240,255,.4);border-color:#00F0FF}50%{box-shadow:0 0 28px rgba(255,154,31,.7);border-color:#FF9A1F}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce .anva-it.hot,#edteam-annonce .anva-bt{animation:none}}',
+            '#edteam-annonce .anvdf{margin-top:18px;text-align:left;font-size:.8em}',
+            '#edteam-annonce .anvdf-chaine{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px} #edteam-annonce .anvdf-chip{border:1px solid var(--k);color:var(--k);background:color-mix(in srgb,var(--k) 9%,#0a0c10);padding:6px 12px;letter-spacing:1px;font-size:.88em} #edteam-annonce .anvdf-chaine .fl{color:#778;font-size:1.3em}',
+            '#edteam-annonce .anvdf-jeu{border:1px solid #2a3540;background:#070a0e;padding:10px 12px} #edteam-annonce .anvdf-jeu .h{color:#8a949c;letter-spacing:2px;font-size:.72em;margin-bottom:8px}',
+            '#edteam-annonce .anvdf-jeu .ch{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;padding:9px 13px;margin-top:8px;border:1px solid #333;background:#0c1014} #edteam-annonce .anvdf-jeu .ch b{color:#fff;letter-spacing:2px;grid-column:1} #edteam-annonce .anvdf-jeu .ch span{color:#9ab;font-size:.82em;grid-column:1} #edteam-annonce .anvdf-jeu .ch em{font-style:normal;color:#bbb;letter-spacing:2px;grid-row:1/3;grid-column:2;align-self:center;text-align:right}',
+            '#edteam-annonce .anvdf-jeu .ch.on{border-color:#FFD23F;background:rgba(255,210,63,.10);box-shadow:0 0 16px rgba(255,210,63,.35);animation:anvdfGlow 2.2s ease-in-out infinite} #edteam-annonce .anvdf-jeu .ch.on em{color:#FFD23F} #edteam-annonce .anvdf-jeu .ch u{position:absolute;right:10px;top:-9px;background:#FFD23F;color:#000;text-decoration:none;font-size:.7em;letter-spacing:2px;padding:1px 8px;font-weight:bold} @keyframes anvdfGlow{0%,100%{box-shadow:0 0 6px rgba(255,210,63,.2)}50%{box-shadow:0 0 22px rgba(255,210,63,.55)}}',
+            '#edteam-annonce .anvdf-ab{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:8px;align-items:stretch} #edteam-annonce .anvdf-fl{align-self:center;text-align:center;color:#00F0FF;font-size:1.6em}',
+            '#edteam-annonce .anvdf-sys{border:1px solid #2c2c2c;background:rgba(0,0,0,.5);padding:10px 14px;border-top:3px solid #FFD23F} #edteam-annonce .anvdf-sys.b{border-top-color:#00F0FF} #edteam-annonce .anvdf-sys .t{color:#FFD23F;letter-spacing:2px;font-size:.72em} #edteam-annonce .anvdf-sys.b .t{color:#00F0FF} #edteam-annonce .anvdf-sys .nom{color:#fff;letter-spacing:3px;font-size:1.15em;margin:4px 0 8px} #edteam-annonce .anvdf-sys .l{color:#99a;font-size:.85em;margin-bottom:6px} #edteam-annonce .anvdf-sys .l i{font-style:normal;color:#FF6B5A}',
+            '#edteam-annonce .anvdf-sys .g{margin-top:5px;padding:5px 9px;border-left:3px solid #00FF66;background:rgba(0,255,102,.07);color:#cfe;font-size:.88em} #edteam-annonce .anvdf-sys .g b{color:#00FF66;font-weight:normal;letter-spacing:1px} #edteam-annonce .anvdf-sys .g.n{border-left-color:#555;background:rgba(255,255,255,.04);color:#99a} #edteam-annonce .anvdf-sys .g.n b{color:#aab}',
+            '#edteam-annonce .anvdf-bil{margin-top:10px;padding:9px 14px;border:2px solid #00FF66;background:linear-gradient(135deg,rgba(0,255,102,.12),#050806 70%);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#c9f5da;letter-spacing:2px;font-size:.82em} #edteam-annonce .anvdf-bil b{color:#00FF66;font-weight:normal}',
+            '#edteam-annonce .anvdf-q{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 14px;margin-bottom:10px;border:1px solid #1d1d1d;background:#050505;color:#fff;font-weight:bold} #edteam-annonce .anvdf-q button{background:rgba(255,210,63,.1);border:1px solid #FFD23F;color:#FFD23F;padding:3px 10px;font-family:inherit;box-shadow:0 0 10px rgba(255,210,63,.3);animation:anvdfGlow 2.2s ease-in-out infinite}',
+            '#edteam-annonce .anvdf-fiche{border:1px solid #2c2c2c;border-left:4px solid #FFD23F;background:rgba(0,0,0,.5);padding:10px 14px} #edteam-annonce .anvdf-fiche .e{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px} #edteam-annonce .anvdf-fiche .e b{color:#fff;letter-spacing:2px;font-size:1.05em;margin-right:6px} #edteam-annonce .anvdf-fiche .e em{margin-left:auto;font-style:normal;color:#999}',
+            '#edteam-annonce .anvdf-fiche .tg{border:1px solid #00FF66;color:#00FF66;background:rgba(0,255,102,.08);padding:1px 8px;font-size:.72em;letter-spacing:1px} #edteam-annonce .anvdf-fiche .tg.d{border-color:#00F0FF;color:#00F0FF;background:transparent}',
+            '#edteam-annonce .anvdf-fiche .i{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-top:1px solid #262626} #edteam-annonce .anvdf-fiche .i b{color:#fff;font-weight:normal;letter-spacing:1px} #edteam-annonce .anvdf-fiche .i.no b{text-decoration:line-through;color:#777}',
+            '#edteam-annonce .anvdf-fiche .ok{color:#00FF66;border:1px solid #00FF66;background:rgba(0,255,102,.08);padding:0 8px;letter-spacing:1px} #edteam-annonce .anvdf-fiche .ko{color:#ff6b6b;border:1px solid #ff6b6b;background:rgba(255,80,80,.07);padding:0 8px;letter-spacing:1px} #edteam-annonce .anvdf-fiche .q{color:#bfae6a;display:inline-flex;gap:8px;align-items:center} #edteam-annonce .anvdf-fiche .q u{text-decoration:none;padding:1px 10px;letter-spacing:1px} #edteam-annonce .anvdf-fiche .q u.o{border:1px solid #00FF66;color:#00FF66;animation:anvBlink 1.6s ease-in-out infinite} #edteam-annonce .anvdf-fiche .q u.n{border:1px solid #ff6b6b;color:#ff6b6b}',
+            '@media (max-width:900px){#edteam-annonce .anvdf-ab{grid-template-columns:1fr}#edteam-annonce .anvdf-fl{transform:rotate(90deg)}} @media (prefers-reduced-motion:reduce){#edteam-annonce .anvdf-jeu .ch.on,#edteam-annonce .anvdf-q button,#edteam-annonce .anvdf-fiche .q u.o{animation:none}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce,#edteam-annonce .anc-boite{animation:none}}'
         ].join('\n');
         document.head.appendChild(st);

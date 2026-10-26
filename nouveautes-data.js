@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-defense-installation", date: "2026-10-26T20:10:00Z", type: "NOUVEAU",
+        titre: "Directives de hausse : « Défense d’installation »",
+        texte: "Une nouvelle ligne apparaît dans ton quota du tick, sous les directives de hausse : Défense d’installation, avec le bouton « Où défendre ? ». Quand la faction de la directive est en Boom, un scénario de raid peut se lancer sur ses installations (dans le système de la directive ou dans n’importe quel autre) : en choisissant la défense, tu fais monter son influence dans le système de l’installation, et les bons de combat que tu gagnes comptent pour ta Sécurité si tu les rends dans le système de la directive. La fenêtre liste tous les systèmes où la faction est en Boom. Les installations n’apparaissent qu’après le passage d’un pilote de l’escadron, et le jeu n’indique pas à qui elles appartiennent : un pilote passé sur place (plugin 2.50) regarde la fiche dans le jeu et répond OUI (elle passe au vert) ou NON (elle est barrée). Pas encore de quota ni de mesure du scénario.",
+        important: false
+    },
+    {
         id: "2026-10-mobile-fil-en-haut", date: "2026-10-25T23:19:00Z", type: "AMELIORE",
         titre: "Mobile : le fil de l’escadron s’affiche en premier",
         texte: "Sur l’accueil du téléphone, les 6 dernières actualités de l’escadron s’affichent juste sous ton bloc de commandant. Un toucher ouvre le fil complet, que tu peux faire défiler (plus besoin du bouton Journal). Le bouton EDNEWS se trouve désormais sous le logo de ton escadron.",
