@@ -131,7 +131,7 @@
         if (!liste.length) return legende + '<div class="df-msg"><b>AUCUN SYSTÈME EN BOOM</b>' + fac + ' n\'est en Boom nulle part d\'après Spansh : aucun raid possible. Les bons de la faction rendus dans ' + sy + ' comptent toujours pour ta Sécurité.</div>';
         let h = legende;
         if (avec.length) h += '<div class="df-grp"><b>INSTALLATIONS REPÉRÉES</b><span>' + avec.length + ' système' + (avec.length > 1 ? 's' : '') + (avec.some(x => (x.installations || []).some(i => !i.avis)) ? ' · propriétaire à confirmer sur place : le pilote qui y est passé répond ✓ OUI / ✗ NON' : '') + '</span></div>' + avec.map(fiche).join('');
-        if (sans.length) h += '<div class="df-grp"><b>EN BOOM · INSTALLATIONS INCONNUES</b><span>' + sans.length + ' · arrive dans le système : le plugin repère seul les installations (il peut n\'y en avoir aucune)</span></div><div class="df-chips">' + sans.map(puce).join('') + '</div>';
+        if (sans.length) h += '<div class="df-grp"><b>EN BOOM · INSTALLATIONS INCONNUES</b><span>' + sans.length + ' · arrive dans le système (+1 point BGS, repérage) : le plugin repère seul les installations, il peut n\'y en avoir aucune</span></div><div class="df-chips">' + sans.map(puce).join('') + '</div>';
         if (lointains.length) h += '<details class="df-loin"><summary>' + lointains.length + ' système' + (lointains.length > 1 ? 's' : '') + ' en Boom à plus de ' + LOIN + ' al</summary><div class="df-chips">' + lointains.map(puce).join('') + '</div></details>';
         return h;
     }
