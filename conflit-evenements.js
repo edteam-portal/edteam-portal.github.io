@@ -26,7 +26,8 @@
         try {
             if (!window.EdteamTick) { try { await chargerScript("tick.js?v=8"); } catch (e) { /* tick du cache */ } }
             if (window.EdteamTick && window.EdteamTick.assurer) { try { await window.EdteamTick.assurer(); } catch (e) { /* tick du cache */ } }
-            var r = await c.rpc("bgs_evenements_conflit", { p_depuis: new Date(dernierTick()).toISOString() });
+            // 24 h en arriere (et non depuis le tick) : la fenetre plein ecran de conflit-modale.js reste ouverte 24 h ; le bandeau, lui, filtre par tick (evenement)
+            var r = await c.rpc("bgs_evenements_conflit", { p_depuis: new Date(Math.min(dernierTick(), Date.now() - 86400000)).toISOString() });
             if (r && !r.error && Array.isArray(r.data)) { map = {}; r.data.forEach(function (x) { (map[x.ordre_id] = map[x.ordre_id] || []).push(x); }); }
         } catch (e) { map = null; }
         memo = { ts: Date.now(), data: map }; window.cacheEvtConflits = map;
@@ -73,6 +74,9 @@
     // evenement a montrer pour une directive : le plus recent parmi ses genres
     function evenement(o) {
         var m = window.cacheEvtConflits, l = m && o && m[o.id]; if (!l || !l.length) return null;
+        var tick = dernierTick() / 1000;
+        l = l.filter(function (x) { return Number(x.detecte) >= tick; });      // le bandeau reste « jusqu'au tick », la fenetre plein ecran 24 h
+        if (!l.length) return null;
         return l.slice().sort(function (a, b) { return Number(b.detecte) - Number(a.detecte); })[0];
     }
     // bandeau d'une directive (chaine vide sans evenement). opts : { commande : bool (bouton), mobile : bool }

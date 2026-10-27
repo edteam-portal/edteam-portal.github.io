@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-conflit-fenetre-24h", date: "2026-10-27T19:05:00Z", type: "CORRIGE",
+        titre: "Guerres et élections : la fenêtre plein écran reste 24 h",
+        texte: "La fenêtre plein écran qui annonce le début ou la fin d’une guerre ou d’une élection (victoire, défaite) ne disparaît plus au tick : elle reste disponible 24 heures, une seule fois par appareil, même si tu te connectes le soir. Corrigé aussi : quand une directive est posée sur une faction déjà en guerre ou en élection, l’annonce « EN COURS » est maintenant rattrapée au relevé suivant (elle pouvait manquer).",
+        important: false
+    },
+    {
         id: "2026-10-reperage-boom-installations", date: "2026-10-26T22:40:00Z", type: "AMELIORE",
         titre: "Repérage : les systèmes en Boom à visiter",
         texte: "La mission de repérage (bandeau Renseignement) propose maintenant les systèmes où la faction d’une de vos directives de hausse est en Boom et où personne n’a encore vu d’installation : c’est là que peuvent se lancer les raids de « Défense d’installation ». Arrive dans l’un de ces systèmes avec le plugin lancé : tu gagnes 1 point BGS (Renseignement) et 1 point pour la distinction L’ESPION, comme pour un autre repérage, et le plugin repère tout seul les installations du système. Un système visité sort de la liste pendant 7 jours.",
