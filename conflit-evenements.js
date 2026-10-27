@@ -94,7 +94,7 @@
             var cta = opts.commande && passer && !opts.mobile ? "<button type=\"button\" class=\"cta\" onclick=\"event.stopPropagation(); EdteamConflitEvt.passer(" + Number(o.id) + ",'" + (guerre ? "GUERRE" : "ELECTION") + "')\">PASSER EN " + (guerre ? "GUERRE" : "ÉLECTION") + "</button>" : "";
             if (!guerre) haut = BULLETINS.map(function (b) { return "<span class=\"bul\" style=\"left:" + b[0] + ";animation-delay:" + b[1] + "\"></span>"; }).join("");
             h = "<div class=\"" + cls + " " + (guerre ? "war" : "vote") + "\">" + haut + "<span class=\"ico\">" + ico + "</span><div class=\"tx\"><div class=\"t\">" + titre + "</div>"
-                + "<div class=\"s\"><span class=\"l\">" + lieu + " · <b>" + fac + "</b></span><span class=\"l\">" + (encours ? "directive posée " : "détectée ") + quand + "<span class=\"src\"> (" + src + ")</span> · directive : <b>" + typeFr + " #" + Number(o.id) + "</b></span></div></div>" + cta + "<span class=\"fin\">jusqu’au tick</span></div>";
+                + "<div class=\"s\"><span class=\"l\">" + lieu + " · <b>" + fac + "</b></span><span class=\"l\">" + (encours ? "conflit déjà en cours" : "détectée " + quand + "<span class=\"src\"> (" + src + ")</span>") + " · directive : <b>" + typeFr + " #" + Number(o.id) + "</b></span></div></div>" + cta + "<span class=\"fin\">jusqu’au tick</span></div>";
             return h;
         }
         // FIN : resultat d'apres le dernier score releve
