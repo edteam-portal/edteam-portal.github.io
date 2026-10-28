@@ -15,13 +15,14 @@
     <link rel="stylesheet" href="style.css?v=3">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=4"></script>
+    <script src="shared-utils.js?v=7"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=52"></script>
+    <script src="navigation.js?v=54"></script>
+    <script src="invitations.js?v=1"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
-    <script src="campagnes.js?v=66"></script>
+    <script src="campagnes.js?v=68"></script>
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=7"></script>
     <script src="conflit-modale.js?v=3"></script>
@@ -31,10 +32,9 @@
     <script src="bgs-ticks.js?v=8"></script>
     <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
-    <script src="carte-campagnes.js?v=47"></script>
+    <script src="carte-campagnes.js?v=48"></script>
     <script src="campagnes-pp.js?v=20"></script>
     <script src="campagnes-col.js?v=7"></script>
-    <script src="vitrine-module.js?v=1"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -709,6 +709,17 @@
             BAT: []                                                          // colonisation : stations terminées et paliers de livraisons seulement (pas chaque livraison)
         };
         const nomStationJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
+        // journal d'UNE campagne (bouton de l'en-tete de campagne) : le journal habituel, filtre sur la campagne
+        function filtrerOrdresPage(q) { const esc = profilCommandant.escadron_id || 'ISS'; return window.edteamInvitations ? window.edteamInvitations.filtrerOrdres(q, esc) : q.eq('escadron_id', esc); }
+        window.ouvrirJournalCampagne = async function(id, e) {
+            if (typeof sonClic === 'function') sonClic();
+            ouvrirModal('modal-exploit-fullscreen', e);
+            const sel = document.getElementById('filtre-ordre');
+            journalMemo.ts = Date.now();
+            if (sel && !sel.dataset.ppPret) await chargerRegistreTactique();   // peuple les filtres (campagnes comprises)
+            if (sel) sel.value = 'C' + id;
+            await chargerRegistreTactique();
+        };
         window.ouvrirJournalBGS = function(e) {
             if (typeof sonClic === 'function') sonClic();
             ouvrirModal('modal-exploit-fullscreen', e);
@@ -820,16 +831,32 @@
 
             // SÉCURITÉ ANTI-RECRUE + VÉRIFICATION DU PROFIL (requête unique, fusionnée)
             const rangJeu = parseInt(localStorage.getItem('edteam_rang_jeu') || '3');
-            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            let { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
 
             if (!data) { window.location.href = 'index.html'; return; }
 
-            // PAS D'ESCADRON : la page presente le module (vitrine-module.js) au lieu de rediriger
+            // PAS D'ESCADRON VALIDE (sans escadron, ou escadron pas encore valide par le Directeur) : pas de page BGS, SAUF pour un pilote invite a une campagne (MODE INVITE : invitations.js, SQL 171)
             if (!data.escadron_id || data.escadron_id === 'INDEPENDANT') {
-                if (data.est_approuve) { window.afficherVitrineModule('bgs', data); }
-                else { await supabaseApp.auth.signOut(); window.location.href = 'index.html'; }
-                return;
+                if (!data.est_approuve) await supabaseApp.auth.signOut();
+                const inv = (data.est_approuve && window.edteamInvitations) ? await window.edteamInvitations.charger(true, data.user_id) : null;
+                if (!window.edteamInvitations || !window.edteamInvitations.modeInvite(data, inv)) {
+                    if (window.edteamInvitations && inv && ((inv.pilote || []).length + (inv.escadron || []).length)) window.edteamInvitations.rouvrir();   // invitation pas encore acceptee : le QG la reproposera
+                    window.location.href = 'index.html'; return;
+                }
+                // la page se comporte comme pour un membre de l'escadron hote, mais la base ne lui livre que les campagnes ou il participe, et sans aucun role
+                window.profilReelInvite = data;
+                data = Object.assign({}, data, { escadron_id: inv.participe[0].hote, est_amiral: false, est_officier: false });
+                window.edteamInvitations.activer(supabaseApp, inv);
+                window.EDTEAM_ALLIEES = (inv.participe || []).map(p => p.campagne_id);
+                const titreP = document.querySelector('#bgs-tab-ordres h3'); if (titreP) titreP.innerHTML = '&gt; CAMPAGNES AUXQUELLES JE PARTICIPE';
+            } else if (data.est_approuve && window.edteamInvitations) {
+                // membre d'un escadron invite a des campagnes d'AUTRES escadrons : elles s'affichent dans le bloc « campagnes alliees »
+                const inv = await window.edteamInvitations.charger(false);
+                const miens = String(data.escadron_id).trim().toUpperCase();
+                const ids = ((inv && inv.participe) || []).filter(p => String(p.hote).trim().toUpperCase() !== miens).map(p => p.campagne_id);
+                if (ids.length) { window.EDTEAM_ALLIEES = ids; window.edteamInvitations.activerFusion(supabaseApp); }
             }
+            if (window.edteamInvitations) await window.edteamInvitations.chargerActeurs();
 
             if (data && data.est_approuve) {
                 profilCommandant = data;
@@ -861,7 +888,8 @@
                 
                 const fmt = new Intl.NumberFormat('fr-FR');
                 // Escadron et grades dans l'en-tete (navigation.js)
-                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+                // (en mode invite, l'en-tete montre le profil reel du pilote : sans escadron, jamais celui de l'escadron hote)
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(window.EDTEAM_INVITE && window.profilReelInvite ? window.profilReelInvite : data);
 
                 const failsafeKeyDisplay = document.getElementById('failsafe-api-key');
                 if (failsafeKeyDisplay) failsafeKeyDisplay.innerText = data.cle_api;
@@ -1019,8 +1047,9 @@
         // liste deroulante des campagnes actives (salle de commandement)
         async function chargerChoixCampagne(preselection) {
             const sel = document.getElementById('cmd-campagne'); if (!sel) return;
-            const camps = await window.edteamCampagnes.lire();
-            window.cacheCampagnes = camps;
+            const toutes = await window.edteamCampagnes.lire();
+            window.cacheCampagnes = toutes;
+            const camps = toutes.filter(c => !c.escadron_id || String(c.escadron_id).trim().toUpperCase() === String(profilCommandant.escadron_id || '').trim().toUpperCase());   // jamais une campagne alliee
             const garde = preselection || sel.value;
             sel.innerHTML = camps.length
                 ? '<option value="">-- Choisir une campagne --</option>' + camps.map(c => '<option value="' + c.id + '">' + escapeHtml(window.edteamCampagnes.LIB[c.type_campagne] + ' · ' + c.nom + ' (priorité ' + window.edteamCampagnes.PRIO[c.priorite][0].toLowerCase() + ')') + '</option>').join('')
@@ -1531,15 +1560,15 @@
                 <!-- 1. L'EFFORT : le cœur de l'application -->
                 <div class="bgs-cadre"><div class="bgs-cadre-t">${meta.jour ? 'QUI PARTICIPE ET COMMENT' : 'EFFORT'}</div>
                 ${meta.jour ? `<div id="bt-hero"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement…</div></div>
-                <div class="bgs-sec" style="margin-top: 16px;">PAR ACTIVITÉ <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· l'effort de l'escadron depuis l'émission</span></div>
+                <div class="bgs-sec" style="margin-top: 16px;">PAR ACTIVITÉ <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· l'effort global depuis l'émission</span></div>
                 <div id="bt-bilan"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement…</div></div>
                 <div class="bgs-sec" style="margin-top: 16px;">PARTICIPANTS <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">· part de l'effort, activités et ticks quotidiens joués</span></div>
                 <div id="bt-part"><div style="color:#777; font-size:0.8em; padding:8px 4px;">Chargement…</div></div>` : `<div class="bgs-hero" style="border-color: ${c}; margin-top: 0;">
-                    <div class="h1"><span>EFFORT DE L'ESCADRON</span><span style="display:inline-flex;align-items:center;gap:10px;align-self:center"><b style="color: #fff;white-space:nowrap;">${meta.global} %</b>${bgsAvatars(meta.pilotes, 6, 40)}</span></div>
+                    <div class="h1"><span>EFFORT GLOBAL</span><span style="display:inline-flex;align-items:center;gap:10px;align-self:center"><b style="color: #fff;white-space:nowrap;">${meta.global} %</b>${bgsAvatars(meta.pilotes, 6, 40)}</span></div>
                     <div class="h2"><span>TA PART</span><b style="color: ${c};">${meta.part} %</b></div>
                     <div class="jgh"><i style="width: ${meta.global}%; opacity: 0.5; background: ${c};"></i><i style="width: ${meta.vous}%; background: ${c}; box-shadow: 0 0 9px ${c}, 0 0 2px ${c}, inset 0 0 4px #fff9; border-right: 2px solid #fff8;"></i></div>
                 </div>`}
-                <div class="bgs-sec" style="margin-top: 14px;">${meta.jour ? 'TON QUOTA DU TICK' : 'EFFORT PAR TYPE D\'ACTION'} <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">${meta.jour ? '· depuis le dernier tick ; au-delà du plein effet, le surplus compte pour ton rang' : '· cumul depuis la directive · vif : toi · atténué : escadron'}</span></div>
+                <div class="bgs-sec" style="margin-top: 14px;">${meta.jour ? 'TON QUOTA DU TICK' : 'EFFORT PAR TYPE D\'ACTION'} <span style="color: #777; letter-spacing: 0; font-size: 0.9em;">${meta.jour ? '· depuis le dernier tick ; au-delà du plein effet, le surplus compte pour ton rang' : '· cumul depuis la directive · vif : toi · atténué : global'}</span></div>
                 <div class="bgs-jauges" style="display: flex; flex-direction: column; gap: 6px;">${window.cacheJaugesBgs[ordre.id] || ''}</div>
                 ${meta.jour ? '' : dossier}
                 </div>
@@ -1604,6 +1633,7 @@
             return out;
         }
         async function chargerAccueilBGS(force) {
+            if (window.EDTEAM_INVITE) return;   // mode invite : ni engagement, ni semaine de l'escadron, ni mur des distinctions de l'escadron hote
             const haut = document.getElementById('bgs-accueil-haut');
             if (!haut || !profilCommandant) return;
             if (!force && accueilMemo.ts && Date.now() - accueilMemo.ts < 60000) return;   // déjà affiché il y a moins d'une minute
@@ -1845,9 +1875,7 @@
 
             try {
                 // 1. On télécharge D'ABORD les ordres actifs (très léger)
-                const resOrdres = await supabaseApp.from('ordres_bgs')
-                    .select('*')
-                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
+                const resOrdres = await filtrerOrdresPage(supabaseApp.from('ordres_bgs').select('*'))
                     .eq('statut', 'ACTIF')
                     .order('date_emission', { ascending: false });
                 
@@ -1983,7 +2011,7 @@
                         const formatNum = (val) => new Intl.NumberFormat('fr-FR').format(val);
                         const fmtDual = (valMoi, valSquad, cap, unite = '') => {
                             const u = unite ? ` ${unite}` : '';
-                            return `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${valMoi}${u}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <strong style="color:#fff;">${valSquad} / ${cap}${u}</strong>`;
+                            return `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${valMoi}${u}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Global :</span> <strong style="color:#fff;">${valSquad} / ${cap}${u}</strong>`;
                         };
 
                         let colorPrinc = '#00FF66'; let colorFond = 'rgba(0, 255, 102, 0.02)';
@@ -2030,7 +2058,7 @@
                             const nbCzMoi = Number(((rs.types || {}).CZ_VICTOIRES || {}).nm) || 0;
                             const nbCzSquad = Number(((rs.types || {}).CZ_VICTOIRES || {}).n) || 0;
 
-                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoi}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Escadron :</span> <strong style="color:#fff;">${nbCzSquad} / ${capCz} BATAILLE${capCz > 1 ? 'S' : ''}</strong>`;
+                            const texteCzDual = `<span style="color:#aaa;">Vous :</span> <strong style="color:#fff;">${nbCzMoi}</strong> <span style="color:#666; margin: 0 6px;">|</span> <span style="color:#aaa;">Global :</span> <strong style="color:#fff;">${nbCzSquad} / ${capCz} BATAILLE${capCz > 1 ? 'S' : ''}</strong>`;
 
                             const ratioBonds = Math.min(100, (totauxG['SECURITE'] / capBonds) * 100);
                             const ratioBondsVous = Math.min(100, (totauxMoiG['SECURITE'] / capBonds) * 100);
@@ -2580,9 +2608,8 @@
 
             try {
                 // 1. TÉLÉCHARGEMENT SÉCURISÉ ET OPTIMISÉ (EGRESS PROTÉGÉ)
-                const resOrdres = suite ? { data: memoireOrdresArchives } : await supabaseApp.from('ordres_bgs')
-                    .select('id, systeme_cible, faction_cible, type_ordre, statut, priorite, campagne_id')
-                    .eq('escadron_id', profilCommandant.escadron_id || 'ISS');
+                const resOrdres = suite ? { data: memoireOrdresArchives } : await filtrerOrdresPage(supabaseApp.from('ordres_bgs')
+                    .select('id, systeme_cible, faction_cible, type_ordre, statut, priorite, campagne_id'));
                 const ordres = resOrdres.data || [];
 
                 // Projection stricte intégrant les champs de colonisation et d'action libre
@@ -2660,6 +2687,8 @@
                 profils.forEach(p => {
                     dicoPilotes[p.user_id] = p.cmdr_nom ? p.cmdr_nom.toUpperCase() : 'EN ATTENTE EDMC';
                 });
+                // alliés et solitaires invités : noms de campagnes_acteurs (invitations.js)
+                Object.keys(window.cacheActeurs || {}).forEach(u => { if (!dicoPilotes[u] || dicoPilotes[u] === 'EN ATTENTE EDMC') dicoPilotes[u] = String(window.cacheActeurs[u].n || '').toUpperCase() || 'EN ATTENTE EDMC'; });
                 memoireDicoPilotes = dicoPilotes;
 
                 // PEUPLEMENT DU FILTRE DES PILOTES (une fois) : chaque pilote de l'escadron, par ordre alphabétique
@@ -2867,7 +2896,7 @@
                                 return;
                             }
 
-                            const cmdr = escapeHtml(dicoPilotes[a.user_id] || 'INCONNU');
+                            const cmdr = escapeHtml(dicoPilotes[a.user_id] || 'INCONNU') + (window.edteamInvitations ? window.edteamInvitations.pastille(a.user_id) : '');
 
                             const ordreConcerne = ordres.find(o => String(o.id) === String(a.ordre_id));
                             const cibleSys = escapeHtml(ordreConcerne ? ordreConcerne.systeme_cible.toUpperCase() : (a.systeme ? a.systeme.toUpperCase() : "SECTEUR LOCAL"));
@@ -3232,6 +3261,6 @@
     <script src="destabiliser.js?v=1"></script>
     <script src="rendre.js?v=1"></script>
     <script src="defense.js?v=8"></script>
-    <script src="footer.js?v=41"></script>
+    <script src="footer.js?v=42"></script>
 </body>
 </html>

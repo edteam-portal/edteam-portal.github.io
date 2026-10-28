@@ -110,12 +110,6 @@
         } catch (e) { l.echec = Date.now(); return null; }
     }
     const lvS = n => (etat.lv[n] && etat.lv[n].s) || null;
-    // aide en plein ecran (carte-aide.js), chargee seulement quand on l'ouvre
-    function ouvrirAide(page) {
-        if (window.EdteamCarteAide) { window.EdteamCarteAide.ouvrir(page); return; }
-        const sc = document.createElement("script"); sc.src = "carte-aide.js?v=4"; sc.onload = () => { if (window.EdteamCarteAide) window.EdteamCarteAide.ouvrir(page); }; sc.onerror = () => { /* aide indisponible : rien d'autre a faire */ };
-        document.head.appendChild(sc);
-    }
     const ETATS_FR = { Stronghold: "Défendu", Fortified: "Consolidé", Exploited: "Exploité" };
 
     // ma position (SA ligne privee de session_live : jamais celle d'un autre pilote) ; null si le jeu n'a jamais envoye de session
@@ -167,7 +161,7 @@
         const optAller = "<option value=\"\">⤢ Aller à…</option><option value=\"tout\">Tout voir (cibles et faction)</option><option value=\"cibles\">Toutes les cibles</option>" + ((etat.enn && etat.enn.length) || lvS("acq") || lvS("exp") ? "<option value=\"ennemis\">⚠ Alarmes (systèmes concernés)</option>" : "") + ((etat.ctx || []).some(c => c[5] === 1) ? "<option value=\"colonies\">Colonies de l’escadron</option>" : "")
             + "<optgroup label=\"Campagnes\">" + par.filter(o => o.n).map(o => "<option value=\"c:" + E(o.c.id) + "\">" + E(nomCourtL(o.c.nom, 34)) + " (" + o.n + ")</option>").join("") + "</optgroup>"
             + "<optgroup label=\"Systèmes ciblés\">" + connus.map(x => x.n).sort().map(n => "<option value=\"s:" + E(n) + "\">" + E(n) + "</option>").join("") + "</optgroup>";
-        zone.innerHTML = "<div class=\"cc\"><div class=\"cc-carte bloc holo\"><h2>CARTE GALACTIQUE <em>missions actives · molette : zoom · glisser : déplacer · double-clic : recentrer</em><button type=\"button\" class=\"cc-aide haut\" data-aide=\"debut\" title=\"Tout comprendre : couleurs, alarmes, mécaniques du jeu\">❓ AIDE</button></h2><div class=\"cc-bar\" title=\"molette : zoom · glisser : déplacer · double-clic : recentrer\">" + bt("dessus", "DESSUS", "data-v") + bt("cote", "CÔTÉ", "data-v")
+        zone.innerHTML = "<div class=\"cc\"><div class=\"cc-carte bloc holo\"><h2>CARTE GALACTIQUE <em>missions actives · molette : zoom · glisser : déplacer · double-clic : recentrer</em></h2><div class=\"cc-bar\" title=\"molette : zoom · glisser : déplacer · double-clic : recentrer\">" + bt("dessus", "DESSUS", "data-v") + bt("cote", "CÔTÉ", "data-v")
             + "<select class=\"cc-sel\" data-modesel title=\"Lecture des couleurs\"><option value=\"resultat\">Couleur : résultat</option><option value=\"participation\">Couleur : participation</option><option value=\"priorite\">Couleur : priorité</option></select>"
             + "<details class=\"cc-dom\"><summary>Afficher</summary><div class=\"cc-dom-l\"><div class=\"cc-dl-t\">MISSIONS</div><label><input type=\"checkbox\" data-d=\"BGS\"> BGS</label><label><input type=\"checkbox\" data-d=\"PP\"> Powerplay</label><label><input type=\"checkbox\" data-d=\"COL\"> Colonisation</label><div class=\"cc-dl-t\">SUR LA CARTE</div><label title=\"Montre en fondu (non cliquables) les systèmes contrôlés par la faction de l’escadron, pour situer les systèmes ciblés\"><input type=\"checkbox\" data-f=\"ctx\"> Systèmes de la faction</label><label title=\"Distance de ta position actuelle (visible de toi seul) à chaque système\"><input type=\"checkbox\" data-f=\"dist\"> Depuis ma position</label></div></details>"
             + bt("ren", "⚠ À RENFORCER", "data-f", "ren", "Résultat rouge et au plus un pilote ayant agi depuis le dernier tick : les autres systèmes s’estompent")
@@ -175,7 +169,7 @@
                 + (etat.enn ? "<label title=\"Systèmes contrôlés par une puissance ennemie près de nos systèmes\"><input type=\"checkbox\" data-al=\"1\"> <i class=\"cc-pa\" style=\"background:#ff2d2d\"></i>Powerplay : puissance ennemie en place</label>" : "")
                 + (lvS("acq") ? "<label title=\"Systèmes inoccupés où une puissance ennemie progresse (au moins 10 %)\"><input type=\"checkbox\" data-al=\"2\"> <i class=\"cc-pa\" style=\"background:#ff9a1f\"></i>Powerplay : conquête ennemie</label>" : "")
                 + (lvS("exp") ? "<label title=\"Une faction rivale en Expansion à 20 al ou moins d’un de nos systèmes qui a une place libre\"><input type=\"checkbox\" data-al=\"3\"> <i class=\"cc-pa\" style=\"background:#ff4fd8\"></i>BGS : expansion d’une faction rivale</label>" : "")
-                + "<div class=\"cc-dl-t\">DISTANCE (POWERPLAY)</div><select class=\"cc-sel\" data-rayon><option value=\"10\">≤ 10 al</option><option value=\"15\">≤ 15 al</option><option value=\"25\">≤ 25 al</option></select><button type=\"button\" class=\"cc-aide\" data-aide=\"alarmes\" style=\"margin-top:8px\">❓ Comprendre les alarmes</button></div></details>" : "")
+                + "<div class=\"cc-dl-t\">DISTANCE (POWERPLAY)</div><select class=\"cc-sel\" data-rayon><option value=\"10\">≤ 10 al</option><option value=\"15\">≤ 15 al</option><option value=\"25\">≤ 25 al</option></select></div></details>" : "")
             + "<select class=\"cc-sel\" data-aller title=\"Recadre la carte\">" + optAller + "</select>"  + "<span class=\"cc-msg\" style=\"color:#ffb000;\"></span></div>"
             + "<svg class=\"cc-svg\" viewBox=\"0 0 " + W + " " + H + "\"></svg>"
             + (inconnus.length ? "<div class=\"cc-note\">Position inconnue (système absent d'EDSM ou pas encore récupéré) : " + inconnus.map(n => "<span style=\"color:#9ab;\">" + E(n) + "</span>").join(" · ") + "</div>" : "") + "</div>"
@@ -377,8 +371,7 @@
                 + "<div class=\"cc-lg2\"><span class=\"cc-lgt\">TERRITOIRE</span><span style=\"color:#FFD700\">●</span> colonie · <span style=\"color:#8A7CFF\">◇</span> puissance défendue</div>"
                 + "<div class=\"cc-lg2\"><span class=\"cc-lgt\">ALARMES</span><span style=\"color:#ff2d2d\">●</span> ennemi en place · <span style=\"color:#ff9a1f\">●</span> conquête · <span style=\"color:#ff4fd8\">◯</span> expansion</div>"
                 + "<div class=\"cc-lg2\"><span class=\"cc-lgt\">BULLE</span>pointillée = groupe de cibles</div>"
-                + "<button type=\"button\" class=\"cc-aide\" data-aide=\"debut\">❓ AIDE · TOUT COMPRENDRE</button>";
-            zone.querySelectorAll("[data-aide]").forEach(b => b.onclick = () => ouvrirAide(b.dataset.aide));
+                + "";
         }
         function listeCamps() {
             el.innerHTML = par.map(o => "<div class=\"cc-camp" + (etat.hors.has(o.c.id) ? " off" : "") + "\" data-k=\"" + o.c.id + "\"><i style=\"background:" + o.c.couleur + "; box-shadow:0 0 8px " + o.c.couleur + "\"></i><div>" + E(o.c.nom) + "<small>" + E(o.c.type) + " · priorité " + E((PRIO[o.c.prio || 3] || PRIO[3])[0].toLowerCase()) + "</small></div><span class=\"n\">" + o.n + " sys.</span></div>").join("");
@@ -463,7 +456,6 @@
             const c = cadrer(pts, zmax); etat.zoom = c.z; etat.cx = c.cx; etat.cy = c.cy; dessiner();
         };
         zone.querySelectorAll("[data-v]").forEach(b => b.onclick = () => { etat.vue = b.dataset.v; etat.zoom = 1; etat.cx = null; etat.cy = null; dessiner(); });
-        zone.querySelectorAll("[data-aide]").forEach(b => b.onclick = () => { ouvrirAide(b.dataset.aide); });
         zone.querySelectorAll("[data-al]").forEach(b => b.onchange = () => { etat.al[b.dataset.al] = b.checked; dessiner(); });
         const selRayon = zone.querySelector("[data-rayon]"); if (selRayon) selRayon.onchange = () => { etat.rayon = Number(selRayon.value) || 15; dessiner(); };
         const selMode = zone.querySelector("[data-modesel]"); if (selMode) selMode.onchange = () => { etat.mode = selMode.value; dessiner(); };

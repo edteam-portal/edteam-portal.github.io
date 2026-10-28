@@ -69,15 +69,15 @@
         if (o.zones.tuiles) o.zones.tuiles.innerHTML = "<div class=\"bp-tuiles\">"
             + "<div class=\"bp-t\" style=\"--k:#FF7100;\"><div class=\"t\">PARTICIPANTS</div><div class=\"v\">" + ids.length + "</div><div class=\"s\">pilote" + (ids.length > 1 ? "s" : "") + " depuis l’émission, il y a " + jours + " j</div></div>"
             + "<div class=\"bp-t\" style=\"--k:#2fe07a;\"><div class=\"t\">AUJOURD’HUI</div><div class=\"v\">" + na + " / " + ids.length + "</div><div class=\"s\">ont joué depuis le dernier tick</div></div>"
-            + "<div class=\"bp-t\" style=\"--k:#FFB000;\"><div class=\"t\">TA PART</div><div class=\"v\">" + (ptsPilote[moi] ? fPart(maPart) : "0 %") + "</div><div class=\"s\">de l’effort de l’escadron · " + fr(ptsPilote[moi] || 0, 1) + " pts</div></div></div>";
+            + "<div class=\"bp-t\" style=\"--k:#FFB000;\"><div class=\"t\">TA PART</div><div class=\"v\">" + (ptsPilote[moi] ? fPart(maPart) : "0 %") + "</div><div class=\"s\">de l’effort global · " + fr(ptsPilote[moi] || 0, 1) + " pts</div></div></div>";
 
-        // 2. par activite : une barre cumulee (100 % = l'effort de l'escadron, en points) + legende avec les totaux dans leur unite
+        // 2. par activite : une barre cumulee (100 % = l'effort global, en points) + legende avec les totaux dans leur unite
         const totType = {}; types.forEach(ty => { totType[ty] = ids.reduce((a, u) => a + pts(ty, (brut[u] || {})[ty]), 0); });
         const sommeT = types.reduce((a, ty) => a + totType[ty], 0), actifs = types.filter(ty => totType[ty] > 0);
         const brutTot = ty => data && data.types && data.types[ty] ? Number(data.types[ty].total) || 0 : 0, brutMoi = ty => data && data.types && data.types[ty] ? Number(data.types[ty].moi) || 0 : 0;
-        if (o.zones.activite) o.zones.activite.innerHTML = sommeT > 0 ? "<div class=\"bp-cumul\">" + actifs.map(ty => "<span" + tip((Q.NOMS && Q.NOMS[ty] || ty) + "\n" + (Q.fmtBilan ? Q.fmtBilan(ty, typeOrdre, brutTot(ty)) : fr(brutTot(ty))) + " (" + fPart(100 * totType[ty] / sommeT) + " de l’effort de l’escadron)", COUL[ty]) + " style=\"flex:" + totType[ty] + " 1 0; background:" + (COUL[ty] || "#8a949c") + ";\"></span>").join("") + "</div>"
+        if (o.zones.activite) o.zones.activite.innerHTML = sommeT > 0 ? "<div class=\"bp-cumul\">" + actifs.map(ty => "<span" + tip((Q.NOMS && Q.NOMS[ty] || ty) + "\n" + (Q.fmtBilan ? Q.fmtBilan(ty, typeOrdre, brutTot(ty)) : fr(brutTot(ty))) + " (" + fPart(100 * totType[ty] / sommeT) + " de l’effort global)", COUL[ty]) + " style=\"flex:" + totType[ty] + " 1 0; background:" + (COUL[ty] || "#8a949c") + ";\"></span>").join("") + "</div>"
             + "<div class=\"bp-leg\">" + actifs.map(ty => "<div><i style=\"background:" + (COUL[ty] || "#8a949c") + ";\"></i><span>" + (ICO[ty] || "•") + " " + E(Q.NOMS && Q.NOMS[ty] || ty) + "</span><b>" + (Q.fmtBilan ? Q.fmtBilan(ty, typeOrdre, brutTot(ty)) : fr(brutTot(ty))) + "</b><span class=\"m\">toi : " + (Q.fmtBilan ? Q.fmtBilan(ty, typeOrdre, brutMoi(ty)) : fr(brutMoi(ty))) + "</span><span class=\"p\">" + fPart(100 * totType[ty] / sommeT) + "</span></div>").join("") + "</div>"
-            + "<div style=\"color:#777; font-size:.72em; line-height:1.5; margin-top:8px;\">La barre répartit l’effort de l’escadron entre les activités, depuis l’émission de la directive (en points : 2 M CR = 1 pt).</div>"
+            + "<div style=\"color:#777; font-size:.72em; line-height:1.5; margin-top:8px;\">La barre répartit l’effort global entre les activités, depuis l’émission de la directive (en points : 2 M CR = 1 pt).</div>"
             : "<div style=\"color:#777; font-size:.85em; font-style:italic; padding:6px 2px;\">Aucun effort enregistré pour l’instant.</div>";
 
         // 3. participants : avatar, nom, points et part, barre cumulee par activite, ticks quotidiens joues

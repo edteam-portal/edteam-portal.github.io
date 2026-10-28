@@ -126,17 +126,24 @@
     function logoUrl(l) {
         try { return supabaseApp.storage.from('logos').getPublicUrl(l.chemin).data.publicUrl + '?v=' + encodeURIComponent(l.version); } catch (e) { return ''; }
     }
+    // Etat de la faction renvoye par le serveur (sans_faction, faction_attendue, faction_defaut) : memorise par monter()
+    let ETAT = {};
     function capFaction(f, logo, peut) {
         const v = f && f.variation;
         const url = logo && logo.chemin ? logoUrl(logo) : '';
         const ico = url ? '' : '<div class="qs-hx">' + ICONE_FACTION + '</div>';
-        if (!f) return '<div class="qs-cap"><div class="qs-hx">' + ICONE_FACTION + '</div><div><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">EN ATTENTE DU PREMIER RELEVÉ</div></div></div>';
+        if (!f) {
+            const nom = ETAT.sans_faction ? 'PAS DE FACTION EN JEU' : (ETAT.faction_attendue ? String(ETAT.faction_attendue).toUpperCase() : 'EN ATTENTE DU PREMIER RELEVÉ');
+            return '<div class="qs-cap"><div class="qs-hx">' + ICONE_FACTION + '</div><div><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">' + esc(nom) + '</div></div></div>';
+        }
         return '<div class="qs-cap">' + ico + '<div style="min-width:0;"><div class="qs-k">MA FACTION · BGS</div><div class="qs-n">' + esc(String(f.nom).toUpperCase()) + '</div>'
+             + (ETAT.faction_defaut ? '<div class="qs-note">Faction la plus visée par vos directives de hausse (votre escadron n’a pas de faction en jeu).</div>' : '')
              + (peut ? '<div class="qs-logoligne"><button type="button" class="qs-btnlogo" id="qs-logo-btn" title="Réservé à l’Amiral : image carrée de préférence, redimensionnée automatiquement">' + (logo && logo.chemin ? '✎ LOGO' : '+ LOGO') + '</button><input type="file" id="qs-logo-file" accept="image/png,image/jpeg,image/webp" style="display:none"><span class="qs-amiral">AMIRAL UNIQUEMENT</span></div>' : '') + '</div></div>';
     }
     function statsFaction(f) {
         const v = f && f.variation;
-        if (!f) return '<div class="qs-vide">Le relevé de la faction de votre escadron s’affichera ici dès demain matin.</div>';
+        if (!f) return '<div class="qs-vide">' + (ETAT.sans_faction ? 'Votre escadron n’a pas de faction en jeu. Dès qu’une directive de hausse est posée, la faction visée s’affiche ici.'
+            : 'Premier relevé de la faction de votre escadron : demain matin.') + '</div>';
         const t = (cls, val, lib, va, unite) => '<div class="qs-t ' + cls + '"><div class="v"><span class="qs-ap">≈</span>' + val + (v ? vari(va, unite) : '') + '</div><div class="l">' + lib + '</div></div>';
         return '<div class="qs-tuiles" title="Chiffres estimés d’après Spansh : cette base ne met un système à jour que lorsqu’un joueur le visite (EDDN). Elle peut donc être en retard sur le jeu, surtout pour les petits systèmes peu visités (la présence et les résidents sont les plus concernés). Le panneau de faction en jeu reste la référence.">' + t('cle', fmt(f.systemes_controles), 'CONTRÔLÉS', v && v.systemes_controles) + t('', fmt(f.presence), 'PRÉSENCE', v && v.presence)
              + t('', pop(f.population), 'RÉSIDENTS', v && v.population, pop) + t('', fmt(f.stations), 'STATIONS', v && v.stations) + '</div>'
@@ -171,7 +178,7 @@
 
     async function charger() {
         const now = Date.now();
-        try { const s = JSON.parse(sessionStorage.getItem('edteam_suivi_cache') || 'null'); if (s && now - s.ts < DUREE && s.d && ('peut_logo' in s.d)) return s.d; } catch (e) {}
+        try { const s = JSON.parse(sessionStorage.getItem('edteam_suivi_cache') || 'null'); if (s && now - s.ts < DUREE && s.d && ('peut_logo' in s.d) && ('sans_faction' in s.d)) return s.d; } catch (e) {}
         if (typeof supabaseApp === 'undefined') return null;
         const { data, error } = await supabaseApp.rpc('ma_puissance_et_faction');
         if (error) { console.error('ma_puissance_et_faction :', error); return null; }
@@ -218,6 +225,7 @@
         const elP = document.getElementById(idPuissance), elF = document.getElementById(idFaction);
         try {
             const d = await charger();
+            ETAT = d || {};
             const moi = (typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : {};
             const membre = !!(d && d.acces && (d.faction || (moi.escadron_id && String(moi.escadron_id).toUpperCase() !== 'INDEPENDANT')));
             if (elP) { const h = d && d.puissance ? cartePuissance(d.puissance) : ''; elP.innerHTML = h; elP.style.display = h ? 'flex' : 'none'; }
@@ -250,6 +258,7 @@
         if (!el) return;
         try {
             const d = await charger();
+            ETAT = d || {};
             const moi = (typeof profilCommandant !== 'undefined' && profilCommandant) ? profilCommandant : {};
             const membre = !!(d && d.acces && (d.faction || (moi.escadron_id && String(moi.escadron_id).toUpperCase() !== 'INDEPENDANT')));
             let h = '';

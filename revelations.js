@@ -34,7 +34,7 @@
     function lire(uid) { try { var v = JSON.parse(localStorage.getItem(PREFIXE + uid) || 'null'); return v && typeof v === 'object' ? v : null; } catch (e) { return null; } }
     function ecrire(uid, m) { try { localStorage.setItem(PREFIXE + uid, JSON.stringify(m)); } catch (e) { /* stockage indisponible : la fenetre pourra se rejouer, sans consequence */ } }
     function muter(uid, fn) { var m = lire(uid) || { r: {} }; if (!m.r) m.r = {}; fn(m); ecrire(uid, m); }
-    function aEscadron(p) { var e = String(p && p.escadron_id || '').trim().toUpperCase(); return !!e && e !== 'INDEPENDANT'; }
+    function aEscadron(p) { if (window.EDTEAM_INVITE) return false; var e = String(p && p.escadron_id || '').trim().toUpperCase(); return !!e && e !== 'INDEPENDANT'; }   // (mode invite de la page BGS : pas les fenetres de l'escadron hote)
     function cacheLire(cle, ttl) { try { var c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < ttl) return c; } catch (e) { /* rien */ } return null; }
     function cacheEcrire(cle, obj) { try { obj.ts = Date.now(); sessionStorage.setItem(cle, JSON.stringify(obj)); } catch (e) { /* rien */ } }
     function portrait(uid, nom) {

@@ -1,0 +1,94 @@
+/* MANUEL SYS.EDTEAM (manuel.html) : page de l'application, reservee aux pilotes connectes. Cadre, menu et en-tete : navigation.js / style.css. */
+:root { --vert: #00FF66; --or: #FFD23F; }
+.manuel-zone { scroll-behavior: smooth; scroll-padding-top: 14px; }
+.manuel-zone b, .manuel-zone strong { color: #fff; font-weight: normal; }
+.manuel-zone a { color: var(--ed-blue); }
+.btn-sommaire { display: none; }
+/* page : sommaire a gauche, chapitres a droite */
+.page { position: relative; max-width: 1320px; margin: 0 auto; padding: 0 8px 40px; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; align-items: start; color: #ddd; line-height: 1.65; }
+.sommaire { position: sticky; top: 0; padding: 10px 0 20px; max-height: calc(95vh - 130px); overflow-y: auto; scrollbar-width: thin; }
+.sommaire h2 { font-weight: normal; letter-spacing: 4px; font-size: .78em; color: #6f7f8b; margin-bottom: 12px; }
+.sommaire ol { list-style: none; counter-reset: ch; }
+.sommaire li { counter-increment: ch; margin: 2px 0; }
+.sommaire li a, .sommaire li span { display: flex; gap: 10px; align-items: baseline; padding: 7px 10px; text-decoration: none; color: #9fb0bd; font-size: .86em; letter-spacing: 1px; border-left: 2px solid transparent; transition: .15s; }
+.sommaire li a::before, .sommaire li span::before { content: counter(ch, decimal-leading-zero); color: #556; font-size: .85em; }
+.sommaire li a:hover { color: #fff; background: rgba(0,240,255,.06); }
+.sommaire li a.actif { color: #fff; border-left-color: var(--ed-orange); background: rgba(255,113,0,.08); }
+.sommaire li a.actif::before { color: var(--ed-orange); }
+.sommaire li span { color: #4a5660; cursor: default; }
+.sommaire li span small { margin-left: auto; font-size: .7em; border: 1px solid #3a444c; padding: 0 6px; letter-spacing: 1px; }
+.sommaire .filtre { margin: 0 0 18px; display: flex; flex-wrap: wrap; gap: 6px; }
+.sommaire .filtre button { font-family: inherit; font-size: .72em; letter-spacing: 1px; background: transparent; border: 1px solid #3a444c; color: #8a9aa8; padding: 4px 10px; cursor: pointer; }
+.sommaire .filtre button.on { border-color: var(--ed-orange); color: #fff; background: rgba(255,113,0,.1); }
+
+/* chapitres */
+.contenu { padding-top: 10px; min-width: 0; }
+.intro-manuel { margin-bottom: 38px; }
+.kick { color: var(--ed-blue); letter-spacing: 5px; font-size: .8em; margin-bottom: 12px; }
+h1 { font-size: 2.3em; line-height: 1.15; letter-spacing: 3px; color: #fff; font-weight: normal; text-shadow: 0 0 22px rgba(0,240,255,.35); }
+h1 em { font-style: normal; color: var(--ed-orange); text-shadow: 0 0 22px var(--ed-orange-glow); }
+.accroche { margin-top: 14px; font-size: 1.05em; color: #b9c4cc; max-width: 720px; }
+.chap { margin: 0 0 56px; padding-top: 6px; }
+.chap > header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.chap .num { color: var(--ed-orange); font-size: 2.6em; line-height: 1; letter-spacing: 2px; text-shadow: 0 0 16px var(--ed-orange-glow); }
+.chap h2 { font-weight: normal; letter-spacing: 4px; font-size: 1.6em; color: #fff; }
+.profils { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.profil { font-size: .66em; letter-spacing: 2px; border: 1px solid; padding: 1px 9px; }
+.profil.tous { color: var(--vert); border-color: rgba(0,255,102,.5); } .profil.membre { color: var(--ed-blue); border-color: rgba(0,240,255,.5); } .profil.amiral { color: var(--or); border-color: rgba(255,210,63,.55); } .profil.solo { color: #c9a7ff; border-color: rgba(201,167,255,.5); }
+.pourquoi { margin: 10px 0 22px; padding: 12px 16px; border-left: 3px solid var(--ed-blue); background: rgba(0,240,255,.05); color: #c5d3dc; }
+.pourquoi::before { content: "À QUOI ÇA SERT  "; color: var(--ed-blue); letter-spacing: 3px; font-size: .8em; margin-right: 6px; }
+.chap h3 { font-weight: normal; letter-spacing: 3px; font-size: 1.05em; color: var(--ed-orange); margin: 28px 0 10px; }
+.chap p { margin: 0 0 12px; color: #b4c0c8; max-width: 820px; }
+.chap ul.points { list-style: none; margin: 0 0 14px; max-width: 820px; }
+.chap ul.points li { position: relative; padding: 4px 0 4px 22px; color: #b4c0c8; }
+.chap ul.points li::before { content: "▸"; position: absolute; left: 4px; color: var(--ed-orange); }
+
+/* etapes numerotees */
+.etapes { list-style: none; counter-reset: e; margin: 4px 0 18px; max-width: 860px; }
+.etapes li { counter-increment: e; position: relative; padding: 8px 0 8px 46px; color: #c8d2d9; }
+.etapes li::before { content: counter(e); position: absolute; left: 0; top: 6px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--ed-blue); color: var(--ed-blue); display: flex; align-items: center; justify-content: center; background: rgba(0,240,255,.08); }
+
+/* captures avec reperes numerotes */
+.vue { margin: 14px 0 6px; max-width: 1100px; }
+.vue .cadre { position: relative; border: 1px solid rgba(255,113,0,.45); box-shadow: 0 10px 40px rgba(0,0,0,.6); background: #000; line-height: 0; }
+.vue img { display: block; width: 100%; height: auto; }
+.rep { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; border-radius: 50%; background: var(--ed-orange); color: #000; font-weight: bold; font-size: .85em; line-height: 26px; text-align: center; box-shadow: 0 0 0 3px rgba(0,0,0,.65), 0 0 14px var(--ed-orange-glow); }
+.vue figcaption { margin-top: 8px; color: #6f7f8b; font-size: .8em; letter-spacing: 1px; }
+.legende { list-style: none; margin: 14px 0 6px; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 26px; max-width: 1100px; }
+.legende li { position: relative; padding: 4px 0 4px 38px; color: #aeb9c1; font-size: .93em; }
+.legende li b { color: #fff; }
+.legende li::before { content: attr(data-n); position: absolute; left: 0; top: 4px; width: 26px; height: 26px; border-radius: 50%; background: var(--ed-orange); color: #000; font-weight: bold; font-size: .85em; line-height: 26px; text-align: center; }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 12px 0 8px; max-width: 1100px; }
+.duo .vue { margin: 0; }
+.duo img { border: 1px solid rgba(255,255,255,.14); box-shadow: 0 8px 28px rgba(0,0,0,.55); background: #fff; }
+
+/* cartes (profils, notions) */
+.cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 14px 0 20px; max-width: 1100px; }
+.carte { padding: 16px 18px; border: 1px solid; background: rgba(3,10,14,.8); }
+.carte h4 { font-weight: normal; letter-spacing: 3px; font-size: .95em; margin-bottom: 8px; }
+.carte p { font-size: .9em; margin-bottom: 8px; }
+.carte.solo { border-color: rgba(201,167,255,.45); } .carte.solo h4 { color: #c9a7ff; }
+.carte.membre { border-color: rgba(0,240,255,.45); } .carte.membre h4 { color: var(--ed-blue); }
+.carte.amiral { border-color: rgba(255,210,63,.5); } .carte.amiral h4 { color: var(--or); }
+
+/* encadres */
+.astuce, .attention { margin: 16px 0; padding: 12px 16px; max-width: 860px; border: 1px solid; }
+.astuce { border-color: rgba(0,255,102,.4); background: rgba(0,255,102,.05); color: #c6e8d3; }
+.astuce::before { content: "ASTUCE  "; color: var(--vert); letter-spacing: 3px; font-size: .8em; }
+.attention { border-color: rgba(255,113,0,.6); border-left-width: 5px; background: rgba(255,113,0,.08); color: #f1dccb; }
+.attention::before { content: "⚠ ATTENTION  "; color: var(--ed-orange); letter-spacing: 3px; font-size: .8em; }
+.glossaire { margin: 16px 0; max-width: 860px; border: 1px dashed rgba(255,255,255,.2); padding: 12px 16px; color: #aab6bf; font-size: .92em; }
+.glossaire b { color: var(--ed-orange); }
+.suite { margin-top: 26px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,.14); display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; font-size: .9em; letter-spacing: 1px; }
+.a-venir { margin: 0 0 40px; padding: 22px; border: 1px dashed #3a444c; color: #7d8d99; max-width: 860px; }
+
+@media (max-width: 1000px) {
+    .page { grid-template-columns: 1fr; gap: 0; }
+    .btn-sommaire { display: inline-block; font-family: inherit; letter-spacing: 2px; font-size: .78em; padding: 8px 12px; border: 1px solid var(--ed-orange); color: #fff; background: rgba(255,113,0,.1); cursor: pointer; margin-top: 10px; }
+    .sommaire { position: fixed; inset: 0; z-index: 3000; background: rgba(2,1,0,.98); padding: 20px 18px; max-height: none; display: none; }
+    .sommaire.ouvert { display: block; }
+    h1 { font-size: 1.7em; }
+    .cartes, .legende, .duo { grid-template-columns: 1fr; }
+    .rep { width: 22px; height: 22px; line-height: 22px; font-size: .75em; }
+}
+@media (prefers-reduced-motion: reduce) { .manuel-zone { scroll-behavior: auto; } }

@@ -270,10 +270,12 @@
         var t = l.join("<span>◆</span>");
         return "<b>" + (st.flashOn ? "⚡ FLASH INFO" : "AUJOURD’HUI") + "</b><div class=\"rl\"><div style=\"animation-duration:" + Math.max(32, l.length * 9) + "s\">" + t + "<span>◆</span>" + t + "<span>◆</span></div></div>";
     }
+    // pilote SANS escadron (ou escadron pas encore valide) : « Actualites » du reseau, plus « Fil de l'escadron »
+    function sansEsc() { var e = String(st.o.escadron || "").trim().toUpperCase(); return !e || e === "INDEPENDANT"; }
     function squelette() {
         var m = st.o.mode === "mob";
         st.el.innerHTML = "<div class=\"fil-jr " + (m ? "mob" : "pc") + (st.o.max ? " ap" : "") + "\">"
-            + (m ? "" : "<div class=\"fil-hd\"><div class=\"fil-ti\">Fil de l’escadron<small>" + esc(String(st.o.escadron || "").toUpperCase()) + " · TRANSMISSIONS</small></div><div class=\"fil-live\"><i></i>EN DIRECT</div></div><div class=\"fil-tk\"></div>")
+            + (m ? "" : "<div class=\"fil-hd\"><div class=\"fil-ti\">" + (sansEsc() ? "Actualités<small>RÉSEAU EDTEAM · TRANSMISSIONS</small>" : "Fil de l’escadron<small>" + esc(String(st.o.escadron || "").toUpperCase()) + " · TRANSMISSIONS</small>") + "</div><div class=\"fil-live\"><i></i>EN DIRECT</div></div><div class=\"fil-tk\"></div>")
             + "<div class=\"fil-fl\"></div><div class=\"fil-liste\"></div></div>";
         st.vue = { liste: st.el.querySelector(".fil-liste"), fl: st.el.querySelector(".fil-fl"), tk: st.el.querySelector(".fil-tk") };
         if (!st.tTk) st.tTk = setInterval(function () {      // une actualite sort du bandeau a l'heure pile, meme sans nouvelle ligne

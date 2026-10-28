@@ -15,12 +15,12 @@
     <link rel="stylesheet" href="style.css?v=3">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=4"></script>
+    <script src="shared-utils.js?v=7"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=52"></script>
+    <script src="navigation.js?v=54"></script>
+    <script src="invitations.js?v=1"></script>
     <script src="initiatives-mode.js?v=1"></script>
-    <script src="vitrine-module.js?v=1"></script>
     <script src="chiffres-cles.js?v=4"></script>
 
     <style>
@@ -1113,10 +1113,10 @@
             
             if (!data) { window.location.href = 'index.html'; return; }
 
-            // PAS D'ESCADRON : la page presente le module (vitrine-module.js) au lieu de rediriger
+            // PAS D'ESCADRON VALIDE (sans escadron, ou escadron pas encore valide par le Directeur) : pas de page Escadron, retour au QG
             if (!data.escadron_id || data.escadron_id === 'INDEPENDANT') {
-                if (data.est_approuve) { window.afficherVitrineModule('escadron', data); }
-                else { await supabaseApp.auth.signOut(); window.location.href = 'index.html'; }
+                if (!data.est_approuve) await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
                 return;
             }
 
@@ -1263,6 +1263,6 @@
 
     <script src="medailles.js?v=17"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="footer.js?v=41"></script>
+    <script src="footer.js?v=42"></script>
 </body>
 </html>

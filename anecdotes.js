@@ -83,6 +83,17 @@
             + '<div class="an-titre">' + esc(a.titre) + '</div><div class="an-ap">' + esc(String(a.texte || '').replace(/\n+/g, ' ')) + '</div>'
             + '<div class="an-pied"><span><i>Fait réel :</i> ' + esc(a.fait || '') + ' · CMDR ' + esc(String(a.cmdr_nom || '').toUpperCase()) + '</span><span class="an-lire">LIRE L’ANECDOTE ›</span></div></div></div>';
     }
+    // ----- carte d'attente : aucune anecdote encore (escadron neuf, ou ecriture en cours) ; meme cadre, jamais de trou dans la page -----
+    function htmlVide(mobile) {
+        css();
+        if (mobile) return '<div class="an-mc" style="cursor:default"><div style="font-size:.62em;letter-spacing:3px;color:#FF7100;">ANECDOTE DE L’ESCADRON</div>'
+            + '<div style="color:#fff;font-weight:bold;margin:4px 0;">Votre première anecdote s’écrit…</div>'
+            + '<div style="color:#999;line-height:1.6;font-size:.82em;">Elle apparaîtra dès qu’un exploit de l’escadron sera enregistré.</div></div>';
+        return '<div class="bloc an-bande" style="cursor:default"><div class="an-fil">❝</div><div class="an-lueur"></div>'
+            + '<div class="an-port">❝</div>'
+            + '<div class="an-corps"><div class="an-k"><b>ANECDOTE DE L’ESCADRON</b></div>'
+            + '<div class="an-titre">Votre première anecdote s’écrit…</div><div class="an-ap" style="color:#999">Elle apparaîtra dès qu’un exploit de l’escadron sera enregistré : une courte histoire écrite à partir d’un fait réel.</div></div></div>';
+    }
     // ----- carte de l'accueil mobile -----
     function htmlCarteMobile(a) {
         css();
@@ -140,5 +151,5 @@
         } catch (e) { console.error('Anecdote :', e); alert('L’anecdote n’a pas pu être supprimée.'); }
     }
 
-    window.EDTEAMAnecdotes = { init: function (c) { client = c || client; }, charger: charger, invalider: invalider, htmlBande: htmlBande, htmlCarteMobile: htmlCarteMobile, ouvrir: ouvrir, fermer: fermer, supprimer: supprimer };
+    window.EDTEAMAnecdotes = { init: function (c) { client = c || client; }, charger: charger, invalider: invalider, htmlBande: htmlBande, htmlCarteMobile: htmlCarteMobile, htmlVide: htmlVide, ouvrir: ouvrir, fermer: fermer, supprimer: supprimer };
 })();

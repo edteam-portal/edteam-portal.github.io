@@ -15,10 +15,11 @@
     <link rel="stylesheet" href="style.css?v=3">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=4"></script>
+    <script src="shared-utils.js?v=7"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=52"></script>
+    <script src="navigation.js?v=54"></script>
+    <script src="invitations.js?v=1"></script>
     <script src="dialogue.js?v=1"></script>
     <script src="colonisation-architectes.js?v=4"></script>
     <script src="colonisation-types.js?v=3"></script>
@@ -1342,7 +1343,7 @@
         function coloAbonnerSignal() {
             if (coloSignalCanal || coloSignalEnCours) return;
             const p = window.profilCommandant || profilCommandant; if (!p || !p.user_id) return;
-            const esc = String(p.escadron_id || '').trim();
+            const esc = String(p.escadron_attente || p.escadron_id || '').trim();   // escadron pas encore valide : le plugin range toujours ses releves dans l'espace de l'escadron
             const espace = (!esc || esc.toUpperCase() === 'INDEPENDANT') ? 'PERSO:' + p.user_id : esc;
             coloSignalEnCours = true;
             try {
@@ -1504,6 +1505,6 @@
         });
     </script>
 
-    <script src="footer.js?v=41"></script>
+    <script src="footer.js?v=42"></script>
 </body>
 </html>

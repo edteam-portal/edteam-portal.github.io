@@ -227,6 +227,7 @@
             + '<div class="ft-ligne">'
             +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
+            +   (visiteur ? '' : '<a class="ft-btn ft-aide" href="manuel.html" style="text-decoration:none">MANUEL</a>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
             +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
@@ -235,7 +236,7 @@
             + '</div>'
             + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>'; }
         pied.innerHTML = contenuPied(visiteur);
-        // Page de connexion et sas de securite (index.html) : meme pied de page que la presentation (version visiteur)
+        // Page de connexion et sas de securite (qg.html) : meme pied de page que la presentation (version visiteur)
         ['footer-auth', 'footer-sas'].forEach(function (id) {
             var pa = document.getElementById(id);
             if (pa) { pa.className = 'ft-edteam ft-flux ft-auth'; pa.innerHTML = contenuPied(true); }
@@ -243,7 +244,7 @@
 
         if (window.edteamSon) window.edteamSon.majUI();
         majBoutonSonsJeu(); autoSonsJeu();
-        // Lien direct depuis Discord : index.html?nouveautes=1 ouvre le panneau des nouveautes
+        // Lien direct depuis Discord : qg.html?nouveautes=1 (l'ancien index.html?nouveautes=1 est renvoye ici par la racine) ouvre le panneau des nouveautes
         if (!visiteur && /[?&]nouveautes(=|&|$)/.test(location.search)) setTimeout(function () { window.edteamOuvrirNouveautes(); }, 800);
         if (dansApp()) charger(urlDonnees(), function () { window.edteamMajPointNouveautes(); });
 

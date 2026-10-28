@@ -27,7 +27,7 @@ function injecterArchitectureGlobale() {
         document.head.appendChild(st);
     }
     const path = window.location.pathname;
-    const page = path.split("/").pop() || "index.html";
+    const page = path.split("/").pop() || "qg.html";
     // bouton « ALERTE COMBAT » du menu : il CLIGNOTE DISCRETEMENT (orange, lent) tant que l'alerte n'est pas activee, pour que le pilote comprenne qu'un joueur verrouille ne sera pas signale ; pastille : grise = desactivee, verte = active, orange = en veille
     if (!document.getElementById('nav-alerte-css')) {
         const sa = document.createElement('style'); sa.id = 'nav-alerte-css';
@@ -36,7 +36,7 @@ function injecterArchitectureGlobale() {
     }
     let alerteOn = false; try { const oa = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); alerteOn = !!(oa && oa.on && !oa.veille); } catch (e) {}
 
-    // Pilote sans escadron : BGS et Escadron restent visibles (avec un cadenas) et ouvrent une page de presentation (vitrine-module.js)
+    // Pilote sans escadron (ou escadron pas encore valide) : ni Escadron ni BGS dans le menu
     let indep = false; try { indep = localStorage.getItem('edteam_independant') === 'true'; } catch (e) {}
 
     // --- A. LE MENU LATÉRAL ---
@@ -45,7 +45,7 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div>
             <span class="nav-text">MENU</span>
         </div>
-        <a href="index.html" class="nav-link ${page === 'index.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
+        <a href="qg.html" class="nav-link ${page === 'qg.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon" style="position: relative;">
                 <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"></path><polygon points="12 7.5 13.4 10.4 16.5 10.8 14.2 13 14.8 16.1 12 14.6 9.2 16.1 9.8 13 7.5 10.8 10.6 10.4"></polygon></svg>
                 <span id="badge-amiraute" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 10; text-align: center;">0</span>
@@ -64,11 +64,11 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"></path><line x1="12" y1="18" x2="16" y2="10"></line><circle cx="12" cy="18" r="1.2"></circle></svg></div>
             <span class="nav-text">TABLEAU DE BORD</span>
         </a>
-        <a href="escadron.html" id="nav-link-escadron" class="nav-link ${page === 'escadron.html' ? 'active' : ''}${indep ? ' verrou' : ''}" ${indep ? 'title="Réservé aux membres d\'un escadron"' : ''} style="display: ${(indep || localStorage.getItem('edteam_acces_escadron') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
+        <a href="escadron.html" id="nav-link-escadron" class="nav-link ${page === 'escadron.html' ? 'active' : ''}" style="display: ${(!indep && localStorage.getItem('edteam_acces_escadron') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <span class="nav-text">ESCADRON</span>
         </a>
-        <a href="bgs.html" id="nav-bgs-factions" class="nav-link ${page === 'bgs.html' ? 'active' : ''}${indep ? ' verrou' : ''}" ${indep ? 'title="Réservé aux membres d\'un escadron"' : ''} style="display: ${(indep || localStorage.getItem('edteam_acces_bgs') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
+        <a href="bgs.html" id="nav-bgs-factions" class="nav-link ${page === 'bgs.html' ? 'active' : ''}" style="display: ${(!indep && localStorage.getItem('edteam_acces_bgs') === 'true') ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon" style="position: relative;">
                 <svg viewBox="0 0 24 24"><polyline points="4.8,9.1 12,3.4 19.2,9.1"></polyline><polyline points="4.8,13.9 12,8.2 19.2,13.9"></polyline><polyline points="4.8,18.7 12,13 19.2,18.7" stroke-dasharray="1.6 1.6"></polyline></svg>
                 <span id="badge-escadron" style="display: none; position: absolute; top: -8px; right: -12px; background: #FF3333; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FF3333; z-index: 9999 !important; text-align: center;">0</span>
@@ -82,6 +82,10 @@ function injecterArchitectureGlobale() {
         <a href="trombinoscope.html" id="nav-link-trombinoscope" class="nav-link ${page === 'trombinoscope.html' ? 'active' : ''}" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18c.8-2.4 2.9-3.5 5.5-3.5s4.7 1.1 5.5 3.5"></path></svg></div>
             <span class="nav-text">PHOTOS DES PILOTES</span>
+        </a>
+        <a href="manuel.html" id="nav-link-manuel" class="nav-link ${page === 'manuel.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"></path><path d="M4 21.5A2.5 2.5 0 0 0 6.5 24H20v-5"></path><line x1="9" y1="7" x2="15" y2="7"></line><line x1="9" y1="11" x2="15" y2="11"></line></svg></div>
+            <span class="nav-text">MANUEL</span>
         </a>
         <div id="nav-bas">
         ${page === 'tableau-de-bord.html' ? '' : `<a href="#" id="nav-alerte" class="nav-link${alerteOn ? '' : ' al-off'}" data-alerte-menu title="Alerte combat : à ARMER une fois en début de session de jeu (EDMC et le jeu lancés). Armée, elle vous prévient par un cadre clignotant dès que vous verrouillez un joueur, pour ne pas manquer un scan." onclick="event.preventDefault(); if (typeof edteamAlerteBasculer === 'function') edteamAlerteBasculer()" onmouseenter="if(typeof sonHover==='function') sonHover()">
@@ -282,17 +286,17 @@ window.actualiserHeader = function(profilData) {
         const elCmdr = document.getElementById('cmdr-name-display');
         if (elCmdr) elCmdr.innerText = 'CMDR ' + profilData.cmdr_nom.toUpperCase();
     }
-    // --- PILOTE INDEPENDANT : memorise pour le menu (BGS et Escadron verrouilles), tout est deja dans le profil, aucune requete ---
+    // --- PILOTE SANS ESCADRON VALIDE : memorise pour le menu (ni Escadron ni BGS), tout est deja dans le profil, aucune requete ---
+    // (un escadron pas encore valide par le Directeur est traite comme « sans escadron » : voir masquerEscadronEnAttente, shared-utils.js)
     if (profilData.escadron_id !== undefined) {
         const esc = String(profilData.escadron_id || '').trim();
         const independant = !esc || esc.toUpperCase() === 'INDEPENDANT';
-        // BGS et Escadron : visibles avec un cadenas pour un pilote sans escadron (la page affiche alors sa vitrine)
         try { localStorage.setItem('edteam_independant', independant ? 'true' : 'false'); } catch (e) {}
-        ['nav-link-escadron', 'nav-bgs-factions'].forEach(id => {
-            const lien = document.getElementById(id); if (!lien) return;
-            lien.classList.toggle('verrou', independant);
-            if (independant) { lien.style.display = 'flex'; lien.title = 'Réservé aux membres d\'un escadron'; } else lien.removeAttribute('title');
-        });
+        if (window.edteamInvitations) window.edteamInvitations.verifier(profilData);   // invitations a des campagnes (invitations.js, SQL 171) : menu qui clignote, invitation plein ecran
+        if (independant) {
+            ['edteam_acces_escadron', 'edteam_acces_bgs'].forEach(k => { try { localStorage.setItem(k, 'false'); } catch (e) {} });
+            ['nav-link-escadron', 'nav-bgs-factions'].forEach(id => { const lien = document.getElementById(id); if (lien) lien.style.display = 'none'; });
+        }
     }
 
     // --- PASTILLES DE RANG (Powerplay, BGS, Federation, Auxiliaires) : tout est dans le profil, aucune requete ---

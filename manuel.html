@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>EDTEAM // MANUEL</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="manuel.css?v=2">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared-utils.js?v=7"></script>
+    <script src="son.js?v=1"></script>
+    <script src="photos.js?v=2"></script>
+    <script src="navigation.js?v=54"></script>
+    <script src="invitations.js?v=1"></script>
+    <style>
+        :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
+        body { margin: 0; padding: 0; background-color: var(--ed-bg); background-image: radial-gradient(circle at center, #0a0500 0%, #000 100%); color: var(--ed-orange); font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+        #side-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 60px; background: rgba(10, 10, 10, 0.95); border-right: 1px solid var(--ed-orange-dim); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; z-index: 2000; display: flex; flex-direction: column; padding-top: 15px; }
+        #side-menu.open { width: 250px; box-shadow: 5px 0 30px rgba(0,0,0,0.9); border-right: 1px solid var(--ed-orange); }
+        .nav-link { display: flex; align-items: center; padding: 15px; color: #888; text-decoration: none; white-space: nowrap; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-link:hover { color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); border-left: 3px solid var(--ed-orange); }
+        .nav-link.active { color: var(--ed-blue); background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--ed-blue); }
+        .nav-icon { min-width: 30px; display: flex; justify-content: center; align-items: center; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-text { margin-left: 15px; font-weight: bold; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; font-size: 0.9em; }
+        #side-menu.open .nav-text { opacity: 1; transition-delay: 0.1s; }
+        .hamburger-btn { margin-bottom: 20px; border-bottom: 1px solid #333; color: var(--ed-orange); }
+        .hud-container { width: calc(100% - 60px); max-width: 1920px; height: 95vh; display: flex; flex-direction: column; margin-left: 60px; padding: 20px 30px; box-sizing: border-box; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body.menu-open .hud-container { margin-left: 250px; width: calc(100% - 250px); }
+        .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--ed-orange); box-shadow: 0 0 15px var(--ed-orange-glow), 0 0 5px var(--ed-orange); opacity: 0.15; z-index: 9999; pointer-events: none; animation: scanline-anim 8s linear infinite; }
+        @keyframes scanline-anim { 0% { transform: translateY(-10px); } 100% { transform: translateY(100vh); } }
+        @media (max-width: 900px) { .hud-container { margin-left: 0 !important; width: 100% !important; padding: 12px 14px; } }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div id="holo-tooltip"></div>
+    <nav id="side-menu"></nav>
+
+    <div class="hud-container" id="main-ui" style="display: none; opacity: 0; animation: fadeIn 0.4s ease-out forwards;">
+        <main class="data-window manuel-zone" id="display-area">
+            <button type="button" class="btn-sommaire" id="btn-sommaire">☰ SOMMAIRE DU MANUEL</button>
+            <div class="page">
+        <aside class="sommaire" id="sommaire" aria-label="Sommaire du manuel">
+            <button type="button" class="btn-sommaire" id="btn-fermer" style="margin:0 0 14px">✕ FERMER</button>
+            <h2>JE SUIS…</h2>
+            <div class="filtre">
+                <button type="button" class="on" data-p="tout">TOUS</button>
+                <button type="button" data-p="solo">SOLITAIRE</button>
+                <button type="button" data-p="membre">MEMBRE</button>
+                <button type="button" data-p="amiral">AMIRAL</button>
+            </div>
+            <h2>CHAPITRES</h2>
+            <ol>
+                <li><a href="#bienvenue">Bienvenue</a></li>
+                <li><a href="#premiers-pas">Premiers pas</a></li>
+                <li><a href="#qg">Le quartier général</a></li>
+                <li><a href="#tableau-de-bord">Le tableau de bord en jeu</a></li>
+                <li><a href="#bgs">BGS et campagnes</a></li>
+                <li><a href="#powerplay">Powerplay</a></li>
+                <li><a href="#colonisation">Colonisation</a></li>
+                <li><a href="#budget">Budget personnel</a></li>
+                <li><a href="#escadron">L'escadron</a></li>
+                <li><a href="#allies">Alliés et invitations</a></li>
+                <li><a href="#telephone">Le téléphone</a></li>
+                <li><a href="#amiral">Pour l'Amiral</a></li>
+                <li><a href="#depannage">Dépannage</a></li>
+            </ol>
+        </aside>
+
+        <main class="contenu">
+            <div class="intro-manuel">
+                <div class="kick">LE MANUEL</div>
+                <h1>Tout comprendre, <em>sans rien demander</em></h1>
+                <p class="accroche">À quoi sert chaque page, comment s'en servir, et pourquoi. Dix minutes de lecture évitent des heures de tâtonnements. Chaque chapitre est court, avec une image : lisez dans l'ordre, ou sautez au chapitre qui vous intéresse.</p>
+            </div>
+
+            <!-- ============ 1. BIENVENUE ============ -->
+            <section class="chap" id="bienvenue" data-p="solo membre amiral">
+                <header><span class="num">01</span><h2>BIENVENUE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Savoir ce qu'est SYS.EDTEAM, ce que vous pouvez en tirer, et par où commencer.</p>
+
+                <p><b>SYS.EDTEAM</b> est un outil gratuit, fait par des fans pour les pilotes d'<b>Elite Dangerous</b>. Il lit le journal de votre jeu grâce à <b>EDMC</b>, un petit programme que beaucoup de pilotes utilisent déjà, et en fait <b>un tableau de bord</b> sur le site et sur votre téléphone : vos missions, votre commerce, votre colonisation, votre budget, votre Powerplay, et, si vous êtes dans un escadron, le travail collectif sur le BGS.</p>
+                <p><b>Vous n'avez rien à saisir à la main.</b> Une fois le plugin installé, tout se remplit tout seul pendant que vous jouez.</p>
+
+                <h3>TROIS FAÇONS DE L'UTILISER</h3>
+                <div class="cartes">
+                    <div class="carte solo"><h4>SOLITAIRE</h4>
+                        <p>Vous jouez seul, ou votre escadron n'est pas (encore) sur EDTEAM.</p>
+                        <p>Vous avez : le quartier général, le tableau de bord en jeu, la colonisation, le budget, le hangar et le compagnon mobile. Un Amiral peut aussi vous <b>inviter à une campagne</b>.</p></div>
+                    <div class="carte membre"><h4>MEMBRE D'UN ESCADRON</h4>
+                        <p>Votre escadron est inscrit et <b>validé</b>.</p>
+                        <p>En plus : le fil de l'escadron, les pages <b>Escadron</b> et <b>Engagement</b> (les campagnes BGS), les distinctions, le Pilier de la semaine.</p></div>
+                    <div class="carte amiral"><h4>AMIRAL</h4>
+                        <p>Vous dirigez l'escadron.</p>
+                        <p>En plus : créer les campagnes et les directives, <b>inviter</b> des pilotes ou des escadrons alliés, envoyer des messages à l'escadron.</p></div>
+                </div>
+                <p class="glossaire"><b>Validé, ça veut dire quoi ?</b> Un escadron doit être validé par l'équipe EDTEAM avant d'ouvrir les pages Escadron et Engagement. En attendant, ses pilotes sont traités comme des solitaires : rien n'est perdu, tout s'ouvre dès la validation.</p>
+
+                <h3>LE PARCOURS CONSEILLÉ, EN 5 MINUTES</h3>
+                <ol class="etapes">
+                    <li><b>Créez votre compte</b> sur le site (adresse e-mail, mot de passe), puis cliquez sur le lien reçu par e-mail.</li>
+                    <li><b>Installez EDMC et le plugin EDTEAM</b> en suivant les 4 étapes de l'écran « Activez votre liaison » (chapitre suivant).</li>
+                    <li><b>Lancez Elite Dangerous</b> depuis le bureau Windows : votre nom de commandant arrive sur le site, votre quartier général s'ouvre.</li>
+                    <li><b>Jouez normalement.</b> Revenez sur le site quand vous voulez : tout est à jour.</li>
+                </ol>
+                <p class="astuce">Vous n'êtes pas devant votre PC ? Le site s'ouvre aussi sur téléphone, avec une version adaptée : le « compagnon mobile ».</p>
+                <div class="suite"><span></span><a href="#premiers-pas">Chapitre suivant : Premiers pas ›</a></div>
+            </section>
+
+            <!-- ============ 2. PREMIERS PAS ============ -->
+            <section class="chap" id="premiers-pas" data-p="solo membre amiral">
+                <header><span class="num">02</span><h2>PREMIERS PAS</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Relier votre jeu au site. À faire une seule fois, environ 5 minutes.</p>
+
+                <h3>CRÉER SON COMPTE</h3>
+                <ol class="etapes">
+                    <li>Sur la page d'accueil, cliquez sur <b>[ CRÉER UN COMPTE ]</b>.</li>
+                    <li>Saisissez votre <b>adresse e-mail</b> et un <b>mot de passe</b> d'au moins 8 caractères, confirmez-le.</li>
+                    <li>Ouvrez l'e-mail reçu (regardez les courriers indésirables) et cliquez sur le lien de confirmation.</li>
+                    <li>Connectez-vous : l'écran <b>« Activez votre liaison »</b> s'affiche.</li>
+                </ol>
+
+                <h3>ACTIVER SA LIAISON : LES 4 ÉTAPES, DANS L'ORDRE</h3>
+                <p>Cet écran vous guide. Une barre de progression en haut montre où vous en êtes, et vous pouvez revenir en arrière à tout moment. Votre avancement est mémorisé : si vous fermez la page, vous reprenez où vous étiez.</p>
+
+                <p><b>Étape 1 · Installer EDMC.</b> EDMC (E:D Market Connector) lit le journal du jeu et l'envoie aux outils communautaires. Téléchargez-le depuis le bouton de l'écran, installez-le, lancez-le et connectez-y votre compte Frontier. C'est lui qui affichera votre nom de commandant quand le jeu tourne.</p>
+                <div class="duo"><figure class="vue"><div class="cadre"><img src="images/sas-edmc-fenetre.png" alt="Fenêtre d'EDMC" loading="lazy"></div><figcaption>EDMC lancé. Le nom affiché ici est un exemple.</figcaption></figure></div>
+
+                <p><b>Étape 2 · Ajouter le plugin.</b> Le plugin permet à EDMC de parler à EDTEAM.</p>
+                <ol class="etapes">
+                    <li>Téléchargez le plugin avec le bouton vert de l'écran (le fichier <b>SYS_EDTEAM.zip</b>).</li>
+                    <li>Dans EDMC : <b>Fichier › Paramètres</b>, puis l'onglet <b>Plugins</b>.</li>
+                    <li>Cliquez sur <b>Open Plugins Folder</b> : le dossier des plugins s'ouvre.</li>
+                    <li>Décompressez-y le dossier <b>SYS_EDTEAM</b>.</li>
+                    <li><b>Fermez et relancez complètement EDMC.</b> Le plugin apparaît alors dans la liste.</li>
+                </ol>
+                <div class="duo">
+                    <figure class="vue"><div class="cadre"><img src="images/sas-edmc-menu.png" alt="Menu Fichier d'EDMC : Paramètres" loading="lazy"></div><figcaption>Fichier › Paramètres</figcaption></figure>
+                    <figure class="vue"><div class="cadre"><img src="images/sas-edmc-plugins.png" alt="Onglet Plugins d'EDMC" loading="lazy"></div><figcaption>Onglet Plugins : le dossier, puis la liste</figcaption></figure>
+                </div>
+
+                <p><b>Étape 3 · Coller votre clé.</b> La clé dit à EDTEAM que le jeu qui envoie des données est bien le vôtre. Elle s'affiche sur l'écran : un clic dessus la copie.</p>
+                <ol class="etapes">
+                    <li>Dans EDMC, ouvrez <b>Fichier › Paramètres</b>, puis l'onglet <b>SYS.EDTEAM</b>. S'il est caché, utilisez les flèches <b>‹ ›</b> à droite des onglets.</li>
+                    <li>Collez la clé dans le champ <b>Clé d'Accès</b>.</li>
+                    <li>Cliquez sur <b>OK</b>.</li>
+                </ol>
+                <div class="duo"><figure class="vue"><div class="cadre"><img src="images/sas-edmc-cle.png" alt="Onglet SYS.EDTEAM d'EDMC : Clé d'Accès" loading="lazy"></div><figcaption>La clé de cette image est un exemple : la vôtre s'affiche sur le site.</figcaption></figure></div>
+                <p class="attention">Votre clé est personnelle. Ne la communiquez à personne, ne la publiez jamais sur Discord.</p>
+
+                <p><b>Étape 4 · Redémarrer Elite Dangerous.</b> Le plugin ne lit votre nom de commandant qu'au <b>démarrage du jeu</b>.</p>
+                <ol class="etapes">
+                    <li><b>Fermez complètement</b> Elite Dangerous s'il est ouvert.</li>
+                    <li>Vérifiez qu'<b>EDMC est ouvert</b>.</li>
+                    <li>Relancez le jeu <b>depuis le bureau Windows</b> (raccourci ou lanceur).</li>
+                    <li>Entrez dans votre vaisseau (Open, Groupe privé ou Solo) : quelques secondes plus tard, <b>votre nom s'affiche sur le site</b>.</li>
+                </ol>
+                <p class="attention">Un simple retour au menu du jeu, ou se déconnecter puis se reconnecter dans le jeu, ne suffit pas. Il faut quitter le jeu complètement, puis le relancer depuis le bureau Windows.</p>
+
+                <h3>APRÈS LA LIAISON</h3>
+                <ul class="points">
+                    <li><b>Vous jouez seul</b> (ou votre escadron n'est pas sur EDTEAM) : le site vous accrédite comme <b>pilote indépendant</b>, un clic suffit.</li>
+                    <li><b>Vous êtes dans un escadron déjà inscrit</b> : demandez son <b>code d'invitation</b> à votre Amiral ou à un officier, et saisissez-le à cet endroit.</li>
+                    <li><b>Vous êtes l'Amiral d'un escadron qui n'est pas encore sur EDTEAM</b> : laissez le champ du code vide. Votre escadron est créé, puis soumis à validation.</li>
+                </ul>
+                <p class="astuce">Rien n'arrive après une minute ? Vérifiez dans l'ordre : EDMC est ouvert · SYS_EDTEAM figure dans l'onglet Plugins · la clé est bien collée · le jeu a été relancé depuis le bureau.</p>
+                <div class="suite"><a href="#bienvenue">‹ Bienvenue</a><a href="#qg">Chapitre suivant : Le quartier général ›</a></div>
+            </section>
+
+            <!-- ============ 3. LE QG ============ -->
+            <section class="chap" id="qg" data-p="solo membre amiral">
+                <header><span class="num">03</span><h2>LE QUARTIER GÉNÉRAL</h2><span class="profils"><span class="profil tous">TOUS</span><span class="profil membre">ESCADRON : FIL, PILIER, ÉLAN</span></span></header>
+                <p class="pourquoi">C'est la page d'accueil de l'application : d'un coup d'œil, où en sont votre puissance, votre faction et votre escadron.</p>
+
+                <p>Voici le quartier général d'un pilote membre d'un escadron. <b>Les noms et les chiffres de cette image sont fictifs.</b> Un pilote solitaire voit la même page sans les blocs réservés à l'escadron (anecdote, Pilier, Élan) : le fil d'actualités occupe alors toute la largeur.</p>
+                <figure class="vue">
+                    <div class="cadre">
+                        <img src="images/manuel-qg.jpg" alt="Le quartier général, avec des repères numérotés" loading="lazy">
+                        <span class="rep" style="left:2.3%;top:22%">1</span>
+                        <span class="rep" style="left:45.2%;top:5.2%">2</span>
+                        <span class="rep" style="left:6.5%;top:10.8%">3</span>
+                        <span class="rep" style="left:38%;top:10.8%">4</span>
+                        <span class="rep" style="left:69.5%;top:10.8%">5</span>
+                        <span class="rep" style="left:6.5%;top:33%">6</span>
+                        <span class="rep" style="left:6.5%;top:60.5%">7</span>
+                        <span class="rep" style="left:6.5%;top:82.8%">8</span>
+                        <span class="rep" style="left:34.7%;top:32.6%">9</span>
+                    </div>
+                    <figcaption>Le QG avec des données fictives.</figcaption>
+                </figure>
+                <ol class="legende">
+                    <li data-n="1"><b>Le menu.</b> Un clic sur ☰ l'ouvre avec les noms : Quartier général, Hangar, Budget, Tableau de bord, Escadron, Engagement, Colonisation.</li>
+                    <li data-n="2"><b>Votre en-tête.</b> Votre nom de commandant, votre rang de Powerplay, vos points BGS et votre rang de Fédération ou d'Empire.</li>
+                    <li data-n="3"><b>Ma puissance.</b> Votre puissance Powerplay : combien de systèmes elle contrôle (Stronghold, Fortified, Exploited), sa place parmi les 12 puissances et son évolution.</li>
+                    <li data-n="4"><b>Ma faction.</b> La faction de votre escadron : systèmes contrôlés, présence, population et stations. Le bouton EDNEWS ouvre la gazette de l'escadron.</li>
+                    <li data-n="5"><b>Joueurs croisés.</b> Les joueurs que les pilotes de l'escadron ont verrouillés en combat (onglet Combat du tableau de bord), avec leur vaisseau et l'heure. Un clic ouvre la liste et les détails.</li>
+                    <li data-n="6"><b>Anecdote de l'escadron.</b> Une courte histoire écrite par une IA à partir d'un fait réel de l'escadron. Le « fait réel » est toujours indiqué.</li>
+                    <li data-n="7"><b>Pilier de la semaine.</b> Le pilote qui a rapporté le plus de points BGS à l'escadron. Désigné automatiquement chaque jeudi.</li>
+                    <li data-n="8"><b>Élan Powerplay.</b> Le pilote dont les mérites ont le plus progressé, en proportion de ce qu'il avait déjà. Chacun a sa chance, quel que soit son niveau.</li>
+                    <li data-n="9"><b>Le fil de l'escadron.</b> Tout ce qui se passe : nouvelles missions, distinctions, bilans, joueurs croisés. Des onglets filtrent par sujet.</li>
+                </ol>
+
+                <h3>LE TICK</h3>
+                <p>Le <b>tick</b> est la mise à jour quotidienne de la galaxie par le jeu : c'est à ce moment que l'influence des factions change. Le QG affiche en haut un compte à rebours avant le prochain tick (avec une marge d'incertitude de quelques minutes). Pour le BGS, il rythme tout : on regarde ce qui a changé au dernier tick, et ce qu'il reste à faire avant le suivant.</p>
+
+                <h3>LE FIL DE L'ESCADRON</h3>
+                <ul class="points">
+                    <li>Les onglets <b>BGS</b>, <b>DISTINCTIONS</b>, <b>ESCADRON</b> et <b>JOUEURS CROISÉS</b> trient les actualités ; <b>TOUT</b> les montre toutes.</li>
+                    <li>Le bandeau <b>AUJOURD'HUI</b> en haut fait défiler les nouvelles des dernières 24 heures.</li>
+                    <li>Sous chaque actualité, un petit bouton permet de <b>réagir</b> avec un tampon, pour féliciter ou encourager.</li>
+                </ul>
+                <p class="astuce">Les points d'interrogation <b>?</b> à côté du Pilier et de l'Élan expliquent précisément comment chaque distinction se gagne.</p>
+
+                <h3>LES DISTINCTIONS : COMMENT ON LES GAGNE</h3>
+                <ul class="points">
+                    <li><b>Le Pilier de la semaine</b> : le pilote qui a rapporté le plus de points BGS pendant la semaine (du jeudi 07:00 UTC au jeudi suivant). Avec ou sans directive de l'Amiral, aucun seuil minimum.</li>
+                    <li><b>L'Élan Powerplay</b> : le pilote dont les mérites du cycle ont le plus progressé en proportion de ses mérites de début de cycle. Pour qu'un débutant ne gagne pas grâce à un tout petit gain, le calcul suppose que chacun avait au moins 100 000 mérites au départ.</li>
+                </ul>
+                <div class="suite"><a href="#premiers-pas">‹ Premiers pas</a><a href="#tableau-de-bord">Chapitre suivant : Le tableau de bord en jeu ›</a></div>
+            </section>
+            <!-- AUTO-DEB : chapitres 4 a 13 generes par _captures/gen_manuel.js -->
+            <section class="chap" id="tableau-de-bord" data-p="solo membre amiral">
+                <header><span class="num">04</span><h2>LE TABLEAU DE BORD EN JEU</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Un second écran pendant que vous jouez : ce que vous transportez, vos missions, votre minage, vos découvertes et vos combats, en direct.</p>
+<p>Tant que le jeu tourne avec EDMC et le plugin, la page <b>TABLEAU DE BORD</b> se remplit toute seule, sans rien cliquer. Un témoin <b>EN DIRECT</b> indique à quand remonte la dernière mise à jour (quelques secondes). Quand vous quittez le jeu, la dernière session reste affichée.</p>
+<p class="astuce">Posez-le sur une tablette ou un second écran : tout s'actualise de lui-même.</p>
+<h3>COMMERCE : CE QUE JE TRANSPORTE</h3>
+<figure class="vue"><div class="cadre"><img src="images/manuel-tableau.jpg" alt="Onglet Commerce du tableau de bord" loading="lazy"><span class="rep" style="left:76.7%;top:11.2%">1</span><span class="rep" style="left:62.5%;top:15.5%">2</span><span class="rep" style="left:28.7%;top:19%">3</span><span class="rep" style="left:24%;top:36%">4</span><span class="rep" style="left:51%;top:38%">5</span><span class="rep" style="left:69.5%;top:79.5%">6</span><span class="rep" style="left:7.5%;top:91.5%">7</span></div><figcaption>L'onglet Commerce, avec une session fictive.</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>EN DIRECT.</b> L'état de la liaison avec votre jeu, et le système, la station et le vaisseau où vous êtes.</li><li data-n="2"><b>Les cinq onglets</b> : Commerce, Missions, Minage, Exploration, Combat.</li><li data-n="3"><b>Les chiffres de la session</b> : rang de commerce, bénéfice depuis le lancement, temps de jeu, tonnes vendues.</li><li data-n="4"><b>Votre vaisseau en hologramme</b>, avec votre soute dedans.</li><li data-n="5"><b>La baie de soute</b>, agrandie : une caisse représente 5 tonnes. Survolez une caisse pour voir la marchandise.</li><li data-n="6"><b>VENDRE CE QUE JE TRANSPORTE.</b> Cherche pour vous où vendre, parmi les stations autour de vous.</li><li data-n="7"><b>La légende</b> : une couleur par marchandise, avec les tonnes. Les marchandises de mission sont signalées à part.</li></ol>
+<ul class="points"><li>Plus bas, la <b>feuille de route</b> reprend votre trajet : où vous avez acheté, où vous avez vendu, et le bénéfice de chaque opération.</li><li>Seul le <b>bénéfice</b> compte : il s'affiche à côté du montant de chaque vente.</li><li>« Où vendre ? » examine toute la zone, signale les prix inhabituels, propose des aller-retour rentables et le choix orbitale ou planétaire. Les relevés de prix viennent de <b>deux sources</b> croisées.</li><li>Vous jouez depuis un porte-vaisseaux ? Une <b>tournée</b> peut être calculée depuis lui.</li></ul>
+<h3>MISSIONS : LE PARCOURS LE PLUS COURT</h3>
+<p>L'onglet Missions classe vos missions en cours <b>par système, dans l'ordre le plus court</b>, pour ne pas faire d'aller-retour inutiles.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-tableau_missions.jpg" alt="Onglet Missions du tableau de bord" loading="lazy"><span class="rep" style="left:28.7%;top:19%">1</span><span class="rep" style="left:6.5%;top:27.5%">2</span><span class="rep" style="left:7.5%;top:40%">3</span><span class="rep" style="left:7.5%;top:53%">4</span><span class="rep" style="left:45%;top:28.5%">5</span></div><figcaption>L'onglet Missions : le parcours à gauche, le vaisseau ou la carte à droite.</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>Le résumé</b> : missions en cours, terminées pendant la session, ce qu'il reste à encaisser et la prochaine échéance.</li><li data-n="2"><b>Parcours et missions.</b> Une légende de couleurs explique chaque point : où vous êtes, où aller, à faire, déjà passé mais mission pas terminée, terminé, retour pour rendre les missions.</li><li data-n="3"><b>Vous êtes ici.</b> Le système et la station courants, avec les missions à y faire.</li><li data-n="4"><b>Prochain arrêt.</b> Dépliez une mission pour voir la faction, la destination, la prise, la charge, la réputation et l'influence gagnées, et le rendement par heure.</li><li data-n="5"><b>Vue vaisseau / vue carte.</b> Basculez entre la soute en hologramme et la carte des missions.</li></ol>
+<ul class="points"><li>Vos <b>passagers recherchés</b> sont tamponnés en rouge et passent en premier.</li><li>Les missions de <b>tourisme</b> à destinations multiples sont gérées, avec les passagers à bord.</li><li>Relancer le jeu <b>ne fait pas perdre</b> les détails de vos missions en cours.</li></ul>
+<h3>MINAGE, EXPLORATION, COMBAT</h3>
+<ul class="points"><li><b>Minage</b> : votre session de minage, que vous soyez en vaisseau ou en Rhino (véhicule de surface).</li><li><b>Exploration</b> : le système où vous êtes, ses corps et leur valeur, et l'<b>exobiologie</b> : les espèces à scanner, avec un livre de collection.</li><li><b>Combat</b> : vos victoires, vos primes et bons de combat, vos <b>meurtres</b> (à pied comme en vaisseau), et les joueurs que vous verrouillez. Un clic sur un joueur verrouillé montre son vaisseau, sa prime et, s'il est connu, son escadron.</li></ul>
+<p class="astuce">Votre <b>combinaison</b> à pied, vos <b>modules</b>, votre <b>co-pilote</b> et votre <b>chasseur</b> s'affichent aussi dans l'hologramme. Les vaisseaux sans hologramme sont remplacés par une carte.</p>
+<h3>MON HANGAR</h3>
+<p>La page <b>MON HANGAR</b> liste tous vos vaisseaux et leur équipement tel que le plugin l'a vu la dernière fois que vous les avez pilotés. Aucune valeur et aucune position ne sont affichées.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-hangar.jpg" alt="La page Mon hangar" loading="lazy"><span class="rep" style="left:7.5%;top:31.5%">1</span><span class="rep" style="left:33%;top:32%">2</span><span class="rep" style="left:51%;top:32%">3</span><span class="rep" style="left:32.5%;top:73%">4</span></div><figcaption>Mon hangar (vaisseaux fictifs).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>La liste</b> de vos vaisseaux, avec la taille de plateforme (S, M, L), le nombre de modules ingénieurés et ceux de grade 5. Des filtres et une recherche aident à retrouver un vaisseau.</li><li data-n="2"><b>L'hologramme</b> du vaisseau choisi, et ses chiffres.</li><li data-n="3"><b>L'équipement</b> : armement, modules de base et modules optionnels, avec les ingénieurs.</li><li data-n="4"><b>SIMULER SUR EDSY.</b> Ouvre cette configuration dans l'outil EDSY pour tester l'ingénierie.</li></ol>
+<h3>L'ALERTE COMBAT</h3>
+<p>Dans le menu, <b>ALERTE COMBAT · ARMER</b> se règle une fois en début de session. Armée, elle signale sur n'importe quelle page qu'un joueur vient d'être verrouillé, pour réagir sans quitter ce que vous faites.</p>
+<p class="attention">Rien ne s'affiche ? Lancez le jeu avec EDMC ouvert. Si le plugin est à jour et que rien n'arrive, redémarrez EDMC puis changez de système en jeu. Voir le chapitre Dépannage.</p>
+                <div class="suite"><a href="#qg">‹ Le quartier général</a><a href="#bgs">Chapitre suivant : BGS et campagnes ›</a></div>
+            </section>
+
+            <section class="chap" id="bgs" data-p="membre amiral">
+                <header><span class="num">05</span><h2>BGS ET CAMPAGNES</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+                <p class="pourquoi">Voir ce que devient la galaxie pour les factions que votre escadron soutient ou combat, et ce que chacun y a fait. Aucun objectif chiffré : c'est le jeu qui juge.</p>
+<div class="glossaire"><b>BGS</b> (Background Simulation) : la simulation qui fait vivre les factions. Chaque faction a une <b>influence</b> dans chaque système ; elle monte et descend selon les actions des joueurs.<br><b>Tick</b> : la mise à jour quotidienne de la galaxie. C'est là que les résultats tombent.<br><b>Directive</b> : une consigne de l'Amiral sur un système. <b>HAUSSE</b> : faire monter une faction. <b>BAISSE</b> : faire baisser un rival. <b>GUERRE</b> et <b>ÉLECTION</b> : aider une faction dans un conflit.<br><b>Campagne</b> : un objectif d'ensemble qui regroupe des directives (et des missions Powerplay et de colonisation), avec une <b>priorité</b> (critique, haute, normale) et une échéance.</div>
+<h3>LE PRINCIPE</h3>
+<ul class="points"><li><b>L'Amiral choisit où jouer</b> (les directives). <b>Vous jouez normalement</b> : le plugin reconnaît vos missions, vos combats en zone de conflit, vos bons de combat, votre commerce, vos données d'exploration vendues, votre colonisation et vos meurtres (sous une directive de baisse), et les rattache aux directives. Rien à déclarer.</li><li><b>Aucun objectif chiffré, aucun pourcentage d'avancement.</b> Le site ne dit jamais « il vous reste X % à faire ». C'est le <b>résultat réel dans le jeu</b> qui compte : la couleur d'une ligne dit ce qu'a fait l'influence au <b>dernier tick</b>.</li><li><b>Aucune obligation.</b> Rien ne marque « à faire » ou « quota non atteint » : les pastilles montrent ce que <b>vous avez déjà fait</b> depuis le dernier tick, comme un repère.</li></ul>
+<p>La page <b>ENGAGEMENT</b> rassemble tout cela : les campagnes de l'escadron, vos pastilles, votre progression.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-bgs.jpg" alt="La page Engagement" loading="lazy"><span class="rep" style="left:65.6%;top:11.7%">1</span><span class="rep" style="left:46.7%;top:19.5%">2</span><span class="rep" style="left:78.5%;top:19%">3</span><span class="rep" style="left:6%;top:28%">4</span><span class="rep" style="left:6%;top:32.8%">5</span><span class="rep" style="left:52.5%;top:37.7%">6</span><span class="rep" style="left:61.2%;top:32.7%">7</span><span class="rep" style="left:73.5%;top:42%">8</span><span class="rep" style="left:6.5%;top:48.7%">9</span><span class="rep" style="left:52%;top:48.7%">10</span><span class="rep" style="left:6.5%;top:75%">11</span></div><figcaption>La page Engagement (données fictives).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>Les boutons du haut.</b> JOURNAL DES EXPLOITS (tout ce que l'escadron a fait). Pour l'Amiral : NOUVELLE CAMPAGNE et RAPPORT DISCORD.</li><li data-n="2"><b>L'affichage</b> : en lignes, en cartes, ou sur la carte galactique.</li><li data-n="3"><b>Le message d'EDTEAM</b> : une idée utile du moment (une mission de repérage, par exemple), ou « Tout est à jour ».</li><li data-n="4"><b>Une campagne</b> : son nom, sa priorité et son échéance. Un clic la replie.</li><li data-n="5"><b>Une directive</b> : son numéro et son type (HAUSSE, BAISSE, GUERRE, ÉLECTION), le système et la faction visés. Un clic ouvre son détail.</li><li data-n="6"><b>Le résultat du jeu.</b> L'influence actuelle de la faction, et son évolution depuis le tick. Vert : va dans le sens de la directive ; rouge : à contre-sens, c'est là que l'aide est utile ; bleu : inchangé ou pas encore mesuré. Une couleur pâle veut dire « pas de mesure depuis le tick ». Pour une guerre ou une élection, c'est le <b>score</b>.</li><li data-n="7"><b>Les pilotes qui jouent</b> sur la directive.</li><li data-n="8"><b>Vos pastilles.</b> Une par activité qui compte pour cette directive : elles se remplissent selon ce que vous avez fait depuis le dernier tick. Un ✓ veut dire « plein effet atteint ».</li><li data-n="9"><b>Ma progression</b> : vos points BGS et vos mérites Powerplay sur 8 semaines.</li><li data-n="10"><b>L'escadron cette semaine</b> : la part de chaque pilote depuis jeudi 07:00.</li><li data-n="11"><b>Le mur des spécialistes</b> : sept titres au cumul total, par spécialité (sécurité, logistique, économie, colonisation, conflits, renseignement…).</li></ol>
+<h3>LES PASTILLES : QUELLES ACTIVITÉS ?</h3>
+<ul class="points"><li><b>HAUSSE</b> : Missions (logistique), Économie (bénéfices du commerce et du minage), Sécurité (primes et bons de combat), Science (données d'exploration).</li><li><b>BAISSE</b> : Meurtres, Contrebande, Ventes à perte, Missions échouées.</li><li><b>GUERRE</b> : Victoires en zone de conflit, Bons de combat, Missions militaires.</li><li><b>ÉLECTION</b> : Logistique, Commerce, Science.</li></ul>
+<div class="glossaire"><b>Pourquoi un « plein effet » ?</b> Le jeu applique des <b>rendements décroissants par tick</b> : au-delà d'un certain volume, une activité fait de moins en moins bouger l'influence. Pour les hausses et les baisses, la pastille se remplit jusqu'à ce volume (repère d'efficacité, sans obligation) ; au-delà, ✓, et le surplus compte pour votre <b>rang BGS</b>.<br><b>Guerre et élection</b> : pas de rendement décroissant, donc pas de quota. Un palier vous situe par rapport aux pilotes de l'escadron qui ont agi : <b>lancé</b>, <b>bon</b> (au moins la médiane) ou <b>excellent</b> (au moins le double de la médiane).</div>
+<h3>LE DÉTAIL D'UNE DIRECTIVE</h3>
+<p>Cliquez sur une directive : une fenêtre montre tout ce qui la concerne.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-directive.jpg" alt="Fenêtre de détail d'une directive" loading="lazy"><span class="rep" style="left:3%;top:7%">1</span><span class="rep" style="left:3.2%;top:19%">2</span><span class="rep" style="left:3.5%;top:38%">3</span><span class="rep" style="left:3.5%;top:58.5%">4</span><span class="rep" style="left:51.5%;top:12.3%">5</span><span class="rep" style="left:52%;top:31%">6</span><span class="rep" style="left:52.5%;top:41.7%">7</span><span class="rep" style="left:51.5%;top:47.2%">8</span></div><figcaption>Le détail d'une directive (ici une guerre).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>Le titre</b> : le numéro, le type, la faction et le système, et la date du dernier relevé du jeu.</li><li data-n="2"><b>Qui participe et comment</b> : le nombre de pilotes depuis l'émission, ceux qui ont joué depuis le dernier tick, et <b>votre part</b> de l'effort.</li><li data-n="3"><b>Les participants</b> : les points de chacun et leur poids dans l'effort.</li><li data-n="4"><b>Votre quota du tick</b> : une ligne par activité, avec votre action depuis le dernier tick, la médiane des pilotes actifs et votre palier (guerre, élection) ou votre marge avant que l'effet diminue (hausse, baisse).</li><li data-n="5"><b>Le résultat du jeu</b> : la courbe d'influence sur 30 jours (elle apparaît dès deux mesures).</li><li data-n="6"><b>Maintenant et depuis la directive</b> : l'influence actuelle de la faction, et ce qu'elle a gagné depuis l'émission.</li><li data-n="7"><b>Le score du conflit</b>, pour une guerre ou une élection.</li><li data-n="8"><b>Les factions et leurs états</b> (Boom, Guerre civile, Famine…), avec des conseils selon l'état.</li></ol>
+<p class="astuce">Le vert veut dire « va dans le sens de la directive ». D'autres escadrons et des PNJ agissent aussi dans le système : le chiffre n'est pas la preuve que vos seules actions en sont la cause. Le résultat du jeu est relevé deux fois par jour.</p>
+<h3>LES AIDES DE LA FENÊTRE</h3>
+<p>Selon le type de directive, des boutons vous disent <b>où agir le plus efficacement</b> :</p>
+<ul class="points"><li><b>HAUSSE</b> : « Où vendre ? » (la route commerciale la plus rentable), « Où vendre l'exploration ? », « Où rendre les bons ? » (bons de combat) et la <b>Défense d'installation</b> (« Où défendre ? »), quand la faction est en Boom.</li><li><b>BAISSE</b> : « Route de contrebande » vers le marché noir de la faction, « Où déstabiliser ? » et « Où vendre à perte ? ».</li><li><b>ÉLECTION</b> : « Où vendre ? » aussi, car le commerce et les ventes de données d'exploration y comptent.</li><li>Un <b>aller-retour</b> dont le retour sert une autre directive est mis en évidence (« route double »).</li></ul>
+<h3>GUERRES ET ÉLECTIONS</h3>
+<p>Quand une guerre ou une élection <b>commence</b> ou <b>se termine</b> sur une faction suivie par une directive, une fenêtre plein écran l'annonce, avec sa musique : une fois par événement et par appareil, pendant 24 h. Un bandeau reste au-dessus de la ligne jusqu'au tick suivant. Les scores s'affichent en vert (gagne), rouge (perd) ou bleu (égalité).</p>
+<h3>LE JOURNAL DES EXPLOITS</h3>
+<figure class="vue"><div class="cadre"><img src="images/manuel-journal.jpg" alt="Le journal des exploits" loading="lazy"><span class="rep" style="left:8%;top:33%">1</span><span class="rep" style="left:26%;top:33%">2</span><span class="rep" style="left:46%;top:33%">3</span><span class="rep" style="left:60%;top:33%">4</span><span class="rep" style="left:85%;top:33%">5</span><span class="rep" style="left:92%;top:33%">6</span></div><figcaption>Le journal des exploits.</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>L'heure</b> de l'action (UTC) et son auteur.</li><li data-n="2"><b>Le pilote</b> (ou l'escadron pour la colonisation).</li><li data-n="3"><b>L'ordre</b> : la directive concernée.</li><li data-n="4"><b>Le théâtre</b> : le système et la faction.</li><li data-n="5"><b>Le résultat</b> : ce qui s'est passé.</li><li data-n="6"><b>Les points de rang BGS</b> que chaque action rapporte.</li></ol>
+<ul class="points"><li>Des filtres permettent de chercher par pilote, activité, spécialité ou texte, depuis le dernier cycle (jeudi).</li><li>Les actions rapprochées (meurtres, piratages, missions échouées) sont <b>regroupées sur une ligne</b>.</li><li>Le <b>rang BGS</b> (pastille de l'en-tête) monte avec ces points. Cliquez dessus pour voir votre carrière.</li></ul>
+<h3>LA CARTE GALACTIQUE DES CAMPAGNES</h3>
+<p>Le troisième affichage place les systèmes des campagnes sur la carte de la galaxie : <b>où agir</b> et <b>ce qui s'approche</b>. Un filtre « À renforcer » éclaire les systèmes rouges où presque personne n'a joué depuis le tick. Un système ennemi nouveau est marqué d'une alerte. Clic droit sur un système : son nom est copié, prêt à coller dans le jeu.</p>
+<h3>LA MISSION DE REPÉRAGE : L'ESPION</h3>
+<p>Les données d'un système se mettent à jour quand un pilote s'y rend. Le message d'EDTEAM vous propose des systèmes à visiter ; en les relevant, vous gagnez un point BGS et progressez vers la distinction <b>L'ESPION</b>. Les systèmes en <b>Boom</b> de vos directives de hausse y figurent aussi, pour y repérer les installations.</p>
+                <div class="suite"><a href="#tableau-de-bord">‹ Le tableau de bord en jeu</a><a href="#powerplay">Chapitre suivant : Powerplay ›</a></div>
+            </section>
+
+            <section class="chap" id="powerplay" data-p="solo membre amiral">
+                <header><span class="num">06</span><h2>POWERPLAY</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Suivre votre puissance, vos mérites et votre progression, sans compter à la main.</p>
+<p>Le plugin relève vos <b>mérites Powerplay</b> et votre puissance. Le site en déduit votre cycle (du jeudi au jeudi), votre progression et votre place parmi les pilotes alignés du réseau.</p>
+<ul class="points"><li>Au <b>QG</b>, la carte <b>MA PUISSANCE</b> montre votre puissance : ses systèmes (Stronghold, Fortified, Exploited), sa place parmi les 12 puissances et son évolution.</li><li>Dans l'<b>en-tête</b>, la pastille de gauche donne votre puissance et votre rang. Un clic ouvre la fenêtre ci-dessous.</li></ul>
+<figure class="vue"><div class="cadre"><img src="images/manuel-carriere.jpg" alt="Fenêtre Opérations stratégiques galactiques" loading="lazy"><span class="rep" style="left:20%;top:13.3%">1</span><span class="rep" style="left:21.5%;top:22.7%">2</span><span class="rep" style="left:21.5%;top:32.9%">3</span><span class="rep" style="left:20.3%;top:59%">4</span></div><figcaption>La fenêtre Powerplay (pilotes fictifs).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>La puissance</b> et le compte à rebours du prochain cycle.</li><li data-n="2"><b>Votre statut</b> : votre rang, vos mérites du cycle et votre cumul global.</li><li data-n="3"><b>Ma progression</b> : vos mérites sur 8 cycles, votre meilleur cycle et votre moyenne.</li><li data-n="4"><b>Le tableau des partisans</b> : les pilotes du réseau alignés sur la même puissance, avec leur cycle et leur cumul.</li></ol>
+<h3>LES DISTINCTIONS ET LES CAMPAGNES</h3>
+<ul class="points"><li>L'<b>Élan Powerplay</b> récompense chaque semaine la plus belle progression en proportion (voir le chapitre QG).</li><li>Une campagne peut contenir des <b>missions Powerplay</b> : elles apparaissent avec leur barre du jeu (Inoccupé, Exploité, Consolidé, Défendu), la position au dernier tick (▼ blanc) et maintenant (▲ orange).</li><li>Sous une directive d'<b>ATTAQUE</b>, affaiblir un rival sape son Powerplay.</li></ul>
+<p class="astuce">Les chiffres de systèmes viennent de la base communautaire Spansh, mise à jour quand un joueur visite un système : un petit écart avec le jeu est possible. Le panneau Powerplay du jeu fait foi.</p>
+                <div class="suite"><a href="#bgs">‹ BGS et campagnes</a><a href="#colonisation">Chapitre suivant : Colonisation ›</a></div>
+            </section>
+
+            <section class="chap" id="colonisation" data-p="solo membre amiral">
+                <header><span class="num">07</span><h2>COLONISATION</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Savoir où en sont les chantiers de l'escadron et ce qu'il faut y apporter, sans tableur.</p>
+<p>La page <b>COLONISATION</b> suit les chantiers de construction (Orbital Construction Site…) à partir de ce que les plugins ont relevé : chantiers consultés, livraisons, revendications. Vos livraisons apparaissent <b>dans la minute</b>.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-colonisation.jpg" alt="La page Colonisation" loading="lazy"><span class="rep" style="left:6%;top:18%">1</span><span class="rep" style="left:60.5%;top:18%">2</span><span class="rep" style="left:6.5%;top:27%">3</span><span class="rep" style="left:6.5%;top:39%">4</span><span class="rep" style="left:63%;top:39%">5</span><span class="rep" style="left:63%;top:78%">6</span></div><figcaption>La page Colonisation (données fictives).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>Le filtre de pilote.</b> Tous les pilotes, ou un seul : pour voir vos propres chantiers et livraisons.</li><li data-n="2"><b>Les chiffres</b> : systèmes, constructions terminées, chantiers en cours et tonnes livrées ce cycle.</li><li data-n="3"><b>Systèmes sans architecte.</b> Un système colonisé non attribué : le pilote qui l'a fondé peut se déclarer architecte.</li><li data-n="4"><b>La carte de l'escadron</b> : chaque système avec son avancement. Zoom et filtres (en chantier, terminés).</li><li data-n="5"><b>À apporter en priorité</b> : les marchandises qui manquent le plus, tous chantiers confondus.</li><li data-n="6"><b>Les architectes</b> : qui a fondé quoi, et combien de tonnes ont été livrées.</li></ol>
+<ul class="points"><li>Un clic sur un système ouvre son <b>profil</b> : la carte du système, ses installations (avec leur type), les besoins de chaque chantier et le journal des livraisons, que l'on peut feuilleter et filtrer.</li><li>La colonisation <b>compte pour votre rang BGS</b> : chaque livraison rapporte des points.</li><li>Certains besoins peuvent être dépassés : un chantier accepte parfois plus que ce qui est demandé.</li></ul>
+<p class="attention">Le tableau n'est pas un reflet en temps réel du jeu : un chantier n'apparaît qu'après avoir été consulté ou alimenté par un pilote dont le plugin est à jour. Il peut donc être en retard ou incomplet.</p>
+<p>Vous êtes le premier à fonder un système ? Utilisez <b>SE DÉCLARER ARCHITECTE</b>. Les systèmes sans architecte sont listés pour qu'on les attribue.</p>
+                <div class="suite"><a href="#powerplay">‹ Powerplay</a><a href="#budget">Chapitre suivant : Budget personnel ›</a></div>
+            </section>
+
+            <section class="chap" id="budget" data-p="solo membre amiral">
+                <header><span class="num">08</span><h2>BUDGET PERSONNEL</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Comprendre d'où viennent vos crédits et où ils partent, cycle par cycle. Strictement personnel.</p>
+<p>La page <b>BUDGET</b> est <b>visible par vous seul</b>, même de votre Amiral. Elle est construite à partir de ce que le plugin a relevé dans vos journaux de jeu.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-budget.jpg" alt="La page Budget" loading="lazy"><span class="rep" style="left:80%;top:13.8%">1</span><span class="rep" style="left:5.8%;top:26.9%">2</span><span class="rep" style="left:6%;top:30.8%">3</span><span class="rep" style="left:6%;top:47.2%">4</span><span class="rep" style="left:6%;top:81%">5</span></div><figcaption>La page Budget (montants fictifs).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>LIVRE DE COMPTE.</b> Chaque mouvement, avec filtres (revenus, charges, catégorie, texte). Export possible en fichier CSV.</li><li data-n="2"><b>La période</b> : cycle en cours, cycle précédent, 4 derniers cycles, ou tout. Un cycle va du jeudi 07:00 UTC au jeudi suivant.</li><li data-n="3"><b>Les quatre tuiles</b> : revenus, charges, résultat net et solde au dernier relevé, avec la comparaison au cycle d'avant.</li><li data-n="4"><b>La répartition</b> des revenus (commerce, missions, primes, exploration…) et des charges (achats, modules, assurance, carburant…). Un clic ouvre le livre de compte filtré.</li><li data-n="5"><b>Le compte de résultat</b> : produits et charges, avec la période d'avant et la variation.</li></ol>
+<p class="astuce">Les mouvements que le plugin ne connaît pas (virements, dépôts à la banque d'escadron…) apparaissent en <b>« écart non catégorisé »</b>. Ils ne sont jamais cachés dans une catégorie : le total reste juste.</p>
+                <div class="suite"><a href="#colonisation">‹ Colonisation</a><a href="#escadron">Chapitre suivant : L'escadron ›</a></div>
+            </section>
+
+            <section class="chap" id="escadron" data-p="membre amiral">
+                <header><span class="num">09</span><h2>L'ESCADRON</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+                <p class="pourquoi">Voir ses camarades, leur activité, leurs titres, et retrouver le code d'invitation.</p>
+<p>La page <b>ESCADRON</b> réunit les chiffres de l'escadron et ses pilotes, en cartes. Elle est réservée aux membres d'un escadron validé.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-escadron.jpg" alt="La page Escadron" loading="lazy"><span class="rep" style="left:6%;top:10.5%">1</span><span class="rep" style="left:64.7%;top:22.5%">2</span><span class="rep" style="left:5.8%;top:28.4%">3</span><span class="rep" style="left:7%;top:32.5%">4</span><span class="rep" style="left:52.5%;top:49%">5</span><span class="rep" style="left:13.5%;top:52.3%">6</span></div><figcaption>La page Escadron (pilotes fictifs).</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>Les chiffres</b> : pilotes inscrits, points BGS et crédits générés, mérites Powerplay cumulés, colonisation.</li><li data-n="2"><b>Recherche et tri</b> des pilotes.</li><li data-n="3"><b>Les filtres</b> : tous, actifs cette semaine, officiers, avec un titre.</li><li data-n="4"><b>Une carte de pilote</b> : son rôle (pilote, officier, Amiral), ses points BGS, son activité de la semaine, son rang Powerplay et ses distinctions.</li><li data-n="5"><b>+ AJOUTER MA PHOTO.</b> Votre photo de commandant, visible uniquement par votre escadron.</li><li data-n="6"><b>VOIR LA FICHE.</b> Le détail du pilote : titres, distinctions, hangar.</li></ol>
+<ul class="points"><li>Les <b>recrues</b> sont signalées dans la liste.</li><li>Le <b>code d'invitation</b> de l'escadron, que l'Amiral et les officiers donnent aux nouveaux pilotes, se trouve sur cette page.</li><li>Le <b>mur des spécialistes</b> (page Engagement) attribue sept titres au cumul total. Un titre se perd quand un autre pilote vous dépasse de plus de 2 %.</li></ul>
+<p class="astuce">Aucune distinction ne compte une activité qui n'a pas eu lieu : tout est calculé à partir des actions que le plugin a relevées.</p>
+                <div class="suite"><a href="#budget">‹ Budget personnel</a><a href="#allies">Chapitre suivant : Alliés et invitations ›</a></div>
+            </section>
+
+            <section class="chap" id="allies" data-p="solo membre amiral">
+                <header><span class="num">10</span><h2>ALLIÉS ET INVITATIONS</h2><span class="profils"><span class="profil solo">SOLITAIRE</span><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+                <p class="pourquoi">Participer à la campagne d'un autre escadron, sans en faire partie.</p>
+<p>Un Amiral peut <b>inviter</b> un pilote (avec ou sans escadron) ou <b>tout un escadron allié</b> à participer à l'une de ses campagnes. Vous aidez ; vous ne commandez pas.</p>
+<h3>RECEVOIR UNE INVITATION</h3>
+<ol class="etapes"><li>Le bouton <b>ENGAGEMENT</b> du menu <b>clignote</b>, et une fenêtre plein écran s'ouvre avec l'invitation.</li><li>Choisissez <b>ACCEPTER</b>, <b>REFUSER</b> ou <b>PLUS TARD</b>. Si vous choisissez plus tard, cliquez sur le bouton clignotant pour la rouvrir.</li></ol>
+<figure class="vue" style="max-width:760px"><div class="cadre"><img src="images/manuel-invitation.jpg" alt="Une invitation à une campagne" loading="lazy"></div><figcaption>Une invitation (nom fictif).</figcaption></figure>
+<h3>PARTICIPER</h3>
+<p>Si vous êtes <b>solitaire</b>, la page ENGAGEMENT apparaît avec un seul bloc : <b>CAMPAGNES AUXQUELLES JE PARTICIPE</b>. Vous y voyez les campagnes où vous êtes invité, avec leurs directives, leurs systèmes, leurs évolutions, la carte galactique et les mêmes fenêtres de détail que les membres.</p>
+<figure class="vue"><div class="cadre"><img src="images/manuel-invite_bgs.jpg" alt="La page Engagement d'un invité" loading="lazy"></div><figcaption>La page Engagement d'un pilote invité.</figcaption></figure>
+<ul class="points"><li>Vos actions comptent dans la campagne et apparaissent dans son <b>journal</b>, avec une pastille qui vous distingue : <b>SOLITAIRE</b>, ou <b>ALLIÉ · le nom de votre escadron</b>.</li><li>Vous <b>ne voyez pas</b> la vie interne de l'escadron hôte (son journal général, le mur des spécialistes). Seule la campagne vous est ouverte.</li><li>Si vous êtes <b>membre d'un escadron validé</b>, vous gardez vos propres campagnes, et un bloc <b>CAMPAGNES ALLIÉES</b> s'ajoute en dessous, en lecture seule.</li><li>L'Amiral hôte peut vous <b>retirer</b> de la campagne à tout moment.</li></ul>
+<p class="astuce">Les contributions Powerplay et de colonisation d'un invité ne comptent pas dans les missions de l'escadron hôte. Elles restent dans vos propres pages.</p>
+                <div class="suite"><a href="#escadron">‹ L'escadron</a><a href="#telephone">Chapitre suivant : Le téléphone ›</a></div>
+            </section>
+
+            <section class="chap" id="telephone" data-p="solo membre amiral">
+                <header><span class="num">11</span><h2>LE TÉLÉPHONE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Garder son escadron et ses chiffres dans la poche, quand on n'est pas devant son PC.</p>
+<p>Ouvrez le site sur votre téléphone : il bascule tout seul vers une version adaptée, le <b>compagnon mobile</b>. Vous pouvez aussi l'installer comme une application depuis le menu de votre navigateur (« Ajouter à l'écran d'accueil »). Le bouton <b>COMPAGNON MOBILE</b> en bas des pages du site y mène.</p>
+<figure class="vue" style="max-width:360px"><div class="cadre"><img src="images/manuel-mobile.jpg" alt="Le compagnon mobile" loading="lazy"><span class="rep" style="left:72%;top:2.6%">1</span><span class="rep" style="left:7%;top:10.7%">2</span><span class="rep" style="left:6%;top:22.5%">3</span><span class="rep" style="left:7%;top:36.7%">4</span><span class="rep" style="left:6%;top:52%">5</span><span class="rep" style="left:50%;top:95%">6</span></div><figcaption>L'accueil du compagnon mobile.</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>La cloche</b> des nouveautés, et le réglage de votre compte.</li><li data-n="2"><b>Les alertes</b> : par exemple un titre menacé par un camarade.</li><li data-n="3"><b>Votre commandant</b> : rang BGS, escadron, progression.</li><li data-n="4"><b>Powerplay, Fédération, Empire</b> : vos rangs d'un coup d'œil.</li><li data-n="5"><b>Le fil de l'escadron</b> : les dernières actualités, avec un aperçu. Un toucher ouvre la fenêtre complète.</li><li data-n="6"><b>Les cinq onglets</b> : Accueil, Engagement (vos campagnes), Bâtir (colonisation), Escadron, Croisés (joueurs croisés).</li></ol>
+<ul class="points"><li>Le journal des exploits est complet sur mobile, avec les jauges et les fenêtres des directives et des missions Powerplay comme sur PC.</li><li>Le <b>repérage</b> et les <b>joueurs croisés</b> sont aussi là.</li><li>Les <b>sons du jeu</b> demandent l'application installée.</li></ul>
+                <div class="suite"><a href="#allies">‹ Alliés et invitations</a><a href="#amiral">Chapitre suivant : Pour l'Amiral ›</a></div>
+            </section>
+
+            <section class="chap" id="amiral" data-p="amiral">
+                <header><span class="num">12</span><h2>POUR L'AMIRAL</h2><span class="profils"><span class="profil amiral">AMIRAL</span></span></header>
+                <p class="pourquoi">Lancer une campagne, y ranger les directives, inviter des alliés et garder l'escadron informé.</p>
+<h3>CRÉER UNE CAMPAGNE</h3>
+<p>Sur la page Engagement, cliquez sur <b>+ NOUVELLE CAMPAGNE</b>. Seul l'Amiral peut en créer.</p>
+<figure class="vue" style="max-width:900px"><div class="cadre"><img src="images/manuel-creation.jpg" alt="Fenêtre Nouvelle campagne" loading="lazy"><span class="rep" style="left:29.5%;top:23.5%">1</span><span class="rep" style="left:29.5%;top:32.4%">2</span><span class="rep" style="left:29.5%;top:42%">3</span><span class="rep" style="left:29.5%;top:49%">4</span><span class="rep" style="left:29.5%;top:58%">5</span><span class="rep" style="left:29.5%;top:71%">6</span></div><figcaption>La fenêtre de création.</figcaption></figure>
+<ol class="legende"><li data-n="1"><b>Nom.</b> Par exemple « Opération Amaterasu ».</li><li data-n="2"><b>Type.</b> ATTAQUE (affaiblir un rival, sape son Powerplay), DÉFENSE, MAINTIEN ou CONQUÊTE.</li><li data-n="3"><b>Priorité.</b> Critique, haute ou normale : elle ordonne les campagnes.</li><li data-n="4"><b>Échéance</b>, facultative.</li><li data-n="5"><b>Briefing</b>, facultatif : le contexte et les consignes, que chaque pilote relit en un clic (icône 💬 de la campagne).</li><li data-n="6"><b>Invités</b>, facultatif : recherchez un pilote ou un escadron inscrit sur EDTEAM pour l'inviter tout de suite.</li></ol>
+<h3>AJOUTER DES DIRECTIVES</h3>
+<ul class="points"><li>Dans la campagne, le bouton <b>＋</b> ajoute une directive ou une mission : choisissez le système, la faction visée et le type (hausse, baisse, guerre, élection).</li><li>Vous pouvez <b>glisser-déposer</b> les campagnes pour les réordonner, et choisir <b>l'ordre des systèmes</b>.</li><li>Les icônes de la campagne : 💬 le briefing, 📖 son journal, ✉ inviter, ＋ ajouter, ✎ modifier, 📦 archiver, 🗑 supprimer.</li></ul>
+<h3>INVITER DES ALLIÉS</h3>
+<ol class="etapes"><li>Cliquez sur <b>✉</b> dans la campagne (ou remplissez l'étape 6 à la création).</li><li>Recherchez un <b>pilote</b> (avec ou sans escadron) ou un <b>escadron</b> inscrit.</li><li>L'invité reçoit une fenêtre plein écran et son menu clignote. Vous voyez son état : proposée, acceptée, refusée ou retirée.</li></ol>
+<p>Un pilote invité ne voit que cette campagne. Un escadron allié l'ouvre à tous ses membres. Les actions des invités apparaissent dans le <b>journal de la campagne</b> (📖), avec leur pastille.</p>
+<h3>RECRUTER ET GÉRER</h3>
+<ul class="points"><li>Le <b>code d'invitation</b> de l'escadron est sur la page Escadron : donnez-le aux nouveaux pilotes.</li><li>Les <b>initiatives</b> : vous choisissez comment les pilotes peuvent lancer leurs propres objectifs (LIBRE, avec VALIDATION, ou DÉSACTIVÉ).</li><li><b>RAPPORT DISCORD</b> : un rapport de l'Amirauté prêt à coller sur votre Discord.</li><li>Un escadron neuf doit être <b>validé</b> par l'équipe EDTEAM pour ouvrir les pages Escadron et Engagement. Tant qu'il ne l'est pas, ses pilotes sont traités comme des solitaires.</li></ul>
+<h3>LA SALLE DE COMMANDEMENT</h3>
+<p>Les Amiraux et les officiers disposent d'une <b>salle de commandement</b> (menu), pour suivre l'escadron et ses missions d'un seul regard. Les officiers y voient les mêmes outils de suivi.</p>
+                <div class="suite"><a href="#telephone">‹ Le téléphone</a><a href="#depannage">Chapitre suivant : Dépannage ›</a></div>
+            </section>
+
+            <section class="chap" id="depannage" data-p="solo membre amiral">
+                <header><span class="num">13</span><h2>DÉPANNAGE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <p class="pourquoi">Les petits problèmes les plus fréquents, et comment les régler.</p>
+<div class="plis" style="display:grid;gap:10px;max-width:900px">
+<details class="qr"><summary>Mon nom de commandant n'arrive pas sur le site</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Dans l'ordre : EDMC est ouvert · SYS_EDTEAM figure dans l'onglet Plugins · la clé est collée dans l'onglet SYS.EDTEAM · <b>le jeu a été relancé complètement depuis le bureau Windows</b> (se déconnecter puis se reconnecter dans le jeu ne suffit pas). Attendez ensuite quelques secondes après être entré dans votre vaisseau.</div></details>
+<details class="qr"><summary>Le tableau de bord affiche « Aucune session reçue »</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Lancez Elite Dangerous avec EDMC ouvert. Si le plugin est à jour et que rien n'arrive, redémarrez EDMC puis changez de système en jeu.</div></details>
+<details class="qr"><summary>Le plugin ne semble pas à jour</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Il se met à jour tout seul au démarrage d'EDMC. Quand une nouveauté demande une version récente, relancez EDMC une fois.</div></details>
+<details class="qr"><summary>Je ne vois pas les pages Escadron et Engagement</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Elles sont réservées aux membres d'un escadron <b>validé</b>. Si vous êtes pilote indépendant, ou si votre escadron attend sa validation, elles restent fermées. Un Amiral peut aussi vous inviter à une campagne : voir le chapitre Alliés.</div></details>
+<details class="qr"><summary>J'ai changé d'escadron</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Demandez le code d'invitation de votre nouvel escadron à son Amiral ou à un officier.</div></details>
+<details class="qr"><summary>Ma carte « Ma faction » dit « pas de faction en jeu »</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Frontier ne distribue plus de faction aux nouveaux escadrons. Dès qu'une directive de hausse est posée, la faction la plus visée s'affiche à la place.</div></details>
+<details class="qr"><summary>Les chiffres de systèmes ne sont pas ceux du jeu</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Ils viennent de la base communautaire Spansh, mise à jour quand un joueur visite un système. Un petit écart est normal. Le panneau du jeu fait foi.</div></details>
+<details class="qr"><summary>L'écran se vide, ou une zone disparaît</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Rechargez la page. Si le problème persiste, signalez-le sur le Discord avec une capture d'écran.</div></details>
+<details class="qr"><summary>Je n'entends pas les sons du jeu</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Les sons sont activés par le bouton en bas de la page. Sur téléphone, il faut l'application installée.</div></details>
+</div>
+<p style="margin-top:22px">Une question que ce manuel ne règle pas ? Venez sur le <a href="https://discord.gg/max5W9FreN" target="_blank" rel="noopener">Discord</a> : décrivez ce que vous voyez, avec une capture d'écran, sans y mettre votre clé EDMC.</p>
+                <div class="suite"><a href="#amiral">‹ Pour l'Amiral</a><span></span></div>
+            </section>
+            <!-- AUTO-FIN -->
+        </main>
+        </div>
+        </main>
+    </div>
+
+    <script>
+        // Le manuel est reserve aux pilotes connectes (compte approuve) : meme controle que les autres pages de l'application
+        window.addEventListener('load', async () => {
+            const supabaseApp = window.supabaseApp;
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            const { data } = await chargerProfilAvecCache(supabaseApp, session.user.id);
+            if (data && data.est_approuve) {
+                window.profilCommandant = data;
+                if (data.est_amiral || data.est_directeur) {
+                    const navAmiraute = document.getElementById('nav-bureau-amiraute');
+                    if (navAmiraute) navAmiraute.style.display = 'flex';
+                    if (typeof actualiserBadgeAmiraute === 'function') actualiserBadgeAmiraute();
+                }
+                const navBgs = document.getElementById('nav-bgs-factions');
+                if (navBgs && localStorage.getItem('edteam_acces_bgs') === 'true') navBgs.style.display = 'flex';
+                if (typeof window.actualiserHeader === 'function') window.actualiserHeader(data);
+                const mainUi = document.getElementById('main-ui');
+                if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
+                if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
+            } else {
+                await supabaseApp.auth.signOut();
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+    <script src="manuel.js?v=2"></script>
+    <script src="footer.js?v=42"></script>
+</body>
+</html>

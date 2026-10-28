@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-campagnes-alliees", date: "2026-10-28T23:43:00Z", type: "NOUVEAU",
+        titre: "Campagnes : invitez des amis ou un escadron allié",
+        texte: "L’Amiral peut inviter un pilote (avec ou sans escadron) ou un escadron allié à participer à une campagne précise : bouton ✉ de la campagne, ou étape « Invités » à la création. L’invité reçoit une invitation plein écran et son bouton ENGAGEMENT clignote ; il accepte, refuse ou répond plus tard. Sa vue est limitée à la campagne : directives, résultats du jeu, journal de la campagne, carte galactique. Il ne voit ni les autres campagnes, ni le fil et la page de l’escadron, ni le mur des spécialistes, et ses points n’entrent pas dans vos classements. Une pastille le distingue : SOLITAIRE ou ALLIÉ · nom de l’escadron. L’Amiral peut retirer un invité à tout moment. Les pilotes sans escadron (ou dont l’escadron n’est pas encore validé) deviennent des solitaires : ils gardent le QG, le tableau de bord, la colonisation, le budget et le hangar.",
+        important: false
+    },
+    {
+        id: "2026-10-manuel", date: "2026-10-28T23:26:00Z", type: "NOUVEAU",
+        titre: "Le manuel : tout comprendre, en images",
+        texte: "Un manuel complet, en images, explique ce que l’on peut faire sur le site, comment, et pourquoi : le QG, le tableau de bord en jeu, le BGS et les campagnes, le Powerplay, la colonisation, le budget, l’escadron, les invitations, le téléphone et un chapitre pour l’Amiral. Il s’ouvre depuis « MANUEL » dans le menu ou le bas de page. Un nouveau pilote le reçoit à sa première connexion, à la place des annonces passées.",
+        important: false
+    },
+    {
         id: "2026-10-conflit-fenetre-24h", date: "2026-10-27T19:05:00Z", type: "CORRIGE",
         titre: "Guerres et élections : la fenêtre plein écran reste 24 h",
         texte: "La fenêtre plein écran qui annonce le début ou la fin d’une guerre ou d’une élection (victoire, défaite) ne disparaît plus au tick : elle reste disponible 24 heures, une seule fois par appareil, même si tu te connectes le soir. Corrigé aussi : quand une directive est posée sur une faction déjà en guerre ou en élection, l’annonce « EN COURS » est maintenant rattrapée au relevé suivant (elle pouvait manquer).",

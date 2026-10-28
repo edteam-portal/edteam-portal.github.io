@@ -15,16 +15,16 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=4"></script>
+    <script src="shared-utils.js?v=7"></script>
     <script src="photos.js?v=2"></script>
-    <script src="annonce.js?v=22"></script>
+    <script src="annonce.js?v=25"></script>
     <script src="revelations.js?v=8"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagnes-mobile.js?v=20"></script>
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=7"></script>
     <script src="conflit-modale.js?v=3"></script>
-    <script src="journal-fil.js?v=13"></script>
+    <script src="journal-fil.js?v=14"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -32,8 +32,8 @@
     <script src="pp-etat.js?v=5"></script>
     <script src="campagnes-pp.js?v=19"></script>
     <script src="engagement-mobile.js?v=1"></script>
-    <script src="anecdotes.js?v=3"></script>
-    <script src="qgsuivi.js?v=39"></script>
+    <script src="anecdotes.js?v=4"></script>
+    <script src="qgsuivi.js?v=40"></script>
     <script src="son.js?v=1"></script>
     <script src="colonisation-types.js?v=2"></script>
     <script src="medailles.js?v=17"></script>
@@ -1341,11 +1341,11 @@
         window.addEventListener('edteam-photos', () => { if (typeof xChargerSemaine === 'function' && profilCommandant) { try { xChargerSemaine(false); } catch (e) {} } });
         window.addEventListener('edteam-photos', () => { if (typeof escRendre === 'function' && typeof ESC !== 'undefined' && ESC.liste && ESC.liste.length) { try { escRendre(); } catch (e) {} } });
 
-        // Version ordinateur : le QG (index.html) renvoie les ecrans de moins de 768 px ici ; ce choix, memorise dans le navigateur, l'en empeche. Arriver ici le retire (on veut alors le mobile).
+        // Version ordinateur : le QG (qg.html) renvoie les ecrans de moins de 768 px ici ; ce choix, memorise dans le navigateur, l'en empeche. Arriver ici le retire (on veut alors le mobile).
         try { localStorage.removeItem("edteam_version_pc"); } catch (e) {}
         function versionOrdinateur() {
             try { localStorage.setItem("edteam_version_pc", "1"); } catch (e) {}
-            window.location.href = "index.html";
+            window.location.href = "qg.html";
         }
         async function deconnexionMobile() {
             await supabaseApp.auth.signOut();
@@ -1619,7 +1619,8 @@
             const z = xEl('x-anecdote');
             if (!z || !window.EDTEAMAnecdotes) return;
             const a = await window.EDTEAMAnecdotes.charger(false);
-            if (!a) { z.style.display = 'none'; return; }
+            const sansEsc = !profilCommandant || !profilCommandant.escadron_id || String(profilCommandant.escadron_id).toUpperCase() === 'INDEPENDANT';
+            if (!a) { if (sansEsc) { z.style.display = 'none'; return; } z.innerHTML = window.EDTEAMAnecdotes.htmlVide(true); z.style.display = 'block'; return; }
             z.innerHTML = window.EDTEAMAnecdotes.htmlCarteMobile(a);
             z.style.display = 'block';
         }

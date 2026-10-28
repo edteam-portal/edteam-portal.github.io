@@ -381,6 +381,56 @@
             aide: 'Page BGS · une directive de hausse · ligne DÉFENSE D’INSTALLATION · bouton « OÙ DÉFENDRE ? » · à utiliser sur PC ou tablette',
             lien: 'bgs.html',
             mobile: false
+        },
+        {
+            id: 'allies-campagnes-2026-10',
+            couleur: '#00F0FF',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'UN COUP DE MAIN POUR VOS CAMPAGNES',
+            pages: [
+                {
+                    titre: 'INVITEZ DES AMIS À VOS CAMPAGNES',
+                    sous: 'Des renforts, sans ouvrir la porte de l’escadron',
+                    intro: 'L’Amiral peut maintenant <b>inviter</b> des pilotes amis, avec ou sans escadron, ou <b>un escadron allié tout entier</b>, à participer à <b>une campagne précise</b>. Ils jouent à vos côtés : leurs efforts comptent pour la campagne, comme les vôtres.',
+                    visuelHtml: anvAl1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'L’AMIRAL INVITE', d: 'Dans la fenêtre d’une campagne, l’étape <b>Invités</b> : on cherche un pilote ou un escadron déjà inscrit sur EDTEAM, et on l’invite.' },
+                        { n: '2', t: 'L’INVITÉ ACCEPTE', d: 'Une invitation s’affiche en plein écran : accepter, refuser ou plus tard. Pour un escadron, son Amiral décide, puis <b>chaque pilote choisit pour lui-même</b>.' },
+                        { n: '3', t: 'ILS JOUENT, VOUS LE VOYEZ', d: 'Leurs missions, leurs combats et leur commerce comptent sur les directives de la campagne. Une pastille les distingue : <b style="color:#FFB000">SOLITAIRE</b> ou <b style="color:#4DA3FF">ALLIÉ · nom de l’escadron</b>.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'LEUR VUE EST LIMITÉE',
+                    sous: 'Vos affaires d’escadron restent chez vous',
+                    intro: 'Un invité ne voit <b>que la campagne à laquelle il participe</b>. Il n’a ni la page Escadron, ni vos autres campagnes, ni le fil de l’escadron : son écran ne montre que ce qu’il faut pour aider.',
+                    visuelHtml: anvAl2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '✓', t: 'RIEN DE PERSONNEL', d: 'Pas de fiches de pilotes, pas de liste des effectifs, pas de colonisation de l’escadron. Chacun garde ses propres pages : son budget, son hangar, son tableau de bord.' },
+                        { n: '✓', t: 'VOS CLASSEMENTS INTACTS', d: 'Les points d’un invité n’entrent ni dans le classement de la semaine, ni dans le Pilier, ni dans le mur des spécialistes de l’escadron.' },
+                        { n: '✓', t: 'VOTRE TERRITOIRE RESTE CACHÉ', d: 'Sa carte galactique ne montre que les systèmes de la campagne, jamais ceux que votre faction contrôle ni ceux des autres campagnes.' }
+                    ],
+                    avis: 'Les invités voient les <b>pilotes qui jouent sur la même campagne</b> (leur nom et leur pastille) : c’est ce qui permet de jouer ensemble.'
+                },
+                {
+                    titre: 'POURQUOI C’EST UN PLUS',
+                    sous: 'Plus de mains, plus d’effet, et vous gardez la main',
+                    intro: 'Le jeu limite l’effet de <b>chaque pilote à chaque tick</b> : au-delà d’un certain volume, une activité fait de moins en moins bouger l’influence. Chaque invité apporte son propre volume : <b>la campagne avance plus vite, sans que personne ne se force</b>.',
+                    visuelHtml: anvAl3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'VOUS DÉCIDEZ', d: 'Seul l’Amiral invite et retire, quand il veut. Seul un escadron validé peut créer une campagne. Un invité ne peut rien modifier.' },
+                        { n: '2', t: 'CHACUN CONSENT', d: 'Personne n’est ajouté sans accord. Un pilote refusé trois fois par le même Amiral n’est plus invitable par lui, et une limite de 20 invitations par jour évite tout abus.' },
+                        { n: '3', t: 'RIEN N’EST MÉLANGÉ', d: 'Dans le journal de la campagne et la liste des participants, on voit toujours qui est de l’escadron et qui est invité.' }
+                    ]
+                }
+            ],
+            cta: 'VOIR LES CAMPAGNES',
+            aide: 'Page Engagement · une campagne · ✉ Inviter (Amiral) · à utiliser sur PC ou tablette',
+            lien: 'bgs.html',
+            mobile: false
         }
     ];
 
@@ -406,6 +456,37 @@
     }
     function anvTuile(k, t, v, s) { return '<div class="anv-ti" style="--k:' + k + '"><small>' + t + '</small><b>' + v + '</b><span>' + s + '</span></div>'; }
     // ---- visuels de l'annonce « defense d'installation » : dessines en HTML (aucune capture, aucune donnee reelle ; noms fictifs) ----
+    // ---- annonce « campagnes alliees » : trois visuels dessines (noms fictifs) ----
+    function anvAl1() {
+        var pastille = function (c, t) { return '<span class="anval-pa" style="--k:' + c + '">' + t + '</span>'; };
+        var av = function (t, c) { return '<span class="anval-av" style="--k:' + (c || '#FF7100') + '">' + t + '</span>'; };
+        return '<div class="anval">'
+            + '<div class="anval-c"><div class="h">AMIRAL · NOUVELLE CAMPAGNE · 6 INVITÉS</div><div class="champ">Rechercher un pilote ou un escadron inscrit sur EDTEAM…</div>'
+            + '<div class="chip"><b>CMDR LYRA VESK</b>' + pastille('#FFB000', 'SOLITAIRE') + '</div><div class="chip"><b>NOVA CORSAIRS</b>' + pastille('#4DA3FF', 'ESCADRON ALLIÉ') + '</div></div>'
+            + '<div class="anval-fl">›</div>'
+            + '<div class="anval-c"><div class="h">INVITATION</div><div class="gros">OFFENSIVE DU PRINTEMPS</div><div class="pt">CAMPAGNE · ATTAQUE · PRIORITÉ HAUTE</div><div class="pt">Le CMDR NOVA RIVEN t’invite à participer à cette campagne.</div>'
+            + '<div class="btns"><span class="oui">ACCEPTER</span><span class="non">REFUSER</span></div></div>'
+            + '<div class="anval-fl">›</div>'
+            + '<div class="anval-c"><div class="h">CAMPAGNE · OFFENSIVE DU PRINTEMPS</div><div class="lig"><span class="tg">BGS #42 · HAUSSE</span><b>TAU CETI SUD</b></div>'
+            + '<div class="avs">' + av('DM') + av('NR') + av('LV', '#FFB000') + av('MO', '#4DA3FF') + '</div>'
+            + '<div class="leg">' + pastille('#FFB000', 'SOLITAIRE') + pastille('#4DA3FF', 'ALLIÉ · NCR') + '</div></div>'
+            + '</div>';
+    }
+    function anvAl2() {
+        var oui = ['La campagne où il est invité', 'Ses directives, leurs systèmes et leurs résultats du jeu', 'Ses propres actions et le journal de cette campagne', 'Les pilotes qui y jouent (nom et pastille)'];
+        var non = ['Vos autres campagnes', 'Le fil et le journal de l’escadron', 'La page Escadron : effectifs et fiches de pilotes', 'Le mur des spécialistes, le Pilier, l’Élan', 'La colonisation de l’escadron', 'Les systèmes que contrôle votre faction'];
+        var li = function (t, c, m) { return '<li><i style="color:' + c + '">' + m + '</i>' + t + '</li>'; };
+        return '<div class="anval2"><div class="col oui"><div class="h">✓ L’INVITÉ VOIT</div><ul>' + oui.map(function (t) { return li(t, '#00FF66', '✓'); }).join('') + '</ul></div>'
+            + '<div class="col non"><div class="h">✕ L’INVITÉ NE VOIT JAMAIS</div><ul>' + non.map(function (t) { return li(t, '#ff6b6b', '✕'); }).join('') + '</ul></div></div>';
+    }
+    function anvAl3() {
+        var barre = function (nom, plein, tot, c, txt) { return '<div class="anval3-l"><span class="n">' + nom + '</span><span class="b"><i style="width:' + Math.round(100 * plein / tot) + '%;background:' + c + '"></i></span><span class="t">' + txt + '</span></div>'; };
+        return '<div class="anval3"><div class="h">VOLUME QUI FAIT VRAIMENT BOUGER L’INFLUENCE, À CHAQUE TICK</div>'
+            + barre('1 PILOTE', 12, 36, '#FF7100', 'effet plein jusqu’à un certain volume')
+            + barre('3 PILOTES', 36, 36, '#00FF66', 'trois fois plus de volume efficace')
+            + '<div class="p">Chaque invité a son propre volume par tick : sa contribution s’ajoute, elle ne vous enlève rien.</div></div>';
+    }
+
     function anvDf1() {
         var puce = function (c, t) { return '<span class="anvdf-chip" style="--k:' + c + '">' + t + '</span>'; };
         return '<div class="anvdf"><div class="anvdf-chaine">' + puce('#00FF66', '▲ FACTION ALPHA EN BOOM') + '<span class="fl">+</span>' + puce('#FFD23F', '🏛 UNE INSTALLATION À ELLE') + '<span class="fl">►</span>' + puce('#FF6B5A', '⚔ UN RAID SE LANCE') + '</div>'
@@ -608,6 +689,25 @@
             '#edteam-annonce .anvdf-fiche .i{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-top:1px solid #262626} #edteam-annonce .anvdf-fiche .i b{color:#fff;font-weight:normal;letter-spacing:1px} #edteam-annonce .anvdf-fiche .i.no b{text-decoration:line-through;color:#777}',
             '#edteam-annonce .anvdf-fiche .ok{color:#00FF66;border:1px solid #00FF66;background:rgba(0,255,102,.08);padding:0 8px;letter-spacing:1px} #edteam-annonce .anvdf-fiche .ko{color:#ff6b6b;border:1px solid #ff6b6b;background:rgba(255,80,80,.07);padding:0 8px;letter-spacing:1px} #edteam-annonce .anvdf-fiche .q{color:#bfae6a;display:inline-flex;gap:8px;align-items:center} #edteam-annonce .anvdf-fiche .q u{text-decoration:none;padding:1px 10px;letter-spacing:1px} #edteam-annonce .anvdf-fiche .q u.o{border:1px solid #00FF66;color:#00FF66;animation:anvBlink 1.6s ease-in-out infinite} #edteam-annonce .anvdf-fiche .q u.n{border:1px solid #ff6b6b;color:#ff6b6b}',
             '@media (max-width:900px){#edteam-annonce .anvdf-ab{grid-template-columns:1fr}#edteam-annonce .anvdf-fl{transform:rotate(90deg)}} @media (prefers-reduced-motion:reduce){#edteam-annonce .anvdf-jeu .ch.on,#edteam-annonce .anvdf-q button,#edteam-annonce .anvdf-fiche .q u.o{animation:none}}',
+            '#edteam-annonce .anval{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr) 22px minmax(0,1fr);gap:8px;align-items:stretch;margin-top:18px;text-align:left}',
+            '#edteam-annonce .anval-fl{align-self:center;text-align:center;color:var(--anc);font-size:1.8em}',
+            '#edteam-annonce .anval-c{border:1px solid color-mix(in srgb,var(--anc) 40%,transparent);background:#070a0e;padding:10px 12px;font-size:.78em;line-height:1.5}',
+            '#edteam-annonce .anval-c .h{color:#667;letter-spacing:2px;font-size:.82em;margin-bottom:8px}',
+            '#edteam-annonce .anval-c .champ{border:1px solid #2c3640;color:#6d7a85;padding:6px 8px;margin-bottom:8px}',
+            '#edteam-annonce .anval-c .chip{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #28323b;background:rgba(255,255,255,.03);padding:5px 8px;margin-top:5px;color:#e6edf2}',
+            '#edteam-annonce .anval-c .gros{color:#fff;font-weight:bold;letter-spacing:2px;font-size:1.1em;margin:2px 0}',
+            '#edteam-annonce .anval-c .pt{color:#9fb0bd;font-size:.92em;margin-top:3px}',
+            '#edteam-annonce .anval-c .btns{display:flex;gap:8px;margin-top:10px} #edteam-annonce .anval-c .btns span{border:1px solid;padding:3px 10px;letter-spacing:2px;font-size:.85em} #edteam-annonce .anval-c .btns .oui{color:#00FF66;border-color:#00FF66} #edteam-annonce .anval-c .btns .non{color:#ff6b6b;border-color:#ff6b6b}',
+            '#edteam-annonce .anval-c .lig{display:flex;gap:8px;align-items:center;flex-wrap:wrap} #edteam-annonce .anval-c .lig .tg{border:1px solid #FF7100;color:#FF7100;padding:0 6px;font-size:.85em} #edteam-annonce .anval-c .lig b{color:#fff;letter-spacing:1px}',
+            '#edteam-annonce .anval-c .avs{display:flex;gap:6px;margin:10px 0 6px} #edteam-annonce .anval-av{width:30px;height:30px;border-radius:50%;border:2px solid var(--k);display:grid;place-items:center;color:#fff;font-size:.72em;font-weight:bold;background:#150b03}',
+            '#edteam-annonce .anval-pa{border:1px solid var(--k);color:var(--k);background:color-mix(in srgb,var(--k) 12%,transparent);padding:0 7px;font-size:.78em;letter-spacing:1px;white-space:nowrap} #edteam-annonce .anval-c .leg{display:flex;gap:6px;flex-wrap:wrap}',
+            '#edteam-annonce .anval2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px;text-align:left}',
+            '#edteam-annonce .anval2 .col{border:1px solid;padding:10px 14px;background:#070a0e} #edteam-annonce .anval2 .oui{border-color:rgba(0,255,102,.5)} #edteam-annonce .anval2 .non{border-color:rgba(255,107,107,.5)}',
+            '#edteam-annonce .anval2 .h{letter-spacing:3px;font-size:.78em;margin-bottom:8px;color:#fff} #edteam-annonce .anval2 ul{list-style:none;margin:0;padding:0} #edteam-annonce .anval2 li{display:flex;gap:10px;padding:4px 0;color:#cfd8de;font-size:.82em;line-height:1.45} #edteam-annonce .anval2 li i{font-style:normal;font-weight:bold;flex:none;width:14px}',
+            '#edteam-annonce .anval3{border:1px solid color-mix(in srgb,var(--anc) 35%,transparent);background:#070a0e;padding:12px 16px;margin-top:18px;text-align:left} #edteam-annonce .anval3 .h{color:#667;letter-spacing:2px;font-size:.72em;margin-bottom:10px}',
+            '#edteam-annonce .anval3-l{display:grid;grid-template-columns:96px minmax(0,1fr) minmax(0,1.1fr);gap:12px;align-items:center;margin:7px 0;font-size:.78em} #edteam-annonce .anval3-l .n{color:#fff;letter-spacing:2px} #edteam-annonce .anval3-l .b{height:12px;background:#0d1419;border:1px solid #243038;position:relative} #edteam-annonce .anval3-l .b i{position:absolute;left:0;top:0;bottom:0;opacity:.85} #edteam-annonce .anval3-l .t{color:#9fb0bd}',
+            '#edteam-annonce .anval3 .p{margin-top:10px;color:#aab4bb;font-size:.8em;border-top:1px dashed #2a3640;padding-top:8px}',
+            '@media (max-width:900px){#edteam-annonce .anval{grid-template-columns:1fr}#edteam-annonce .anval-fl{transform:rotate(90deg);height:22px}#edteam-annonce .anval2{grid-template-columns:1fr}#edteam-annonce .anval3-l{grid-template-columns:1fr;gap:4px}}',
             '@media (prefers-reduced-motion:reduce){#edteam-annonce,#edteam-annonce .anc-boite{animation:none}}'
         ].join('\n');
         document.head.appendChild(st);
@@ -690,6 +790,18 @@
         document.body.appendChild(ov);
     }
 
+    // premiere connexion : une seule fenetre de bienvenue (a la place des annonces passees), qui renvoie vers le manuel
+    function bienvenue(profil, opts) {
+        var essais = 0;
+        setTimeout(function essayer() {
+            if (document.getElementById('edteam-annonce') || document.getElementById('edteam-revel')) { if (++essais < 12) setTimeout(essayer, 4000); return; }   // une fenetre deja ouverte passe avant : on reessaie
+            monter({ id: 'bienvenue-manuel', couleur: '#00F0FF', etiquette: 'BIENVENUE', titre: 'BIENVENUE SUR EDTEAM', sous: 'Un manuel en images vous explique tout',
+                intro: 'Dix minutes de lecture pour savoir <b>ce que vous pouvez faire</b> sur le site, <b>comment</b>, et <b>pourquoi</b>.',
+                etapes: [{ n: '1', t: 'LE QG', d: 'Votre accueil, jour après jour.' }, { n: '2', t: 'LE JEU EN DIRECT', d: 'Commerce, missions, hangar.' }, { n: '3', t: 'ESCADRON', d: 'Campagnes, BGS, colonisation.' }],
+                cta: 'OUVRIR LE MANUEL', lien: 'manuel.html', aide: 'Il reste toujours accessible depuis le menu (MANUEL) et le bas de page.' }, profil.user_id, opts && opts.aller);
+        }, typeof (opts && opts.delai) === 'number' ? opts.delai : 1800);
+    }
+
     window.edteamAnnonce = {
         // profil : la ligne du pilote connecte (user_id, escadron_id, est_approuve) ; opts.aller : que faire au clic sur le bouton principal ; opts.delai : attente avant l'affichage (ms)
         proposer: function (profil, opts) {
@@ -697,7 +809,9 @@
                 opts = opts || {};
                 if (!profil || !profil.user_id || profil.est_approuve === false) return;
                 var esc_ = String(profil.escadron_id || '').trim().toUpperCase();
-                var sansEscadron = !esc_ || esc_ === 'INDEPENDANT';
+                var sansEscadron = !esc_ || esc_ === 'INDEPENDANT' || !!window.EDTEAM_INVITE;
+                // premiere connexion sur cet appareil (rien de memorise) : les annonces passees ne le concernent pas, elles avertissent les pilotes DEJA la des nouveautes ; le manuel s'adresse aux nouveaux
+                try { if (localStorage.getItem(PREFIXE + profil.user_id) === null) { ecrire(profil.user_id, ANNONCES.map(function (x) { return x.id; })); bienvenue(profil, opts); return; } } catch (e) { /* stockage indisponible : pas de rattrapage possible, on s'abstient */ return; }
                 var vues = lire(profil.user_id);
                 var a = ANNONCES.filter(function (x) {
                     if (vues.indexOf(x.id) >= 0) return false;

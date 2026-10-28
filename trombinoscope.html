@@ -15,10 +15,11 @@
     <link rel="stylesheet" href="style.css?v=3">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=4"></script>
+    <script src="shared-utils.js?v=7"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=52"></script>
+    <script src="navigation.js?v=54"></script>
+    <script src="invitations.js?v=1"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -487,6 +488,37 @@
         window.addEventListener('resize', () => { clearTimeout(rpRedim); rpRedim = setTimeout(() => { if (RP.lignes.length && document.getElementById('rp-graphe')) dessinerRapport(false); }, 200); });
 
         // ---------------------------------------------------------------
+        //  ESCADRONS A VALIDER (SQL 170) : un escadron enregistre n'ouvre les pages Escadron et BGS a ses pilotes qu'une fois valide ici
+        // ---------------------------------------------------------------
+        async function chargerValidationEscadrons() {
+            const z = document.getElementById('tb-validation'); if (!z) return;
+            const { data, error } = await supabaseApp.rpc('escadrons_validation');
+            if (error || !Array.isArray(data) || !data.length) { z.innerHTML = ''; return; }   // fonction absente (script pas lance) ou aucun escadron : rien a afficher
+            const attente = data.filter(e => !e.valide).length;
+            let h = '<div class="bloc cy" style="margin-bottom: 16px;"><h2>ESCADRONS <em>' + (attente ? attente + ' à valider' : 'tous validés') + '</em></h2><div style="display: grid; gap: 8px;">';
+            data.forEach(e => {
+                const nom = escapeHtml(String(e.escadron || ''));
+                const bouton = e.valide
+                    ? '<button type="button" data-esc="' + nom + '" data-val="0" style="background: transparent; border: 1px solid #FF7100; color: #FF7100; padding: 6px 14px; font-family: inherit; letter-spacing: 1.5px; cursor: pointer; opacity: .7;">RETIRER</button>'
+                    : '<button type="button" data-esc="' + nom + '" data-val="1" style="background: rgba(0,255,102,.1); border: 1px solid #00FF66; color: #00FF66; padding: 6px 14px; font-family: inherit; letter-spacing: 1.5px; font-weight: bold; cursor: pointer;">VALIDER</button>';
+                h += '<div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 12px; border-left: 3px solid ' + (e.valide ? '#00FF66' : '#FF7100') + '; background: rgba(255,255,255,.03);">'
+                    + '<b style="color: #fff; letter-spacing: 2px;">' + nom + '</b>'
+                    + '<span style="color: #889; font-size: .85em;">Amiral : ' + escapeHtml(String(e.amiral || '—')) + ' · ' + (Number(e.pilotes) || 0) + ' pilote' + ((Number(e.pilotes) || 0) > 1 ? 's' : '') + '</span>'
+                    + '<span style="margin-left: auto; display: flex; align-items: center; gap: 12px;"><span style="font-size: .75em; letter-spacing: 2px; color: ' + (e.valide ? '#00FF66' : '#FF7100') + ';">' + (e.valide ? 'VALIDÉ' : 'EN ATTENTE') + '</span>' + bouton + '</span></div>';
+            });
+            z.innerHTML = h + '</div></div>';
+        }
+        document.addEventListener('click', async e => {
+            const b = e.target.closest && e.target.closest('#tb-validation button[data-esc]'); if (!b) return;
+            const nom = b.dataset.esc, valider = b.dataset.val === '1';
+            if (!valider && !confirm('Retirer la validation de ' + nom + ' ?\n\nSes pilotes perdent l\'accès aux pages Escadron et BGS.')) return;
+            b.disabled = true;
+            try { const { error } = await supabaseApp.rpc('valider_escadron', { p_escadron: nom, p_valide: valider }); if (error) throw error; }
+            catch (x) { console.error('Erreur validation :', x); alert('Impossible de modifier la validation pour le moment.'); }
+            chargerValidationEscadrons();
+        });
+
+        // ---------------------------------------------------------------
         //  DEMARRAGE : reserve au Directeur (la base le verifie aussi)
         // ---------------------------------------------------------------
         window.addEventListener('load', async () => {
@@ -502,7 +534,8 @@
             const mainUi = document.getElementById('main-ui');
             if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
             if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
-            document.getElementById('display-area').innerHTML = '<div id="tb-rapport"></div><div class="rp-tip" id="rp-tip"></div><div id="tb-photos"></div>';
+            document.getElementById('display-area').innerHTML = '<div id="tb-validation"></div><div id="tb-rapport"></div><div class="rp-tip" id="rp-tip"></div><div id="tb-photos"></div>';
+            chargerValidationEscadrons().catch(e => console.error('Erreur validation des escadrons :', e));
             chargerRapport().then(l => { RP.lignes = l; dessinerRapport(false); }).catch(e => { console.error('Erreur rapport :', e); dessinerRapport(true); });
             try { ST.liste = await charger(false); dessiner(); }
             catch (e) {
@@ -512,6 +545,6 @@
         });
     </script>
 
-    <script src="footer.js?v=41"></script>
+    <script src="footer.js?v=42"></script>
 </body>
 </html>

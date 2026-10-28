@@ -1,0 +1,70 @@
+/* SAS DE SECURITE : parcours en 4 etapes (sas.js). Cadres : bloc.css (reference EDTEAM). */
+.sas-carte { text-align: left !important; }
+.sas-titre { text-align: center; margin: 6px 0 2px; color: var(--ed-orange); font-size: 2em; letter-spacing: 5px; font-weight: normal; text-shadow: 0 0 12px var(--ed-orange-glow); }
+.sas-sous { text-align: center; color: #8a9aa8; margin: 0 0 22px; }
+
+/* progression */
+.sas-rail { display: flex; align-items: flex-start; margin: 0 6px 18px; }
+.sas-pt { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; text-align: center; cursor: pointer; background: none; border: 0; font-family: inherit; padding: 0; }
+.sas-pt::before { content: ""; position: absolute; top: 19px; left: -50%; width: 100%; height: 2px; background: #2a3038; z-index: 0; }
+.sas-pt:first-child::before { display: none; }
+.sas-pt.fait::before, .sas-pt.cour::before { background: #00FF66; }
+.sas-rond { position: relative; z-index: 1; width: 40px; height: 40px; border-radius: 50%; border: 2px solid #3a424c; background: #05080a; display: flex; align-items: center; justify-content: center; font-size: 1.15em; color: #667; }
+.sas-pt.fait .sas-rond { border-color: #00FF66; color: #00FF66; background: rgba(0,255,102,.08); }
+.sas-pt.cour .sas-rond { border-color: var(--ed-orange); color: #fff; background: rgba(255,113,0,.15); box-shadow: 0 0 16px var(--ed-orange-glow); }
+.sas-nom { margin-top: 7px; letter-spacing: 2px; font-size: .78em; color: #667; }
+.sas-pt.fait .sas-nom { color: #7fcf9c; } .sas-pt.cour .sas-nom { color: var(--ed-orange); }
+
+/* une etape */
+.sas-etape { display: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: center; margin-bottom: 4px; }
+.sas-etape h3 { font-weight: normal; letter-spacing: 3px; font-size: 1.25em; color: #fff; margin: 0 0 6px; }
+.sas-etape h3 small { color: var(--ed-orange); letter-spacing: 2px; margin-right: 8px; }
+.sas-but { color: #9fb0bd; margin: 0 0 12px; }
+.sas-actions { list-style: none; counter-reset: a; margin: 0 0 16px; padding: 0; }
+.sas-actions li { counter-increment: a; position: relative; padding: 5px 0 5px 34px; color: #d3dde4; line-height: 1.5; }
+.sas-actions li::before { content: counter(a); position: absolute; left: 0; top: 5px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,240,255,.12); border: 1px solid rgba(0,240,255,.5); color: var(--ed-blue); display: flex; align-items: center; justify-content: center; font-size: .8em; }
+.sas-actions b { color: #fff; font-weight: normal; text-decoration: underline; text-decoration-color: var(--ed-orange); text-underline-offset: 3px; }
+.sas-boutons { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.sas-btn { display: inline-block; font-family: inherit; letter-spacing: 2px; padding: 11px 18px; border: 1px solid var(--ed-blue); color: var(--ed-blue); background: rgba(0,240,255,.08); text-decoration: none; font-size: .92em; cursor: pointer; transition: .2s; }
+.sas-btn:hover { background: var(--ed-blue); color: #000; }
+.sas-btn.vert { border-color: #00FF66; color: #00FF66; background: rgba(0,255,102,.08); } .sas-btn.vert:hover { background: #00FF66; color: #000; }
+.sas-btn.or { border-color: var(--ed-orange); color: #fff; background: rgba(255,113,0,.12); } .sas-btn.or:hover { background: var(--ed-orange); color: #000; }
+.sas-lien { background: none; border: 0; font-family: inherit; color: #7fcf9c; font-size: .85em; letter-spacing: 1px; margin-top: 12px; cursor: pointer; padding: 0; }
+.sas-lien:hover { color: #fff; }
+
+/* visuels (captures d'EDMC, donnees fictives) */
+.sas-visuel { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.sas-visuel img { display: block; max-width: 100%; height: auto; border: 1px solid #3a4652; box-shadow: 0 8px 30px rgba(0,0,0,.55); background: #fff; }
+.sas-visuel img.petite { max-width: 62%; }
+.sas-legende { color: #7d8d99; font-size: .82em; text-align: center; letter-spacing: 1px; }
+
+/* cle */
+.sas-cle { border: 1px solid var(--ed-blue); background: rgba(0,240,255,.05); padding: 11px 14px; margin: 0 0 14px; }
+.sas-cle span { display: block; color: #8a9aa8; font-size: .78em; letter-spacing: 2px; margin-bottom: 4px; }
+.sas-cle strong { color: var(--ed-orange); letter-spacing: 2px; font-size: 1.15em; font-weight: normal; cursor: pointer; word-break: break-all; }
+
+/* avertissement : redemarrer le jeu */
+.sas-alerte { border: 1px solid #FF7100; border-left: 5px solid #FF7100; background: rgba(255,113,0,.1); padding: 12px 14px; margin: 0 0 14px; color: #f1dccb; line-height: 1.55; }
+.sas-alerte b { color: #fff; font-weight: normal; letter-spacing: 1px; }
+
+/* radar */
+.sas-radar { position: relative; height: 220px; display: flex; align-items: center; justify-content: center; }
+.sas-radar i { position: absolute; border: 1px solid rgba(0,255,102,.35); border-radius: 50%; }
+.sas-radar .r1 { width: 74px; height: 74px; } .sas-radar .r2 { width: 148px; height: 148px; } .sas-radar .r3 { width: 220px; height: 220px; }
+.sas-radar .bal { position: absolute; width: 110px; height: 2px; left: 50%; top: 50%; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(0,255,102,.9), transparent); animation: sasBalayage 3.4s linear infinite; }
+.sas-radar .pt0 { width: 10px; height: 10px; border-radius: 50%; background: #00FF66; box-shadow: 0 0 14px #00FF66; }
+@keyframes sasBalayage { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* signal */
+.sas-signal { margin-top: 16px; }
+.sas-signal .sas-l { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed #3a424c; padding: 8px 0; font-size: 1.02em; }
+.sas-signal .sas-l > span:first-child { color: #8a9aa8; letter-spacing: 1px; }
+.sas-aide { margin-top: 12px; border: 1px dashed rgba(255,113,0,.4); padding: 10px 14px; color: #b9a99a; font-size: .88em; line-height: 1.55; }
+.sas-aide b { color: var(--ed-orange); font-weight: normal; }
+.sas-pied { text-align: center; margin-top: 14px; }
+
+@media (max-width: 800px) {
+    .sas-etape { grid-template-columns: 1fr; gap: 14px; }
+    .sas-titre { font-size: 1.45em; letter-spacing: 3px; }
+    .sas-visuel img.petite { max-width: 100%; }
+}
