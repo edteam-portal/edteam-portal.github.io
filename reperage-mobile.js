@@ -86,6 +86,7 @@
         dessiner(f, D);
         S.iv = setInterval(async function () {
             var m = document.getElementById('rm-feuille'); if (!m) { clearInterval(S.iv); return; }
+            if (document.hidden) return;   // onglet cache : aucune lecture
             U.vider(); var n = await donnees(true); if (n && document.getElementById('rm-feuille')) dessiner(m, n);
         }, 45000);
     }

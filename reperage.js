@@ -205,6 +205,7 @@
         // la fenetre suit le pilote : toutes les 45 s la liste et la position sont relues (sauf pendant la saisie d'un champ)
         const iv = setInterval(async () => {
             const m = document.getElementById("rp-modale"); if (!m) { clearInterval(iv); return; }
+            if (document.hidden) return;   // onglet cache : aucune lecture (la liste se rafraichit au tour suivant apres le retour)
             const a = document.activeElement; if (a && m.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
             memo = null; pos = null; const n = await charger(true), np = await maPosition();
             if (n && document.getElementById("rp-modale")) dessiner(n, np);
