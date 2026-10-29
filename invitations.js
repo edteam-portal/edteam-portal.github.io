@@ -15,7 +15,7 @@
         if (document.getElementById('edteam-inv-css')) return;
         var s = document.createElement('style'); s.id = 'edteam-inv-css';
         s.textContent = '@keyframes edteamInvClg { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 14px #FF7100, inset 0 0 8px #FF7100; } }'
-            + '#nav-bgs-factions.invite-clignote { animation: edteamInvClg 1.6s infinite; }'
+            + '#nav-bgs-factions.invite-clignote, #nav-btn-bgs.invite-clignote { animation: edteamInvClg 1.6s infinite; }'
             + '.inv-pastille { display:inline-block; font-size:.62em; letter-spacing:2px; padding:1px 6px; border:1px solid; vertical-align:middle; margin-left:8px; white-space:nowrap; }'
             + '.inv-pastille.sol { color:#ffb347; border-color:#ffb347; background:rgba(255,179,71,.08); } .inv-pastille.all { color:#3ec9ff; border-color:#3ec9ff; background:rgba(62,201,255,.08); }'
             + '.inv-av { position:relative; display:inline-flex; } .inv-av > i { position:absolute; right:-3px; bottom:-3px; width:13px; height:13px; border-radius:50%; font:bold 8px/13px sans-serif; text-align:center; font-style:normal; color:#000; z-index:3; }'
@@ -27,6 +27,7 @@
             + '#edteam-inv-overlay button { font-family:inherit; letter-spacing:3px; padding:10px 30px; margin:0 6px; cursor:pointer; background:transparent; }'
             + '#edteam-inv-overlay .ok { border:1px solid #2ecc71; color:#2ecc71; background:rgba(46,204,113,.08); } #edteam-inv-overlay .no { border:1px solid #ff4a4a; color:#ff4a4a; }'
             + '#edteam-inv-overlay .plus { border:0; color:#778; letter-spacing:2px; font-size:.8em; margin-top:18px; display:block; margin-left:auto; margin-right:auto; }'
+            + '@media (max-width:600px) { #edteam-inv-overlay .inv-carte { padding:26px 16px; } #edteam-inv-overlay .inv-nom { font-size:1.4em; letter-spacing:3px; } #edteam-inv-overlay button { margin:6px 4px; } }'
             + 'body.mode-invite #btn-journal-bgs, body.mode-invite #btn-nouvelle-campagne, body.mode-invite #btn-rapport-discord, body.mode-invite #btn-initiative, body.mode-invite #bgs-mode-ini, body.mode-invite #bgs-propositions,'
             + 'body.mode-invite #bgs-ini-titre, body.mode-invite #bgs-duo-ordres, body.mode-invite #bgs-veille, body.mode-invite #bgs-accueil-haut, body.mode-invite #bgs-titres-acc, body.mode-invite #bgs-comment,'
             + 'body.mode-invite #bgs-aide-engagement, body.mode-invite .rp-bandeau, body.mode-invite #rp-zone { display:none !important; }';
@@ -58,7 +59,7 @@
     function nbAttente(s) { return s ? (s.pilote || []).length + (s.escadron || []).length : 0; }
 
     function menu(s, independant) {
-        var lien = document.getElementById('nav-bgs-factions'); if (!lien) return;
+        var lien = document.getElementById('nav-bgs-factions') || document.getElementById('nav-btn-bgs'); if (!lien) return;   // PC ou mobile
         var attente = nbAttente(s), actives = s ? Number(s.actives) || 0 : 0;
         ecrire('edteam_invite_actif', actives > 0 ? 'true' : 'false');
         if (independant && (actives > 0 || attente > 0)) lien.style.display = 'flex';
@@ -183,6 +184,13 @@
         };
         client.__shimInvite = true;
     }
+    // MOBILE, pilote sans escadron : seuls les appels de la page Engagement sont remplaces par leur version invite, le reste du site garde ses appels normaux
+    function installerShimSouple(client) {
+        if (!client || client.__shimInvite) return;
+        var orig = client.rpc.bind(client);
+        client.rpc = function (nom, args, opts) { return orig(MAP[nom] || nom, args, opts); };
+        client.__shimInvite = true;
+    }
     function modeInvite(profil, s) { return !!(profil && profil.est_approuve && sans(profil) && s && Number(s.actives) > 0 && (s.participe || []).length); }
     function activer(client, s) { css(); document.body.classList.add('mode-invite'); installerShim(client); window.EDTEAM_INVITE = true; }
 
@@ -205,5 +213,5 @@
         return d.rpc('campagnes_acteurs').then(function (r) { window.cacheActeurs = (r && r.data && typeof r.data === 'object' && !Array.isArray(r.data)) ? r.data : {}; return window.cacheActeurs; }, function () { window.cacheActeurs = {}; return {}; });
     }
 
-    window.edteamInvitations = { rouvrir: function () { ecrire(PLUS_TARD, '', true); }, charger: charger, invalider: invalider, verifier: verifier, modeInvite: modeInvite, activer: activer, activerFusion: function (client) { css(); installerFusion(client); }, filtrerOrdres: filtrerOrdres, css: css, pastille: pastille, htmlPastille: htmlPastille, badgeAvatar: badgeAvatar, chargerActeurs: chargerActeurs, abreger: abreger };
+    window.edteamInvitations = { enAttente: function () { return nbAttente(etat); }, rappeler: function () { ecrire(PLUS_TARD, '', true); if (etat) overlay(etat, true); }, activerSouple: function (client) { css(); window.EDTEAM_INVITE = true; installerShimSouple(client); }, rouvrir: function () { ecrire(PLUS_TARD, '', true); }, charger: charger, invalider: invalider, verifier: verifier, modeInvite: modeInvite, activer: activer, activerFusion: function (client) { css(); installerFusion(client); }, filtrerOrdres: filtrerOrdres, css: css, pastille: pastille, htmlPastille: htmlPastille, badgeAvatar: badgeAvatar, chargerActeurs: chargerActeurs, abreger: abreger };
 })();

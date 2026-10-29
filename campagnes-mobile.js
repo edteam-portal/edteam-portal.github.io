@@ -144,6 +144,13 @@
         }
         return out;
     }
+    // campagne d'un AUTRE escadron (invitation) : pastille ALLIÉE · TAG, lecture seule
+    function tagAllie(c) {
+        var e = String(moi().escadron_id || '').trim().toUpperCase(), h = String(c.escadron_id || '').trim();
+        if (!h || c.synthetique || (e && e !== 'INDEPENDANT' && h.toUpperCase() === e)) return '';
+        var I = window.edteamInvitations;
+        return I ? I.htmlPastille('ALLIE', h) : '';
+    }
     function blocCampagne(g, ctx) {
         var c = g.c, cc = COUL_CAMP[c.type_campagne] || '#aaa', prio = c.priorite || 3, pk = prio === 1 ? 'c' : prio === 2 ? 'h' : 'n';
         var lignes = [], pcts = [];
@@ -161,7 +168,7 @@
         var info = c.echeance ? '⏳ jusqu\'au ' + String(c.echeance).slice(8, 10) + '/' + String(c.echeance).slice(5, 7) : '';
         return '<div class="mc-camp' + (replie ? ' rep' : '') + '" id="mcc-' + c.id + '" style="--cc:' + cc + ';">'
             + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '22 0, rgba(0,0,0,0) 70%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
-            + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
+            + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span>' + tagAllie(c) + '<span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
             + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span><span class="mc-fl">▾</span></div>'
             + (info ? '<div class="r3">' + info + '</div>' : '') + '</div>'
             + '<div class="mc-lignes">' + (lignes.join('') || '<div class="mc-vide">Aucune mission dans cette campagne.</div>') + '</div></div>';
