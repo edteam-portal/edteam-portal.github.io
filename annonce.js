@@ -431,6 +431,54 @@
             aide: 'Page Engagement · une campagne · ✉ Inviter (Amiral) · à utiliser sur PC ou tablette',
             lien: 'bgs.html',
             mobile: false
+        },
+        {
+            id: 'discussions-campagne-2026-10',
+            couleur: '#00F0FF',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'UNE DISCUSSION PAR CAMPAGNE',
+            pages: [
+                {
+                    titre: 'UN FIL DE DISCUSSION PAR CAMPAGNE',
+                    sous: 'Parlez-vous entre alliés, au même endroit',
+                    intro: 'Chaque campagne a maintenant <b>son fil de discussion</b>, ouvert à tous ceux qui y participent : l’escadron, les alliés et les invités. <b>Cherchez la bulle</b> sur la ligne de la campagne.',
+                    visuelHtml: anvDisc1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'REPÉREZ LA BULLE', d: 'Page <b>Engagement</b>, sur la ligne de chaque campagne, à côté du journal. Sur mobile : à droite du nom de la campagne.' },
+                        { n: '2', t: 'TOUCHEZ-LA', d: 'Le fil s’ouvre en plein écran. Le chiffre indique le nombre de messages.' },
+                        { n: '3', t: 'ELLE CLIGNOTE', d: 'Quand il y a du nouveau, la bulle <b>clignote en cyan</b> : quelqu’un vous a écrit.' }
+                    ]
+                },
+                {
+                    titre: 'ÉCRIVEZ, RÉPONDEZ, RÉAGISSEZ',
+                    sous: 'Simple, court, entre participants',
+                    intro: 'Un message de 280 caractères au plus. Chacun se reconnaît à sa <b>pastille</b> : Amiral, allié ou solitaire invité.',
+                    visuelHtml: anvDisc2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'ÉCRIRE', d: 'Tapez votre message en bas, puis <b>ENVOYER</b> (ou la touche Entrée). Pas de lien, pas d’image.' },
+                        { n: '2', t: 'RÉPONDRE', d: '<b>RÉPONDRE</b> sous un message : la citation s’affiche. Un <b>👍</b> pour approuver en un clic.' },
+                        { n: '3', t: 'MODÉRATION', d: 'Vous supprimez vos messages. L’Amiral de l’escadron hôte et le Directeur peuvent supprimer ceux des autres.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'ET LE JOURNAL AUSSI',
+                    sous: 'Un chiffre pour savoir s’il y a du nouveau',
+                    intro: 'Le <b>carnet</b> du journal affiche désormais le nombre de <b>nouvelles lignes</b> depuis votre dernière ouverture. Sa pastille est <b>ambrée</b>, pour ne pas la confondre avec la bulle des discussions (cyan).',
+                    visuelHtml: anvDisc3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '✓', t: 'VISIBLE DES SEULS PARTICIPANTS', d: 'L’escadron hôte, les alliés et les invités acceptés. Personne d’autre.' },
+                        { n: '✓', t: 'EFFACÉ APRÈS LA CAMPAGNE', d: 'Les messages disparaissent <b>30 jours</b> après la fin de la campagne.' },
+                        { n: '✓', t: 'SUR PC ET MOBILE', d: 'La même bulle, avec le même compteur, partout.' }
+                    ]
+                }
+            ],
+            cta: 'VOIR LES CAMPAGNES',
+            aide: 'Page Engagement · ligne d’une campagne · bouton en forme de bulle',
+            lien: 'bgs.html'
         }
     ];
 
@@ -457,6 +505,47 @@
     function anvTuile(k, t, v, s) { return '<div class="anv-ti" style="--k:' + k + '"><small>' + t + '</small><b>' + v + '</b><span>' + s + '</span></div>'; }
     // ---- visuels de l'annonce « defense d'installation » : dessines en HTML (aucune capture, aucune donnee reelle ; noms fictifs) ----
     // ---- annonce « campagnes alliees » : trois visuels dessines (noms fictifs) ----
+    // ---- annonce « discussions de campagne » : trois visuels dessines en HTML / SVG (noms fictifs, aucune donnee reelle) ----
+    var DSC_SVG = {
+        brief: '<svg viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10H3z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+        jour: '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/><path d="M3 7h2M3 12h2M3 17h2"/></svg>',
+        disc: '<svg viewBox="0 0 24 24"><path d="M4 5h12a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 16 15H9l-4 3.5V15H4a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 4 5z"/><path d="M20 9.5h.5A1.5 1.5 0 0 1 22 11v6a1.5 1.5 0 0 1-1.5 1.5H20V21l-3.5-2.5H11"/></svg>',
+        mail: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+        plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+    };
+    var DSC_CSS = '<style>.dsc-v .ic{position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #444;border-radius:4px;color:#bbb;background:rgba(0,0,0,.4)}'
+        + '.dsc-v .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.dsc-v .ic.dim{opacity:.4}'
+        + '.dsc-v .ic.cible{border-color:#00F0FF;color:#00F0FF;animation:dscPulse 1.6s ease-in-out infinite}.dsc-v .bd{position:absolute;top:-8px;right:-8px;min-width:17px;height:17px;border-radius:9px;background:#667;color:#000;font-size:11px;line-height:17px;text-align:center;font-weight:bold;padding:0 3px}.dsc-v .bd.c{background:#00F0FF}.dsc-v .bd.a{background:#FFB000}.dsc-v .ic.ambre{border-color:#FFB000;color:#FFB000;animation:dscPulseA 1.6s ease-in-out infinite}@keyframes dscPulseA{0%,100%{box-shadow:0 0 0 0 rgba(255,176,0,.7)}50%{box-shadow:0 0 0 9px rgba(255,176,0,0)}}'
+        + '@keyframes dscPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,240,255,.7)}50%{box-shadow:0 0 0 9px rgba(0,240,255,0)}}</style>';
+    function dscIc(cl, svg, bd, bdc) { return '<span class="ic ' + cl + '">' + svg + (bd ? '<span class="bd' + (bdc === 'a' ? ' a' : bdc ? ' c' : '') + '">' + bd + '</span>' : '') + '</span>'; }
+    function anvDisc1() {
+        return DSC_CSS + '<div class="dsc-v" style="max-width:640px;margin:16px auto 0;text-align:left;">'
+            + '<div style="border:1px solid #FF4a4a99;border-left:4px solid #FF4a4a;background:rgba(40,8,8,.5);padding:12px 14px;">'
+            + '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span style="color:#FF4a4a;font-size:1.15em;letter-spacing:3px;font-weight:bold;">ATTAQUE</span><span style="color:#cfd8dc;letter-spacing:1.5px;font-size:.85em;">OFFENSIVE DU PRINTEMPS</span><span style="flex:1"></span>'
+            + '<span style="display:inline-flex;gap:6px;">' + dscIc('dim', DSC_SVG.brief) + dscIc('dim', DSC_SVG.jour) + dscIc('cible', DSC_SVG.disc, '5', true) + dscIc('dim', DSC_SVG.mail) + dscIc('dim', DSC_SVG.plus) + '</span></div>'
+            + '<div style="color:#667;font-size:.72em;margin-top:8px;">BGS #42 · HAUSSE · TAU CETI SUD</div></div>'
+            + '<div style="text-align:right;margin:8px 70px 0 0;color:#00F0FF;font-size:.8em;letter-spacing:2px;">▲ ICI : LES DISCUSSIONS</div></div>';
+    }
+    function anvDisc2() {
+        var pa = function (c, t) { return '<span style="font-size:.62em;border:1px solid ' + c + ';color:' + c + ';padding:0 6px;margin-left:6px;letter-spacing:1px;">' + t + '</span>'; };
+        var av = function (t, c) { return '<span style="flex:none;width:28px;height:28px;border-radius:50%;background:' + c + '22;border:1px solid ' + c + ';color:#fff;text-align:center;line-height:26px;font-size:.7em;">' + t + '</span>'; };
+        var msg = function (a, nom, p, txt, extra) { return '<div style="display:flex;gap:10px;margin:10px 0;text-align:left;">' + a + '<div><div style="color:#fff;font-size:.8em;letter-spacing:1px;">' + nom + p + '</div>' + (extra || '') + '<div style="color:#ddd;font-size:.85em;line-height:1.45;margin-top:2px;">' + txt + '</div></div></div>'; };
+        return '<div style="max-width:560px;margin:16px auto 0;border:1px solid #00F0FF66;background:rgba(0,20,26,.6);padding:10px 16px;">'
+            + '<div style="color:#00F0FF;font-size:.7em;letter-spacing:2px;border-bottom:1px dashed #00F0FF44;padding-bottom:6px;">DISCUSSION · OFFENSIVE DU PRINTEMPS</div>'
+            + msg(av('NR', '#FF7100'), 'CMDR NOVA RIVEN', pa('#00FF66', 'AMIRAL'), 'Bienvenue aux alliés ! On vise la zone de conflit après le tick.')
+            + msg(av('LV', '#FFB000'), 'CMDR LYRA VESK', pa('#FFB000', 'SOLITAIRE'), 'Merci pour l’invitation. Vous jouez vers quelle heure ?', '<div style="border-left:2px solid #2a4650;padding-left:8px;color:#6c8;font-size:.7em;margin-top:2px;">↳ CMDR NOVA RIVEN : Bienvenue aux alliés !</div>')
+            + msg(av('MO', '#4DA3FF'), 'CMDR MORRO', pa('#4DA3FF', 'ALLIÉ · NCR'), 'Nous sommes quatre à venir ce soir. 👍 2')
+            + '<div style="display:flex;gap:8px;margin-top:8px;"><span style="flex:1;border:1px solid #1f4650;color:#556;padding:8px 10px;font-size:.8em;text-align:left;">Écrire à toute la campagne…</span><span style="border:1px solid #00F0FF;color:#00F0FF;padding:8px 14px;font-size:.78em;letter-spacing:1px;">ENVOYER</span></div></div>';
+    }
+    function anvDisc3() {
+        var ligne = function (ic, txt) { return '<div style="display:flex;align-items:center;gap:14px;margin:12px 0;text-align:left;">' + ic + '<span style="color:#aab;font-size:.85em;">' + txt + '</span></div>'; };
+        return DSC_CSS + '<div class="dsc-v" style="max-width:560px;margin:16px auto 0;border:1px solid #00F0FF55;background:rgba(0,20,26,.5);padding:8px 18px;">'
+            + ligne(dscIc('', DSC_SVG.disc), 'Aucun message : la bulle est vide.')
+            + ligne(dscIc('', DSC_SVG.disc, '12'), '12 messages, tous lus : pastille grise.')
+            + ligne(dscIc('cible', DSC_SVG.disc, '12', true), '<b style="color:#00F0FF">Du nouveau</b> : la bulle clignote en cyan.')
+            + ligne(dscIc('ambre', DSC_SVG.jour, '7', 'a'), '<b style="color:#FFB000">Le journal aussi</b>, en ambre : 7 nouvelles lignes depuis votre dernière ouverture.')
+            + '</div>';
+    }
     function anvAl1() {
         var pastille = function (c, t) { return '<span class="anval-pa" style="--k:' + c + '">' + t + '</span>'; };
         var av = function (t, c) { return '<span class="anval-av" style="--k:' + (c || '#FF7100') + '">' + t + '</span>'; };

@@ -169,7 +169,7 @@
         return '<div class="mc-camp' + (replie ? ' rep' : '') + '" id="mcc-' + c.id + '" style="--cc:' + cc + ';">'
             + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '22 0, rgba(0,0,0,0) 70%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
             + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span>' + tagAllie(c) + '<span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
-            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span><span class="mc-fl">▾</span></div>'
+            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span>' + (window.edteamDiscussion ? '<button type="button" class="mc-disc" data-disc="' + c.id + '" aria-label="Discussions de la campagne" onclick="event.stopPropagation(); edteamDiscussion.ouvrir(' + c.id + ')">' + window.edteamDiscussion.icone + '<span class="dsc-b"></span></button>' : '') + '<span class="mc-fl">▾</span></div>'
             + (info ? '<div class="r3">' + info + '</div>' : '') + '</div>'
             + '<div class="mc-lignes">' + (lignes.join('') || '<div class="mc-vide">Aucune mission dans cette campagne.</div>') + '</div></div>';
     }
@@ -242,6 +242,7 @@
             var ordres = [], camps = {}; API.idx = {};
             ctx.groupes.forEach(function (g) { camps[g.c.id] = g.c; g.items.forEach(function (x) { ordres.push(x.o); API.idx[x.o.id] = x.index; }); });
             var bande = window.EdteamUtile && window.cacheQuotasBgs ? window.EdteamUtile.legende() : '';
+            if (window.edteamDiscussion) setTimeout(function () { window.edteamDiscussion.appliquer(); window.edteamDiscussion.maj(false); }, 0);
             return bande + ctx.groupes.filter(function (g) { return g.items.length || API.nb(g.c.id); }).map(function (g) { return blocCampagne(g, ctx); }).join('');
         },
         ouvrirOrdre: function (id) { if (API.idx && API.idx[id] != null && typeof window.ouvrirModalOrdre === 'function') window.ouvrirModalOrdre(API.idx[id], COUL_BGS); },

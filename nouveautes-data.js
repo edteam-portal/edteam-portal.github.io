@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-plugin-2-51", date: "2026-10-30T14:06:02Z", type: "AMELIORE",
+        titre: "Plugin SYS.EDTEAM 2.51 : à jour ?",
+        texte: "La version 2.51 du plugin est disponible. Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Le numéro de version s’affiche en haut du plugin dans EDMC : vérifiez que vous êtes bien en 2.51. Un plugin à jour, c’est la garantie que tout fonctionne comme prévu sur le site.",
+        important: true,
+        action: "Relancez EDMC deux fois pour passer en 2.51"
+    },
+    {
+        id: "2026-10-discussions-campagne", date: "2026-10-30T13:54:45Z", type: "NOUVEAU",
+        titre: "Campagnes : une discussion par campagne",
+        texte: "Chaque campagne a son fil de discussion, ouvert à tous ses participants (escadron, alliés, invités). Nouveau bouton en forme de bulle sur la ligne de la campagne, avec le nombre de messages ; il clignote quand il y a du nouveau. Messages courts, sans lien, avec réponses et 👍. Visible des seuls participants, effacé 30 jours après la fin de la campagne. Les icônes Briefing (mégaphone) et Journal (carnet) changent aussi."
+    },
+    {
         id: "2026-10-fil-bienvenue-recrues", date: "2026-10-30T12:51:52Z", type: "NOUVEAU",
         titre: "Fil : bienvenue aux nouvelles recrues",
         texte: "Quand un pilote rejoint le réseau, le fil de l’escadron l’annonce : « Bienvenue dans le réseau » pour tout le monde, « Nouvelle recrue » quand il rejoint votre escadron. Un bouton permet de lui souhaiter la bienvenue en un clic. Les icônes du menu ont aussi été uniformisées."

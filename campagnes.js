@@ -40,6 +40,7 @@
             '.camp-ic { background:transparent; border:1px solid #444; color:#bbb; width:26px; height:26px; padding:0; font-size:.85em; line-height:1; cursor:pointer; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; }',
             '.camp-ic:hover { border-color:#00F0FF; color:#00F0FF; background:rgba(0,240,255,.08); } .camp-ic.rouge:hover { border-color:#FF3333; color:#FF3333; background:rgba(255,51,51,.08); }',
             '.camp-ics { display:inline-flex; gap:4px; }',
+            '.camp-ic svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }',
             '#modal-edition-mission .cmd-pills { display:flex; gap:8px; flex-wrap:wrap; }',
             '.camp-ligne { position:relative; overflow:hidden; display:grid; grid-template-columns:max-content minmax(0,1fr) auto 20px auto; gap:12px; align-items:center; padding:8px 6px; border-top:1px solid rgba(255,255,255,.22); cursor:pointer; transition:filter .2s; white-space:nowrap; }',
             '.camp-ligne:hover { filter:brightness(1.3); }',
@@ -113,6 +114,12 @@
 
     // Une ligne par mission. Chaque mission : { tag, couleur, texte (html), pct, barre (texte), veille, clic (js) }
     // bouton d'action en icone (modifier, cloturer, supprimer, ajouter) : titre au survol
+    var SV_BRIEFING = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4h3l7 4V6L6 10H3z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+    var SV_JOURNAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/><path d="M3 7h2M3 12h2M3 17h2"/></svg>';
+    // bouton « Discussions » : la pastille (nombre de messages) et le clignotement des non lus sont poses par campagne-discussion.js
+    // bouton « Journal » : la pastille (nouvelles lignes depuis la derniere ouverture) est posee par campagne-discussion.js
+    function icJrn(id) { return '<button type="button" class="camp-ic camp-disc" data-jrn="' + id + '" title="Journal de cette campagne" onclick="event.stopPropagation(); edteamCampagnes.journal(' + id + ')">' + SV_JOURNAL + '<span class="dsc-b"></span></button>'; }
+    function icDisc(id) { return '<button type="button" class="camp-ic camp-disc" data-disc="' + id + '" title="Discussions de la campagne" onclick="event.stopPropagation(); edteamDiscussion.ouvrir(' + id + ')">' + (window.edteamDiscussion ? window.edteamDiscussion.icone : '') + '<span class="dsc-b"></span></button>'; }
     function ic(titre, glyphe, js, rouge) { return '<button type="button" class="camp-ic' + (rouge ? ' rouge' : '') + '" title="' + esc(titre) + '" onclick="event.stopPropagation(); ' + js + '">' + glyphe + '</button>'; }
     // fond d'une ligne ou d'un entete : rempli = effort de l'escadron ; la part du pilote est une lueur neon (element .camp-neon) de la meme couleur
     function fond(col, pct) {
@@ -313,7 +320,7 @@
             var info = c.echeance ? '⏳ jusqu\'au ' + dateCourte(c.echeance) : '';
             var tagAlliee = alliee ? '<span class="inv-pastille all" title="Campagne de ' + esc(c.escadron_id) + ' : vous participez, sans la commander">ALLIÉE · ' + esc(window.edteamInvitations ? window.edteamInvitations.abreger(c.escadron_id) : String(c.escadron_id).slice(0, 3)) + '</span>' : '';
             var bulle = '';   // (le message de la campagne s'ouvre maintenant dans une fenetre : icone 💬 avant celle du journal)
-            var actions = c.synthetique ? '' : '<span class="camp-ics">' + (c.briefing ? ic('Message de la campagne', '💬', 'edteamCampagnes.briefing(' + c.id + ')') : '') + ic('Journal de cette campagne', '📖', 'edteamCampagnes.journal(' + c.id + ')') + (amiral ? ic('Inviter des pilotes ou des escadrons', '✉', 'edteamCampagnes.inviter(' + c.id + ')') : '') + (cmd ? ic('Ajouter une mission à cette campagne', '＋', 'edteamCampagnes.ajouter(' + c.id + ')') : '')
+            var actions = c.synthetique ? '' : '<span class="camp-ics">' + (c.briefing ? ic('Message de la campagne', SV_BRIEFING, 'edteamCampagnes.briefing(' + c.id + ')') : '') + icJrn(c.id) + icDisc(c.id) + (amiral ? ic('Inviter des pilotes ou des escadrons', '✉', 'edteamCampagnes.inviter(' + c.id + ')') : '') + (cmd ? ic('Ajouter une mission à cette campagne', '＋', 'edteamCampagnes.ajouter(' + c.id + ')') : '')
                 + (amiral ? ic('Modifier la campagne', '✎', 'edteamCampagnes.ouvrir(' + c.id + ')') + ic('Clôturer la campagne et ses missions', '📦', 'edteamCampagnes.cloturer(' + c.id + ')') + ic('Supprimer la campagne (seulement si elle est vide)', '🗑', 'edteamCampagnes.supprimer(' + c.id + ')', true) : '') + '</span>';
             return (alliee && !window.EDTEAM_INVITE && ci === camps.findIndex(estAlliee) ? '<div class="camp-titre" style="color:#3ec9ff; border-bottom-color:rgba(62,201,255,.4); margin-top:10px;">&gt; CAMPAGNES ALLIÉES <small>invité par un autre escadron · vous participez, sans les commander</small></div>' : '')
                 + '<div class="bloc camp-carte' + (alliee ? ' camp-alliee' : '') + (repliees.indexOf(String(c.id)) >= 0 ? ' repliee' : '') + '" id="camp-' + c.id + '" style="--wa:' + (cmd ? '116px' : '0px') + '; --bdc:' + col + 'bf; --accent:' + col + '; --teinte:' + col + '12; --lueur:' + col + '14; border:1px solid ' + col + '99; box-shadow: inset 4px 0 0 ' + col + ', 0 0 18px ' + col + '18;">'
@@ -331,6 +338,7 @@
         brancherGlisser(zone);
         brancherInfobulles(zone);
         reperage();
+        if (window.edteamDiscussion) { window.edteamDiscussion.appliquer(); window.edteamDiscussion.maj(false); }
     }
     // bandeau « Renseignement » (mission de reperage, script SQL 121) : visible de tous les pilotes d'un escadron, charge a la demande (reperage.js)
     function reperage() {
@@ -593,7 +601,7 @@
             document.getElementById('cb-texte').textContent = c.briefing;
             if (typeof ouvrirModal === 'function') ouvrirModal('modal-camp-briefing'); else document.getElementById('modal-camp-briefing').style.display = 'flex';
         },
-        journal: function (id) { if (typeof window.ouvrirJournalCampagne === 'function') window.ouvrirJournalCampagne(id); },
+        journal: function (id) { if (window.edteamDiscussion) window.edteamDiscussion.journalVu(id); if (typeof window.ouvrirJournalCampagne === 'function') window.ouvrirJournalCampagne(id); },
         inviter: function (id) { this.ouvrir(id); var q = document.getElementById('camp-inv-q'); if (q) setTimeout(function () { q.focus(); q.scrollIntoView({ block: 'center' }); }, 150); },
         chercherInvites: chercherInvites, ajouterInvite: ajouterInvite, retirerInvite: retirerInvite,
         choisir: function (genre, v) { if (typeof sonClic === 'function') sonClic(); if (genre === 'type') typeChoisi = v; else prioChoisie = v; dessinerChoix(); },
