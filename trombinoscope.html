@@ -237,6 +237,14 @@
             return P.liste.filter(p => (!P.esc || nomEsc(p) === P.esc) && (!P.statut || statut(p) === P.statut) && (!P.sansPhoto || !p.chemin)
                 && (!P.nouv || Date.now() - Date.parse(p.cree_le) < 7 * JOUR) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
         }
+        // VERSION DU PLUGIN (script SQL 177) : reference = la plus haute version vue chez les pilotes. Vert = a jour, orange = en retard, rouge « — » = n'a jamais signale sa version (plugin d'avant 2.51 : pas encore redemarre apres la mise a jour).
+        const cmpVer = (a, b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
+        const versionRef = () => P.liste.reduce((m, p) => p.plugin_version && cmpVer(p.plugin_version, m) > 0 ? p.plugin_version : m, '0');
+        function celluleVersion(p, ref) {
+            if (!p.plugin_version) return '<td class="pl-c ' + (p.est_approuve ? 'r' : 'g') + '" title="Aucune version signalée : plugin d\'avant la 2.51 ou plugin non lancé depuis la mise à jour.">—</td>';
+            const ok = cmpVer(p.plugin_version, ref) >= 0;
+            return '<td class="pl-c ' + (ok ? 'v' : 'o') + '" title="Vu ' + esc(ilYa(p.plugin_vu_le)) + '">' + esc(p.plugin_version) + (ok ? '' : ' (en retard)') + '</td>';
+        }
         // DIAGNOSTIC : une case par fonction (date de la derniere donnee recue). Rouge = jamais recue, orange = plus de 14 j.
         // « Suspect » = pilote approuve qui envoie des donnees (14 j) mais dont une fonction courante (BGS, budget, Powerplay, hangar) n'est JAMAIS remontee.
         const DIAG = [['BGS', 'd_bgs', 1], ['COLONISATION', 'd_colo', 0], ['BUDGET', 'd_budget', 1], ['POWERPLAY', 'd_pp', 1], ['FIL', 'd_journal', 0], ['HANGAR', 'd_hangar', 1], ['COMBAT', 'd_combat', 0]];
@@ -245,14 +253,15 @@
         const arrete = p => p.est_approuve && (!p.derniere_activite || Date.now() - Date.parse(p.derniere_activite) >= 14 * JOUR);
         function tableDiagnostic(l) {
             if (l.length && !('d_bgs' in l[0])) return '<div class="tb-vide">Le diagnostic demande le script SQL 176 (pas encore lancé).</div>';
+            const ref = versionRef();
             const ordre = p => suspect(p) ? 0 : arrete(p) ? 1 : 2;
             const lignes = l.filter(p => p.est_approuve).sort((a, b) => ordre(a) - ordre(b) || (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0)).map(p => {
-                const cases = DIAG.map(([, k, c]) => { const e = etatCase(p, k); return '<td class="pl-c ' + (e === 'n' ? (c ? 'r' : 'g') : e === 'o' ? 'o' : 'v') + '">' + (e === 'n' ? '—' : esc(ilYa(p[k]))) + '</td>'; }).join('');
+                const cases = DIAG.map(([, k, c]) => { const e = etatCase(p, k); return '<td class="pl-c ' + (e === 'n' ? (c ? 'r' : 'g') : e === 'o' ? 'o' : 'v') + '">' + (e === 'n' ? '—' : esc(ilYa(p[k]))) + '</td>'; }).join('') + celluleVersion(p, ref);
                 const v = suspect(p) ? '<span class="pl-s j">SUSPECT</span>' : arrete(p) ? '<span class="pl-s d">ARRÊTÉ</span>' : '<span class="pl-s v">OK</span>';
                 return '<tr><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td>' + cases + '<td>' + v + '</td></tr>';
-            }).join('') || '<tr><td colspan="10" class="tb-vide">Aucun pilote approuvé ne correspond.</td></tr>';
-            return '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th>' + DIAG.map(([t]) => '<th>' + t + '</th>').join('') + '<th>DIAGNOSTIC</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
-                + '<div class="rp-note">Chaque case = date de la dernière donnée reçue pour cette fonction. <b style="color:#FF3333">—</b> rouge : jamais reçue alors que le pilote envoie d\'autres données (bug possible ou ancienne version du plugin). Orange : plus de 14 jours. « Suspect » = au moins une fonction courante (BGS, budget, Powerplay, hangar) jamais remontée ; « Arrêté » = plus aucune donnée depuis 14 jours (ne joue plus, ou plugin éteint). Colonisation, fil et combat dépendent de ce que le pilote fait : jamais en rouge. Un pilote qui n\'a simplement pas joué à une fonction n\'est pas forcément un bug.</div>';
+            }).join('') || '<tr><td colspan="11" class="tb-vide">Aucun pilote approuvé ne correspond.</td></tr>';
+            return '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th>' + DIAG.map(([t]) => '<th>' + t + '</th>').join('') + '<th>PLUGIN</th><th>DIAGNOSTIC</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
+                + '<div class="rp-note">Chaque case = date de la dernière donnée reçue pour cette fonction. <b style="color:#FF3333">—</b> rouge : jamais reçue alors que le pilote envoie d\'autres données (bug possible ou ancienne version du plugin). Orange : plus de 14 jours. « Suspect » = au moins une fonction courante (BGS, budget, Powerplay, hangar) jamais remontée ; « Arrêté » = plus aucune donnée depuis 14 jours (ne joue plus, ou plugin éteint). Colonisation, fil et combat dépendent de ce que le pilote fait : jamais en rouge. Colonne PLUGIN : version signalée par le plugin (vert = à jour, orange = en retard, rouge « — » = jamais signalée : ancien plugin, ou EDMC pas redémarré depuis la mise à jour). Un pilote qui n\'a simplement pas joué à une fonction n\'est pas forcément un bug.</div>';
         }
         function dessinerPilotes(garderSaisie) {
             const zone = document.getElementById('tb-pilotes'); if (!zone) return;
@@ -261,19 +270,20 @@
             const nNouv = P.liste.filter(p => Date.now() - Date.parse(p.cree_le) < 7 * JOUR).length, nSans = P.liste.filter(p => !p.chemin).length;
             const l = vuePilotes().sort((a, b) => (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0));
             const puce = (on, clic, txt) => '<span class="tb-puce' + (on ? ' on' : '') + '" onclick="' + clic + '">' + txt + '</span>';
+            const ref = versionRef();
             const lignes = l.map(p => {
                 const s = STATUTS[statut(p)];
                 return '<tr><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ROLES[role(p)]) + '</td><td>' + esc(dateFr(p.cree_le).slice(0, 5)) + '</td><td>'
-                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td><td>'
+                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td>' + celluleVersion(p, ref) + '<td>'
                     + '<button class="tb-btn pl-bt" ' + (p.chemin ? 'onclick="ouvrirAvatar(\'' + esc(p.user_id) + '\')"' : 'disabled') + '>AVATAR' + (p.chemin ? '' : ' (AUCUN)') + '</button></td></tr>';
-            }).join('') || '<tr><td colspan="8" class="tb-vide">Aucun pilote ne correspond à ces filtres.</td></tr>';
+            }).join('') || '<tr><td colspan="9" class="tb-vide">Aucun pilote ne correspond à ces filtres.</td></tr>';
             zone.innerHTML = '<div class="tb-tete"><h2>&gt; PILOTES <small>VUE DU DIRECTEUR · TOUS LES ESCADRONS</small></h2><div class="tb-outils">'
                 + '<input type="search" id="tb-q" placeholder="Rechercher un pilote…" style="width: 210px;" value="' + esc(P.q) + '" oninput="P.q = this.value; dessinerPilotes(true)">'
                 + '<select onchange="P.esc = this.value; dessinerPilotes()"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + esc(k) + '"' + (P.esc === k ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select></div></div>'
                 + '<div class="tb-puces">' + puce(!P.diag, 'P.diag = false; dessinerPilotes()', 'VUE : LISTE') + puce(P.diag, 'P.diag = true; dessinerPilotes()', 'VUE : DIAGNOSTIC (' + P.liste.filter(suspect).length + ' suspect' + (P.liste.filter(suspect).length > 1 ? 's' : '') + ')') + '<span style="width: 14px;"></span>' + puce(!P.statut && !P.sansPhoto && !P.nouv, 'P.statut = \'\'; P.sansPhoto = false; P.nouv = false; dessinerPilotes()', 'TOUS (' + P.liste.length + ')')
                 + Object.keys(STATUTS).map(k => puce(P.statut === k, 'P.statut = P.statut === \'' + k + '\' ? \'\' : \'' + k + '\'; dessinerPilotes()', STATUTS[k][0] + ' (' + (cnt[k] || 0) + ')')).join('')
                 + puce(P.nouv, 'P.nouv = !P.nouv; dessinerPilotes()', 'NOUVEAUX 7 J (' + nNouv + ')') + puce(P.sansPhoto, 'P.sansPhoto = !P.sansPhoto; dessinerPilotes()', 'SANS PHOTO (' + nSans + ')') + '</div>'
-                + (P.diag ? tableDiagnostic(l) : '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th><th>RÔLE</th><th>INSCRIPTION</th><th>DERNIÈRE ACTIVITÉ</th><th>DERNIÈRE CONNEXION</th><th>STATUT</th><th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>')
+                + (P.diag ? tableDiagnostic(l) : '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th><th>RÔLE</th><th>INSCRIPTION</th><th>DERNIÈRE ACTIVITÉ</th><th>DERNIÈRE CONNEXION</th><th>STATUT</th><th>PLUGIN</th><th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>')
                 + (P.diag ? '' : '<div class="rp-note">« Activité » = dernières données envoyées (BGS, colonisation, budget, Powerplay, fil). « Connexion » = dernière ouverture de session par mot de passe (sous-estimée). Le bouton AVATAR ouvre la photo du pilote pour la contrôler et la retirer si elle n\'est pas adaptée.</div>');
             if (garderSaisie) { const el = document.getElementById('tb-q'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
         }
