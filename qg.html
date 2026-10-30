@@ -883,6 +883,7 @@
                 if (tagsEscadrons.length === 0) throw new Error("Aucun escadron actif n'a été détecté parmi les pilotes.");
 
                 let compteSucces = 0;
+                const echecsGazette = [];
 
                 // 3. L'IA va traiter chaque escadron un par un
                 for (const tagActuel of tagsEscadrons) {
@@ -968,7 +969,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         body: { prompt: prompt }
                     });
 
-                    if (aiError) throw new Error("Échec de la communication avec le serveur IA.");
+                    if (aiError) { console.error('Gazette ' + tagActuel + ' : IA indisponible', aiError); echecsGazette.push(tagActuel); continue; }   // on passe a l'escadron suivant
 
                     if (aiData && aiData.candidates) {
                         let fullText = aiData.candidates[0].content.parts[0].text.trim().replace(/^```html\n?/, '').replace(/```$/, '').trim();
@@ -978,20 +979,23 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                             const titre = fullText.substring(0, firstLineBreak).replace(/[\*#]/g, '').trim();
                             const htmlContent = fullText.substring(firstLineBreak).trim();
 
-                            await supabaseApp.from('gazette_hebdo').insert([{
+                            const { error: erreurInsertion } = await supabaseApp.from('gazette_hebdo').insert([{
                                 semaine_id: currentWeekId,
                                 escadron_id: tagActuel,
                                 titre: titre,
                                 contenu: htmlContent
                             }]);
-                            
-                            // NOUVEAU : On annonce la création de l'EDNEWS dans le journal de l'escadron
-                            await window.enregistrerJournalActivite(
-                                'EDNEWS ESCADRON', 
-                                `Publication d'une nouvelle édition : ${titre}`, 
-                                'var(--ed-blue)'
-                            );
-                            
+                            if (erreurInsertion) { console.error('Gazette ' + tagActuel + ' : enregistrement refuse', erreurInsertion); echecsGazette.push(tagActuel); continue; }
+
+                            // On annonce l'EDNEWS dans le fil de l'escadron, SEULEMENT si l'edition est bien enregistree et si c'est celui du Directeur (le fil ecrit toujours dans l'escadron de celui qui clique)
+                            if (String(tagActuel).toUpperCase() === String(profilCommandant.escadron_id || '').toUpperCase()) {
+                                await window.enregistrerJournalActivite(
+                                    'EDNEWS ESCADRON',
+                                    `Publication d'une nouvelle édition : ${titre}`,
+                                    'var(--ed-blue)'
+                                );
+                            }
+
                             compteSucces++;
                         }
                     }
@@ -1001,13 +1005,13 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 }
 
                 if (compteSucces > 0) {
-                    afficherAlerte("ÉDITIONS PUBLIÉES", `Mission accomplie Directeur. ${compteSucces} journaux d'escadron ont été imprimés et transmis sur le réseau.`, "#00FF66");
+                    afficherAlerte("ÉDITIONS PUBLIÉES", `Mission accomplie Directeur. ${compteSucces} journaux d'escadron ont été imprimés et transmis sur le réseau.${echecsGazette.length ? " Échec pour : " + echecsGazette.join(", ") + "." : ""}`, "#00FF66");
                     // Charger la Gazette dès le démarrage
                 chargerGazette(true);
                 // Charger le Flux holographique
                 if (typeof window.chargerFluxActivite === 'function') window.chargerFluxActivite(true);
             } else {
-                    afficherAlerte("TERMINÉ", "Aucune nouvelle gazette à imprimer (soit elles existent déjà, soit aucun escadron n'est actif).", "var(--ed-blue)");
+                    afficherAlerte(echecsGazette.length ? "ÉDITIONS NON PUBLIÉES" : "TERMINÉ", echecsGazette.length ? "L'IA n'a pas répondu ou l'enregistrement a été refusé pour : " + echecsGazette.join(", ") + ". Réessayez dans quelques minutes (la génération automatique du jeudi réessaie aussi)." : "Aucune nouvelle gazette à imprimer (soit elles existent déjà, soit aucun escadron n'est actif).", echecsGazette.length ? "#FF3333" : "var(--ed-blue)");
                 }
 
             } catch(e) {
