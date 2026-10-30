@@ -479,6 +479,54 @@
             cta: 'VOIR LES CAMPAGNES',
             aide: 'Page Engagement · ligne d’une campagne · bouton en forme de bulle',
             lien: 'bgs.html'
+        },
+        {
+            id: 'edteam-news-2026-10',
+            couleur: '#00F0FF',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'EDTEAM NEWS : LE JOURNAL DE VOTRE ESCADRON',
+            pages: [
+                {
+                    titre: 'UN VRAI JOURNAL, CHAQUE JEUDI',
+                    sous: 'EDNews fait peau neuve',
+                    intro: 'Chaque semaine, votre escadron reçoit <b>son journal</b> : une « une », des chiffres exacts, des héros, les résultats de vos guerres. Plus qu’un texte : une vraie édition, avec <b>vos avatars</b>.',
+                    visuelHtml: anvNw1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'CHAQUE JEUDI', d: 'Une nouvelle édition paraît après le relevé de la semaine. Un badge rouge vous prévient.' },
+                        { n: '2', t: 'OUVREZ EDNEWS', d: 'Le bouton <b>EDNEWS</b> : au QG, dans la carte de votre faction ; sur mobile, sous le logo de l’escadron.' },
+                        { n: '3', t: 'DES CHIFFRES SÛRS', d: 'Tous les chiffres viennent des relevés de l’escadron. Le journal ne les invente pas.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'HUIT RUBRIQUES À LIRE',
+                    sous: 'Tout ce qui a compté cette semaine',
+                    intro: 'Héros de la semaine (le <b>Pilier</b> et l’<b>Élan Powerplay</b>), résultats des guerres, participation aux campagnes, tableau d’honneur, nouveaux pilotes, distinctions, brèves et agenda.',
+                    visuelHtml: anvNw2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '★', t: 'LES HÉROS', d: 'Le pilier de l’effort BGS et l’Élan Powerplay, avec leur avatar.' },
+                        { n: '⚔', t: 'LES GUERRES', d: 'Victoires, défaites et conflits en cours, avec les scores du jeu.' },
+                        { n: '◈', t: 'LES CAMPAGNES', d: 'Qui a participé, avec les avatars des pilotes et des invités.' }
+                    ]
+                },
+                {
+                    titre: 'LE KIOSQUE DES ÉDITIONS',
+                    sous: 'Rien ne se perd',
+                    intro: 'Toutes les éditions restent au <b>kiosque</b>, avec leur couverture. Passez de l’une à l’autre avec les flèches. Les anciennes éditions restent lisibles.',
+                    visuelHtml: anvNw3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'LE KIOSQUE', d: 'Une couverture par édition, la dernière mise en avant.' },
+                        { n: '2', t: 'LA LECTURE', d: 'En grand sur PC, en plein écran sur mobile. Les blocs défilent s’il y a beaucoup à lire.' },
+                        { n: '3', t: 'AUTOMATIQUE', d: 'Rien à faire : l’édition paraît toute seule chaque semaine.' }
+                    ]
+                }
+            ],
+            cta: 'LIRE LA DERNIÈRE ÉDITION',
+            aide: 'QG · carte de votre faction · bouton EDNEWS (sur mobile : sous le logo de l’escadron)',
+            lien: 'qg.html'
         }
     ];
 
@@ -545,6 +593,32 @@
             + ligne(dscIc('cible', DSC_SVG.disc, '12', true), '<b style="color:#00F0FF">Du nouveau</b> : la bulle clignote en cyan.')
             + ligne(dscIc('ambre', DSC_SVG.jour, '7', 'a'), '<b style="color:#FFB000">Le journal aussi</b>, en ambre : 7 nouvelles lignes depuis votre dernière ouverture.')
             + '</div>';
+    }
+    // ---- annonce « EDTEAM News » : trois visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
+    var NWS_CSS = '<style>.nw{max-width:640px;margin:16px auto 0;text-align:left}.nw .une{border:1px solid #00F0FF55;background:linear-gradient(180deg,rgba(0,40,52,.55),rgba(3,8,12,.9));padding:12px 14px}'
+        + '.nw .mt{text-align:center;font:700 1.7em/1 Rajdhani,Arial Narrow,sans-serif;letter-spacing:9px;color:#fff;border-top:3px double #00F0FF;border-bottom:1px solid #00F0FF;padding:6px 0 5px;text-shadow:0 0 14px rgba(0,240,255,.5)}.nw .mt em{font-style:normal;color:#00F0FF}'
+        + '.nw .hd{font:700 1.25em/1.1 Rajdhani,Arial Narrow,sans-serif;color:#fff;text-transform:uppercase;margin:10px 0 6px}.nw .tx{font:.8em/1.5 Georgia,serif;color:#b9c7cc}'
+        + '.nw .tl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.nw .tl div{border:1px solid #16303a;border-left:3px solid var(--k);padding:5px 8px;background:#091018}.nw .tl small{display:block;color:#6f8590;font-size:.52em;letter-spacing:2px}.nw .tl b{color:#fff;font:700 1.25em Rajdhani,sans-serif}'
+        + '.nw .hx{display:inline-flex;align-items:center;justify-content:center;width:34px;height:38px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(135deg,var(--c),#111);color:#fff;font:700 .8em Rajdhani,sans-serif}'
+        + '.nw .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #FF3333;background:rgba(255,51,51,.1);padding:7px 12px;color:#fff;animation:nwp 1.6s ease-in-out infinite}.nw .btn b{color:#00F0FF;letter-spacing:2px;font-size:.8em}.nw .btn small{display:block;color:#aaa;font-size:.55em}@keyframes nwp{50%{box-shadow:0 0 18px rgba(255,51,51,.7)}}'
+        + '.nw .chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.nw .chip{border:1px solid #16303a;border-top:3px solid var(--k);background:#091018;padding:9px 8px;text-align:center}.nw .chip i{display:block;font-style:normal;font-size:1.5em;color:var(--k);margin-bottom:3px}.nw .chip b{display:block;color:#fff;font-size:.6em;letter-spacing:2px;font-weight:normal}'
+        + '.nw .cv{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px}.nw .cv>div{border:1px solid #16303a;background:#091018;padding:8px}.nw .cv>div:first-child{border-color:#FF7100}.nw .cv .m{border:1px solid #1d3540;padding:6px;min-height:92px;background:linear-gradient(180deg,#0b1a24,#060b10)}.nw .cv .m b{display:block;text-align:center;font:700 .75em Rajdhani,sans-serif;letter-spacing:4px;color:#fff;border-bottom:2px solid #00F0FF;padding-bottom:3px}.nw .cv .m span{display:block;font:700 .75em/1.15 Rajdhani,sans-serif;color:#fff;text-transform:uppercase;margin-top:5px}.nw .cv small{display:block;color:#6f8590;font-size:.55em;margin-top:5px;letter-spacing:1px}.nw .cv .nv{background:#FF7100;color:#000;font-size:.5em;font-weight:bold;letter-spacing:2px;padding:1px 6px;margin-bottom:4px;display:inline-block}</style>';
+    function anvNw1() {
+        return NWS_CSS + '<div class="nw"><div class="une"><div class="mt">EDTEAM <em>NEWS</em></div><div class="hd">Trois guerres, deux élections : l’escadron ne perd aucun front</div>'
+            + '<div class="tx">Du 23 au 30 octobre, l’escadron a conclu cinq conflits en vainqueur et accueilli deux nouveaux pilotes dans ses rangs.</div>'
+            + '<div class="tl"><div style="--k:#00FF66"><small>CONFLITS GAGNÉS</small><b>5</b></div><div style="--k:#FF7100"><small>INFLUENCE</small><b>1 802</b></div><div style="--k:#00F0FF"><small>LOGISTIQUE</small><b>3,8 Md</b></div></div></div>'
+            + '<div style="display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap"><span class="btn">📰 <span><b>EDNEWS</b><small>ÉDITION DU 30/10</small></span></span><span style="color:#00F0FF;font-size:.78em;letter-spacing:2px">◀ ICI : LE BOUTON, AU QG ET SUR MOBILE</span></div></div>';
+    }
+    function anvNw2() {
+        var c = function (i, t, k) { return '<div class="chip" style="--k:' + k + '"><i>' + i + '</i><b>' + t + '</b></div>'; };
+        return NWS_CSS + '<div class="nw"><div class="chips">' + c('★', 'HÉROS', '#FFB000') + c('⚔', 'GUERRES', '#00FF66') + c('◎', 'CAMPAGNES', '#00F0FF') + c('▤', 'HONNEUR', '#00F0FF')
+            + c('✚', 'NOUVEAUX', '#00FF66') + c('✪', 'DISTINCTIONS', '#B07CFF') + c('✉', 'BRÈVES', '#FF7100') + c('▦', 'AGENDA', '#FF7100') + '</div>'
+            + '<div style="display:flex;gap:10px;align-items:center;margin-top:14px;justify-content:center"><span class="hx" style="--c:#FFB000">NR</span><span class="hx" style="--c:#FF4FD8">LV</span><span class="hx" style="--c:#00F0FF">DM</span><span class="hx" style="--c:#00FF66">KS</span><span class="hx" style="--c:#B07CFF">MO</span><span style="color:#6f8590;font-size:.72em;margin-left:8px">les avatars des pilotes partout</span></div></div>';
+    }
+    function anvNw3() {
+        var m = function (t, n, nv) { return '<div>' + (nv ? '<span class="nv">DERNIÈRE ÉDITION</span>' : '') + '<div class="m"><b>EDTEAM NEWS</b><span>' + t + '</span></div><small>' + n + '</small></div>'; };
+        return NWS_CSS + '<div class="nw"><div class="cv">' + m('Trois guerres, deux élections', '30/10 · N° 10', true) + m('Le pacte d’acier tient bon', '22/10 · N° 9') + m('Les fantômes de la bulle', '15/10 · N° 8') + '</div>'
+            + '<div style="text-align:center;margin-top:12px;color:#6f8590;font-size:.75em;letter-spacing:2px">◀ ÉDITION PRÉCÉDENTE &nbsp;·&nbsp; ÉDITION SUIVANTE ▶</div></div>';
     }
     function anvAl1() {
         var pastille = function (c, t) { return '<span class="anval-pa" style="--k:' + c + '">' + t + '</span>'; };

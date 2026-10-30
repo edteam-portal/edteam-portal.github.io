@@ -48,6 +48,8 @@
     <script src="photos.js?v=2"></script>
     <script src="anecdotes.js?v=4"></script>
     <script src="journal-fil.js?v=16"></script>
+    <script src="journal-edition.js?v=1"></script>
+    <script src="gazette-journal.js?v=1"></script>
     <script src="navigation.js?v=56"></script>
     <script src="invitations.js?v=2"></script>
     <script src="sas.js?v=1"></script>
@@ -2475,6 +2477,15 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         function ouvrirGazette() {
             sonClic(); 
             enregistrerTelemetrie('action', 'lecture_gazette');
+            // nouvelle fenetre GALNET NEWS (kiosque + editions mises en page) ; l'ancienne reste en repli si le module n'est pas charge
+            if (window.EdteamEdnews && window.EdteamJournal) {
+                window.EdteamEdnews.ouvrir({
+                    db: supabaseApp, escadron: profilCommandant && profilCommandant.escadron_id,
+                    photoBase: (() => { try { return supabaseApp.storage.from('photos').getPublicUrl('x').data.publicUrl.replace(/x$/, ''); } catch (e) { return ''; } })(),
+                    apresLecture: (id, derniere) => { if (!derniere) return; try { localStorage.setItem('edteam_last_gazette_read', id); } catch (e) { /* tant pis */ } const bn = document.getElementById('gazette-badge-new'), br = document.getElementById('gazette-badge-read'); if (bn) bn.style.display = 'none'; if (br) br.style.display = 'block'; }
+                });
+                return;
+            }
             ouvrirModal('modal-gazette');
             
             // NOUVEAU : On affiche automatiquement la dernière édition dès l'ouverture
@@ -2872,7 +2883,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
-    <script src="annonce.js?v=26"></script>
+    <script src="annonce.js?v=27"></script>
     <script src="footer.js?v=42"></script>
 </body>
 </html>

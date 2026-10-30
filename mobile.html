@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=7"></script>
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=2"></script>
-    <script src="annonce.js?v=26"></script>
+    <script src="annonce.js?v=27"></script>
     <script src="revelations.js?v=8"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
@@ -27,6 +27,8 @@
     <script src="conflit-evenements.js?v=7"></script>
     <script src="conflit-modale.js?v=3"></script>
     <script src="journal-fil.js?v=16"></script>
+    <script src="journal-edition.js?v=1"></script>
+    <script src="gazette-journal.js?v=1"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -2982,6 +2984,12 @@
             const btn = document.getElementById('m-btn-gazette');
             if (btn) { btn.style.animation = 'none'; btn.style.borderColor = ''; }
 
+            // nouvelle fenetre GALNET NEWS plein ecran (kiosque + editions) ; l'ancienne reste en repli si le module n'est pas charge
+            if (window.EdteamEdnews && window.EdteamJournal) {
+                window.EdteamEdnews.ouvrir({ db: supabaseApp, escadron: window.profilCommandant && window.profilCommandant.escadron_id,
+                    photoBase: (() => { try { return supabaseApp.storage.from('photos').getPublicUrl('x').data.publicUrl.replace(/x$/, ''); } catch (e) { return ''; } })() });
+                return;
+            }
             document.getElementById('modal-gazette').style.display = 'flex'; 
             const sel = document.getElementById('m-gazette-selector');
             if (sel && sel.value) afficherGazetteSelectionnee(sel.value);
