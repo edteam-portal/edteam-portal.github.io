@@ -26,7 +26,7 @@
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=7"></script>
     <script src="conflit-modale.js?v=3"></script>
-    <script src="journal-fil.js?v=15"></script>
+    <script src="journal-fil.js?v=16"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -2885,10 +2885,12 @@
         // FIL DE L'ESCADRON : affiche en direct tout en haut de l'accueil (comme sur PC), journal-fil.js (reactions SQL 158)
         // Accueil : les 6 dernieres lignes ; un toucher ouvre la fenetre complete (defilement, filtres, plus anciennes)
         let filMobileLignes = [], filMobileTs = 0;
-        const FIL_OPTS = { mode: 'mob', puissance: () => (window.profilCommandant && window.profilCommandant.puissance_nom) || '' };
+        const FIL_OPTS = { mode: 'mob', puissance: () => (window.profilCommandant && window.profilCommandant.puissance_nom) || '',
+            photo: (uid, nom) => { try { return window.EDTEAMPhotos ? window.EDTEAMPhotos.url(uid, nom) : ''; } catch (e) { return ''; } } };   // photo du pilote dans l'hexagone (sans photo : initiales)
         async function monterFilApercu() {
             const cont = document.getElementById('x-fil-liste');
             cont.innerHTML = '';
+            try { if (window.EDTEAMPhotos) await window.EDTEAMPhotos.charger(false); } catch (e) { /* sans photos : initiales */ }
             window.EdteamFil.monter(cont, Object.assign({ db: supabaseApp, max: 6 }, FIL_OPTS));
             await window.EdteamFil.donner(filMobileLignes, true);
         }
@@ -2897,6 +2899,7 @@
             const cont = document.getElementById('m-fil-contenu');
             cont.innerHTML = '';
             document.getElementById('modal-fil').style.display = 'flex';
+            try { if (window.EDTEAMPhotos) await window.EDTEAMPhotos.charger(false); } catch (e) { /* sans photos : initiales */ }
             window.EdteamFil.monter(cont, Object.assign({ db: supabaseApp }, FIL_OPTS));
             await window.EdteamFil.donner(filMobileLignes, true);
         }
