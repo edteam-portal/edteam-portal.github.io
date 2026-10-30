@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-copier-lieux", date: "2026-10-30T21:50:17Z", type: "NOUVEAU",
+        titre: "Copier un système ou une station d’un clic",
+        texte: "Partout où le site affiche le nom d’un système ou d’une station (QG, directives BGS, campagnes, commerce, colonisation, tableau de bord, mobile…), un clic le copie : vous n’avez plus qu’à le coller dans la recherche de la carte de la galaxie du jeu. Un petit message « Copié » le confirme. Les noms apparaissent soulignés en pointillés. Le premier affichage d’une page peut mettre un instant à repérer certains noms.",
+        important: false
+    },
+    {
+        id: "2026-10-hangar-coriolis", date: "2026-10-30T21:50:18Z", type: "AMELIORE",
+        titre: "Hangar : un lien vers Coriolis en plus d’EDSY",
+        texte: "Dans Mon hangar, et dans le hangar d’un pilote de l’escadron, chaque vaisseau dont l’équipement est connu a maintenant un bouton « Voir sur Coriolis » à côté du bouton EDSY. Il ouvre la configuration du vaisseau dans Coriolis, pour ceux qui préfèrent cet outil. Comme pour EDSY, les valeurs exactes des jets d’ingénierie ne sont pas connues.",
+        important: false
+    },
+    {
         id: "2026-10-flotte-hologrammes-3", date: "2026-10-30T21:30:30Z", type: "NOUVEAU",
         titre: "Tableau de bord : 17 nouveaux vaisseaux, toute la flotte en hologramme",
         texte: "Votre vaisseau s’affiche en hologramme dans l’onglet Missions : modules, passagers dans leurs cabines et soute. Dix-sept vaisseaux s’ajoutent : Sidewinder, Hauler, Adder, Viper Mk IV, Cobra Mk IV, Asp Scout, Orca, Type-9 Heavy, Type-10 Defender, Imperial Clipper, Federal Assault Ship, Mamba, Krait Phantom, Alliance Chieftain, Alliance Crusader, Alliance Challenger et Anaconda Mk II. Les 49 vaisseaux sont maintenant disponibles : il n’en reste aucun à faire. Une annonce en plein écran présente la liste, une seule fois.",
