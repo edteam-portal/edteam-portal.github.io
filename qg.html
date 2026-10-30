@@ -869,7 +869,7 @@
             try {
                 const dateLimite = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
                 const d = new Date();
-                const currentWeekId = d.getUTCFullYear() + "-W" + Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1))) / 86400000) + 1)/7);
+                const currentWeekId = (() => { const j = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())); j.setUTCDate(j.getUTCDate() - ((j.getUTCDay() + 3) % 7)); const an = j.getUTCFullYear(), d0 = Date.UTC(an, 0, 1); return an + "-W" + (Math.floor((Math.floor((j - d0) / 86400000) + 1 - (1 + ((4 - new Date(d0).getUTCDay() + 7) % 7))) / 7) + 1); })();   // la semaine change le jeudi (comme auto-gazette v9)
 
                 // 1. On télécharge toutes les données de la semaine en une seule fois
                 const [resParams, resEfforts, resProfils] = await Promise.all([
