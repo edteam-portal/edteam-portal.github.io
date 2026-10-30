@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#000000">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <title>EDTEAM // PHOTOS DES PILOTES</title>
+    <title>EDTEAM // PILOTES</title>
     <meta name="robots" content="noindex, nofollow">
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
     <script src="shared-utils.js?v=7"></script>
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
-    <script src="navigation.js?v=54"></script>
+    <script src="navigation.js?v=56"></script>
     <script src="invitations.js?v=2"></script>
 
     <style>
@@ -111,6 +111,15 @@
         @media (max-width: 1100px) { .rp-kpis { grid-template-columns: repeat(3, 1fr); } .rp-kpi.hero { grid-column: 1 / -1; } .rp-corps { grid-template-columns: 1fr; } }
         @media (max-width: 560px) { .rp-kpis { grid-template-columns: repeat(2, 1fr); } .rp-info { margin-left: 0; width: 100%; } .rp-vols { grid-template-columns: 1fr; } }
 
+        .tb-onglets { display: flex; gap: 6px; border-bottom: 1px dashed var(--ed-orange-dim); margin-bottom: 16px; }
+        .tb-onglet { padding: 9px 22px; border: 1px solid #5a3000; border-bottom: none; color: #888; cursor: pointer; letter-spacing: 2px; font-size: 0.85em; user-select: none; }
+        .tb-onglet:hover { color: #ccc; } .tb-onglet.a { color: var(--ed-orange); border-color: var(--ed-orange); background: rgba(255, 113, 0, 0.12); }
+        .pl-table td, .pl-table th { text-align: left; } .pl-table td:first-child { color: #fff; font-weight: bold; letter-spacing: 1px; }
+        .pl-av { display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: #2a1800; text-align: center; line-height: 26px; font-size: 0.72em; color: #fff; vertical-align: middle; margin-right: 8px; }
+        .pl-s { padding: 2px 8px; font-size: 0.72em; border: 1px solid; letter-spacing: 1px; white-space: nowrap; }
+        .pl-s.v { color: var(--ed-green); } .pl-s.d { color: #aaa; } .pl-s.j { color: var(--ed-red); } .pl-s.e { color: var(--ed-blue); } .pl-s.a { color: var(--ed-orange); }
+        .pl-bt { border-color: var(--ed-orange); color: var(--ed-orange); padding: 3px 10px; } .pl-bt:disabled { opacity: 0.35; cursor: default; border-color: #555; color: #777; }
+        .pl-ln { display: flex; align-items: center; gap: 10px; margin: 7px 0; font-size: 0.82em; color: #ddd; } .pl-ln span { width: 190px; color: #999; flex: none; } .pl-ln i { display: block; height: 10px; background: var(--ed-blue); opacity: 0.8; } .pl-ln b { color: #fff; }
         /* agrandissement : la photo en grand pour controler */
         .tb-voile { position: fixed; inset: 0; z-index: 4000; background: rgba(0, 0, 0, 0.88); display: none; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
         .tb-fiche { width: 100%; max-width: 1060px; max-height: 94vh; overflow-y: auto; border: 1px solid var(--ed-orange); background: rgba(8, 4, 0, 0.98); box-shadow: 0 0 40px rgba(255, 113, 0, 0.25); padding: 22px 26px; position: relative; box-sizing: border-box; }
@@ -173,9 +182,10 @@
     <script>
         const supabaseApp = window.supabaseApp;
         let profilCommandant = null;
-        const ST = { liste: [], esc: '', q: '', tri: 'recent', nouv: false, courant: -1, vue: [] };
+        const ST = { courant: -1, vue: [] };
+        const P = { liste: [], esc: '', q: '', statut: '', sansPhoto: false, nouv: false, chargement: null };
         const esc = escapeHtml;
-        const CLE = 'edteam_trombi_v1';
+        const CLE = 'edteam_pilotes_v1';
         const ROLES = { amiral: 'Amiral', officier: 'Officier BGS', pilote: 'Pilote' };
 
         function urlPhoto(chemin) { try { return supabaseApp.storage.from('photos').getPublicUrl(chemin).data.publicUrl; } catch (e) { return ''; } }
@@ -198,50 +208,115 @@
         // ---------------------------------------------------------------
         async function charger(force) {
             if (!force) { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.ts < 120000) return c.d; } catch (e) {} }
-            const r = await supabaseApp.rpc('photos_directeur');
+            const r = await supabaseApp.rpc('pilotes_directeur');
             if (r.error) throw r.error;
             try { sessionStorage.setItem(CLE, JSON.stringify({ ts: Date.now(), d: r.data || [] })); } catch (e) {}
             return r.data || [];
         }
 
         // ---------------------------------------------------------------
-        //  PAGE
+        //  ONGLET PILOTES : tous les comptes, un tableau SANS image (la photo n'est telechargee qu'a l'ouverture de la fenetre AVATAR)
         // ---------------------------------------------------------------
-        function vueFiltree() {
-            const q = ST.q.trim().toUpperCase();
-            let l = ST.liste.filter(p => (!ST.esc || nomEsc(p) === ST.esc) && (!ST.nouv || estNouvelle(p)) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
-            const n = p => String(p.cmdr_nom || '');
-            if (ST.tri === 'nom') l.sort((a, b) => n(a).localeCompare(n(b)));
-            else if (ST.tri === 'esc') l.sort((a, b) => nomEsc(a).localeCompare(nomEsc(b)) || n(a).localeCompare(n(b)));
-            else l.sort((a, b) => Date.parse(b.maj_le) - Date.parse(a.maj_le));
-            return l;
+        const STATUTS = { ACTIF: ['ACTIF 7 J', 'v'], DORMANT: ['DORMANT', 'd'], JAMAIS: ['JAMAIS DE DONNÉE', 'j'], EMAIL: ['E-MAIL NON CONFIRMÉ', 'e'], ATTENTE: ['EN ATTENTE', 'a'] };
+        const JOUR = 86400e3;
+        function statut(p) {
+            if (!p.email_confirme) return 'EMAIL';
+            if (!p.est_approuve) return 'ATTENTE';
+            if (!p.derniere_activite) return 'JAMAIS';
+            return Date.now() - Date.parse(p.derniere_activite) < 7 * JOUR ? 'ACTIF' : 'DORMANT';
         }
-        function dessiner(garderSaisie) {
-            const zone = document.getElementById('tb-photos') || document.getElementById('display-area');
-            const escs = {}; ST.liste.forEach(p => { const k = nomEsc(p); escs[k] = (escs[k] || 0) + 1; });
-            const nNouv = ST.liste.filter(estNouvelle).length;
-            const puces = [['', 'TOUS (' + ST.liste.length + ')']].concat(Object.keys(escs).sort().map(k => [k, k + ' (' + escs[k] + ')']));
-            ST.vue = vueFiltree();
-            const html = ST.vue.map((p, i) => `<div class="tb-vign" onclick="ouvrirPhoto(${i})">
-                    <div class="tb-img">${estNouvelle(p) ? '<span class="tb-new">NOUVELLE</span>' : ''}<span class="tb-zoom">AGRANDIR</span><img src="${esc(urlPhoto(p.chemin))}" alt="" loading="lazy" decoding="async" onerror="this.style.opacity=0.15"></div>
-                    <div class="tb-inf"><div class="tb-n">CMDR ${esc(String(p.cmdr_nom || '').toUpperCase())}</div><div class="tb-e">${esc(nomEsc(p))}</div><div class="tb-d">envoyée le ${esc(dateFr(p.maj_le))}</div></div>
-                    <button class="tb-btn" onclick="event.stopPropagation(); retirerDepuisListe(${i})">RETIRER</button>
-                </div>`).join('') || '<div class="tb-vide">' + (ST.liste.length ? 'Aucune photo ne correspond à ces filtres.' : 'Aucun pilote n\'a encore ajouté de photo.') + '</div>';
-            zone.innerHTML = `
-                <div class="tb-tete">
-                    <h2>&gt; PHOTOS DES PILOTES <small>VUE DU DIRECTEUR · TOUS LES ESCADRONS</small></h2>
-                    <div class="tb-outils">
-                        <input type="search" id="tb-q" placeholder="Rechercher un pilote…" style="width: 210px;" value="${esc(ST.q)}" oninput="ST.q = this.value; dessiner(true)">
-                        <select onchange="ST.tri = this.value; dessiner()">
-                            <option value="recent"${ST.tri === 'recent' ? ' selected' : ''}>Trier : plus récentes d'abord</option>
-                            <option value="esc"${ST.tri === 'esc' ? ' selected' : ''}>Trier : escadron, puis nom</option>
-                            <option value="nom"${ST.tri === 'nom' ? ' selected' : ''}>Trier : nom</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="tb-puces">${puces.map(([k, t]) => `<span class="tb-puce${!ST.nouv && ST.esc === k ? ' on' : ''}" onclick="ST.esc = ${JSON.stringify(k).replace(/"/g, '&quot;')}; ST.nouv = false; dessiner()">${esc(t)}</span>`).join('')}<span class="tb-puce${ST.nouv ? ' on' : ''}" onclick="ST.nouv = !ST.nouv; if (ST.nouv) ST.esc = ''; dessiner()">NOUVELLES 48 H (${nNouv})</span></div>
-                <div class="tb-grille">${html}</div>`;
+        function ilYa(iso) {
+            if (!iso) return '—';
+            const j = Math.floor((Date.now() - Date.parse(iso)) / JOUR);
+            return j <= 0 ? 'aujourd\'hui' : j === 1 ? 'hier' : 'il y a ' + j + ' j';
+        }
+        function initiales(p) { return String(p.cmdr_nom || '?').replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || '?'; }
+        function vuePilotes() {
+            const q = P.q.trim().toUpperCase();
+            return P.liste.filter(p => (!P.esc || nomEsc(p) === P.esc) && (!P.statut || statut(p) === P.statut) && (!P.sansPhoto || !p.chemin)
+                && (!P.nouv || Date.now() - Date.parse(p.cree_le) < 7 * JOUR) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
+        }
+        function dessinerPilotes(garderSaisie) {
+            const zone = document.getElementById('tb-pilotes'); if (!zone) return;
+            const escs = [...new Set(P.liste.map(nomEsc))].sort();
+            const cnt = {}; P.liste.forEach(p => { const s = statut(p); cnt[s] = (cnt[s] || 0) + 1; });
+            const nNouv = P.liste.filter(p => Date.now() - Date.parse(p.cree_le) < 7 * JOUR).length, nSans = P.liste.filter(p => !p.chemin).length;
+            const l = vuePilotes().sort((a, b) => (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0));
+            const puce = (on, clic, txt) => '<span class="tb-puce' + (on ? ' on' : '') + '" onclick="' + clic + '">' + txt + '</span>';
+            const lignes = l.map(p => {
+                const s = STATUTS[statut(p)];
+                return '<tr><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ROLES[role(p)]) + '</td><td>' + esc(dateFr(p.cree_le).slice(0, 5)) + '</td><td>'
+                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td><td>'
+                    + '<button class="tb-btn pl-bt" ' + (p.chemin ? 'onclick="ouvrirAvatar(\'' + esc(p.user_id) + '\')"' : 'disabled') + '>AVATAR' + (p.chemin ? '' : ' (AUCUN)') + '</button></td></tr>';
+            }).join('') || '<tr><td colspan="8" class="tb-vide">Aucun pilote ne correspond à ces filtres.</td></tr>';
+            zone.innerHTML = '<div class="tb-tete"><h2>&gt; PILOTES <small>VUE DU DIRECTEUR · TOUS LES ESCADRONS</small></h2><div class="tb-outils">'
+                + '<input type="search" id="tb-q" placeholder="Rechercher un pilote…" style="width: 210px;" value="' + esc(P.q) + '" oninput="P.q = this.value; dessinerPilotes(true)">'
+                + '<select onchange="P.esc = this.value; dessinerPilotes()"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + esc(k) + '"' + (P.esc === k ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select></div></div>'
+                + '<div class="tb-puces">' + puce(!P.statut && !P.sansPhoto && !P.nouv, 'P.statut = \'\'; P.sansPhoto = false; P.nouv = false; dessinerPilotes()', 'TOUS (' + P.liste.length + ')')
+                + Object.keys(STATUTS).map(k => puce(P.statut === k, 'P.statut = P.statut === \'' + k + '\' ? \'\' : \'' + k + '\'; dessinerPilotes()', STATUTS[k][0] + ' (' + (cnt[k] || 0) + ')')).join('')
+                + puce(P.nouv, 'P.nouv = !P.nouv; dessinerPilotes()', 'NOUVEAUX 7 J (' + nNouv + ')') + puce(P.sansPhoto, 'P.sansPhoto = !P.sansPhoto; dessinerPilotes()', 'SANS PHOTO (' + nSans + ')') + '</div>'
+                + '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th><th>RÔLE</th><th>INSCRIPTION</th><th>DERNIÈRE ACTIVITÉ</th><th>DERNIÈRE CONNEXION</th><th>STATUT</th><th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
+                + '<div class="rp-note">« Activité » = dernières données envoyées (BGS, colonisation, budget, Powerplay, fil). « Connexion » = dernière ouverture de session par mot de passe (sous-estimée). Le bouton AVATAR ouvre la photo du pilote pour la contrôler et la retirer si elle n\'est pas adaptée.</div>';
             if (garderSaisie) { const el = document.getElementById('tb-q'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+        }
+        // fenetre AVATAR : la photo du pilote (les fleches passent au pilote suivant qui a une photo)
+        function ouvrirAvatar(uid) {
+            ST.vue = P.liste.filter(p => p.chemin).sort((a, b) => String(a.cmdr_nom || '').localeCompare(String(b.cmdr_nom || '')));
+            ouvrirPhoto(ST.vue.findIndex(p => p.user_id === uid));
+        }
+
+        // ---------------------------------------------------------------
+        //  ONGLET USAGE (partie pilotes) : calcule dans le navigateur a partir de la MEME liste (aucune requete de plus)
+        // ---------------------------------------------------------------
+        function dessinerUsagePilotes() {
+            const zone = document.getElementById('tb-usage-pilotes'); if (!zone) return;
+            const L = P.liste, ok = L.filter(p => p.est_approuve), now = Date.now();
+            const act = (p, j) => p.derniere_activite && now - Date.parse(p.derniere_activite) < j * JOUR;
+            const a7 = ok.filter(p => act(p, 7)).length, a24 = ok.filter(p => act(p, 1)).length, dorm = ok.filter(p => p.derniere_activite && !act(p, 7));
+            const nouv = L.filter(p => now - Date.parse(p.cree_le) < 7 * JOUR).length, taux = ok.length ? Math.round(100 * a7 / ok.length) : 0;
+            const verdict = !ok.length ? 'Aucun pilote approuvé pour le moment.' : (taux >= 60 ? 'Bon usage' : taux >= 30 ? 'Usage moyen' : 'Usage faible') + ' : ' + a7 + ' pilote' + (a7 > 1 ? 's' : '') + ' sur ' + ok.length + (a7 > 1 ? ' ont' : ' a') + ' envoyé des données cette semaine' + (dorm.length ? ', et ' + dorm.length + ' n\'ont rien envoyé depuis plus de 7 jours.' : '.');
+            const barre = (lib, n, max) => '<div class="pl-ln"><span>' + lib + '</span><i style="width:' + Math.round(220 * n / Math.max(max, 1)) + 'px"></i><b>' + n + '</b></div>';
+            const entonnoir = [['Inscrits', L.length], ['E-mail confirmé', L.filter(p => p.email_confirme).length], ['Approuvés', ok.length], ['Première donnée envoyée', ok.filter(p => p.derniere_activite).length], ['Actifs sur 7 jours', a7]];
+            const fonc = [['BGS', 'f_bgs'], ['Colonisation', 'f_colo'], ['Budget', 'f_budget'], ['Powerplay', 'f_pp'], ['Fil de l\'escadron', 'f_journal'], ['Hangar', 'f_hangar'], ['Combat', 'f_combat']].map(([t, k]) => [t, ok.filter(p => p[k]).length]);
+            const sem = {}; L.forEach(p => { const w = Math.min(Math.floor((now - Date.parse(p.cree_le)) / (7 * JOUR)), 4); (sem[w] = sem[w] || { n: 0, a: 0 }).n++; if (act(p, 7)) sem[w].a++; });
+            const lib = w => w === 0 ? 'Cette semaine' : w === 4 ? 'Il y a 4 sem. et plus' : 'Il y a ' + w + ' sem.';
+            const kpi = (t, v, s, h) => '<div class="rp-kpi' + (h ? ' hero' : '') + '"><div class="rp-kl">' + t + '</div><div class="rp-kv">' + v + '</div><div class="rp-ks">' + s + '</div></div>';
+            zone.innerHTML = '<div class="tb-tete"><h2>&gt; USAGE PAR PILOTE <small>' + L.length + ' COMPTES</small></h2></div>'
+                + '<div class="rp-kpis" style="grid-template-columns: 1.6fr repeat(3, 1fr);">' + kpi('LE RÉSEAU EST-IL UTILISÉ ?', a7 + ' / ' + ok.length, 'actifs 7 j / approuvés · ' + taux + ' %', true) + kpi('ACTIFS 24 H', a24, a7 ? Math.round(100 * a24 / a7) + ' % des actifs 7 j' : '') + kpi('NOUVEAUX 7 J', nouv, 'inscrits') + kpi('DORMANTS', dorm.length, 'sans donnée depuis plus de 7 j') + '</div>'
+                + '<div class="rp-carte" style="margin-bottom: 12px;"><div class="rp-titre"><span>VERDICT</span></div><b style="color: #fff;">' + esc(verdict) + '</b></div>'
+                + '<div class="rp-corps" style="grid-template-columns: 1fr 1fr;"><div class="rp-carte"><div class="rp-titre"><span>ENTONNOIR D\'INSCRIPTION</span></div>' + entonnoir.map(([t, n]) => barre(t, n, L.length)).join('') + '</div>'
+                + '<div class="rp-carte"><div class="rp-titre"><span>PILOTES PAR FONCTION · 30 JOURS</span></div>' + fonc.map(([t, n]) => barre(t, n, ok.length)).join('') + '<div class="rp-note" style="margin: 8px 0 0;">Minage et exploration : pas encore mesurables par pilote.</div></div></div>'
+                + '<div class="rp-corps" style="grid-template-columns: 1fr 1fr;"><div class="rp-carte"><div class="rp-titre"><span>DORMANTS (' + dorm.length + ')</span></div><div class="rp-scroll" style="max-height: 230px;"><table class="rp-table pl-table"><tbody>'
+                + (dorm.sort((a, b) => Date.parse(a.derniere_activite) - Date.parse(b.derniere_activite)).map(p => '<tr><td>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ilYa(p.derniere_activite)) + '</td></tr>').join('') || '<tr><td class="tb-vide">Aucun dormant.</td></tr>') + '</tbody></table></div></div>'
+                + '<div class="rp-carte"><div class="rp-titre"><span>RÉTENTION PAR SEMAINE D\'INSCRIPTION</span></div><table class="rp-table pl-table"><thead><tr><th>INSCRITS</th><th>COMPTES</th><th>ACTIFS 7 J</th></tr></thead><tbody>'
+                + Object.keys(sem).sort().map(w => '<tr><td>' + lib(Number(w)) + '</td><td>' + sem[w].n + '</td><td>' + sem[w].a + ' (' + Math.round(100 * sem[w].a / sem[w].n) + ' %)</td></tr>').join('') + '</tbody></table></div></div>'
+                + '<div class="rp-note">Calculé dans le navigateur à partir de la liste des pilotes (aucune requête de plus). Ne mesure que les données envoyées, pas les pages consultées.</div>';
+        }
+
+        // ---------------------------------------------------------------
+        //  ONGLETS : chaque onglet ne charge ses donnees qu'a sa premiere ouverture
+        // ---------------------------------------------------------------
+        async function donneesPilotes() {
+            if (P.chargement) return P.chargement;
+            P.chargement = (async () => { const l = await charger(false); l.forEach(p => { p.maj_le = p.photo_le; }); P.liste = l; })();
+            try { await P.chargement; } finally { P.chargement = null; }
+        }
+        const OUVERT = {};
+        async function ouvrirOnglet(nom) {
+            document.querySelectorAll('.tb-onglet').forEach(e => e.classList.toggle('a', e.dataset.o === nom));
+            document.querySelectorAll('.tb-pane').forEach(e => { e.style.display = e.id === 'pane-' + nom ? 'block' : 'none'; });
+            try { sessionStorage.setItem('edteam_pilotes_onglet', nom); } catch (e) {}
+            if (nom === 'esc') return;
+            if (OUVERT[nom]) { if (nom === 'pil') dessinerPilotes(); else dessinerUsagePilotes(); return; }
+            OUVERT[nom] = true;
+            try {
+                if (nom === 'usage') chargerRapport().then(l => { RP.lignes = l; dessinerRapport(false); }).catch(e => { console.error('Erreur rapport :', e); dessinerRapport(true); });
+                await donneesPilotes();
+                if (nom === 'pil') dessinerPilotes(); else dessinerUsagePilotes();
+            } catch (e) {
+                OUVERT[nom] = false; console.error('Erreur pilotes :', e);
+                document.getElementById(nom === 'pil' ? 'tb-pilotes' : 'tb-usage-pilotes').innerHTML = '<div class="tb-vide">Impossible de lire les pilotes pour le moment (le script SQL 175 est-il lancé ?).<br>Réessayez dans quelques instants.</div>';
+            }
         }
 
         // ---------------------------------------------------------------
@@ -276,13 +351,9 @@
             await window.EDTEAMPhotos.charger(true);
             await window.EDTEAMPhotos.retirer(p.user_id);
             try { sessionStorage.removeItem(CLE); } catch (e) {}
-            ST.liste = ST.liste.filter(x => x.user_id !== p.user_id);
+            p.chemin = null; p.maj_le = null;
+            ST.vue = ST.vue.filter(x => x.user_id !== p.user_id);
             return true;
-        }
-        async function retirerDepuisListe(i) {
-            const p = ST.vue[i]; if (!p) return;
-            try { if (await retirer(p)) dessiner(); }
-            catch (e) { console.error(e); alert('La photo n\'a pas pu être retirée : ' + (e && e.message ? e.message : e)); }
         }
         async function retirerPhotoCourante() {
             const p = ST.vue[ST.courant]; if (!p) return;
@@ -290,7 +361,7 @@
             try {
                 b.disabled = true;
                 if (!(await retirer(p))) { b.disabled = false; return; }
-                dessiner();
+                dessinerPilotes();
                 if (ST.vue.length) ouvrirPhoto(Math.min(ST.courant, ST.vue.length - 1)); else fermerPhoto();
             } catch (e) {
                 console.error(e); b.disabled = false;
@@ -534,14 +605,12 @@
             const mainUi = document.getElementById('main-ui');
             if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
             if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
-            document.getElementById('display-area').innerHTML = '<div id="tb-validation"></div><div id="tb-rapport"></div><div class="rp-tip" id="rp-tip"></div><div id="tb-photos"></div>';
+            document.getElementById('display-area').innerHTML = '<div class="tb-onglets"><span class="tb-onglet a" data-o="esc" onclick="ouvrirOnglet(\'esc\')">ESCADRONS</span><span class="tb-onglet" data-o="pil" onclick="ouvrirOnglet(\'pil\')">PILOTES</span><span class="tb-onglet" data-o="usage" onclick="ouvrirOnglet(\'usage\')">USAGE</span></div>'
+                + '<div class="tb-pane" id="pane-esc"><div id="tb-validation"></div></div><div class="tb-pane" id="pane-pil" style="display:none"><div id="tb-pilotes"><div class="tb-vide">&gt; CHARGEMENT…</div></div></div>'
+                + '<div class="tb-pane" id="pane-usage" style="display:none"><div id="tb-usage-pilotes"></div><div id="tb-rapport"></div><div class="rp-tip" id="rp-tip"></div></div>';
             chargerValidationEscadrons().catch(e => console.error('Erreur validation des escadrons :', e));
-            chargerRapport().then(l => { RP.lignes = l; dessinerRapport(false); }).catch(e => { console.error('Erreur rapport :', e); dessinerRapport(true); });
-            try { ST.liste = await charger(false); dessiner(); }
-            catch (e) {
-                console.error('Erreur trombinoscope :', e);
-                (document.getElementById('tb-photos') || document.getElementById('display-area')).innerHTML = '<div class="tb-vide">Impossible de lire les photos pour le moment.<br>Réessayez dans quelques instants.</div>';
-            }
+            let o = 'esc'; try { o = sessionStorage.getItem('edteam_pilotes_onglet') || 'esc'; } catch (e) {}
+            if (o !== 'esc') ouvrirOnglet(o);
         });
     </script>
 
