@@ -94,7 +94,7 @@
     }
     async function assets() {
         if (!document.getElementById("hg-css")) { const st = document.createElement("style"); st.id = "hg-css"; st.textContent = CSS; document.head.appendChild(st); }
-        if (typeof SILHOUETTES === "undefined") await charger("silhouettes-data.js?v=2");
+        if (typeof SILHOUETTES === "undefined") await charger("silhouettes-data.js?v=3");
         if (!window.HoloVaisseau) await charger("holo-vaisseau.js?v=2");
         if (!window.EDTEAM_MODULES) await charger("modules-data.js?v=1");
     }

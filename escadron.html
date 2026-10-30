@@ -975,7 +975,7 @@
             const id = window.__ficheCourante;
             if (!id) return;
             try {
-                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=2'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=3'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
                 window.EdteamHangar.ouvrir(id);
             } catch (e) { console.error('Hangar :', e); }
         }

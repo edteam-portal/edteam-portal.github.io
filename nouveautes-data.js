@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-flotte-hologrammes-3", date: "2026-10-30T21:30:30Z", type: "NOUVEAU",
+        titre: "Tableau de bord : 17 nouveaux vaisseaux, toute la flotte en hologramme",
+        texte: "Votre vaisseau s’affiche en hologramme dans l’onglet Missions : modules, passagers dans leurs cabines et soute. Dix-sept vaisseaux s’ajoutent : Sidewinder, Hauler, Adder, Viper Mk IV, Cobra Mk IV, Asp Scout, Orca, Type-9 Heavy, Type-10 Defender, Imperial Clipper, Federal Assault Ship, Mamba, Krait Phantom, Alliance Chieftain, Alliance Crusader, Alliance Challenger et Anaconda Mk II. Les 49 vaisseaux sont maintenant disponibles : il n’en reste aucun à faire. Une annonce en plein écran présente la liste, une seule fois.",
+        important: false
+    },
+    {
         id: "2026-10-edteam-news", date: "2026-10-30T15:44:12Z", type: "NOUVEAU",
         titre: "EDTEAM News : un vrai journal chaque semaine",
         texte: "EDNews devient EDTEAM News. Chaque jeudi, votre escadron reçoit son journal : une « une », les héros de la semaine (Pilier et Élan Powerplay), les résultats des guerres, la participation aux campagnes, le tableau d’honneur, les nouveaux pilotes, les distinctions et les brèves, avec les avatars des pilotes. Tous les chiffres viennent des relevés de l’escadron. Le kiosque garde toutes les éditions. Bouton EDNEWS au QG (carte de votre faction) et sur mobile (sous le logo de l’escadron).",

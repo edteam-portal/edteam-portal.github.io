@@ -72,7 +72,7 @@
     }
     function chargerScript(src) { return new Promise(function (ok) { var s = document.createElement("script"); s.src = src; s.onload = function () { ok(true); }; s.onerror = function () { ok(false); }; document.head.appendChild(s); }); }
     async function assurerHolos() {
-        try { if (typeof SILHOUETTES === "undefined") await chargerScript("silhouettes-data.js?v=2"); if (!window.HoloVaisseau) await chargerScript("holo-vaisseau.js?v=2"); } catch (e) { /* sans hologramme : l'icone reste */ }
+        try { if (typeof SILHOUETTES === "undefined") await chargerScript("silhouettes-data.js?v=3"); if (!window.HoloVaisseau) await chargerScript("holo-vaisseau.js?v=2"); } catch (e) { /* sans hologramme : l'icone reste */ }
     }
     function statutDe(nom) { var x = st.statuts[String(nom || "").toLowerCase()]; return x && !x._ ? campDe(x) : null; }
     function ini(n) { var s = String(n || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase(); return s.slice(0, 2) || "?"; }

@@ -21,13 +21,13 @@
     <script src="navigation.js?v=56"></script>
     <script src="invitations.js?v=2"></script>
     <script src="modules-data.js?v=1"></script>
-    <script src="silhouettes-data.js?v=2"></script>
+    <script src="silhouettes-data.js?v=3"></script>
     <script src="modules-vaisseau.js?v=25"></script>
     <script src="minage.js?v=15"></script>
     <script src="exobio-valeurs.js?v=1"></script>
     <script src="exploration.js?v=52"></script>
     <script src="puissances.js?v=2"></script>
-    <script src="joueurs-croises.js?v=16"></script>
+    <script src="joueurs-croises.js?v=17"></script>
     <script src="combat.js?v=49"></script>
 
     <style>
@@ -599,7 +599,7 @@
             python_nx: "Python Mk II", diamondback: "Diamondback Scout", diamondbackxl: "Diamondback Explorer", empire_courier: "Imperial Courier", smallcombat01_nx: "Kestrel Mk II", lakonminer: "Type-11 Prospector", empire_eagle: "Imperial Eagle", empire_trader: "Imperial Clipper",
             federation_dropship: "Federal Dropship", federation_dropship_mkii: "Federal Assault Ship", federation_gunship: "Federal Gunship", federation_corvette: "Federal Corvette", independant_trader: "Keelback",
             ferdelance: "Fer-de-Lance", mamba: "Mamba", krait_mkii: "Krait Mk II", krait_light: "Krait Phantom", anaconda: "Anaconda", cutter: "Imperial Cutter", belugaliner: "Beluga Liner", orca: "Orca",
-            dolphin: "Dolphin", typex: "Alliance Chieftain", typex_2: "Alliance Crusader", typex_3: "Alliance Challenger", panthermkii: "Panther Clipper Mk II", explorer_nx: "Caspian Explorer", mandalay: "Mandalay", corsair: "Corsair" };
+            dolphin: "Dolphin", typex: "Alliance Chieftain", typex_2: "Alliance Crusader", typex_3: "Alliance Challenger", panthermkii: "Panther Clipper Mk II", explorer_nx: "Caspian Explorer", mandalay: "Mandalay", corsair: "Corsair", anacondamkii: "Anaconda Mk II" };
         const nomVaisseau = m => { const k = String(m || "").toLowerCase(); return VAISSEAUX[k] || (m ? String(m).charAt(0).toUpperCase() + String(m).slice(1) : ""); };
         const TYPES = { don: ["🤝", "Donation"], passagers: ["🧑‍🚀", "Passagers"], courrier: ["✉", "Courrier"], collecte: ["📦", "Collecte"], livraison: ["📦", "Livraison"], sauvetage: ["🛟", "Sauvetage"],
             minage: ["⛏", "Minage"], massacre: ["☠", "Massacre"], assassinat: ["🎯", "Assassinat"], exploration: ["🔭", "Exploration"], autre: ["📜", "Mission"] };
@@ -867,11 +867,11 @@
         const LARGE = 1000;
         // liste des vaisseaux modelises : se met a jour toute seule des qu'une entree de SILHOUETTES est ajoutee (champ nom)
         function listeModelises() { const n = Object.values(SILHOUETTES).map(x => x.nom).filter(Boolean); return n.length > 1 ? n.slice(0, -1).map(x => `<b>${x}</b>`).join(", ") + " et <b>" + n[n.length - 1] + "</b>" : n.map(x => `<b>${x}</b>`).join(""); }
-        const FLOTTE_A_FAIRE = 14;      // vaisseaux restant a modeliser (a corriger a la main quand on en ajoute ; meme chiffre dans annonce.js)
+        const FLOTTE_A_FAIRE = 0;       // vaisseaux restant a modeliser (a corriger a la main quand on en ajoute ; meme chiffre dans annonce.js)
         function noteVaisseaux() {
             if (!S || (S.pied && S.pied.on) || window.innerWidth < LARGE) return "";
             const modele = !!SILHOUETTES[String((S.vaisseau || {}).modele || "").toLowerCase()], n = Object.keys(SILHOUETTES).length;
-            return `<div class="tb-sub tb-bientotv" style="margin-bottom:12px;">${modele ? "Votre vaisseau est modélisé en hologramme." : "Votre vaisseau n'est pas encore modélisé en hologramme : il arrivera plus tard."} ${n} vaisseaux sont déjà disponibles, ${FLOTTE_A_FAIRE} sont encore à faire.</div>`;
+            return `<div class="tb-sub tb-bientotv" style="margin-bottom:12px;">${modele ? "Votre vaisseau est modélisé en hologramme." : "Votre vaisseau n'est pas encore modélisé en hologramme : il arrivera plus tard."} ${FLOTTE_A_FAIRE > 0 ? n + " vaisseaux sont déjà disponibles, " + FLOTTE_A_FAIRE + " sont encore à faire." : "Les " + n + " vaisseaux sont tous disponibles."}</div>`;
         }
         const silhouetteActive = () => { const v = S && S.vaisseau ? S.vaisseau : {}; return window.innerWidth >= LARGE ? (SILHOUETTES[String(v.modele || "").toLowerCase()] || null) : null; };
         let ecranLarge = window.innerWidth >= LARGE;
