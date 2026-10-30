@@ -23,9 +23,28 @@ function injecterArchitectureGlobale() {
     // Menu lateral plus compact : avec le Hangar il compte 13 entrees, trop pour une tablette en paysage (hauteur 600 a 800 px). Defile si besoin, sans barre visible ; Nouveautes, compte et deconnexion restent epingles en bas (#nav-bas), toujours visibles.
     if (!document.getElementById('nav-compact-css')) {
         const st = document.createElement('style'); st.id = 'nav-compact-css';
-        st.textContent = "#side-menu { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; padding-top: 8px; } #side-menu::-webkit-scrollbar { display: none; } #side-menu .nav-link { padding: 15px; margin: 3px 0; } #side-menu .nav-icon svg { width: 26px; height: 26px; } #side-menu .nav-text { font-size: 1em; } #side-menu .hamburger-btn { margin-bottom: 10px; } #nav-bas { position: sticky; bottom: 0; margin-top: auto; flex: none; z-index: 3; padding: 4px 0 6px; background: #0a0a0a; border-top: 1px solid rgba(255,255,255,.12); } #nav-bas .nav-link { margin: 2px 0 !important; border-top: 0 !important; } @media (max-height: 820px) { #side-menu .nav-link { padding: 11px 15px; margin: 2px 0; } #side-menu .nav-icon svg { width: 24px; height: 24px; } #side-menu .hamburger-btn { margin-bottom: 6px; } } @media (max-height: 640px) { #side-menu .nav-link { padding: 8px 15px; margin: 1px 0; } #side-menu .nav-icon svg { width: 22px; height: 22px; } #side-menu .hamburger-btn { margin-bottom: 3px; } #nav-bas { padding: 2px 0 3px; } }";
+        st.textContent = "#side-menu .nav-icon svg * { vector-effect: non-scaling-stroke; } #side-menu .nav-icon svg { stroke-width: 1.9; } #side-menu { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; padding-top: 8px; } #side-menu::-webkit-scrollbar { display: none; } #side-menu .nav-link { padding: 15px; margin: 3px 0; } #side-menu .nav-icon svg { width: 26px; height: 26px; } #side-menu .nav-text { font-size: 1em; } #side-menu .hamburger-btn { margin-bottom: 10px; } #nav-bas { position: sticky; bottom: 0; margin-top: auto; flex: none; z-index: 3; padding: 4px 0 6px; background: #0a0a0a; border-top: 1px solid rgba(255,255,255,.12); } #nav-bas .nav-link { margin: 2px 0 !important; border-top: 0 !important; } @media (max-height: 820px) { #side-menu .nav-link { padding: 11px 15px; margin: 2px 0; } #side-menu .nav-icon svg { width: 24px; height: 24px; } #side-menu .hamburger-btn { margin-bottom: 6px; } } @media (max-height: 640px) { #side-menu .nav-link { padding: 8px 15px; margin: 1px 0; } #side-menu .nav-icon svg { width: 22px; height: 22px; } #side-menu .hamburger-btn { margin-bottom: 3px; } #nav-bas { padding: 2px 0 3px; } }";
         document.head.appendChild(st);
     }
+    // icones du menu : chacune est recadree sur son dessin (viewBox carre autour de la boite reelle) pour que toutes aient la meme taille apparente
+    window.edteamUniformiserIcones = function () {
+        try {
+            const mesure = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            mesure.setAttribute('style', 'position:absolute;left:-9999px;top:0;width:24px;height:24px;visibility:hidden');
+            document.body.appendChild(mesure);
+            document.querySelectorAll('#side-menu .nav-icon > svg:not([data-uni])').forEach(function (s) {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                Array.from(s.children).forEach(function (n) { g.appendChild(n.cloneNode(true)); });
+                mesure.appendChild(g);
+                const b = g.getBBox(); mesure.removeChild(g);
+                if (!b.width && !b.height) return;
+                const c = Math.max(b.width, b.height) + 2.6;      // + epaisseur du trait
+                s.setAttribute('viewBox', (b.x + b.width / 2 - c / 2) + ' ' + (b.y + b.height / 2 - c / 2) + ' ' + c + ' ' + c);
+                s.setAttribute('data-uni', '1');
+            });
+            document.body.removeChild(mesure);
+        } catch (e) { /* tailles d'origine */ }
+    };
     const path = window.location.pathname;
     const page = path.split("/").pop() || "qg.html";
     // bouton « ALERTE COMBAT » du menu : il CLIGNOTE DISCRETEMENT (orange, lent) tant que l'alerte n'est pas activee, pour que le pilote comprenne qu'un joueur verrouille ne sera pas signale ; pastille : grise = desactivee, verte = active, orange = en veille
@@ -79,13 +98,13 @@ function injecterArchitectureGlobale() {
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="16" r="5.5"></circle><ellipse cx="11" cy="16" rx="9.5" ry="2.6" transform="rotate(-18 11 16)"></ellipse><line x1="11" y1="10.5" x2="11" y2="3"></line><path d="M11 3l8 2.5-8 2.5"></path></svg></div>
             <span class="nav-text">COLONISATION</span>
         </a>
-        <a href="trombinoscope.html" id="nav-link-trombinoscope" class="nav-link ${page === 'trombinoscope.html' ? 'active' : ''}" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
-            <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18c.8-2.4 2.9-3.5 5.5-3.5s4.7 1.1 5.5 3.5"></path></svg></div>
-            <span class="nav-text">PHOTOS DES PILOTES</span>
-        </a>
         <a href="manuel.html" id="nav-link-manuel" class="nav-link ${page === 'manuel.html' ? 'active' : ''}" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"></path><path d="M4 21.5A2.5 2.5 0 0 0 6.5 24H20v-5"></path><line x1="9" y1="7" x2="15" y2="7"></line><line x1="9" y1="11" x2="15" y2="11"></line></svg></div>
             <span class="nav-text">MANUEL</span>
+        </a>
+        <a href="trombinoscope.html" id="nav-link-trombinoscope" class="nav-link ${page === 'trombinoscope.html' ? 'active' : ''}" style="display: none;" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18c.8-2.4 2.9-3.5 5.5-3.5s4.7 1.1 5.5 3.5"></path></svg></div>
+            <span class="nav-text">PILOTES</span>
         </a>
         <div id="nav-bas">
         ${page === 'tableau-de-bord.html' ? '' : `<a href="#" id="nav-alerte" class="nav-link${alerteOn ? '' : ' al-off'}" data-alerte-menu title="Alerte combat : à ARMER une fois en début de session de jeu (EDMC et le jeu lancés). Armée, elle vous prévient par un cadre clignotant dès que vous verrouillez un joueur, pour ne pas manquer un scan." onclick="event.preventDefault(); if (typeof edteamAlerteBasculer === 'function') edteamAlerteBasculer()" onmouseenter="if(typeof sonHover==='function') sonHover()">
@@ -242,6 +261,7 @@ function injecterArchitectureGlobale() {
     const menuNav = document.getElementById('side-menu');
     if (menuNav && menuNav.innerHTML.trim() === '') {
         menuNav.innerHTML = menuHTML;
+        window.edteamUniformiserIcones();
     }
 
     const mainUi = document.getElementById('main-ui');

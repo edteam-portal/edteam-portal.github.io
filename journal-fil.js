@@ -33,7 +33,9 @@
         if (t.indexOf("ANNULÉE") >= 0 || t.indexOf("SUPPRIMÉE") >= 0) return { k: "ax", f: "bgs", nom: t, ic: "⚑", col: "#FF6A5C" };
         if (t.indexOf("CLÔTURÉE") >= 0) return { k: "cl", f: "bgs", nom: t, ic: "⚑", col: "#2FE07A" };
         if (t.indexOf("DIRECTIVE") >= 0 || t.indexOf("CAMPAGNE") >= 0) return { k: "dr", f: "bgs", nom: t, ic: "⚑", col: "#00E5F5" };
-        if (t.indexOf("RECRUE") >= 0 || t.indexOf("NOUVEAU SUR") >= 0 || t.indexOf("RECRUTEMENT") >= 0 || t.indexOf("ROLE") >= 0 || t.indexOf("COMMANDEMENT") >= 0) return { k: "rc", f: "esc", nom: t, ic: "✚", col: "#2FE07A" };
+        if (t.indexOf("NOUVEAU SUR") >= 0) return { k: "rc", f: "esc", nom: "BIENVENUE DANS LE RÉSEAU EDTEAM", ic: "✚", col: "#00E5F5", maj: 1, bv: "réseau" };
+        if (t.indexOf("RECRUE") >= 0 || t.indexOf("RECRUTEMENT") >= 0) return { k: "rc", f: "esc", nom: "NOUVELLE RECRUE · ESCADRON", ic: "✚", col: "#2FE07A", maj: 1, bv: "escadron" };
+        if (t.indexOf("ROLE") >= 0 || t.indexOf("COMMANDEMENT") >= 0) return { k: "rc", f: "esc", nom: t, ic: "✚", col: "#2FE07A" };
         if (t.indexOf("RENSEIGNEMENT") >= 0 || t.indexOf("ALERTE") >= 0) return { k: "al", f: "esc", nom: t, ic: "◆", col: "#FF6A5C" };
         if (t.indexOf("COMMUNIQUÉ") >= 0 || t.indexOf("ANNONCE") >= 0 || t.indexOf("TRANSMISSION") >= 0) return { k: "an", f: "esc", nom: t, ic: "◈", col: "#FFD24A" };
         if (t.indexOf("BILAN") >= 0 || t.indexOf("EDNEWS") >= 0) return { k: "bi", f: "esc", nom: t, ic: "◈", col: "#00E5F5" };
@@ -89,6 +91,7 @@
         }
         var par = String(l.cmdr_nom || ""), sys = par.toUpperCase() === "SYS.EDTEAM" || !par;
         var av = (c.maj || c.f === "bgs") && !sys;       // lignes de directives et de campagnes : l'avatar du pilote qui les a faites
+        if (c.bv) return { tit: esc(d), sb: c.bv === "réseau" ? "Un nouveau pilote vient d’arriver sur EDTEAM" : "Un pilote de plus dans les rangs de l’escadron", av: av ? ini(par) : "", nom: av ? par : "" };
         return { tit: esc(d), sb: sys ? "" : "par <b>" + esc(par) + "</b>", av: av ? ini(par) : "", nom: av ? par : "" };
     }
     function ligneCroise(l) {
@@ -202,9 +205,10 @@
         var logo = c.k === "bi" && String(c.nom).indexOf("BILAN") >= 0 ? LOGO : "";        // bilan reseau : le logo EDTEAM dans l'hexagone
         var hex = logo ? "<div class=\"fil-hex logo\">" + logo + "</div>" : holo ? "<div class=\"fil-hex holo\">" + holo + "</div>" : "<div class=\"fil-hex\"><span>" + (p.av ? esc(p.av) : c.ic) + "</span>" + (photo ? "<img src=\"" + esc(photo) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" onerror=\"this.remove()\">" : "") + "</div>";
         var tp = p.stamp ? { t: p.stamp.t, c: p.stamp.c } : tampon(l, c), col = p.stamp ? p.stamp.c : c.col;
-        return "<div class=\"fil-it" + (c.maj ? " maj" : "") + (nl ? " nl" : "") + (st.fresh && st.fresh[l.id] ? " arr" : "") + (bk ? " bk" : "") + "\" style=\"--k:" + col + "\" id=\"fil-" + l.id + "\">" + (nl ? "<span class=\"fil-new\">NOUVEAU</span>" : "") + hex
+        var bvx = c.bv && st.rxDispo && !st.rx.moi[l.id] ? "<button type=\"button\" class=\"fil-p bv\" data-a=\"rx\" data-id=\"" + l.id + "\" data-e=\"applaudir\">👏 " + (c.bv === "réseau" ? "SOUHAITER LA BIENVENUE" : "ACCUEILLIR") + "</button>" : "";
+        return "<div class=\"fil-it" + (c.maj ? " maj" : "") + (c.bv ? " bv" : "") + (nl ? " nl" : "") + (st.fresh && st.fresh[l.id] ? " arr" : "") + (bk ? " bk" : "") + "\" style=\"--k:" + col + "\" id=\"fil-" + l.id + "\">" + (nl ? "<span class=\"fil-new\">NOUVEAU</span>" : "") + hex
             + "<div class=\"fil-cx\"><div class=\"fil-cat\">" + (bk ? "<b class=\"fil-flash\">⚡ FLASH INFO</b>" : "") + esc(c.nom) + "</div><div class=\"fil-tt\">" + p.tit + "</div>" + (p.sb ? "<div class=\"fil-sb\">" + p.sb + "</div>" : "") + "</div>"
-            + "<div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i>" + tpHtml(tp) + "</div>" + rxHtml(l.id, false, c.k === "cr" ? inaraHtml(p.cr) : "") + "</div>";
+            + "<div class=\"fil-tm\">" + heure(d) + "<i>" + ilYa(d) + "</i>" + tpHtml(tp) + "</div>" + rxHtml(l.id, false, c.k === "cr" ? inaraHtml(p.cr) : bvx) + "</div>";
     }
     function groupe(g, c) {
         var cle = "g" + g[0].id, ouvert = !!st.ouverts[cle], d = new Date(g[0].created_at), n = g.length, titre, corps = "";
@@ -371,7 +375,11 @@
         + ".fil-flash{display:inline-block;background:#FF9A1F;color:#1a0d00;font-weight:700;letter-spacing:3px;font-size:10px;padding:2px 8px;margin-right:10px;animation:fil-clig 1s steps(1) infinite}@keyframes fil-clig{50%{background:#fff3c4}}"
         + ".fil-jr.flash::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:3;box-shadow:inset 0 0 0 1px rgba(255,154,31,.7),inset 0 0 40px rgba(255,154,31,.25);animation:fil-cadre 1.5s ease-in-out 5}@keyframes fil-cadre{50%{opacity:.25}}"
         + ".fil-jr.flash .fil-tk>b{animation:fil-clig 1s steps(1) infinite}.fil-tk strong{color:#fff;font-weight:700;text-shadow:0 0 10px rgba(255,154,31,.7)}"
-        + ".fil-new{position:absolute;right:30px;top:-1px;background:#FF7100;color:#1a0900;font-size:9.5px;letter-spacing:2.5px;padding:2px 8px}"
+        + ".fil-new{position:absolute;right:26px;top:-1px;z-index:2;background:#FF7100;color:#1a0900;font-size:12px;font-weight:800;letter-spacing:3px;padding:3px 12px 3px 10px;box-shadow:0 0 14px rgba(255,113,0,.75);clip-path:polygon(0 0,100% 0,100% 100%,8px 100%,0 calc(100% - 8px));animation:fil-nw 1.8s ease-in-out infinite;font-family:Bahnschrift,'Segoe UI',system-ui,sans-serif}.fil-new::before{content:'● ';font-size:9px;vertical-align:1px}@keyframes fil-nw{50%{box-shadow:0 0 24px rgba(255,160,40,1);background:#FF9A1F}}"
+        + ".fil-it.nl{border-left-width:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--k) 13%,#0b1017),#0b1017 55%)}.fil-it.nl .fil-tt{color:#fff}"
+        + ".fil-it.bv{border:1px solid color-mix(in srgb,var(--k) 55%,transparent);border-left:6px solid var(--k);background:radial-gradient(120% 140% at 0 50%,color-mix(in srgb,var(--k) 20%,#0b1017),#0b1017 60%);box-shadow:0 0 22px color-mix(in srgb,var(--k) 18%,transparent)}.fil-it.bv .fil-cat{font-weight:700;letter-spacing:4px;font-size:11.5px}.fil-it.bv .fil-hex{background:var(--k);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--k) 70%,transparent))}"
+        + ".fil-p.bv{color:#fff;font-size:12px;letter-spacing:2px;font-weight:700;border-color:var(--k);background:color-mix(in srgb,var(--k) 22%,transparent);padding:6px 14px}.fil-p.bv:hover{background:color-mix(in srgb,var(--k) 40%,transparent)}"
+        + "@media(min-width:701px){.fil-jr.pc:not(.ap) .fil-it{grid-template-columns:66px 1fr auto}.fil-jr.pc:not(.ap) .fil-it.maj{grid-template-columns:86px 1fr auto}.fil-jr.pc:not(.ap) .fil-it .fil-hex{grid-row:1/3;align-self:start;width:64px;height:70px;font-size:26px}.fil-jr.pc:not(.ap) .fil-it.maj .fil-hex{width:84px;height:92px;font-size:32px}.fil-jr.pc:not(.ap) .fil-it .fil-cx{grid-column:2;grid-row:1}.fil-jr.pc:not(.ap) .fil-it .fil-tm{grid-column:3;grid-row:1}.fil-jr.pc:not(.ap) .fil-it .fil-rx{grid-row:2}}"
         + ".fil-puces{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.fil-puces span{font-size:12px;background:#0a1219;border:1px solid var(--ln);padding:3px 9px;color:#b8c7d0;overflow-wrap:anywhere}.fil-puces em{font-style:normal;color:var(--mu);margin-left:6px}.fil-puces .fil-cmpt{opacity:.55}"
         + ".fil-plus{color:var(--cy);font-size:12px;letter-spacing:2px;margin-top:9px;cursor:pointer;display:inline-block}.fil-plus:hover{color:#fff}"
         + ".fil-sous{margin-top:8px;border-top:1px solid var(--ln)}.fil-sl{padding:7px 0;border-bottom:1px solid var(--ln)}.fil-slt{font-size:13.5px;color:#c4d1d8;overflow-wrap:anywhere}.fil-slt b{color:#00E5F5;font-weight:600}.fil-slt em{font-style:normal;color:var(--mu)}.fil-slh{font-family:'Share Tech Mono',Consolas,monospace;font-size:11px;color:var(--mu);margin-right:6px}"

@@ -5,6 +5,11 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-fil-bienvenue-recrues", date: "2026-10-30T12:51:52Z", type: "NOUVEAU",
+        titre: "Fil : bienvenue aux nouvelles recrues",
+        texte: "Quand un pilote rejoint le réseau, le fil de l’escadron l’annonce : « Bienvenue dans le réseau » pour tout le monde, « Nouvelle recrue » quand il rejoint votre escadron. Un bouton permet de lui souhaiter la bienvenue en un clic. Les icônes du menu ont aussi été uniformisées."
+    },
+    {
         id: "2026-10-campagnes-alliees", date: "2026-10-28T23:43:00Z", type: "NOUVEAU",
         titre: "Campagnes : invitez des amis ou un escadron allié",
         texte: "L’Amiral peut inviter un pilote (avec ou sans escadron) ou un escadron allié à participer à une campagne précise : bouton ✉ de la campagne, ou étape « Invités » à la création. L’invité reçoit une invitation plein écran et son bouton ENGAGEMENT clignote ; il accepte, refuse ou répond plus tard. Sa vue est limitée à la campagne : directives, résultats du jeu, journal de la campagne, carte galactique. Il ne voit ni les autres campagnes, ni le fil et la page de l’escadron, ni le mur des spécialistes, et ses points n’entrent pas dans vos classements. Une pastille le distingue : SOLITAIRE ou ALLIÉ · nom de l’escadron. L’Amiral peut retirer un invité à tout moment. Les pilotes sans escadron (ou dont l’escadron n’est pas encore validé) deviennent des solitaires : ils gardent le QG, le tableau de bord, la colonisation, le budget et le hangar.",
