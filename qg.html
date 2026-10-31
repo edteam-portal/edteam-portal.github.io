@@ -2858,10 +2858,25 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         }
         window.addEventListener('edteam-anecdotes', () => { if (typeof profilCommandant !== 'undefined' && profilCommandant) chargerAnecdoteQG(profilCommandant); });
         window.addEventListener('edteam-photos', () => { if (typeof profilCommandant !== 'undefined' && profilCommandant) { chargerDistinctionsQG(profilCommandant); chargerAnecdoteQG(profilCommandant); } });
+        // ACTUALITES en vue SOLO (pleine largeur) : le cadre prend toute la hauteur utile de l'ecran, quelle que soit sa taille (petit portable comme grand ecran) ; minimum 420 px, le reste defile dans le cadre
+        function ajusterHauteurFil() {
+            const g = document.getElementById('qg-grille'), f = document.getElementById('qg-fil'), z = document.getElementById('display-area');
+            if (!g || !f || !z) return;
+            if (!g.classList.contains('qg-pleine') || window.innerWidth < 1100) { if (f.style.height) { f.style.height = ''; f.style.minHeight = ''; } return; }
+            f.style.minHeight = '420px';
+            const pied = document.getElementById('footer-edteam');
+            const haut = f.getBoundingClientRect().top - z.getBoundingClientRect().top + z.scrollTop;          // position du cadre dans la zone defilante
+            const bas = pied ? pied.offsetHeight + (parseFloat(getComputedStyle(pied).marginTop) || 0) + (parseFloat(getComputedStyle(pied).marginBottom) || 0) : 0;
+            const h = Math.max(420, Math.floor(z.clientHeight - haut - bas - 14));
+            if (Math.abs((parseFloat(f.style.height) || 0) - h) > 1) f.style.height = h + 'px';
+        }
+        window.addEventListener('resize', ajusterHauteurFil);
+        window.addEventListener('load', () => { [0, 400, 1500, 3500].forEach(t => setTimeout(ajusterHauteurFil, t)); });
+        document.addEventListener('DOMContentLoaded', () => { const g = document.getElementById('qg-grille'); if (g && window.MutationObserver) new MutationObserver(ajusterHauteurFil).observe(g, { attributes: true, attributeFilter: ['class'] }); const z = document.getElementById('display-area'); if (z && window.ResizeObserver) new ResizeObserver(ajusterHauteurFil).observe(z); });
         async function chargerDistinctionsQG(profil) {
             const boxP = document.getElementById('qg-pilier'), boxE = document.getElementById('qg-elan');
             if (!boxP || !boxE) return;
-            const grillePleine = document.getElementById('qg-grille'); if (grillePleine) grillePleine.classList.toggle('qg-pleine', !profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT');
+            const grillePleine = document.getElementById('qg-grille'); if (grillePleine) grillePleine.classList.toggle('qg-pleine', !profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT'); ajusterHauteurFil();
             if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') { const col = document.getElementById('qg-colonne-distinctions'); if (col) col.style.display = 'none'; return; }
             const cle = 'edteam_qg_dist_' + profil.user_id;
             let d = null;

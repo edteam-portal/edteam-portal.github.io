@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-qg-solo-hauteur", date: "2026-10-31T13:39:10Z", type: "AMELIORE",
+        titre: "Quartier général : les actualités s’adaptent à la hauteur de l’écran",
+        texte: "Pour un pilote sans escadron, le cadre « Actualités » du Quartier général prend maintenant toute la hauteur de l’écran, du petit portable au grand moniteur : plus de grand vide en dessous, et le pied de page reste visible. Il se réajuste tout seul si vous changez la taille de la fenêtre.",
+        important: false
+    },
+    {
         id: "2026-10-fc-classe", date: "2026-10-31T13:29:00Z", type: "AMELIORE",
         titre: "Fleet Carrier : choisissez la classe de votre carrier",
         texte: "Dans Mon hangar, carte « Mon Fleet Carrier », choisissez la classe de votre carrier (Drake, Victory, Fortune ou Nautilus) : celle que le jeu affiche dans la carte de la galaxie. Votre hologramme change tout de suite, et vos camarades le voient dans la page Escadron. Le jeu ne transmet pas cette information : sans choix, l’hologramme montre la coque de base (Drake). Un carrier peut ainsi avoir eu un mauvais hologramme jusqu’ici : il suffit de cliquer sur la bonne classe.",
