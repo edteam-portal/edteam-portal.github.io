@@ -123,6 +123,15 @@
 .fc-mb .f{color:#7d8a92;font-size:.72em;letter-spacing:.5px;margin-top:9px;line-height:1.5}.fc-mb .f b{color:#FFD98A;font-weight:normal}
 .fc-mb button{margin-top:12px;background:rgba(255,176,0,.1);border:1px solid #FFB000;color:#FFD98A;font:inherit;font-size:.78em;letter-spacing:2px;padding:6px 20px;cursor:pointer}
 .fc-hg img.sc{object-fit:contain}
+.fcm-cls{display:flex;align-items:center;justify-content:space-between;gap:8px 18px;flex-wrap:wrap}
+.fcm-cls .txt{flex:1 1 240px;min-width:0}.fcm-cls small{display:block;color:#7d8a92;font-size:.68em;letter-spacing:2px}
+.fcm-cl{display:flex;gap:6px;flex:0 0 auto}
+.fcm-cl button{width:84px;background:#030201;border:1px solid #3a2d12;padding:3px 3px 3px;cursor:pointer;color:#8b97a0;font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.fcm-cl button img{width:100%;height:36px;object-fit:contain;opacity:.7}
+.fcm-cl button span{font-size:.58em;letter-spacing:1.5px;white-space:nowrap}
+.fcm-cl button:hover{border-color:#FFB000}.fcm-cl button:hover img{opacity:1}
+.fcm-cl button.on{border-color:#FFB000;background:rgba(255,176,0,.12);color:#FFD98A}.fcm-cl button.on img{opacity:1}
+.fcm-cls .aide{display:block;margin-top:3px;color:#6f7d85;font-size:.68em;letter-spacing:.3px;line-height:1.4}
 .fc-sctag{display:inline-block;border:1px solid #FFB000;color:#FFB000;background:rgba(255,176,0,.1);padding:1px 8px;font-size:.7em;letter-spacing:2px;white-space:nowrap}
 .fc-srvvu{display:block;margin-top:3px;color:#7d8a92;font-size:.7em;letter-spacing:.5px}
 .fc-scesc{display:block;color:#8b97a0;font-size:.74em;letter-spacing:1px;margin-top:3px}
@@ -188,6 +197,30 @@
             + '<div class="ligne"><textarea id="fc-msg-t" maxlength="200" rows="2" placeholder="Ex. : posé là pour la mission. Réparation et marché ouverts, tritium à bord.">' + E(c.message || "") + "</textarea>"
             + '<div class="btns"><button type="button" data-a="pub">PUBLIER</button><button type="button" class="g" data-a="eff">EFFACER</button></div></div></div>';
     }
+    function selecteurClasse(c) {
+        const cur = holoDe(c);
+        return '<div class="fcm-cls"><div class="txt"><small>CLASSE DU CARRIER</small><span class="aide">' + (c.holo ? "Classe affichée à vos camarades." : "Par défaut : coque de base. Choisissez la classe indiquée dans la carte de la galaxie du jeu.") + '</span></div><div class="fcm-cl">'
+            + CLASSES.map(x => '<button type="button" data-h="' + x[0] + '"' + (x[0] === cur ? ' class="on"' : "") + ' title="' + E(x[1]) + '"><img src="images/carriers/carrier-' + x[0] + '.webp" alt="" loading="lazy" onerror="this.remove()"><span>' + x[1] + "</span></button>").join("")
+            + "</div></div>";
+    }
+    function brancherClasse(el, c) {
+        const z = el.querySelector(".fcm-cls"); if (!z) return;
+        z.addEventListener("click", async e => {
+            const b = e.target.closest("button[data-h]"); if (!b) return;
+            const v = b.dataset.h; z.querySelectorAll("button").forEach(x => { x.disabled = true; });
+            try {
+                const r = await window.supabaseApp.rpc("fc_holo", { p_holo: v });
+                if (r.error) { const er = new Error(r.error.message || "erreur"); er.code = r.error.code; er.status = r.status; throw er; }
+                if (r.data === true) {
+                    c.holo = v; oublier();
+                    const im = el.querySelector(".fcm-hg img"); if (im) { im.src = imgCarrier(c); }
+                    z.querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.h === v));
+                    z.querySelector(".aide").textContent = "Classe affichée à vos camarades.";
+                } else z.querySelector(".aide").textContent = "Impossible pour le moment.";
+            } catch (x) { console.error("Carrier : classe", x); z.querySelector(".aide").textContent = absente(x) ? "Pas encore activé sur le serveur." : "Impossible pour le moment."; }
+            z.querySelectorAll("button").forEach(x => { x.disabled = false; });
+        });
+    }
     function brancherMessage(el) {
         const z = el.querySelector(".fcm-msg"); if (!z) return;
         const ta = z.querySelector("textarea"), cpt = z.querySelector(".cpt"), etat = z.querySelector(".etat");
@@ -249,10 +282,12 @@
                 + blocMessage(c)
                 + (s ? '<div class="fc-saut">' + s + "</div>" : "")
                 + '<div class="fcm-bas">' + (srv ? '<div class="fcm-bilan"><span class="a"><b>' + nA + "</b>ACTIFS</span>" + (nP ? '<span class="p"><b>' + nP + "</b>EN PAUSE</span>" : "") + "<span><b>" + nO + "</b>DÉSACTIVÉS</span></div>" : "")
-                + '<label class="fc-part"><input type="checkbox" ' + (c.partage ? "checked" : "") + '> Montrer mon carrier aux pilotes de mon escadron</label></div></div></div>'
+                + '<label class="fc-part"><input type="checkbox" ' + (c.partage ? "checked" : "") + '> Montrer mon carrier aux pilotes de mon escadron</label></div>'
+                + selecteurClasse(c) + "</div></div>"
                 + (srv ? famillesServices(srv) : '<div class="fc-sv-mien"><small>SERVICES DU CARRIER</small>' + chipsServices(c.services) + "</div>")
                 + '<div class="fc-note">Vos camarades voient l’indicatif, le nom, le système, l’accès aux docks, le saut annoncé et le message que vous écrivez ici. Jamais le solde, la cargaison ni le carburant. La position est celle de votre dernière session de jeu : un saut effectué quand vous n’étiez pas connecté n’apparaît qu’à votre prochaine connexion.</div>';
             brancherMessage(el);
+            brancherClasse(el, c);
             const cb = el.querySelector(".fc-part input");
             cb.addEventListener("change", async () => {
                 const voulu = cb.checked; cb.disabled = true;
@@ -274,9 +309,11 @@
         ["Commodities", "MARCHÉ", "Achat et vente de marchandises"], ["VoucherRedemption", "BONS", "Encaissement des bons"], ["Exploration", "CARTOGRAPHIE", "Universal Cartographics"],
         ["BlackMarket", "MARCHÉ NOIR", "Marché noir"], ["VistaGenomics", "VISTA GENOMICS", "Vista Genomics"], ["PioneerSupplies", "PIONEER", "Pioneer Supplies"], ["Bartender", "BAR", "Bar du carrier"]
     ];
-    // 3 modeles de carrier : variante du journal (CarrierBuy.Variant) -> hologramme. CORRESPONDANCE A CONFIRMER : A = Victory, B = Fortune, C = Nautilus (hypothese : ordre donne par le proprietaire, son carrier est CarrierDockB). Variante inconnue : Fortune.
-    const IMG_VARIANTE = { CarrierDockA: "victory", CarrierDockB: "fortune", CarrierDockC: "nautilus" };
-    const imgCarrier = c => "images/carriers/carrier-" + (c && c.sc ? "escadron" : (IMG_VARIANTE[c && c.var] || "fortune")) + ".webp";   // le carrier D ESCADRON a sa propre image (plus large)
+    // CLASSE du carrier (SQL 192) : Drake = coque de base ; Victory, Fortune, Nautilus = habillages de la boutique. Le journal ne la donne pas (le code CarrierDockA/B/C ne la decrit pas) : le PROPRIETAIRE la choisit
+    // dans Mon hangar ; sans choix, on montre la coque de base. Le carrier d'ESCADRON a sa propre image.
+    const CLASSES = [["drake", "DRAKE"], ["victory", "VICTORY"], ["fortune", "FORTUNE"], ["nautilus", "NAUTILUS"]];
+    const holoDe = c => (c && CLASSES.some(x => x[0] === c.holo)) ? c.holo : "drake";
+    const imgCarrier = c => "images/carriers/carrier-" + (c && c.sc ? "escadron" : holoDe(c)) + ".webp";
     // familles de la carte du hangar : [titre, [cles]]
     const FAMILLES = [["Logistique", ["Repair", "Refuel", "Rearm", "CarrierFuel"]], ["Commerce et vaisseaux", ["Commodities", "BlackMarket", "VoucherRedemption", "Shipyard", "Outfitting"]], ["Exploration et vie à bord", ["Exploration", "VistaGenomics", "PioneerSupplies", "Bartender"]]];
     function famillesServices(srv) {

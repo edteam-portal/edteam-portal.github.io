@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-fc-classe", date: "2026-10-31T13:29:00Z", type: "AMELIORE",
+        titre: "Fleet Carrier : choisissez la classe de votre carrier",
+        texte: "Dans Mon hangar, carte « Mon Fleet Carrier », choisissez la classe de votre carrier (Drake, Victory, Fortune ou Nautilus) : celle que le jeu affiche dans la carte de la galaxie. Votre hologramme change tout de suite, et vos camarades le voient dans la page Escadron. Le jeu ne transmet pas cette information : sans choix, l’hologramme montre la coque de base (Drake). Un carrier peut ainsi avoir eu un mauvais hologramme jusqu’ici : il suffit de cliquer sur la bonne classe.",
+        important: false
+    },
+    {
         id: "2026-10-alerte-combat-explication", date: "2026-10-31T13:00:30Z", type: "AMELIORE",
         titre: "Alerte combat : une explication claire au survol, et une cible comme symbole",
         texte: "Passez la souris sur « ALERTE COMBAT » dans le menu : une explication dit à quoi sert le bouton (être prévenu dès que vous verrouillez un autre joueur, même depuis une autre page de l’application, par exemple sur un second écran), ce qui s’affiche, et pourquoi l’armer une fois en début de session de jeu (l’application n’écoute votre jeu que si vous le demandez). Elle indique aussi l’état de l’alerte : désarmée, armée ou en veille. Le symbole du bouton devient une cible, plus parlante que le triangle d’avertissement.",
