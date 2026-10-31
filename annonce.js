@@ -590,6 +590,56 @@
             aide: 'Menu latéral : ESCADRON (onglets) · MON HANGAR (votre carrier) · à utiliser sur PC ou tablette',
             lien: 'escadron.html',
             mobile: false
+        },
+        {
+            id: 'surveillance-2026-10',
+            couleur: '#B07CFF',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'SURVEILLANCE DES SYSTÈMES STRATÉGIQUES',
+            pages: [
+                {
+                    titre: 'L’ÉTAT-MAJOR SURVEILLE, TOUT LE MONDE VOIT',
+                    sous: 'Page Escadron · onglet SYSTÈMES',
+                    intro: 'L’Amiral et les officiers choisissent les systèmes <b>importants pour l’escadron</b> : un clic sur l’<b>œil</b> d’une ligne, ou l’ajout d’un système <b>par son nom</b>, même hors de notre faction. <b>Tous les pilotes</b> voient l’œil et les alertes.',
+                    visuelHtml: anvSv1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '◉', t: 'UN CLIC SUR L’ŒIL', d: 'Pour l’Amiral, les officiers et le Directeur. Les autres voient, sans modifier.' },
+                        { n: '+', t: 'OU PAR SON NOM', d: 'Le nom est vérifié (EDSM). Contrôlé ou non par notre faction : peu importe. 40 systèmes au plus.' },
+                        { n: '▤', t: 'UN FILTRE', d: '« SURVEILLÉS » les rassemble, les plus graves en premier.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'ILS CLIGNOTENT QUAND ÇA BOUGE',
+                    sous: 'Rouge : urgent · Orange : à surveiller',
+                    intro: 'Un système surveillé <b>clignote doucement</b> et affiche des pastilles dès qu’il se passe quelque chose. Ce qui n’est pas relevé est écrit <b>« non relevé »</b> : rien n’est jamais inventé.',
+                    visuelHtml: anvSv2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '●', t: 'ROUGE', d: 'Guerre, élection, faction sur le départ, ou donnée de plus de <b>24 h</b>.' },
+                        { n: '●', t: 'ORANGE', d: 'Baisse d’influence de notre faction, ou donnée de plus de <b>12 h</b>.' },
+                        { n: '●', t: 'GRIS', d: 'Pas encore de relevé : il manque un pilote sur place.' }
+                    ]
+                },
+                {
+                    titre: 'ET ILS ENTRENT DANS LE REPÉRAGE',
+                    sous: 'Passez-y : +1 point ESPION',
+                    intro: 'Un système surveillé dont la donnée vieillit rejoint la <b>liste de repérage</b>. Un pilote qui y <b>arrive</b> la met à jour pour tout l’escadron et gagne <b>1 point BGS et 1 point ESPION</b>. Les seuils sont réglés par le <b>Directeur</b>.',
+                    visuelHtml: anvSv3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'LE SYSTÈME VIEILLIT', d: 'Au-delà de l’âge limite (12 h), ou 6 h s’il est en alerte.' },
+                        { n: '2', t: 'VOUS PASSEZ', d: 'Le plugin envoie les influences vues dans le jeu : le système repart au vert.' },
+                        { n: '3', t: 'LE DIRECTEUR RÈGLE', d: 'Fenêtre de repérage de la page Engagement : âges, seuils de baisse et de départ.' }
+                    ],
+                    avis: '<b>Plugin SYS.EDTEAM 2.56</b> : il se met à jour tout seul, <b>relancez EDMC deux fois</b> pour que vos passages comptent dans les systèmes surveillés.'
+                }
+            ],
+            cta: 'VOIR LES SYSTÈMES',
+            aide: 'Menu latéral : ESCADRON · onglet SYSTÈMES · œil au début de chaque ligne · à utiliser sur PC ou tablette',
+            lien: 'escadron.html',
+            mobile: false
         }
     ];
 
@@ -694,6 +744,36 @@
         return FCV_CSS + '<div class="fcv"><div class="carte"><div class="big" style="background-image:url(images/carriers/carrier-fortune.webp)"></div><div style="flex:1 1 260px"><div style="color:#FFB000;letter-spacing:3px;font-size:.8em">MON FLEET CARRIER</div><div style="color:#fff;font-size:1.3em;letter-spacing:2px;margin:4px 0 10px">NOVA TERMINUS</div>'
             + '<span class="pill a">7 ACTIFS</span><span class="pill p">1 EN PAUSE</span><span class="pill">5 DÉSACTIVÉS</span>'
             + '<div style="display:flex;gap:8px;flex-wrap:wrap"><div class="fam"><h5>LOGISTIQUE</h5>' + t('', 'RÉPARATION', 'ACTIF') + t('', 'TRITIUM', 'ACTIF') + '</div><div class="fam"><h5>EXPLORATION</h5>' + t('p', 'VISTA GENOMICS', 'EN PAUSE') + t('o', 'CARTOGRAPHIE', 'DÉSACTIVÉ') + '</div></div></div></div></div>';
+    }
+
+    // ---- annonce « Surveillance des systemes » : visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
+    var SVV_CSS = '<style>.svv{max-width:700px;margin:16px auto 0;text-align:left;font-size:.82em}.svv table{width:100%;border-collapse:collapse}.svv th{text-align:left;color:#7d8a92;font-size:.64em;letter-spacing:2px;font-weight:normal;padding:5px 8px;border-bottom:1px solid #B07CFF55}.svv td{padding:7px 8px;border-bottom:1px dashed #2e2a40;color:#dfe9ec;vertical-align:middle}'
+        + '.svv .oe{width:30px;color:#B07CFF}.svv .oe svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}.svv .oe.off{color:#55606a;opacity:.5}'
+        + '.svv .al{display:inline-block;margin:0 4px 2px 0;padding:0 6px;font-size:.7em;letter-spacing:1px;border:1px solid currentColor;white-space:nowrap}.svv .al.v{color:#B07CFF}.svv .al.r{color:#FF4D4D;animation:svvC 1.2s ease-in-out infinite}.svv .al.o{color:#FFB000;animation:svvC 2.2s ease-in-out infinite}.svv .al.g{color:#8b97a0}'
+        + '.svv tr.r td{animation:svvR 1.2s ease-in-out infinite}.svv tr.o td{animation:svvO 2.2s ease-in-out infinite}@keyframes svvC{50%{opacity:.45}}@keyframes svvR{0%,100%{background:rgba(255,77,77,.04)}50%{background:rgba(255,77,77,.2)}}@keyframes svvO{0%,100%{background:rgba(255,176,0,.03)}50%{background:rgba(255,176,0,.15)}}'
+        + '.svv .ajout{display:flex;gap:8px;align-items:center;margin:0 0 10px;color:#9a86d6;font-size:.72em;letter-spacing:1.5px}.svv .ajout span.ch{flex:1;border:1px solid #4a3f6b;color:#6f7d85;padding:6px 10px}.svv .ajout b{border:1px solid #B07CFF;color:#d9c7ff;padding:6px 12px;font-weight:normal}'
+        + '.svv .carte{border:1px solid #B07CFF66;background:rgba(176,124,255,.05);padding:12px 14px}.svv .carte h5{margin:0 0 6px;color:#B07CFF;font-weight:normal;font-size:.72em;letter-spacing:3px}.svv .pt{display:inline-block;margin-left:8px;color:#00FF66;border:1px solid #00FF66;padding:0 7px;font-size:.7em;letter-spacing:1px}</style>';
+    var SVV_OEIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    function anvSv1() {
+        var r = function (on, nom, ty, notes) { return '<tr><td class="oe' + (on ? '' : ' off') + '">' + SVV_OEIL + '</td><td><b>' + nom + '</b></td><td>' + ty + '</td><td>' + notes + '</td></tr>'; };
+        return SVV_CSS + '<div class="svv"><div class="ajout"><span>◉ SURVEILLER UN SYSTÈME</span><span class="ch">Nom du système (même hors de notre faction)</span><b>AJOUTER</b></div><table><thead><tr><th></th><th>SYSTÈME</th><th>TYPE</th><th>NOTES</th></tr></thead><tbody>'
+            + r(true, 'Aldera', '<span style="color:#FFB44D">COLONIE</span>', '<span class="al v">SURVEILLÉ</span>')
+            + r(true, 'VANTOR', '<span style="color:#B07CFF">SURVEILLÉ</span>', '<span class="al v">SURVEILLÉ</span><small style="color:#7d8a92"> ajouté à la main</small>')
+            + r(false, 'Kestrel Prime', '<span style="color:#8b97a0">—</span>', '—') + '</tbody></table></div>';
+    }
+    function anvSv2() {
+        var r = function (cl, nom, notes) { return '<tr class="' + cl + '"><td class="oe">' + SVV_OEIL + '</td><td><b>' + nom + '</b></td><td>' + notes + '</td></tr>'; };
+        return SVV_CSS + '<div class="svv"><table><thead><tr><th></th><th>SYSTÈME</th><th>NOTES</th></tr></thead><tbody>'
+            + r('r', 'Potamoi', '<span class="al v">SURVEILLÉ</span><span class="al r">GUERRE</span><span class="al r">DÉPART IMMINENT · FACTION X 3 %</span>')
+            + r('r', 'Sedna', '<span class="al v">SURVEILLÉ</span><span class="al r">DONNÉE 30 H</span>')
+            + r('o', 'Lave', '<span class="al v">SURVEILLÉ</span><span class="al o">▼ INFLUENCE −2,3 PT / 24 H</span><span class="al o">DONNÉE 14 H</span>')
+            + r('', 'Aldera', '<span class="al v">SURVEILLÉ</span><span class="al g">NON RELEVÉ</span>') + '</tbody></table></div>';
+    }
+    function anvSv3() {
+        return SVV_CSS + '<div class="svv"><div class="carte"><h5>ROUTE DE REPÉRAGE</h5><table><tbody>'
+            + '<tr><td class="oe">' + SVV_OEIL + '</td><td><b>LAVE</b> <span class="al v">SURVEILLANCE</span><br><small style="color:#7d8a92">Surveillé · baisse d’influence · limite 12 h</small></td><td style="color:#ff8a8a">14 h</td><td style="color:#00F0FF">12 al</td></tr>'
+            + '<tr><td class="oe">' + SVV_OEIL + '</td><td><b>POTAMOI</b> <span class="al v">SURVEILLANCE</span><br><small style="color:#7d8a92">Surveillé · guerre · limite 6 h</small></td><td style="color:#ff8a8a">7 h</td><td style="color:#00F0FF">31 al</td></tr>'
+            + '</tbody></table><div style="margin-top:10px;color:#cfd8dc">Vous arrivez à Lave : <span class="pt">+1 BGS</span><span class="pt">+1 ESPION</span> · le système sort de la liste pour tout l’escadron.</div></div></div>';
     }
     // ---- annonce « EDTEAM News » : trois visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
     var NWS_CSS = '<style>.nw{max-width:640px;margin:16px auto 0;text-align:left}.nw .une{border:1px solid #00F0FF55;background:linear-gradient(180deg,rgba(0,40,52,.55),rgba(3,8,12,.9));padding:12px 14px}'

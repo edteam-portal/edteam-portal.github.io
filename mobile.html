@@ -19,7 +19,7 @@
     <script src="shared-utils.js?v=7"></script>
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=2"></script>
-    <script src="annonce.js?v=29"></script>
+    <script src="annonce.js?v=30"></script>
     <script src="revelations.js?v=8"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
@@ -1764,7 +1764,7 @@
             const el = xEl('m-reperage'); if (!el) return;
             const go = () => { if (window.EdteamReperageMobile) window.EdteamReperageMobile.monter(el); };
             if (window.EdteamReperageMobile && window.EdteamReperage) { go(); return; }
-            chargerScriptMobile('reperage.js?v=29', () => chargerScriptMobile('reperage-mobile.js?v=2', go));
+            chargerScriptMobile('reperage.js?v=31', () => chargerScriptMobile('reperage-mobile.js?v=2', go));
         }
 
         function chargerBGSMobile(force) {

@@ -5,6 +5,26 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-plugin-2-56", date: "2026-10-31T15:06:20Z", type: "AMELIORE",
+        titre: "Plugin SYS.EDTEAM 2.56 : à jour ?",
+        texte: "La version 2.56 du plugin est disponible. Quand vous arrivez dans un système surveillé par l’état-major, elle envoie les influences vues dans votre jeu : le système est mis à jour pour tout l’escadron et votre passage compte dans le repérage. Elle règle aussi un petit défaut : le repérage est maintenant compté avant l’envoi des influences. Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",
+        important: true,
+        action: "Relancez EDMC deux fois pour passer en 2.56"
+    },
+    {
+        id: "2026-10-surveillance-reperage", date: "2026-10-31T15:06:10Z", type: "AMELIORE",
+        titre: "Repérage : les systèmes surveillés entrent dans la liste",
+        texte: "Un système surveillé par l’état-major dont la donnée vieillit (12 h par défaut, 6 h s’il est en alerte) rejoint la liste du repérage, avec la pastille « Surveillance » : un pilote qui y arrive la met à jour pour tout l’escadron et gagne 1 point BGS et 1 point ESPION. Dans la fenêtre de repérage, le Directeur règle la surveillance : activation, âge limite, âge en alerte, seuil de baisse d’influence et seuil de départ d’une faction.",
+        important: false
+    },
+    {
+        id: "2026-10-surveillance-systemes", date: "2026-10-31T15:06:00Z", type: "NOUVEAU",
+        titre: "Surveillance des systèmes stratégiques",
+        texte: "Dans la page Escadron, onglet SYSTÈMES, l’Amiral, les officiers et le Directeur peuvent surveiller des systèmes : un clic sur l’œil d’une ligne, ou l’ajout d’un système par son nom, même hors de notre faction. Tous les pilotes voient l’œil et les alertes. Un système surveillé clignote en rouge (guerre, élection, faction sur le départ, donnée de plus de 24 h) ou en orange (baisse d’influence, donnée de plus de 12 h). Un filtre « Surveillés » les rassemble, les plus graves en premier ; la fiche d’un système indique qui l’a mis sous surveillance. Ce qui n’est pas relevé est écrit « non relevé ». 40 systèmes au plus.",
+        important: true,
+        action: "Ouvrez Escadron > Systèmes pour voir les systèmes surveillés"
+    },
+    {
         id: "2026-10-qg-solo-hauteur", date: "2026-10-31T13:39:10Z", type: "AMELIORE",
         titre: "Quartier général : les actualités s’adaptent à la hauteur de l’écran",
         texte: "Pour un pilote sans escadron, le cadre « Actualités » du Quartier général prend maintenant toute la hauteur de l’écran, du petit portable au grand moniteur : plus de grand vide en dessous, et le pied de page reste visible. Il se réajuste tout seul si vous changez la taille de la fenêtre.",
