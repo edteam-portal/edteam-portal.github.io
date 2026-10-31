@@ -8,9 +8,9 @@
     const M = window.systemesMobile = {};
     const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const client = () => (typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp || null);
-    const VERSION_ATTENDUE = 4, CLE = 'edteam_sysfac_v4', DUREE = 3600000, CLE_SURV = 'edteam_surv_v1', DUREE_SURV = 600000, CLE_EDSM = 'edteam_sysfac_edsm_v1_', DUREE_EDSM = 1800000, PAGE = 40;
+    const VERSION_ATTENDUE = 6, CLE = 'edteam_sysfac_v5', DUREE = 3600000, CLE_SURV = 'edteam_surv_v1', DUREE_SURV = 600000, CLE_EDSM = 'edteam_sysfac_edsm_v1_', DUREE_EDSM = 1800000, PAGE = 40;
     // colonnes d'une ligne du serveur
-    const C = { nom: 0, ctrl: 1, colo: 2, archi: 3, membre: 4, infl: 5, etats: 6, age: 7, nbf: 8, dir: 9, chant: 10, conf: 11, pui: 12, sp: 13, x: 14, y: 15, z: 16, camp: 17 };
+    const C = { nom: 0, ctrl: 1, colo: 2, archi: 3, membre: 4, infl: 5, etats: 6, age: 7, nbf: 8, dir: 9, chant: 10, conf: 11, pui: 12, sp: 13, x: 14, y: 15, z: 16, camp: 17, vari: 18, pale: 19, src: 20 };
     const survDe = r => ST.sm.get(String(r[C.nom]).toLowerCase());
     const FILTRES = [
         ['controles', 'TOUS', r => r[C.ctrl] >= 1 || !!survDe(r)],
@@ -51,6 +51,7 @@
 .sm-l1{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
 .sm-nom{color:#fff;font-size:.98em;letter-spacing:1px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Rajdhani','Share Tech Mono',sans-serif;display:flex;align-items:center;gap:6px;min-width:0}
 .sm-nom svg{flex:none;width:15px;height:15px;fill:none;stroke:#B07CFF;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sm-ar{display:block;font-size:.66em;letter-spacing:.5px;white-space:nowrap}.sm-ar.pale{opacity:.6}.sm-ar em{font-style:normal;color:#7d8a92;margin-left:4px}
 .sm-inf{flex:none;text-align:right;line-height:1.15}.sm-inf b{color:#fff;font-weight:normal;font-size:.92em}.sm-inf small{display:block;color:#7d8a92;font-size:.56em}.sm-inf small.v{color:#e0a14d}
 .sm-l2{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .sm-p{display:inline-block;padding:1px 7px;border:1px solid currentColor;font-size:.56em;letter-spacing:1px;border-radius:4px;white-space:nowrap}
@@ -99,10 +100,10 @@
 
     // alertes d'un systeme surveille : rouge (2) guerre / election / depart imminent / donnee > 2 x limite ; orange (1) baisse d'influence / donnee > limite ; gris (0) pas de releve
     function alertes(s) {
-        const reg = (ST.surv && ST.surv.reglages) || {}, lim = Number(reg.age_surv_h) || 12, seuilB = Number(reg.surv_baisse_pts) || 1, l = [];
+        const reg = (ST.surv && ST.surv.reglages) || {}, lim = Number(reg.age_surv_h) || 12, seuilB = Number(reg.surv_baisse_pts) || 1, l = [], seuilD = Number(reg.surv_depart_pct) || 3, seuilC = Number(reg.surv_depart_clign_pct) || 2.5;
         if (s.g) l.push({ t: 'GUERRE', n: 2 });
         if (s.e) l.push({ t: 'ÉLECTION', n: 2 });
-        if (s.dn) l.push({ t: 'DÉPART IMMINENT · ' + String(s.dn).toUpperCase() + ' ' + s.di + ' %' + (s.dv ? ' (NOUS)' : ''), n: 2 });
+        if (s.dn && Number(s.di) < seuilD) l.push({ t: 'DÉPART IMMINENT · ' + String(s.dn).toUpperCase() + ' ' + s.di + ' %' + (s.dv ? ' (NOUS)' : ''), n: Number(s.di) < seuilC ? 2 : 1 });
         if (s.b != null && Number(s.b) >= seuilB) l.push({ t: '▼ INFLUENCE −' + Number(s.b).toFixed(1) + ' PT / 24 H', n: 1 });
         if (s.d == null) l.push({ t: 'NON RELEVÉ', n: 0 });
         else { const h = (Date.now() / 1000 - s.d) / 3600; if (h > 2 * lim) l.push({ t: 'DONNÉE ' + Math.round(h) + ' H', n: 2 }); else if (h > lim) l.push({ t: 'DONNÉE ' + Math.round(h) + ' H', n: 1 }); }
@@ -160,13 +161,20 @@
         }[ST.tri] || (() => 0);
         return l.map(r => [r, ST.d.s.indexOf(r)]).sort((a, b) => cmp(a[0], b[0]));
     }
+    const ORIGINE = r => r[C.src] === 2 ? 'Spansh' : r[C.src] === 1 ? 'relevé d’installations' : 'pilote ou EDSM';
+    // evolution de l'influence de notre faction (SQL 199) : fleche verte = gain, rouge = perte ; « 48 h » = aucune mesure depuis le dernier tick
+    function fleche(r) {
+        const v = r[C.vari]; if (v == null || r[C.infl] == null) return '';
+        const col = v > 0 ? '#00FF66' : v < 0 ? '#FF5C5C' : '#8b97a0', pale = r[C.pale] === 1;
+        return '<span class="sm-ar' + (pale ? ' pale' : '') + '" style="color:' + col + '">' + (v > 0 ? '▲ +' : v < 0 ? '▼ −' : '= ') + Math.abs(v).toFixed(1).replace('.', ',') + (pale ? '<em>48 h</em>' : '') + '</span>';
+    }
     function carte(r, i) {
         const colo = r[C.colo] === 1, mb = r[C.membre] === 1, sv = survDe(r), al = sv ? alertes(sv) : null, d = distDe(r);
         const cls = (al && al.niv >= 1 ? 'a' + al.niv : al && al.niv === 0 ? 'sv0' : mb ? 'mb' : r[C.ctrl] === 2 ? 'cib' : r[C.ctrl] === 0 ? 'non' : '');
         const type = r[C.ctrl] === 3 ? '<span class="sm-p" style="color:#B07CFF">SURVEILLÉ HORS FACTION</span>' : r[C.ctrl] === 2 ? '<span class="sm-p" style="color:#00F0FF">CIBLE</span>' : r[C.ctrl] === 0 ? '<span class="sm-p" style="color:#8b97a0">NON CONTRÔLÉ</span>' : colo ? '<span class="sm-p" style="color:#FFB44D">COLONIE</span>' : '';
         const pastilles = (al ? al.l.map(x => '<span class="sm-p n' + x.n + '">' + E(x.t) + '</span>').join('') : '') + type + (r[C.dir] ? '<span class="sm-p" style="color:#FF7100">DIRECTIVE</span>' : '') + (r[C.conf] ? '<span class="sm-p" style="color:#FF5C5C">CONFLIT</span>' : '')
             + (r[C.chant] ? '<span class="sm-p" style="color:#FFD700">CHANTIERS ×' + r[C.chant] + '</span>' : '') + chipsEtats(r[C.etats]);
-        const inf = r[C.infl] == null ? '<div class="sm-inf"><small>influence non relevée</small></div>' : '<div class="sm-inf"><b>' + r[C.infl].toFixed(1).replace('.', ',') + ' %</b><small class="' + (r[C.age] > 72 ? 'v' : '') + '">' + ilYaH(r[C.age]) + '</small></div>';
+        const inf = r[C.infl] == null ? '<div class="sm-inf"><small>influence non relevée</small></div>' : '<div class="sm-inf"><b>' + r[C.infl].toFixed(1).replace('.', ',') + ' %</b>' + fleche(r) + '<small class="' + (r[C.age] > 72 ? 'v' : '') + '">' + ilYaH(r[C.age]) + (r[C.src] === 2 ? ' · Spansh' : '') + '</small></div>';
         const archi = r[C.archi] ? '<span class="ar">' + avatar(r[C.archi]) + '<span>CMDR ' + E(String(r[C.archi]).toUpperCase()) + (mb ? '' : ' · hors escadron') + '</span></span>' : '<span class="ar"><span>' + (colo ? 'architecte inconnu' : (r[C.nbf] != null ? r[C.nbf] + ' faction' + (r[C.nbf] > 1 ? 's' : '') : '')) + '</span></span>';
         return '<div class="sm-c ' + cls + '" onclick="systemesMobile.fiche(' + i + ')"><div class="sm-l1"><span class="sm-nom">' + (sv ? OEIL : '') + '<span style="overflow:hidden;text-overflow:ellipsis">' + lieu(r[C.nom]) + '</span></span>' + inf + '</div>'
             + (pastilles ? '<div class="sm-l2">' + pastilles + '</div>' : '') + '<div class="sm-l3">' + archi + (d != null ? '<i>' + fmtD(d) + ' al</i>' : '') + '</div></div>';
@@ -232,7 +240,7 @@
         o.innerHTML = '<div class="sm-sh"><div class="top"><div><small>SYSTÈME · ' + E(String(ST.d.faction || '').toUpperCase()) + '</small><b>' + lieu(r[C.nom]) + '</b></div><span class="x" onclick="systemesMobile.fermer()">✕</span></div>'
             + '<div class="bd">' + bd + '</div>' + surv
             + '<h4>NOTRE FACTION</h4><div class="grille">'
-            + cs('INFLUENCE', r[C.infl] == null ? 'non relevée' : r[C.infl].toFixed(1).replace('.', ',') + ' %', r[C.age] > 168 ? 'al' : '', r[C.infl] == null ? '' : ilYaH(r[C.age]))
+            + cs('INFLUENCE', r[C.infl] == null ? 'non relevée' : r[C.infl].toFixed(1).replace('.', ',') + ' %' + fleche(r), r[C.age] > 168 ? 'al' : '', r[C.infl] == null ? '' : 'relevé ' + ilYaH(r[C.age]) + ' (' + ORIGINE(r) + ')')
             + cs('ÉTATS', chipsEtats(r[C.etats]) || '—') + cs('FACTIONS', r[C.nbf] == null ? '—' : r[C.nbf])
             + cs('DONNÉE SPANSH', r[C.sp] == null ? '—' : ilYaH(r[C.sp] * 24), r[C.sp] > 21 ? 'al' : '') + (d != null ? cs('DISTANCE', fmtD(d) + ' al', '', 'depuis ' + E(ST.moi.nom || 'votre position')) : '') + '</div>'
             + (colo ? '<h4>COLONIE</h4><div class="grille">' + cs('ARCHITECTE', r[C.archi] ? avatar(r[C.archi], 26) + ' CMDR ' + E(String(r[C.archi]).toUpperCase()) : 'inconnu') + cs('MEMBRE DE L’ESCADRON', r[C.archi] ? (mb ? '<span style="color:#00FF66">OUI</span>' : '<span style="color:#8b97a0">NON</span>') : '—') + cs('CHANTIERS EN COURS', r[C.chant] || '0') + '</div>'

@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-systemes-evolution-filtres", date: "2026-10-31T18:48:09Z", type: "AMELIORE",
+        titre: "Systèmes : l’influence de tous les systèmes, son évolution, des filtres plus clairs",
+        texte: "Dans l’onglet SYSTÈMES (PC et mobile), les systèmes sans relevé de pilote ni d’EDSM affichent maintenant l’influence donnée par Spansh (mention « Spansh », environ 24 h de retard ; la valeur la plus récente gagne). Chaque influence affiche une petite flèche d’évolution comme sur la page BGS : verte pour un gain, rouge pour une perte, depuis le dernier tick (flèche pâle « 48 h » quand aucune mesure n’est postérieure au tick). Sur tablette et portable (écran de 1600 px ou moins), les systèmes et les Fleet Carriers passent en cartes lisibles au toucher, avec un choix de tri, au lieu d’un tableau écrasé ; deux boutons TABLEAU / CARTES permettent de choisir son affichage. Les filtres principaux tiennent sur une ligne, les autres sont derrière « + FILTRES », et le champ pour surveiller un système n’apparaît que sur demande. La fiche d’un système indique maintenant la date du relevé de notre serveur et celle d’EDSM, et signale quand EDSM est en retard sur nos pilotes ; une note explique d’où viennent les chiffres (Spansh, relevés des pilotes, EDSM).",
+        important: false
+    },
+    {
+        id: "2026-10-surveillance-depart-seuils", date: "2026-10-31T18:29:42Z", type: "AMELIORE",
+        titre: "Surveillance : l’alerte « faction sur le départ » avec deux seuils",
+        texte: "Dans l’onglet SYSTÈMES, une faction qui perd de l’influence (ou en retraite) dans un système surveillé clignote maintenant en orange quand son influence descend sous 3 %, puis en rouge sous 2,5 %. Le Directeur règle les deux seuils dans la fenêtre du repérage (page BGS).",
+        important: false
+    },
+    {
         id: "2026-10-mobile-systemes-carriers", date: "2026-10-31T18:07:56Z", type: "NOUVEAU",
         titre: "Mobile : les systèmes et les Fleet Carriers de l’escadron",
         texte: "Dans l’onglet Escadron du mobile, trois sous-onglets : Membres, Systèmes et Fleet Carriers. Systèmes : les systèmes de votre faction avec leurs alertes (guerre, élection, influence en baisse, donnée ancienne), filtres, recherche, distance depuis votre position et fiche détaillée. Fleet Carriers : où se poser, chez qui, avec quels services et quel message du propriétaire, avec une fiche pour chaque carrier. C’est de la consultation : la surveillance des systèmes et la gestion de votre carrier restent sur le PC.",

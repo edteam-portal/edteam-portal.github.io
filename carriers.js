@@ -144,6 +144,17 @@
 .fc-dirsel{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:0 0 10px;font-size:.72em;letter-spacing:1.5px;color:#7d8a92}
 .fc-dirsel select{background:#05080c;border:1px solid #3a474d;color:#dfe9ec;font:inherit;padding:5px 8px;letter-spacing:1px;max-width:100%}.fc-dirsel select:focus{outline:none;border-color:var(--c)}
 .fcm-sep{flex:0 0 14px}
+.fc-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:10px}
+.fc .vue-sel{display:inline-flex;margin-left:auto}.fc .vue-sel button{background:transparent;border:1px solid #3a474d;color:#aab7bd;font:inherit;font-size:.74em;letter-spacing:1.5px;padding:5px 12px;cursor:pointer}.fc .vue-sel button+button{border-left:0}.fc .vue-sel button.on{border-color:var(--c);color:#fff;background:rgba(255,176,0,.16)}
+.fc-cd{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:11px 14px 11px 10px;border:1px solid #3a2d12;border-left:4px solid var(--c);background:linear-gradient(90deg,rgba(255,176,0,.08),rgba(255,255,255,.02) 60%);min-width:0}
+.fc-cd.sc{border-color:#12303a;border-left-color:#00F0FF;background:linear-gradient(90deg,rgba(0,240,255,.09),rgba(255,255,255,.02) 60%)}.fc-cd.moi{box-shadow:inset 0 0 0 1px rgba(0,240,255,.4)}.fc-cd.dir{border-left-color:#FF7100}
+.fc-cdh{align-self:center;height:78px;border:1px solid rgba(255,176,0,.35);background:radial-gradient(circle,rgba(255,176,0,.2),rgba(0,0,0,.55) 72%);display:flex;align-items:center;justify-content:center;overflow:hidden}.fc-cd.sc .fc-cdh{border-color:rgba(0,240,255,.35);background:radial-gradient(circle,rgba(0,240,255,.2),rgba(0,0,0,.55) 72%)}
+.fc-cdh img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,176,0,.5))}.fc-cd.sc .fc-cdh img{filter:drop-shadow(0 0 8px rgba(0,240,255,.5))}
+.fc-cdb{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fc-cdb .l1{display:flex;align-items:baseline;gap:10px;min-width:0}.fc-cdb .l1 b{color:#fff;font-weight:normal;letter-spacing:1.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fc-cdb .l1 small{color:#7d8a92;letter-spacing:2px;font-size:.74em}.fc-cdb .l1 .vu{margin-left:auto;flex:none;color:#7d8a92;font-size:.72em;white-space:nowrap}
+.fc-cdb .l2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.84em}.fc-cdb .l3{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;font-size:.86em}.fc-cdb .l3 .di{color:#9fb0b6;font-size:.86em}.fc-cdb .l3 .di b{color:#00F0FF;font-weight:normal}
+.fc-cdb .fc-svc{display:flex;flex-wrap:wrap;gap:4px}.fc-cdb .att{color:#ffd98a;font-size:.8em;line-height:1.4}
+.fc-msgl{padding:6px 10px;border-left:3px solid #FFB000;background:rgba(255,176,0,.08);color:#ffe2a8;font-size:.78em;line-height:1.45;cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.fc-msgl.old{opacity:.7}
 @media (max-width:760px){.fc-holo{width:auto}.fc-tab thead{display:none}.fc-tab,.fc-tab tbody,.fc-tab tr,.fc-tab td{display:block;width:100%}.fc-tab tr{padding:8px 0;border-bottom:1px dashed #28343a}.fc-tab td{border:0;padding:3px 4px}}
 `;
     function style() {
@@ -361,6 +372,14 @@
         } catch (e) { return false; }
     }
 
+    // MODE CARTES : une CARTE par carrier (hologramme, pilote, systeme, services sur plusieurs lignes, message, distances) au lieu du tableau
+    // AFFICHAGE : « auto » = cartes jusqu'a 1600 px de large (tablettes, portables), tableau au-dela ; le pilote peut forcer l'un ou l'autre (memoire sur l'appareil, commune a Systemes et Fleet Carriers)
+    const CLE_VUE = "edteam_vue_esc";
+    const vuePref = () => { try { const v = localStorage.getItem(CLE_VUE); return v === "cartes" || v === "tableau" ? v : "auto"; } catch (e) { return "auto"; } };
+    const tablette = () => { const p = vuePref(); return p === "cartes" ? true : p === "tableau" ? false : !!(window.matchMedia && window.matchMedia("(max-width: 1600px)").matches); };
+    const boutonsVue = () => '<span class="vue-sel" role="group" aria-label="Affichage"><button type="button" data-vue="tableau" class="' + (!tablette() ? "on" : "") + '" title="Afficher en tableau">☰ TABLEAU</button><button type="button" data-vue="cartes" class="' + (tablette() ? "on" : "") + '" title="Afficher en cartes">▦ CARTES</button></span>';
+    const choisirVue = v => { try { localStorage.setItem(CLE_VUE, v); } catch (e) { /* tant pis */ } window.dispatchEvent(new Event("edteam-vue")); };
+
     // ---- le tableau ----
     function dessinerListe(el, S) {
         const E_ = S.etat, liste = S.liste, dirs = S.dirs, moi = S.moi;
@@ -394,8 +413,20 @@
                 + "<td>" + ilYa(c.vu) + "</td></tr>";
         }).join("");
         const zone = el.querySelector(".fc-liste");
-        zone.innerHTML = aff.length ? '<table class="fc-tab"><thead><tr><th></th>' + th("nom", "CARRIER") + "<th>PILOTE</th><th>SYSTÈME</th><th>SERVICES</th>" + (avecDm ? th("dm", "DIST. DEPUIS MOI") : "") + (avecDd ? th("dd", "DIST. DIRECTIVE") : "") + th("vu", "VU") + "</tr></thead><tbody>" + rows + "</tbody></table>"
+        const cartes = () => '<div class="fc-grille">' + aff.map(({ c, dm, dd, ddNom, dirT }) => {
+            const sv = saut(c), acc = ACCES[c.acces];
+            const srv = c.sc ? (c.services ? chipsServices(c.services) + (c.services_vu ? '<small class="fc-srvvu">relevés ' + ilYa(c.services_vu) + " à l’appontage</small>" : "") : '<span class="inv">services non relevés</span>') : chipsServices(c.services);
+            return '<div class="fc-cd' + (c.moi ? " moi" : "") + (c.sc ? " sc" : "") + (dirT ? " dir" : "") + '"><div class="fc-cdh"><img class="' + (c.sc ? "sc" : "") + '" src="' + imgCarrier(c) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>'
+                + '<div class="fc-cdb"><div class="l1"><b>' + E(c.nom || c.indicatif) + "</b><small>" + E(c.indicatif) + '</small><span class="vu">' + ilYa(c.vu) + "</span></div>"
+                + '<div class="l2">' + (c.sc ? '<span class="fc-sctag">CARRIER D’ESCADRON</span><span class="fc-scesc">' + E(c.escadron || "") + "</span>" : pilote(c, 26)) + (acc ? '<span class="fc-acc" style="color:' + acc[1] + '">' + acc[0] + "</span>" : "") + (c.moi && !c.partage ? '<span class="fc-tag">NON PARTAGÉ</span>' : "") + "</div>"
+                + '<div class="l3"><span class="sy">' + (c.systeme ? "<b>" + lieu(c.systeme) + "</b>" : '<span class="inv">position inconnue</span>') + "</span>" + (dm != null ? '<span class="di" title="Distance depuis votre position"><b>' + fmtD(dm) + " al</b> depuis moi</span>" : "") + (dd != null ? '<span class="di" title="Distance à la directive">' + fmtD(dd) + " al · " + E(ddNom || "directive") + "</span>" : "") + "</div>"
+                + (dirT ? '<div class="l4"><span class="fc-dirtag">◆ DIRECTIVE · ' + E(String(dirT).toUpperCase()) + "</span></div>" : "")
+                + '<div class="fc-svc">' + srv + "</div>"
+                + (sv ? '<div class="att">' + sv + "</div>" : "") + (c.message ? '<div class="fc-msgl' + (msgAncien(c) ? " old" : "") + '" data-m="' + S.liste.indexOf(c) + '" title="Cliquer pour lire le message en entier">✉ ' + E(c.message) + "</div>" : "") + "</div></div>";
+        }).join("") + "</div>";
+        zone.innerHTML = aff.length && tablette() ? cartes() : aff.length ? '<table class="fc-tab"><thead><tr><th></th>' + th("nom", "CARRIER") + "<th>PILOTE</th><th>SYSTÈME</th><th>SERVICES</th>" + (avecDm ? th("dm", "DIST. DEPUIS MOI") : "") + (avecDd ? th("dd", "DIST. DIRECTIVE") : "") + th("vu", "VU") + "</tr></thead><tbody>" + rows + "</tbody></table>"
             : '<div class="fc-vide">' + (liste.length ? "Aucun carrier ne correspond à ces filtres." : "Aucun carrier partagé pour l’instant. Les carriers des pilotes apparaissent tout seuls avec le plugin SYS.EDTEAM 2.53 (relancer EDMC une fois).") + "</div>";
+        { const fil = el.querySelector(".fc-fil"); if (fil) { let z = fil.querySelector(".vue-sel"); if (z) z.remove(); fil.insertAdjacentHTML("beforeend", boutonsVue()); } }
         el.querySelector(".fc-n").textContent = aff.length + " carrier" + (aff.length > 1 ? "s" : "");
         el.querySelectorAll("[data-f]").forEach(b => b.classList.toggle("on", b.dataset.f === E_.f));
         el.querySelectorAll("[data-sv]").forEach(b => b.classList.toggle("on", E_.sv.has(b.dataset.sv)));
@@ -426,6 +457,7 @@
                 + '<div class="fc-liste"></div>'
                 + '<div class="fc-note">Position et services lus dans le journal de jeu de chaque propriétaire : ils datent de sa dernière session. Les distances sont en années-lumière, calculées sur votre appareil. Chaque pilote peut cacher son carrier depuis la page Mon hangar. Le carrier d’escadron est montré à tous les membres : sa position vient du journal de jeu du dernier membre qui l’a vu, ses services de l’appontage du dernier membre qui s’y est posé.</div>';
             el.addEventListener("click", e => {
+                const bv = e.target.closest("[data-vue]"); if (bv) { choisirVue(bv.dataset.vue); return; }
                 const f = e.target.closest("[data-f]"), sv = e.target.closest("[data-sv]"), ed = e.target.closest("[data-ed]"), t = e.target.closest("th[data-t]"), mg = e.target.closest("[data-m]"), fm = e.target.closest("[data-msg]");
                 if (mg) { modaleMessage(S.liste[+mg.dataset.m]); return; }
                 if (fm) S.etat.msg = !S.etat.msg;
@@ -437,6 +469,7 @@
                 dessinerListe(el, S);
             });
             infobulleMessage(el, S);
+            { const re = () => { if (el.isConnected) dessinerListe(el, S); }; window.addEventListener("edteam-vue", re); if (window.matchMedia) { const mq = window.matchMedia("(max-width: 1600px)"); if (mq.addEventListener) mq.addEventListener("change", re); else if (mq.addListener) mq.addListener(re); } }
             const sel = el.querySelector(".fc-dirchoix"); if (sel) sel.addEventListener("change", () => { S.etat.dir = sel.value; dessinerListe(el, S); });
             dessinerListe(el, S);
             lirePosition().then(p => { S.moi = p; dessinerListe(el, S); });          // une petite lecture (~80 octets) : la liste s'affiche sans l'attendre

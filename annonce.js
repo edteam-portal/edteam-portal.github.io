@@ -617,7 +617,7 @@
                     visuelHtml: anvSv2,
                     colonnes: 3,
                     etapes: [
-                        { n: '●', t: 'ROUGE', d: 'Guerre, élection, faction sur le départ, ou donnée de plus de <b>24 h</b>.' },
+                        { n: '●', t: 'ROUGE', d: 'Guerre, élection, ou donnée de plus de <b>24 h</b>. Une faction sur le départ clignote en <b>orange</b> sous 3 % et en <b>rouge</b> sous 2,5 %.' },
                         { n: '●', t: 'ORANGE', d: 'Baisse d’influence de notre faction, ou donnée de plus de <b>12 h</b>.' },
                         { n: '●', t: 'GRIS', d: 'Pas encore de relevé : il manque un pilote sur place.' }
                     ]
@@ -764,7 +764,7 @@
     function anvSv2() {
         var r = function (cl, nom, notes) { return '<tr class="' + cl + '"><td class="oe">' + SVV_OEIL + '</td><td><b>' + nom + '</b></td><td>' + notes + '</td></tr>'; };
         return SVV_CSS + '<div class="svv"><table><thead><tr><th></th><th>SYSTÈME</th><th>NOTES</th></tr></thead><tbody>'
-            + r('r', 'Potamoi', '<span class="al v">SURVEILLÉ</span><span class="al r">GUERRE</span><span class="al r">DÉPART IMMINENT · FACTION X 3 %</span>')
+            + r('r', 'Potamoi', '<span class="al v">SURVEILLÉ</span><span class="al r">GUERRE</span><span class="al r">DÉPART IMMINENT · FACTION X 2,4 %</span>')
             + r('r', 'Sedna', '<span class="al v">SURVEILLÉ</span><span class="al r">DONNÉE 30 H</span>')
             + r('o', 'Lave', '<span class="al v">SURVEILLÉ</span><span class="al o">▼ INFLUENCE −2,3 PT / 24 H</span><span class="al o">DONNÉE 14 H</span>')
             + r('', 'Aldera', '<span class="al v">SURVEILLÉ</span><span class="al g">NON RELEVÉ</span>') + '</tbody></table></div>';

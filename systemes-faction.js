@@ -11,12 +11,13 @@
     if (window.EdteamSystemes) return;
 
     const E = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    const VERSION_ATTENDUE = 4, CLE = "edteam_sysfac_v4", DUREE = 3600000, CLE_EDSM = "edteam_sysfac_edsm_v1_", DUREE_EDSM = 1800000;
+    const VERSION_ATTENDUE = 6, CLE = "edteam_sysfac_v5", DUREE = 3600000, CLE_EDSM = "edteam_sysfac_edsm_v1_", DUREE_EDSM = 1800000;
     // colonnes d'une ligne du serveur
-    const C = { nom: 0, ctrl: 1, colo: 2, archi: 3, membre: 4, infl: 5, etats: 6, age: 7, nbf: 8, dir: 9, chant: 10, conf: 11, pui: 12, sp: 13, x: 14, y: 15, z: 16, camp: 17 };
+    const C = { nom: 0, ctrl: 1, colo: 2, archi: 3, membre: 4, infl: 5, etats: 6, age: 7, nbf: 8, dir: 9, chant: 10, conf: 11, pui: 12, sp: 13, x: 14, y: 15, z: 16, camp: 17, vari: 18, pale: 19, src: 20 };   // src : origine de l'influence (0 pilote ou EDSM, 1 releve d'installations, 2 Spansh)
     const FILTRES = [
-        ["controles", "CONTRÔLÉS, CIBLES ET SURVEILLÉS", r => r[C.ctrl] >= 1 || !!survDe(r)],
+        ["controles", "TOUS LES SYSTÈMES SUIVIS", r => r[C.ctrl] >= 1 || !!survDe(r)],
         ["surveilles", "SURVEILLÉS", r => !!survDe(r)],
+        ["alertes", "EN ALERTE", r => { const v = survDe(r); return !!v && alertes(v).niv >= 1; }],
         ["colonies", "COLONIES", r => r[C.ctrl] === 1 && r[C.colo] === 1],
         ["membres", "COLONIES DE MEMBRES", r => r[C.membre] === 1],
         ["directives", "DIRECTIVE ACTIVE", r => r[C.dir] === 1],
@@ -26,7 +27,16 @@
         ["cibles", "CIBLES", r => r[C.ctrl] === 2],
         ["non", "COLONIES NON CONTRÔLÉES", r => r[C.ctrl] === 0]
     ];
-    let DATA = null, BRUT = null, EL = null, SURV = null, SM = new Map(), etat = { f: "controles", q: "", tri: "nom", sens: 1 };
+    const PRINCIPAUX = ["controles", "surveilles", "alertes", "colonies", "membres"];   // les autres filtres sont derriere « + FILTRES »
+    let DATA = null, BRUT = null, EL = null, SURV = null, SM = new Map(), etat = { f: "controles", q: "", tri: "nom", sens: 1, plus: false, add: false, nb: 48 };
+    // MODE CARTES : le tableau est remplace par une grille de CARTES (lisible au toucher, pas de colonnes ecrasees), avec un selecteur de tri et la suite a la demande
+    // AFFICHAGE : « auto » = cartes jusqu'a 1600 px de large (tablettes, portables), tableau au-dela ; le pilote peut forcer l'un ou l'autre (memoire sur l'appareil, commune a Systemes et Fleet Carriers)
+    const CLE_VUE = "edteam_vue_esc";
+    const vuePref = () => { try { const v = localStorage.getItem(CLE_VUE); return v === "cartes" || v === "tableau" ? v : "auto"; } catch (e) { return "auto"; } };
+    const tablette = () => { const p = vuePref(); return p === "cartes" ? true : p === "tableau" ? false : !!(window.matchMedia && window.matchMedia("(max-width: 1600px)").matches); };
+    const boutonsVue = () => '<span class="vue-sel" role="group" aria-label="Affichage"><button type="button" data-vue="tableau" class="' + (!tablette() ? "on" : "") + '" title="Afficher en tableau">☰ TABLEAU</button><button type="button" data-vue="cartes" class="' + (tablette() ? "on" : "") + '" title="Afficher en cartes">▦ CARTES</button></span>';
+    const choisirVue = v => { try { localStorage.setItem(CLE_VUE, v); } catch (e) { /* tant pis */ } window.dispatchEvent(new Event("edteam-vue")); };
+
 
     const CSS = `
 .sf{font-family:'Share Tech Mono',monospace;margin:0 0 14px;--c:#00F0FF}
@@ -35,11 +45,25 @@
 .sf-h h2{margin:0;color:var(--c);font-size:1.05em;letter-spacing:3px;font-weight:normal;text-transform:uppercase}
 .sf-h em{color:#8b97a0;font-size:.74em;font-style:normal;letter-spacing:1px}
 .sf-n{margin-left:auto;color:#8b97a0;font-size:.78em;letter-spacing:1px}
-.sf-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
-.sf-bar button{background:transparent;border:1px solid #3a474d;color:#aab7bd;font:inherit;font-size:.72em;letter-spacing:1.5px;padding:5px 11px;cursor:pointer}
+.sf-bar{margin:0 0 10px;display:flex;flex-direction:column;gap:7px}.sf-bar1,.sf-bar2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.sf-bar2{padding:8px 10px;border:1px dashed #2a3a40;background:rgba(0,240,255,.03)}
+.sf-bar button{background:transparent;border:1px solid #3a474d;color:#aab7bd;font:inherit;font-size:.72em;letter-spacing:1.5px;padding:6px 13px;cursor:pointer}
 .sf-bar button.on{border-color:var(--c);color:#fff;background:rgba(0,240,255,.12)}
 .sf-bar button i{font-style:normal;color:#7d8a92;margin-left:6px}.sf-bar button.on i{color:#9ee}
-.sf-outils{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 10px}.sf-outils .sf-ref{flex:1 1 360px;margin:0}
+.sf-bar button.rouge i{color:#FF5C5C}.sf-grille-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px}
+.sf-cd{display:flex;flex-direction:column;gap:7px;padding:11px 14px 11px 12px;border:1px solid #1d2a30;border-left:4px solid var(--k,#00F0FF);background:linear-gradient(90deg,color-mix(in srgb,var(--k,#00F0FF) 8%,transparent),rgba(255,255,255,.02) 60%);cursor:pointer;min-width:0}
+.sf-cd:active{background:linear-gradient(90deg,color-mix(in srgb,var(--k,#00F0FF) 20%,transparent),rgba(255,255,255,.04) 60%)}
+.sf-cd.a1{--k:#FFB000}.sf-cd.a2{--k:#FF4D4D}.sf-cd.sv0{--k:#B07CFF}.sf-cd.mb{--k:#00FF66}.sf-cd.cib{--k:#00F0FF}.sf-cd.non{--k:#6a7378}
+.sf-cd.sv1{animation:sfPulse1 2.2s ease-in-out infinite}.sf-cd.sv2{animation:sfPulse2 1.2s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.sf-cd.sv1,.sf-cd.sv2{animation:none}}
+.sf-cd1{display:flex;align-items:center;gap:8px;min-width:0}.sf-cd1 .sf-nom{font-size:1.02em;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}.sf-cd1 .sf-oeil{flex:none}.sf-cd1 .sf-inf{flex:none;text-align:right;margin-left:auto}
+.sf-cd2{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:.72em;letter-spacing:1px}
+.sf-cd3{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#8b97a0;font-size:.78em;min-width:0}.sf-cd3 .sf-pil{min-width:0}.sf-cdd{flex:none;color:#00F0FF;letter-spacing:1px}
+.sf-plus{display:block;width:100%;margin:12px 0 0;padding:14px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.4);color:#9fe9f2;font:inherit;font-size:.8em;letter-spacing:2px;cursor:pointer}
+.sf-vue{margin-left:auto}.vue-sel{display:inline-flex;gap:0}.vue-sel button{background:transparent;border:1px solid #3a474d;color:#aab7bd;font:inherit;font-size:.7em;letter-spacing:1.5px;padding:7px 12px;cursor:pointer}.vue-sel button+button{border-left:0}.vue-sel button.on{border-color:var(--c,#00F0FF);color:#fff;background:rgba(0,240,255,.14)}
+.sf-tri{background:#05080c;border:1px solid #3a474d;color:#dfe9ec;font:inherit;font-size:.74em;letter-spacing:1px;padding:8px 10px}
+.sf-fl{display:inline-block;margin-left:8px;font-size:.82em;letter-spacing:.5px;white-space:nowrap}.sf-fl.pale{opacity:.6}.sf-fl em{font-style:normal;color:#7d8a92;font-size:.78em;margin-left:5px}.sf-bar button.plus{border-style:dashed;color:#9fe9f2;margin-left:auto}
+.sf-outils{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 10px;padding:8px 0;border-top:1px solid #1d2a30;border-bottom:1px solid #1d2a30}.sf-outils .sf-ref{flex:1 1 360px;margin:0}
+.sf-addbtn{margin-left:0;background:rgba(176,124,255,.08);border:1px solid #6b4fb0;color:#d9c7ff;font:inherit;font-size:.72em;letter-spacing:2px;padding:7px 14px;cursor:pointer}.sf-addbtn.on{border-color:#B07CFF;background:rgba(176,124,255,.18);color:#fff}
 .sf-outils input{flex:0 1 340px;min-width:220px;background:#05080c;border:1px solid #3a474d;color:#dfe9ec;font:inherit;font-size:.8em;padding:7px 10px;letter-spacing:1px}
 .sf-outils input:focus{outline:none;border-color:var(--c)}
 .sf-cadre{border:1px solid rgba(0,240,255,.18)}
@@ -223,18 +247,28 @@
         liste.forEach(s => { if (!connus.has(String(s.s).toLowerCase())) extra.push([s.s, 3, 0, null, 0, null, null, null, null, 0, 0, 0, null, null, s.x, s.y, s.z, null]); });
         return Object.assign({}, d, { s: d.s.concat(extra) });
     }
-    // les alertes d'un systeme surveille : rouge (n 2) = guerre, election, faction sur le depart, donnee de plus de 2 x la limite ; orange (n 1) = baisse d'influence, donnee de plus de la limite ; gris (n 0) = pas de releve
+    // les alertes d'un systeme surveille : rouge (n 2) = guerre, election, donnee de plus de 2 x la limite ; orange (n 1) = baisse d'influence, donnee de plus de la limite ;
+    // FACTION SUR LE DEPART (SQL 198) : ORANGE qui clignote sous le seuil de depart (3 %), ROUGE qui clignote sous le seuil rouge (2,5 %), les deux reglables par le Directeur ; gris (n 0) = pas de releve
     function alertes(s) {
         const reg = (SURV && SURV.reglages) || {}, lim = Number(reg.age_surv_h) || 12, seuilB = Number(reg.surv_baisse_pts) || 1, l = [];
+        const seuilD = Number(reg.surv_depart_pct) || 3, seuilC = Number(reg.surv_depart_clign_pct) || 2.5;
         if (s.g) l.push({ t: "GUERRE", n: 2 });
         if (s.e) l.push({ t: "ÉLECTION", n: 2 });
-        if (s.dn) l.push({ t: "DÉPART IMMINENT · " + String(s.dn).toUpperCase() + " " + s.di + " %" + (s.dv ? " (NOUS)" : ""), n: 2 });
+        if (s.dn && Number(s.di) < seuilD) l.push({ t: "DÉPART IMMINENT · " + String(s.dn).toUpperCase() + " " + s.di + " %" + (s.dv ? " (NOUS)" : ""), n: Number(s.di) < seuilC ? 2 : 1 });
         if (s.b != null && Number(s.b) >= seuilB) l.push({ t: "▼ INFLUENCE −" + Number(s.b).toFixed(1) + " PT / 24 H", n: 1 });
         if (s.d == null) l.push({ t: "NON RELEVÉ", n: 0 });
         else { const h = (Date.now() / 1000 - s.d) / 3600; if (h > 2 * lim) l.push({ t: "DONNÉE " + Math.round(h) + " H", n: 2 }); else if (h > lim) l.push({ t: "DONNÉE " + Math.round(h) + " H", n: 1 }); }
         return { l: l, niv: l.reduce((m, x) => Math.max(m, x.n), 0) };
     }
-    const chipsSurv = al => '<span class="sf-al sv" title="Système surveillé par l’état-major de l’escadron">SURVEILLÉ</span>' + al.l.map(x => '<span class="sf-al n' + x.n + '">' + E(x.t) + "</span>").join("");
+    const clsAl = x => 'sf-al n' + x.n;
+    const chipsSurv = al => '<span class="sf-al sv" title="Système surveillé par l’état-major de l’escadron">SURVEILLÉ</span>' + al.l.map(x => '<span class="' + clsAl(x) + '">' + E(x.t) + "</span>").join("");
+    const ORIGINE = r => r[C.src] === 2 ? "Spansh" : r[C.src] === 1 ? "relevé d’installations" : "pilote ou EDSM";
+    // evolution de l'influence de notre faction (SQL 199) : fleche verte = gain, rouge = perte, grise = inchangee ; fond net = depuis le dernier tick, pale (« 48 h ») = aucune mesure depuis le tick
+    function fleche(r) {
+        const v = r[C.vari]; if (v == null || r[C.infl] == null) return "";
+        const col = v > 0 ? "#00FF66" : v < 0 ? "#FF5C5C" : "#8b97a0", pale = r[C.pale] === 1;
+        return '<span class="sf-fl' + (pale ? " pale" : "") + '" style="color:' + col + '" title="' + (pale ? "Variation de notre influence sur 48 h (aucune mesure depuis le dernier tick)" : "Variation de notre influence depuis le dernier tick") + '">' + (v > 0 ? "▲ +" : v < 0 ? "▼ −" : "= ") + Math.abs(v).toFixed(1).replace(".", ",") + (pale ? "<em>48 h</em>" : "") + "</span>";
+    }
     function celluleOeil(i, sv) {
         if (!SURV) return "";
         if (SURV.peut) return '<td class="sf-oeil' + (sv ? " on" : "") + '"><button type="button" data-oeil="' + i + '" title="' + (sv ? "Surveillé par l’état-major : cliquer pour arrêter" : "Surveiller ce système") + '" aria-label="' + (sv ? "Arrêter la surveillance" : "Surveiller ce système") + '">' + OEIL + "</button></td>";
@@ -284,7 +318,9 @@
     }
     function majAjout(el) {
         const z = el.querySelector(".sf-add"); if (!z) return;
-        if (!SURV || !SURV.peut) { z.style.display = "none"; z.innerHTML = ""; delete z.dataset.pret; return; }
+        const bb = el.querySelector(".sf-addbtn");
+        if (!SURV || !SURV.peut) { z.style.display = "none"; z.innerHTML = ""; delete z.dataset.pret; if (bb) bb.style.display = "none"; return; }
+        if (bb) { bb.style.display = ""; bb.textContent = "◉ SURVEILLER UN SYSTÈME · " + ((SURV.liste || []).length) + " / 40"; bb.classList.toggle("on", !!etat.add); }
         if (!z.dataset.pret) {
             z.dataset.pret = "1";
             z.innerHTML = '<span>◉ SURVEILLER UN SYSTÈME</span><input type="text" maxlength="80" placeholder="Nom du système (même hors de notre faction)" aria-label="Système à surveiller" autocomplete="off" spellcheck="false"><button type="button" data-aj="1">AJOUTER</button><span class="sf-msg"></span><span class="sf-nb"></span>';
@@ -292,7 +328,7 @@
             z.querySelector("button").addEventListener("click", go);
             z.querySelector("input").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); go(); } });
         }
-        z.style.display = ""; z.querySelector(".sf-nb").textContent = ((SURV.liste || []).length) + " / 40";
+        z.style.display = etat.add ? "" : "none"; z.querySelector(".sf-nb").textContent = ((SURV.liste || []).length) + " / 40";
     }
     // section « SURVEILLANCE » de la fiche d'un systeme
     function sectionSurv(r) {
@@ -303,7 +339,7 @@
         if (sv) {
             const al = alertes(sv);
             h += '<div class="sf-grille">' + cs("SURVEILLÉ PAR", sv.par ? "CMDR " + E(String(sv.par).toUpperCase()) + '<small style="display:block;color:#7d8a92;font-size:.7em;margin-top:3px">' + ilYaS(sv.le) + "</small>" : "l’état-major")
-                + cs("DONNÉE", sv.d == null ? "non relevée" : ilYaS(sv.d)) + cs("ALERTES", al.l.filter(x => x.n > 0 || x.t === "NON RELEVÉ").length ? al.l.map(x => '<span class="sf-al n' + x.n + '">' + E(x.t) + "</span>").join("") : '<span style="color:#2fe0a8">AUCUNE</span>') + "</div>";
+                + cs("DERNIER RELEVÉ (SERVEUR)", sv.d == null ? "non relevé" : ilYaS(sv.d)) + cs("ALERTES", al.l.filter(x => x.n > 0 || x.t === "NON RELEVÉ").length ? al.l.map(x => '<span class="' + clsAl(x) + '">' + E(x.t) + "</span>").join("") : '<span style="color:#2fe0a8">AUCUNE</span>') + "</div>";
         } else h += '<div class="sf-note" style="margin:0 0 8px">Ce système n’est pas surveillé.</div>';
         if (peut) h += '<div style="margin-top:10px"><button type="button" class="sf-lien" data-sv-bascule="1" style="background:transparent;cursor:pointer;font:inherit;letter-spacing:2px">' + (sv ? "ARRÊTER LA SURVEILLANCE" : "SURVEILLER CE SYSTÈME") + '</button><span class="sf-note" data-sv-msg="1" style="margin-left:6px"></span></div>';
         return h + "</div>";
@@ -319,6 +355,7 @@
         let l = DATA.s.filter(f[2]);
         if (q) l = l.filter(r => String(r[C.nom]).toLowerCase().indexOf(q) >= 0 || String(r[C.archi] || "").toLowerCase().indexOf(q) >= 0);
         const idx = { nom: C.nom, infl: C.infl, archi: C.archi, nbf: C.nbf }[etat.tri] || C.nom, s = etat.sens, val = r => etat.tri === "dist" ? distDe(r) : r[idx];
+        if (etat.tri === "alerte") return l.slice().sort((a, b) => (alertes(survDe(b) || { d: 1 }).niv * (survDe(b) ? 1 : 0) - alertes(survDe(a) || { d: 1 }).niv * (survDe(a) ? 1 : 0)) || String(a[C.nom]).localeCompare(String(b[C.nom]), "fr"));
         l = l.slice().sort((a, b) => {
             const x = val(a), y = val(b);
             if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;       // les valeurs absentes en dernier, quel que soit le sens
@@ -331,14 +368,41 @@
         const colo = r[C.colo] === 1, archi = r[C.archi], mb = r[C.membre] === 1;
         const type = r[C.ctrl] === 3 ? '<span class="sf-ty" style="color:#B07CFF" title="Système ajouté à la main par l’état-major : hors de la liste de la faction défendue">SURVEILLÉ</span>' : r[C.ctrl] === 2 ? '<span class="sf-ty" style="color:#00F0FF" title="Système visé par une directive ou une campagne active, que notre faction ne contrôle pas">CIBLE</span>' : r[C.ctrl] === 0 ? '<span class="sf-ty" style="color:#8b97a0">NON CONTRÔLÉE</span>' : colo ? '<span class="sf-ty" style="color:#FFB44D">COLONIE</span>' : '<span class="sf-inc">—</span>';
         const arch = archi ? pilote(archi) + (mb ? "" : '<small style="color:#8b97a0;display:block;margin-left:34px">hors escadron</small>') : colo ? '<span class="sf-inc">inconnu</span>' : '<span class="sf-inc">—</span>';
-        const inf = r[C.infl] == null ? '<span class="sf-inc">non relevée</span>' : '<div class="sf-inf"><b>' + r[C.infl].toFixed(1) + ' %</b><small class="' + (r[C.age] > 72 ? "sf-vieux" : "") + '">' + ilYaH(r[C.age]) + "</small></div>";
+        const inf = r[C.infl] == null ? '<span class="sf-inc">non relevée</span>' : '<div class="sf-inf"><b>' + r[C.infl].toFixed(1) + ' %</b>' + fleche(r) + '<small class="' + (r[C.age] > 72 ? "sf-vieux" : "") + '" title="Origine : ' + ORIGINE(r) + '">' + ilYaH(r[C.age]) + (r[C.src] === 2 ? " · Spansh" : "") + "</small></div>";
         const sv = survDe(r), al = sv ? alertes(sv) : null, not = (sv ? chipsSurv(al) : "") + (r[C.dir] ? '<span style="color:#FF7100">DIRECTIVE</span>' : "") + (r[C.conf] ? '<span style="color:#FF4D4D">CONFLIT</span>' : "") + (r[C.chant] ? '<span style="color:#FFD700">CHANTIERS ×' + r[C.chant] + "</span>" : "") + (r[C.pui] ? '<span style="color:#b8a0ff">' + "PP · " + E(String(r[C.pui]).toUpperCase()) + "</span>" : "");
         return '<tr data-i="' + i + '" class="' + (sv ? "sv sv" + al.niv + " " : "") + (r[C.ctrl] === 0 ? "non " : "") + (r[C.ctrl] === 2 ? "cib " : "") + (mb ? "mb" : "") + '">' + celluleOeil(i, sv) + '<td><span class="sf-nom">' + lieu(r[C.nom]) + "</span>" + (r[C.camp] ? ' <span class="sf-c" title="Campagne en cours : ' + E(r[C.camp]) + '">C</span>' : "") + "</td>" + celluleDist(r) + "<td>" + type + "</td><td>" + arch + "</td><td>" + inf + "</td><td>" + (chipsEtats(r[C.etats]) || '<span class="sf-inc">—</span>') + "</td><td>" + (r[C.nbf] == null ? "—" : r[C.nbf]) + '</td><td class="sf-not">' + (not || '<span class="sf-inc" style="border:0">—</span>') + "</td></tr>";
     }
+    // CARTE (mode tablette) : meme contenu qu'une ligne du tableau, mis en page pour le toucher
+    function carte(r, i) {
+        const colo = r[C.colo] === 1, archi = r[C.archi], mb = r[C.membre] === 1, sv = survDe(r), al = sv ? alertes(sv) : null;
+        const type = r[C.ctrl] === 3 ? '<span class="sf-ty" style="color:#B07CFF">SURVEILLÉ HORS FACTION</span>' : r[C.ctrl] === 2 ? '<span class="sf-ty" style="color:#00F0FF">CIBLE</span>' : r[C.ctrl] === 0 ? '<span class="sf-ty" style="color:#8b97a0">NON CONTRÔLÉE</span>' : colo ? '<span class="sf-ty" style="color:#FFB44D">COLONIE</span>' : "";
+        const inf = r[C.infl] == null ? '<div class="sf-inf"><small>influence non relevée</small></div>' : '<div class="sf-inf"><b>' + r[C.infl].toFixed(1).replace(".", ",") + ' %</b>' + fleche(r) + '<small class="' + (r[C.age] > 72 ? "sf-vieux" : "") + '" title="Origine : ' + ORIGINE(r) + '">' + ilYaH(r[C.age]) + (r[C.src] === 2 ? " · Spansh" : "") + "</small></div>";
+        const puces = (sv ? chipsSurv(al) : "") + type + (r[C.dir] ? '<span style="color:#FF7100">DIRECTIVE</span>' : "") + (r[C.conf] ? '<span style="color:#FF4D4D">CONFLIT</span>' : "") + (r[C.chant] ? '<span style="color:#FFD700">CHANTIERS ×' + r[C.chant] + "</span>" : "")
+            + (r[C.pui] ? '<span style="color:#b8a0ff">PP · ' + E(String(r[C.pui]).toUpperCase()) + "</span>" : "") + chipsEtats(r[C.etats]);
+        const cls = (al && al.niv >= 1 ? "a" + al.niv : al && al.niv === 0 ? "sv0" : mb ? "mb" : r[C.ctrl] === 2 ? "cib" : r[C.ctrl] === 0 ? "non" : "");
+        const oeil = celluleOeil(i, sv).replace(/^<td/, "<div").replace(/<\/td>$/, "</div>"), d = distDe(r);
+        return '<div class="sf-cd ' + cls + '" data-i="' + i + '"><div class="sf-cd1">' + oeil + '<span class="sf-nom">' + lieu(r[C.nom]) + "</span>" + (r[C.camp] ? ' <span class="sf-c" title="Campagne en cours : ' + E(r[C.camp]) + '">C</span>' : "") + inf + "</div>"
+            + (puces ? '<div class="sf-cd2">' + puces + "</div>" : "")
+            + '<div class="sf-cd3">' + (archi ? pilote(archi, 24) + (mb ? "" : '<small style="color:#8b97a0;margin-left:8px">hors escadron</small>') : '<span class="sf-inc">' + (colo ? "architecte inconnu" : (r[C.nbf] != null ? r[C.nbf] + " faction" + (r[C.nbf] > 1 ? "s" : "") : "")) + "</span>") + (d != null ? '<span class="sf-cdd">' + fmtDist(d) + " al</span>" : "") + "</div></div>";
+    }
     function dessiner(el) {
         const l = lignesVisibles(), th = (t, lib) => '<th data-t="' + t + '" class="' + (etat.tri === t ? "tri" : "") + '">' + lib + (etat.tri === t ? (etat.sens > 0 ? " ▲" : " ▼") : "") + "</th>";
-        el.querySelector(".sf-bar").querySelectorAll("[data-f]").forEach(b => { const ff = FILTRES.find(x => x[0] === b.dataset.f); b.classList.toggle("on", b.dataset.f === etat.f); const n = b.querySelector("i"); if (n && ff) n.textContent = DATA.s.filter(ff[2]).length; if (b.dataset.f === "surveilles") b.style.display = SURV ? "" : "none"; });
+        { // bandeau de filtres : les principaux sur une ligne, les autres derriere « + FILTRES » (reste ouvert si l'un d'eux est actif)
+            const dispo = FILTRES.filter(f => !((f[0] === "surveilles" || f[0] === "alertes") && !SURV)), ouvert = etat.plus || PRINCIPAUX.indexOf(etat.f) < 0;
+            const bt = f => '<button type="button" data-f="' + f[0] + '" class="' + (etat.f === f[0] ? "on" : "") + (f[0] === "alertes" && DATA.s.some(r => { const v = survDe(r); return v && alertes(v).niv === 2; }) ? " rouge" : "") + '">' + f[1] + "<i>" + DATA.s.filter(f[2]).length + "</i></button>";
+            el.querySelector(".sf-bar").innerHTML = '<div class="sf-bar1">' + dispo.filter(f => PRINCIPAUX.indexOf(f[0]) >= 0).map(bt).join("") + '<button type="button" class="plus" data-plus="1">' + (ouvert ? "− MOINS DE FILTRES" : "+ FILTRES") + "</button></div>"
+                + (ouvert ? '<div class="sf-bar2">' + dispo.filter(f => PRINCIPAUX.indexOf(f[0]) < 0).map(bt).join("") + "</div>" : "");
+        }
         el.querySelector(".sf-n").textContent = l.length + " système" + (l.length > 1 ? "s" : "");
+        const modeT = tablette();
+        { const vz = el.querySelector(".sf-vue"); if (vz) vz.innerHTML = boutonsVue(); }
+        const selT = el.querySelector(".sf-tri"); if (selT) { selT.style.display = modeT ? "" : "none"; selT.value = etat.tri === "dist" && !refActive() ? "nom" : etat.tri; const od = selT.querySelector('option[value="dist"]'); if (od) od.style.display = refActive() ? "" : "none"; }
+        if (modeT) {
+            el.querySelector(".sf-cadre").innerHTML = l.length ? '<div class="sf-grille-c">' + l.slice(0, etat.nb).map(r => carte(r, DATA.s.indexOf(r))).join("") + "</div>" + (l.length > etat.nb ? '<button type="button" class="sf-plus" data-plus-c="1">AFFICHER ' + Math.min(48, l.length - etat.nb) + " DE PLUS (" + (l.length - etat.nb) + " RESTANTS)</button>" : "")
+                : '<div class="sf-vide">' + (etat.f === "surveilles" ? "Aucun système surveillé pour l’instant." : "Aucun système ne correspond à ce filtre.") + "</div>";
+            if (window.EdteamCopie && window.EdteamCopie.scanner) window.EdteamCopie.scanner(el.querySelector(".sf-cadre"));
+            return;
+        }
         el.querySelector(".sf-cadre").innerHTML = l.length
             ? '<table class="sf-tab' + (SURV ? " sf-av" : "") + '"><thead><tr>' + (SURV ? '<th class="sf-oeil-th"></th>' : "") + th("nom", "SYSTÈME") + (refActive() ? th("dist", "DISTANCE") : "") + "<th>TYPE</th>" + th("archi", "ARCHITECTE") + th("infl", "INFLUENCE") + "<th>ÉTATS</th>" + th("nbf", "FACT.") + "<th>NOTES</th></tr></thead><tbody>" + l.map((r, i) => ligne(r, DATA.s.indexOf(r))).join("") + "</tbody></table>"
             : '<div class="sf-vide">' + (etat.f === "surveilles" ? "Aucun système surveillé pour l’instant." + (SURV && SURV.peut ? " Cliquez sur l’œil d’une ligne, ou ajoutez un système par son nom." : " L’Amiral et les officiers choisissent les systèmes à surveiller.") : "Aucun système ne correspond à ce filtre.") + "</div>";
@@ -358,7 +422,16 @@
     }
     // Factions PRESENTES (influence > 0) puis, separees et GRISEES, les factions a 0 % : elles ont quitte le systeme, EDSM / Spansh les gardent en historique.
     // EDSM ne donne PAS la date de leur depart (leur historique ne contient qu'un point a 0 %) : on ne l'invente pas. La colonne MAJ n'est donc pas affichee pour elles (c'est la date du systeme, pas la leur).
-    function tableauFactions(d) {
+    // nosTs : heure (secondes) du releve de NOTRE serveur pour ce systeme, ou null ; sert a signaler quand EDSM est en retard sur les pilotes
+    function noteFraicheur(d, nosTs) {
+        const t = (d.f || []).reduce((m, x) => Math.max(m, Number(x.lastUpdate) || 0), 0);
+        if (!nosTs || !t) return "";
+        const ecart = nosTs - t;
+        if (ecart > 3600) return '<div class="sf-note" style="border-left:3px solid #00F0FF;padding-left:10px">Notre serveur a un relevé <b>plus récent</b> (' + ilYaS(nosTs) + ') que celui d’EDSM (' + ilYaS(t) + ') : EDSM n’a pas encore reçu la visite d’un joueur dans ce système. Pour notre faction, les chiffres du serveur (en haut de la fiche) font foi.</div>';
+        if (ecart < -3600) return '<div class="sf-note" style="border-left:3px solid #FFB000;padding-left:10px">EDSM a un relevé <b>plus récent</b> (' + ilYaS(t) + ') que notre serveur (' + ilYaS(nosTs) + ') : le prochain passage d’un pilote ou la prochaine mise à jour du matin / du soir le rattrapera.</div>';
+        return "";
+    }
+    function tableauFactions(d, nosTs) {
         if (!d || !d.f || !d.f.length) return '<div class="sf-vide">EDSM ne connaît pas encore les factions de ce système.</div>';
         const toutes = d.f.slice().sort((a, b) => (b.influence || 0) - (a.influence || 0)), nous = DATA.faction;
         const pres = toutes.filter(x => (x.influence || 0) > 0), anc = toutes.filter(x => !((x.influence || 0) > 0));
@@ -367,7 +440,8 @@
         const ligneHist = x => '<tr class="hist"><td>' + E(x.name) + (x.isPlayer ? " <small>JOUEURS</small>" : "") + ' <small class="h">A QUITTÉ LE SYSTÈME</small></td><td>0 %</td><td colspan="4">historique : plus présente</td></tr>';
         const moi = pres.find(x => x.name === nous), rival = pres.find(x => x.name !== nous);
         const ecart = moi && rival ? ((moi.influence - rival.influence) * 100) : null;
-        return '<table class="sf-fac"><thead><tr><th>FACTION</th><th>INFLUENCE</th><th>ÉTAT</th><th>EN ATTENTE</th><th>EN RÉCUPÉRATION</th><th>MAJ</th></tr></thead><tbody>' + pres.map(ligne).join("")
+        const frais = noteFraicheur(d, nosTs);
+        return frais + '<table class="sf-fac"><thead><tr><th>FACTION</th><th>INFLUENCE</th><th>ÉTAT</th><th>EN ATTENTE</th><th>EN RÉCUPÉRATION</th><th title="Dernière mise à jour chez EDSM (dernier joueur passé dans le système) : ce n’est pas la date de notre relevé">MAJ EDSM</th></tr></thead><tbody>' + pres.map(ligne).join("")
             + (anc.length ? '<tr class="histsep"><td colspan="6">HISTORIQUE · ' + anc.length + " faction" + (anc.length > 1 ? "s" : "") + " à 0 % : elle" + (anc.length > 1 ? "s ne sont" : " n’est") + " plus dans le système, EDSM et Spansh " + (anc.length > 1 ? "les" : "la") + " gardent en mémoire. La date de leur départ n’est pas connue.</td></tr>" + anc.map(ligneHist).join("") : "")
             + "</tbody></table>"
             + (ecart != null ? '<div class="sf-note">Écart entre ' + E(nous) + " et la meilleure faction rivale présente (" + E(rival.name) + ") : <b style=\"color:" + (ecart >= 0 ? "#00FF66" : "#FF4D4D") + "\">" + (ecart >= 0 ? "+" : "") + ecart.toFixed(1) + " points</b>.</div>" : "");
@@ -389,7 +463,7 @@
         const case_ = (t, v, al) => '<div class="sf-case' + (al ? " alerte" : "") + '"><small>' + t + "</small><b>" + v + "</b></div>";
         const sections = (extra || "") + sectionSurv(r)
             + '<div class="sf-sec"><h4>NOTRE FACTION</h4><div class="sf-grille">'
-            + case_("INFLUENCE", r[C.infl] == null ? "non relevée" : r[C.infl].toFixed(1) + " %" + '<small style="display:block;color:#7d8a92;font-size:.7em;margin-top:3px">' + ilYaH(r[C.age]) + "</small>", r[C.age] > 168)
+            + case_("INFLUENCE", r[C.infl] == null ? "non relevée" : r[C.infl].toFixed(1) + " %" + fleche(r) + '<small style="display:block;color:#7d8a92;font-size:.7em;margin-top:3px">relevé ' + ilYaH(r[C.age]) + " (" + ORIGINE(r) + ")</small>", r[C.age] > 168)
             + case_("ÉTATS", chipsEtats(r[C.etats]) || "—")
             + case_("FACTIONS", r[C.nbf] == null ? "—" : r[C.nbf])
             + case_("DONNÉE SPANSH", r[C.sp] == null ? "—" : ilYaH(r[C.sp] * 24), r[C.sp] > 21) + (distTxt(r) ? case_("DISTANCE", distTxt(r)) : "") + "</div></div>"
@@ -402,7 +476,7 @@
         const v = modale({ petit: "SYSTÈME · " + E(DATA && DATA.faction || "").toUpperCase(), titre: lieu(r[C.nom]), badges: badges, sections: sections, apres: v2 => brancherFicheSurv(v2, r),
             liens: '<a class="sf-lien" href="bgs.html">PAGE BGS</a>' + (colo ? '<a class="sf-lien" href="colonisation.html">PAGE COLONISATION</a>' : "") });
         const zone = v.querySelector(".sf-fd");
-        try { zone.innerHTML = tableauFactions(await edsm(r[C.nom])); } catch (e) { zone.innerHTML = '<div class="sf-vide">EDSM est injoignable pour le moment. Les chiffres ci-dessus restent ceux du serveur.</div>'; }
+        try { zone.innerHTML = tableauFactions(await edsm(r[C.nom]), (survDe(r) && survDe(r).d) || (r[C.infl] != null && r[C.age] != null ? Date.now() / 1000 - r[C.age] * 3600 : null)); } catch (e) { zone.innerHTML = '<div class="sf-vide">EDSM est injoignable pour le moment. Les chiffres ci-dessus restent ceux du serveur.</div>'; }
     }
 
     // ---- montage ----
@@ -416,19 +490,26 @@
             if (!d) { el.style.display = "none"; return; }                   // pas d'escadron : rien a montrer
             BRUT = d; EL = el; await chargerSurv(false); DATA = preparer(d);
             if (!d.faction || !Array.isArray(d.s) || !d.s.length) { el.innerHTML = '<div class="sf-h"><h2>Systèmes de la faction défendue</h2></div><div class="sf-vide">La faction défendue de votre escadron n’est pas encore suivie : le tableau apparaîtra dès que son suivi sera en place.</div>'; return; }
-            const cnt = f => DATA.s.filter(f[2]).length;
             el.innerHTML = '<div class="sf-h"><h2>Systèmes de ' + E(d.faction) + '</h2><em>où nous sommes, qui a colonisé quoi</em><span class="sf-n"></span></div>'
-                + '<div class="sf-bar">' + FILTRES.map(f => '<button type="button" data-f="' + f[0] + '">' + f[1] + "<i>" + cnt(f) + "</i></button>").join("") + "</div>"
-                + '<div class="sf-outils"><div class="sf-ref"></div><input type="search" placeholder="Rechercher un système ou un architecte…" aria-label="Rechercher" autocomplete="off" spellcheck="false"></div><div class="sf-add" style="display:none"></div><div class="sf-cadre"></div>'
-                + '<div class="sf-leg"><span><i style="background:#00FF66"></i> colonie dont l’architecte est un membre de l’escadron</span><span><i style="background:#00F0FF"></i> cible (directive ou campagne active, système non contrôlé)</span><span><i style="background:#8b97a0"></i> colonie non contrôlée</span><span><b class="sf-c">C</b> campagne en cours</span>' + (SURV ? '<span><b style="color:#B07CFF">◉</b> surveillé par l’état-major</span><span><i style="background:#FF4D4D"></i> clignote : guerre, élection, faction sur le départ, donnée de plus de ' + 2 * (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span><span><i style="background:#FFB000"></i> clignote : baisse d’influence, donnée de plus de ' + (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span>' : '') + '</div>'
-                + '<div class="sf-note">Clic sur une ligne : la fiche du système. Liste mise à jour chaque jour' + (d.maj ? " (dernière mise à jour " + ilYaH((Date.now() - new Date(d.maj).getTime()) / 3600000) + ")" : "") + ". L’influence n’est connue que pour les systèmes relevés récemment (directives, Boom) : sinon « non relevée ». L’architecte n’est connu que si le plugin d’un pilote a relevé la revendication.</div>";
-            el.querySelector(".sf-bar").addEventListener("click", e => { const b = e.target.closest("[data-f]"); if (b) { etat.f = b.dataset.f; dessiner(el); } });
-            el.querySelector(".sf-outils input").addEventListener("input", e => { etat.q = e.target.value; dessiner(el); });
+                + '<div class="sf-bar"></div>'
+                + '<div class="sf-outils"><input type="search" placeholder="Rechercher un système ou un architecte…" aria-label="Rechercher" autocomplete="off" spellcheck="false"><div class="sf-ref"></div><span class="sf-vue"></span><select class="sf-tri" aria-label="Trier" style="display:none"><option value="nom">TRI : NOM</option><option value="alerte">TRI : ALERTES D’ABORD</option><option value="infl">TRI : INFLUENCE</option><option value="dist">TRI : DISTANCE</option><option value="nbf">TRI : FACTIONS</option></select><button type="button" class="sf-addbtn" data-addbtn="1" style="display:none">◉ SURVEILLER UN SYSTÈME</button></div><div class="sf-add" style="display:none"></div><div class="sf-cadre"></div>'
+                + '<div class="sf-leg"><span><i style="background:#00FF66"></i> colonie dont l’architecte est un membre de l’escadron</span><span><i style="background:#00F0FF"></i> cible (directive ou campagne active, système non contrôlé)</span><span><i style="background:#8b97a0"></i> colonie non contrôlée</span><span><b class="sf-c">C</b> campagne en cours</span>' + (SURV ? '<span><b style="color:#B07CFF">◉</b> surveillé par l’état-major</span><span><i style="background:#FF4D4D"></i> clignote : guerre, élection, faction à moins de ' + String(Number((SURV.reglages || {}).surv_depart_clign_pct) || 2.5).replace('.', ',') + ' %, donnée de plus de ' + 2 * (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span><span><i style="background:#FFB000"></i> clignote : baisse d’influence, faction à moins de ' + String(Number((SURV.reglages || {}).surv_depart_pct) || 3).replace('.', ',') + ' %, donnée de plus de ' + (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span>' : '') + '</div>'
+                + '<div class="sf-note">Clic sur une ligne : la fiche du système. <b>D’où viennent les chiffres ?</b> La liste des systèmes, le nombre de factions et la puissance : <b>Spansh</b>, chaque nuit' + (d.maj ? " (dernière mise à jour " + ilYaH((Date.now() - new Date(d.maj).getTime()) / 3600000) + ")" : "") + '. L’influence et les états de notre faction : les <b>relevés des pilotes</b> (le plugin les envoie à l’arrivée dans un système surveillé ou visé par une directive : le plus frais), <b>EDSM</b> (deux fois par jour pour ces mêmes systèmes) et, pour tous les autres systèmes, <b>Spansh</b> (mention « Spansh », environ 24 h de retard) ; la valeur la plus récente gagne. La fiche interroge aussi EDSM en direct. <b>Flèche</b> : évolution de notre influence depuis le dernier tick (fond pâle « 48 h » : aucune mesure depuis le tick). L’architecte n’est connu que si le plugin d’un pilote a relevé la revendication.</div>';
+            el.querySelector(".sf-bar").addEventListener("click", e => {
+                if (e.target.closest("[data-plus]")) { etat.plus = !(etat.plus || PRINCIPAUX.indexOf(etat.f) < 0); if (!etat.plus && PRINCIPAUX.indexOf(etat.f) < 0) etat.f = "controles"; dessiner(el); return; }
+                const b = e.target.closest("[data-f]"); if (b) { etat.f = b.dataset.f; etat.nb = 48; dessiner(el); }
+            });
+            el.querySelector(".sf-outils input").addEventListener("input", e => { etat.q = e.target.value; etat.nb = 48; dessiner(el); });
+            el.querySelector(".sf-tri").addEventListener("change", e => { etat.tri = e.target.value; etat.sens = etat.tri === "infl" ? -1 : 1; etat.nb = 48; dessiner(el); });
+            { const re = () => { if (DATA) dessiner(el); }; window.addEventListener("edteam-vue", re); if (window.matchMedia) { const mq = window.matchMedia("(max-width: 1600px)"); if (mq.addEventListener) mq.addEventListener("change", re); else if (mq.addListener) mq.addListener(re); } }
             el.addEventListener("click", e => {
+                const ab = e.target.closest("[data-addbtn]"); if (ab) { etat.add = !etat.add; majAjout(el); const i = el.querySelector(".sf-add input"); if (etat.add && i) i.focus(); return; }
                 const oe = e.target.closest("[data-oeil]"); if (oe) { e.stopPropagation(); basculer(DATA.s[+oe.dataset.oeil], el); return; }
                 const th = e.target.closest("th[data-t]"); if (th) { const t = th.dataset.t; etat.sens = etat.tri === t ? -etat.sens : 1; etat.tri = t; dessiner(el); return; }
                 if (e.target.closest(".edteam-lieu")) return;                  // un clic sur le nom copie le systeme (copier-lieux.js) sans ouvrir la fiche
-                const tr = e.target.closest("tr[data-i]"); if (tr) ouvrirFiche(DATA.s[+tr.dataset.i]);
+                const bv = e.target.closest("[data-vue]"); if (bv) { choisirVue(bv.dataset.vue); return; }
+                const pc = e.target.closest("[data-plus-c]"); if (pc) { etat.nb += 48; dessiner(el); return; }
+                const tr = e.target.closest("tr[data-i], .sf-cd[data-i]"); if (tr) ouvrirFiche(DATA.s[+tr.dataset.i]);
             });
             el.querySelector(".sf-ref").addEventListener("click", e => { const b = e.target.closest("[data-r]"); if (b && !b.disabled) { REF.mode = b.dataset.r; majRef(el); dessiner(el); } });
             dessiner(el); majRef(el); majAjout(el); chargerRefs(el);
