@@ -788,6 +788,12 @@
                     <span class="xsp"></span>
                     <span class="xmut" id="m-squad-count">--</span>
                 </div>
+                <div class="xseg" id="x-esc-seg">
+                    <button class="on" data-v="membres" onclick="escVue('membres')">MEMBRES</button>
+                    <button data-v="systemes" onclick="escVue('systemes')">SYSTÈMES</button>
+                    <button data-v="fc" onclick="escVue('fc')">FLEET CARRIERS</button>
+                </div>
+                <div id="esc-v-membres" style="display: flex; flex-direction: column; gap: 12px;">
                 <div class="xsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="x-esc-q" placeholder="Rechercher un pilote…" oninput="escRendre()"></div>
                 <div class="xfl" id="x-esc-fl">
                     <button data-f="tous" class="on" onclick="escFiltre('tous')">TOUS</button>
@@ -798,6 +804,9 @@
                     <div class="xmut" style="text-align: center; padding: 20px;">Chargement de l'équipage...</div>
                 </div>
                 <button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="ouvrirSalleBgsMobile()">CLASSEMENT BGS DE L'ESCADRON</button>
+                </div>
+                <div id="esc-v-systemes" style="display: none;"><div id="sm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des systèmes…</div></div></div>
+                <div id="esc-v-fc" style="display: none;"><div id="fm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des carriers…</div></div></div>
             </div>
 
             <!-- ========================================== -->
@@ -1444,9 +1453,28 @@
             if (tabId === 'qg') chargerAccueilMobile(false);
             else if (tabId === 'bgs') chargerBGSMobile(false);
             else if (tabId === 'batir') chargerBatirMobile(false);
-            else if (tabId === 'escadron') chargerEscadronMobile(false);
+            else if (tabId === 'escadron') { chargerEscadronMobile(false); if (escVueCourante !== 'membres') escOuvrirModule(); }
             else if (tabId === 'croises') chargerCroisesMobile(false);
             setTimeout(xMajCloche, 600);
+        }
+
+        // ESCADRON : sous-onglets MEMBRES / SYSTEMES / FLEET CARRIERS (consultation). Systemes et Fleet Carriers (systemes-mobile.js, fc-mobile.js) ne sont charges qu'a leur premiere ouverture ; memes lectures serveur et memes caches que le PC.
+        let escVueCourante = 'membres';
+        function escVue(v) {
+            sonClic(); escVueCourante = v;
+            { const n = xEl('m-squad-count'); if (n) n.style.visibility = v === 'membres' ? '' : 'hidden'; }
+            document.querySelectorAll('#x-esc-seg button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+            [['membres', 'esc-v-membres', 'flex'], ['systemes', 'esc-v-systemes', 'block'], ['fc', 'esc-v-fc', 'block']].forEach(([k, id, d]) => { const e = xEl(id); if (e) e.style.display = k === v ? d : 'none'; });
+            escOuvrirModule();
+        }
+        function escOuvrirModule() {
+            const def = { systemes: ['systemesMobile', 'systemes-mobile.js?v=3', 'sm-corps'], fc: ['fcMobile', 'fc-mobile.js?v=3', 'fm-corps'] }[escVueCourante];
+            if (!def) return;
+            if (window[def[0]]) { window[def[0]].ouvrir(false); return; }
+            const sc = document.createElement('script'); sc.src = def[1];
+            sc.onload = () => { if (window[def[0]]) window[def[0]].ouvrir(false); };
+            sc.onerror = () => { const c = xEl(def[2]); if (c) c.innerHTML = '<div class="xmut" style="text-align: center; padding: 30px;">Impossible de charger cet onglet pour le moment.</div>'; };
+            document.head.appendChild(sc);
         }
 
         // JOUEURS CROISES : le fichier (croises-mobile.js) n'est charge qu'a la premiere ouverture de l'onglet ; une seule lecture serveur, mise en memoire 5 minutes

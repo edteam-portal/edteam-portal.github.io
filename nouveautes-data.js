@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-mobile-systemes-carriers", date: "2026-10-31T18:07:56Z", type: "NOUVEAU",
+        titre: "Mobile : les systèmes et les Fleet Carriers de l’escadron",
+        texte: "Dans l’onglet Escadron du mobile, trois sous-onglets : Membres, Systèmes et Fleet Carriers. Systèmes : les systèmes de votre faction avec leurs alertes (guerre, élection, influence en baisse, donnée ancienne), filtres, recherche, distance depuis votre position et fiche détaillée. Fleet Carriers : où se poser, chez qui, avec quels services et quel message du propriétaire, avec une fiche pour chaque carrier. C’est de la consultation : la surveillance des systèmes et la gestion de votre carrier restent sur le PC.",
+        important: false
+    },
+    {
         id: "2026-10-mobile-journal-campagne", date: "2026-10-31T17:49:35Z", type: "NOUVEAU",
         titre: "Mobile : le journal de la campagne et les alliés repérés",
         texte: "Sur mobile, chaque campagne a maintenant un bouton 📖 : il ouvre le journal de la campagne (directives et missions Powerplay), avec l’escadron hôte, les alliés et les invités. Un allié ou un solitaire est repéré par un petit A ou S et le nom de son escadron ; leur avatar a un contour dans la liste des missions. Le soutien libre d’un escadron n’apparaît jamais dans ce journal.",
