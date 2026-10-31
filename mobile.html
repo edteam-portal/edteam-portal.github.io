@@ -2538,8 +2538,18 @@
                 const dd = await xLireDirectives(false);
                 const ordres = dd.ordres;
                 // toutes les actions des 30 derniers jours (directives en cours, clôturées et soutien libre, comme le journal du PC) ; la colonisation a son journal dans l'onglet Bâtir
-                const efforts = await xCache('exploits', 120000, async () => {
-                    const { data, error } = await supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details').neq('type_action', 'COLONISATION').gte('date_action', new Date(Date.now() - 30 * 86400000).toISOString()).order('date_action', { ascending: false }).limit(150);
+                const efforts = await xCache('exploits2', 120000, async () => {
+                    let qe = supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details').neq('type_action', 'COLONISATION').gte('date_action', new Date(Date.now() - 30 * 86400000).toISOString());
+                    // le Directeur lit les efforts de TOUS les escadrons : on ne garde que ceux des pilotes de l'escadron et ceux des directives visibles (comme pour un pilote)
+                    if (profilCommandant.escadron_id && String(profilCommandant.escadron_id).toUpperCase() !== 'INDEPENDANT') {
+                        const rm = await supabaseApp.from('profils_publics').select('user_id').eq('escadron_id', profilCommandant.escadron_id);
+                        const uids = (rm.data || []).map(x => x.user_id).filter(Boolean), oids = (ordres || []).map(o => o.id).filter(x => x !== undefined && x !== null);
+                        const cond = [];
+                        if (uids.length) cond.push('user_id.in.(' + uids.join(',') + ')');
+                        if (oids.length) cond.push('ordre_id.in.(' + oids.join(',') + ')');
+                        if (cond.length) qe = qe.or(cond.join(','));
+                    }
+                    const { data, error } = await qe.order('date_action', { ascending: false }).limit(150);
                     if (error) throw error;
                     return data || [];
                 }, force);
