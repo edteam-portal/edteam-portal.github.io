@@ -5,6 +5,19 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-mobile-journal-campagne", date: "2026-10-31T17:49:35Z", type: "NOUVEAU",
+        titre: "Mobile : le journal de la campagne et les alliés repérés",
+        texte: "Sur mobile, chaque campagne a maintenant un bouton 📖 : il ouvre le journal de la campagne (directives et missions Powerplay), avec l’escadron hôte, les alliés et les invités. Un allié ou un solitaire est repéré par un petit A ou S et le nom de son escadron ; leur avatar a un contour dans la liste des missions. Le soutien libre d’un escadron n’apparaît jamais dans ce journal.",
+        important: false
+    },
+    {
+        id: "2026-10-pp-inoccupe-plugin-2-57", date: "2026-10-31T17:33:39Z", type: "AMELIORE",
+        titre: "Powerplay : la progression des systèmes inoccupés",
+        texte: "Dans la fenêtre d’une mission Powerplay, un système inoccupé affiche maintenant la progression de chaque puissance en lice (celle de la vôtre est repérée par une étoile), telle que le jeu l’écrit dans le journal quand un pilote arrive dans le système. Il faut le plugin 2.57 : il s’installe tout seul, lancez EDMC une première fois (il le télécharge), puis une seconde fois (il est alors actif). La donnée apparaît dès qu’un pilote passe dans le système.",
+        important: true,
+        action: "Relancez EDMC deux fois pour passer en 2.57"
+    },
+    {
         id: "2026-10-allies-powerplay-journal", date: "2026-10-31T16:00:00Z", type: "CORRIGE",
         titre: "Alliés invités : leurs mérites Powerplay comptent, et le journal reste celui de l’escadron",
         texte: "Un pilote d’un autre escadron invité à une campagne voit maintenant ses mérites Powerplay rattachés à la mission : il apparaît dans la liste et la fenêtre de la mission. Le journal de l’escadron (bouton « JOURNAL DE L’ESCADRON ») ne montre que les efforts des membres de l’escadron, sur PC et mobile : le soutien libre d’un escadron reste confidentiel. Les alliés et les invités n’apparaissent que dans le journal de leur campagne (📖), qui est maintenant une fenêtre à part : elle ne contient que les lignes de la campagne (directives, missions Powerplay) et ses propres filtres, avec un petit A (allié) ou S (solitaire) à côté du nom et un fin cadre autour de la ligne. Le journal filtré sur une mission Powerplay affiche aussi ses lignes les plus anciennes.",

@@ -68,7 +68,7 @@
         if (!P || !liste || !liste.length) return '';
         // 5 emplacements au plus : au-dela, 4 avatars et une pastille « +N »
         var tous = liste.length <= 5, vus = tous ? liste : liste.slice(0, 4), reste = tous ? [] : liste.slice(4);
-        return '<span class="mc-avs">' + vus.map(function (x) { return P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 22 }); }).join('')
+        return '<span class="mc-avs">' + vus.map(function (x) { var h = P.avatar({ uid: x.u, nom: x.nom, role: 'pilote', taille: 22 }); return window.edteamInvitations ? window.edteamInvitations.badgeAvatar(x.u, h) : h; }).join('')
             + (reste.length ? '<span style="width:22px;height:22px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#1a1a1a;border:1px solid #555;color:#ccc;font-size:.62em;font-weight:bold;box-shadow:0 0 0 2px #0a0a0a;">+' + reste.length + '</span>' : '') + '</span>';
     }
     // jauge d'influence (comme sur le PC) : gris = influence qui n'a pas bouge depuis le dernier tick (ou sur 48 h), plein = gain, raye = perte ; couleur = resultat de la directive ; trait blanc = valeur avant le tick
@@ -169,7 +169,7 @@
         return '<div class="mc-camp' + (replie ? ' rep' : '') + '" id="mcc-' + c.id + '" style="--cc:' + cc + ';">'
             + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '22 0, rgba(0,0,0,0) 70%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
             + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span>' + tagAllie(c) + '<span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
-            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span>' + (window.edteamDiscussion ? '<button type="button" class="mc-disc" data-disc="' + c.id + '" aria-label="Discussions de la campagne" onclick="event.stopPropagation(); edteamDiscussion.ouvrir(' + c.id + ')">' + window.edteamDiscussion.icone + '<span class="dsc-b"></span></button>' : '') + '<span class="mc-fl">▾</span></div>'
+            + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span>' + (isFinite(Number(c.id)) ? '<button type="button" class="mc-disc" aria-label="Journal de la campagne" title="Journal de la campagne" onclick="event.stopPropagation(); edteamCampagnesMob.journal(' + c.id + ')">📖</button>' : '') + (window.edteamDiscussion ? '<button type="button" class="mc-disc" data-disc="' + c.id + '" aria-label="Discussions de la campagne" onclick="event.stopPropagation(); edteamDiscussion.ouvrir(' + c.id + ')">' + window.edteamDiscussion.icone + '<span class="dsc-b"></span></button>' : '') + '<span class="mc-fl">▾</span></div>'
             + (info ? '<div class="r3">' + info + '</div>' : '') + '</div>'
             + '<div class="mc-lignes">' + (lignes.join('') || '<div class="mc-vide">Aucune mission dans cette campagne.</div>') + '</div></div>';
     }
@@ -264,6 +264,58 @@
                 + (r.estIni && r.estCmd ? '<button type="button" class="mcp-btn" onclick="edteamCampagnesMob.adopter(\'pp\',' + id + ');">TRANSFORMER EN MISSION DE CAMPAGNE</button>' : '') + '</div>' : '';
             f.innerHTML = '<div class="mc-pp-tete"><span>MISSION POWERPLAY</span><button type="button" aria-label="Fermer" onclick="edteamCampagnesMob.fermerPP()">✕</button></div><div class="mc-pp-corps">' + r.html + cmd + '</div>';
             document.body.appendChild(f); document.documentElement.style.overflow = 'hidden';
+        },
+        // JOURNAL D'UNE CAMPAGNE (mobile) : seulement les lignes de CETTE campagne (directives BGS + missions Powerplay) pour l'escadron hote, les allies et les invites ;
+        // jamais de soutien libre ni d'autre directive. La feuille est ouverte VIDE (message d'attente) puis remplie.
+        journal: async function (id) {
+            var idNum = Number(id); if (!isFinite(idNum)) return;
+            if (typeof sonClic === 'function') sonClic();
+            var f = document.getElementById('mc-pp'); if (f) f.remove();
+            f = document.createElement('div'); f.id = 'mc-pp'; f.style.setProperty('--c', '#00F0FF');
+            f.innerHTML = '<div class="mc-pp-tete"><span>JOURNAL DE LA CAMPAGNE</span><button type="button" aria-label="Fermer" onclick="edteamCampagnesMob.fermerPP()">✕</button></div><div class="mc-pp-corps" id="mc-jrn"><div style="color:#777; font-style:italic; text-align:center; margin-top:30px;">Ouverture du journal de la campagne...</div></div>';
+            document.body.appendChild(f); document.documentElement.style.overflow = 'hidden';
+            var corps = function () { return document.getElementById('mc-jrn'); };
+            try {
+                var I = window.edteamInvitations, d = db();
+                var ro = await d.from('ordres_bgs').select('id, systeme_cible, faction_cible, type_ordre').eq('campagne_id', idNum);
+                var ordres = (ro && ro.data) || [], ids = ordres.map(function (o) { return o.id; });
+                var parOrdre = {}; ordres.forEach(function (o) { parOrdre[String(o.id)] = o; });
+                var re = ids.length ? await d.from('efforts_bgs').select('user_id, ordre_id, valeur, type_action, date_action, systeme, details').in('ordre_id', ids).neq('type_action', 'COLONISATION').order('date_action', { ascending: false }).limit(100) : { data: [] };
+                var rp = await d.rpc('pp_journal', { p_campagne: idNum, p_limite: 150 });
+                var acteurs = window.cacheActeurs || {}, lignes = [];
+                ((re && re.data) || []).forEach(function (e) {
+                    var o = parOrdre[String(e.ordre_id)] || {}, t = e.type_action;
+                    lignes.push({ t: e.date_action, uid: e.user_id, nom: (acteurs[e.user_id] && acteurs[e.user_id].n) || '', cible: String(o.systeme_cible || e.systeme || '').toUpperCase() + ' · ' + String(o.type_ordre || ''), v: Number(e.valeur) || 0, genre: t, type: String(t || '').replace(/_/g, ' ').toLowerCase(), c: '#FF7100', n: 1 });
+                });
+                (Array.isArray(rp && rp.data) ? rp.data : []).forEach(function (l) {
+                    var tp = TYPE_PP[l.type_pp] || [l.type_pp, '#aaa'];
+                    lignes.push({ t: l.date_action, uid: l.user_id, nom: l.cmdr || (acteurs[l.user_id] && acteurs[l.user_id].n) || '', cible: String(l.systeme || '').toUpperCase() + ' · Powerplay ' + tp[0].toLowerCase(), v: Number(l.merites) || 0, genre: 'PP', type: String(ORIGINE[l.origine_action] || l.origine_action || '').toLowerCase(), c: PPC, n: 1 });
+                });
+                lignes.sort(function (a, b) { return new Date(b.t) - new Date(a.t); });
+                var ouverts = {}, groupes = [];
+                lignes.forEach(function (l) {
+                    var cle = [l.uid, l.cible, l.genre, l.type].join('|'), g = ouverts[cle], tl = new Date(l.t).getTime();
+                    if (g && isFinite(tl) && g.t0 - tl <= 300000) { g.v += l.v; g.n += 1; return; }
+                    l.t0 = tl; ouverts[cle] = l; groupes.push(l);
+                });
+                lignes = groupes.slice(0, 120);
+                var sans = {}; lignes.forEach(function (l) { if (!l.nom && l.uid) sans[l.uid] = 1; });   // noms manquants : lus une seule fois
+                if (Object.keys(sans).length) { try { var rn = await d.from('profils_publics').select('user_id, cmdr_nom').in('user_id', Object.keys(sans)); ((rn && rn.data) || []).forEach(function (x) { lignes.forEach(function (l) { if (!l.nom && String(l.uid) === String(x.user_id)) l.nom = x.cmdr_nom; }); }); } catch (e2) { /* sans nom : INCONNU */ } }
+                var c = corps(); if (!c) return;
+                c.innerHTML = lignes.length ? lignes.map(function (l) {
+                    var d0 = new Date(l.t), quand = isNaN(d0) ? '' : ('0' + d0.getDate()).slice(-2) + '/' + ('0' + (d0.getMonth() + 1)).slice(-2) + ' ' + ('0' + d0.getHours()).slice(-2) + ':' + ('0' + d0.getMinutes()).slice(-2);
+                    var marque = I ? I.marque(l.uid) : '', info = I ? I.info(l.uid) : '';
+                    var g0 = l.genre, txtV = g0 === 'PP' ? '+' + fmt(l.v) + ' mérites' : (['MISSIONS', 'ELECTION_MISSIONS', 'GUERRE_MISSIONS'].indexOf(g0) >= 0 ? '+' + fmt(l.v) + ' INF' : (['ECONOMIE', 'SECURITE', 'SCIENCE', 'CONTREBANDE'].indexOf(g0) >= 0 ? '+' + Math.round(l.v / 100000) / 10 + ' M CR' : fmt(l.v)));
+                    txtV = esc(txtV) + (l.n > 1 ? ' <span style="color:#888; font-size:.8em;" title="' + l.n + ' gains réunis (5 minutes)">×' + l.n + '</span>' : '');
+                    return '<div style="border:1px solid #222; border-left:3px solid ' + l.c + '; border-radius:10px; padding:9px 11px; margin-bottom:7px; background:rgba(255,255,255,.02);">'
+                        + '<div style="display:flex; justify-content:space-between; gap:8px; align-items:baseline;"><b style="color:#fff; font-size:.9em; overflow-wrap:anywhere;">CMDR ' + esc(String(l.nom || 'INCONNU').toUpperCase()) + marque + '</b><span style="color:#7fa; font-size:.7em; white-space:nowrap;">' + quand + '</span></div>'
+                        + (info ? '<div style="color:#3ec9ff; font-size:.62em; letter-spacing:1px; margin-top:2px;">' + esc(info.replace(/^ · /, '')) + '</div>' : '')
+                        + '<div style="display:flex; justify-content:space-between; gap:8px; margin-top:5px; font-size:.78em;"><span style="color:#999; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc(l.cible) + '</span><b style="color:' + l.c + '; white-space:nowrap;">' + txtV + '</b></div>'
+                        + (l.type ? '<div style="color:#667; font-size:.62em; margin-top:2px;">' + esc(l.type) + '</div>' : '') + '</div>';
+                }).join('') : '<div style="color:#777; font-style:italic; text-align:center; margin-top:30px;">Aucune transmission pour cette campagne.</div>';
+            } catch (e) {
+                var c2 = corps(); if (c2) c2.innerHTML = '<div style="color:#c77; text-align:center; margin-top:30px;">Journal indisponible pour le moment.</div>';
+            }
         },
         fermerPP: function () { var f = document.getElementById('mc-pp'); if (f) f.remove(); document.documentElement.style.overflow = ''; },
         deplier: function (id) { var d = document.getElementById(id); if (!d) return; if (typeof sonClic === 'function') sonClic(); d.style.display = d.style.display === 'none' ? 'block' : 'none'; },

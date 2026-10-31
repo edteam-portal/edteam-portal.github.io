@@ -18,12 +18,12 @@
     <script src="copier-lieux.js?v=2"></script>
     <script src="shared-utils.js?v=7"></script>
     <script src="photos.js?v=2"></script>
-    <script src="invitations.js?v=12"></script>
+    <script src="invitations.js?v=13"></script>
     <script src="annonce.js?v=30"></script>
     <script src="revelations.js?v=10"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
-    <script src="campagnes-mobile.js?v=22"></script>
+    <script src="campagnes-mobile.js?v=23"></script>
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=7"></script>
     <script src="conflit-modale.js?v=3"></script>
@@ -35,7 +35,7 @@
     <script src="bgs-ticks.js?v=8"></script>
     <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
-    <script src="campagnes-pp.js?v=22"></script>
+    <script src="campagnes-pp.js?v=23"></script>
     <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=4"></script>
     <script src="qgsuivi.js?v=41"></script>
@@ -1412,7 +1412,7 @@
 
         // pilotes de l'escadron (identifiants), pour ne montrer que leurs efforts
         function xMembres() {
-            return xCache('membres', 600000, async () => {
+            return xCache('membres_ids', 600000, async () => {
                 const r = await supabaseApp.from('profils_publics').select('user_id').eq('escadron_id', profilCommandant.escadron_id);
                 return (r.data || []).map(x => String(x.user_id)).filter(Boolean);
             });
@@ -2718,7 +2718,7 @@
             try {
                 const esc = profilCommandant.escadron_id;
                 const [membres, semaine, titres, _photos] = await Promise.all([
-                    xCache('membres', 180000, async () => {
+                    xCache('membres2', 180000, async () => {
                         let rep = await supabaseApp.from('profils_publics').select('cmdr_nom, est_amiral, est_officier, user_id, rang_bgs, rang_escadron_jeu, puissance_rang').eq('escadron_id', esc).eq('est_approuve', true);
                         if (rep.error) {
                             // Repli : rang en jeu pas encore expose (script SQL 30)
