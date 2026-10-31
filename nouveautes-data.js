@@ -5,6 +5,19 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-plugin-2-54", date: "2026-10-31T11:49:20Z", type: "AMELIORE",
+        titre: "Plugin SYS.EDTEAM 2.54 : à jour ?",
+        texte: "La version 2.54 du plugin est disponible. Elle relève la position du carrier de votre escadron, qui apparaît alors dans la page Escadron (onglet FLEET CARRIERS). Un seul membre à jour suffit à le montrer à tout l’escadron. Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",
+        important: true,
+        action: "Relancez EDMC deux fois pour passer en 2.54"
+    },
+    {
+        id: "2026-10-escadron-carrier", date: "2026-10-31T11:49:10Z", type: "NOUVEAU",
+        titre: "Page Escadron, onglet FLEET CARRIERS : le carrier de l’escadron",
+        texte: "Le carrier commun de l’escadron s’affiche maintenant en tête de la liste, avec son propre hologramme, son nom, son système, son accès aux docks, son saut annoncé, la distance depuis vous et jusqu’à une directive. Sa position vient du journal de jeu du dernier membre qui l’a vu : il suffit qu’un seul pilote ait le plugin 2.54. Les services du carrier d’escadron ne sont pas transmis par le jeu aux membres : ils sont marqués « non relevés ». Jamais de solde, de cargaison ni de carburant.",
+        important: false
+    },
+    {
         id: "2026-10-copier-lieux-svg", date: "2026-10-31T11:34:10Z", type: "CORRIGE",
         titre: "Copier un système : les noms de la carte galactique réapparaissent",
         texte: "Sur la carte galactique de la page BGS, les noms de systèmes pouvaient disparaître depuis l’arrivée du « copier un système d’un clic ». C’est corrigé : les noms redeviennent visibles. Sur ces dessins, le nom n’est pas copiable d’un clic.",

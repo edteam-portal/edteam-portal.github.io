@@ -102,6 +102,10 @@
 .fcm-t.p em{color:#FFB000}.fcm-t.o em{color:#6b7680}.fcm-t.o b{color:#7d8a92}
 @media (max-width:760px){.fcm-holo{flex-basis:100%}}
 .fc.ambre .fc-part input{accent-color:#FFB000}
+.fc-hg img.sc{object-fit:contain}
+.fc-sctag{display:inline-block;border:1px solid #FFB000;color:#FFB000;background:rgba(255,176,0,.1);padding:1px 8px;font-size:.7em;letter-spacing:2px;white-space:nowrap}
+.fc-scesc{display:block;color:#8b97a0;font-size:.74em;letter-spacing:1px;margin-top:3px}
+.fc.ambre .fc-tab tr.sc td{background:rgba(255,176,0,.07)}
 .fc-svc{max-width:300px}.fc-sv-mien{margin-top:12px}.fc-sv-mien small{display:block;color:#7d8a92;font-size:.68em;letter-spacing:2px;margin-bottom:4px}
 .fc-dirtag{display:inline-block;margin:4px 0 0;padding:0 7px;border:1px solid #FF7100;color:#FF9A4D;background:rgba(255,113,0,.1);font-size:.72em;letter-spacing:1.5px;white-space:nowrap}
 .fc-tab tr.dir td:first-child{box-shadow:inset 3px 0 0 #FF7100}.fc-tab tr.moi.dir td:first-child{box-shadow:inset 3px 0 0 #00F0FF,inset 6px 0 0 #FF7100}
@@ -199,7 +203,7 @@
     ];
     // 3 modeles de carrier : variante du journal (CarrierBuy.Variant) -> hologramme. CORRESPONDANCE A CONFIRMER : A = Victory, B = Fortune, C = Nautilus (hypothese : ordre donne par le proprietaire, son carrier est CarrierDockB). Variante inconnue : Fortune.
     const IMG_VARIANTE = { CarrierDockA: "victory", CarrierDockB: "fortune", CarrierDockC: "nautilus" };
-    const imgCarrier = c => "images/carriers/carrier-" + (IMG_VARIANTE[c && c.var] || "fortune") + ".webp";
+    const imgCarrier = c => "images/carriers/carrier-" + (c && c.sc ? "escadron" : (IMG_VARIANTE[c && c.var] || "fortune")) + ".webp";   // le carrier D ESCADRON a sa propre image (plus large)
     // familles de la carte du hangar : [titre, [cles]]
     const FAMILLES = [["Logistique", ["Repair", "Refuel", "Rearm", "CarrierFuel"]], ["Commerce et vaisseaux", ["Commodities", "BlackMarket", "VoucherRedemption", "Shipyard", "Outfitting"]], ["Exploration et vie à bord", ["Exploration", "VistaGenomics", "PioneerSupplies", "Bartender"]]];
     function famillesServices(srv) {
@@ -271,11 +275,11 @@
         const cellD = (d, nom) => d == null ? '<span class="inv">—</span>' : "<b>" + fmtD(d) + " al</b>" + (nom ? "<small>" + E(nom) + "</small>" : "");
         const rows = aff.map(({ c, dm, dd, ddNom, dirT }) => {
             const s = saut(c);
-            return '<tr class="' + (c.moi ? "moi " : "") + (dirT ? "dir" : "") + '"><td class="fc-holo"><div class="fc-hg" title="' + E(c.nom || c.indicatif) + '"><img src="' + imgCarrier(c) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div></td><td><b>' + E(c.nom || c.indicatif) + "</b><small>" + E(c.indicatif) + "</small></td>"
-                + "<td>" + pilote(c) + (c.moi && !c.partage ? '<span class="fc-tag" title="Visible de vous seul : cochez la case dans Mon hangar pour le montrer à l’escadron">NON PARTAGÉ</span>' : "") + "</td>"
+            return '<tr class="' + (c.moi ? "moi " : "") + (c.sc ? "sc " : "") + (dirT ? "dir" : "") + '"><td class="fc-holo"><div class="fc-hg" title="' + E(c.nom || c.indicatif) + '"><img class="' + (c.sc ? "sc" : "") + '" src="' + imgCarrier(c) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div></td><td><b>' + E(c.nom || c.indicatif) + "</b><small>" + E(c.indicatif) + "</small></td>"
+                + "<td>" + (c.sc ? '<span class="fc-sctag" title="Le carrier commun de l’escadron, vu par n’importe lequel de ses membres">CARRIER D’ESCADRON</span><span class="fc-scesc">' + E(c.escadron || "") + "</span>" : pilote(c)) + (c.moi && !c.partage ? '<span class="fc-tag" title="Visible de vous seul : cochez la case dans Mon hangar pour le montrer à l’escadron">NON PARTAGÉ</span>' : "") + "</td>"
                 + "<td>" + (c.systeme ? "<b>" + lieu(c.systeme) + "</b>" : '<span class="inv">position inconnue</span>')
                 + (dirT ? '<div><span class="fc-dirtag" title="Une directive active vise ce système">◆ DIRECTIVE · ' + E(String(dirT).toUpperCase()) + "</span></div>" : "") + (s ? '<div class="att">' + s + "</div>" : "") + "</td>"
-                + '<td class="fc-svc">' + chipsServices(c.services) + "</td>"
+                + '<td class="fc-svc">' + (c.sc ? '<span class="inv" title="Le jeu ne transmet pas les services du carrier d’escadron aux membres qui n’en sont pas capitaines">non relevés</span>' : chipsServices(c.services)) + "</td>"
                 + (avecDm ? '<td class="fc-dd">' + cellD(dm) + "</td>" : "") + (avecDd ? '<td class="fc-dd">' + cellD(dd, ddNom) + "</td>" : "")
                 + "<td>" + ilYa(c.vu) + "</td></tr>";
         }).join("");
@@ -294,10 +298,11 @@
         el.className = "fc ambre bloc or"; el.style.padding = "14px 18px";
         el.innerHTML = '<div class="fc-vide">Chargement des carriers…</div>';
         try {
-            const d = await rpc("fc_escadron", null, "esc");
+            const [d, sc] = await Promise.all([rpc("fc_escadron", null, "esc"), rpc("fc_sc_lire", null, "sc").catch(() => null)]);   // le carrier d'escadron (SQL 189) : sans lui la liste marche comme avant
             if (window.EDTEAMPhotos) { try { await window.EDTEAMPhotos.charger(false); } catch (e) { /* initiales a la place */ } }
             if (!d) { el.style.display = "none"; return; }           // pas d'escadron : rien a montrer
-            const liste = Array.isArray(d.liste) ? d.liste : [], dirs = Array.isArray(d.directives) ? d.directives : [];    // directives : [systeme, type, x, y, z]
+            const liste = Array.isArray(d.liste) ? d.liste.slice() : [], dirs = Array.isArray(d.directives) ? d.directives : [];    // directives : [systeme, type, x, y, z]
+            if (sc && sc.systeme) liste.unshift(Object.assign({}, sc, { sc: true, nom: sc.nom || "Carrier d’escadron", indicatif: sc.indicatif || "", services: null }));   // le carrier COMMUN de l'escadron, en tete
             // coordonnees inconnues du serveur : EDSM direct (rare : un systeme absent des tables du serveur)
             const manque = []; liste.forEach(c => { if (c.systeme && c.x == null) manque.push(c.systeme); }); dirs.forEach(r => { if (r[2] == null) manque.push(r[0]); });
             const cache = manque.length ? await coordonnees(Array.from(new Set(manque))) : lireCoords();
@@ -308,7 +313,7 @@
                 + FILTRES_SERVICES.map(k => '<button type="button" data-sv="' + k + '">' + SERVICES.find(x => x[0] === k)[1] + "</button>").join("") + (dirs.length ? '<span class="fcm-sep"></span><button type="button" data-ed="1">DANS UN SYSTÈME EN DIRECTIVE</button>' : "") + "</div>"
                 + '<div class="fc-dirsel"><span class="fc-moi"></span>' + (dirs.length ? '<span>DIRECTIVE : <select class="fc-dirchoix"><option value="proche">LA PLUS PROCHE DE CHAQUE CARRIER</option>' + dirs.map((r, i) => '<option value="' + i + '">' + E(r[0]) + " · " + E(String(r[1] || "").toLowerCase()) + "</option>").join("") + "</select></span>" : "") + "</div>"
                 + '<div class="fc-liste"></div>'
-                + '<div class="fc-note">Position et services lus dans le journal de jeu de chaque propriétaire : ils datent de sa dernière session. Les distances sont en années-lumière, calculées sur votre appareil. Chaque pilote peut cacher son carrier depuis la page Mon hangar.</div>';
+                + '<div class="fc-note">Position et services lus dans le journal de jeu de chaque propriétaire : ils datent de sa dernière session. Les distances sont en années-lumière, calculées sur votre appareil. Chaque pilote peut cacher son carrier depuis la page Mon hangar. Le carrier d’escadron est montré à tous les membres : sa position vient du journal de jeu du dernier membre qui l’a vu.</div>';
             el.addEventListener("click", e => {
                 const f = e.target.closest("[data-f]"), sv = e.target.closest("[data-sv]"), ed = e.target.closest("[data-ed]"), t = e.target.closest("th[data-t]");
                 if (f) S.etat.f = f.dataset.f;
