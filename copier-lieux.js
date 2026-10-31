@@ -17,7 +17,7 @@
     var BANALS = new Set(['port', 'station', 'systeme', 'système', 'inconnu', 'inconnue', 'aucun', 'aucune', 'unknown', 'none', 'null', 'undefined', 'home', 'nord', 'sud', 'true', 'false', 'oui', 'non', 'faction', 'pilote', 'escadron', 'mission', 'missions']);
     var MOT = /[\p{L}\p{N}][\p{L}\p{N}'’\-]*/gu;
     var CLE_OK = /^(?:sys|st|os|ost|stn)$|syst|station/i, CLE_NON = /type|(?:^|_)id$|^id|etat|state|faction|statut|status|dist|count|^nb|date|_at$|coord|url|lien|label|titre|texte|note/i;
-    var SAUTE = /^(?:SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|BUTTON|A|SVG|TITLE|NOSCRIPT|CODE|PRE|CANVAS|IFRAME|HEAD|DATALIST|META|LINK)$/;
+    var SAUTE = /^(?:SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|BUTTON|A|SVG|TITLE|NOSCRIPT|CODE|PRE|CANVAS|IFRAME|HEAD|DATALIST|META|LINK)$/i;   // insensible a la casse : dans une page HTML, un element SVG a pour tagName « svg »
     var DEJA = '.edteam-lieu,[data-copie],.tb-cp,.ec-cp,.copy-click,[data-nocopie],[contenteditable],[contenteditable=""],[contenteditable="true"]';
 
     function valide(s) {
@@ -102,7 +102,7 @@
         return res;
     }
     function ignore(el) {
-        for (var e = el; e && e.nodeType === 1; e = e.parentNode) { if (SAUTE.test(e.tagName) || (e.matches && e.matches(DEJA))) return true; if (e === document.body) break; }
+        for (var e = el; e && e.nodeType === 1; e = e.parentNode) { if (SAUTE.test(e.tagName) || e.namespaceURI === 'http://www.w3.org/2000/svg' || (e.matches && e.matches(DEJA))) return true; if (e === document.body) break; }
         return false;
     }
     function envelopper(noeud) {
