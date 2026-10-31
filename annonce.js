@@ -527,6 +527,69 @@
             cta: 'LIRE LA DERNIÈRE ÉDITION',
             aide: 'QG · carte de votre faction · bouton EDNEWS (sur mobile : sous le logo de l’escadron)',
             lien: 'qg.html'
+        },
+        {
+            id: 'escadron-fc-2026-10',
+            couleur: '#FFB000',
+            etiquette: '★ NOUVELLES FONCTIONS',
+            titre: 'LA PAGE ESCADRON, ET VOTRE CARRIER AU HANGAR',
+            pages: [
+                {
+                    titre: 'PAGE ESCADRON : TROIS ONGLETS',
+                    sous: 'Systèmes · Membres · Fleet Carriers',
+                    intro: 'La page <b>Escadron</b> se range en <b>trois onglets</b>. Elle s’ouvre maintenant sur <b>SYSTÈMES</b> ; vos camarades sont dans <b>MEMBRES</b>.',
+                    visuelHtml: anvFc1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'SYSTÈMES', d: 'Où votre faction est installée, qui a colonisé quoi, et où sont les directives et campagnes.' },
+                        { n: '2', t: 'MEMBRES', d: 'La liste des pilotes de l’escadron, comme avant.' },
+                        { n: '3', t: 'FLEET CARRIERS', d: 'Les carriers que vos camarades ont choisi de partager.' }
+                    ]
+                },
+                {
+                    titre: 'PAGE ESCADRON · ONGLET SYSTÈMES',
+                    sous: 'Les systèmes de la faction que vous défendez',
+                    intro: 'Un tableau <b>trié et filtrable</b> : colonies, cibles des directives et des campagnes, conflits, chantiers. Cliquez sur une ligne pour sa <b>fiche</b>.',
+                    visuelHtml: anvFc2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '▌', t: 'BARRE VERTE', d: 'Une colonie dont l’<b>architecte est un membre</b> de l’escadron.' },
+                        { n: 'C', t: 'CAMPAGNE EN COURS', d: 'Une mission active d’une campagne vise ce système. <b>CIBLE</b> : système visé que la faction ne contrôle pas encore.' },
+                        { n: '↔', t: 'DISTANCE', d: 'Depuis votre position (plugin) ou votre carrier. Les valeurs inconnues sont écrites « non relevée », jamais inventées.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'PAGE ESCADRON · ONGLET FLEET CARRIERS',
+                    sous: 'Où se poser, chez qui, avec quoi',
+                    intro: 'Les carriers de l’escadron, avec leur <b>hologramme</b>, leurs <b>services</b> et la distance : depuis vous, et jusqu’à la directive la plus proche.',
+                    visuelHtml: anvFc3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'SERVICES', d: 'Réparation, ravitaillement, réarmement, chantier naval, équipement… Filtrez ceux dont vous avez besoin.' },
+                        { n: '2', t: 'DIRECTIVE', d: 'Un carrier posé dans un système en directive est marqué en orange.' },
+                        { n: '3', t: 'VOUS CHOISISSEZ', d: 'Chacun décide de montrer ou non son carrier. Jamais le solde, la cargaison ni le carburant.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'MON HANGAR · MON FLEET CARRIER',
+                    sous: 'Ce n’est pas la page Escadron : c’est la vôtre',
+                    intro: 'Dans <b>Mon hangar</b>, la carte de <b>votre</b> carrier est refaite, aux couleurs ambre : <b>grand hologramme</b> et <b>services en tuiles</b>.',
+                    visuelHtml: anvFc4,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '◉', t: 'ACTIFS', d: 'Les services en marche, en vert.' },
+                        { n: '◉', t: 'EN PAUSE', d: 'Les services suspendus, en ambre.' },
+                        { n: '◉', t: 'DÉSACTIVÉS', d: 'Ceux que votre carrier ne propose pas, en gris.' }
+                    ],
+                    avis: '<b>Plugin SYS.EDTEAM 2.53</b> : il se met à jour tout seul, <b>relancez EDMC deux fois</b> pour voir vos services et le bon modèle de carrier.'
+                }
+            ],
+            cta: 'OUVRIR LA PAGE ESCADRON',
+            aide: 'Menu latéral : ESCADRON (onglets) · MON HANGAR (votre carrier) · à utiliser sur PC ou tablette',
+            lien: 'escadron.html',
+            mobile: false
         }
     ];
 
@@ -593,6 +656,44 @@
             + ligne(dscIc('cible', DSC_SVG.disc, '12', true), '<b style="color:#00F0FF">Du nouveau</b> : la bulle clignote en cyan.')
             + ligne(dscIc('ambre', DSC_SVG.jour, '7', 'a'), '<b style="color:#FFB000">Le journal aussi</b>, en ambre : 7 nouvelles lignes depuis votre dernière ouverture.')
             + '</div>';
+    }
+
+    // ---- annonce « Escadron + Fleet Carriers » : visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
+    var FCV_CSS = '<style>.fcv{max-width:680px;margin:16px auto 0;text-align:left;font-size:.82em}.fcv .tabs{display:flex;gap:6px;border-bottom:1px solid #FFB00055}.fcv .tabs span{padding:6px 14px;border:1px solid #3a2d12;border-bottom:0;color:#8b97a0;letter-spacing:2px;font-size:.8em}.fcv .tabs span.on{background:#FFB000;color:#000;border-color:#FFB000;font-weight:bold}'
+        + '.fcv .tb{width:100%;border-collapse:collapse}.fcv .tb th{text-align:left;color:#7d8a92;font-size:.66em;letter-spacing:2px;font-weight:normal;padding:5px 8px;border-bottom:1px solid #FFB00055}.fcv .tb td{padding:7px 8px;border-bottom:1px dashed #3a2d12;color:#dfe9ec;vertical-align:middle}.fcv .tb td small{display:block;color:#7d8a92;font-size:.78em}'
+        + '.fcv .tg{display:inline-block;border:1px solid var(--k);color:var(--k);padding:0 7px;font-size:.7em;letter-spacing:1.5px}.fcv .c{display:inline-block;margin-left:6px;border:1px solid #FF4FD8;color:#FF4FD8;padding:0 5px;font-size:.7em}.fcv .mb td:first-child{box-shadow:inset 3px 0 0 #00FF66}.fcv .ci td:first-child{box-shadow:inset 3px 0 0 #00F0FF}.fcv .dr td:first-child{box-shadow:inset 3px 0 0 #FF5A36}'
+        + '.fcv .sv{display:inline-block;margin:0 3px 2px 0;padding:0 5px;border:1px solid #2fe0a8;color:#9ff3d6;font-size:.64em;letter-spacing:1px}.fcv .sv.p{border-color:#6b7680;color:#8b97a0;text-decoration:line-through}'
+        + '.fcv .hg{display:inline-block;width:92px;height:50px;border:1px solid #FFB00073;background:#030201 center/contain no-repeat;box-shadow:0 0 12px #FFB00030}'
+        + '.fcv .carte{display:flex;gap:16px;flex-wrap:wrap;border:1px solid #FFB00066;background:rgba(255,176,0,.04);padding:12px}.fcv .carte .big{flex:0 0 190px;height:140px;border:1px solid #FFB00080;background:#030201 center/contain no-repeat;box-shadow:0 0 18px #FFB00033}'
+        + '.fcv .fam{flex:1 1 150px;min-width:150px;border:1px solid #3a2d12;padding:6px 8px}.fcv .fam h5{margin:0 0 4px;color:#FFB000;font-weight:normal;font-size:.7em;letter-spacing:2px}.fcv .t{display:flex;gap:7px;align-items:center;padding:3px 0;font-size:.78em;color:#e8f6f8}.fcv .t i{flex:none;width:8px;height:8px;border-radius:50%;background:#2fe0a8;box-shadow:0 0 7px #2fe0a8}.fcv .t.p i{background:#FFB000;box-shadow:0 0 7px #FFB000}.fcv .t.o{color:#7d8a92}.fcv .t.o i{background:#3a444a;box-shadow:none}.fcv .t em{margin-left:auto;font-style:normal;font-size:.7em;letter-spacing:1px;color:#2fe0a8}.fcv .t.p em{color:#FFB000}.fcv .t.o em{color:#6b7680}'
+        + '.fcv .pill{display:inline-block;border:1px solid #3a2d12;padding:2px 9px;margin:0 6px 8px 0;font-size:.72em;letter-spacing:2px;color:#8b97a0}.fcv .pill.a{border-color:#2fe0a8;color:#9ff3d6}.fcv .pill.p{border-color:#FFB000;color:#ffd98a}</style>';
+    function anvFc1() {
+        return FCV_CSS + '<div class="fcv"><div class="tabs"><span class="on">SYSTÈMES</span><span>MEMBRES</span><span>FLEET CARRIERS</span></div>'
+            + '<div style="border:1px solid #3a2d12;border-top:0;padding:14px;color:#aab7bd;text-align:center;letter-spacing:1px">La page s’ouvre sur l’onglet <b style="color:#FFB000">SYSTÈMES</b></div></div>';
+    }
+    function anvFc2() {
+        var r = function (cl, nom, ty, k, arch, inf, c) { return '<tr class="' + cl + '"><td><b>' + nom + '</b>' + (c ? '<span class="c" title="campagne">C</span>' : '') + '</td><td><span class="tg" style="--k:' + k + '">' + ty + '</span></td><td>' + arch + '</td><td>' + inf + '</td><td>' + c2(cl) + '</td></tr>'; };
+        var c2 = function (cl) { return cl === 'ci' ? '75 al' : cl === 'mb' ? '12 al' : '38 al'; };
+        return FCV_CSS + '<div class="fcv"><div class="tabs"><span class="on">SYSTÈMES</span><span>MEMBRES</span><span>FLEET CARRIERS</span></div><table class="tb"><thead><tr><th>SYSTÈME</th><th>TYPE</th><th>ARCHITECTE</th><th>INFLUENCE</th><th>DISTANCE</th></tr></thead><tbody>'
+            + r('mb', 'Aldera', 'COLONIE', '#FFB44D', 'CMDR NOVA RIVEN', '48,2 %', false)
+            + r('', 'Kestrel Prime', '—', '#8b97a0', '—', '62,0 %', true)
+            + r('ci', 'Vantor', 'CIBLE', '#00F0FF', '—', '35,1 %', false)
+            + '</tbody></table></div>';
+    }
+    function anvFc3() {
+        var h = 'images/carriers/carrier-fortune.webp';
+        var r = function (cl, nom, ind, sys, svs, d1, d2) { return '<tr class="' + cl + '"><td><span class="hg" style="background-image:url(' + h + ')"></span></td><td><b>' + nom + '</b><small>' + ind + '</small></td><td>' + sys + (cl === 'dr' ? '<br><span class="tg" style="--k:#FF5A36">DIRECTIVE · GUERRE</span>' : '') + '</td><td>' + svs + '</td><td>' + d1 + '</td><td>' + d2 + '</td></tr>'; };
+        var sv = function (t, p) { return '<span class="sv' + (p ? ' p' : '') + '">' + t + '</span>'; };
+        return FCV_CSS + '<div class="fcv"><div class="tabs"><span>SYSTÈMES</span><span>MEMBRES</span><span class="on">FLEET CARRIERS</span></div><table class="tb"><thead><tr><th></th><th>CARRIER</th><th>SYSTÈME</th><th>SERVICES</th><th>DIST. DEPUIS MOI</th><th>DIST. DIRECTIVE</th></tr></thead><tbody>'
+            + r('dr', 'LE PHARE', 'AAA-111', 'Potamoi', sv('RÉPARATION') + sv('RAVITAILLEMENT') + sv('CHANTIER NAVAL'), '210 al', '0 al')
+            + r('', 'LA FORGE', 'BBB-222', 'Aldera', sv('RÉPARATION') + sv('RÉARMEMENT') + sv('VISTA', true), '12 al', '41 al')
+            + '</tbody></table></div>';
+    }
+    function anvFc4() {
+        var t = function (cl, n, e) { return '<div class="t ' + cl + '"><i></i>' + n + '<em>' + e + '</em></div>'; };
+        return FCV_CSS + '<div class="fcv"><div class="carte"><div class="big" style="background-image:url(images/carriers/carrier-fortune.webp)"></div><div style="flex:1 1 260px"><div style="color:#FFB000;letter-spacing:3px;font-size:.8em">MON FLEET CARRIER</div><div style="color:#fff;font-size:1.3em;letter-spacing:2px;margin:4px 0 10px">NOVA TERMINUS</div>'
+            + '<span class="pill a">7 ACTIFS</span><span class="pill p">1 EN PAUSE</span><span class="pill">5 DÉSACTIVÉS</span>'
+            + '<div style="display:flex;gap:8px;flex-wrap:wrap"><div class="fam"><h5>LOGISTIQUE</h5>' + t('', 'RÉPARATION', 'ACTIF') + t('', 'TRITIUM', 'ACTIF') + '</div><div class="fam"><h5>EXPLORATION</h5>' + t('p', 'VISTA GENOMICS', 'EN PAUSE') + t('o', 'CARTOGRAPHIE', 'DÉSACTIVÉ') + '</div></div></div></div></div>';
     }
     // ---- annonce « EDTEAM News » : trois visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
     var NWS_CSS = '<style>.nw{max-width:640px;margin:16px auto 0;text-align:left}.nw .une{border:1px solid #00F0FF55;background:linear-gradient(180deg,rgba(0,40,52,.55),rgba(3,8,12,.9));padding:12px 14px}'

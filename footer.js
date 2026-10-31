@@ -136,7 +136,7 @@
     window.edteamOuvrirAide = function (section) {
         if (window.edteamAide) { window.edteamAide.ouvrir(section); return; }
         var s = document.createElement('script');
-        s.src = 'aide.js?v=47';
+        s.src = 'aide.js?v=52';
         s.onload = function () { if (window.edteamAide) window.edteamAide.ouvrir(section); };
         document.head.appendChild(s);
     };

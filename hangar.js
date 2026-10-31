@@ -4,7 +4,7 @@
 //    EdteamHangar.ouvrir(userId, nom)    : fenetre plein ecran (fiche pilote de la page Escadron) ; userId vide = son propre hangar
 //    EdteamHangar.monter(element)        : affichage dans la page (page « Mon hangar »)
 //  Une seule lecture serveur (hangar_lire), a l'ouverture, gardee 3 minutes dans la session. Les hologrammes et les noms de modules (fichiers statiques) ne sont charges qu'a l'ouverture.
-//  Couleur par taille de plateforme : S vert, M cyan, L ambre (donnees Coriolis). Aucune valeur en credits, aucune position.
+//  Couleur par taille de plateforme : S vert, M cyan, L ambre (donnees Coriolis). Aucune valeur en credits, aucune position de vaisseau.
 // =====================================================================================================
 (function () {
     "use strict";
@@ -201,7 +201,7 @@
             + '<div class="hg-st"><div><small>VAISSEAUX</small><b>' + tous.length + "</b></div><div><small>ÉQUIPEMENT CONNU</small><b>" + nEq + "</b></div><div><small>MODULES INGÉNIÉRÉS</small><b>" + nIng + "</b></div><div><small>AVEC HOLOGRAMME</small><b>" + nHolo + "</b></div></div>"
             + '<div class="hg-b"><input class="hg-q" type="search" placeholder="Rechercher un vaisseau…" aria-label="Rechercher un vaisseau"><div class="hg-f" data-g="f"><button data-f="tous">TOUS</button><button data-f="eng">INGÉNIÉRÉS</button><button data-f="g5">AVEC DU G5</button></div>'
             + '<div class="hg-f" data-g="z"><button class="z t1" data-z="1">S</button><button class="z t2" data-z="2">M</button><button class="z t3" data-z="3">L</button><span class="hg-leg">taille de plateforme</span></div><span class="hg-n"></span></div>'
-            + '<div class="hg-m"></div><div class="hg-note">Équipement tel que le plugin l’a vu la dernière fois que le pilote a piloté le vaisseau ou modifié son équipement' + (data.maj ? " · dernière transmission " + ilYa(data.maj) : "") + ". Aucune valeur ni position n’est affichée.</div>";
+            + '<div class="hg-m"></div><div class="hg-note">Équipement tel que le plugin l’a vu la dernière fois que le pilote a piloté le vaisseau ou modifié son équipement' + (data.maj ? " · dernière transmission " + ilYa(data.maj) : "") + ". Aucune valeur en crédits ni position de vaisseau n’est affichée.</div>";
         const zone = cont.querySelector(".hg-m"), compte = cont.querySelector(".hg-n");
         function vue() {
             const q = ET.q.trim().toLowerCase();

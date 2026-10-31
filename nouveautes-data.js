@@ -5,6 +5,43 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-copier-lieux-svg", date: "2026-10-31T11:34:10Z", type: "CORRIGE",
+        titre: "Copier un système : les noms de la carte galactique réapparaissent",
+        texte: "Sur la carte galactique de la page BGS, les noms de systèmes pouvaient disparaître depuis l’arrivée du « copier un système d’un clic ». C’est corrigé : les noms redeviennent visibles. Sur ces dessins, le nom n’est pas copiable d’un clic.",
+        important: false
+    },
+    {
+        id: "2026-10-plugin-2-53", date: "2026-10-31T11:34:00Z", type: "AMELIORE",
+        titre: "Plugin SYS.EDTEAM 2.53 : à jour ?",
+        texte: "La version 2.53 du plugin est disponible. Elle lit les services de votre Fleet Carrier (réparation, ravitaillement, chantier naval…) et son modèle, pour les montrer dans la page Escadron (onglet FLEET CARRIERS) et dans Mon hangar. Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",
+        important: true,
+        action: "Relancez EDMC deux fois pour passer en 2.53"
+    },
+    {
+        id: "2026-10-hangar-fc-refait", date: "2026-10-31T11:33:50Z", type: "AMELIORE",
+        titre: "Mon hangar : votre Fleet Carrier en grand, avec ses services",
+        texte: "Dans Mon hangar (et non sur la page Escadron), la carte « Mon Fleet Carrier » est refaite aux couleurs ambre : un grand hologramme de votre carrier, puis ses services rangés en trois familles (logistique, commerce et vaisseaux, exploration et vie à bord). Chaque service indique s’il est actif, en pause ou désactivé, avec une ligne d’explication. Il vous faut le plugin 2.53 pour voir les services ; sans lui, l’ancienne ligne de pastilles s’affiche.",
+        important: false
+    },
+    {
+        id: "2026-10-escadron-fleet-carriers", date: "2026-10-31T11:33:40Z", type: "NOUVEAU",
+        titre: "Page Escadron, onglet FLEET CARRIERS : où se poser, chez qui, avec quoi",
+        texte: "Les Fleet Carriers que vos camarades ont choisi de partager : hologramme, pilote, système, services (réparation, ravitaillement, réarmement, chantier naval, équipement…), accès aux docks, distance depuis vous et distance jusqu’à une directive. Un carrier posé dans un système en directive est marqué en orange, et vous filtrez par service. Jamais de solde, de cargaison ni de carburant. Chacun décide, dans son hangar, de montrer ou non son carrier.",
+        important: false
+    },
+    {
+        id: "2026-10-escadron-systemes", date: "2026-10-31T11:33:30Z", type: "NOUVEAU",
+        titre: "Page Escadron, onglet SYSTÈMES : où est installée votre faction",
+        texte: "Un tableau des systèmes de la faction que votre escadron défend : colonies, systèmes cibles des directives et des campagnes, conflits récents, chantiers en cours. Une barre verte marque une colonie dont l’architecte est un membre de l’escadron, un « C » une campagne en cours. Colonne Distance depuis votre position (plugin) ou votre carrier, filtres, tri, recherche, et une fiche par système avec les factions présentes. Ce qui n’est pas relevé est écrit « non relevée », jamais inventé. Un clic sur le nom copie le système.",
+        important: false
+    },
+    {
+        id: "2026-10-escadron-onglets", date: "2026-10-31T11:33:20Z", type: "AMELIORE",
+        titre: "Page Escadron : trois onglets, ouverte sur SYSTÈMES",
+        texte: "La page Escadron se range en trois onglets : SYSTÈMES (ouvert par défaut), MEMBRES (la liste des pilotes, comme avant) et FLEET CARRIERS. Les blocs du haut restent en place. Vos favoris sur la page MEMBRES s’ouvrent avec l’adresse escadron.html#membres.",
+        important: false
+    },
+    {
         id: "2026-10-copier-lieux", date: "2026-10-30T21:50:17Z", type: "NOUVEAU",
         titre: "Copier un système ou une station d’un clic",
         texte: "Partout où le site affiche le nom d’un système ou d’une station (QG, directives BGS, campagnes, commerce, colonisation, tableau de bord, mobile…), un clic le copie : vous n’avez plus qu’à le coller dans la recherche de la carte de la galaxie du jeu. Un petit message « Copié » le confirme. Les noms apparaissent soulignés en pointillés. Le premier affichage d’une page peut mettre un instant à repérer certains noms.",

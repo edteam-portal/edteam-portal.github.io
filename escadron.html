@@ -19,6 +19,8 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="copier-lieux.js?v=2"></script>
+    <script src="carriers.js?v=13"></script>
+    <script src="systemes-faction.js?v=13"></script>
     <script src="navigation.js?v=56"></script>
     <script src="invitations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
@@ -95,6 +97,11 @@
         .info-btn:hover { color: #fff !important; text-shadow: 0 0 8px currentColor; transform: scale(1.1); }
         
         .header-bottom-row { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--ed-orange); padding-bottom: 10px; margin-bottom: 15px; }
+        .esc-onglets { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 16px; border-bottom: 1px solid var(--ed-orange-dim); }
+        .esc-onglet { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 9px 26px; font-family: inherit; font-size: 0.95em; letter-spacing: 2px; cursor: pointer; opacity: 0.75; margin-bottom: -1px; }
+        .esc-onglet:hover { background: rgba(255, 113, 0, 0.1); opacity: 1; }
+        .esc-onglet.actif { opacity: 1; background: var(--ed-orange); color: #000; font-weight: bold; }
+        .esc-onglet small { margin-left: 8px; font-size: 0.8em; opacity: 0.8; }
         .tab-bar { display: flex; gap: 5px; flex-wrap: wrap; }
         .tab-btn { background: transparent; border: 1px solid var(--ed-orange-dim); border-bottom: none; color: var(--ed-orange); padding: 8px 30px; font-family: 'Share Tech Mono', monospace; font-size: 1.05em; letter-spacing: 2px; cursor: pointer; opacity: 0.5; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: 0.2s; }
         .tab-btn:hover { background: rgba(255, 113, 0, 0.1); opacity: 0.8; }
@@ -342,7 +349,7 @@
         .eff-outils input, .eff-outils select { background: rgba(0, 0, 0, 0.7); border: 1px solid #5a3000; color: #ddd; padding: 7px 12px; font-family: inherit; font-size: 0.88em; outline: none; }
         .eff-outils input { width: 220px; }
         .eff-outils input:focus, .eff-outils select:focus { border-color: var(--ed-orange); }
-        .eff-puces { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+        .eff-puces { display: flex; gap: 6px; flex-wrap: wrap; margin: 0; }
         .eff-puce { border: 1px solid #444; color: #999; padding: 3px 12px; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; border-radius: 12px; user-select: none; transition: 0.15s; }
         .eff-puce:hover { border-color: #888; color: #ccc; }
         .eff-puce.on { border-color: var(--ed-orange); color: var(--ed-orange); background: rgba(255, 113, 0, 0.1); }
@@ -483,9 +490,15 @@
                 </div>
             </div>
 
+            <div class="esc-onglets" role="tablist">
+                <button type="button" class="esc-onglet actif" data-onglet="systemes" role="tab">SYSTÈMES</button>
+                <button type="button" class="esc-onglet" data-onglet="membres" role="tab">MEMBRES</button>
+                <button type="button" class="esc-onglet" data-onglet="fc" role="tab">FLEET CARRIERS</button>
+            </div>
+
+            <section id="onglet-membres" hidden>
             <div class="eff-tete">
-                <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">&gt; EFFECTIFS DE L'ESCADRON</h3>
-                <span id="badge-onglet-escadron" style="display: none; background: #FF3333; color: #fff; border-radius: 10px; padding: 4px 10px; font-size: 0.9em; font-weight: bold; box-shadow: 0 0 8px #FF3333;">0</span>
+                <div class="eff-puces" id="eff-puces"></div>
                 <div class="eff-outils">
                     <input type="search" id="eff-recherche" placeholder="Rechercher un pilote…" oninput="effFiltrer()" autocomplete="off" spellcheck="false">
                     <select id="eff-tri" onchange="effFiltrer()">
@@ -495,11 +508,15 @@
                     </select>
                 </div>
             </div>
-            <div class="eff-puces" id="eff-puces"></div>
 
             <div id="liste-effectifs" class="eff-grille">
                 <div style="grid-column: 1 / -1; color: #666; font-style: italic; text-align: center; margin-top: 20px;">> CHARGEMENT DES EFFECTIFS...</div>
             </div>
+
+            </section>
+
+            <section id="onglet-fc" hidden><div id="fc-escadron"></div></section>
+            <section id="onglet-systemes"><div id="sf-systemes"></div></section>
 
 
             <!-- MODALE : DOSSIER DU PILOTE -->
@@ -753,6 +770,21 @@
             if (window.brancherTitresSpecialistes) window.brancherTitresSpecialistes(conteneur);
         }
 
+        // ONGLETS de la page : chaque onglet ne se charge qu'a sa premiere ouverture (aucune lecture serveur tant qu'on ne l'ouvre pas) ; #membres et #fc ouvrent directement l'onglet (sans adresse : SYSTEMES)
+        const ONGLETS_ESC = { membres: 'onglet-membres', fc: 'onglet-fc', systemes: 'onglet-systemes' }, ongletsCharges = {};
+        function ouvrirOngletEsc(nom, majUrl) {
+            if (!ONGLETS_ESC[nom]) nom = 'systemes';          // onglet d'ouverture de la page
+            Object.keys(ONGLETS_ESC).forEach(n => { const s = document.getElementById(ONGLETS_ESC[n]); if (s) s.hidden = n !== nom; });
+            document.querySelectorAll('.esc-onglet').forEach(b => { const on = b.dataset.onglet === nom; b.classList.toggle('actif', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+            if (!ongletsCharges[nom] && window.EdteamCarriers) {
+                if (nom === 'fc') { ongletsCharges[nom] = true; window.EdteamCarriers.monterEscadron(document.getElementById('fc-escadron')); }
+            }
+            if (nom === 'systemes' && !ongletsCharges[nom] && window.EdteamSystemes) { ongletsCharges[nom] = true; window.EdteamSystemes.monter(document.getElementById('sf-systemes')); }
+            if (majUrl) { try { history.replaceState(null, '', location.pathname + location.search + (nom === 'systemes' ? '' : '#' + nom)); } catch (e) {} }
+        }
+        document.addEventListener('click', e => { const b = e.target.closest ? e.target.closest('.esc-onglet') : null; if (b) { if (typeof sonClic === 'function') sonClic(); ouvrirOngletEsc(b.dataset.onglet, true); } });
+        window.addEventListener('hashchange', () => ouvrirOngletEsc(location.hash.replace('#', '')));
+
         async function chargerEffectifsEscadron() {
             const containerEffectifs = document.getElementById('liste-effectifs');
             if (!containerEffectifs) return;
@@ -976,7 +1008,7 @@
             const id = window.__ficheCourante;
             if (!id) return;
             try {
-                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=4'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+                if (!window.EdteamHangar) await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'hangar.js?v=5'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
                 window.EdteamHangar.ouvrir(id);
             } catch (e) { console.error('Hangar :', e); }
         }
@@ -1161,6 +1193,7 @@
                 
                 // Démarrage des effectifs
                 chargerEffectifsEscadron();
+                ouvrirOngletEsc(location.hash.replace('#', '') || (/[?&]fiche=moi(&|$)/.test(location.search) ? 'membres' : ''));     // sans adresse particuliere : SYSTEMES (MEMBRES pour le lien « ma fiche ») ; #membres et #fc ouvrent ces onglets
                 if (typeof chargerChiffresQG === 'function') chargerChiffresQG(profilCommandant);
                 chargerCodeInvitation(data);
                 chargerModeInitiatives(data);
@@ -1264,6 +1297,6 @@
 
     <script src="medailles.js?v=17"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="footer.js?v=42"></script>
+    <script src="footer.js?v=51"></script>
 </body>
 </html>
