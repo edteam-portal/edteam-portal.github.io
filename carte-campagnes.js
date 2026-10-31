@@ -70,10 +70,18 @@
     }
 
     // decor : systemes controles par la faction de l'escadron (SQL 115) ; un appel par jour au plus et par navigateur, rien n'est bloquant (sans le script SQL, pas de decor)
+    // CONFIDENTIALITE : les memoires du navigateur sont propres a chaque compte (identifiant de session). Sans cela, un compte solitaire/invite
+    // ouvert dans le meme navigateur qu'un compte d'escadron relisait les alertes et strategies de l'escadron. Anciennes cles (sans compte) purgees.
+    async function cleCompte(base) {
+        let uid = "";
+        try { const s = await window.supabaseApp.auth.getSession(); uid = (s && s.data && s.data.session && s.data.session.user && s.data.session.user.id) || ""; } catch (e) { uid = ""; }
+        ["edteam_ctx_v1", "edteam_enn_v1", "edteam_acq_v1", "edteam_exp_v3"].forEach(k => { try { localStorage.removeItem(k); } catch (e) { /* rien */ } });
+        return uid ? base + "_" + uid : null;      // sans compte identifie : aucune memoire lue ni ecrite
+    }
     async function contexte() {
         if (etat.ctx) return etat.ctx;
         if (etat.ctxEchec && Date.now() - etat.ctxEchec < 600000) return [];
-        const CK = "edteam_ctx_v1";
+        const CK = await cleCompte("edteam_ctx_v1u"); if (!CK) return [];
         try { const v = JSON.parse(localStorage.getItem(CK) || "null"); if (v && Array.isArray(v.s) && v.v === 2 && v.f && Date.now() - v.t < 24 * 3600 * 1000) { etat.ctx = v.s; etat.fac = v.f || ""; etat.pw = v.pw || ""; return etat.ctx; } } catch (e) { /* memoire indisponible */ }
         try {
             const r = await window.supabaseApp.rpc("carte_contexte");
@@ -87,7 +95,7 @@
     async function ennemis() {
         if (etat.enn) return etat.enn;
         if (etat.ennEchec && Date.now() - etat.ennEchec < 600000) return null;      // script SQL absent ou erreur : pas de nouvel essai avant 10 minutes
-        const CK = "edteam_enn_v1";
+        const CK = await cleCompte("edteam_enn_v1u"); if (!CK) return null;
         try { const v = JSON.parse(localStorage.getItem(CK) || "null"); if (v && v.v === 1 && Array.isArray(v.s) && Date.now() - v.t < 24 * 3600 * 1000) { etat.enn = v.s; etat.ennPw = v.pw || ""; etat.ennMaj = v.maj || ""; return etat.enn; } } catch (e) { /* memoire indisponible */ }
         try {
             const r = await window.supabaseApp.rpc("carte_ennemis");
@@ -101,6 +109,7 @@
         const l = etat.lv[nom] = etat.lv[nom] || { s: null, maj: "", pw: "", echec: 0 };
         if (l.s) return l.s;
         if (l.echec && Date.now() - l.echec < 600000) return null;
+        ck = await cleCompte(ck + "u"); if (!ck) return null;
         try { const v = JSON.parse(localStorage.getItem(ck) || "null"); if (v && v.v === 1 && Array.isArray(v.s) && Date.now() - v.t < 24 * 3600 * 1000) { l.s = v.s; l.maj = v.maj || ""; l.pw = v.pw || ""; return l.s; } } catch (e) { /* memoire indisponible */ }
         try {
             const r = await window.supabaseApp.rpc(rpc);
