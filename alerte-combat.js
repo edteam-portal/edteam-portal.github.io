@@ -107,7 +107,7 @@
     function majBouton() {
         var e = etatAlerte();
         [].forEach.call(document.querySelectorAll('[data-alerte-point]'), function (p) { p.className = 'al-pt' + (e === 'on' ? ' on' : e === 'off' ? '' : ' ve'); });
-        [].forEach.call(document.querySelectorAll('[data-alerte-menu]'), function (m) { m.classList.toggle('al-off', e === 'off' || e === 'veille'); m.title = AIDE[e]; });
+        [].forEach.call(document.querySelectorAll('[data-alerte-menu]'), function (m) { m.classList.toggle('al-off', e === 'off' || e === 'veille'); m.setAttribute('data-alerte-etat', e); m.removeAttribute('title'); });
         [].forEach.call(document.querySelectorAll('[data-alerte-label]'), function (l) { l.textContent = ({ off: 'ALERTE COMBAT · ARMER', on: 'ALERTE COMBAT · ARMÉE', veille: 'ALERTE COMBAT · VEILLE', attente: 'ALERTE · ATTENTE JEU' })[e]; });
     }
 

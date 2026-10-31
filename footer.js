@@ -82,10 +82,10 @@
     window.edteamAlerteBasculer = function () {
         function go() { if (window.EdteamAlerte) window.EdteamAlerte.basculer(); }
         if (window.EdteamAlerte) { go(); return; }
-        var s = document.createElement('script'); s.src = 'alerte-combat.js?v=6'; s.onload = go; document.head.appendChild(s);
+        var s = document.createElement('script'); s.src = 'alerte-combat.js?v=7'; s.onload = go; document.head.appendChild(s);
     };
     (function () {
-        try { var o = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); if (o && o.on && !/tableau-de-bord/i.test(location.pathname)) { var s = document.createElement('script'); s.src = 'alerte-combat.js?v=6'; document.head.appendChild(s); } } catch (e) { /* stockage indisponible */ }
+        try { var o = JSON.parse(localStorage.getItem('edteam_alerte_v1') || 'null'); if (o && o.on && !/tableau-de-bord/i.test(location.pathname)) { var s = document.createElement('script'); s.src = 'alerte-combat.js?v=7'; document.head.appendChild(s); } } catch (e) { /* stockage indisponible */ }
     })();
     // Sons du jeu sur toutes les pages (son-jeu.js) : SEULEMENT dans l'application installee (le navigateur n'autorise le son sans clic que la) ; le tableau de bord garde son propre moteur.
     // Navigateur simple : le bouton explique comment installer. Aucune connexion tant que l'option est coupee ; le moteur n'est charge que si l'option est active.

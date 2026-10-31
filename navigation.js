@@ -107,8 +107,8 @@ function injecterArchitectureGlobale() {
             <span class="nav-text">PILOTES</span>
         </a>
         <div id="nav-bas">
-        ${page === 'tableau-de-bord.html' ? '' : `<a href="#" id="nav-alerte" class="nav-link${alerteOn ? '' : ' al-off'}" data-alerte-menu title="Alerte combat : à ARMER une fois en début de session de jeu (EDMC et le jeu lancés). Armée, elle vous prévient par un cadre clignotant dès que vous verrouillez un joueur, pour ne pas manquer un scan." onclick="event.preventDefault(); if (typeof edteamAlerteBasculer === 'function') edteamAlerteBasculer()" onmouseenter="if(typeof sonHover==='function') sonHover()">
-            <div class="nav-icon" style="position: relative;"><svg viewBox="0 0 24 24"><path d="M12 3l9.5 17h-19z"></path><line x1="12" y1="10" x2="12" y2="14.5"></line><circle cx="12" cy="17.2" r=".6"></circle></svg><span class="al-pt${alerteOn ? ' on' : ''}" data-alerte-point></span></div>
+        ${page === 'tableau-de-bord.html' ? '' : `<a href="#" id="nav-alerte" class="nav-link${alerteOn ? '' : ' al-off'}" data-alerte-menu data-alerte-etat="${alerteOn ? 'on' : 'off'}" aria-label="Alerte combat : à armer une fois en début de session de jeu" onclick="event.preventDefault(); if (typeof edteamAlerteBasculer === 'function') edteamAlerteBasculer()" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof edteamAlerteInfo==='function') edteamAlerteInfo(event)" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
+            <div class="nav-icon" style="position: relative;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2.2"></circle><line x1="12" y1="2.5" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="21.5"></line><line x1="2.5" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="21.5" y2="12"></line></svg><span class="al-pt${alerteOn ? ' on' : ''}" data-alerte-point></span></div>
             <span class="nav-text" data-alerte-label>ALERTE COMBAT · ${alerteOn ? 'ARMÉE' : 'ARMER'}</span>
         </a>`}
         <a href="#" id="nav-nouveautes" class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1);" onclick="event.preventDefault(); if(typeof edteamOuvrirNouveautes==='function') edteamOuvrirNouveautes()" onmouseenter="if(typeof sonHover==='function') sonHover(); if(typeof showHoloTooltip==='function') showHoloTooltip(event, 'NOUVEAUTÉS<br><span style=\\'color:#ccc; font-size:0.85em; font-weight:normal;\\'>Ce qui vient d\\'être ajouté à EDTEAM</span>', '#FFD700')" onmouseleave="if(typeof hideHoloTooltip==='function') hideHoloTooltip()" onmousemove="if(typeof moveHoloTooltip==='function') moveHoloTooltip(event)">
@@ -969,6 +969,25 @@ window.showHoloTooltip = function(e, text, color = 'var(--ed-orange)', silent = 
         tooltip.style.display = 'block'; 
         window.moveHoloTooltip(e);
     }
+};
+
+// ALERTE COMBAT : l'explication complete au survol du bouton du menu (le texte change selon l'etat de l'alerte)
+window.edteamAlerteInfo = function (e) {
+    const m = document.getElementById('nav-alerte'), etat = (m && m.getAttribute('data-alerte-etat')) || 'off';
+    const ETAT = {
+        off: ['#8b97a0', 'Désarmée', 'Cliquez pour l\'armer.'],
+        on: ['#00FF66', 'Armée', 'Cliquez pour la désarmer.'],
+        veille: ['#FFB000', 'En veille', 'Aucun signal depuis plus de 3 h. Cliquez pour la réarmer.'],
+        attente: ['#FFB000', 'Armée, mais votre jeu est muet', 'Lancez EDMC et le jeu : l\'alerte repartira toute seule.']
+    }[etat] || ['#8b97a0', 'Désarmée', 'Cliquez pour l\'armer.'];
+    const p = 'margin:0 0 7px;';
+    window.showHoloTooltip(e, '<div style="white-space:normal;width:340px;font-weight:normal;letter-spacing:.3px;line-height:1.5;color:#e6e6e6;">'
+        + '<div style="color:#FF7100;font-weight:bold;letter-spacing:2px;margin-bottom:7px;">ALERTE COMBAT · À QUOI ÇA SERT ?</div>'
+        + '<div style="' + p + '"><b style="color:#fff;">Ne plus manquer un joueur.</b> Dès que vous <b>verrouillez un autre joueur</b> (un CMDR, pas un PNJ), l’application vous prévient, <b>même si vous êtes sur une autre page</b> (QG, Engagement…) : très utile sur un second écran ou une tablette.</div>'
+        + '<div style="' + p + '"><b style="color:#fff;">Ce qui s’affiche :</b> un gros cadre clignotant avec son nom, son vaisseau et sa faction. Un clic ouvre l’onglet Combat : la fiche de la cible, hostile ou alliée, avec sa menace estimée.</div>'
+        + '<div style="' + p + '"><b style="color:#fff;">Pourquoi cliquer en début de session ?</b> L’application n’écoute votre jeu que si vous le demandez. Il faut l’<b>armer une fois par session de jeu</b>, avec EDMC et le jeu lancés. Sans ce clic, aucune alerte. Elle se met en veille après 3 h sans signal.</div>'
+        + '<div style="border-top:1px dashed rgba(255,255,255,.18);padding-top:6px;color:' + ETAT[0] + ';font-weight:bold;">● ' + ETAT[1].toUpperCase() + ' <span style="font-weight:normal;color:#bbb;">· ' + ETAT[2] + '</span></div>'
+        + '</div>', '#FF7100', true);
 };
 
 window.hideHoloTooltip = function() { 

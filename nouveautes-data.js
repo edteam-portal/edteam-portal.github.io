@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-alerte-combat-explication", date: "2026-10-31T13:00:30Z", type: "AMELIORE",
+        titre: "Alerte combat : une explication claire au survol, et une cible comme symbole",
+        texte: "Passez la souris sur « ALERTE COMBAT » dans le menu : une explication dit à quoi sert le bouton (être prévenu dès que vous verrouillez un autre joueur, même depuis une autre page de l’application, par exemple sur un second écran), ce qui s’affiche, et pourquoi l’armer une fois en début de session de jeu (l’application n’écoute votre jeu que si vous le demandez). Elle indique aussi l’état de l’alerte : désarmée, armée ou en veille. Le symbole du bouton devient une cible, plus parlante que le triangle d’avertissement.",
+        important: false
+    },
+    {
         id: "2026-10-escadron-entete", date: "2026-10-31T12:45:10Z", type: "AMELIORE",
         titre: "Page Escadron : en-tête simplifié",
         texte: "En haut de la page Escadron, les quatre cartes de chiffres (pilotes inscrits, BGS, Powerplay, colonisation) disparaissent. Pour l’Amiral et le Directeur, le code d’invitation et le réglage des initiatives des pilotes sont côte à côte, sur une seule ligne. Le réglage des initiatives devient trois boutons toujours visibles (Libre, Sur validation, Désactivé) : l’explication de chacun s’affiche au survol, plus besoin de déplier.",
