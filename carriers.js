@@ -104,6 +104,7 @@
 .fc.ambre .fc-part input{accent-color:#FFB000}
 .fc-hg img.sc{object-fit:contain}
 .fc-sctag{display:inline-block;border:1px solid #FFB000;color:#FFB000;background:rgba(255,176,0,.1);padding:1px 8px;font-size:.7em;letter-spacing:2px;white-space:nowrap}
+.fc-srvvu{display:block;margin-top:3px;color:#7d8a92;font-size:.7em;letter-spacing:.5px}
 .fc-scesc{display:block;color:#8b97a0;font-size:.74em;letter-spacing:1px;margin-top:3px}
 .fc.ambre .fc-tab tr.sc td{background:rgba(255,176,0,.07)}
 .fc-svc{max-width:300px}.fc-sv-mien{margin-top:12px}.fc-sv-mien small{display:block;color:#7d8a92;font-size:.68em;letter-spacing:2px;margin-bottom:4px}
@@ -279,7 +280,7 @@
                 + "<td>" + (c.sc ? '<span class="fc-sctag" title="Le carrier commun de l’escadron, vu par n’importe lequel de ses membres">CARRIER D’ESCADRON</span><span class="fc-scesc">' + E(c.escadron || "") + "</span>" : pilote(c)) + (c.moi && !c.partage ? '<span class="fc-tag" title="Visible de vous seul : cochez la case dans Mon hangar pour le montrer à l’escadron">NON PARTAGÉ</span>' : "") + "</td>"
                 + "<td>" + (c.systeme ? "<b>" + lieu(c.systeme) + "</b>" : '<span class="inv">position inconnue</span>')
                 + (dirT ? '<div><span class="fc-dirtag" title="Une directive active vise ce système">◆ DIRECTIVE · ' + E(String(dirT).toUpperCase()) + "</span></div>" : "") + (s ? '<div class="att">' + s + "</div>" : "") + "</td>"
-                + '<td class="fc-svc">' + (c.sc ? '<span class="inv" title="Le jeu ne transmet pas les services du carrier d’escadron aux membres qui n’en sont pas capitaines">non relevés</span>' : chipsServices(c.services)) + "</td>"
+                + '<td class="fc-svc">' + (c.sc ? (c.services ? chipsServices(c.services) + (c.services_vu ? '<small class="fc-srvvu" title="Les services actifs sont lus à l’appontage d’un membre au carrier. Un service absent est désactivé ou en pause : le jeu ne distingue pas les deux.">relevés ' + ilYa(c.services_vu) + " à l’appontage</small>" : "") : '<span class="inv" title="Les services du carrier d’escadron sont lus à l’appontage d’un membre au carrier (plugin 2.55) : personne n’a encore apponté depuis la mise en place.">non relevés</span>') : chipsServices(c.services)) + "</td>"
                 + (avecDm ? '<td class="fc-dd">' + cellD(dm) + "</td>" : "") + (avecDd ? '<td class="fc-dd">' + cellD(dd, ddNom) + "</td>" : "")
                 + "<td>" + ilYa(c.vu) + "</td></tr>";
         }).join("");
@@ -302,7 +303,7 @@
             if (window.EDTEAMPhotos) { try { await window.EDTEAMPhotos.charger(false); } catch (e) { /* initiales a la place */ } }
             if (!d) { el.style.display = "none"; return; }           // pas d'escadron : rien a montrer
             const liste = Array.isArray(d.liste) ? d.liste.slice() : [], dirs = Array.isArray(d.directives) ? d.directives : [];    // directives : [systeme, type, x, y, z]
-            if (sc && sc.systeme) liste.unshift(Object.assign({}, sc, { sc: true, nom: sc.nom || "Carrier d’escadron", indicatif: sc.indicatif || "", services: null }));   // le carrier COMMUN de l'escadron, en tete
+            if (sc && sc.systeme) liste.unshift(Object.assign({}, sc, { sc: true, nom: sc.nom || "Carrier d’escadron", indicatif: sc.indicatif || "", services: sc.services && typeof sc.services === "object" ? sc.services : null }));   // le carrier COMMUN de l'escadron, en tete
             // coordonnees inconnues du serveur : EDSM direct (rare : un systeme absent des tables du serveur)
             const manque = []; liste.forEach(c => { if (c.systeme && c.x == null) manque.push(c.systeme); }); dirs.forEach(r => { if (r[2] == null) manque.push(r[0]); });
             const cache = manque.length ? await coordonnees(Array.from(new Set(manque))) : lireCoords();
@@ -313,7 +314,7 @@
                 + FILTRES_SERVICES.map(k => '<button type="button" data-sv="' + k + '">' + SERVICES.find(x => x[0] === k)[1] + "</button>").join("") + (dirs.length ? '<span class="fcm-sep"></span><button type="button" data-ed="1">DANS UN SYSTÈME EN DIRECTIVE</button>' : "") + "</div>"
                 + '<div class="fc-dirsel"><span class="fc-moi"></span>' + (dirs.length ? '<span>DIRECTIVE : <select class="fc-dirchoix"><option value="proche">LA PLUS PROCHE DE CHAQUE CARRIER</option>' + dirs.map((r, i) => '<option value="' + i + '">' + E(r[0]) + " · " + E(String(r[1] || "").toLowerCase()) + "</option>").join("") + "</select></span>" : "") + "</div>"
                 + '<div class="fc-liste"></div>'
-                + '<div class="fc-note">Position et services lus dans le journal de jeu de chaque propriétaire : ils datent de sa dernière session. Les distances sont en années-lumière, calculées sur votre appareil. Chaque pilote peut cacher son carrier depuis la page Mon hangar. Le carrier d’escadron est montré à tous les membres : sa position vient du journal de jeu du dernier membre qui l’a vu.</div>';
+                + '<div class="fc-note">Position et services lus dans le journal de jeu de chaque propriétaire : ils datent de sa dernière session. Les distances sont en années-lumière, calculées sur votre appareil. Chaque pilote peut cacher son carrier depuis la page Mon hangar. Le carrier d’escadron est montré à tous les membres : sa position vient du journal de jeu du dernier membre qui l’a vu, ses services de l’appontage du dernier membre qui s’y est posé.</div>';
             el.addEventListener("click", e => {
                 const f = e.target.closest("[data-f]"), sv = e.target.closest("[data-sv]"), ed = e.target.closest("[data-ed]"), t = e.target.closest("th[data-t]");
                 if (f) S.etat.f = f.dataset.f;

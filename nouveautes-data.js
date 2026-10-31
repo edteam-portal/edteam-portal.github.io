@@ -5,6 +5,19 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-plugin-2-55", date: "2026-10-31T12:09:20Z", type: "AMELIORE",
+        titre: "Plugin SYS.EDTEAM 2.55 : à jour ?",
+        texte: "La version 2.55 du plugin est disponible. Elle relève les services du carrier de votre escadron quand vous vous posez dessus, pour les montrer dans la page Escadron (onglet FLEET CARRIERS). Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",
+        important: true,
+        action: "Relancez EDMC deux fois pour passer en 2.55"
+    },
+    {
+        id: "2026-10-escadron-carrier-services", date: "2026-10-31T12:09:10Z", type: "AMELIORE",
+        titre: "Le carrier de l’escadron : ses services",
+        texte: "Dans l’onglet FLEET CARRIERS de la page Escadron, le carrier de l’escadron montre maintenant ses services (réparation, ravitaillement, réarmement, chantier naval…), comme ceux des pilotes. Ils sont lus quand un membre se pose sur le carrier : il suffit d’un seul pilote avec le plugin 2.55, et la ligne indique « relevés il y a… à l’appontage ». Un service absent est désactivé ou en pause : le jeu ne distingue pas les deux.",
+        important: false
+    },
+    {
         id: "2026-10-plugin-2-54", date: "2026-10-31T11:49:20Z", type: "AMELIORE",
         titre: "Plugin SYS.EDTEAM 2.54 : à jour ?",
         texte: "La version 2.54 du plugin est disponible. Elle relève la position du carrier de votre escadron, qui apparaît alors dans la page Escadron (onglet FLEET CARRIERS). Un seul membre à jour suffit à le montrer à tout l’escadron. Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",
