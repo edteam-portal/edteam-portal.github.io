@@ -82,7 +82,7 @@
 .fcm-hg i:nth-of-type(1){left:4px;top:4px;border-width:2px 0 0 2px}.fcm-hg i:nth-of-type(2){right:4px;top:4px;border-width:2px 2px 0 0}.fcm-hg i:nth-of-type(3){left:4px;bottom:4px;border-width:0 0 2px 2px}.fcm-hg i:nth-of-type(4){right:4px;bottom:4px;border-width:0 2px 2px 0}
 .fcm-hg span{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:14px 10px 5px;background:linear-gradient(0deg,rgba(3,2,1,.92),transparent);color:#ffd98a;font-size:.68em;letter-spacing:2px}
 @media (prefers-reduced-motion:reduce){.fcm-hg:before{animation:none;display:none}}
-.fcm-main{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.fcm-main{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .fcm-bilan{display:flex;gap:8px;flex-wrap:wrap}
 .fcm-bilan span{border:1px solid #3a2d12;padding:3px 10px;font-size:.72em;letter-spacing:2px;color:#8b97a0}
 .fcm-bilan span b{font-weight:normal;font-size:1.25em;margin-right:6px}
@@ -102,6 +102,26 @@
 .fcm-t.p em{color:#FFB000}.fcm-t.o em{color:#6b7680}.fcm-t.o b{color:#7d8a92}
 @media (max-width:760px){.fcm-holo{flex-basis:100%}}
 .fc.ambre .fc-part input{accent-color:#FFB000}
+/* message du proprietaire (SQL 191) : zone de saisie dans Mon hangar, pastille + infobulle + fenetre dans l'onglet de l'escadron */
+.fcm-msg{margin-top:0}.fcm-msg .top{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;min-width:0}.fcm-msg label{color:#7d8a92;font-size:.68em;letter-spacing:2px;white-space:nowrap}
+.fcm-msg .ligne{display:flex;gap:10px;align-items:stretch}.fcm-msg .btns{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}.fcm-msg .btns button{flex:1 1 0;min-width:104px}
+.fcm-msg textarea{flex:1 1 auto;min-width:0;width:100%;min-height:58px;resize:vertical;background:#05080c;border:1px solid #3a2d12;color:#e8f6f8;font:inherit;font-size:.86em;padding:7px 9px;letter-spacing:.3px;line-height:1.45}
+.fcm-msg textarea:focus{outline:none;border-color:#FFB000}.fcm-msg textarea::placeholder{color:#55606a}
+.fcm-msg button{background:rgba(255,176,0,.1);border:1px solid #FFB000;color:#FFD98A;font:inherit;font-size:.72em;letter-spacing:2px;padding:4px 14px;cursor:pointer}
+.fcm-msg button.g{background:transparent;border-color:#5a5340;color:#9b9580}.fcm-msg button:disabled{opacity:.5;cursor:default}
+.fcm-msg .etat{flex:1 1 auto;min-width:0;font-size:.72em;color:#9ff3d6;letter-spacing:.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fcm-msg .cpt{flex:0 0 auto;color:#6f7d85;font-size:.7em;letter-spacing:1px}
+.fcm-bas{display:flex;align-items:center;justify-content:space-between;gap:10px 18px;flex-wrap:wrap}.fcm-bas .fc-part{margin:0}
+@media (max-width:560px){.fcm-msg .ligne{flex-direction:column}.fcm-msg .btns{flex-direction:row}}
+.fc-msgb{display:inline-block;margin-top:5px;border:1px solid #FFB000;color:#FFD98A;background:rgba(255,176,0,.1);padding:0 8px;font-size:.7em;letter-spacing:1.5px;cursor:pointer;white-space:nowrap}
+.fc-msgb:hover{background:rgba(255,176,0,.22);color:#fff}.fc-msgb.old{border-color:#6b6350;color:#9b9580;background:none}
+.fc-tip{position:fixed;display:none;z-index:99999;max-width:340px;background:rgba(14,9,0,.97);border:1px solid #FFB000;color:#fff;padding:8px 11px;font:.78rem/1.5 'Share Tech Mono',monospace;letter-spacing:.4px;pointer-events:none;box-shadow:0 0 14px rgba(0,0,0,.7);white-space:pre-wrap;overflow-wrap:anywhere}
+.fc-tip small{display:block;margin-top:5px;color:#9b9580;font-size:.9em}
+.fc-mo{position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.fc-mb{width:min(520px,100%);background:#0c0803;border:1px solid #FFB000;box-shadow:0 0 30px rgba(255,176,0,.25);padding:16px 18px;font-family:'Share Tech Mono',monospace;color:#e8f6f8}
+.fc-mb .h{color:#FFB000;font-size:.7em;letter-spacing:3px}.fc-mb .t{color:#fff;font-size:1.25em;letter-spacing:2px;margin:4px 0 2px}.fc-mb .p{color:#9b9580;font-size:.8em;letter-spacing:1px;margin-bottom:10px}
+.fc-mb .x{border-left:3px solid #FFB000;background:rgba(255,176,0,.07);padding:10px 12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.92em}
+.fc-mb .f{color:#7d8a92;font-size:.72em;letter-spacing:.5px;margin-top:9px;line-height:1.5}.fc-mb .f b{color:#FFD98A;font-weight:normal}
+.fc-mb button{margin-top:12px;background:rgba(255,176,0,.1);border:1px solid #FFB000;color:#FFD98A;font:inherit;font-size:.78em;letter-spacing:2px;padding:6px 20px;cursor:pointer}
 .fc-hg img.sc{object-fit:contain}
 .fc-sctag{display:inline-block;border:1px solid #FFB000;color:#FFB000;background:rgba(255,176,0,.1);padding:1px 8px;font-size:.7em;letter-spacing:2px;white-space:nowrap}
 .fc-srvvu{display:block;margin-top:3px;color:#7d8a92;font-size:.7em;letter-spacing:.5px}
@@ -158,6 +178,56 @@
     const absente = e => e && (e.status === 404 || e.code === "PGRST202" || e.code === "42883");
 
     // ---- « Mon Fleet Carrier » ----
+    // ---- message du proprietaire sur son carrier (SQL 191) ----
+    const msgAncien = c => !!(c && c.message_sys && c.systeme && String(c.message_sys).toLowerCase() !== String(c.systeme).toLowerCase());
+    const msgMeta = c => "écrit " + ilYa(c.message_vu) + (c.message_sys ? " à " + c.message_sys : "");
+    function blocMessage(c) {
+        return '<div class="fcm-msg"><div class="top"><label for="fc-msg-t">MESSAGE POUR LES PILOTES DE L’ESCADRON</label><span class="etat">'
+            + (c.message ? "Publié, " + E(msgMeta(c)) + (msgAncien(c) ? " · le carrier a bougé depuis" : "") : "") + (!c.partage ? (c.message ? " · " : "") + "invisible tant que votre carrier n’est pas partagé" : "")
+            + '</span><span class="cpt"></span></div>'
+            + '<div class="ligne"><textarea id="fc-msg-t" maxlength="200" rows="2" placeholder="Ex. : posé là pour la mission. Réparation et marché ouverts, tritium à bord.">' + E(c.message || "") + "</textarea>"
+            + '<div class="btns"><button type="button" data-a="pub">PUBLIER</button><button type="button" class="g" data-a="eff">EFFACER</button></div></div></div>';
+    }
+    function brancherMessage(el) {
+        const z = el.querySelector(".fcm-msg"); if (!z) return;
+        const ta = z.querySelector("textarea"), cpt = z.querySelector(".cpt"), etat = z.querySelector(".etat");
+        const maj = () => { cpt.textContent = ta.value.length + " / 200"; }; ta.addEventListener("input", maj); maj();
+        z.addEventListener("click", async e => {
+            const b = e.target.closest("button[data-a]"); if (!b) return;
+            const eff = b.dataset.a === "eff"; if (eff) { ta.value = ""; maj(); }
+            z.querySelectorAll("button").forEach(x => { x.disabled = true; });
+            try {
+                const r = await window.supabaseApp.rpc("fc_message", { p_texte: eff ? "" : ta.value });
+                if (r.error) { const er = new Error(r.error.message || "erreur"); er.code = r.error.code; er.status = r.status; throw er; }
+                if (r.data === true) { oublier(); etat.textContent = eff ? "Message effacé" : "Publié à l’instant : vos camarades le voient dans la page Escadron"; }
+                else etat.textContent = "Réessayez dans un instant";
+            } catch (x) { console.error("Carrier : message", x); etat.textContent = absente(x) ? "Pas encore activé sur le serveur" : "Impossible pour le moment"; }
+            z.querySelectorAll("button").forEach(x => { x.disabled = false; });
+        });
+    }
+    let infoEl = null;
+    const info = () => infoEl || (infoEl = Object.assign(document.body.appendChild(document.createElement("div")), { className: "fc-tip" }));
+    function modaleMessage(c) {
+        if (!c || !c.message) return;
+        const o = document.createElement("div"); o.className = "fc-mo";
+        o.innerHTML = '<div class="fc-mb" role="dialog"><div class="h">MESSAGE DU PROPRIÉTAIRE</div><div class="t"></div><div class="p"></div><div class="x"></div><div class="f"></div><button type="button">FERMER</button></div>';
+        o.querySelector(".t").textContent = c.nom || c.indicatif || "Carrier";
+        o.querySelector(".p").textContent = (c.pilote ? "CMDR " + String(c.pilote).toUpperCase() + " · " : "") + (c.systeme || "position inconnue");
+        o.querySelector(".x").textContent = c.message;
+        o.querySelector(".f").innerHTML = E(msgMeta(c)) + (msgAncien(c) ? "<br><b>Le carrier a bougé depuis : il est maintenant à " + E(c.systeme) + ".</b>" : "");
+        const fermer = () => { o.remove(); document.removeEventListener("keydown", cl); };
+        const cl = e => { if (e.key === "Escape") fermer(); };
+        o.addEventListener("click", e => { if (e.target === o || e.target.tagName === "BUTTON") fermer(); });
+        document.addEventListener("keydown", cl); document.body.appendChild(o); o.querySelector("button").focus();
+    }
+    function infobulleMessage(el, S) {
+        const t = () => info();
+        const pos = e => { const b = t(), w = b.offsetWidth, h = b.offsetHeight; let x = e.clientX + 14, y = e.clientY + 18; if (x + w > innerWidth - 8) x = innerWidth - w - 8; if (y + h > innerHeight - 8) y = e.clientY - h - 12; b.style.left = Math.max(8, x) + "px"; b.style.top = Math.max(8, y) + "px"; };
+        el.addEventListener("mouseover", e => { const m = e.target.closest("[data-m]"); if (!m) return; const c = S.liste[+m.dataset.m]; if (!c || !c.message) return; const b = t(); b.textContent = c.message; const sm = document.createElement("small"); sm.textContent = msgMeta(c) + (msgAncien(c) ? " · le carrier a bougé depuis" : "") + " · cliquez pour ouvrir"; b.appendChild(sm); b.style.display = "block"; pos(e); });
+        el.addEventListener("mousemove", e => { if (infoEl && infoEl.style.display === "block") pos(e); });
+        el.addEventListener("mouseout", e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest("[data-m]")) { if (infoEl) infoEl.style.display = "none"; } });
+    }
+
     async function monterMien(el) {
         style(); if (!el) return;
         el.className = "fc ambre bloc or"; el.style.padding = "14px 18px";
@@ -176,11 +246,13 @@
                 + '<div class="fc-info"><div><small>SYSTÈME</small><span class="fc-sys">' + (c.systeme ? lieu(c.systeme) : "position inconnue") + "</span></div>"
                 + "<div><small>ACCÈS AUX DOCKS</small>" + badgeAcces(c.acces) + "</div>"
                 + "<div><small>DERNIÈRE INFORMATION</small><span>" + ilYa(c.vu) + "</span></div></div></div>"
-                + (srv ? '<div class="fcm-bilan"><span class="a"><b>' + nA + "</b>ACTIFS</span>" + (nP ? '<span class="p"><b>' + nP + "</b>EN PAUSE</span>" : "") + "<span><b>" + nO + "</b>DÉSACTIVÉS</span></div>" : "")
+                + blocMessage(c)
                 + (s ? '<div class="fc-saut">' + s + "</div>" : "")
-                + '<label class="fc-part"><input type="checkbox" ' + (c.partage ? "checked" : "") + '> Montrer mon carrier aux pilotes de mon escadron</label></div></div>'
+                + '<div class="fcm-bas">' + (srv ? '<div class="fcm-bilan"><span class="a"><b>' + nA + "</b>ACTIFS</span>" + (nP ? '<span class="p"><b>' + nP + "</b>EN PAUSE</span>" : "") + "<span><b>" + nO + "</b>DÉSACTIVÉS</span></div>" : "")
+                + '<label class="fc-part"><input type="checkbox" ' + (c.partage ? "checked" : "") + '> Montrer mon carrier aux pilotes de mon escadron</label></div></div></div>'
                 + (srv ? famillesServices(srv) : '<div class="fc-sv-mien"><small>SERVICES DU CARRIER</small>' + chipsServices(c.services) + "</div>")
-                + '<div class="fc-note">Vos camarades voient l’indicatif, le nom, le système, l’accès aux docks et le saut annoncé. Jamais le solde, la cargaison ni le carburant. La position est celle de votre dernière session de jeu : un saut effectué quand vous n’étiez pas connecté n’apparaît qu’à votre prochaine connexion.</div>';
+                + '<div class="fc-note">Vos camarades voient l’indicatif, le nom, le système, l’accès aux docks, le saut annoncé et le message que vous écrivez ici. Jamais le solde, la cargaison ni le carburant. La position est celle de votre dernière session de jeu : un saut effectué quand vous n’étiez pas connecté n’apparaît qu’à votre prochaine connexion.</div>';
+            brancherMessage(el);
             const cb = el.querySelector(".fc-part input");
             cb.addEventListener("change", async () => {
                 const voulu = cb.checked; cb.disabled = true;
@@ -266,7 +338,7 @@
             const dirT = c.dir || (c.systeme && dirs.find(r => String(r[0]).toLowerCase() === String(c.systeme).toLowerCase()) || [])[1] || null;
             return { c, dm, dd, ddNom, dirT };
         });
-        let aff = lignes.filter(x => (E_.f !== "ouverts" || OUVERT.has(x.c.acces)) && Array.from(E_.sv).every(k => x.c.services && x.c.services[k] === 1) && (!E_.enDir || x.dirT));
+        let aff = lignes.filter(x => (E_.f !== "ouverts" || OUVERT.has(x.c.acces)) && Array.from(E_.sv).every(k => x.c.services && x.c.services[k] === 1) && (!E_.enDir || x.dirT) && (!E_.msg || x.c.message));
         if (E_.tri) {
             const val = x => E_.tri === "nom" ? String(x.c.nom || x.c.indicatif).toLowerCase() : E_.tri === "dm" ? x.dm : E_.tri === "dd" ? x.dd : x.c.vu;
             aff = aff.slice().sort((a, b) => { const p = val(a), q = val(b); if (p == null && q == null) return 0; if (p == null) return 1; if (q == null) return -1; return (typeof p === "number" ? p - q : String(p).localeCompare(String(q), "fr")) * E_.sens * (E_.tri === "vu" ? -1 : 1); });
@@ -279,7 +351,7 @@
             return '<tr class="' + (c.moi ? "moi " : "") + (c.sc ? "sc " : "") + (dirT ? "dir" : "") + '"><td class="fc-holo"><div class="fc-hg" title="' + E(c.nom || c.indicatif) + '"><img class="' + (c.sc ? "sc" : "") + '" src="' + imgCarrier(c) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div></td><td><b>' + E(c.nom || c.indicatif) + "</b><small>" + E(c.indicatif) + "</small></td>"
                 + "<td>" + (c.sc ? '<span class="fc-sctag" title="Le carrier commun de l’escadron, vu par n’importe lequel de ses membres">CARRIER D’ESCADRON</span><span class="fc-scesc">' + E(c.escadron || "") + "</span>" : pilote(c)) + (c.moi && !c.partage ? '<span class="fc-tag" title="Visible de vous seul : cochez la case dans Mon hangar pour le montrer à l’escadron">NON PARTAGÉ</span>' : "") + "</td>"
                 + "<td>" + (c.systeme ? "<b>" + lieu(c.systeme) + "</b>" : '<span class="inv">position inconnue</span>')
-                + (dirT ? '<div><span class="fc-dirtag" title="Une directive active vise ce système">◆ DIRECTIVE · ' + E(String(dirT).toUpperCase()) + "</span></div>" : "") + (s ? '<div class="att">' + s + "</div>" : "") + "</td>"
+                + (dirT ? '<div><span class="fc-dirtag" title="Une directive active vise ce système">◆ DIRECTIVE · ' + E(String(dirT).toUpperCase()) + "</span></div>" : "") + (c.message ? '<div><span class="fc-msgb' + (msgAncien(c) ? " old" : "") + '" data-m="' + S.liste.indexOf(c) + '">✉ MESSAGE DU PROPRIÉTAIRE</span></div>' : "") + (s ? '<div class="att">' + s + "</div>" : "") + "</td>"
                 + '<td class="fc-svc">' + (c.sc ? (c.services ? chipsServices(c.services) + (c.services_vu ? '<small class="fc-srvvu" title="Les services actifs sont lus à l’appontage d’un membre au carrier. Un service absent est désactivé ou en pause : le jeu ne distingue pas les deux.">relevés ' + ilYa(c.services_vu) + " à l’appontage</small>" : "") : '<span class="inv" title="Les services du carrier d’escadron sont lus à l’appontage d’un membre au carrier (plugin 2.55) : personne n’a encore apponté depuis la mise en place.">non relevés</span>') : chipsServices(c.services)) + "</td>"
                 + (avecDm ? '<td class="fc-dd">' + cellD(dm) + "</td>" : "") + (avecDd ? '<td class="fc-dd">' + cellD(dd, ddNom) + "</td>" : "")
                 + "<td>" + ilYa(c.vu) + "</td></tr>";
@@ -291,6 +363,7 @@
         el.querySelectorAll("[data-f]").forEach(b => b.classList.toggle("on", b.dataset.f === E_.f));
         el.querySelectorAll("[data-sv]").forEach(b => b.classList.toggle("on", E_.sv.has(b.dataset.sv)));
         const be = el.querySelector("[data-ed]"); if (be) be.classList.toggle("on", E_.enDir);
+        const bm = el.querySelector("[data-msg]"); if (bm) bm.classList.toggle("on", !!E_.msg);
         const mo = el.querySelector(".fc-moi"); if (mo) mo.textContent = moi ? "DISTANCE DEPUIS MA POSITION · " + (moi.nom || "position de jeu") + (moi.maj ? " (relevée " + ilYa(new Date(moi.maj).getTime() / 1000) + ")" : "") : "distance depuis moi : position de jeu inconnue (plugin SYS.EDTEAM)";
         if (window.EdteamCopie) window.EdteamCopie.scanner(zone);
     }
@@ -311,19 +384,22 @@
                 posC: c => c.x != null ? [c.x, c.y, c.z] : (c.systeme && cache[c.systeme]) || null, posD: r => r[2] != null ? [r[2], r[3], r[4]] : cache[r[0]] || null };
             el.innerHTML = '<div class="fc-h"><h2>Fleet Carriers de l’escadron</h2><em>où se poser, chez qui, avec quoi</em><span class="fc-n"></span></div>'
                 + '<div class="fc-fil">'
-                + FILTRES_SERVICES.map(k => '<button type="button" data-sv="' + k + '">' + SERVICES.find(x => x[0] === k)[1] + "</button>").join("") + (dirs.length ? '<span class="fcm-sep"></span><button type="button" data-ed="1">DANS UN SYSTÈME EN DIRECTIVE</button>' : "") + "</div>"
+                + FILTRES_SERVICES.map(k => '<button type="button" data-sv="' + k + '">' + SERVICES.find(x => x[0] === k)[1] + "</button>").join("") + (dirs.length ? '<span class="fcm-sep"></span><button type="button" data-ed="1">DANS UN SYSTÈME EN DIRECTIVE</button>' : "") + (liste.some(c => c.message) ? '<button type="button" data-msg="1">AVEC UN MESSAGE</button>' : "") + "</div>"
                 + '<div class="fc-dirsel"><span class="fc-moi"></span>' + (dirs.length ? '<span>DIRECTIVE : <select class="fc-dirchoix"><option value="proche">LA PLUS PROCHE DE CHAQUE CARRIER</option>' + dirs.map((r, i) => '<option value="' + i + '">' + E(r[0]) + " · " + E(String(r[1] || "").toLowerCase()) + "</option>").join("") + "</select></span>" : "") + "</div>"
                 + '<div class="fc-liste"></div>'
                 + '<div class="fc-note">Position et services lus dans le journal de jeu de chaque propriétaire : ils datent de sa dernière session. Les distances sont en années-lumière, calculées sur votre appareil. Chaque pilote peut cacher son carrier depuis la page Mon hangar. Le carrier d’escadron est montré à tous les membres : sa position vient du journal de jeu du dernier membre qui l’a vu, ses services de l’appontage du dernier membre qui s’y est posé.</div>';
             el.addEventListener("click", e => {
-                const f = e.target.closest("[data-f]"), sv = e.target.closest("[data-sv]"), ed = e.target.closest("[data-ed]"), t = e.target.closest("th[data-t]");
-                if (f) S.etat.f = f.dataset.f;
+                const f = e.target.closest("[data-f]"), sv = e.target.closest("[data-sv]"), ed = e.target.closest("[data-ed]"), t = e.target.closest("th[data-t]"), mg = e.target.closest("[data-m]"), fm = e.target.closest("[data-msg]");
+                if (mg) { modaleMessage(S.liste[+mg.dataset.m]); return; }
+                if (fm) S.etat.msg = !S.etat.msg;
+                else if (f) S.etat.f = f.dataset.f;
                 else if (sv) { const k = sv.dataset.sv; if (S.etat.sv.has(k)) S.etat.sv.delete(k); else S.etat.sv.add(k); }
                 else if (ed) S.etat.enDir = !S.etat.enDir;
                 else if (t) { const c = t.dataset.t; S.etat.sens = S.etat.tri === c ? -S.etat.sens : 1; S.etat.tri = c; }
                 else return;
                 dessinerListe(el, S);
             });
+            infobulleMessage(el, S);
             const sel = el.querySelector(".fc-dirchoix"); if (sel) sel.addEventListener("change", () => { S.etat.dir = sel.value; dessinerListe(el, S); });
             dessinerListe(el, S);
             lirePosition().then(p => { S.moi = p; dessinerListe(el, S); });          // une petite lecture (~80 octets) : la liste s'affiche sans l'attendre

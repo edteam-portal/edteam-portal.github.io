@@ -19,12 +19,11 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="copier-lieux.js?v=2"></script>
-    <script src="carriers.js?v=16"></script>
+    <script src="carriers.js?v=18"></script>
     <script src="systemes-faction.js?v=13"></script>
     <script src="navigation.js?v=56"></script>
     <script src="invitations.js?v=2"></script>
     <script src="initiatives-mode.js?v=1"></script>
-    <script src="chiffres-cles.js?v=4"></script>
 
     <style>
         :root { --ed-orange: #FF7100; --ed-orange-dim: rgba(255, 113, 0, 0.2); --ed-orange-glow: rgba(255, 113, 0, 0.5); --ed-blue: #00F0FF; --ed-bg: #020100; --ed-red: #FF3333; --ed-green: #00FF66; }
@@ -109,14 +108,17 @@
 
         .data-window { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
         .data-row { padding: 20px; margin-bottom: 12px; }
-        .mode-ini-cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 4px; }
+        .mode-ini-cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; }
         @media (max-width: 800px) { .mode-ini-cartes { grid-template-columns: minmax(0, 1fr); } }
-        .mode-ini-carte { position: relative; text-align: left; font-family: inherit; background: rgba(0,0,0,0.35); border: 1px solid #444; color: #aaa; padding: 12px; cursor: pointer; transition: 0.15s; }
-        .mode-ini-carte b { display: block; letter-spacing: 2px; margin-bottom: 4px; font-size: 1.05em; }
+        .mode-ini-carte { position: relative; text-align: center; font-family: inherit; background: rgba(0,0,0,0.35); border: 1px solid #444; color: #aaa; padding: 9px 12px; cursor: pointer; transition: 0.15s; }
+        .mode-ini-carte b { display: block; letter-spacing: 2px; margin: 0; font-size: 0.95em; }
         .mode-ini-carte span { display: block; font-size: 0.8em; line-height: 1.45; color: #999; }
         .mode-ini-carte:hover { border-color: #FF4FD8; color: #FF4FD8; }
         .mode-ini-carte.actif { border-color: #FF4FD8; color: #FF4FD8; background: rgba(255,79,216,0.08); box-shadow: 0 0 10px rgba(255,79,216,0.25); }
-        .mode-ini-carte.actif::after { content: "ACTIF"; position: absolute; top: 8px; right: 10px; font-size: 0.65em; letter-spacing: 2px; }
+        .mode-ini-carte.actif::after { content: "● ACTIF"; display: block; margin-top: 3px; font-size: 0.62em; letter-spacing: 2px; }
+        #esc-info { position: fixed; display: none; z-index: 99999; max-width: 330px; background: rgba(10, 5, 10, 0.97); border: 1px solid #FF4FD8; color: #fff; padding: 8px 11px; font-size: 0.78rem; line-height: 1.5; letter-spacing: 0.4px; text-align: left; pointer-events: none; box-shadow: 0 0 14px rgba(0,0,0,0.7); }
+        [data-info] { cursor: help; }
+        .mode-ini-carte[data-info] { cursor: pointer; }
         .mode-ini-retour { border: 1px solid #00F0FF; background: rgba(0,240,255,0.06); color: #00F0FF; padding: 10px 12px; font-size: 0.85em; line-height: 1.5; margin-bottom: 10px; }   /* cadre : classe .bloc (style.css) */
         
         .rank-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,113,0,0.1); transition: 0.2s; }
@@ -455,12 +457,9 @@
         <!-- ZONE D'AFFICHAGE DU CONTENU DIRECT -->
         <main class="data-window" id="display-area" style="padding-top: 5px;">
             
-            <!-- CHIFFRES CLES DE L'ESCADRON (chiffres-cles.js) -->
-            <div style="display: flex; gap: 8px; align-items: stretch; margin-bottom: 14px;">
-                <div id="qg-chiffres" style="display: flex; flex-direction: column; gap: 12px; margin: 0; flex: 1 1 auto; min-width: 0;">
-                    <div id="qg-chiffres-corps"><div style="color: #666; font-style: italic; padding: 14px;">&gt; CHARGEMENT...</div></div>
-                </div>
-                <div id="carte-code" class="bloc or" style="display: none; flex: 1 1 0; min-width: 230px; margin: 0; padding: 8px 14px 9px;" title="Code à donner aux pilotes qui rejoignent l'escadron : sans lui, un pilote reste indépendant et peut le saisir plus tard. Le grade de chacun (Officier, Amiral) est repris du jeu.">
+            <!-- PREMIERE LIGNE (Amiral / Directeur) : CODE D'INVITATION et INITIATIVES DES PILOTES cote a cote ; chaque bloc reste cache pour les autres roles -->
+            <div id="esc-ligne-admin" style="display: flex; flex-wrap: wrap; gap: 0 12px; align-items: stretch;">
+                <div id="carte-code" class="bloc or" style="display: none; flex: 1 1 380px; max-width: 760px; min-width: 230px; margin: 0 0 12px; padding: 8px 14px 9px;" title="Code à donner aux pilotes qui rejoignent l'escadron : sans lui, un pilote reste indépendant et peut le saisir plus tard. Le grade de chacun (Officier, Amiral) est repris du jeu.">
                     <div style="color: #FFD700; letter-spacing: 2px; font-size: 0.66em; font-weight: bold; white-space: nowrap; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 7px;">CODE D'INVITATION</div>
                     <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
                         <span id="code-valeur" style="font-size: 1.3em; letter-spacing: 4px; color: #fff; font-weight: bold;">----</span>
@@ -469,25 +468,20 @@
                     </div>
                     <div id="code-note" style="color: #777; font-size: 0.62em; letter-spacing: 0.5px; line-height: 1.4; margin-top: 6px;">À donner aux pilotes qui rejoignent l'escadron. Sans ce code, un pilote reste indépendant ; il peut le saisir plus tard, depuis le Quartier Général, pour rejoindre l'escadron.</div>
                 </div>
-            </div>
 
             <!-- CODE D'INVITATION : visible par l'Amiral et les officiers (fonction mon_code_invitation) ; seul l'Amiral peut le renouveler -->
             <!-- MODE DES INITIATIVES DES PILOTES (script SQL 70) : l'Amiral seul le regle -->
-            <div id="carte-mode-ini" class="bloc" style="display: none; margin-bottom: 12px; padding-top: 10px; padding-bottom: 10px; --bdc: rgba(255,79,216,.75); --teinte: rgba(255,79,216,.07); --lueur: rgba(255,79,216,.08); --accent: #FF4FD8;">
-                <div onclick="basculerModeIni()" style="display: flex; align-items: center; gap: 14px; cursor: pointer; flex-wrap: wrap;">
-                    <h2 style="color: #FF4FD8; margin: 0; flex: 1 1 auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">INITIATIVES DES PILOTES <span style="font-style: normal; font-size: 0.62em; letter-spacing: 2px; color: #ffb3ef; border: 1px solid rgba(255,79,216,.55); background: rgba(255,79,216,.1); padding: 2px 9px;">RÉGLAGE DE L'AMIRAL</span></h2>
-                    <span id="mode-ini-resume" style="color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 0.8em;"></span>
-                    <span id="mode-ini-fleche" style="color: #FF4FD8; letter-spacing: 2px; font-size: 0.72em;">▾ MODIFIER</span>
+            <div id="carte-mode-ini" class="bloc" style="display: none; flex: 1 1 520px; min-width: 260px; margin: 0 0 12px; padding: 8px 14px 9px; flex-direction: column; justify-content: center; --bdc: rgba(255,79,216,.75); --teinte: rgba(255,79,216,.07); --lueur: rgba(255,79,216,.08); --accent: #FF4FD8;">
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 8px;">
+                    <h2 style="color: #FF4FD8; margin: 0; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 1.05em; white-space: nowrap;">INITIATIVES DES PILOTES <span id="mode-ini-aide" data-info="Si vous n'ouvrez pas le site pendant 7 jours, vos pilotes retrouvent automatiquement le mode LIBRE. Votre choix est conservé et revient dès que vous rouvrez le site." style="font-style: normal; font-size: 0.62em; letter-spacing: 2px; color: #ffb3ef; border: 1px solid rgba(255,79,216,.55); background: rgba(255,79,216,.1); padding: 2px 9px; cursor: help;">RÉGLAGE DE L'AMIRAL</span></h2>
                 </div>
-                <div id="mode-ini-detail" style="display: none; margin-top: 10px;">
                 <div id="mode-ini-retour" style="display: none;"></div>
                 <div class="mode-ini-cartes">
-                    <button type="button" class="mode-ini-carte" data-mode="LIBRE" onclick="choisirModeInitiatives('LIBRE')"><b>LIBRE</b><span>Tout pilote lance une initiative, active tout de suite. C'est le fonctionnement par défaut.</span></button>
-                    <button type="button" class="mode-ini-carte" data-mode="VALIDATION" onclick="choisirModeInitiatives('VALIDATION')"><b>SUR VALIDATION</b><span>Les pilotes proposent. Rien n'est actif tant que vous ou un officier n'avez pas accepté. Une proposition non traitée expire après 48 h.</span></button>
-                    <button type="button" class="mode-ini-carte" data-mode="DESACTIVE" onclick="choisirModeInitiatives('DESACTIVE')"><b>DÉSACTIVÉ</b><span>Le bouton « Lancer une initiative » disparaît pour les pilotes. Vous et vos officiers pouvez toujours en lancer.</span></button>
+                    <button type="button" class="mode-ini-carte" data-mode="LIBRE" onclick="choisirModeInitiatives('LIBRE')" data-info="Tout pilote lance une initiative, active tout de suite. C'est le fonctionnement par défaut."><b>LIBRE</b></button>
+                    <button type="button" class="mode-ini-carte" data-mode="VALIDATION" onclick="choisirModeInitiatives('VALIDATION')" data-info="Les pilotes proposent. Rien n'est actif tant que vous ou un officier n'avez pas accepté. Une proposition non traitée expire après 48 h."><b>SUR VALIDATION</b></button>
+                    <button type="button" class="mode-ini-carte" data-mode="DESACTIVE" onclick="choisirModeInitiatives('DESACTIVE')" data-info="Le bouton « Lancer une initiative » disparaît pour les pilotes. Vous et vos officiers pouvez toujours en lancer."><b>DÉSACTIVÉ</b></button>
                 </div>
-                <div class="bloc-note">Si vous n'ouvrez pas le site pendant 7 jours, vos pilotes retrouvent automatiquement le mode LIBRE. Votre choix est conservé et revient dès que vous rouvrez le site.</div>
-                </div>
+            </div>
             </div>
 
             <div class="esc-onglets" role="tablist">
@@ -1194,7 +1188,6 @@
                 // Démarrage des effectifs
                 chargerEffectifsEscadron();
                 ouvrirOngletEsc(location.hash.replace('#', '') || (/[?&]fiche=moi(&|$)/.test(location.search) ? 'membres' : ''));     // sans adresse particuliere : SYSTEMES (MEMBRES pour le lien « ma fiche ») ; #membres et #fc ouvrent ces onglets
-                if (typeof chargerChiffresQG === 'function') chargerChiffresQG(profilCommandant);
                 chargerCodeInvitation(data);
                 chargerModeInitiatives(data);
 
@@ -1230,11 +1223,11 @@
             try {
                 const g = await window.edteamIniMode.reglage(true);
                 if (!g || !(g.amiral || profil.est_directeur)) return;
-                carte.style.display = 'block';
+                carte.style.display = 'flex';
                 if (!g.amiral) {   // Directeur : il voit le choix de l'Amiral de son escadron, sans pouvoir le changer
-                    document.querySelectorAll('.mode-ini-carte').forEach(b => { b.disabled = true; b.style.cursor = 'default'; b.style.pointerEvents = 'none'; });
-                    const note = carte.querySelector('.bloc-note');
-                    if (note) note.textContent = 'Réglage de l\'Amiral de l\'escadron, en lecture seule pour vous. Si l\'Amiral n\'ouvre pas le site pendant 7 jours, les pilotes retrouvent automatiquement le mode LIBRE.';
+                    window.__iniLectureSeule = true; document.querySelectorAll('.mode-ini-carte').forEach(b => { b.style.cursor = 'default'; b.setAttribute('aria-disabled', 'true'); });
+                    const aide = document.getElementById('mode-ini-aide');
+                    if (aide) { aide.textContent = 'RÉGLAGE DE L\'AMIRAL · LECTURE SEULE'; aide.dataset.info = 'Réglage de l\'Amiral de l\'escadron, en lecture seule pour vous. Si l\'Amiral n\'ouvre pas le site pendant 7 jours, les pilotes retrouvent automatiquement le mode LIBRE.'; }
                 }
                 marquerModeInitiatives(g.mode);
                 const r = document.getElementById('mode-ini-retour');
@@ -1242,20 +1235,24 @@
                     const nom = { LIBRE: 'LIBRE', VALIDATION: 'SUR VALIDATION', DESACTIVE: 'DÉSACTIVÉ' }[g.mode] || g.mode;
                     r.className = 'mode-ini-retour';
                     r.innerHTML = 'Vous étiez absent plus de 7 jours : vos pilotes étaient repassés en mode LIBRE. ' + (g.mode === 'LIBRE' ? '' : 'Votre réglage « ' + nom + ' » est de nouveau en vigueur. ') + '<button type="button" style="margin-left: 10px; background: transparent; border: 1px solid #00F0FF; color: #00F0FF; font-family: inherit; padding: 2px 10px; cursor: pointer;" onclick="window.edteamIniMode.retourVu(); this.parentElement.style.display = \'none\';">OK</button>';
-                    r.style.display = 'block'; basculerModeIni(true);
+                    r.style.display = 'block';
                 }
             } catch (e) { /* le reglage reste masque */ }
         }
+        // infobulle instantanee pour tout element portant data-info (title natif : lent, rogne par les cadres, absent sur un bouton inerte)
+        (function () {
+            const t = document.createElement('div'); t.id = 'esc-info'; document.body.appendChild(t);
+            const cible = el => el && el.closest ? el.closest('[data-info]') : null;
+            const pos = e => { const w = t.offsetWidth, h = t.offsetHeight; let x = e.clientX + 14, y = e.clientY + 18; if (x + w > innerWidth - 8) x = innerWidth - w - 8; if (y + h > innerHeight - 8) y = e.clientY - h - 12; t.style.left = Math.max(8, x) + 'px'; t.style.top = Math.max(8, y) + 'px'; };
+            document.addEventListener('mouseover', e => { const c = cible(e.target); if (!c) { t.style.display = 'none'; return; } t.textContent = c.getAttribute('data-info'); t.style.display = 'block'; pos(e); });
+            document.addEventListener('mousemove', e => { if (t.style.display === 'block') pos(e); });
+            document.addEventListener('mouseout', e => { if (!cible(e.relatedTarget)) t.style.display = 'none'; });
+        })();
         function marquerModeInitiatives(mode) {
             document.querySelectorAll('.mode-ini-carte').forEach(b => b.classList.toggle('actif', b.dataset.mode === mode));
-            const rs = document.getElementById('mode-ini-resume'); if (rs) rs.textContent = 'MODE : ' + ({ LIBRE: 'LIBRE', VALIDATION: 'SUR VALIDATION', DESACTIVE: 'DÉSACTIVÉ' }[mode] || mode);
-        }
-        function basculerModeIni(ouvrir) {
-            const d = document.getElementById('mode-ini-detail'), f = document.getElementById('mode-ini-fleche'); if (!d) return;
-            const o = typeof ouvrir === 'boolean' ? ouvrir : d.style.display === 'none';
-            d.style.display = o ? 'block' : 'none'; if (f) f.textContent = o ? '▴ REPLIER' : '▾ MODIFIER';
         }
         async function choisirModeInitiatives(mode) {
+            if (window.__iniLectureSeule) return;   // Directeur : il voit le choix de l'Amiral sans pouvoir le changer
             if (typeof sonClic === 'function') sonClic();
             const { error } = await window.edteamIniMode.definir(mode);
             if (error) { alert(error.message || 'Réglage impossible.'); return; }
@@ -1297,6 +1294,6 @@
 
     <script src="medailles.js?v=17"></script>
     <script src="rubans.js?v=1"></script>
-    <script src="footer.js?v=51"></script>
+    <script src="footer.js?v=52"></script>
 </body>
 </html>

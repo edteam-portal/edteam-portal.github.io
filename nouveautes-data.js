@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-escadron-entete", date: "2026-10-31T12:45:10Z", type: "AMELIORE",
+        titre: "Page Escadron : en-tête simplifié",
+        texte: "En haut de la page Escadron, les quatre cartes de chiffres (pilotes inscrits, BGS, Powerplay, colonisation) disparaissent. Pour l’Amiral et le Directeur, le code d’invitation et le réglage des initiatives des pilotes sont côte à côte, sur une seule ligne. Le réglage des initiatives devient trois boutons toujours visibles (Libre, Sur validation, Désactivé) : l’explication de chacun s’affiche au survol, plus besoin de déplier.",
+        important: false
+    },
+    {
+        id: "2026-10-fc-message", date: "2026-10-31T12:45:20Z", type: "NOUVEAU",
+        titre: "Fleet Carrier : un message pour votre escadron",
+        texte: "Dans Mon hangar, sous la position de votre carrier, vous pouvez laisser un court message à vos camarades (200 caractères) : « posé là pour la mission, réparation et marché ouverts… ». Dans la page Escadron, onglet FLEET CARRIERS, une pastille « message du propriétaire » apparaît sur la ligne du carrier : le message s’affiche au survol, ou en cliquant pour l’ouvrir dans une fenêtre. Un filtre « avec un message » les rassemble. Le message suit le partage de votre carrier, garde le système où vous l’avez écrit et se grise quand le carrier a bougé depuis : pensez à le mettre à jour.",
+        important: false
+    },
+    {
         id: "2026-10-plugin-2-55", date: "2026-10-31T12:09:20Z", type: "AMELIORE",
         titre: "Plugin SYS.EDTEAM 2.55 : à jour ?",
         texte: "La version 2.55 du plugin est disponible. Elle relève les services du carrier de votre escadron quand vous vous posez dessus, pour les montrer dans la page Escadron (onglet FLEET CARRIERS). Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",
