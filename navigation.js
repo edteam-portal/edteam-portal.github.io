@@ -333,7 +333,7 @@ window.actualiserHeader = function(profilData) {
             else if (!window.__revelChargement) {
                 window.__revelChargement = true;
                 const sRev = document.createElement('script');
-                sRev.src = 'revelations.js?v=8';
+                sRev.src = 'revelations.js?v=10';
                 sRev.onload = lancerRev;
                 document.head.appendChild(sRev);
             }

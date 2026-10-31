@@ -106,14 +106,16 @@
 
     // ---------- LECTURE (une requete legere, 15 minutes de memoire de session) ----------
     window.chargerTitresSpecialistes = async function (escadronId, force) {
-        const cle = 'edteam_titres_' + (escadronId || 'x');
+        const cle = 'edteam_titres2_' + (escadronId || 'x');
         try {
             const c = JSON.parse(sessionStorage.getItem(cle) || 'null');
             if (!force && c && Date.now() - c.ts < 900000) return c.data;
         } catch (e) { /* memoire de session indisponible : on lit simplement */ }
         const data = {};
         try {
-            const { data: rows, error } = await supabaseApp.from('titres_specialistes').select('code, user_id, cmdr_nom, valeur, second_nom, second_valeur, depuis');
+            if (!escadronId) return null;
+            // le Directeur peut lire les titres de TOUS les escadrons : on ne garde que ceux de l'escadron affiche
+            const { data: rows, error } = await supabaseApp.from('titres_specialistes').select('code, user_id, cmdr_nom, valeur, second_nom, second_valeur, depuis').eq('escadron_id', escadronId);
             if (error) throw error;
             (rows || []).forEach(r => { data[r.code] = r; });
             try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), data })); } catch (e) { /* ignore */ }

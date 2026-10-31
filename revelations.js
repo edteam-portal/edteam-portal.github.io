@@ -81,10 +81,11 @@
         return d;
     }
     async function lireTitres(p) {
-        var cle = 'edteam_titres_' + (p.escadron_id || 'x'), c = cacheLire(cle, 900000);
+        var cle = 'edteam_titres2_' + (p.escadron_id || 'x'), c = cacheLire(cle, 900000);
         if (c) return c.data;
         try {
-            var r = await db().from('titres_specialistes').select('code, user_id, cmdr_nom, valeur, second_nom, second_valeur, depuis');
+            if (!p.escadron_id) return null;
+            var r = await db().from('titres_specialistes').select('code, user_id, cmdr_nom, valeur, second_nom, second_valeur, depuis').eq('escadron_id', p.escadron_id);
             if (r.error) throw r.error;
             var data = {}; (r.data || []).forEach(function (x) { data[x.code] = x; });
             cacheEcrire(cle, { data: data });
@@ -474,7 +475,7 @@
             css();
             if (etat.file.length) {
                 var liste = etat.file.splice(0).sort(function (a, b) { return PRIO[a.type] - PRIO[b.type]; });
-                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=16');
+                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=18');
                 if (liste.some(function (it) { return it.type === 'plaque'; }) && typeof window.forgerRubanSVG !== 'function') await chargerScript('rubans.js?v=1');
                 await chaine(liste);
             }
