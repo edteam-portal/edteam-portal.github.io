@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-10-allies-powerplay-journal", date: "2026-10-31T16:00:00Z", type: "CORRIGE",
+        titre: "Alliés invités : leurs mérites Powerplay comptent, et le journal reste celui de l’escadron",
+        texte: "Un pilote d’un autre escadron invité à une campagne voit maintenant ses mérites Powerplay rattachés à la mission : il apparaît dans la liste et la fenêtre de la mission. Le journal de l’escadron (bouton « JOURNAL DE L’ESCADRON ») ne montre que les efforts des membres de l’escadron, sur PC et mobile : le soutien libre d’un escadron reste confidentiel. Les alliés et les invités n’apparaissent que dans le journal de leur campagne (📖), qui est maintenant une fenêtre à part : elle ne contient que les lignes de la campagne (directives, missions Powerplay) et ses propres filtres, avec un petit A (allié) ou S (solitaire) à côté du nom et un fin cadre autour de la ligne. Le journal filtré sur une mission Powerplay affiche aussi ses lignes les plus anciennes.",
+        important: false
+    },
+    {
         id: "2026-10-plugin-2-56", date: "2026-10-31T15:06:20Z", type: "AMELIORE",
         titre: "Plugin SYS.EDTEAM 2.56 : à jour ?",
         texte: "La version 2.56 du plugin est disponible. Quand vous arrivez dans un système surveillé par l’état-major, elle envoie les influences vues dans votre jeu : le système est mis à jour pour tout l’escadron et votre passage compte dans le repérage. Elle règle aussi un petit défaut : le repérage est maintenant compté avant l’envoi des influences. Elle s’installe toute seule : lancez EDMC une première fois (il la télécharge), puis une seconde fois (elle est alors active). Vérifiez le numéro de version en haut du plugin dans EDMC.",

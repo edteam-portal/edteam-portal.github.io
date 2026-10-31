@@ -484,7 +484,7 @@ window.ouvrirCarriere = function(quoi) {
     if (!window.__carriereChargement) {
         window.__carriereChargement = new Promise((ok, ko) => {
             const s = document.createElement('script');
-            s.src = 'carriere.js?v=2';
+            s.src = 'carriere.js?v=3';
             s.onload = ok; s.onerror = () => { window.__carriereChargement = null; ko(); };
             document.head.appendChild(s);
         });

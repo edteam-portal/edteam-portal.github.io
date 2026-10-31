@@ -458,7 +458,7 @@
                     <div style="background: ${fondLigne}; border: 1px solid ${bordureLigne}; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95em;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <span style="color: ${rangNumero <= 3 ? '#FFD700' : '#888'}; font-weight: bold; width: 30px;">#${rangNumero}</span>${avLigne(p)}
-                            <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}</span>
+                            <span style="color: #fff; font-weight: bold;">CMDR ${(p.cmdr_nom || 'INCONNU').toUpperCase()}${window.edteamInvitations && window.edteamInvitations.marqueEscadron ? window.edteamInvitations.marqueEscadron(p.escadron_id, estMoi) : ''}</span>
                             <span style="font-size: 0.85em;">${tagSquad}</span>
                             <span style="color: var(--ed-blue); font-size: 0.8em; border: 1px solid rgba(0,240,255,0.4); padding: 1px 6px; border-radius: 2px;">RANG ${p.puissance_rang || 0}</span>
                         </div>

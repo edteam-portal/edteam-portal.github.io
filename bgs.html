@@ -19,8 +19,8 @@
     <script src="son.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="copier-lieux.js?v=2"></script>
-    <script src="navigation.js?v=58"></script>
-    <script src="invitations.js?v=2"></script>
+    <script src="navigation.js?v=59"></script>
+    <script src="invitations.js?v=12"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="accueil-pp.js?v=11"></script>
     <script src="campagne-discussion.js?v=2"></script>
@@ -35,7 +35,7 @@
     <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
     <script src="carte-campagnes.js?v=48"></script>
-    <script src="campagnes-pp.js?v=20"></script>
+    <script src="campagnes-pp.js?v=22"></script>
     <script src="campagnes-col.js?v=7"></script>
 
     <style>
@@ -441,7 +441,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--ed-orange-dim); padding-bottom: 15px; margin-bottom: 8px; gap: 12px; flex-wrap: wrap;">
                     <h3 style="margin: 0; color: var(--ed-orange); letter-spacing: 2px; font-size: 1.2em;">&gt; CAMPAGNES, INITIATIVES ET ENGAGEMENT</h3>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button id="btn-journal-bgs" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirJournalBGS(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ JOURNAL DES EXPLOITS ]</button>
+                        <button id="btn-journal-bgs" style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirJournalBGS(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='var(--ed-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 240, 255, 0.1)'; this.style.color='var(--ed-blue)';">[ JOURNAL DE L'ESCADRON ]</button>
                         <button id="btn-nouvelle-campagne" style="display: none; background: rgba(255, 51, 51, 0.1); border: 1px solid #FF3333; color: #FF3333; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="edteamCampagnes.ouvrir(null)" onmouseenter="if(typeof sonHover === 'function') sonHover()">[ + NOUVELLE CAMPAGNE ]</button>
                         <button id="btn-rapport-discord" style="display: none; background: rgba(88, 101, 242, 0.12); border: 1px solid #5865F2; color: #8ea1ff; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="EdteamRapport.ouvrir()" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#5865F2'; this.style.color='#fff';" onmouseout="this.style.background='rgba(88, 101, 242, 0.12)'; this.style.color='#8ea1ff';" title="Rapport de l'Amirauté prêt à coller sur Discord">[ 📋 RAPPORT DISCORD ]</button>
                         <button id="btn-initiative" style="display: none; background: rgba(255, 79, 216, 0.1); border: 1px solid #FF4FD8; color: #FF4FD8; padding: 9px 20px; font-family: inherit; font-size: 0.95em; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="ouvrirInitiative(event)" onmouseenter="if(typeof sonHover === 'function') sonHover()" onmouseover="this.style.background='#FF4FD8'; this.style.color='#000';" onmouseout="this.style.background='rgba(255, 79, 216, 0.1)'; this.style.color='#FF4FD8';" title="Lancez un objectif BGS pour inviter l'escadron à vous rejoindre">[ + LANCER UNE INITIATIVE ]</button>
@@ -701,6 +701,7 @@
         let journalMemo = { ts: 0 };
         let journalEtat = { lignes: [], fin: true };   // actions déjà chargées (100 par page, 500 au plus)
         let memoireStations = [];                      // stations de colonisation terminées (affichées dans le journal avec les actions)
+        let memoireMembres = [];                       // pilotes de L'ESCADRON seulement : le journal general ne montre qu'eux (les allies et invites n'apparaissent que dans le journal de leur campagne)
         let memoirePP = [];                            // efforts Powerplay (merites) de l'escadron, affiches dans le journal avec les actions (script SQL 96)
         let memoirePaliers = [];                       // paliers de tonnes livrées (colonisation) franchis par les pilotes, annoncés dans le journal
         // Filtre « spécialité » : types d'action qui font progresser chaque titre du mur des spécialistes (même correspondance que le calcul serveur des titres)
@@ -713,17 +714,45 @@
         const nomStationJournal = s => (String(s || '').replace(/^(Orbital|Planetary|Surface) Construction Site: /i, '').replace(/^\$EXT_PANEL_ColonisationShip;\s*/, '').trim()) || 'Construction';
         // journal d'UNE campagne (bouton de l'en-tete de campagne) : le journal habituel, filtre sur la campagne
         function filtrerOrdresPage(q) { const esc = profilCommandant.escadron_id || 'ISS'; return window.edteamInvitations ? window.edteamInvitations.filtrerOrdres(q, esc) : q.eq('escadron_id', esc); }
+        // DEUX JOURNAUX DISTINCTS dans la meme fenetre : le journal de l'ESCADRON (membres seulement, soutien libre compris) et le journal d'UNE CAMPAGNE (seulement les lignes de cette campagne : directives, missions Powerplay ;
+        // escadron hote, allies et invites). Le mode campagne ne lit JAMAIS le journal general, ne propose que les filtres de la campagne, et la fenetre est videe avant d'etre affichee.
+        let filtresGeneraux = null;
+        window.__jcamp = null;
+        function configurerFiltresJournal(idCamp) {
+            const sp = document.getElementById('filtre-pilote'), so = document.getElementById('filtre-ordre');
+            if (!sp || !so) return;
+            if (!filtresGeneraux) filtresGeneraux = { p: sp.innerHTML, o: so.innerHTML };
+            delete so.dataset.pret; delete so.dataset.ppPret;
+            if (idCamp === null) { sp.innerHTML = filtresGeneraux.p; so.innerHTML = filtresGeneraux.o; sp.value = 'ALL'; so.value = 'ALL'; }
+            else {
+                const n = String(idCamp).replace(/\D/g, '');
+                sp.innerHTML = '<option value="ALL" selected>[ TOUS LES PARTICIPANTS ]</option><option value="ME">> MON DOSSIER PERSONNEL</option>';
+                so.innerHTML = '<option value="C' + n + '" selected>[ TOUTE LA CAMPAGNE ]</option>';
+                sp.value = 'ALL'; so.value = 'C' + n;
+            }
+            document.getElementById('filtre-specialite').value = 'ALL';
+            const rech = document.getElementById('filtre-recherche'); if (rech) rech.value = '';
+        }
         window.ouvrirJournalCampagne = async function(id, e) {
             if (typeof sonClic === 'function') sonClic();
+            const idNum = Number(id); if (!isFinite(idNum)) return;
+            window.__jcamp = idNum;
+            configurerFiltresJournal(idNum);
+            const zone = document.getElementById('modal-exploit-feed-content');
+            if (zone) zone.innerHTML = '<div style="color: #555; font-style: italic; text-align: center; margin-top: 40px;">Ouverture du journal de la campagne...</div>';
+            journalEtat = { lignes: [], fin: false }; memoirePP = [];
+            const titre = document.getElementById('titre-journal-exploits'); if (titre) titre.textContent = '> JOURNAL DE LA CAMPAGNE';
             ouvrirModal('modal-exploit-fullscreen', e);
-            const sel = document.getElementById('filtre-ordre');
-            journalMemo.ts = Date.now();
-            if (sel && !sel.dataset.ppPret) await chargerRegistreTactique();   // peuple les filtres (campagnes comprises)
-            if (sel) sel.value = 'C' + id;
+            journalMemo.ts = 0;
             await chargerRegistreTactique();
         };
         window.ouvrirJournalBGS = function(e) {
             if (typeof sonClic === 'function') sonClic();
+            if (window.__jcamp !== null) {   // la fenetre montrait une campagne : retour au journal de l'escadron, vide d'abord
+                window.__jcamp = null; configurerFiltresJournal(null); journalMemo.ts = 0;
+                journalEtat = { lignes: [], fin: false }; memoirePP = [];
+                const z = document.getElementById('modal-exploit-feed-content'); if (z) z.innerHTML = '';
+            }
             ouvrirModal('modal-exploit-fullscreen', e);
             if (Date.now() - journalMemo.ts < 60000) return;
             journalMemo.ts = Date.now();
@@ -2607,21 +2636,28 @@
             const filtrePeriode = document.getElementById('filtre-periode').value;
             const filtreOrdre = document.getElementById('filtre-ordre').value;
             const filtreSpec = document.getElementById('filtre-specialite').value;
+            const idCamp = window.__jcamp === null || window.__jcamp === undefined ? null : String(window.__jcamp);
+            const estJournalCampagne = idCamp !== null;
 
             try {
                 // 1. TÉLÉCHARGEMENT SÉCURISÉ ET OPTIMISÉ (EGRESS PROTÉGÉ)
                 const resOrdres = suite ? { data: memoireOrdresArchives } : await filtrerOrdresPage(supabaseApp.from('ordres_bgs')
-                    .select('id, systeme_cible, faction_cible, type_ordre, statut, priorite, campagne_id'));
+                    .select('id, systeme_cible, faction_cible, type_ordre, statut, priorite, campagne_id, escadron_id'));
                 const ordres = resOrdres.data || [];
+                // directives du journal : celles de la campagne ouverte, ou (journal de l'escadron) SEULEMENT celles de l'escadron (jamais celles d'une campagne alliee)
+                const maj = s => String(s || '').trim().toUpperCase();
+                const ordresJ = estJournalCampagne ? ordres.filter(o => String(o.campagne_id) === idCamp) : ordres.filter(o => maj(o.escadron_id) === maj(profilCommandant.escadron_id));
 
                 // Projection stricte intégrant les champs de colonisation et d'action libre
                 // la colonisation a son propre journal (page Colonisation) : elle n'apparait plus ici
+                const resMembres = suite ? { data: null } : await supabaseApp.from('profils_publics').select('user_id, cmdr_nom').eq('escadron_id', profilCommandant.escadron_id || 'ISS');
+                if (!suite) memoireMembres = (resMembres.data || []).map(p => String(p.user_id));
                 let queryEfforts = supabaseApp.from('efforts_bgs')
                     .select('user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details')
                     .neq('type_action', 'COLONISATION');
 
                 if (filtreOrdre === 'ACTIF') {
-                    const activeOrdreIds = ordres.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
+                    const activeOrdreIds = ordresJ.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
                     if (activeOrdreIds.length > 0) {
                         queryEfforts = queryEfforts.in('ordre_id', activeOrdreIds);
                     } else {
@@ -2629,8 +2665,9 @@
                     }
                 } else if (filtreOrdre === 'CLOS') {
                     // directives clôturées (archivées) : toutes celles qui ne sont plus en cours
-                    const idsActifs = ordres.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
+                    const idsActifs = ordresJ.filter(o => o.statut === 'ACTIF').map(o => String(o.id));
                     queryEfforts = queryEfforts.not('ordre_id', 'is', null);
+                    queryEfforts = ordresJ.length ? queryEfforts.in('ordre_id', ordresJ.map(o => String(o.id))) : queryEfforts.eq('ordre_id', 'none');
                     if (idsActifs.length) queryEfforts = queryEfforts.not('ordre_id', 'in', '(' + idsActifs.join(',') + ')');
                 } else if (filtreOrdre === 'LIBRE') {
                     // Cible spécifiquement les actions sans ordre (soutien libre & chantiers de colonisation) ; la période est filtrée plus bas, sans plafond de 30 jours
@@ -2638,15 +2675,21 @@
                 } else if (/^P\d+$/.test(filtreOrdre)) {
                     queryEfforts = queryEfforts.eq('ordre_id', 'none');   // une mission Powerplay precise : aucune ligne BGS
                 } else if (/^C\d+$/.test(filtreOrdre)) {
-                    const idsCampagne = ordres.filter(o => String(o.campagne_id) === filtreOrdre.slice(1)).map(o => String(o.id));
+                    const idsCampagne = ordres.filter(o => String(o.campagne_id) === filtreOrdre.slice(1) && (!estJournalCampagne || String(o.campagne_id) === idCamp)).map(o => String(o.id));
                     queryEfforts = idsCampagne.length ? queryEfforts.in('ordre_id', idsCampagne) : queryEfforts.eq('ordre_id', 'none');
                 } else if (filtreOrdre !== 'ALL') {
-                    queryEfforts = queryEfforts.eq('ordre_id', filtreOrdre);
+                    queryEfforts = ordresJ.some(o => String(o.id) === String(filtreOrdre)) ? queryEfforts.eq('ordre_id', filtreOrdre) : queryEfforts.eq('ordre_id', 'none');   // une directive qui n'est pas de ce journal : rien
                 }
+                // journal de campagne : JAMAIS une ligne hors des directives de la campagne (ni soutien libre, ni autre directive)
+                if (estJournalCampagne) queryEfforts = ordresJ.length ? queryEfforts.in('ordre_id', ordresJ.map(o => String(o.id))) : queryEfforts.eq('ordre_id', 'none');
                 // « TOUTES LES ACTIVITÉS » : sans aucun filtre de directive, donc directives en cours, directives CLÔTURÉES et actions libres, sur la période choisie
                 // (avec « tout l'historique », vraiment tout l'historique : 100 lignes par page, 500 au plus)
 
                 // Pilote et période filtrés côté serveur, et seulement les 100 actions les plus récentes (celles qui sont affichées)
+                // SOUTIEN LIBRE CONFIDENTIEL : hors du journal d'une campagne, seulement les efforts des pilotes de l'escadron (jamais ceux d'un autre escadron, meme si on peut les lire)
+                const titreJournal = document.getElementById('titre-journal-exploits');
+                if (titreJournal) titreJournal.textContent = estJournalCampagne ? '> JOURNAL DE LA CAMPAGNE : ESCADRON, ALLIÉS ET INVITÉS' : "> JOURNAL DE L'ESCADRON : COMMUNICATIONS INTERCEPTÉES";
+                if (!estJournalCampagne) queryEfforts = memoireMembres.length ? queryEfforts.in('user_id', memoireMembres) : queryEfforts.eq('user_id', profilCommandant.user_id);
                 if (filtrePilote !== 'ALL') queryEfforts = queryEfforts.eq('user_id', filtrePilote === 'ME' ? profilCommandant.user_id : filtrePilote);
                 if (filtreSpec !== 'ALL') {
                     const typesSpec = TYPES_SPECIALITE[filtreSpec] || [];
@@ -2666,13 +2709,14 @@
                 if (!suite) memoirePaliers = (resPaliers && Array.isArray(resPaliers.data) ? resPaliers.data : [])
                     .filter(l => l && l.t).map(l => ({ type_action: 'PALIER', date_action: l.t, cmdr: l.cmdr, palier: l.palier, total: l.total }));
                 // Efforts Powerplay de l'escadron (300 derniers, une fois) : fonction serveur pp_journal (script SQL 96)
-                const resPP = suite ? null : await supabaseApp.rpc('pp_journal', { p_limite: 300 }).then(r => r, () => ({ data: null }));
+                const argsPP = { p_limite: 300 };
+                if (estJournalCampagne) argsPP.p_campagne = Number(idCamp);
+                if (/^P\d+$/.test(filtreOrdre)) argsPP.p_mission = Number(filtreOrdre.slice(1));   // une mission precise : le serveur ne renvoie que ses lignes (sinon limite aux 300 dernieres de l'escadron)
+                const resPP = suite ? null : await supabaseApp.rpc('pp_journal', argsPP).then(r => r, () => ({ data: null }));
                 if (!suite) memoirePP = regrouperMeritesPP((resPP && Array.isArray(resPP.data) ? resPP.data : []).filter(l => l && l.date_action).map(l => Object.assign({ type_action: 'PP' }, l)));
                 const [resEfforts, resProfils] = await Promise.all([
                     queryEfforts,
-                    suite ? Promise.resolve({ data: null }) : supabaseApp.from('profils_publics')
-                        .select('user_id, cmdr_nom')
-                        .eq('escadron_id', profilCommandant.escadron_id || 'ISS')
+                    Promise.resolve(resMembres)
                 ]);
 
                 // On extrait les données directement (sans redéclarer "ordres")
@@ -2695,7 +2739,15 @@
 
                 // PEUPLEMENT DU FILTRE DES PILOTES (une fois) : chaque pilote de l'escadron, par ordre alphabétique
                 const selectPilote = document.getElementById('filtre-pilote');
-                if (selectPilote && !suite && selectPilote.options.length <= 2 && profils.length) {
+                if (selectPilote && !suite && estJournalCampagne && selectPilote.options.length <= 2) {
+                    // journal de campagne : seulement les pilotes qui ont une ligne dans CETTE campagne (jamais la liste de leur escadron)
+                    const vus = {};
+                    effortsBruts.forEach(e => { if (e.user_id) vus[e.user_id] = dicoPilotes[e.user_id] || 'INCONNU'; });
+                    memoirePP.forEach(l => { if (l.user_id) vus[l.user_id] = String(l.cmdr || dicoPilotes[l.user_id] || 'INCONNU').toUpperCase(); });
+                    Object.keys(vus).filter(u => u !== profilCommandant.user_id).sort((a, c) => String(vus[a]).localeCompare(String(vus[c]))).forEach(u => {
+                        const opt = document.createElement('option'); opt.value = u; opt.textContent = 'CMDR ' + String(vus[u]).toUpperCase(); selectPilote.appendChild(opt);
+                    });
+                } else if (selectPilote && !suite && selectPilote.options.length <= 2 && profils.length) {
                     profils.filter(p => p.cmdr_nom && p.user_id !== profilCommandant.user_id).sort((a, b) => a.cmdr_nom.localeCompare(b.cmdr_nom)).forEach(p => {
                         const opt = document.createElement('option');
                         opt.value = p.user_id; opt.textContent = 'CMDR ' + p.cmdr_nom.toUpperCase();
@@ -2705,7 +2757,7 @@
 
                 // 2. PEUPLEMENT DU FILTRE DES ORDRES (AVEC NUMÉRO D'OPÉRATION)
                 const selectOrdre = document.getElementById('filtre-ordre');
-                if (selectOrdre && !suite && !selectOrdre.dataset.pret && ordres.length) {
+                if (selectOrdre && !suite && !selectOrdre.dataset.pret && ordresJ.length) {
                     selectOrdre.dataset.pret = '1';
                     const groupe = (titre, liste) => {
                         if (!liste.length) return;
@@ -2713,11 +2765,12 @@
                         liste.forEach(o => { const opt = document.createElement('option'); opt.value = o.id; opt.textContent = '#' + o.id + ' · ' + String(o.systeme_cible || '').toUpperCase() + ' (' + o.type_ordre + ')'; g.appendChild(opt); });
                         selectOrdre.appendChild(g);
                     };
-                    groupe('DIRECTIVES EN COURS', ordres.filter(o => o.statut === 'ACTIF').sort((a, b) => b.id - a.id));
-                    groupe('DIRECTIVES CLÔTURÉES (40 DERNIÈRES)', ordres.filter(o => o.statut !== 'ACTIF').sort((a, b) => b.id - a.id).slice(0, 40));
+                    groupe('DIRECTIVES EN COURS', ordresJ.filter(o => o.statut === 'ACTIF').sort((a, b) => b.id - a.id));
+                    groupe('DIRECTIVES CLÔTURÉES (40 DERNIÈRES)', ordresJ.filter(o => o.statut !== 'ACTIF').sort((a, b) => b.id - a.id).slice(0, 40));
                 }
 
-                if (selectOrdre && !suite && !selectOrdre.dataset.ppPret && (window.cacheCampagnes || []).length + ((window.cachePP && window.cachePP.missions) || []).length) {
+                const missionsPPJ = ((window.cachePP && window.cachePP.missions) || []).filter(m => !estJournalCampagne || String(m.campagne_id) === idCamp);
+                if (selectOrdre && !suite && !selectOrdre.dataset.ppPret && missionsPPJ.length) {
                     selectOrdre.dataset.ppPret = '1';
                     const grp = (titre, liste) => {
                         if (!liste.length) return;
@@ -2725,8 +2778,7 @@
                         liste.forEach(([v, t]) => { const opt = document.createElement('option'); opt.value = v; opt.textContent = t; g.appendChild(opt); });
                         selectOrdre.appendChild(g);
                     };
-                    grp('CAMPAGNES EN COURS', (window.cacheCampagnes || []).map(c => ['C' + c.id, String(c.nom).toUpperCase()]));
-                    grp('MISSIONS POWERPLAY EN COURS', ((window.cachePP && window.cachePP.missions) || []).map(m => ['P' + m.id, '#P' + m.id + ' · ' + String(m.systeme || '').toUpperCase() + ' (' + m.type_pp + ')']));
+                    grp('MISSIONS POWERPLAY EN COURS', missionsPPJ.map(m => ['P' + m.id, '#P' + m.id + ' · ' + String(m.systeme || '').toUpperCase() + ' (' + m.type_pp + ')']));
                 }
 
                 // 3. FILTRAGE TEMPOREL, OPÉRATIONNEL ET PILOTE
@@ -2797,6 +2849,7 @@
                 const ppVisibles = memoirePP.filter(l => {
                     const t = new Date(l.date_action).getTime();
                     if (isNaN(t) || t < limiteBasseJournal || !enPeriodeJournal(l)) return false;
+                    if (estJournalCampagne ? String(l.campagne_id) !== idCamp : (memoireMembres.length && !memoireMembres.includes(String(l.user_id)))) return false;   // allies / invites : seulement dans le journal de leur campagne
                     if (filtrePilote !== 'ALL' && String(l.user_id) !== String(filtrePilote === 'ME' ? profilCommandant.user_id : filtrePilote)) return false;
                     if (!(filtreSpec === 'ALL' || /^PP/.test(filtreSpec))) return false;
                     if (filtreSpec === 'PPREN' && l.type_pp !== 'RENFORCEMENT') return false;
@@ -2863,15 +2916,16 @@
                                 const cpp = '#8A7CFF';
                                 const bgW = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                                 const nomW = escapeHtml(String(a.cmdr || 'INCONNU').toUpperCase());
+                                const marqueW = window.edteamInvitations ? window.edteamInvitations.marque(a.user_id) : '', classeW = '', infoW = window.edteamInvitations ? window.edteamInvitations.info(a.user_id) : '';
                                 const abr = { RENFORCEMENT: 'RENFORC.', SAPE: 'SAPE', ACQUISITION: 'ACQUIS.' }[a.type_pp] || '';
                                 const lie = a.mission_pp_id != null;
                                 const tagW = lie ? '#P' + a.mission_pp_id + ' | ' + abr : (abr ? 'LIBRE | ' + abr : 'HORS MISSION');
                                 const colW = { RENFORCEMENT: '#00FF66', SAPE: '#FF3333', ACQUISITION: '#EDEDED' }[a.type_pp] || cpp;
                                 const origW = { PRIMES: 'PRIMES', COMBAT: 'COMBAT', MISSIONS: 'MISSIONS', LIVRAISONS: 'LIVRAISONS', COMMERCE: 'COMMERCE', EXPLORATION: 'EXPLORATION', SAUVETAGE: 'SAUVETAGE', COMMUNAUTE: 'COMMUNAUTÉ', AUTRE: 'AUTRE' }[a.origine_action] || 'AUTRE';
                                 feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgW}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cpp};" onmouseover="this.style.background='rgba(138, 124, 255, 0.10)';" onmouseout="this.style.background='${bgW}';">
+                            <div class="exploit-row${classeW}" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgW}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${cpp};" onmouseover="this.style.background='rgba(138, 124, 255, 0.10)';" onmouseout="this.style.background='${bgW}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
-                                <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${nomW}">CMDR ${nomW}</span>
+                                <span style="color: #fff; font-weight: bold; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${nomW}${infoW}">CMDR ${nomW}${marqueW}</span>
                                 <div style="white-space: nowrap;"><span style="border: 1px solid ${cpp}; color: ${cpp}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;" title="${lie ? 'Mission Powerplay #' + a.mission_pp_id : 'Soutien libre : aucune mission ne correspond à ce système et à ce type'}">${tagW}</span></div>
                                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888;"><span style="color: ${cpp}; font-weight: bold;">${escapeHtml(String(a.systeme || '').toUpperCase())}</span><span style="color: #555; margin: 0 6px;">//</span><span style="color: #aaa;">POWERPLAY</span></div>
                                 <span style="text-align: right; white-space: nowrap; color: ${colW}; font-weight: bold; font-size: 1.05em; text-shadow: 0 0 6px ${colW}40;">+${new Intl.NumberFormat('fr-FR').format(a.merites)} MÉRITES${a.n > 1 ? ' <span style="color: #888; font-size: 0.8em;" title="' + a.n + ' gains successifs réunis sur une ligne">×' + a.n + '</span>' : ''}</span>
@@ -2898,7 +2952,8 @@
                                 return;
                             }
 
-                            const cmdr = escapeHtml(dicoPilotes[a.user_id] || 'INCONNU') + (window.edteamInvitations ? window.edteamInvitations.pastille(a.user_id) : '');
+                            const cmdr = escapeHtml(dicoPilotes[a.user_id] || 'INCONNU');   // texte seul (sert aussi d'infobulle)
+                            const marqueActeur = window.edteamInvitations ? window.edteamInvitations.marque(a.user_id) : '', classeActeur = '', infoActeur = window.edteamInvitations ? window.edteamInvitations.info(a.user_id) : '';
 
                             const ordreConcerne = ordres.find(o => String(o.id) === String(a.ordre_id));
                             const cibleSys = escapeHtml(ordreConcerne ? ordreConcerne.systeme_cible.toUpperCase() : (a.systeme ? a.systeme.toUpperCase() : "SECTEUR LOCAL"));
@@ -2976,9 +3031,9 @@
                             const bgLigne = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                             
                             feedHtml += `
-                            <div class="exploit-row" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgLigne}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
+                            <div class="exploit-row${classeActeur}" style="display: grid; grid-template-columns: 165px 180px 140px minmax(220px,1fr) minmax(110px,190px) 125px 140px; gap: 10px; align-items: center; padding: 8px 14px; background: ${bgLigne}; border-radius: 3px; font-size: 1em; transition: background 0.15s; border-left: 3px solid ${colorOrdre};" onmouseover="this.style.background='rgba(0, 240, 255, 0.08)';" onmouseout="this.style.background='${bgLigne}';">
                                 <span style="color: var(--ed-blue); font-weight: bold; font-size: 0.95em;">[${horodatageComplet}]</span>
-                                <span style="color: #fff; font-weight: bold; font-size: 1em; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${cmdr}">CMDR ${cmdr}</span>
+                                <span style="color: #fff; font-weight: bold; font-size: 1em; overflow-wrap: anywhere; line-height: 1.2;" title="CMDR ${cmdr}${infoActeur}">CMDR ${cmdr}${marqueActeur}</span>
                                 <div style="white-space: nowrap;">
                                     <span style="border: 1px solid ${colorOrdre}; color: ${colorOrdre}; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: inline-block;">${badgeOrdreTexte}</span>
                                 </div>
@@ -3181,7 +3236,7 @@
             <div class="modal-close" style="color: var(--ed-blue);" onclick="fermerModal('modal-exploit-fullscreen')">X</div>
             
             <div style="border-bottom: 1px dashed var(--ed-blue); padding-bottom: 15px; margin-bottom: 20px; flex-shrink: 0;">
-                <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 3px; font-size: 1.3em;">> JOURNAL DES EXPLOITS : COMMUNICATIONS INTERCEPTÉES</span>
+                <span style="color: var(--ed-blue); font-weight: bold; letter-spacing: 3px; font-size: 1.3em;" id="titre-journal-exploits">> JOURNAL DE L'ESCADRON : COMMUNICATIONS INTERCEPTÉES</span>
             </div>
             
             <div class="barre-filtres-journal">

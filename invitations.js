@@ -18,8 +18,12 @@
             + '#nav-bgs-factions.invite-clignote, #nav-btn-bgs.invite-clignote { animation: edteamInvClg 1.6s infinite; }'
             + '.inv-pastille { display:inline-block; font-size:.62em; letter-spacing:2px; padding:1px 6px; border:1px solid; vertical-align:middle; margin-left:8px; white-space:nowrap; }'
             + '.inv-pastille.sol { color:#ffb347; border-color:#ffb347; background:rgba(255,179,71,.08); } .inv-pastille.all { color:#3ec9ff; border-color:#3ec9ff; background:rgba(62,201,255,.08); }'
-            + '.inv-av { position:relative; display:inline-flex; } .inv-av > i { position:absolute; right:-3px; bottom:-3px; width:13px; height:13px; border-radius:50%; font:bold 8px/13px sans-serif; text-align:center; font-style:normal; color:#000; z-index:3; }'
+            + '.inv-mini { display:inline-block; font:bold .62em/1 sans-serif; padding:2px 4px; margin-left:6px; border:1px solid; border-radius:2px; vertical-align:middle; letter-spacing:0; }'
+            + '.inv-mini.sol { color:#ffb347; border-color:#ffb347; } .inv-mini.all { color:#3ec9ff; border-color:#3ec9ff; }'
+            + '.exploit-row.inv-ligne-all { box-shadow:inset 0 0 0 1px rgba(62,201,255,.4); } .exploit-row.inv-ligne-sol { box-shadow:inset 0 0 0 1px rgba(255,179,71,.4); }'
+            + '.inv-av { position:relative; display:inline-flex; } .inv-av > i { position:absolute; right:0; bottom:0; width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 1px #0a0a0a; font:bold 9px/14px sans-serif; text-align:center; font-style:normal; color:#000; z-index:3; }'
             + '.inv-av > i.sol { background:#ffb347; } .inv-av > i.all { background:#3ec9ff; }'
+            + '.camp-avs .inv-av > i { display:none; } .dir-avs .inv-av > .ph { margin-left:0; } .dir-avs .inv-av { margin-left:-7px; } .dir-avs > .inv-av:first-child { margin-left:0; } .inv-av.all > .ph { outline:2px solid #3ec9ff; outline-offset:-2px; } .inv-av.sol > .ph { outline:2px solid #ffb347; outline-offset:-2px; }'
             + '#edteam-inv-overlay { position:fixed; inset:0; z-index:99999; background:radial-gradient(ellipse at center, rgba(8,14,24,.94), rgba(0,0,0,.97)); display:flex; align-items:center; justify-content:center; }'
             + '#edteam-inv-overlay .inv-carte { width:640px; max-width:92vw; text-align:center; border:1px solid #FF7100; box-shadow:0 0 40px rgba(255,113,0,.35); background:rgba(10,8,6,.95); padding:38px 44px; }'
             + '#edteam-inv-overlay .inv-kick { color:#FF7100; letter-spacing:6px; font-size:.8em; } #edteam-inv-overlay .inv-nom { color:#fff; font-size:1.9em; letter-spacing:5px; margin:16px 0 6px; text-shadow:0 0 14px #FF7100; }'
@@ -39,6 +43,16 @@
         return m.length >= 2 ? m.map(function (x) { return x[0]; }).join('').slice(0, 4) : String(nom || '').toUpperCase().slice(0, 3);
     }
     function acteur(uid) { return (window.cacheActeurs || {})[uid] || null; }
+    // vu PAR LE LECTEUR : null si c'est lui ou un pilote de SON escadron ; sinon { k: 'ALLIE' (avec e = son escadron) | 'SOLITAIRE' }
+    function normE(t) { var s = String(t || '').trim().replace(/\s+/g, ' ').toUpperCase(); return s === 'INDEPENDANT' ? '' : s; }
+    function acteurVu(uid) {
+        var a = acteur(uid); if (!a) return null;
+        var moi = null; try { moi = window.profilReelInvite || ((typeof profilCommandant !== 'undefined') ? profilCommandant : null); } catch (x) { moi = null; }
+        if (moi && String(moi.user_id) === String(uid)) return null;
+        var ee = normE(a.e), mon = normE(moi && moi.escadron_id);
+        if (ee && mon && ee === mon) return null;
+        return { k: ee ? 'ALLIE' : 'SOLITAIRE', e: a.e, n: a.n };
+    }
 
     // memoire de 30 s PAR PILOTE (un autre compte dans le meme onglet ne reprend pas l'etat du precedent) ; le QG relit toujours (arrivee apres la connexion)
     function charger(force, uid) {
@@ -135,7 +149,9 @@
         return !!o && ids.indexOf(String(o.campagne_id)) >= 0;
     }
     var PASSE = { mes_invitations: 1, repondre_invitation: 1, repondre_invitation_escadron: 1, campagnes_acteurs: 1, invite_bgs_directives_resume: 1, invite_bgs_resultats: 1, invite_directives_activite: 1,
-                  invite_pp_missions_vue: 1, invite_col_missions_vue: 1, invite_bgs_quotas_jour: 1, invite_carte_coords: 1, invite_bgs_bilan_directive: 1 };
+                  invite_pp_missions_vue: 1, invite_col_missions_vue: 1, invite_bgs_quotas_jour: 1, invite_carte_coords: 1, invite_bgs_bilan_directive: 1,
+                  // DISCUSSIONS et journal de la campagne : le serveur verifie l'acces (participant accepte, escadron hote ou Directeur)
+                  photos_visibles: 1, pp_journal: 1, tableau_partisans: 1, campagne_discussion_lire: 1, campagne_discussion_ecrire: 1, campagne_discussion_pouce: 1, campagne_discussion_supprimer: 1, campagne_discussions_compteurs: 1, campagne_journal_vu: 1 };
     // MEMBRE d'un escadron avec des campagnes ALLIEES : chaque appel est fait pour son escadron ET pour ses campagnes invitees, puis fusionne
     function tab(x) { return Array.isArray(x) ? x : []; }
     function fusionner(nom, a, b) {
@@ -200,18 +216,46 @@
         return k === 'SOLITAIRE' ? '<span class="inv-pastille sol">SOLITAIRE</span>' : '<span class="inv-pastille all" title="' + e(esc || '') + '">ALLIÉ · ' + e(abreger(esc)) + '</span>';
     }
     function pastille(uid) {
-        var a = acteur(uid); if (!a || a.k === 'MEMBRE') return '';
+        var a = acteurVu(uid); if (!a) return '';
         return htmlPastille(a.k, a.e);
     }
-    function badgeAvatar(uid, html) {
-        var a = acteur(uid); if (!a || a.k === 'MEMBRE') return html;
+    // marque DISCRETE d'un acteur dans une ligne de journal : petit A (allie) ou S (solitaire) a cote du nom, et cadre fin autour de la ligne ; rien pour un membre de l'escadron hote
+    function marque(uid) {
+        var a = acteurVu(uid); if (!a) return '';
         css();
-        return '<span class="inv-av">' + html + '<i class="' + (a.k === 'SOLITAIRE' ? 'sol' : 'all') + '" title="' + (a.k === 'SOLITAIRE' ? 'SOLITAIRE' : 'ALLIÉ · ' + e(a.e || '')) + '">' + (a.k === 'SOLITAIRE' ? 'S' : 'A') + '</i></span>';
+        var sol = a.k === 'SOLITAIRE';
+        return '<span class="inv-mini ' + (sol ? 'sol' : 'all') + '" title="' + (sol ? 'SOLITAIRE invité' : 'ALLIÉ · ' + e(a.e || '')) + '">' + (sol ? 'S' : 'A') + '</span>';
+    }
+    // marque d'une ligne de CLASSEMENT (partisans de la puissance) : A (allie, avec l'escadron en infobulle) ou S (solitaire) pour tout pilote qui n'est ni moi ni de mon escadron
+    function marqueEscadron(esc, estMoi) {
+        if (estMoi) return '';
+        var moi = null; try { moi = window.profilReelInvite || ((typeof profilCommandant !== 'undefined') ? profilCommandant : null); } catch (x) { moi = null; }
+        var ee = normE(esc), mon = normE(moi && moi.escadron_id);
+        if (ee && mon && ee === mon) return '';
+        css();
+        return ee ? '<span class="inv-mini all" title="ALLIÉ · ' + e(esc) + '">A</span>' : '<span class="inv-mini sol" title="SOLITAIRE">S</span>';
+    }
+    // etiquette complete (fenetre d'une mission) : ALLIE · nom de l'escadron, ou SOLITAIRE ; rien pour un membre de l'escadron hote
+    function etiquette(uid) {
+        var a = acteurVu(uid); if (!a) return '';
+        css();
+        return a.k === 'SOLITAIRE' ? '<span class="inv-pastille sol">SOLITAIRE</span>' : '<span class="inv-pastille all">ALLIÉ · ' + e(a.e || '') + '</span>';
+    }
+    // texte d'infobulle (journal) : « · ALLIÉ · nom de l'escadron » ou « · SOLITAIRE »
+    function info(uid) {
+        var a = acteurVu(uid); if (!a) return '';
+        return a.k === 'SOLITAIRE' ? ' · SOLITAIRE' : ' · ALLIÉ · ' + e(a.e || '');
+    }
+    function classeLigne(uid) { var a = acteurVu(uid); return !a ? '' : (a.k === 'SOLITAIRE' ? ' inv-ligne-sol' : ' inv-ligne-all'); }
+    function badgeAvatar(uid, html) {
+        var a = acteurVu(uid); if (!a) return html;
+        css();
+        return '<span class="inv-av ' + (a.k === 'SOLITAIRE' ? 'sol' : 'all') + '">' + html + '<i class="' + (a.k === 'SOLITAIRE' ? 'sol' : 'all') + '" title="' + (a.k === 'SOLITAIRE' ? 'SOLITAIRE' : 'ALLIÉ · ' + e(a.e || '')) + '">' + (a.k === 'SOLITAIRE' ? 'S' : 'A') + '</i></span>';
     }
     function chargerActeurs() {
         var d = db(); if (!d) return Promise.resolve({});
         return d.rpc('campagnes_acteurs').then(function (r) { window.cacheActeurs = (r && r.data && typeof r.data === 'object' && !Array.isArray(r.data)) ? r.data : {}; return window.cacheActeurs; }, function () { window.cacheActeurs = {}; return {}; });
     }
 
-    window.edteamInvitations = { enAttente: function () { return nbAttente(etat); }, rappeler: function () { ecrire(PLUS_TARD, '', true); if (etat) overlay(etat, true); }, activerSouple: function (client) { css(); window.EDTEAM_INVITE = true; installerShimSouple(client); }, rouvrir: function () { ecrire(PLUS_TARD, '', true); }, charger: charger, invalider: invalider, verifier: verifier, modeInvite: modeInvite, activer: activer, activerFusion: function (client) { css(); installerFusion(client); }, filtrerOrdres: filtrerOrdres, css: css, pastille: pastille, htmlPastille: htmlPastille, badgeAvatar: badgeAvatar, chargerActeurs: chargerActeurs, abreger: abreger };
+    window.edteamInvitations = { enAttente: function () { return nbAttente(etat); }, rappeler: function () { ecrire(PLUS_TARD, '', true); if (etat) overlay(etat, true); }, activerSouple: function (client) { css(); window.EDTEAM_INVITE = true; installerShimSouple(client); }, rouvrir: function () { ecrire(PLUS_TARD, '', true); }, charger: charger, invalider: invalider, verifier: verifier, modeInvite: modeInvite, activer: activer, activerFusion: function (client) { css(); installerFusion(client); }, filtrerOrdres: filtrerOrdres, css: css, pastille: pastille, marque: marque, marqueEscadron: marqueEscadron, etiquette: etiquette, info: info, classeLigne: classeLigne, htmlPastille: htmlPastille, badgeAvatar: badgeAvatar, chargerActeurs: chargerActeurs, abreger: abreger };
 })();

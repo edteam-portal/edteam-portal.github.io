@@ -18,7 +18,7 @@
     <script src="copier-lieux.js?v=2"></script>
     <script src="shared-utils.js?v=7"></script>
     <script src="photos.js?v=2"></script>
-    <script src="invitations.js?v=2"></script>
+    <script src="invitations.js?v=12"></script>
     <script src="annonce.js?v=30"></script>
     <script src="revelations.js?v=10"></script>
     <script src="initiatives-mode.js?v=1"></script>
@@ -35,7 +35,7 @@
     <script src="bgs-ticks.js?v=8"></script>
     <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
-    <script src="campagnes-pp.js?v=19"></script>
+    <script src="campagnes-pp.js?v=22"></script>
     <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=4"></script>
     <script src="qgsuivi.js?v=41"></script>
@@ -1410,6 +1410,14 @@
             return data;
         }
 
+        // pilotes de l'escadron (identifiants), pour ne montrer que leurs efforts
+        function xMembres() {
+            return xCache('membres', 600000, async () => {
+                const r = await supabaseApp.from('profils_publics').select('user_id').eq('escadron_id', profilCommandant.escadron_id);
+                return (r.data || []).map(x => String(x.user_id)).filter(Boolean);
+            });
+        }
+
         function xEstMembre() { const p = profilCommandant; return !!(p && p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT'); }
         // meme regle que le menu BGS du PC : membre d'un escadron, les recrues aussi
         function xAccesBgs() {
@@ -2538,16 +2546,12 @@
                 const dd = await xLireDirectives(false);
                 const ordres = dd.ordres;
                 // toutes les actions des 30 derniers jours (directives en cours, clôturées et soutien libre, comme le journal du PC) ; la colonisation a son journal dans l'onglet Bâtir
-                const efforts = await xCache('exploits2', 120000, async () => {
+                const efforts = await xCache('exploits3', 120000, async () => {
                     let qe = supabaseApp.from('efforts_bgs').select('id, user_id, ordre_id, valeur, type_action, date_action, systeme, faction, details').neq('type_action', 'COLONISATION').gte('date_action', new Date(Date.now() - 30 * 86400000).toISOString());
-                    // le Directeur lit les efforts de TOUS les escadrons : on ne garde que ceux des pilotes de l'escadron et ceux des directives visibles (comme pour un pilote)
+                    // le Directeur lit les efforts de TOUS les escadrons : on ne garde que ceux des pilotes de l'escadron (le soutien libre d'un autre escadron est confidentiel ; les invites n'apparaissent que dans le journal de leur campagne)
                     if (profilCommandant.escadron_id && String(profilCommandant.escadron_id).toUpperCase() !== 'INDEPENDANT') {
-                        const rm = await supabaseApp.from('profils_publics').select('user_id').eq('escadron_id', profilCommandant.escadron_id);
-                        const uids = (rm.data || []).map(x => x.user_id).filter(Boolean), oids = (ordres || []).map(o => o.id).filter(x => x !== undefined && x !== null);
-                        const cond = [];
-                        if (uids.length) cond.push('user_id.in.(' + uids.join(',') + ')');
-                        if (oids.length) cond.push('ordre_id.in.(' + oids.join(',') + ')');
-                        if (cond.length) qe = qe.or(cond.join(','));
+                        const uids = await xMembres();
+                        if (uids.length) qe = qe.in('user_id', uids);
                     }
                     const { data, error } = await qe.order('date_action', { ascending: false }).limit(150);
                     if (error) throw error;
@@ -2567,10 +2571,11 @@
                     return (Array.isArray(data) ? data : []).filter(l => l && l.t).map(l => ({ type_action: 'PALIER', date_action: l.t, cmdr: l.cmdr, palier: l.palier, total: l.total }));
                 }, force).catch(() => []);
                 // efforts Powerplay de l'escadron (merites) : fonction serveur pp_journal, comme le PC
-                const pp = await xCache('exploits_pp', 120000, async () => {
+                const pp = await xCache('exploits_pp2', 120000, async () => {
                     const { data, error } = await supabaseApp.rpc('pp_journal', { p_limite: 300 });
                     if (error) throw error;
-                    return xRegrouperMeritesPP((Array.isArray(data) ? data : []).filter(l => l && l.date_action).map(l => Object.assign({ type_action: 'PP' }, l)));
+                    const membres = await xMembres();   // les allies (renvoyes par le serveur pour le journal de leur campagne) n'apparaissent pas ici
+                    return xRegrouperMeritesPP((Array.isArray(data) ? data : []).filter(l => l && l.date_action && (!membres.length || membres.includes(String(l.user_id)))).map(l => Object.assign({ type_action: 'PP' }, l)));
                 }, force).catch(() => []);
                 const noms = {};
                 dd.resume.forEach(r => (r.pilotes || []).forEach(x => { noms[String(x.u)] = x.nom; }));
@@ -3503,7 +3508,7 @@
                             <span style="color: ${index < 3 ? '#FFD700' : '#888'}; font-weight: bold; min-width: 26px;">#${index + 1}</span>
                             ${window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ nom: p.cmdr_nom, role: 'pilote', taille: 34 }) : ''}
                             <div style="min-width: 0;">
-                                <div style="color: #fff; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((p.cmdr_nom || 'INCONNU').toUpperCase())}</div>
+                                <div style="color: #fff; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((p.cmdr_nom || 'INCONNU').toUpperCase())}${window.edteamInvitations && window.edteamInvitations.marqueEscadron ? window.edteamInvitations.marqueEscadron(p.escadron_id, estMoi) : ''}</div>
                                 <div style="color: #888; font-size: 0.75em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">[ ${tagSquad} ] <span style="color: var(--ed-blue);">RANG ${p.puissance_rang || 0}</span></div>
                             </div>
                         </div>

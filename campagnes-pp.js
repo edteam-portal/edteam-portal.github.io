@@ -127,6 +127,7 @@
             var pil = (m.pilotes || []).map(function (p) {
                 var estMoi = String(p.u) === String(moi().user_id), part = totP > 0 ? 100 * (Number(p.m) || 0) / totP : 0;
                 var av = window.EDTEAMPhotos ? window.EDTEAMPhotos.avatar({ uid: p.u, nom: p.nom, role: 'pilote', taille: 44 }) : '';
+                if (window.edteamInvitations) av = window.edteamInvitations.badgeAvatar(p.u, av);   // petit A (allie) ou S (solitaire) sur l'avatar
                 // repartition de SES merites par origine (script SQL 112) : une fine barre cumulee, memes couleurs que celle de l'escadron
                 var po = p.o && typeof p.o === 'object' ? Object.keys(p.o).map(function (k) { return [k, Number(p.o[k]) || 0]; }).filter(function (x) { return x[1] > 0; }).sort(function (x, y) { return y[1] - x[1]; }) : [];
                 var totPo = po.reduce(function (acc, x) { return acc + x[1]; }, 0);
@@ -135,7 +136,7 @@
                     return '<span data-pptip="' + esc((ORIGINE[x[0]] || x[0]) + '\n' + fmt(x[1]) + ' mérites (' + (pp < 1 ? '< 1' : Math.round(pp)) + ' % de ses mérites)') + '" data-tc="' + col + '" style="flex:' + x[1] + ' 1 0; min-width:2px; background:' + col + '; opacity:.85; cursor:help;"></span>';
                 }).join('') + '</span>' : '';
                 return '<div style="display:flex; align-items:center; gap:14px; padding:9px 14px; min-height:62px; border-bottom:1px solid rgba(255,255,255,.06);">' + av
-                    + '<span style="flex:1; min-width:0;"><span style="display:block; color:' + (estMoi ? '#fff' : c) + '; font-weight:bold; letter-spacing:1px; font-size:1.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CMDR ' + esc(String(p.nom || 'INCONNU').toUpperCase()) + (estMoi ? ' (VOUS)' : '') + '</span>'
+                    + '<span style="flex:1; min-width:0;"><span style="display:block; color:' + (estMoi ? '#fff' : c) + '; font-weight:bold; letter-spacing:1px; font-size:1.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CMDR ' + esc(String(p.nom || 'INCONNU').toUpperCase()) + (estMoi ? ' (VOUS)' : '') + (window.edteamInvitations ? window.edteamInvitations.etiquette(p.u) : '') + '</span>'
                     + '<span style="color:#8a949c; font-size:.8em;">≈ ' + fmt(cp(p.m)) + ' pts de contrôle</span>' + barP + '</span>'
                     + '<span style="text-align:right; flex:none; min-width:150px;"><b style="color:' + c + '; font-size:1.25em;">' + fmt(p.m) + '</b> <span style="color:#9ab; font-size:.72em; letter-spacing:1px;">MÉRITES</span><span style="display:block; color:#8a949c; font-size:.8em;">' + (part > 0 && part < 1 ? '< 1' : Math.round(part)) + ' % des participants</span></span></div>';
             }).join('')
