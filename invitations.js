@@ -18,6 +18,8 @@
             + '#nav-bgs-factions.invite-clignote, #nav-btn-bgs.invite-clignote { animation: edteamInvClg 1.6s infinite; }'
             + '.inv-pastille { display:inline-block; font-size:.62em; letter-spacing:2px; padding:1px 6px; border:1px solid; vertical-align:middle; margin-left:8px; white-space:nowrap; }'
             + '.inv-pastille.sol { color:#ffb347; border-color:#ffb347; background:rgba(255,179,71,.08); } .inv-pastille.all { color:#3ec9ff; border-color:#3ec9ff; background:rgba(62,201,255,.08); }'
+            // tampon « SOUTIEN ALLIES » (meme style que le tampon REPERE du reperage, mais droit) : cadre net, lettres espacees, lueur
+            + '.inv-tampon { display:inline-block; color:#3ec9ff; border:2px solid #3ec9ff; padding:1px 10px; font-weight:bold; letter-spacing:3px; font-size:.72em; opacity:.92; box-shadow:inset 0 0 0 1px rgba(62,201,255,.35); text-shadow:0 0 6px rgba(62,201,255,.35); white-space:nowrap; vertical-align:middle; cursor:help; }'
             + '.inv-mini { display:inline-block; font:bold .62em/1 sans-serif; padding:2px 4px; margin-left:6px; border:1px solid; border-radius:2px; vertical-align:middle; letter-spacing:0; }'
             + '.inv-mini.sol { color:#ffb347; border-color:#ffb347; } .inv-mini.all { color:#3ec9ff; border-color:#3ec9ff; }'
             + '.exploit-row.inv-ligne-all { box-shadow:inset 0 0 0 1px rgba(62,201,255,.4); } .exploit-row.inv-ligne-sol { box-shadow:inset 0 0 0 1px rgba(255,179,71,.4); }'
@@ -148,7 +150,7 @@
         var ids = (window.EDTEAM_ALLIEES || []).map(String), o = (window.cacheOrdresBgs || []).filter(function (x) { return String(x.id) === String(id); })[0];
         return !!o && ids.indexOf(String(o.campagne_id)) >= 0;
     }
-    var PASSE = { mes_invitations: 1, repondre_invitation: 1, repondre_invitation_escadron: 1, campagnes_acteurs: 1, invite_bgs_directives_resume: 1, invite_bgs_resultats: 1, invite_directives_activite: 1,
+    var PASSE = { mes_invitations: 1, repondre_invitation: 1, repondre_invitation_escadron: 1, campagnes_acteurs: 1, campagnes_partenaires: 1, invite_bgs_directives_resume: 1, invite_bgs_resultats: 1, invite_directives_activite: 1,
                   invite_pp_missions_vue: 1, invite_col_missions_vue: 1, invite_bgs_quotas_jour: 1, invite_carte_coords: 1, invite_bgs_bilan_directive: 1,
                   // DISCUSSIONS et journal de la campagne : le serveur verifie l'acces (participant accepte, escadron hote ou Directeur)
                   photos_visibles: 1, pp_journal: 1, tableau_partisans: 1, campagne_discussion_lire: 1, campagne_discussion_ecrire: 1, campagne_discussion_pouce: 1, campagne_discussion_supprimer: 1, campagne_discussions_compteurs: 1, campagne_journal_vu: 1 };
@@ -254,8 +256,32 @@
     }
     function chargerActeurs() {
         var d = db(); if (!d) return Promise.resolve({});
-        return d.rpc('campagnes_acteurs').then(function (r) { window.cacheActeurs = (r && r.data && typeof r.data === 'object' && !Array.isArray(r.data)) ? r.data : {}; return window.cacheActeurs; }, function () { window.cacheActeurs = {}; return {}; });
+        // escadrons partenaires par campagne (SQL 202) : appel facultatif, sans la fonction serveur la pastille n'apparait simplement pas
+        var pPart; try { pPart = Promise.resolve(d.rpc('campagnes_partenaires')).then(function (r) { window.cachePartenaires = (r && r.data && typeof r.data === 'object' && !Array.isArray(r.data)) ? r.data : {}; }, function () { window.cachePartenaires = {}; }); } catch (x) { window.cachePartenaires = {}; pPart = Promise.resolve(); }
+        return d.rpc('campagnes_acteurs').then(function (r) { window.cacheActeurs = (r && r.data && typeof r.data === 'object' && !Array.isArray(r.data)) ? r.data : {}; return pPart.then(function () { return window.cacheActeurs; }); }, function () { window.cacheActeurs = {}; return pPart.then(function () { return {}; }); });
+    }
+    // pastille « ALLIES » d'une campagne : les AUTRES escadrons (pas le mien) qui y participent, plus les solitaires ; rien s'il n'y en a pas (campagne de mon seul escadron)
+    // texte court et qualitatif : les escadrons par leur sigle (FRC · TB, au plus 2 puis +N) et les solitaires (« 1 S ») ; l'infobulle donne chaque escadron avec ses pilotes
+    // hote = nom de l'escadron hote quand la campagne est celle d'un AUTRE escadron : le tampon s'affiche toujours et la bulle dit de qui elle est
+    function pastillePartenaires(idCampagne, mobile, hote) {
+        var P = (window.cachePartenaires || {})[String(idCampagne)]; if (!P && !hote) return '';
+        P = P || { e: [], s: 0, sj: [] };
+        var moi = null; try { moi = window.profilReelInvite || ((typeof profilCommandant !== 'undefined') ? profilCommandant : null); } catch (x) { moi = null; }
+        var mon = normE(moi && moi.escadron_id);
+        var esc = (P.e || []).filter(function (x) { return normE(x.n) !== mon; }), sol = Number(P.s) || 0;
+        if (!esc.length && !sol && !hote) return '';
+        css();
+        // contenu de la bulle : titre, puis une ligne par escadron (nom, pilotes) et une pour les solitaires
+        var mot = hote ? 'ALLIÉ SOUTENU' : 'SOUTIEN ALLIÉS';   // ma campagne : je soutiens des allies ; la campagne d'un autre escadron : je suis l'allie soutenu
+        // hote de la campagne : les escadrons soutenus sont les alliés invités ; vu de l'escadron invité : « Escadron soutenu » = le mien, « Autres alliés » = les autres
+        // vue de l'escadron invite : « Campagne de … » et seulement les NOMS des escadrons qui participent (le mien compris), sans pilotes
+        var lignes = hote
+            ? [mot, 'Campagne de ' + hote, 'Participants :'].concat((P.e || []).map(function (x) { return x.n; }))
+            : [mot].concat(esc.map(function (x) { return x.n; }));   // vue de l'organisateur : juste la liste des escadrons (sans pilotes)
+        var tip = lignes.join('\n');
+        // PC : bulle holographique du site (data-tip, branchee par campagnes.js) ; mobile : pas de survol, attribut title
+        return '<span class="inv-tampon"' + (mobile ? ' title="' + e(tip) + '"' : ' data-tip="' + e(tip) + '" data-tc="#3ec9ff"') + '>' + mot + '</span>';
     }
 
-    window.edteamInvitations = { enAttente: function () { return nbAttente(etat); }, rappeler: function () { ecrire(PLUS_TARD, '', true); if (etat) overlay(etat, true); }, activerSouple: function (client) { css(); window.EDTEAM_INVITE = true; installerShimSouple(client); }, rouvrir: function () { ecrire(PLUS_TARD, '', true); }, charger: charger, invalider: invalider, verifier: verifier, modeInvite: modeInvite, activer: activer, activerFusion: function (client) { css(); installerFusion(client); }, filtrerOrdres: filtrerOrdres, css: css, pastille: pastille, marque: marque, marqueEscadron: marqueEscadron, etiquette: etiquette, info: info, classeLigne: classeLigne, htmlPastille: htmlPastille, badgeAvatar: badgeAvatar, chargerActeurs: chargerActeurs, abreger: abreger };
+    window.edteamInvitations = { enAttente: function () { return nbAttente(etat); }, rappeler: function () { ecrire(PLUS_TARD, '', true); if (etat) overlay(etat, true); }, activerSouple: function (client) { css(); window.EDTEAM_INVITE = true; installerShimSouple(client); }, rouvrir: function () { ecrire(PLUS_TARD, '', true); }, charger: charger, invalider: invalider, verifier: verifier, modeInvite: modeInvite, activer: activer, activerFusion: function (client) { css(); installerFusion(client); }, filtrerOrdres: filtrerOrdres, css: css, pastille: pastille, marque: marque, marqueEscadron: marqueEscadron, etiquette: etiquette, info: info, classeLigne: classeLigne, htmlPastille: htmlPastille, badgeAvatar: badgeAvatar, chargerActeurs: chargerActeurs, pastillePartenaires: pastillePartenaires, abreger: abreger };
 })();

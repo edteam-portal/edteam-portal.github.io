@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-campagnes-soutien-allies", date: "2026-11-01T12:40:00Z", type: "AMELIORE",
+        titre: "Campagnes partagées : un tampon SOUTIEN ALLIÉS, et les nouveaux membres sont invités automatiquement",
+        texte: "Quand une campagne est partagée avec d’autres escadrons, un tampon bleu apparaît à droite de l’échéance (PC et mobile) : « SOUTIEN ALLIÉS » sur la campagne de votre escadron, « ALLIÉ SOUTENU » sur celle d’un autre escadron qui vous a invité. En passant la souris dessus, vous voyez les escadrons qui participent (avec leurs pilotes du côté de l’escadron organisateur). Un pilote qui rejoint un escadron ayant déjà accepté une campagne reçoit maintenant son invitation tout seul. L’icône enveloppe de la ligne de campagne est retirée : l’Amiral invite depuis « Modifier la campagne ».",
+        important: false
+    },
+    {
         id: "2026-10-systemes-evolution-filtres", date: "2026-10-31T18:48:09Z", type: "AMELIORE",
         titre: "Systèmes : l’influence de tous les systèmes, son évolution, des filtres plus clairs",
         texte: "Dans l’onglet SYSTÈMES (PC et mobile), les systèmes sans relevé de pilote ni d’EDSM affichent maintenant l’influence donnée par Spansh (mention « Spansh », environ 24 h de retard ; la valeur la plus récente gagne). Chaque influence affiche une petite flèche d’évolution comme sur la page BGS : verte pour un gain, rouge pour une perte, depuis le dernier tick (flèche pâle « 48 h » quand aucune mesure n’est postérieure au tick). Sur tablette et portable (écran de 1600 px ou moins), les systèmes et les Fleet Carriers passent en cartes lisibles au toucher, avec un choix de tri, au lieu d’un tableau écrasé ; deux boutons TABLEAU / CARTES permettent de choisir son affichage. Les filtres principaux tiennent sur une ligne, les autres sont derrière « + FILTRES », et le champ pour surveiller un système n’apparaît que sur demande. La fiche d’un système indique maintenant la date du relevé de notre serveur et celle d’EDSM, et signale quand EDSM est en retard sur nos pilotes ; une note explique d’où viennent les chiffres (Spansh, relevés des pilotes, EDSM).",

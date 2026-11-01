@@ -151,6 +151,13 @@
         var I = window.edteamInvitations;
         return I ? I.htmlPastille('ALLIE', h) : '';
     }
+    // autres escadrons qui participent (SQL 202) : noms abreges dans la pastille, noms complets en infobulle ; rien pour une campagne de mon seul escadron
+    // un seul tampon SOUTIEN ALLIÉS (comme sur PC) : pour la campagne d'un autre escadron, la bulle dit aussi de qui elle est
+    function tagPartenaires(c) {
+        var I = window.edteamInvitations; if (!I || c.synthetique) return '';
+        var e = String(moi().escadron_id || '').trim().toUpperCase(), h = String(c.escadron_id || '').trim();
+        return I.pastillePartenaires(c.id, true, (h && !(e && e !== 'INDEPENDANT' && h.toUpperCase() === e)) ? h : null);
+    }
     function blocCampagne(g, ctx) {
         var c = g.c, cc = COUL_CAMP[c.type_campagne] || '#aaa', prio = c.priorite || 3, pk = prio === 1 ? 'c' : prio === 2 ? 'h' : 'n';
         var lignes = [], pcts = [];
@@ -168,7 +175,7 @@
         var info = c.echeance ? '⏳ jusqu\'au ' + String(c.echeance).slice(8, 10) + '/' + String(c.echeance).slice(5, 7) : '';
         return '<div class="mc-camp' + (replie ? ' rep' : '') + '" id="mcc-' + c.id + '" style="--cc:' + cc + ';">'
             + '<div class="mc-head" style="--c:' + cc + '; background:linear-gradient(90deg,' + cc + '22 0, rgba(0,0,0,0) 70%);" onclick="edteamCampagnesMob.basculer(\'' + c.id + '\')">'
-            + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span>' + tagAllie(c) + '<span class="pa ' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
+            + '<div class="r1"><span class="mc-type">' + (LIB_CAMP[c.type_campagne] || esc(c.type_campagne)) + '</span>' + tagPartenaires(c) +'<span class="pa' + pk + '">' + (prio === 1 ? '▲ CRITIQUE' : prio === 2 ? '▲ HAUTE' : 'NORMALE') + '</span></div>'
             + '<div class="r2"><span class="mc-nom">' + esc(c.nom) + '</span>' + (isFinite(Number(c.id)) ? '<button type="button" class="mc-disc" aria-label="Journal de la campagne" title="Journal de la campagne" onclick="event.stopPropagation(); edteamCampagnesMob.journal(' + c.id + ')">📖</button>' : '') + (window.edteamDiscussion ? '<button type="button" class="mc-disc" data-disc="' + c.id + '" aria-label="Discussions de la campagne" onclick="event.stopPropagation(); edteamDiscussion.ouvrir(' + c.id + ')">' + window.edteamDiscussion.icone + '<span class="dsc-b"></span></button>' : '') + '<span class="mc-fl">▾</span></div>'
             + (info ? '<div class="r3">' + info + '</div>' : '') + '</div>'
             + '<div class="mc-lignes">' + (lignes.join('') || '<div class="mc-vide">Aucune mission dans cette campagne.</div>') + '</div></div>';
