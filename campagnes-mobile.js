@@ -106,9 +106,11 @@
             d = '<b style="color:#fff;">' + ctx.pct(res.influence) + ' %</b>' + (fl ? ' <span style="color:' + cs + ';" title="' + (vt ? 'Évolution ' + vt.fen : 'Évolution depuis la directive') + '">' + fl + (fl === '=' ? '' : ' ' + ctx.pts(vv)) + '</span>' : '');
         } else d = '<span style="color:#666;">—</span>';
         var typeFr = o.type_ordre === 'ELECTION' ? 'ÉLECTION' : String(o.type_ordre || '');
-        return (window.EdteamConflitEvt ? window.EdteamConflitEvt.bandeau(o, { mobile: true }) : '') + ligneMob({ c: COUL_BGS, k: kk, tag: '#' + o.id + ' · ' + typeFr, sys: esc(String(o.systeme_cible || '').toUpperCase()), pct: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? null : av.pct, vous: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? 0 : vous, g: esc(String(o.faction_cible || '').toUpperCase()), d: d,
+        var htmlLigne = ligneMob({ c: COUL_BGS, k: kk, tag: '#' + o.id + ' · ' + typeFr, sys: esc(String(o.systeme_cible || '').toUpperCase()), pct: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? null : av.pct, vous: (window.cacheQuotasBgs && window.cacheQuotasBgs[o.id]) ? 0 : vous, g: esc(String(o.faction_cible || '').toUpperCase()), d: d,
             jg: donnees ? jaugeMob(o, res) : '', avs: avatarsMob(rs.pilotes), etats: window.edteamEtats && donnees ? window.edteamEtats.badges(res, true) : '', fondRes: window.EdteamUtile ? window.EdteamUtile.fondLigne(o, res, ctx.sens) : '',
             pips: window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) : '', clic: 'ouvrirModalOrdre(' + index + ', \'' + COUL_BGS + '\')' });
+        // bande de conflit soudee a la ligne de la directive (un seul bloc), 24 h
+        return window.EdteamConflitEvt ? window.EdteamConflitEvt.envelopper(o, htmlLigne, { mobile: true }) : htmlLigne;
     }
     // ligne Powerplay comme sur le PC : barre du jeu (4 zones, triangle blanc = au dernier tick, orange = maintenant), etat et net du cycle, fond de resultat (net / pale) ; un appui ouvre la feuille de la mission
     function lignePPMob(m) {

@@ -192,7 +192,7 @@
         return 'fl';
     }
     function rangCarte(m) { var s = m.sig && m.sig.sens; return s === 'dn' ? 0 : s === 'fl' ? 1 : s === 'up' ? 3 : 2; }
-    function ligne(m) { return (m.bandeau || '') + ligneUne(m); }
+    function ligne(m) { return m.enveloppe ? m.enveloppe(ligneUne(m)) : ligneUne(m); }   // m.enveloppe : bande de conflit soudee a la ligne (conflit-evenements.js)
     function ligneUne(m) {
         // pas de pourcentage par mission : la barre de fond parle d'elle-meme ; son explication passe en infobulle de la ligne
         var attr = attrM(m), actions = actionsM(m), glisser = glisserM(m);
@@ -262,8 +262,8 @@
             var rs = resume[o.id] || {}; var mt = meta[o.id] || { global: 0 };
             var veille = veilleIds.has(String(o.id));
             var typeFr = { HAUSSE: 'HAUSSE', BAISSE: 'BAISSE', GUERRE: 'GUERRE', ELECTION: 'ÉLECTION' }[o.type_ordre] || String(o.type_ordre || '').toUpperCase();
-            var EV = window.EdteamConflitEvt;      // debut / fin de guerre ou d'election (SQL 132), jusqu'au tick suivant
-            return { bandeau: EV ? EV.bandeau(o, { commande: estCommandement() }) : '', bandeauC: EV ? EV.bandeau(o, { commande: estCommandement(), compact: true }) : '', sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, sig: sigM(o, mt), jauge: sigM(o, mt) ? jauge(o, ((window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null)) : '', fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: mt.jour ? '' : 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
+            var EV = window.EdteamConflitEvt;      // debut / fin de guerre ou d'election (SQL 132), 24 h
+            return { enveloppe: EV ? function (h) { return EV.envelopper(o, h, { commande: estCommandement() }); } : null, bandeauC: EV ? EV.bandeau(o, { commande: estCommandement(), compact: true }) : '', sys: String(o.systeme_cible || '').toUpperCase(), tag: 'BGS #' + o.id + ' - ' + typeFr, domaine: 'BGS', id: o.id, couleur: COUL_BGS, conflit: (o.type_ordre === 'GUERRE' || o.type_ordre === 'ELECTION' ? couleurConflit(o) : null), veille: veille, pct: mt.jour ? null : (mt.global || 0), vous: mt.jour ? null : mt.vous, sig: sigM(o, mt), jauge: sigM(o, mt) ? jauge(o, ((window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null)) : '', fondRes: mt.jour && window.EdteamUtile ? window.EdteamUtile.fondLigne(o, (window.cacheResultatsBgs && window.cacheResultatsBgs.dir || {})[o.id] || null, typeof bgsSens === 'function' ? bgsSens : null) : '', avatars: avatars(rs.pilotes), legendeTitre: mt.jour ? '' : 'Effort de l\'escadron : ' + (mt.global || 0) + ' %. La lueur néon à gauche : votre participation (' + (mt.part || 0) + ' % de l\'effort).',
                 clic: "ouvrirDetailResultat('" + o.id + "')", infoE: infoFaction(o), infoP: (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
                 info: infoFaction(o) + (mt.jour && window.EdteamQuotas && window.cacheQuotasBgs && window.cacheQuotasBgs[o.id] ? '<span class="qj-c2">' + window.EdteamQuotas.pips(o, window.cacheQuotasBgs[o.id]) + '</span>' : ''),
                 texte: '<b>' + esc(String(o.systeme_cible || '').toUpperCase()) + '</b> <em>· ' + esc(String(o.faction_cible || '').toUpperCase()) + (veille ? ' · EN VEILLE' : '') + '</em>' };

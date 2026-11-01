@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-bande-conflit-24h", date: "2026-11-01T14:10:00Z", type: "AMELIORE",
+        titre: "Guerres et élections : une bande plus claire, collée à sa mission, pendant 24 h",
+        texte: "Quand une guerre ou une élection commence ou se termine sur une faction de vos missions, l’annonce est maintenant une fine bande collée à la mission concernée (même couleur, même lueur), au lieu d’un grand cadre au-dessus qu’on pouvait prendre pour une autre ligne. Elle indique l’événement (guerre commencée, élection commencée, victoire, défaite avec le score) ; l’heure, la source et l’adversaire sont dans la bulle au survol. Elle reste affichée 24 heures, comme la fenêtre plein écran. Sur PC et mobile.",
+        important: false
+    },
+    {
         id: "2026-11-campagnes-soutien-allies", date: "2026-11-01T12:40:00Z", type: "AMELIORE",
         titre: "Campagnes partagées : un tampon SOUTIEN ALLIÉS, et les nouveaux membres sont invités automatiquement",
         texte: "Quand une campagne est partagée avec d’autres escadrons, un tampon bleu apparaît à droite de l’échéance (PC et mobile) : « SOUTIEN ALLIÉS » sur la campagne de votre escadron, « ALLIÉ SOUTENU » sur celle d’un autre escadron qui vous a invité. En passant la souris dessus, vous voyez les escadrons qui participent (avec leurs pilotes du côté de l’escadron organisateur). Un pilote qui rejoint un escadron ayant déjà accepté une campagne reçoit maintenant son invitation tout seul. L’icône enveloppe de la ligne de campagne est retirée : l’Amiral invite depuis « Modifier la campagne ».",
