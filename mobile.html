@@ -787,15 +787,15 @@
                 <div class="xrow">
                     <div class="xbig" id="m-esc-nom" style="font-size: 1.25em; letter-spacing: 2px; overflow-wrap: anywhere;">ESCADRON</div>
                     <span class="xsp"></span>
-                    <span class="xmut" id="m-squad-count">--</span>
+                    <span class="xmut" id="m-squad-count" style="visibility: hidden;">--</span>
                 </div>
                 <div class="xseg" id="x-esc-seg">
-                    <button class="on" data-v="membres" onclick="escVue('membres')">MEMBRES</button>
-                    <button data-v="systemes" onclick="escVue('systemes')">SYSTÈMES</button>
+                    <button class="on" data-v="systemes" onclick="escVue('systemes')">SYSTÈMES</button>
                     <button data-v="fc" onclick="escVue('fc')">FLEET CARRIERS</button>
+                    <button data-v="membres" onclick="escVue('membres')">MEMBRES</button>
                     <button data-v="fa" onclick="escVue('fa')">ALLIÉS</button>
                 </div>
-                <div id="esc-v-membres" style="display: flex; flex-direction: column; gap: 12px;">
+                <div id="esc-v-membres" style="display: none; flex-direction: column; gap: 12px;">
                 <div class="xsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="x-esc-q" placeholder="Rechercher un pilote…" oninput="escRendre()"></div>
                 <div class="xfl" id="x-esc-fl">
                     <button data-f="tous" class="on" onclick="escFiltre('tous')">TOUS</button>
@@ -807,7 +807,7 @@
                 </div>
                 <button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="ouvrirSalleBgsMobile()">CLASSEMENT BGS DE L'ESCADRON</button>
                 </div>
-                <div id="esc-v-systemes" style="display: none;"><div id="sm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des systèmes…</div></div></div>
+                <div id="esc-v-systemes" style="display: block;"><div id="sm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des systèmes…</div></div></div>
                 <div id="esc-v-fa" style="display: none;"><div id="fa-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des frères d’armes…</div></div></div>
                 <div id="esc-v-fc" style="display: none;"><div id="fm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des carriers…</div></div></div>
             </div>
@@ -1459,13 +1459,13 @@
             if (tabId === 'qg') chargerAccueilMobile(false);
             else if (tabId === 'bgs') chargerBGSMobile(false);
             else if (tabId === 'batir') chargerBatirMobile(false);
-            else if (tabId === 'escadron') { chargerEscadronMobile(false); if (escVueCourante !== 'membres') escOuvrirModule(); }
+            else if (tabId === 'escadron') { chargerEscadronMobile(false); escOuvrirModule(); }
             else if (tabId === 'croises') chargerCroisesMobile(false);
             setTimeout(xMajCloche, 600);
         }
 
         // ESCADRON : sous-onglets MEMBRES / SYSTEMES / FLEET CARRIERS (consultation). Systemes et Fleet Carriers (systemes-mobile.js, fc-mobile.js) ne sont charges qu'a leur premiere ouverture ; memes lectures serveur et memes caches que le PC.
-        let escVueCourante = 'membres';
+        let escVueCourante = 'systemes';
         function escVue(v) {
             sonClic(); escVueCourante = v;
             { const n = xEl('m-squad-count'); if (n) n.style.visibility = v === 'membres' ? '' : 'hidden'; }

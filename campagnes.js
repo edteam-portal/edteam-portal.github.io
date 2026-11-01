@@ -519,9 +519,25 @@
         z.innerHTML = invites.map(function (o, i) {
             var ini = String(o.nom || '?').slice(0, 2).toUpperCase();
             return '<div style="display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #1a1a22;"><span style="width:28px; height:28px; border-radius:50%; background:#2a3140; border:2px solid #556; display:inline-flex; align-items:center; justify-content:center; font-size:.65em; color:#dde;">' + esc(ini) + '</span>'
-                + '<b style="color:#fff; letter-spacing:1px;">' + esc(o.nom || '?') + '</b>' + pastInv(o)
+                + '<b style="color:#fff; letter-spacing:1px;">' + esc(o.nom || '?') + '</b>' + pastInv(o) + boutonAide(o, i)
                 + '<span style="margin-left:auto; font-size:.7em; letter-spacing:2px; white-space:nowrap;">' + libEtat(o) + '</span><span title="Retirer" style="color:#888; cursor:pointer; padding:0 4px;" onclick="edteamCampagnes.retirerInvite(' + i + ')">✕</span></div>';
         }).join('');
+    }
+    // FRERES D'ARMES (SQL 206) : « campagne pour AIDER cet escadron » ; seulement en modification, pour un escadron dont des pilotes ont accepte
+    function campagneEditee() { return campEdition ? (window.cacheCampagnes || []).find(function (x) { return String(x.id) === String(campEdition); }) : null; }
+    function boutonAide(o, i) {
+        var c = campagneEditee(); if (!c || o.type !== 'ESCADRON' || o.etat !== 'ACCEPTE' || !(o.acceptes > 0)) return '';
+        var on = String(c.escadron_aide || '').trim().toUpperCase() === String(o.nom || '').trim().toUpperCase();
+        return '<span title="' + (on ? 'Cette campagne aide cet escadron : ses diplômes FRÈRES D’ARMES porteront son nom. Cliquer pour retirer.' : 'Faire de cette campagne une aide à cet escadron : vos pilotes comptent pour FRÈRES D’ARMES et reçoivent un diplôme à son nom.') + '" style="margin-left:6px; cursor:pointer; font-size:.62em; letter-spacing:2px; white-space:nowrap; padding:2px 7px; border:1px solid ' + (on ? '#D4A24C' : '#556') + '; color:' + (on ? '#FFD24A' : '#99a') + '; background:' + (on ? 'rgba(212,162,76,.15)' : 'transparent') + ';" onclick="edteamCampagnes.basculerAide(' + i + ')">' + (on ? '★ ESCADRON AIDÉ' : 'AIDER') + '</span>';
+    }
+    var ERR_AIDE = { REFUSE_DROIT: 'Réservé à l’Amiral.', CLOTUREE: 'La campagne est clôturée.', PAS_ALLIE: 'Aucun pilote de cet escadron n’a encore accepté.', MEME_ESCADRON: 'C’est votre escadron.', CAMPAGNE_INTROUVABLE: 'Campagne introuvable.' };
+    async function basculerAide(i) {
+        var o = invites[i], c = campagneEditee(); if (!o || !c) return;
+        if (typeof sonClic === 'function') sonClic();
+        var on = String(c.escadron_aide || '').trim().toUpperCase() === String(o.nom || '').trim().toUpperCase();
+        var r = await db().rpc('campagne_definir_aide', { p_campagne: Number(c.id), p_escadron: on ? '' : o.nom });
+        if (r.error || r.data !== 'OK') { messageInv(ERR_AIDE[r.data] || 'Impossible pour le moment.'); return; }
+        c.escadron_aide = on ? null : o.nom; messageInv(''); dessinerInvites();
     }
     function dessinerResultats() {
         var z = document.getElementById('camp-inv-res'); if (!z) return;
@@ -605,7 +621,7 @@
         },
         journal: function (id) { if (window.edteamDiscussion) window.edteamDiscussion.journalVu(id); if (typeof window.ouvrirJournalCampagne === 'function') window.ouvrirJournalCampagne(id); },
         inviter: function (id) { this.ouvrir(id); var q = document.getElementById('camp-inv-q'); if (q) setTimeout(function () { q.focus(); q.scrollIntoView({ block: 'center' }); }, 150); },
-        chercherInvites: chercherInvites, ajouterInvite: ajouterInvite, retirerInvite: retirerInvite,
+        chercherInvites: chercherInvites, ajouterInvite: ajouterInvite, retirerInvite: retirerInvite, basculerAide: basculerAide,
         choisir: function (genre, v) { if (typeof sonClic === 'function') sonClic(); if (genre === 'type') typeChoisi = v; else prioChoisie = v; dessinerChoix(); },
         ouvrir: function (id) {
             if (typeof sonClic === 'function') sonClic();

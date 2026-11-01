@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-freres-armes-aide", date: "2026-11-01T20:00:00Z", type: "NOUVEAU",
+        titre: "Frères d’armes : une campagne pour aider un escadron allié",
+        texte: "Quand votre escadron mène une campagne pour en aider un autre, l’Amiral peut maintenant le désigner : dans Modifier la campagne, sur la ligne de l’escadron invité (dès qu’un de ses pilotes a accepté), bouton AIDER. À la clôture, vos pilotes qui ont agi comptent pour leur médaille FRÈRES D’ARMES et reçoivent un diplôme au nom de l’escadron aidé, signé de son Amiral, qui peut y ajouter un mot depuis l’onglet FRÈRES D’ARMES de sa page Escadron. Si l’escadron aidé n’a pas d’Amiral, le diplôme reste au nom de votre escadron. Les pilotes de l’escadron aidé ne comptent pas pour leur propre escadron.",
+        important: false
+    },
+    {
         id: "2026-11-freres-armes", date: "2026-11-01T18:30:00Z", type: "NOUVEAU",
         titre: "Frères d’armes : un merci entre escadrons, avec médaille et diplôme",
         texte: "Quand vous aidez la campagne d’un autre escadron, elle compte pour votre médaille FRÈRES D’ARMES (une graduation par campagne, 5 étoiles à 1, 3, 5, 10 et 20 campagnes, puis le métal change : bronze, argent à 30, or à 50, diamant à 100). À la clôture de la campagne, l’Amiral hôte vous remet automatiquement un diplôme de remerciement holographique, avec un mot de sa part s’il en écrit un ; il s’affiche en plein écran à votre prochaine arrivée sur le QG, une seule fois, puis reste dans la fenêtre FRÈRES D’ARMES (pastille en haut de page). Cliquez sur n’importe quelle médaille pour l’agrandir et comprendre chaque graduation. Les membres d’un escadron voient dans l’onglet FRÈRES D’ARMES de la page Escadron les alliés qui ont aidé leurs campagnes ; l’Amiral y rédige les remerciements. Une ligne apparaît dans le fil des deux escadrons, et la gazette a son encart « Ils nous ont aidés ». Il n’y a aucun classement. Sur mobile : sous-onglet ALLIÉS de ESCADRON et ligne FRÈRES D’ARMES des Réglages.",
