@@ -396,7 +396,7 @@ window.actualiserHeader = function(profilData) {
                 '<path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>');
             zone.innerHTML = h;
             zone.style.display = 'flex';
-            try { window.__faPastille(zone, profilData.user_id); } catch (e) { /* la pastille « Freres d'armes » ne doit jamais gener l'en-tete */ }
+            try { window.__faPastille(zone, profilData.user_id, !!(profilData.est_amiral !== undefined ? profilData.est_amiral : (window.profilCommandant || {}).est_amiral)); } catch (e) { /* la pastille « Freres d'armes » ne doit jamais gener l'en-tete */ }
             if (!zone.__tips) {
                 zone.__tips = true;
                 const cible = e => e.target.closest ? e.target.closest('.hd-rg') : null;
@@ -484,16 +484,31 @@ window.__faCharger = function () {
     if (!window.__faChargement) {
         window.__faChargement = new Promise((ok, ko) => {
             const s = document.createElement('script');
-            s.src = 'freres-armes.js?v=9';
+            s.src = 'freres-armes.js?v=10';
             s.onload = ok; s.onerror = () => { window.__faChargement = null; ko(); };
             document.head.appendChild(s);
         });
     }
     return window.__faChargement;
 };
-window.__faPastille = function (zone, uid0) {
+// Rappel a l'Amiral (SQL 206) : un diplome remis AU NOM de son escadron (campagne menee par un autre escadron pour l'aider) n'a pas de fenetre « Remercier vos allies ? » a la cloture.
+// Au QG, une fois par session, on lui propose UNE campagne recente (14 jours) qu'il n'a pas encore vue ; chaque campagne n'est proposee qu'une fois (memoire locale par compte).
+window.__faRappel = function (uid) {
+    if (window.__faRappelFait || !/qg.html/i.test(location.pathname)) return; window.__faRappelFait = true;
+    const db = window.supabaseApp; if (!db) return;
+    setTimeout(() => {
+        db.rpc('freres_armes_campagnes').then(r => {
+            const l = (r && Array.isArray(r.data)) ? r.data : []; if (!l.length) return;
+            let vus = []; try { vus = JSON.parse(localStorage.getItem('edteam_fa_rappel_' + uid) || '[]'); } catch (e) { vus = []; }
+            const c = l.find(x => !x.message && !vus.includes(String(x.campagne_id)) && Date.now() - new Date(x.le).getTime() < 14 * 86400000);
+            if (c) window.__faCharger().then(() => window.edteamFreresArmes.remercier(c.campagne_id)).catch(() => {});
+        }, () => {});
+    }, 3500);
+};
+window.__faPastille = function (zone, uid0, amiral) {
     const uid = uid0 || (window.profilCommandant || {}).user_id; if (!uid || !zone) return;
     window.__faUid = uid;
+    if (amiral) window.__faRappel(uid);
     const cle = 'edteam_fa_v1_' + uid;
     const poser = d => {
         zone.querySelectorAll('.hd-rg.fa').forEach(e => e.remove());

@@ -249,6 +249,7 @@
         var r = await db.rpc('freres_armes_campagne', { p_campagne: Number(idCampagne) });
         var info = r && r.data;
         if (!info || !(Number(info.n) > 0)) return;                 // aucun allie n'a aide cette campagne : aucune fenetre en plus
+        try { var kk = 'edteam_fa_rappel_' + (window.__faUid || ''), lu = JSON.parse(localStorage.getItem(kk) || '[]'); if (lu.indexOf(String(idCampagne)) < 0) { lu.push(String(idCampagne)); localStorage.setItem(kk, JSON.stringify(lu.slice(-60))); } } catch (x) { /* memoire locale indisponible */ }   // proposee une fois : le rappel du QG ne la reproposera pas
         css();
         var old = document.getElementById('far-fond'); if (old) old.remove();
         var pil = info.pilotes || [], noms = pil.slice(0, 14).map(function (p) { return '<span>CMDR ' + E(String(p.nom || '?').toUpperCase()) + (p.escadron ? ' · ' + E(p.escadron) : ' · SOLITAIRE') + '</span>'; }).join('') + (pil.length > 14 ? '<span>+ ' + (pil.length - 14) + '</span>' : '');

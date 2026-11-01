@@ -1476,7 +1476,7 @@
         function escOuvrirModule() {
             if (escVueCourante === 'fa') {       // FRERES D'ARMES (SQL 204/205) : freres-armes.js charge a la demande, comme les autres sous-onglets
                 const monter = () => { if (window.edteamFreresArmes) window.edteamFreresArmes.monterEscadron(xEl('fa-corps')); };
-                if (window.edteamFreresArmes) monter(); else chargerScriptMobile('freres-armes.js?v=9', monter);
+                if (window.edteamFreresArmes) monter(); else chargerScriptMobile('freres-armes.js?v=10', monter);
                 return;
             }
             const def = { systemes: ['systemesMobile', 'systemes-mobile.js?v=6', 'sm-corps'], fc: ['fcMobile', 'fc-mobile.js?v=4', 'fm-corps'] }[escVueCourante];
@@ -1506,13 +1506,13 @@
                 const row = xEl('m-row-fa'), sous = xEl('m-row-fa-sous');
                 if (row) row.style.display = 'flex';
                 if (sous) sous.textContent = d.n + ' campagne' + (d.n > 1 ? 's' : '') + ' · médaille ' + (NOM[d.metal] || '') + ' ' + '★'.repeat(e) + '☆'.repeat(5 - e);
-                if ((d.diplomes || []).some(x => !x.vu)) chargerScriptMobile('freres-armes.js?v=9', () => { if (window.edteamFreresArmes) window.edteamFreresArmes.annonce(); });
+                if ((d.diplomes || []).some(x => !x.vu)) chargerScriptMobile('freres-armes.js?v=10', () => { if (window.edteamFreresArmes) window.edteamFreresArmes.annonce(); });
             } catch (e) { /* la rubrique Freres d'armes ne doit jamais gener l'accueil */ }
         }
         function ouvrirFaMobile() {
             xEl('modal-reglages').style.display = 'none';
             if (window.edteamFreresArmes) { window.edteamFreresArmes.ouvrir(); return; }
-            chargerScriptMobile('freres-armes.js?v=9', () => { if (window.edteamFreresArmes) window.edteamFreresArmes.ouvrir(); });
+            chargerScriptMobile('freres-armes.js?v=10', () => { if (window.edteamFreresArmes) window.edteamFreresArmes.ouvrir(); });
         }
 
         // ESPACE DIRECTEUR (validation des escadrons, pilotes, usage) : directeur-mobile.js n'est charge qu'a la premiere ouverture

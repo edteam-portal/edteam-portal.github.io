@@ -646,7 +646,7 @@
             couleur: '#D4A24C',
             etiquette: '★ NOUVELLE FONCTION',
             titre: 'FRÈRES D’ARMES : LE MERCI ENTRE ESCADRONS',
-            avant: ['medaille.js?v=2', 'freres-armes.js?v=9'],
+            avant: ['medaille.js?v=2', 'freres-armes.js?v=10'],
             pages: [
                 {
                     titre: 'AIDEZ UN ALLIÉ, SOYEZ REMERCIÉ',
