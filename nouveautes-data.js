@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-mobile-fil-apercu-groupes", date: "2026-11-01T17:20:00Z", type: "CORRIGE",
+        titre: "Mobile : le fil de l’escadron ne s’allonge plus quand plusieurs événements se regroupent",
+        texte: "Sur l’accueil du téléphone, quand plusieurs directives modifiées, nouvelles missions ou joueurs croisés arrivent en peu de temps, le fil les regroupait en une carte très haute. L’aperçu n’affiche plus que le titre du groupe, sur une ligne ; le détail et les réactions restent dans le fil complet (toucher la carte).",
+        important: false
+    },
+    {
         id: "2026-11-mobile-corrections-directeur", date: "2026-11-01T16:30:00Z", type: "CORRIGE",
         titre: "Mobile : noms lisibles sur petit écran, bouton du son réparé, Espace Directeur",
         texte: "Sur téléphone : dans la fenêtre d’une mission Powerplay, le nom de chaque commandant n’est plus coupé (les mérites passent dessous quand l’écran est étroit) ; dans BÂTIR, le total à livrer reste sur une seule ligne ; dans l’onglet Fleet Carriers de ESCADRON, la mention « Escadron et amis » passe à la ligne au lieu d’écraser le nom du pilote ; le bouton du son des Réglages fonctionne de nouveau. Le Directeur dispose en plus d’un Espace Directeur dans les Réglages (validation des escadrons, liste des pilotes avec diagnostic, usage).",
