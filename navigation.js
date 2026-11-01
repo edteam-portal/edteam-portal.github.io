@@ -268,7 +268,7 @@ function injecterArchitectureGlobale() {
     if (mainUi && !document.querySelector('.hud-header')) {
         mainUi.insertAdjacentHTML('afterbegin', headerGlobalHTML);
         if (window.edteamSon) window.edteamSon.majUI();
-        if (!window.EdteamTick) { const sc = document.createElement('script'); sc.src = 'tick.js?v=10'; document.head.appendChild(sc); }   // heure du tick + compte a rebours (tick.js)
+        if (!window.EdteamTick) { const sc = document.createElement('script'); sc.src = 'tick.js?v=11'; document.head.appendChild(sc); }   // heure du tick + compte a rebours (tick.js)
     }
 
     if (!document.getElementById('modal-gestion-compte')) {
@@ -1196,4 +1196,18 @@ document.addEventListener('visibilitychange', function() {
 
 // Rétrocompatibilité d'appel
 window.systemLoop = window.demarrerSystemLoop;
+
+// APPLI INSTALLEE (tablette, telephone) : elle reste en memoire des heures ou des jours et n'a pas de bouton « actualiser ». Apres plus de 20 minutes en arriere-plan, au retour la page se recharge
+// toute seule (donnees et versions du site a jour), sauf si un champ de saisie contient du texte en cours.
+(function () {
+    let cache = 0;
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) { cache = Date.now(); return; }
+        if (!cache || Date.now() - cache < 20 * 60000) return;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && String(a.value || '').trim()) return;
+        cache = 0; location.reload();
+    });
+})();
+
 

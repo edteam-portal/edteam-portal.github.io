@@ -154,6 +154,8 @@
         if (!document.getElementById("hd-tick-css")) { const st = document.createElement("style"); st.id = "hd-tick-css"; st.textContent = CSS; document.head.appendChild(st); }
         dessiner();
         rafraichir().then(() => { dessiner(); annoncer(); });
+        // retour sur la page (tablette : minuteries gelees en veille) : on relit tout de suite, sans attendre les 30 s ; le plafond d'un appel toutes les 10 minutes reste en place
+        document.addEventListener("visibilitychange", () => { if (document.hidden) return; dessiner(); rafraichir().then(() => { dessiner(); annoncer(); }); });
         let n = 0;
         setInterval(() => { if (document.hidden) return; dessiner(); if (++n % 30 === 0) rafraichir().then(() => { dessiner(); annoncer(); }); }, 1000);      // compteur a la seconde ; test du reseau toutes les 30 s (l'appel reel reste limite a un par 10 min ou 3 h)
     }
