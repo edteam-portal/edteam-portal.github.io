@@ -46,12 +46,12 @@
     <script src="qgsuivi.js?v=41"></script>
     <script src="son.js?v=2"></script>
     <script src="photos.js?v=2"></script>
-    <script src="anecdotes.js?v=4"></script>
+    <script src="anecdotes.js?v=5"></script>
     <script src="journal-fil.js?v=19"></script>
     <script src="journal-edition.js?v=1"></script>
-    <script src="gazette-journal.js?v=2"></script>
+    <script src="gazette-journal.js?v=4"></script>
     <script src="copier-lieux.js?v=2"></script>
-    <script src="navigation.js?v=72"></script>
+    <script src="navigation.js?v=74"></script>
     <script src="invitations.js?v=21"></script>
     <script src="sas.js?v=1"></script>
 
@@ -249,10 +249,11 @@
         }
         /* MISE EN PAGE DU QG : rangee d'entree en haut ; dessous, colonne de gauche (anecdote, Pilier, Elan) et le fil de l'escadron, aussi haut que cette colonne.
            Tablette (< 1100 px, le fil a alors toute la largeur) : anecdote en bande, fil, puis Pilier et Elan cote a cote ; petit ecran (< 620 px) : tout en une colonne. */
-        #qg-grille { display: grid; gap: 12px; align-items: stretch; grid-template-columns: minmax(340px, 420px) minmax(0, 1fr); grid-template-areas: "top top" "anec fil" "pil fil" "elan fil"; }
+        #qg-grille { display: grid; gap: 12px; align-items: stretch; grid-template-columns: minmax(340px, 420px) minmax(0, 1fr); grid-template-areas: "top top" "tit fil" "pil fil" "elan fil"; }
         #qg-grille > .qg-toprow { grid-area: top; display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; min-width: 0; }
         #qg-anecdote { grid-area: anec; min-width: 0; align-self: start; }
         #qg-colonne-distinctions { display: contents; }
+        #qg-titres { grid-area: tit; min-width: 0; }
         #qg-pilier { grid-area: pil; min-width: 0; }
         #qg-elan { grid-area: elan; min-width: 0; }
         #qg-fil { grid-area: fil; position: relative; min-width: 0; min-height: 560px; cursor: default; margin-bottom: 0; padding: 0; }
@@ -268,11 +269,11 @@
         /* pilote sans escadron : ni anecdote, ni Pilier, ni Elan : les ACTUALITES prennent toute la largeur */
         #qg-grille.qg-pleine { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "top" "fil" !important; }
         @media (max-width: 1099px) {
-            #qg-grille { grid-template-columns: 1fr 1fr; grid-template-areas: "top top" "anec anec" "fil fil" "pil elan"; }
+            #qg-grille { grid-template-columns: 1fr 1fr; grid-template-areas: "top top" "tit tit" "fil fil" "pil elan"; }
             #qg-fil { height: 640px; min-height: 0; }
         }
         @media (max-width: 620px) {
-            #qg-grille { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "anec" "fil" "pil" "elan"; }
+            #qg-grille { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "tit" "fil" "pil" "elan"; }
         }
     </style>
 
@@ -483,6 +484,7 @@
 
                 <!-- COLONNE GAUCHE : DISTINCTIONS DE LA SEMAINE (Pilier BGS + Élan Powerplay) -->
                     <div id="qg-colonne-distinctions">
+                        <div id="qg-titres" class="bloc" style="display: none; padding: 16px 14px 12px;"></div>
                         <div id="qg-pilier" style="display: flex; flex-direction: column;"><div class="bloc" style="padding: 24px; color: #666; font-style: italic; flex: 1;">&gt; CHARGEMENT...</div></div>
                         <div id="qg-elan" style="display: flex; flex-direction: column;"></div>
                     </div>
@@ -2848,6 +2850,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         // ANECDOTE DE L'ESCADRON : une seule lecture (rpc), memoire de 10 minutes ; la bande n'apparait que s'il y a une anecdote recente
         async function chargerAnecdoteQG(profil) {
             const zone = document.getElementById('qg-anecdote');
+            if (zone) zone.style.display = 'none';
+            return;       // plus de bloc anecdote au QG (remplace par « Les titres de l'escadron ») : la petite carte d'annonce et la liste du kiosque EDNEWS suffisent
             if (!zone || !window.EDTEAMAnecdotes) return;
             if (!profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') { zone.style.display = 'none'; return; }
             try { if (window.EDTEAMPhotos) await window.EDTEAMPhotos.charger(false); } catch (e) {}
@@ -2873,7 +2877,21 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         window.addEventListener('resize', ajusterHauteurFil);
         window.addEventListener('load', () => { [0, 400, 1500, 3500].forEach(t => setTimeout(ajusterHauteurFil, t)); });
         document.addEventListener('DOMContentLoaded', () => { const g = document.getElementById('qg-grille'); if (g && window.MutationObserver) new MutationObserver(ajusterHauteurFil).observe(g, { attributes: true, attributeFilter: ['class'] }); const z = document.getElementById('display-area'); if (z && window.ResizeObserver) new ResizeObserver(ajusterHauteurFil).observe(z); });
+        // LES TITRES DE L'ESCADRON (medailles.js, charge a la demande : une lecture legere de 8 lignes, gardee 15 minutes en memoire de session)
+        async function chargerTitresQG(profil) {
+            const box = document.getElementById('qg-titres'); if (!box || !profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') return;
+            try {
+                if (!window.chargerTitresSpecialistes) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'medailles.js?v=19'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+                const data = await window.chargerTitresSpecialistes(profil.escadron_id);
+                if (!data || !Object.keys(data).length) { box.style.display = 'none'; return; }
+                const sig = JSON.stringify(data); if (box.dataset.sig === sig) return; box.dataset.sig = sig;
+                box.innerHTML = window.htmlBandeauTitres(data, profil.user_id);
+                box.style.display = 'block';
+                if (typeof window.brancherTitresSpecialistes === 'function') window.brancherTitresSpecialistes(box);
+            } catch (e) { box.style.display = 'none'; }
+        }
         async function chargerDistinctionsQG(profil) {
+            chargerTitresQG(profil);
             const boxP = document.getElementById('qg-pilier'), boxE = document.getElementById('qg-elan');
             if (!boxP || !boxE) return;
             const grillePleine = document.getElementById('qg-grille'); if (grillePleine) grillePleine.classList.toggle('qg-pleine', !profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT'); ajusterHauteurFil();

@@ -449,7 +449,7 @@
             if (e.target.className === 'a-f') { retirer(); return; }
             retirer();
             var ouvrir = function () { if (window.EDTEAMAnecdotes) window.EDTEAMAnecdotes.ouvrir(); };
-            if (window.EDTEAMAnecdotes) ouvrir(); else chargerScript('anecdotes.js?v=3').then(ouvrir);
+            if (window.EDTEAMAnecdotes) ouvrir(); else chargerScript('anecdotes.js?v=5').then(ouvrir);
         });
         // en bas à droite ; si une carte du pied de page (« Le saviez-vous ? », nouveauté importante) occupe déjà ce coin, on se pose juste au-dessus
         try {
@@ -475,7 +475,7 @@
             css();
             if (etat.file.length) {
                 var liste = etat.file.splice(0).sort(function (a, b) { return PRIO[a.type] - PRIO[b.type]; });
-                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=18');
+                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=19');
                 if (liste.some(function (it) { return it.type === 'plaque'; }) && typeof window.forgerRubanSVG !== 'function') await chargerScript('rubans.js?v=2');
                 await chaine(liste);
             }

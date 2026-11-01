@@ -35,7 +35,7 @@
             '.an-pied{display:flex;justify-content:space-between;color:#777;font-size:.7em;gap:14px;flex-wrap:wrap}',
             '.an-pied i{font-style:normal;color:#aaa}',
             '.an-lire{color:var(--ed-orange,#FF7100);letter-spacing:1px}',
-            '.an-voile{position:fixed;inset:0;z-index:4200;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box}',
+            '.an-voile{position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box}',
             '.an-fiche{width:100%;max-width:720px;max-height:92vh;overflow-y:auto;border:1px solid var(--ed-orange,#FF7100);background:rgba(8,4,0,.98);box-shadow:0 0 40px rgba(255,113,0,.25);padding:22px 26px;position:relative;box-sizing:border-box;font-family:inherit;color:#ccc}',
             '.an-x{position:absolute;top:12px;right:18px;color:var(--ed-orange,#FF7100);font-weight:bold;cursor:pointer;font-size:1.2em}',
             '.an-fiche h3{margin:8px 0 10px;color:#fff;font-size:1.25em;letter-spacing:1px}',
@@ -115,7 +115,7 @@
             + '<div class="an-base"><i style="font-style:normal;color:#aaa;">Fait réel :</i> ' + esc(a.fait || '') + ' · CMDR ' + esc(String(a.cmdr_nom || '').toUpperCase())
             + '<br>Histoire écrite par une IA à partir de ce fait ; le reste est de la fiction.</div>';
     }
-    async function ouvrir() {
+    async function ouvrir(indice) {
         if (typeof sonClic === 'function') sonClic();
         css(); fermer();
         const v = document.createElement('div');
@@ -136,7 +136,7 @@
         };
         window.EDTEAMAnecdotes._voir = dessiner;
         window.EDTEAMAnecdotes._liste = liste;
-        dessiner(0);
+        dessiner(Math.max(0, Math.min(liste.length - 1, Number(indice) || 0)));
     }
     async function supprimer(id) {
         const texte = 'Supprimer cette anecdote ? Elle disparaîtra pour tout l’escadron.';

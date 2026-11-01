@@ -20,7 +20,7 @@
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=21"></script>
     <script src="annonce.js?v=33"></script>
-    <script src="revelations.js?v=11"></script>
+    <script src="revelations.js?v=13"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
     <script src="campagnes-mobile.js?v=27"></script>
@@ -29,7 +29,7 @@
     <script src="conflit-modale.js?v=3"></script>
     <script src="journal-fil.js?v=19"></script>
     <script src="journal-edition.js?v=1"></script>
-    <script src="gazette-journal.js?v=2"></script>
+    <script src="gazette-journal.js?v=4"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -37,11 +37,11 @@
     <script src="pp-etat.js?v=5"></script>
     <script src="campagnes-pp.js?v=24"></script>
     <script src="engagement-mobile.js?v=1"></script>
-    <script src="anecdotes.js?v=4"></script>
+    <script src="anecdotes.js?v=5"></script>
     <script src="qgsuivi.js?v=41"></script>
     <script src="son.js?v=2"></script>
     <script src="colonisation-types.js?v=2"></script>
-    <script src="medailles.js?v=18"></script>
+    <script src="medailles.js?v=19"></script>
     <script src="etats-faction.js?v=4"></script>
 
     <link rel="stylesheet" href="bloc.css?v=1">
@@ -708,6 +708,7 @@
 
                 <!-- CETTE SEMAINE : Pilier, Elan, podium (membres d'un escadron) -->
                 <div id="x-semaine" style="display: none; flex-direction: column; gap: 12px;">
+                    <div class="xc" id="x-titres" style="display: none; padding: 14px 10px 10px;"></div>
                     <div class="xh2">CETTE SEMAINE</div>
                     <div class="xc g" id="x-pilier"></div>
                     <div class="xc b" id="x-elan" style="display: none;"></div>
@@ -1198,7 +1199,10 @@
         function sonSucces() { playUI('success'); }
 
         // FORGE VECTORIELLE DES PINS (SPÉCIALISTES) POUR MOBILE
-        window.forgerMedailleSVG = function(type, couleurAura) {
+        // medailles.js (charge plus haut) dessine les 8 titres de specialiste en metal sculpte ; seul « ELE » (Elan) garde ce petit pin simplifie
+        const forgeRicheTitres = window.forgerMedailleSVG;
+        window.forgerMedailleSVG = function(type, couleurAura, vacant) {
+            if (type !== 'ELE' && typeof forgeRicheTitres === 'function') return forgeRicheTitres(type, couleurAura, vacant);
             let grad = ''; let icone = '';
             if (type === 'SEC') { grad = 'gradTitane'; icone = '<path d="M35,45 L65,45 L65,65 C65,75 50,85 50,85 C50,85 35,75 35,65 Z" fill="url(#gradTitane)" stroke="#111" stroke-width="2"/>'; } 
             else if (type === 'LOG') { grad = 'gradBronze'; icone = '<polygon points="50,45 65,52 65,68 50,75 35,68 35,52" fill="none" stroke="url(#gradBronze)" stroke-width="4"/><polyline points="35,52 50,60 65,52" stroke="url(#gradBronze)" stroke-width="4" fill="none"/><line x1="50" y1="60" x2="50" y2="75" stroke="url(#gradBronze)" stroke-width="4"/>'; } 
@@ -1766,6 +1770,11 @@
                 const es = xEl('x-escsem');
                 if (sem && sem.escadron) { es.style.display = 'block'; es.innerHTML = xHtmlSemaine(sem); } else es.style.display = 'none';
                 xChargerAnecdote();
+                try {      // « Les titres de l'escadron » : memes donnees que les alertes ci-dessus (lecture gardee 15 minutes, aucune requete de plus)
+                    const tt = typeof window.chargerTitresSpecialistes === 'function' && typeof window.htmlBandeauTitres === 'function' ? await window.chargerTitresSpecialistes(p.escadron_id, false) : null;
+                    const bt = xEl('x-titres');
+                    if (bt) { if (tt && Object.keys(tt).length) { bt.innerHTML = window.htmlBandeauTitres(tt, p.user_id); bt.style.display = 'block'; } else bt.style.display = 'none'; }
+                } catch (e) { /* le bandeau ne doit jamais gener l'accueil */ }
             } catch (e) {
                 console.error('Erreur semaine (accueil) :', e);
                 box.style.display = 'none';

@@ -5,6 +5,18 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-titres-qg-anecdotes", date: "2026-11-01T23:00:00Z", type: "AMELIORE",
+        titre: "Les titres de spécialiste en vue au QG, les anecdotes dans EDNEWS",
+        texte: "Le QG affiche maintenant « Les titres de l’escadron » à la place de l’anecdote : les huit médailles avec le visage de leur titulaire (cliquez sur une médaille pour la voir en grand, avec le titulaire, son score et le pilote qui le suit). Le mur de la page BGS fait grossir la médaille au survol de la carte, et les cartes des pilotes montrent les titres en plus grand avec un cadre de la couleur du titre autour de la photo. Les anecdotes de l’escadron ne sont plus un bloc du QG : la petite carte qui s’ouvre en bas à droite reste, et leur liste est dans le kiosque EDNEWS, à côté des éditions ; une anecdote s’y lit dans le même cadre que les éditions, avec les flèches pour passer à la suivante.",
+        important: false
+    },
+    {
+        id: "2026-11-medailles-specialistes", date: "2026-11-01T22:00:00Z", type: "AMELIORE",
+        titre: "Les médailles du mur des spécialistes sont refaites en métal sculpté",
+        texte: "Les huit médailles de titres (Fer de lance, Maître logisticien, Magnat, Bâtisseur, Expert scientifique, Exécuteur, Seigneur de guerre, Espion) sont redessinées : bord crénelé, couronne de métal facetté gravée du nom du titre et de sa catégorie, lauriers sculptés, filet d’émail à la couleur du titre, centre sous un dôme de verre, icône en relief et bélière à cabochon sur un ruban tissé. Elles s’affichent sur le mur de la page BGS, sur les cartes et les fiches des pilotes et dans la fenêtre d’un nouveau titre. Rien ne bouge : le dessin est fixe.",
+        important: false
+    },
+    {
         id: "2026-11-plaques-metal", date: "2026-11-01T21:00:00Z", type: "AMELIORE",
         titre: "Les plaques de directives deviennent de vraies plaques de métal",
         texte: "Les plaques gagnées sur les directives (fiche des pilotes, page BGS, fenêtre d’une nouvelle plaque) sont redessinées : une plaque rectangulaire de métal biseauté et rivetée, avec un champ d’émail à la couleur de la directive (guerre, hausse, baisse, élection), une barrette de métal incrustée par jour d’engagement et des étoiles en relief. Le métal reprend celui des médailles : acier en dessous de 10 points, bronze, argent, or puis diamant à 100 points. Le podium (1re, 2e, 3e place) a sa bordure diamant, or ou argent et son médaillon numéroté. Rien ne bouge dans les listes : le dessin est fixe.",

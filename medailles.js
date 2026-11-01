@@ -51,6 +51,9 @@
             <radialGradient id="gradDish" cx="38%" cy="32%" r="85%"><stop offset="0%" stop-color="#3a3f47"/><stop offset="55%" stop-color="#14171c"/><stop offset="100%" stop-color="#050607"/></radialGradient>
             <radialGradient id="gradShine" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
             <linearGradient id="gradRubanOmbre" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#000" stop-opacity="0.45"/><stop offset="35%" stop-color="#fff" stop-opacity="0.18"/><stop offset="65%" stop-color="#000" stop-opacity="0.05"/><stop offset="100%" stop-color="#000" stop-opacity="0.5"/></linearGradient>
+            ${Object.keys(TONS).concat(['V']).map(k => { const t = k === 'V' ? TON_VACANT : TONS[k]; return '<linearGradient id="gT_' + k + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="' + t[0] + '"/><stop offset="45%" stop-color="' + t[1] + '"/><stop offset="100%" stop-color="' + t[2] + '"/></linearGradient><radialGradient id="gT_' + k + 'i" cx="38%" cy="32%" r="85%"><stop offset="0%" stop-color="' + mixHex(t[0], t[1], .35) + '"/><stop offset="100%" stop-color="' + mixHex(t[1], t[2], .55) + '"/></radialGradient>'; }).join('')}
+            <pattern id="medTissu" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height=".9" fill="#fff" opacity=".16"/><rect y="1.5" width="3" height=".7" fill="#000" opacity=".22"/></pattern>
+            <filter id="medRelief" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceAlpha" stdDeviation=".55" result="b"/><feDiffuseLighting in="b" surfaceScale="2.2" diffuseConstant="1.1" lighting-color="#ffffff" result="d"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting><feComposite in="SourceGraphic" in2="d" operator="arithmetic" k1="1.35" k2="0" k3="0" k4="0" result="m"/><feComposite in="m" in2="SourceAlpha" operator="in"/></filter>
             <filter id="glowMedal"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs></svg>`;
         document.body.appendChild(d);
@@ -70,6 +73,14 @@
         return f;
     }
 
+    // teintes du métal de chaque titre : [clair, moyen, foncé] (mêmes familles que les médailles FRÈRES D'ARMES)
+    const TONS = {
+        SEC: ['#F4F7FA', '#9fb0bf', '#3f4c6b'], LOG: ['#ffc56b', '#cd7f32', '#4a2511'], ECO: ['#FFF1A8', '#E6B422', '#5C4305'], SCI: ['#FFFFFF', '#B0C4DE', '#6a7a8c'],
+        EXE: ['#8a8a8a', '#3a3a3a', '#050505'], GUE: ['#C8CED3', '#6f7479', '#2F4F4F'], BAT: ['#FFF1A8', '#E6B422', '#5C4305'], ESP: ['#7a7e88', '#2a2c33', '#000000']
+    };
+    const TON_VACANT = ['#8a8a8a', '#555555', '#222222'];
+    function mixHex(a, b, t) { const p = h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)), x = p(a), y = p(b); return '#' + x.map((v, i) => { const c = Math.round(v + (y[i] - v) * t); return (c < 16 ? '0' : '') + c.toString(16); }).join(''); }
+
     // vacant = true : version grisee, sans aura
     window.forgerMedailleSVG = function (type, couleurAura, vacant) {
         assurerDefs();
@@ -82,25 +93,66 @@
         else if (type === 'GUE') { grad = 'gradAcier'; ribbon = '#E8740C'; icone = '<line x1="38" y1="48" x2="62" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><line x1="62" y1="48" x2="38" y2="72" stroke="url(#gradAcier)" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="60" r="4" fill="#FF7100" filter="url(#glowMedal)"/>'; }
         else if (type === 'BAT') { grad = 'gradOr'; ribbon = '#D9A800'; icone = '<polygon points="50,40 68,50 68,70 50,80 32,70 32,50" fill="none" stroke="url(#gradOr)" stroke-width="3"/><path d="M50,40 L50,80 M32,50 L68,70 M32,70 L68,50" stroke="url(#gradOr)" stroke-width="2"/>'; }
         else if (type === 'ESP') { grad = 'gradNoir'; ribbon = '#2a2b33'; icone = '<path d="M28,60 Q50,41 72,60 Q50,79 28,60 Z" fill="none" stroke="#E6EAF0" stroke-width="3"/><circle cx="50" cy="60" r="7.5" fill="#E6EAF0"/><circle cx="50" cy="60" r="3" fill="#000"/><line x1="50" y1="40" x2="50" y2="46" stroke="#E6EAF0" stroke-width="2.2" stroke-linecap="round"/>'; }
+        // ----- NOUVEAU RENDU (statique : aucune animation) : bord crénelé, couronne de métal facetté gravée du nom du titre, lauriers sculptés, cuvette sous dôme de verre, icône en relief, bélière à cabochon -----
+        const T = vacant ? TON_VACANT : (TONS[type] || TON_VACANT), K = vacant ? 'V' : type, fx = v => v.toFixed(1);
+        const uid = 'mt' + Math.random().toString(36).substring(2, 7), tit = PAR_CODE[type];
+        const col = vacant ? '#555555' : couleurAura;
+        let dents = '';
+        for (let i = 0; i < 56; i++) { const a = -Math.PI / 2 + 2 * Math.PI * i / 56, r = i % 2 ? 37.4 : 39.7; dents += `${fx(50 + r * Math.cos(a))},${fx(60 + r * Math.sin(a))} `; }
+        let couronne = '';
+        for (let i = 0; i < 36; i++) {
+            const a0 = -Math.PI / 2 + 2 * Math.PI * i / 36, a1 = -Math.PI / 2 + 2 * Math.PI * (i + 1) / 36;
+            const tt = (Math.sin(i * 2 * Math.PI / 36 * 2 + 0.7) + 1) / 2 * (0.65 + 0.35 * Math.sin(i * 0.9 + 1));
+            couronne += `<polygon points="${fx(50 + 37.6 * Math.cos(a0))},${fx(60 + 37.6 * Math.sin(a0))} ${fx(50 + 37.6 * Math.cos(a1))},${fx(60 + 37.6 * Math.sin(a1))} ${fx(50 + 31.5 * Math.cos(a1))},${fx(60 + 31.5 * Math.sin(a1))} ${fx(50 + 31.5 * Math.cos(a0))},${fx(60 + 31.5 * Math.sin(a0))}" fill="${mixHex(T[2], T[0], tt)}"/>`;
+        }
+        // lauriers de métal : 2 x 7 feuilles avec nervure
+        let lau = '';
+        for (let i = 0; i < 7; i++) {
+            const th = (28 + i * 17) * Math.PI / 180;
+            [-1, 1].forEach(sens => {
+                const x = 50 + sens * 26.4 * Math.sin(th), y = 60 + 26.4 * Math.cos(th);
+                const tang = Math.atan2(-Math.sin(th), sens * Math.cos(th)) * 180 / Math.PI + sens * 28;
+                lau += `<g transform="rotate(${tang.toFixed(0)} ${fx(x)} ${fx(y)})"><ellipse cx="${fx(x + .35)}" cy="${fx(y + .5)}" rx="4.6" ry="2" fill="#000" opacity=".5"/><ellipse cx="${fx(x)}" cy="${fx(y)}" rx="4.6" ry="2" fill="url(#gT_${K})" stroke="#000" stroke-opacity=".55" stroke-width=".35"/><line x1="${fx(x - 3.6)}" y1="${fx(y)}" x2="${fx(x + 3.6)}" y2="${fx(y)}" stroke="#000" stroke-opacity=".45" stroke-width=".3"/></g>`;
+            });
+        }
+        const sombre = type === 'EXE' || type === 'ESP';
+        const nomHaut = vacant ? 'TITRE VACANT' : (tit ? tit.nom : ''), nomBas = vacant ? '' : (tit ? tit.sous : '');
+        const gravure = (chemin, texte) => `<text font-family="'Share Tech Mono', monospace" font-size="3.7" font-weight="bold" letter-spacing="1.1" text-anchor="middle"><textPath href="#${chemin}" startOffset="50%" fill="${sombre ? '#000' : '#fff'}" fill-opacity="${sombre ? .9 : .55}" dy=".28">${esc(texte)}</textPath></text><text font-family="'Share Tech Mono', monospace" font-size="3.7" font-weight="bold" letter-spacing="1.1" text-anchor="middle"><textPath href="#${chemin}" startOffset="50%" fill="${sombre ? '#fff' : '#000'}" fill-opacity="${sombre ? .8 : .72}">${esc(texte)}</textPath></text>`;
         const aura = vacant ? '' : `<circle cx="50" cy="60" r="21" fill="none" stroke="${couleurAura}" stroke-width="1.4" opacity="0.7" filter="url(#glowMedal)"/>`;
-        const lau = lauriers(vacant ? '#555' : ribbon);
-        const reflet = vacant ? '' : '<ellipse cx="37" cy="43" rx="15" ry="7" transform="rotate(-38 37 43)" fill="url(#gradShine)"/><path d="M22,56 A29,29 0 0 1 46,31" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.35"/>';
         const style = vacant ? 'opacity: 0.32; filter: grayscale(1) drop-shadow(0 3px 4px rgba(0,0,0,0.8));' : 'filter: drop-shadow(0 5px 6px rgba(0,0,0,0.85));';
+        const rub = vacant ? '#3a3a3a' : ribbon;
         return `
         <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; ${style}">
-            <path d="M30,0 L52,0 L52,34 L41,41 L30,34 Z" fill="${ribbon}"/>
-            <path d="M48,0 L70,0 L70,34 L59,41 L48,34 Z" fill="${ribbon}"/>
+            <defs><path id="${uid}h" d="M17.2,60 A32.8,32.8 0 0 1 82.8,60"/><path id="${uid}b" d="M14.6,60 A35.4,35.4 0 0 0 85.4,60"/></defs>
+            <path d="M30,0 L52,0 L52,34 L41,41 L30,34 Z" fill="${rub}"/>
+            <path d="M48,0 L70,0 L70,34 L59,41 L48,34 Z" fill="${rub}"/>
+            <path d="M30,0 L70,0 L70,34 L59,41 L48,34 L41,41 L30,34 Z" fill="url(#medTissu)"/>
             <path d="M30,0 L70,0 L70,34 L59,41 L48,34 L41,41 L30,34 Z" fill="url(#gradRubanOmbre)"/>
             <line x1="41" y1="0" x2="41" y2="38" stroke="#000" stroke-width="0.6" opacity="0.35"/><line x1="59" y1="0" x2="59" y2="38" stroke="#000" stroke-width="0.6" opacity="0.35"/>
-            <circle cx="50" cy="60" r="37" fill="url(#gradRim)"/>
-            <circle cx="50" cy="60" r="35" fill="url(#${grad})"/>
-            <circle cx="50" cy="60" r="35" fill="none" stroke="url(#gradRimInv)" stroke-width="1.2"/>
-            <circle cx="50" cy="60" r="32.5" fill="none" stroke="${vacant ? '#555' : '#000'}" stroke-width="0.8" stroke-dasharray="1.4 2.6" opacity="0.55"/>
+            <path d="M32,0V32M68,0V32" stroke="#fff" stroke-width=".5" stroke-dasharray="1.6 1.4" opacity=".28"/>
+            <path d="M25,15.2 L28,11.4 H72 L75,15.2 L72,19.4 H28 Z" fill="#000" opacity=".5" transform="translate(.5 1)"/><path d="M25,15.2 L28,11.4 H72 L75,15.2 L72,19.4 H28 Z" fill="url(#gT_${K})" stroke="#000" stroke-opacity=".65" stroke-width=".6"/><path d="M28,12.3 H72" stroke="#fff" stroke-opacity=".6" stroke-width=".7"/>
+            <circle cx="29.2" cy="15.4" r="1" fill="#000" opacity=".55"/><circle cx="70.8" cy="15.4" r="1" fill="#000" opacity=".55"/>
+            <polygon points="50,9.4 56.4,15.4 50,21.4 43.6,15.4" fill="#000" opacity=".5" transform="translate(.4 .7)"/><polygon points="50,9.4 56.4,15.4 50,21.4 43.6,15.4" fill="${col}" stroke="#000" stroke-opacity=".7" stroke-width=".6"/><polygon points="50,9.4 56.4,15.4 50,15.4" fill="#fff" opacity=".42"/><polygon points="50,21.4 43.6,15.4 50,15.4" fill="#000" opacity=".28"/>
+            <polygon points="${dents}" fill="#000" opacity=".45" transform="translate(.5 1)"/>
+            <polygon points="${dents}" fill="url(#gT_${K})" stroke="#000" stroke-opacity=".6" stroke-width=".5" stroke-linejoin="round"/>
+            ${couronne}
+            <circle cx="50" cy="60" r="37.5" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".6"/>
+            ${gravure(uid + 'h', nomHaut)}${gravure(uid + 'b', nomBas)}
+            <circle cx="50" cy="60" r="31.5" fill="none" stroke="#000" stroke-opacity=".75" stroke-width=".9"/>
+            <circle cx="50" cy="60" r="30.6" fill="url(#gT_${K}i)"/>
+            <circle cx="50" cy="60" r="30.6" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width=".5"/>
+            <circle cx="50" cy="60" r="29.1" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="1.6"/><circle cx="50" cy="60" r="29.1" fill="none" stroke="${col}" stroke-width="1" opacity=".9"/>
             ${lau}
-            <circle cx="50" cy="60" r="23" fill="url(#gradDish)" stroke="url(#${grad})" stroke-width="2"/>
+            <circle cx="50" cy="60" r="24.4" fill="#000" opacity=".5"/>
+            <circle cx="50" cy="60" r="23.4" fill="url(#gT_${K})"/>
+            <circle cx="50" cy="60" r="21.6" fill="url(#gradDish)"/>
+            <circle cx="50" cy="60" r="21.6" fill="none" stroke="#000" stroke-opacity=".8" stroke-width="1"/>
             ${aura}
-            ${icone}
-            ${reflet}
+            <g opacity=".6" transform="translate(.9 1.3)" style="filter: brightness(0);">${icone}</g>
+            <g filter="url(#medRelief)">${icone}</g>
+            <ellipse cx="42" cy="48" rx="14" ry="6.4" transform="rotate(-28 42 48)" fill="url(#gradShine)" opacity="${vacant ? 0 : .5}"/>
+            <path d="M21.5,54 A30.6,30.6 0 0 1 46,29.8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="${vacant ? 0 : .4}"/><path d="M83,68 A35,35 0 0 1 55,94" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" opacity="${vacant ? 0 : .3}"/>
+            ${vacant ? '' : '<path d="M20,34 l1.1,3.3 3.3,1.1 -3.3,1.1 -1.1,3.3 -1.1,-3.3 -3.3,-1.1 3.3,-1.1z" fill="#fff" opacity=".9"/>'}
         </svg>`;
     };
 
@@ -156,6 +208,7 @@
 
     // ---------- LE MUR (accueil BGS) : 8 cartes, titulaire + cumul + avance sur le second ----------
     window.htmlMurTitres = function (data, monId) {
+        memoriser(data);
         const P = window.EDTEAMPhotos;
         // adresse sure dans un url('...') : ni apostrophe ni parenthese
         const photoDe = r => { const u = (P && r) ? P.url(r.user_id, r.cmdr_nom) : ''; return u ? u.replace(/'/g, '%27').split('(').join('%28').split(')').join('%29') : ''; };
@@ -166,7 +219,7 @@
             const ph = photoDe(r);
             const tip = esc(infoBulle(t, r));
             const moi = r && monId && r.user_id === monId;
-            const base = `<div class="titre-carte${r ? '' : ' vacant'}${moi ? ' moi' : ''}" style="--tc: ${t.couleur};" data-titre-tip="${tip}" data-titre-col="${t.couleur}">`;
+            const base = `<div class="titre-carte${r ? '' : ' vacant'}${moi ? ' moi' : ''}" style="--tc: ${t.couleur};" data-titre-tip="${tip}" data-titre-col="${t.couleur}" data-titre-code="${t.code}">`;
             if (!r) {
                 return `${base}
                     ${unePhoto ? '<div class="titre-fantome">' + window.forgerMedailleSVG(t.code, t.couleur, true) + '</div>' : ''}
@@ -186,22 +239,43 @@
         return `<div class="titres-grille${unePhoto ? ' avec-photos' : ''}">${cartes}</div>`;
     };
 
+    // BANDEAU « LES TITRES DE L'ESCADRON » (QG et accueil mobile) : les 8 médailles, avec le visage du titulaire dessous ; chaque cellule ouvre la loupe
+    window.htmlBandeauTitres = function (data, monId) {
+        memoriser(data);
+        const P = window.EDTEAMPhotos;
+        const cellules = TITRES.map(t => {
+            const r = data && data[t.code];
+            const url = (P && r) ? String(P.url(r.user_id, r.cmdr_nom) || '').replace(/'/g, '%27').split('(').join('%28').split(')').join('%29') : '';
+            const av = r ? '<span class="tb-av" style="' + (url ? "background-image:url('" + esc(url) + "')" : '') + '">' + (url ? '' : esc(P ? P.initiales(r.cmdr_nom) : '?')) + '</span>' : '<span class="tb-av vide"></span>';
+            const moi = r && monId && r.user_id === monId;
+            return '<div class="tb-cell' + (r ? '' : ' vacant') + (moi ? ' moi' : '') + '" style="--tc: ' + t.couleur + ';" data-titre-tip="' + esc(infoBulle(t, r)) + '" data-titre-col="' + t.couleur + '" data-titre-code="' + t.code + '">'
+                + '<div class="tb-med">' + window.forgerMedailleSVG(t.code, t.couleur, !r) + '</div>'
+                + '<div class="tb-pil">' + av + '<b>' + (r ? esc(String(r.cmdr_nom).toUpperCase()) : 'VACANT') + '</b></div></div>';
+        }).join('');
+        return '<div class="tb-cap">&gt; LES TITRES DE L\u2019ESCADRON <small>cliquez sur une médaille</small></div><div class="tb-grille">' + cellules + '</div>';
+    };
+
+    // couleurs des titres détenus par un pilote (premier = le plus récent dans l'ordre du mur)
+    window.couleursTitresPilote = function (data, userId) { return TITRES.filter(t => data && data[t.code] && String(data[t.code].user_id) === String(userId)).map(t => t.couleur); };
+
     // ---------- PASTILLES DE FICHE PILOTE : les titres que CE pilote detient ----------
     window.htmlTitresPilote = function (data, userId, taille) {
+        memoriser(data);
         taille = taille || 45;
         return TITRES.filter(t => data[t.code] && String(data[t.code].user_id) === String(userId)).map(t => {
             const tip = esc(infoBulle(t, data[t.code]));
-            return `<div class="titre-pastille" style="width: ${taille}px; height: ${taille}px; cursor: help; transition: 0.2s;" data-titre-tip="${tip}" data-titre-col="${t.couleur}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${window.forgerMedailleSVG(t.code, t.couleur)}</div>`;
+            return `<div class="titre-pastille" style="width: ${taille}px; height: ${taille}px; cursor: help; transition: 0.2s;" data-titre-tip="${tip}" data-titre-col="${t.couleur}" data-titre-code="${t.code}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${window.forgerMedailleSVG(t.code, t.couleur)}</div>`;
         }).join('');
     };
 
     // Titres detenus par un pilote, avec leur nom, la duree de detention et la valeur (bandeau de la fiche pilote)
     window.htmlTitresPiloteDetail = function (data, userId) {
+        memoriser(data);
         return TITRES.filter(t => data[t.code] && String(data[t.code].user_id) === String(userId)).map(t => {
             const r = data[t.code];
             const jours = Math.max(0, Math.floor((Date.now() - Date.parse(r.depuis)) / 86400000));
             const depuis = isNaN(jours) ? '' : 'titulaire depuis ' + jours + ' j · ';
-            return `<div class="titre-detail" data-titre-tip="${esc(infoBulle(t, r))}" data-titre-col="${t.couleur}">
+            return `<div class="titre-detail" data-titre-tip="${esc(infoBulle(t, r))}" data-titre-col="${t.couleur}" data-titre-code="${t.code}">
                 <div class="titre-detail-med">${window.forgerMedailleSVG(t.code, t.couleur)}</div>
                 <div><b style="color: ${t.couleur};">${esc(t.nom)}</b><small>${depuis}${esc(formater(t.unite, r.valeur))}</small></div>
             </div>`;
@@ -267,6 +341,48 @@
 
     window.brancherTitresSpecialistes = brancherBulles;
 
+    // ---------- LOUPE : une médaille de titre en grand, avec son titulaire (clic sur le mur, sur une pastille de fiche ou sur un titre du détail) ----------
+    const MEMO = {};
+    function memoriser(data) { Object.keys(data || {}).forEach(k => { MEMO[k] = data[k]; }); }
+    function fermerTitre() { const o = document.getElementById('mt-fond'); if (o) o.remove(); document.removeEventListener('keydown', toucheTitre, true); }
+    function toucheTitre(e) { if (e.key === 'Escape') { e.stopPropagation(); fermerTitre(); } }
+    function ouvrirMedailleTitre(code) {
+        const t = PAR_CODE[code]; if (!t) return;
+        fermerTitre();
+        const r = MEMO[code] || null, P = window.EDTEAMPhotos;
+        const taille = Math.max(190, Math.min(360, window.innerHeight - 300, window.innerWidth - 90));
+        let titulaire = '<div class="mt-vac">TITRE VACANT<small>Personne n’a encore d’activité dans cette catégorie.</small></div>';
+        if (r) {
+            const url = P ? String(P.url(r.user_id, r.cmdr_nom) || '').replace(/'/g, '%27').split('(').join('%28').split(')').join('%29') : '';
+            const ini = P ? P.initiales(r.cmdr_nom) : '?';
+            const jours = Math.max(0, Math.floor((Date.now() - Date.parse(r.depuis)) / 86400000));
+            titulaire = '<div class="mt-tit"><div class="mt-av" style="' + (url ? "background-image:url('" + esc(url) + "')" : '') + '">' + (url ? '' : esc(ini)) + '</div>'
+                + '<div><div class="mt-pil">' + esc(String(r.cmdr_nom).toUpperCase()) + '</div><div class="mt-val">' + esc(formater(t.unite, r.valeur)) + '</div>'
+                + (isNaN(jours) ? '' : '<div class="mt-dep">titulaire depuis ' + jours + ' jour' + (jours > 1 ? 's' : '') + '</div>') + '</div></div>'
+                + (r.second_nom ? '<div class="mt-sec">Suit : <b>' + esc(String(r.second_nom).toUpperCase()) + '</b>, ' + esc(formater(t.unite, r.second_valeur)) + ' (retard de ' + esc(formater(t.unite, Math.max(0, r.valeur - r.second_valeur))) + ')</div>' : '');
+        }
+        const f = document.createElement('div'); f.id = 'mt-fond';
+        f.innerHTML = '<div class="mt-cadre" style="--tc:' + t.couleur + ';"><div class="mt-boite"><span class="mt-x" data-mt-x>X</span>'
+            + '<div class="mt-sc" style="width:' + taille + 'px;height:' + taille + 'px;"><div class="mt-med">' + window.forgerMedailleSVG(t.code, t.couleur, !r) + '</div></div>'
+            + '<div class="mt-txt"><div class="mt-nom">' + esc(t.nom) + '</div><div class="mt-sous">' + esc(t.sous) + '</div>'
+            + '<div class="mt-desc">' + esc(t.desc) + '</div><div class="mt-mes">Mesuré en : ' + esc(t.mesure) + '. Cumul total depuis le début des relevés.</div>'
+            + titulaire + '<div class="mt-reg">Le titre change de main dès qu’un autre pilote dépasse le titulaire de plus de 2 %.</div></div></div></div>';
+        f.addEventListener('click', ev => { if (ev.target === f || ev.target.closest('[data-mt-x]')) fermerTitre(); });
+        document.body.appendChild(f);
+        document.addEventListener('keydown', toucheTitre, true);
+    }
+    window.ouvrirMedailleTitre = ouvrirMedailleTitre;
+    if (!window.__mtClic) {
+        window.__mtClic = true;
+        document.addEventListener('click', ev => {
+            const el = ev.target && ev.target.closest ? ev.target.closest('[data-titre-code]') : null; if (!el) return;
+            ev.stopPropagation(); ev.preventDefault();
+            if (typeof hideHoloTooltip === 'function') hideHoloTooltip();
+            if (typeof sonClic === 'function') sonClic();
+            ouvrirMedailleTitre(el.getAttribute('data-titre-code'));
+        }, true);
+    }
+
     // ---------- STYLE (injecte une fois) ----------
     if (!document.getElementById('titres-style')) {
         const st = document.createElement('style');
@@ -287,7 +403,8 @@
         .titre-avance { font-size: 0.62em; color: #9a9a9a; text-align: center; line-height: 1.3; }
         .titre-avance span { color: #666; }
         .titres-grille.avec-photos .titre-carte { min-height: 292px; overflow: hidden; }
-        .titres-grille.avec-photos .titre-medaille { position: absolute; top: 9px; right: 9px; width: 52px; height: 52px; margin: 0; z-index: 2; }
+        .titres-grille.avec-photos .titre-medaille { position: absolute; top: 9px; right: 9px; width: 52px; height: 52px; margin: 0; z-index: 2; transform-origin: 100% 0; transition: transform .28s cubic-bezier(.2, .8, .3, 1.15), filter .25s; }
+        .titres-grille.avec-photos .titre-carte:hover .titre-medaille { transform: scale(1.85); }
         .titres-grille.avec-photos .titre-nom { margin-top: auto; position: relative; z-index: 1; text-shadow: 0 1px 4px #000; }
         .titres-grille.avec-photos .titre-sous, .titres-grille.avec-photos .titre-pilote, .titres-grille.avec-photos .titre-total, .titres-grille.avec-photos .titre-avance { position: relative; z-index: 1; }
         .titres-grille.avec-photos .titre-total, .titres-grille.avec-photos .titre-avance { text-shadow: 0 1px 4px #000; }
@@ -296,6 +413,36 @@
         .titre-fond.sans { background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--tc) 30%, #0a0604), #07090b 78%); display: flex; align-items: flex-start; justify-content: center; }
         .titre-ini { margin-top: 74px; font-size: 2.6em; font-weight: bold; letter-spacing: 1px; color: color-mix(in srgb, var(--tc) 85%, #fff); text-shadow: 0 0 16px color-mix(in srgb, var(--tc) 60%, transparent); }
         .titre-fantome { position: absolute; left: 50%; top: 92px; transform: translateX(-50%); width: 96px; height: 96px; opacity: 0.2; z-index: 0; pointer-events: none; }
+        [data-titre-code] { cursor: zoom-in !important; }
+        .tb-cap { color: #FFD24A; letter-spacing: 3px; font-size: .78em; font-weight: bold; margin-bottom: 10px; } .tb-cap small { display: block; color: #6e7882; letter-spacing: 1px; font-weight: normal; margin-top: 3px; font-size: .85em; }
+        .tb-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 12px 6px; }
+        .tb-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 6px 2px 8px; border: 1px solid transparent; transition: background .2s, border-color .2s; }
+        .tb-cell:hover { background: color-mix(in srgb, var(--tc) 9%, transparent); border-color: color-mix(in srgb, var(--tc) 40%, transparent); }
+        .tb-cell.moi { border-color: color-mix(in srgb, var(--tc) 55%, transparent); background: color-mix(in srgb, var(--tc) 7%, transparent); }
+        .tb-med { width: 86px; height: 86px; } .tb-cell:hover .tb-med { filter: drop-shadow(0 0 9px var(--tc)); }
+        .tb-nom { font-size: .6em; letter-spacing: 1px; color: var(--tc); font-weight: bold; text-align: center; line-height: 1.25; min-height: 2.5em; display: flex; align-items: center; }
+        .tb-pil { display: flex; align-items: center; gap: 5px; max-width: 100%; min-width: 0; } .tb-pil b { font-size: .64em; color: #e6ecf1; letter-spacing: .5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tb-av { width: 26px; height: 26px; flex: none; border-radius: 50%; background: #1a222b center / cover; border: 2px solid var(--tc); display: flex; align-items: center; justify-content: center; font-size: .6em; font-weight: bold; color: var(--tc); }
+        .tb-av.vide { border-style: dashed; border-color: #444; background: transparent; } .tb-cell.vacant .tb-pil b { color: #667; font-weight: normal; } .tb-cell.vacant .tb-nom { color: #667; }
+        .titres-grille.avec-photos .titre-fantome { display: none; }
+        #mt-fond { position: fixed; inset: 0; z-index: 99990; background: rgba(2,3,5,.9); display: flex; align-items: center; justify-content: center; padding: clamp(8px, 2.5vw, 28px); backdrop-filter: blur(3px); }
+        #mt-fond .mt-cadre { --tc: #FFD24A; display: flex; width: min(980px, 100%); max-height: 100%; padding: 1px; box-sizing: border-box; background: linear-gradient(135deg, var(--tc), color-mix(in srgb, var(--tc) 35%, #05070a) 55%, var(--tc)); clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px)); filter: drop-shadow(0 0 28px color-mix(in srgb, var(--tc) 30%, transparent)); }
+        #mt-fond .mt-boite { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 22px 36px; width: 100%; min-height: 0; overflow-y: auto; padding: clamp(18px, 3vw, 34px); box-sizing: border-box; background: radial-gradient(ellipse at 28% 30%, color-mix(in srgb, var(--tc) 16%, #0b0f14), #05070a 72%); clip-path: polygon(0 0, calc(100% - 23px) 0, 100% 23px, 100% 100%, 23px 100%, 0 calc(100% - 23px)); color: #d5dce2; }
+        #mt-fond .mt-x { position: absolute; top: 10px; right: 30px; cursor: pointer; color: var(--tc); font-weight: bold; letter-spacing: 2px; padding: 4px 8px; }
+        #mt-fond .mt-sc { perspective: 1400px; flex: none; display: flex; align-items: center; justify-content: center; }
+        #mt-fond .mt-med { width: 100%; height: 100%; animation: mtTourne 7s ease-in-out infinite; filter: drop-shadow(0 0 22px color-mix(in srgb, var(--tc) 40%, transparent)); }
+        #mt-fond .mt-sc:hover .mt-med { animation-play-state: paused; }
+        @keyframes mtTourne { 0%, 100% { transform: rotateY(-18deg) rotateX(4deg); } 50% { transform: rotateY(18deg) rotateX(-3deg); } }
+        #mt-fond .mt-txt { flex: 1 1 300px; min-width: min(300px, 100%); max-width: 460px; }
+        #mt-fond .mt-nom { font-size: clamp(1.3em, 3.2vw, 2em); font-weight: bold; letter-spacing: 3px; color: var(--tc); text-shadow: 0 0 18px color-mix(in srgb, var(--tc) 45%, transparent); }
+        #mt-fond .mt-sous { letter-spacing: 5px; font-size: .75em; color: #8b97a2; margin: 2px 0 14px; }
+        #mt-fond .mt-desc { line-height: 1.55; font-size: .9em; } #mt-fond .mt-mes { color: #7d8791; font-size: .75em; margin-top: 8px; line-height: 1.5; }
+        #mt-fond .mt-tit { display: flex; align-items: center; gap: 14px; margin-top: 18px; padding: 12px; border: 1px solid color-mix(in srgb, var(--tc) 40%, transparent); background: rgba(255,255,255,.03); }
+        #mt-fond .mt-av { width: 64px; height: 64px; flex: none; border-radius: 50%; background: #1a222b center / cover; border: 2px solid var(--tc); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--tc); }
+        #mt-fond .mt-pil { font-weight: bold; letter-spacing: 2px; color: #fff; font-size: 1.05em; } #mt-fond .mt-val { color: var(--tc); font-weight: bold; margin-top: 2px; } #mt-fond .mt-dep { color: #8b97a2; font-size: .75em; margin-top: 2px; }
+        #mt-fond .mt-sec { margin-top: 8px; font-size: .78em; color: #9aa6b0; } #mt-fond .mt-reg { margin-top: 12px; font-size: .7em; color: #6e7882; line-height: 1.5; }
+        #mt-fond .mt-vac { margin-top: 18px; padding: 12px; border: 1px dashed #4a5560; color: #aab4be; letter-spacing: 3px; font-weight: bold; } #mt-fond .mt-vac small { display: block; letter-spacing: 0; font-weight: normal; margin-top: 4px; color: #7d8791; }
+        @media (prefers-reduced-motion: reduce) { #mt-fond .mt-med { animation: none; } }
         .titre-detail { display: flex; align-items: center; gap: 12px; cursor: help; }
         .titre-detail-med { width: 56px; height: 56px; flex: none; }
         .titre-detail b { display: block; font-size: 0.8em; letter-spacing: 1px; }

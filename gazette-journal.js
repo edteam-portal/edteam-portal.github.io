@@ -19,6 +19,9 @@
             ".ed-btn{border:1px solid #1f4650;color:#00F0FF;padding:5px 11px;font-size:.74em;letter-spacing:2px;cursor:pointer;user-select:none;white-space:nowrap}.ed-btn:hover{background:rgba(0,240,255,.1)}.ed-btn.off{opacity:.3;pointer-events:none}.ed-x{color:#00F0FF;font-weight:bold;cursor:pointer;padding:0 4px}",
             ".ed-corps{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1f5560 transparent}.ed-corps::-webkit-scrollbar{width:8px}.ed-corps::-webkit-scrollbar-thumb{background:#1f5560;border-radius:4px}",
             ".ed-kio{padding:20px}.ed-kio h2{font-size:.72em;letter-spacing:4px;color:#6f8590;font-weight:normal;margin:4px 0 14px}",
+            ".ed-haut{display:flex;flex-wrap:wrap;gap:22px 28px;align-items:flex-start}.ed-edit{flex:0 1 560px;min-width:min(300px,100%)}.ed-anec{flex:1 1 320px;max-width:520px;min-width:min(300px,100%);max-height:340px;display:flex;flex-direction:column;border:1px solid #16303a;background:#070d13;padding:12px 14px 10px}.ed-anec h2{margin:0 0 10px!important;color:#00F0FF!important;flex:none}.ed-anec h2 em{font-style:normal;color:#5f7380;margin-left:6px}",
+            ".ed-anl{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1f5560 transparent}.ed-anl .l{display:flex;gap:9px;align-items:center;padding:7px 3px;border-bottom:1px solid #0f1c24;cursor:pointer;color:#c3d3db;font-size:.8em;line-height:1.3}.ed-anl .l:hover{background:rgba(0,240,255,.07);color:#fff}.ed-anl .tg,.ed-an .tg{flex:none;border:1px solid;padding:0 5px;font-size:.62em;letter-spacing:1.5px;line-height:1.7}.ed-anl .tt{flex:1;min-width:0}.ed-anl .l b{flex:none;font-weight:normal;color:#5f7380;font-size:.85em}.ed-anp{flex:none;margin-top:8px;color:#566a75;font-size:.66em;line-height:1.5}",
+            ".ed-an{max-width:780px;margin:0 auto;padding:26px 24px 44px;color:#c8d6dd;font-size:.98em;line-height:1.8}.ed-an .k{display:flex;gap:14px;align-items:center;color:#6f8590;font-size:.72em;letter-spacing:3px;margin-bottom:12px}.ed-an .k .n{margin-left:auto}.ed-an h3{margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid #16303a;font:700 1.9em/1.15 'Rajdhani','Arial Narrow',sans-serif;color:#fff;text-transform:uppercase;letter-spacing:1px}.ed-an p{margin:0 0 14px}.ed-an .base{margin-top:24px;border-top:1px dashed #16303a;padding-top:10px;color:#6f8590;font-size:.74em;line-height:1.7}.ed-an .base b{color:#9fb3bd;font-weight:normal}.ed-an .sup{display:inline-block;margin-top:14px;border:1px solid #6b2a2a;color:#ff6b6b;font-size:.68em;letter-spacing:2px;padding:5px 10px;cursor:pointer}.ed-an .sup:hover{background:rgba(255,80,80,.1)}",
             ".ed-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}",
             ".ed-couv{border:1px solid #16303a;background:#091018;padding:10px;cursor:pointer;position:relative;transition:.15s}.ed-couv:hover{border-color:#00F0FF;box-shadow:0 0 18px rgba(0,240,255,.2)}.ed-couv.neuve{grid-column:span 2;border-color:#FF7100;box-shadow:0 0 22px rgba(255,113,0,.18)}",
             ".ed-couv .rub{position:absolute;top:-1px;left:-1px;background:#FF7100;color:#000;font-size:.62em;font-weight:bold;letter-spacing:2px;padding:2px 8px;z-index:2}",
@@ -53,10 +56,10 @@
     function corps() { return document.getElementById('ed-corps'); }
     function titre(t) { var h = document.querySelector('#ednews-ov .ed-fh h1'); if (h) h.textContent = t; }
 
-    function boutons(visibles) {
+    function boutons(visibles, anec) {
         var b = document.getElementById('ed-back'), p = document.getElementById('ed-prev'), n = document.getElementById('ed-next');
         if (b) b.style.display = visibles ? '' : 'none'; if (p) p.style.display = visibles ? '' : 'none'; if (n) n.style.display = visibles ? '' : 'none';
-        if (visibles) { p.classList.toggle('off', ST.i >= ST.liste.length - 1); n.classList.toggle('off', ST.i <= 0); }
+        if (visibles) { var lst = anec ? ST.anec : ST.liste, k = anec ? ST.ia : ST.i; p.classList.toggle('off', k >= lst.length - 1); n.classList.toggle('off', k <= 0); }
     }
 
     function dessinerKiosque() {
@@ -65,19 +68,51 @@
         var h = '<div class="ed-kio">';
         if (!ST.liste.length) h += '<div class="ed-vide">Aucune édition pour le moment.<br>La première paraît le jeudi, après le relevé hebdomadaire.</div>';
         if (nouv.length) {
-            h += '<h2>&gt; ÉDITIONS</h2><div class="ed-grille">' + nouv.map(function (g, k) {
+            h += '<div class="ed-haut"><div class="ed-edit"><h2>&gt; ÉDITIONS</h2><div class="ed-grille">' + nouv.map(function (g, k) {
                 var premiere = k === 0, i = ST.liste.indexOf(g);
                 return '<div class="ed-couv' + (premiere ? ' neuve' : '') + '" data-i="' + i + '">' + (premiere ? '<span class="rub">DERNIÈRE ÉDITION</span>' : '')
                     + '<div class="ed-mini"><div class="ed-mt">EDTEAM NEWS</div><div class="ed-ms">BULLETIN OFFICIEL · N° ' + esc(g.numero || '') + '</div><div class="ed-mh">' + esc(g.titre) + '</div><div class="ed-mv">' + ART[(g.id || 0) % 4] + '</div></div>'
                     + '<div class="ed-cd"><span>' + esc(dateFr(g.created_at)) + '</span><span>' + (g.hero ? 'PILIER : ' + esc(String(g.hero).toUpperCase()) : '') + '</span></div></div>';
-            }).join('') + '</div>';
-        }
+            }).join('') + '</div></div><aside class="ed-anec" id="ed-anec" style="display:none"></aside></div>';
+        } else h += '<div class="ed-haut"><aside class="ed-anec" id="ed-anec" style="display:none"></aside></div>';
         if (!nouv.length && anciennes.length) h += '<div class="ed-vide" style="padding:26px 10px 8px">Les éditions mises en page de EDTEAM News paraîtront à partir du prochain jeudi.<br>Les éditions précédentes restent lisibles ci-dessous.</div>';
         if (anciennes.length) {
             h += '<div class="ed-arch"><h2>&gt; ANCIENNES ÉDITIONS (TEXTE)</h2>' + anciennes.map(function (g) { return '<div class="l" data-i="' + ST.liste.indexOf(g) + '"><b>' + esc(dateFr(g.created_at)) + '</b>' + esc(g.titre) + '</div>'; }).join('') + '</div>';
         }
         corps().innerHTML = h + '</div>'; corps().scrollTop = 0;
         [].forEach.call(corps().querySelectorAll('[data-i]'), function (e) { e.addEventListener('click', function () { lire(Number(e.getAttribute('data-i'))); }); });
+        anecdotesKiosque();
+    }
+
+    var TON = { humour: ['HUMOUR', '#FFD700'], epique: ['ÉPIQUE', '#FF7100'], emotion: ['ÉMOTION', '#ff8fb0'], serieux: ['SÉRIEUX', '#00F0FF'] };
+    function peutAnecdotes() { try { var p = window.profilCommandant; return !!(p && (p.est_amiral || p.est_directeur)); } catch (e) { return false; } }
+    // lecture d'une anecdote DANS le kiosque (meme cadre que les editions : retour kiosque, fleches precedente / suivante), sans la liste dessous
+    function lireAnecdote(k) {
+        var a = ST.anec[k]; if (!a) return;
+        ST.ia = k; ST.vue = 'anecdote'; titre('▣ EDTEAM NEWS // ANECDOTE DE L\'ESCADRON'); boutons(true, true);
+        var t = TON[a.ton] || ['HISTOIRE', '#9fb3bd'];
+        var paras = String(a.texte || '').split(/\n+/).filter(Boolean).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+        corps().innerHTML = '<div class="ed-an"><div class="k"><span class="tg" style="color:' + t[1] + ';border-color:' + t[1] + '">' + t[0] + '</span><span>' + esc(dateFr(a.created_at)) + '</span><span class="n">' + (k + 1) + ' / ' + ST.anec.length + '</span></div>'
+            + '<h3>' + esc(a.titre) + '</h3>' + paras
+            + '<div class="base"><b>Fait réel :</b> ' + esc(a.fait || '') + ' · CMDR ' + esc(String(a.cmdr_nom || '').toUpperCase()) + '<br>Histoire écrite par une IA à partir de ce fait ; le reste est de la fiction.</div>'
+            + (peutAnecdotes() && window.EDTEAMAnecdotes ? '<div class="sup" id="ed-an-sup">SUPPRIMER CETTE ANECDOTE</div>' : '') + '</div>';
+        corps().scrollTop = 0;
+        var s = document.getElementById('ed-an-sup');
+        if (s) s.addEventListener('click', async function () { await window.EDTEAMAnecdotes.supprimer(Number(a.id)); dessinerKiosque(); });
+    }
+
+    // ANECDOTES DE L'ESCADRON : la liste (la plus recente en haut) a cote des editions ; un clic ouvre l'anecdote en entier (anecdotes.js). Une lecture legere a l'ouverture du kiosque ; rien si aucune anecdote.
+    async function anecdotesKiosque() {
+        try {
+            if (!window.EDTEAMAnecdotes || !ST.opts || !ST.opts.db) return;
+            var r = await ST.opts.db.rpc('anecdotes_escadron', { p_limite: 30 });
+            var z = document.getElementById('ed-anec');
+            if (!z || ST.vue !== 'kiosque' || !r || r.error || !Array.isArray(r.data) || !r.data.length) return;
+            ST.anec = r.data;
+            z.innerHTML = '<h2>&gt; ANECDOTES DE L’ESCADRON <em>' + r.data.length + '</em></h2><div class="ed-anl">' + r.data.map(function (a, i) { var t = TON[a.ton] || ['', '#9fb3bd']; return '<div class="l" data-an="' + i + '"><span class="tg" style="color:' + t[1] + ';border-color:' + t[1] + '">' + t[0] + '</span><span class="tt">' + esc(a.titre) + '</span><b>' + esc(dateFr(a.created_at).slice(0, 5)) + '</b></div>'; }).join('') + '</div><div class="ed-anp">Histoires écrites par une IA à partir de faits réels de l’escadron.</div>';
+            z.style.display = '';
+            [].forEach.call(z.querySelectorAll('[data-an]'), function (e) { e.addEventListener('click', function () { lireAnecdote(Number(e.getAttribute('data-an'))); }); });
+        } catch (e) { /* le kiosque reste utilisable sans les anecdotes */ }
     }
 
     // FRERES D'ARMES : encart « Ils nous ont aides » (SQL 205) = les pilotes d'autres escadrons qui ont agi sur les campagnes de l'escadron pendant la PERIODE DE L'EDITION.
@@ -125,22 +160,24 @@
         document.documentElement.style.overflow = ''; document.removeEventListener('keydown', touche); ST.opts = null;
     }
     function touche(e) {
-        if (e.key === 'Escape') { if (ST.vue === 'edition') dessinerKiosque(); else fermer(); }
+        if (e.key === 'Escape') { if (ST.vue === 'edition' || ST.vue === 'anecdote') dessinerKiosque(); else fermer(); }
+        else if (ST.vue === 'anecdote' && e.key === 'ArrowLeft' && ST.ia < ST.anec.length - 1) lireAnecdote(ST.ia + 1);
+        else if (ST.vue === 'anecdote' && e.key === 'ArrowRight' && ST.ia > 0) lireAnecdote(ST.ia - 1);
         else if (ST.vue === 'edition' && e.key === 'ArrowLeft' && ST.i < ST.liste.length - 1) lire(ST.i + 1);
         else if (ST.vue === 'edition' && e.key === 'ArrowRight' && ST.i > 0) lire(ST.i - 1);
     }
 
     async function ouvrir(opts) {
         css(); if (document.getElementById('ednews-ov')) return;
-        ST = { opts: opts, liste: [], i: -1, vue: 'kiosque' };
+        ST = { opts: opts, liste: [], i: -1, vue: 'kiosque', anec: [], ia: -1 };
         if (typeof window.sonClic === 'function') window.sonClic();
         var v = document.createElement('div'); v.id = 'ednews-ov'; v.className = 'ed-ov';
         v.addEventListener('click', function (e) { if (e.target === v) fermer(); });
         v.innerHTML = '<div class="ed-fiche"><div class="ed-fh"><span class="ed-btn" id="ed-back">◀ KIOSQUE</span><h1></h1><span class="ed-btn" id="ed-prev" title="Édition précédente">◀</span><span class="ed-btn" id="ed-next" title="Édition suivante">▶</span><span class="ed-x" id="ed-x">X</span></div><div class="ed-corps" id="ed-corps"><div class="ed-vide">Chargement…</div></div></div>';
         document.body.appendChild(v); document.documentElement.style.overflow = 'hidden'; document.addEventListener('keydown', touche);
         document.getElementById('ed-x').addEventListener('click', fermer); document.getElementById('ed-back').addEventListener('click', dessinerKiosque);
-        document.getElementById('ed-prev').addEventListener('click', function () { if (ST.i < ST.liste.length - 1) lire(ST.i + 1); });
-        document.getElementById('ed-next').addEventListener('click', function () { if (ST.i > 0) lire(ST.i - 1); });
+        document.getElementById('ed-prev').addEventListener('click', function () { if (ST.vue === 'anecdote') { if (ST.ia < ST.anec.length - 1) lireAnecdote(ST.ia + 1); return; } if (ST.i < ST.liste.length - 1) lire(ST.i + 1); });
+        document.getElementById('ed-next').addEventListener('click', function () { if (ST.vue === 'anecdote') { if (ST.ia > 0) lireAnecdote(ST.ia - 1); return; } if (ST.i > 0) lire(ST.i - 1); });
         titre('▣ EDTEAM NEWS // KIOSQUE DE L\'ESCADRON'); boutons(false);
         var q = function (cols) { var r = ST.opts.db.from('gazette_hebdo').select(cols).order('created_at', { ascending: false }).limit(60); return ST.opts.escadron ? r.eq('escadron_id', ST.opts.escadron) : r; };
         var res;

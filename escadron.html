@@ -21,7 +21,7 @@
     <script src="copier-lieux.js?v=2"></script>
     <script src="carriers.js?v=22"></script>
     <script src="systemes-faction.js?v=20"></script>
-    <script src="navigation.js?v=72"></script>
+    <script src="navigation.js?v=74"></script>
     <script src="invitations.js?v=21"></script>
     <script src="initiatives-mode.js?v=1"></script>
 
@@ -392,7 +392,8 @@
         .eff-ligne b { color: #fff; font-size: 1.15em; } .eff-ligne small { color: #888; }
         .eff-barre { height: 3px; background: rgba(255, 255, 255, 0.08); margin-top: 3px; }
         .eff-barre > i { display: block; height: 100%; background: var(--ed-orange); }
-        .eff-dec { display: flex; align-items: center; gap: 5px; height: 34px; border-top: 1px dashed rgba(255, 255, 255, 0.12); padding-top: 6px; margin-top: auto; overflow: hidden; }
+        .eff-carte.a-titre .eff-img::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; box-shadow: inset 0 0 0 3px var(--tt), inset 0 0 26px color-mix(in srgb, var(--tt) 40%, transparent); }
+        .eff-dec { display: flex; align-items: center; gap: 5px; height: 54px; border-top: 1px dashed rgba(255, 255, 255, 0.12); padding-top: 6px; margin-top: auto; overflow: hidden; }
         .eff-plaques { display: flex; align-items: center; gap: 6px; zoom: 0.5; min-height: 44px; }
         .eff-plaques > span { font-size: 1.7em !important; }
         .eff-rien { color: #666; font-size: 0.78em; font-style: italic; }
@@ -740,13 +741,14 @@
                 const powerplay = p.puissance_nom ? 'Powerplay rang ' + (Number(p.puissance_rang) || 0) : 'Powerplay —';
 
                 // titres de specialiste et meilleures plaques
-                const titresHtml = window.htmlTitresPilote ? window.htmlTitresPilote(titres, p.user_id, 30) : '';
+                const titresHtml = window.htmlTitresPilote ? window.htmlTitresPilote(titres, p.user_id, 46) : '';
+                const ttCoul = window.couleursTitresPilote ? window.couleursTitresPilote(titres, p.user_id) : [];
                 const rubans = rubansDepuisPalmares(p.palmares_bgs);
                 const totalPlaques = Math.max(rubans.length, p.palmares_total || 0);
                 const plaquesHtml = rubans.slice(0, 3).map(r => r.html).join('') + (totalPlaques > 3 ? `<span style="color: #666; font-size: 0.72em; font-weight: bold; margin-left: 3px;" title="+${totalPlaques - 3} autres décorations">+${totalPlaques - 3}</span>` : '');
 
                 return `
-                <div class="bloc eff-carte ${roleClasse}${moi ? ' cy' : ''}" onclick="ouvrirProfilPilote('${p.user_id}')" onmouseenter="if(typeof sonHover==='function') sonHover()">
+                <div class="bloc eff-carte ${roleClasse}${moi ? ' cy' : ''}${ttCoul.length ? ' a-titre' : ''}"${ttCoul.length ? ` style="--tt: ${ttCoul[0]};"` : ''} onclick="ouvrirProfilPilote('${p.user_id}')" onmouseenter="if(typeof sonHover==='function') sonHover()">
                     <div class="eff-img">
                         ${portraitCarte(p)}
                         ${moi && !(window.EDTEAMPhotos && window.EDTEAMPhotos.url(p.user_id, p.cmdr_nom)) ? '<span class="eff-ajout" onclick="event.stopPropagation(); if(typeof sonClic===\'function\') sonClic(); ouvrirModal(\'modal-gestion-compte\')">+ AJOUTER MA PHOTO</span>' : ''}
@@ -1295,7 +1297,7 @@
         }
     </script>
 
-    <script src="medailles.js?v=18"></script>
+    <script src="medailles.js?v=19"></script>
     <script src="rubans.js?v=2"></script>
     <script src="footer.js?v=54"></script>
 </body>
