@@ -650,6 +650,8 @@
             if (r.error) { console.error(r.error); alert(r.error.message || 'Échec de la clôture.'); return; }
             if (typeof sonSucces === 'function') sonSucces();
             await this.rafraichir();
+            // FRERES D'ARMES : si des allies ont aide cette campagne, l'Amiral peut leur ajouter un mot (facultatif) ; sans allie, aucune fenetre en plus ; sans les scripts SQL 204/205, rien
+            try { if (window.__faCharger) window.__faCharger().then(function () { return window.edteamFreresArmes.remercier(id); }).catch(function () { /* rien */ }); } catch (e) { /* rien */ }
         },
         // replier / deplier une campagne
         basculer: function (id) {

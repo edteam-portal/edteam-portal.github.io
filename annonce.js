@@ -640,6 +640,59 @@
             aide: 'Menu latéral : ESCADRON · onglet SYSTÈMES · œil au début de chaque ligne · à utiliser sur PC ou tablette',
             lien: 'escadron.html',
             mobile: false
+        },
+        {
+            id: 'freres-armes-2026-11',
+            couleur: '#D4A24C',
+            etiquette: '★ NOUVELLE FONCTION',
+            titre: 'FRÈRES D’ARMES : LE MERCI ENTRE ESCADRONS',
+            avant: ['medaille.js?v=2', 'freres-armes.js?v=9'],
+            pages: [
+                {
+                    titre: 'AIDEZ UN ALLIÉ, SOYEZ REMERCIÉ',
+                    sous: 'Une médaille qui se construit, campagne après campagne',
+                    intro: 'Quand l’Amiral d’un autre escadron vous invite à l’une de ses campagnes, <b>chaque campagne où vous agissez compte une fois</b> pour votre médaille <b>FRÈRES D’ARMES</b>, quel que soit l’effort. À la clôture, l’Amiral vous remet <b>un diplôme de remerciement</b>. Il n’y a <b>aucun classement</b> : vous progressez pour vous, et pour l’alliance.',
+                    visuelHtml: anvFa1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'VOUS AIDEZ', d: 'Missions, combats, mérites Powerplay… sur la campagne d’un autre escadron : <b>un effort mesuré suffit</b>.' },
+                        { n: '2', t: 'L’AMIRAL CLÔTURE', d: 'Un diplôme est créé <b>automatiquement</b> pour chaque allié, avec un mot de l’Amiral s’il en écrit un. Une ligne apparaît dans le fil des deux escadrons.' },
+                        { n: '3', t: 'VOTRE MÉDAILLE GRANDIT', d: 'Une graduation par campagne, et <b>5 étoiles</b> à 1, 3, 5, 10 et 20 campagnes.' }
+                    ],
+                    avis: 'Les efforts de colonisation et le soutien libre ne comptent pas pour l’instant.'
+                },
+                {
+                    titre: 'LE DIPLÔME',
+                    sous: 'Un document holographique, à garder',
+                    intro: 'Il porte <b>le logo de l’escadron qui vous remercie</b>, votre avatar, la signature de l’Amiral, un numéro d’authenticité et <b>votre médaille à cet instant</b>. À votre première connexion après la clôture, il s’affiche <b>en plein écran, une seule fois</b>.',
+                    visuelHtml: anvFa2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '✉', t: 'LE MOT DE L’AMIRAL', d: 'Jusqu’à 240 caractères, dans l’encadré « Transmission de l’Amiral ». L’Amiral l’écrit juste après la clôture, ou plus tard.' },
+                        { n: '◈', t: 'À RETROUVER TOUJOURS', d: 'Dès votre premier diplôme, la pastille <b>FRÈRES D’ARMES</b> apparaît en haut de page : elle ouvre vos diplômes et votre médaille.' },
+                        { n: '⌕', t: 'LA LOUPE', d: 'Cliquez sur une médaille pour l’agrandir. Survolez une graduation ou une étoile : elle vous dit à quelle campagne elle correspond (pour la vôtre seulement).' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'BRONZE, ARGENT, OR, DIAMANT',
+                    sous: 'Le métal change avec le nombre de campagnes',
+                    intro: 'Comme les plaques de directives, la médaille change de métal. <b>Chacun voit ses alliés</b> : tous les membres d’un escadron découvrent, dans l’onglet <b>FRÈRES D’ARMES</b> de la page Escadron, les pilotes qui ont aidé leurs campagnes. <b>Seul l’Amiral</b> rédige les remerciements.',
+                    visuelHtml: anvFa3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '▤', t: 'PAGE ESCADRON', d: 'Onglet <b>FRÈRES D’ARMES</b> : les alliés et solitaires qui ont aidé vos campagnes, avec leur médaille. L’Amiral y écrit ses messages.' },
+                        { n: '◉', t: 'DANS LA GAZETTE', d: 'Chaque édition d’EDTEAM News a son encart <b>« Ils nous ont aidés »</b>, pour la semaine concernée.' },
+                        { n: '☎', t: 'SUR MOBILE', d: 'Sous-onglet <b>ALLIÉS</b> de ESCADRON, et la ligne <b>FRÈRES D’ARMES</b> des Réglages dès votre premier diplôme.' }
+                    ]
+                }
+            ],
+            cta: 'VOIR LES FRÈRES D’ARMES',
+            aide: 'Page Escadron · onglet FRÈRES D’ARMES (ordinateur) · sous-onglet ALLIÉS de ESCADRON (mobile)',
+            action: function () {
+                if (typeof escVue === 'function' && typeof switchMobileTab === 'function') { switchMobileTab('escadron'); escVue('fa'); }
+                else window.location.href = 'escadron.html#fa';
+            }
         }
     ];
 
@@ -775,6 +828,28 @@
             + '<tr><td class="oe">' + SVV_OEIL + '</td><td><b>POTAMOI</b> <span class="al v">SURVEILLANCE</span><br><small style="color:#7d8a92">Surveillé · guerre · limite 6 h</small></td><td style="color:#ff8a8a">7 h</td><td style="color:#00F0FF">31 al</td></tr>'
             + '</tbody></table><div style="margin-top:10px;color:#cfd8dc">Vous arrivez à Lave : <span class="pt">+1 BGS</span><span class="pt">+1 ESPION</span> · le système sort de la liste pour tout l’escadron.</div></div></div>';
     }
+    // ---- annonce « Freres d'armes » : trois visuels dessines avec le VRAI code de la medaille et du diplome (noms fictifs, aucune donnee reelle) ----
+    var FAA_CSS = '<style>#edteam-annonce .faa{display:flex;flex-direction:column;align-items:center;gap:12px;margin:14px auto 0}'
+        + '#edteam-annonce .faa-hero{filter:drop-shadow(0 0 22px rgba(255,210,74,.25))} #edteam-annonce .faa-cap{text-align:center;color:#9fb0bd;font-size:.74em;letter-spacing:3px;line-height:1.7} #edteam-annonce .faa-cap b{display:block;color:#FFD24A;font-weight:normal;font-size:1.15em;letter-spacing:4px}'
+        + '#edteam-annonce .faa-flux{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:4px} #edteam-annonce .faa-flux span{border:1px solid rgba(212,162,76,.55);background:rgba(212,162,76,.08);color:#f1dcae;padding:6px 12px;font-size:.72em;letter-spacing:2px} #edteam-annonce .faa-flux i{color:#D4A24C;font-style:normal}'
+        + '#edteam-annonce .faa-dip{width:880px;zoom:.62;margin:0 auto;pointer-events:none} #edteam-annonce .faa-dip .fad-x{display:none}'
+        + '#edteam-annonce .faa-echelle{display:flex;justify-content:center;gap:clamp(6px,2.4vw,30px);flex-wrap:wrap;align-items:flex-end} #edteam-annonce .faa-echelle figure{margin:0;text-align:center} #edteam-annonce .faa-echelle figcaption{margin-top:6px;color:#9fb0bd;font-size:.7em;letter-spacing:2px;line-height:1.6} #edteam-annonce .faa-echelle figcaption b{display:block;color:#fff;font-weight:normal;font-size:1.1em;letter-spacing:3px}'
+        + '@media (max-width:900px){#edteam-annonce .faa-dip{zoom:.4}}</style>';
+    function anvFa1() {
+        var M = window.EdteamMedaille; if (!M) return '';
+        return FAA_CSS + '<div class="faa"><div class="faa-hero">' + M.html3D(34, 170) + '</div><div class="faa-cap"><b>34 CAMPAGNES ALLIÉES</b>MÉDAILLE ARGENT · 5 ÉTOILES</div>'
+            + '<div class="faa-flux"><span>VOUS AIDEZ</span><i>▸</i><span>L’AMIRAL CLÔTURE</span><i>▸</i><span>DIPLÔME + MÉDAILLE</span></div></div>';
+    }
+    function anvFa2() {
+        var F = window.edteamFreresArmes; if (!F || !F.exemple || !window.EdteamMedaille) return '';
+        return FAA_CSS + '<div class="faa">' + F.exemple() + '</div>';
+    }
+    function anvFa3() {
+        var M = window.EdteamMedaille; if (!M) return '';
+        return FAA_CSS + '<div class="faa"><div class="faa-echelle">' + [[5, 'BRONZE', '1 à 29'], [34, 'ARGENT', 'dès 30'], [62, 'OR', 'dès 50'], [120, 'DIAMANT', 'dès 100']].map(function (x) {
+            return '<figure>' + M.svg(x[0], 104, false) + '<figcaption><b>' + x[1] + '</b>' + x[2] + ' campagnes</figcaption></figure>'; }).join('') + '</div></div>';
+    }
+
     // ---- annonce « EDTEAM News » : trois visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
     var NWS_CSS = '<style>.nw{max-width:640px;margin:16px auto 0;text-align:left}.nw .une{border:1px solid #00F0FF55;background:linear-gradient(180deg,rgba(0,40,52,.55),rgba(3,8,12,.9));padding:12px 14px}'
         + '.nw .mt{text-align:center;font:700 1.7em/1 Rajdhani,Arial Narrow,sans-serif;letter-spacing:9px;color:#fff;border-top:3px double #00F0FF;border-bottom:1px solid #00F0FF;padding:6px 0 5px;text-shadow:0 0 14px rgba(0,240,255,.5)}.nw .mt em{font-style:normal;color:#00F0FF}'
@@ -1099,6 +1174,16 @@
         document.body.appendChild(ov);
     }
 
+    // scripts a charger AVANT d'afficher une annonce (ex. : la medaille, dessinee par du code charge a la demande) ; en cas d'echec, l'annonce s'affiche quand meme (sans visuel)
+    function chargerAvant(liste, fin) {
+        var i = 0;
+        (function suite() {
+            if (i >= liste.length) { fin(); return; }
+            var src = liste[i++], base = src.split('?')[0];
+            if ((base === 'medaille.js' && window.EdteamMedaille) || (base === 'freres-armes.js' && window.edteamFreresArmes)) { suite(); return; }
+            var sc = document.createElement('script'); sc.src = src; sc.onload = suite; sc.onerror = suite; document.head.appendChild(sc);
+        })();
+    }
     function monter(a, uid, aller) {
         css();
         var ov = document.createElement('div');
@@ -1167,7 +1252,7 @@
                 if (!a) return;
                 setTimeout(function () {
                     if (document.getElementById('edteam-annonce') || document.getElementById('edteam-revel')) return;
-                    monter(a, profil.user_id, opts.aller);
+                    if (a.avant && a.avant.length) chargerAvant(a.avant, function () { monter(a, profil.user_id, opts.aller); }); else monter(a, profil.user_id, opts.aller);
                 }, typeof opts.delai === 'number' ? opts.delai : 1800);
             } catch (e) { /* une annonce ne doit jamais gener la page */ }
         },

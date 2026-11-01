@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-freres-armes", date: "2026-11-01T18:30:00Z", type: "NOUVEAU",
+        titre: "Frères d’armes : un merci entre escadrons, avec médaille et diplôme",
+        texte: "Quand vous aidez la campagne d’un autre escadron, elle compte pour votre médaille FRÈRES D’ARMES (une graduation par campagne, 5 étoiles à 1, 3, 5, 10 et 20 campagnes, puis le métal change : bronze, argent à 30, or à 50, diamant à 100). À la clôture de la campagne, l’Amiral hôte vous remet automatiquement un diplôme de remerciement holographique, avec un mot de sa part s’il en écrit un ; il s’affiche en plein écran à votre prochaine arrivée sur le QG, une seule fois, puis reste dans la fenêtre FRÈRES D’ARMES (pastille en haut de page). Cliquez sur n’importe quelle médaille pour l’agrandir et comprendre chaque graduation. Les membres d’un escadron voient dans l’onglet FRÈRES D’ARMES de la page Escadron les alliés qui ont aidé leurs campagnes ; l’Amiral y rédige les remerciements. Une ligne apparaît dans le fil des deux escadrons, et la gazette a son encart « Ils nous ont aidés ». Il n’y a aucun classement. Sur mobile : sous-onglet ALLIÉS de ESCADRON et ligne FRÈRES D’ARMES des Réglages.",
+        important: true
+    },
+    {
         id: "2026-11-mobile-fil-apercu-groupes", date: "2026-11-01T17:20:00Z", type: "CORRIGE",
         titre: "Mobile : le fil de l’escadron ne s’allonge plus quand plusieurs événements se regroupent",
         texte: "Sur l’accueil du téléphone, quand plusieurs directives modifiées, nouvelles missions ou joueurs croisés arrivent en peu de temps, le fil les regroupait en une carte très haute. L’aperçu n’affiche plus que le titre du groupe, sur une ligne ; le détail et les réactions restent dans le fil complet (toucher la carte).",

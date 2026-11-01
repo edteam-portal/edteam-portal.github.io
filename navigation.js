@@ -396,6 +396,7 @@ window.actualiserHeader = function(profilData) {
                 '<path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>');
             zone.innerHTML = h;
             zone.style.display = 'flex';
+            try { window.__faPastille(zone, profilData.user_id); } catch (e) { /* la pastille « Freres d'armes » ne doit jamais gener l'en-tete */ }
             if (!zone.__tips) {
                 zone.__tips = true;
                 const cible = e => e.target.closest ? e.target.closest('.hd-rg') : null;
@@ -476,9 +477,54 @@ window.EDTEAM_RANGS = {
     fed: ["AUCUN", "RECRUIT", "CADET", "MIDSHIPMAN", "PETTY OFFICER", "CHIEF PETTY OFFICER", "WARRANT OFFICER", "ENSIGN", "LIEUTENANT", "LT. COMMANDER", "POST COMMANDER", "POST CAPTAIN", "REAR ADMIRAL", "VICE ADMIRAL", "ADMIRAL"],
     emp: ["AUCUN", "OUTSIDER", "SERF", "MASTER", "SQUIRE", "KNIGHT", "LORD", "BARON", "VISCOUNT", "COUNT", "EARL", "MARQUIS", "DUKE", "PRINCE", "KING"]
 };
+// FRERES D'ARMES (SQL 204) : pastille de l'en-tete, visible SEULEMENT pour un pilote qui a deja au moins un diplome. Les donnees (rang + diplomes) sont gardees 10 minutes dans la session :
+// une seule petite requete, puis plus rien. freres-armes.js (la fenetre) et medaille.js (le dessin) ne sont telecharges qu'au clic.
+window.__faCharger = function () {
+    if (window.edteamFreresArmes) return Promise.resolve();
+    if (!window.__faChargement) {
+        window.__faChargement = new Promise((ok, ko) => {
+            const s = document.createElement('script');
+            s.src = 'freres-armes.js?v=9';
+            s.onload = ok; s.onerror = () => { window.__faChargement = null; ko(); };
+            document.head.appendChild(s);
+        });
+    }
+    return window.__faChargement;
+};
+window.__faPastille = function (zone, uid0) {
+    const uid = uid0 || (window.profilCommandant || {}).user_id; if (!uid || !zone) return;
+    window.__faUid = uid;
+    const cle = 'edteam_fa_v1_' + uid;
+    const poser = d => {
+        zone.querySelectorAll('.hd-rg.fa').forEach(e => e.remove());
+        if (!d || !(Number(d.n) > 0)) return;
+        const COUL = { bronze: '#e39a52', argent: '#e8f1f8', or: '#ffd24a', diamant: '#8fe6ff' }, NOM = { bronze: 'BRONZE', argent: 'ARGENT', or: 'OR', diamant: 'DIAMANT' };
+        const col = d.metal === 'bronze' ? '#D4A24C' : (COUL[d.metal] || '#D4A24C'), e = Math.max(0, Math.min(5, Number(d.etoiles) || 0)), etoiles = '★'.repeat(e) + '☆'.repeat(5 - e);
+        const att = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        const nb = Number(d.n), txt = nb + ' campagne' + (nb > 1 ? 's' : '') + ' alliée' + (nb > 1 ? 's' : '') + ' aidée' + (nb > 1 ? 's' : '') + ' · médaille ' + (NOM[d.metal] || '') + '. Diplômes de remerciement et médaille.';
+        zone.insertAdjacentHTML('beforeend', '<div class="hd-rg fa" style="--c:' + col + ';" onclick="ouvrirCarriere(\'fa\')" data-c="' + col + '" data-t="FRÈRES D’ARMES" data-d="' + att(txt) + '"><div class="hx"><svg viewBox="0 0 100 100"><polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40"/><polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40"/><polygon points="50,45 42,55 50,65 58,55"/></svg></div>'
+            + '<div class="tx"><div class="l">FRÈRES D’ARMES</div><div class="v"><span class="vl">' + (nb >= 30 ? nb + ' · ' + (NOM[d.metal] || '') : etoiles) + '</span><span class="vc">' + (nb >= 30 ? nb : etoiles) + '</span></div></div></div>');
+        // ANNONCE : un diplome pas encore vu s'affiche UNE fois, a l'arrivee sur le QG (le serveur retient qu'il a ete vu)
+        try { if (/qg.html/i.test(location.pathname) && !window.__faAnnonce && (d.diplomes || []).some(x => !x.vu)) { window.__faAnnonce = true; window.__faCharger().then(() => window.edteamFreresArmes.annonce()).catch(() => {}); } } catch (e) { /* l'annonce ne doit jamais gener la page */ }
+        if (!document.getElementById('fa-hx-css')) { const st = document.createElement('style'); st.id = 'fa-hx-css'; st.textContent = '.hd-rg.fa .hx svg { width: 19px; height: 19px; fill: var(--c); stroke: none; }'; document.head.appendChild(st); }
+    };
+    try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < 600000) { poser(c.d); return; } } catch (e) { /* memoire illisible */ }
+    const db = window.supabaseApp; if (!db || window.__faEnCours) return;
+    window.__faEnCours = true;
+    db.rpc('mes_freres_armes').then(r => {
+        window.__faEnCours = false;
+        if (r.error || !r.data || typeof r.data !== 'object') return;      // fonction absente (script SQL 204 pas lance) : rien ne s'affiche
+        try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), d: r.data })); } catch (e) { /* stockage plein */ }
+        poser(r.data);
+    }, () => { window.__faEnCours = false; });
+};
 // carriere.js (les quatre fenetres : BGS, Powerplay, Federation, Auxiliaires) n'est telecharge qu'au premier clic sur une pastille
 window.ouvrirCarriere = function(quoi) {
     if (typeof hideHoloTooltip === 'function') hideHoloTooltip();
+    if (quoi === 'fa') {       // Freres d'armes : freres-armes.js (fenetre + diplomes) puis medaille.js (dessin), charges au premier clic
+        window.__faCharger().then(() => window.edteamFreresArmes.ouvrir()).catch(() => {});
+        return;
+    }
     const lancer = () => { if (window.carriere) window.carriere.ouvrir(quoi); };
     if (window.carriere) { lancer(); return; }
     if (!window.__carriereChargement) {

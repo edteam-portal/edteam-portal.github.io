@@ -21,7 +21,7 @@
     <script src="copier-lieux.js?v=2"></script>
     <script src="carriers.js?v=22"></script>
     <script src="systemes-faction.js?v=20"></script>
-    <script src="navigation.js?v=59"></script>
+    <script src="navigation.js?v=69"></script>
     <script src="invitations.js?v=21"></script>
     <script src="initiatives-mode.js?v=1"></script>
 
@@ -486,8 +486,9 @@
 
             <div class="esc-onglets" role="tablist">
                 <button type="button" class="esc-onglet actif" data-onglet="systemes" role="tab">SYSTÈMES</button>
-                <button type="button" class="esc-onglet" data-onglet="membres" role="tab">MEMBRES</button>
                 <button type="button" class="esc-onglet" data-onglet="fc" role="tab">FLEET CARRIERS</button>
+                <button type="button" class="esc-onglet" data-onglet="membres" role="tab">MEMBRES</button>
+                <button type="button" class="esc-onglet" data-onglet="fa" role="tab">FRÈRES D’ARMES</button>
             </div>
 
             <section id="onglet-membres" hidden>
@@ -510,6 +511,7 @@
             </section>
 
             <section id="onglet-fc" hidden><div id="fc-escadron"></div></section>
+            <section id="onglet-fa" hidden><div id="fa-escadron"></div></section>
             <section id="onglet-systemes"><div id="sf-systemes"></div></section>
 
 
@@ -765,7 +767,7 @@
         }
 
         // ONGLETS de la page : chaque onglet ne se charge qu'a sa premiere ouverture (aucune lecture serveur tant qu'on ne l'ouvre pas) ; #membres et #fc ouvrent directement l'onglet (sans adresse : SYSTEMES)
-        const ONGLETS_ESC = { membres: 'onglet-membres', fc: 'onglet-fc', systemes: 'onglet-systemes' }, ongletsCharges = {};
+        const ONGLETS_ESC = { membres: 'onglet-membres', fc: 'onglet-fc', fa: 'onglet-fa', systemes: 'onglet-systemes' }, ongletsCharges = {};
         function ouvrirOngletEsc(nom, majUrl) {
             if (!ONGLETS_ESC[nom]) nom = 'systemes';          // onglet d'ouverture de la page
             Object.keys(ONGLETS_ESC).forEach(n => { const s = document.getElementById(ONGLETS_ESC[n]); if (s) s.hidden = n !== nom; });
@@ -773,6 +775,7 @@
             if (!ongletsCharges[nom] && window.EdteamCarriers) {
                 if (nom === 'fc') { ongletsCharges[nom] = true; window.EdteamCarriers.monterEscadron(document.getElementById('fc-escadron')); }
             }
+            if (nom === 'fa' && !ongletsCharges[nom]) { ongletsCharges[nom] = true; if (window.__faCharger) window.__faCharger().then(() => window.edteamFreresArmes.monterEscadron(document.getElementById('fa-escadron'), { pc: true })).catch(() => { ongletsCharges[nom] = false; }); }   // Freres d'armes (SQL 204 / 205) : charge a la premiere ouverture
             if (nom === 'systemes' && !ongletsCharges[nom] && window.EdteamSystemes) { ongletsCharges[nom] = true; window.EdteamSystemes.monter(document.getElementById('sf-systemes')); }
             if (majUrl) { try { history.replaceState(null, '', location.pathname + location.search + (nom === 'systemes' ? '' : '#' + nom)); } catch (e) {} }
         }

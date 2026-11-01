@@ -80,6 +80,29 @@
         [].forEach.call(corps().querySelectorAll('[data-i]'), function (e) { e.addEventListener('click', function () { lire(Number(e.getAttribute('data-i'))); }); });
     }
 
+    // FRERES D'ARMES : encart « Ils nous ont aides » (SQL 205) = les pilotes d'autres escadrons qui ont agi sur les campagnes de l'escadron pendant la PERIODE DE L'EDITION.
+    // Sans les scripts SQL, ou sans aide d'allies cette semaine-la, rien n'est ajoute : l'edition reste identique.
+    async function encartAllies(rel, idx) {
+        try {
+            var r = await ST.opts.db.rpc('gazette_allies', { p_escadron: ST.opts.escadron, p_du: rel.du, p_au: rel.au });
+            if (ST.i !== idx || !r || r.error || !Array.isArray(r.data) || !r.data.length) return;
+            var par = {}, ordre = [];
+            r.data.forEach(function (x) { var k = x.nom; if (!par[k]) { par[k] = { nom: x.nom, escadron: x.escadron, camps: [] }; ordre.push(k); } if (par[k].camps.indexOf(x.campagne) < 0) par[k].camps.push(x.campagne); });
+            if (!document.getElementById('ed-fa-css')) { var st = document.createElement('style'); st.id = 'ed-fa-css';
+                st.textContent = '.fa-enc { margin:22px 0 4px; border:1px solid rgba(62,201,255,.45); border-left:4px solid #3ec9ff; background:linear-gradient(90deg,rgba(62,201,255,.09),rgba(62,201,255,.02)); padding:14px 18px 10px; font-family:"Share Tech Mono",Consolas,monospace; }'
+                    + '.fa-enc .k { color:#3ec9ff; font-size:10px; letter-spacing:4px; } .fa-enc .t { color:#fff; font-size:16px; letter-spacing:1.5px; margin:5px 0 10px; }'
+                    + '.fa-enc .l { display:flex; align-items:center; gap:12px; padding:8px 0; border-top:1px solid rgba(255,255,255,.07); font-size:13px; color:#c8d2d9; } .fa-enc .l:first-of-type { border-top:0; }'
+                    + '.fa-enc .av { flex:none; width:32px; height:32px; border-radius:50%; background:#16202a; border:2px solid #3ec9ff; display:grid; place-items:center; font-size:10px; color:#9fb3c4; } .fa-enc .av.s { border-color:#ffb347; }'
+                    + '.fa-enc .l b { color:#fff; letter-spacing:1px; font-weight:normal; } .fa-enc .l em { margin-left:auto; text-align:right; color:#7d8a95; font-style:normal; font-size:11px; line-height:1.5; }';
+                document.head.appendChild(st); }
+            var nb = ordre.length;
+            var h = '<div class="fa-enc"><div class="k">ILS NOUS ONT AIDÉS</div><div class="t">' + nb + ' allié' + (nb > 1 ? 's' : '') + ' au service de l’escadron cette semaine-là</div>'
+                + ordre.map(function (k) { var p = par[k], ini = String(p.nom || '?').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 2) || '?';
+                    return '<div class="l"><span class="av' + (p.escadron ? '' : ' s') + '">' + esc(ini) + '</span><b>CMDR ' + esc(String(p.nom || '?').toUpperCase()) + '</b><em>' + esc(p.escadron || 'solitaire') + '<br>' + p.camps.map(function (c) { return '« ' + esc(c) + ' »'; }).join(' · ') + '</em></div>'; }).join('') + '</div>';
+            var pied = corps().querySelector('.pied'), racine = corps().querySelector('.jn');
+            if (pied) pied.insertAdjacentHTML('beforebegin', h); else if (racine) racine.insertAdjacentHTML('beforeend', h);
+        } catch (e) { /* l'encart ne doit jamais gener la lecture de l'edition */ }
+    }
     async function lire(i) {
         var g = ST.liste[i]; if (!g) return;
         ST.i = i; ST.vue = 'edition'; titre('▣ EDTEAM NEWS · ' + (g.numero ? 'ÉDITION N° ' + g.numero : dateFr(g.created_at))); boutons(true);
@@ -92,6 +115,7 @@
         var d = r.data;
         if (d.releve && window.EdteamJournal) corps().innerHTML = '<div class="ed-edition">' + window.EdteamJournal.rendre(d.releve, d.texte || {}, { numero: d.numero, photoBase: ST.opts.photoBase }) + '</div>';
         else corps().innerHTML = '<div class="ed-ancien"><h3>' + esc(d.titre) + '</h3><div style="color:#778;font-size:.8em;margin-bottom:14px">ÉDITION DU ' + esc(dateFr(d.created_at)) + '</div>' + nettoyer(d.contenu) + '</div>';
+        if (d.releve && d.releve.du && d.releve.au && ST.opts.escadron) encartAllies(d.releve, i);
         corps().scrollTop = 0;
         try { if (ST.opts.apresLecture) ST.opts.apresLecture(g.id, i === 0); } catch (e) { /* rien */ }
     }

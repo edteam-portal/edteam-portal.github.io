@@ -20,6 +20,7 @@
     // ------------------------------------------------------------------------------------------------------------
     function categorie(l) {
         var t = String(l.type_action || "").toUpperCase(), c = String(l.couleur || "");
+        if (t.indexOf("FRÈRES D") >= 0) return { k: "fa", f: "dist", nom: "FRÈRES D’ARMES", ic: "✦", col: "#3ec9ff", maj: 1 };
         if (t.indexOf("TITRE SPÉCIALISTE") >= 0) return { k: "ti", f: "dist", nom: "TITRE DE SPÉCIALISTE", ic: "★", col: "#C9D1DB", maj: 1 };
         if (t.indexOf("RANG BGS") >= 0) return { k: "rg", f: "dist", nom: "RANG BGS", ic: "▲", col: "#FFD24A", maj: 1 };
         if (t.indexOf("DISTINCTION") >= 0) return { k: "ds", f: "dist", nom: t, ic: "✪", col: "#FFD24A", maj: 1 };
@@ -43,6 +44,7 @@
     }
     // TAMPONS des lignes de directives / campagnes (page BGS) : NOUVELLE, MODIFIEE, CLOTUREE, ANNULEE
     function tampon(l, c) {
+        if (c.k === "fa") return { t: "REMERCIEMENTS", c: c.col };
         if (c.f !== "bgs") return null;
         var t = String(l.type_action || "").toUpperCase();
         if (t.indexOf("ANNULÉE") >= 0 || t.indexOf("SUPPRIMÉE") >= 0) return { t: "ANNULÉE", c: c.col };         // le tampon prend toujours la couleur de la bande verticale de la carte
@@ -89,6 +91,7 @@
             var sc = statutDe(m[1]);
             return { tit: "Nouveau joueur croisé : <b>" + esc(m[1]) + "</b>", sb: esc(m[2]) + " · " + esc(m[3]) + " · relevé par <b>" + esc(m[4]) + "</b>" + (sc && sc.why ? " · " + esc(sc.why) : ""), av: "", stamp: sc, cr: m[1] };
         }
+        if (c.k === "fa") return { tit: esc(d).replace(/(CMDR [^,«.]+?)(?= et | a | ont | pour|,)/g, "<b>$1</b>"), sb: "Frères d’armes · médaille et diplômes dans la Carrière", av: "", nom: "" };
         var par = String(l.cmdr_nom || ""), sys = par.toUpperCase() === "SYS.EDTEAM" || !par;
         var av = (c.maj || c.f === "bgs") && !sys;       // lignes de directives et de campagnes : l'avatar du pilote qui les a faites
         if (c.bv) return { tit: esc(d), sb: c.bv === "réseau" ? "Un nouveau pilote vient d’arriver sur EDTEAM" : "Un pilote de plus dans les rangs de l’escadron", av: av ? ini(par) : "", nom: av ? par : "" };

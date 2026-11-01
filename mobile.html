@@ -19,7 +19,7 @@
     <script src="shared-utils.js?v=7"></script>
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=21"></script>
-    <script src="annonce.js?v=31"></script>
+    <script src="annonce.js?v=33"></script>
     <script src="revelations.js?v=10"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
@@ -27,9 +27,9 @@
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=9"></script>
     <script src="conflit-modale.js?v=3"></script>
-    <script src="journal-fil.js?v=18"></script>
+    <script src="journal-fil.js?v=19"></script>
     <script src="journal-edition.js?v=1"></script>
-    <script src="gazette-journal.js?v=1"></script>
+    <script src="gazette-journal.js?v=2"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -793,6 +793,7 @@
                     <button class="on" data-v="membres" onclick="escVue('membres')">MEMBRES</button>
                     <button data-v="systemes" onclick="escVue('systemes')">SYSTÈMES</button>
                     <button data-v="fc" onclick="escVue('fc')">FLEET CARRIERS</button>
+                    <button data-v="fa" onclick="escVue('fa')">ALLIÉS</button>
                 </div>
                 <div id="esc-v-membres" style="display: flex; flex-direction: column; gap: 12px;">
                 <div class="xsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="x-esc-q" placeholder="Rechercher un pilote…" oninput="escRendre()"></div>
@@ -807,6 +808,7 @@
                 <button class="m-btn" style="width: 100%; font-size: 0.74em; padding: 12px; border-radius: 13px;" onclick="ouvrirSalleBgsMobile()">CLASSEMENT BGS DE L'ESCADRON</button>
                 </div>
                 <div id="esc-v-systemes" style="display: none;"><div id="sm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des systèmes…</div></div></div>
+                <div id="esc-v-fa" style="display: none;"><div id="fa-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des frères d’armes…</div></div></div>
                 <div id="esc-v-fc" style="display: none;"><div id="fm-corps"><div class="xmut" style="text-align: center; padding: 30px;">Chargement des carriers…</div></div></div>
             </div>
 
@@ -1098,6 +1100,7 @@
                     </div>
                 </div>
             </div>
+            <div class="xc click xlink" id="m-row-fa" style="display: none; border-color: #D4A24C;" onclick="ouvrirFaMobile()"><span class="e">🏅</span><span style="font-size: 0.85em;">Frères d’armes<br><span class="xmut" style="font-size: 0.8em;" id="m-row-fa-sous">médaille et diplômes</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" id="m-row-directeur" style="display: none; border-color: var(--ed-blue);" onclick="ouvrirDirecteurMobile()"><span class="e">🛰️</span><span style="font-size: 0.85em;">Espace Directeur<br><span class="xmut" style="font-size: 0.8em;">escadrons à valider · pilotes · usage</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; ouvrirAideMobile()"><span class="e">❓</span><span style="font-size: 0.85em;">Aide et questions fréquentes</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')"><span class="e">🎧</span><span style="font-size: 0.85em;">Rejoindre le Discord</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
@@ -1290,6 +1293,7 @@
             chargerQGMobile();
             if (window.edteamIniMode) window.edteamIniMode.presence(profilCommandant);   // presence de l'Amiral (script SQL 70), au plus un appel par 6 h
             initNouveautesMobile();
+            xApres(faMobileInit, 2200);        // Freres d'armes : apres l'accueil
             if (window.QGSuivi) QGSuivi.monterMobile('m-suivi');
             // pastilles (gazette, notes, livraisons, exploits) : lues apres l'accueil, pas en meme temps que lui
             chargerFilMobile();
@@ -1466,10 +1470,15 @@
             sonClic(); escVueCourante = v;
             { const n = xEl('m-squad-count'); if (n) n.style.visibility = v === 'membres' ? '' : 'hidden'; }
             document.querySelectorAll('#x-esc-seg button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-            [['membres', 'esc-v-membres', 'flex'], ['systemes', 'esc-v-systemes', 'block'], ['fc', 'esc-v-fc', 'block']].forEach(([k, id, d]) => { const e = xEl(id); if (e) e.style.display = k === v ? d : 'none'; });
+            [['membres', 'esc-v-membres', 'flex'], ['systemes', 'esc-v-systemes', 'block'], ['fc', 'esc-v-fc', 'block'], ['fa', 'esc-v-fa', 'block']].forEach(([k, id, d]) => { const e = xEl(id); if (e) e.style.display = k === v ? d : 'none'; });
             escOuvrirModule();
         }
         function escOuvrirModule() {
+            if (escVueCourante === 'fa') {       // FRERES D'ARMES (SQL 204/205) : freres-armes.js charge a la demande, comme les autres sous-onglets
+                const monter = () => { if (window.edteamFreresArmes) window.edteamFreresArmes.monterEscadron(xEl('fa-corps')); };
+                if (window.edteamFreresArmes) monter(); else chargerScriptMobile('freres-armes.js?v=9', monter);
+                return;
+            }
             const def = { systemes: ['systemesMobile', 'systemes-mobile.js?v=6', 'sm-corps'], fc: ['fcMobile', 'fc-mobile.js?v=4', 'fm-corps'] }[escVueCourante];
             if (!def) return;
             if (window[def[0]]) { window[def[0]].ouvrir(false); return; }
@@ -1477,6 +1486,33 @@
             sc.onload = () => { if (window[def[0]]) window[def[0]].ouvrir(false); };
             sc.onerror = () => { const c = xEl(def[2]); if (c) c.innerHTML = '<div class="xmut" style="text-align: center; padding: 30px;">Impossible de charger cet onglet pour le moment.</div>'; };
             document.head.appendChild(sc);
+        }
+
+        // FRERES D'ARMES (SQL 204) : rang + diplomes lus UNE fois (memoire 10 min dans la session, meme cle que le PC) ; la ligne des Reglages n'apparait qu'avec au moins un diplome ;
+        // un diplome pas encore vu s'annonce UNE fois a l'arrivee. freres-armes.js (+ medaille.js) ne sont telecharges qu'a ce moment-la ou au clic.
+        async function faMobileInit() {
+            try {
+                const uid = (profilCommandant || {}).user_id; if (!uid) return;
+                const cle = 'edteam_fa_v1_' + uid; let d = null;
+                try { const c = JSON.parse(sessionStorage.getItem(cle) || 'null'); if (c && Date.now() - c.ts < 600000) d = c.d; } catch (e) { /* memoire illisible */ }
+                if (!d) {
+                    const r = await supabaseApp.rpc('mes_freres_armes');
+                    if (r.error || !r.data || typeof r.data !== 'object') return;            // script SQL 204 pas lance : rien ne s'affiche
+                    d = r.data; try { sessionStorage.setItem(cle, JSON.stringify({ ts: Date.now(), d: d })); } catch (e) { /* stockage plein */ }
+                }
+                window.__faMob = d;
+                if (!(Number(d.n) > 0)) return;
+                const NOM = { bronze: 'BRONZE', argent: 'ARGENT', or: 'OR', diamant: 'DIAMANT' }, e = Math.max(0, Math.min(5, Number(d.etoiles) || 0));
+                const row = xEl('m-row-fa'), sous = xEl('m-row-fa-sous');
+                if (row) row.style.display = 'flex';
+                if (sous) sous.textContent = d.n + ' campagne' + (d.n > 1 ? 's' : '') + ' · médaille ' + (NOM[d.metal] || '') + ' ' + '★'.repeat(e) + '☆'.repeat(5 - e);
+                if ((d.diplomes || []).some(x => !x.vu)) chargerScriptMobile('freres-armes.js?v=9', () => { if (window.edteamFreresArmes) window.edteamFreresArmes.annonce(); });
+            } catch (e) { /* la rubrique Freres d'armes ne doit jamais gener l'accueil */ }
+        }
+        function ouvrirFaMobile() {
+            xEl('modal-reglages').style.display = 'none';
+            if (window.edteamFreresArmes) { window.edteamFreresArmes.ouvrir(); return; }
+            chargerScriptMobile('freres-armes.js?v=9', () => { if (window.edteamFreresArmes) window.edteamFreresArmes.ouvrir(); });
         }
 
         // ESPACE DIRECTEUR (validation des escadrons, pilotes, usage) : directeur-mobile.js n'est charge qu'a la premiere ouverture
