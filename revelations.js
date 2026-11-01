@@ -476,7 +476,7 @@
             if (etat.file.length) {
                 var liste = etat.file.splice(0).sort(function (a, b) { return PRIO[a.type] - PRIO[b.type]; });
                 if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=18');
-                if (liste.some(function (it) { return it.type === 'plaque'; }) && typeof window.forgerRubanSVG !== 'function') await chargerScript('rubans.js?v=1');
+                if (liste.some(function (it) { return it.type === 'plaque'; }) && typeof window.forgerRubanSVG !== 'function') await chargerScript('rubans.js?v=2');
                 await chaine(liste);
             }
             if (etat.anecdote) { var a = etat.anecdote; etat.anecdote = null; if (!document.getElementById('edteam-anec')) montrerAnecdote(a); }

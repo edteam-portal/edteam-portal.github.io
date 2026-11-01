@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-plaques-metal", date: "2026-11-01T21:00:00Z", type: "AMELIORE",
+        titre: "Les plaques de directives deviennent de vraies plaques de métal",
+        texte: "Les plaques gagnées sur les directives (fiche des pilotes, page BGS, fenêtre d’une nouvelle plaque) sont redessinées : une plaque rectangulaire de métal biseauté et rivetée, avec un champ d’émail à la couleur de la directive (guerre, hausse, baisse, élection), une barrette de métal incrustée par jour d’engagement et des étoiles en relief. Le métal reprend celui des médailles : acier en dessous de 10 points, bronze, argent, or puis diamant à 100 points. Le podium (1re, 2e, 3e place) a sa bordure diamant, or ou argent et son médaillon numéroté. Rien ne bouge dans les listes : le dessin est fixe.",
+        important: false
+    },
+    {
         id: "2026-11-freres-armes-aide", date: "2026-11-01T20:00:00Z", type: "NOUVEAU",
         titre: "Frères d’armes : une campagne pour aider un escadron allié",
         texte: "Quand votre escadron mène une campagne pour en aider un autre, l’Amiral peut maintenant le désigner : dans Modifier la campagne, sur la ligne de l’escadron invité (dès qu’un de ses pilotes a accepté), bouton AIDER. À la clôture, vos pilotes qui ont agi comptent pour leur médaille FRÈRES D’ARMES et reçoivent un diplôme au nom de l’escadron aidé, signé de son Amiral, qui peut y ajouter un mot depuis l’onglet FRÈRES D’ARMES de sa page Escadron. Si l’escadron aidé n’a pas d’Amiral, le diplôme reste au nom de votre escadron. Les pilotes de l’escadron aidé ne comptent pas pour leur propre escadron.",
