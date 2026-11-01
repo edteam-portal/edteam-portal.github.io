@@ -45,7 +45,7 @@
 .fm-l1{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
 .fm-nom{color:#fff;font-size:.98em;letter-spacing:1.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Rajdhani','Share Tech Mono',sans-serif}
 .fm-vu{flex:none;color:#7d8a92;font-size:.6em;white-space:nowrap}
-.fm-l2{display:flex;align-items:center;gap:7px;min-width:0;color:#bfb7a0;font-size:.7em}
+.fm-l2{display:flex;flex-wrap:wrap;align-items:center;gap:3px 7px;min-width:0;color:#bfb7a0;font-size:.7em}
 .fm-l2 .ph{width:20px;height:20px;font-size:7px;flex:none}.fm-l2 .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fm-tag{flex:none;border:1px solid currentColor;padding:0 6px;font-size:.78em;letter-spacing:1.5px;border-radius:4px}
 .fm-sys{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;font-size:.74em}

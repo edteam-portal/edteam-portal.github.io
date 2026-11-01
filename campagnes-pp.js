@@ -135,10 +135,11 @@
                     var col = COUL_ORIG[x[0]] || '#8a949c', pp = 100 * x[1] / totPo;
                     return '<span data-pptip="' + esc((ORIGINE[x[0]] || x[0]) + '\n' + fmt(x[1]) + ' mérites (' + (pp < 1 ? '< 1' : Math.round(pp)) + ' % de ses mérites)') + '" data-tc="' + col + '" style="flex:' + x[1] + ' 1 0; min-width:2px; background:' + col + '; opacity:.85; cursor:help;"></span>';
                 }).join('') + '</span>' : '';
-                return '<div style="display:flex; align-items:center; gap:14px; padding:9px 14px; min-height:62px; border-bottom:1px solid rgba(255,255,255,.06);">' + av
-                    + '<span style="flex:1; min-width:0;"><span style="display:block; color:' + (estMoi ? '#fff' : c) + '; font-weight:bold; letter-spacing:1px; font-size:1.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CMDR ' + esc(String(p.nom || 'INCONNU').toUpperCase()) + (estMoi ? ' (VOUS)' : '') + (window.edteamInvitations ? window.edteamInvitations.etiquette(p.u) : '') + '</span>'
+                // flex-wrap : sur un petit ecran, le bloc des merites passe sous le nom (sinon le nom du commandant est tronque a quelques lettres)
+                return '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; padding:9px 14px; min-height:62px; border-bottom:1px solid rgba(255,255,255,.06);">' + av
+                    + '<span style="flex:1 1 170px; min-width:0;"><span style="display:block; color:' + (estMoi ? '#fff' : c) + '; font-weight:bold; letter-spacing:1px; font-size:1.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CMDR ' + esc(String(p.nom || 'INCONNU').toUpperCase()) + (estMoi ? ' (VOUS)' : '') + (window.edteamInvitations ? window.edteamInvitations.etiquette(p.u) : '') + '</span>'
                     + '<span style="color:#8a949c; font-size:.8em;">≈ ' + fmt(cp(p.m)) + ' pts de contrôle</span>' + barP + '</span>'
-                    + '<span style="text-align:right; flex:none; min-width:150px;"><b style="color:' + c + '; font-size:1.25em;">' + fmt(p.m) + '</b> <span style="color:#9ab; font-size:.72em; letter-spacing:1px;">MÉRITES</span><span style="display:block; color:#8a949c; font-size:.8em;">' + (part > 0 && part < 1 ? '< 1' : Math.round(part)) + ' % des participants</span></span></div>';
+                    + '<span style="text-align:right; flex:0 0 auto; margin-left:auto; min-width:150px;"><b style="color:' + c + '; font-size:1.25em;">' + fmt(p.m) + '</b> <span style="color:#9ab; font-size:.72em; letter-spacing:1px;">MÉRITES</span><span style="display:block; color:#8a949c; font-size:.8em;">' + (part > 0 && part < 1 ? '< 1' : Math.round(part)) + ' % des participants</span></span></div>';
             }).join('')
                 || '<div style="color:#666; text-align:center; font-size:.9em; padding:16px; font-style:italic;">Aucun participant pour le moment.</div>';
             var etat = m.etat, hist = m.hist || [], courbe = '';

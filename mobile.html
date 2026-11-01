@@ -35,11 +35,11 @@
     <script src="bgs-ticks.js?v=8"></script>
     <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
-    <script src="campagnes-pp.js?v=23"></script>
+    <script src="campagnes-pp.js?v=24"></script>
     <script src="engagement-mobile.js?v=1"></script>
     <script src="anecdotes.js?v=4"></script>
     <script src="qgsuivi.js?v=41"></script>
-    <script src="son.js?v=1"></script>
+    <script src="son.js?v=2"></script>
     <script src="colonisation-types.js?v=2"></script>
     <script src="medailles.js?v=18"></script>
     <script src="etats-faction.js?v=4"></script>
@@ -364,7 +364,8 @@
         /* Batir : chantiers lisibles a distance */
         .bt-hero { display: grid; grid-template-columns: 1.1fr 1.5fr 1fr; gap: 8px; }
         .bt-hero > div { background: var(--x-card); border: 1px solid var(--x-line); border-radius: 14px; padding: 12px 8px; text-align: center; }
-        .bt-hero b { display: block; font-family: 'Rajdhani', sans-serif; font-size: 2.1em; line-height: 1; }
+        .bt-hero b { display: block; font-family: 'Rajdhani', sans-serif; font-size: 2.1em; line-height: 1; white-space: nowrap; }
+        .bt-hero > div:nth-child(2) b { font-size: clamp(1.15em, 5.4vw, 2.1em); }   /* « 1 250 205 t » sur une seule ligne, meme sur un petit ecran */
         .bt-hero span { display: block; font-size: 0.58em; letter-spacing: 1.6px; color: var(--x-mut); margin-top: 6px; }
         .bt-ap { display: flex; flex-direction: column; gap: 12px; }
         .bt-ap .l { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -1097,6 +1098,7 @@
                     </div>
                 </div>
             </div>
+            <div class="xc click xlink" id="m-row-directeur" style="display: none; border-color: var(--ed-blue);" onclick="ouvrirDirecteurMobile()"><span class="e">🛰️</span><span style="font-size: 0.85em;">Espace Directeur<br><span class="xmut" style="font-size: 0.8em;">escadrons à valider · pilotes · usage</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; ouvrirAideMobile()"><span class="e">❓</span><span style="font-size: 0.85em;">Aide et questions fréquentes</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')"><span class="e">🎧</span><span style="font-size: 0.85em;">Rejoindre le Discord</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc xlink" style="cursor: default;"><span class="e">🔊</span><span style="font-size: 0.85em;">Sons de l'application</span><span class="chev"><button type="button" data-son-toggle class="m-btn" style="background: rgba(255,255,255,0.05); border-color: #555; color: #ccc; padding: 8px 14px; display: flex; align-items: center; justify-content: center; border-radius: 10px;"></button></span></div>
@@ -1468,13 +1470,20 @@
             escOuvrirModule();
         }
         function escOuvrirModule() {
-            const def = { systemes: ['systemesMobile', 'systemes-mobile.js?v=6', 'sm-corps'], fc: ['fcMobile', 'fc-mobile.js?v=3', 'fm-corps'] }[escVueCourante];
+            const def = { systemes: ['systemesMobile', 'systemes-mobile.js?v=6', 'sm-corps'], fc: ['fcMobile', 'fc-mobile.js?v=4', 'fm-corps'] }[escVueCourante];
             if (!def) return;
             if (window[def[0]]) { window[def[0]].ouvrir(false); return; }
             const sc = document.createElement('script'); sc.src = def[1];
             sc.onload = () => { if (window[def[0]]) window[def[0]].ouvrir(false); };
             sc.onerror = () => { const c = xEl(def[2]); if (c) c.innerHTML = '<div class="xmut" style="text-align: center; padding: 30px;">Impossible de charger cet onglet pour le moment.</div>'; };
             document.head.appendChild(sc);
+        }
+
+        // ESPACE DIRECTEUR (validation des escadrons, pilotes, usage) : directeur-mobile.js n'est charge qu'a la premiere ouverture
+        function ouvrirDirecteurMobile() {
+            xEl('modal-reglages').style.display = 'none';
+            if (window.directeurMobile) { window.directeurMobile.ouvrir(); return; }
+            chargerScriptMobile('directeur-mobile.js?v=1', () => { if (window.directeurMobile) window.directeurMobile.ouvrir(); });
         }
 
         // JOUEURS CROISES : le fichier (croises-mobile.js) n'est charge qu'a la premiere ouverture de l'onglet ; une seule lecture serveur, mise en memoire 5 minutes
@@ -1513,6 +1522,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_reglages');
             xEl('modal-reglages').style.display = 'flex';
+            { const rd = xEl('m-row-directeur'); if (rd) rd.style.display = (profilCommandant && profilCommandant.est_directeur) ? 'flex' : 'none'; }   // reserve au Directeur
             if (typeof majPhotoMobile === 'function') majPhotoMobile();
             if (typeof majOptionAnecdotesMobile === 'function') majOptionAnecdotesMobile();
         }

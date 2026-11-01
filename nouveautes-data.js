@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-mobile-corrections-directeur", date: "2026-11-01T16:30:00Z", type: "CORRIGE",
+        titre: "Mobile : noms lisibles sur petit écran, bouton du son réparé, Espace Directeur",
+        texte: "Sur téléphone : dans la fenêtre d’une mission Powerplay, le nom de chaque commandant n’est plus coupé (les mérites passent dessous quand l’écran est étroit) ; dans BÂTIR, le total à livrer reste sur une seule ligne ; dans l’onglet Fleet Carriers de ESCADRON, la mention « Escadron et amis » passe à la ligne au lieu d’écraser le nom du pilote ; le bouton du son des Réglages fonctionne de nouveau. Le Directeur dispose en plus d’un Espace Directeur dans les Réglages (validation des escadrons, liste des pilotes avec diagnostic, usage).",
+        important: false
+    },
+    {
         id: "2026-11-bande-conflit-24h", date: "2026-11-01T14:10:00Z", type: "AMELIORE",
         titre: "Guerres et élections : une bande plus claire, collée à sa mission, pendant 24 h",
         texte: "Quand une guerre ou une élection commence ou se termine sur une faction de vos missions, l’annonce est maintenant une fine bande collée à la mission concernée (même couleur, même lueur), au lieu d’un grand cadre au-dessus qu’on pouvait prendre pour une autre ligne. Elle indique l’événement (guerre commencée, élection commencée, victoire, défaite avec le score) ; l’heure, la source et l’adversaire sont dans la bulle au survol. Elle reste affichée 24 heures, comme la fenêtre plein écran. Sur PC et mobile.",

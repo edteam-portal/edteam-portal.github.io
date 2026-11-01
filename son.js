@@ -83,7 +83,7 @@
     document.addEventListener('click', function (e) {
         var b = e.target && e.target.closest ? e.target.closest('[data-son-toggle]') : null;
         if (b) { e.preventDefault(); window.edteamSon.basculer(); }
-    });
+    }, true);   // phase de capture : les fenetres (reglages du mobile...) arretent la propagation du clic (stopPropagation) et le bouton ne recevait plus rien
     // le stockage peut changer depuis un autre onglet
     window.addEventListener('storage', function (e) { if (e.key === CLE) { muet = lireMuet(); appliquer(); } });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', majUI); else majUI();
