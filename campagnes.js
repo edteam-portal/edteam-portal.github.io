@@ -70,6 +70,7 @@
             // lignes « resultat » : fond sombre teinte + barre coloree a gauche (au lieu d'un aplat), jauge d'influence avec le mouvement du tick
             '.camp-carte { --wg:200px; --wi:480px; --wa:116px; }',
             '.camp-ligne.rn { grid-template-columns:max-content minmax(0,1fr) var(--wg) var(--wi) 20px var(--wa); border-top:0; margin-bottom:4px; background:linear-gradient(90deg, color-mix(in srgb, var(--k) 15%, #0a0c10), #0a0c10 72%); box-shadow:inset 4px 0 0 var(--k), inset 0 0 0 1px rgba(255,255,255,.05); }',
+            '.camp-ligne.al.sn { border-top:0; margin-bottom:4px; background:linear-gradient(90deg, rgba(120,135,145,.14), #0a0c10 72%) !important; box-shadow:inset 4px 0 0 #6f7c84, inset 0 0 0 1px rgba(255,255,255,.05); }',
             '.camp-ligne.rn.pale { background:linear-gradient(90deg, color-mix(in srgb, var(--k) 8%, #0a0c10), #0a0c10 72%); }',
             '.camp-info .ce { display:inline-flex; align-items:center; justify-content:flex-end; gap:10px; width:120px; flex:none; } .camp-info .ca { display:inline-flex; align-items:center; width:150px; flex:none; overflow:hidden; }',
             '.camp-ligne.rn .camp-info { width:var(--wi); justify-content:flex-end; } .camp-ligne.rn .camp-ics, .camp-ligne.al .camp-ics { min-width:var(--wa); justify-content:flex-end; }',
@@ -199,7 +200,7 @@
         if (m.sig) return '<div class="camp-ligne rn' + (m.sig.pale ? ' pale' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="--k:' + coulM(m) + '; --c:' + m.couleur + ';">'
             + pastille(m.tag, coulM(m)) + '<div class="txt"><span class="nm">' + m.texte + '</span></div>'
             + (m.jauge || '<span></span>') + '<div class="camp-info">' + (m.infoE != null ? '<span class="ce">' + m.infoE + '</span><span class="ca">' + (m.avatars || '') + '</span>' + (m.infoP || m.infoM || '<span class="qj-c2"></span>') : (m.info || '') + (m.avatars || '')) + '</div><span style="color:#666;">›</span>' + actions + '</div>';
-        return '<div class="camp-ligne al' + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + (m.fondRes || fond(m.couleur, m.pct)) + '; --c:' + m.couleur + ';">' + neon(m.couleur, m.pct, m.vous)
+        return '<div class="camp-ligne al' + (m.pct == null ? ' sn' : '') + (m.veille ? ' veille' : '') + (m.gris ? ' gris' : '') + '"' + glisser + attr + ' style="background:' + (m.fondRes || fond(m.couleur, m.pct)) + '; --c:' + m.couleur + ';">' + neon(m.couleur, m.pct, m.vous)
             + pastille(m.tag, m.couleur) + '<div class="txt"><span class="nm">' + m.texte + '</span></div>'
             + '<div class="camp-info al-i"><span class="al-t">' + (m.infoE != null ? m.infoE : (m.info || '')) + '</span><span class="ca">' + (m.avatars || '') + '</span>' + (m.infoP || m.infoM || '<span class="qj-c2"></span>') + '</div><span style="color:#666;">' + (m.gris ? '🔒' : '›') + '</span>' + actions + '</div>';
     }
