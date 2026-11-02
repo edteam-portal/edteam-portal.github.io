@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-gazette-portrait", date: "2026-11-02T19:40:37Z", type: "AMELIORE",
+        titre: "Gazette : le portrait suit la hauteur de l’article",
+        texte: "Dans la une de la gazette, le portrait de la puissance soutenue s’agrandit pour suivre la hauteur de l’article, au lieu de laisser du vide sous les quatre chiffres.",
+        important: false
+    },
+    {
         id: "2026-11-pied-page-application", date: "2026-11-02T19:33:31Z", type: "AMELIORE",
         titre: "Pied de page allégé, installation de l’application",
         texte: "Le pied de page garde l’essentiel (Discord, English, Aide, Compagnon mobile). Le bouton de son de l’interface, les cookies et les sons du jeu sont dans Gestion du compte, dans un seul bloc : la ligne « Application PC » propose d’installer EDTEAM comme application en un clic (Chrome, Edge) pour que les sons du jeu se jouent sur toutes les pages. Une petite invitation à l’installer s’affiche une seule fois sur ordinateur.",
