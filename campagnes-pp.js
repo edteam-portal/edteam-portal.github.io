@@ -28,6 +28,35 @@
     function aPuissance() { return !!(vue && vue.puissance); }
     function pctControle(m) { return m.etat && m.etat.progres != null ? Math.round(Number(m.etat.progres) * 100) : null; }
     function trouver(id) { return ((vue && vue.missions) || []).filter(function (m) { return String(m.id) === String(id); })[0] || null; }
+    // ===== systeme DISPUTE (conquete) : deux puissances au-dessus du seuil de conflit ; score de controle = progression du journal x 120 000 =====
+    var SEUIL_CONFLIT = 120000, COUL_PUIS = ['#ffa31a', '#19aaff', '#8f9aa6'];
+    function maPuissance() { return String((vue && vue.puissance) || moi().puissance_nom || '').toLowerCase(); }
+    function duelDe(m) {
+        var e = m && m.etat; if (!e || e.etat !== 'Unoccupied' || !Array.isArray(e.conflit)) return null;
+        var f = e.conflit.filter(function (c) { return c && c.p && Number(c.v) >= 1; }).sort(function (a, b) { return Number(b.v) - Number(a.v); }).map(function (c) { return { p: c.p, s: Math.round(Number(c.v) * SEUIL_CONFLIT) }; });
+        if (f.length < 2) return null;
+        var mp = maPuissance(), rang = -1; f.forEach(function (c, i) { if (rang < 0 && String(c.p).toLowerCase() === mp) rang = i; });
+        var ecart = rang === 0 ? f[0].s - f[1].s : rang > 0 ? f[rang].s - f[0].s : null;
+        return { f: f, rang: rang, ecart: ecart, sens: rang < 0 ? 'fl' : (rang === 0 ? 'up' : 'dn'), autre: rang === 0 ? f[1].p : f[0].p };
+    }
+    // type de mission que l'etat releve du systeme appelle (RENFORCEMENT quand notre puissance le controle, ACQUISITION quand il est inoccupe ou dispute) ; null si rien a proposer
+    function typeSuggere(m) {
+        var e = m && m.etat; if (!e || (m.type_pp !== 'RENFORCEMENT' && m.type_pp !== 'ACQUISITION')) return null;
+        var t = null;
+        if (e.etat === 'Unoccupied') t = 'ACQUISITION';
+        else if ((e.etat === 'Exploited' || e.etat === 'Fortified' || e.etat === 'Stronghold') && e.controlling && String(e.controlling).toLowerCase() === maPuissance()) t = 'RENFORCEMENT';
+        return t && t !== m.type_pp ? t : null;
+    }
+    function duelBarre(d) {
+        var a = d.f[0], b = d.f[1], tip = d.f.map(function (c) { return c.p + ' : ' + fmt(c.s) + ' pts'; }).join('\n');
+        return '<span class="pp-zb" data-pptip="' + esc('Score de contrôle\n' + tip) + '" data-tc="' + COUL_PUIS[0] + '"><span style="position:absolute; left:0; right:0; top:11px; height:9px; display:flex; gap:2px;"><i style="flex:' + a.s + '; background:' + COUL_PUIS[0] + '; opacity:.85;"></i><i style="flex:' + b.s + '; background:' + COUL_PUIS[1] + '; opacity:.85;"></i></span></span>';
+    }
+    function pilule(suggere) { return '<span title="L\'état du système a changé : ouvrez la mission pour la basculer" style="color:#ffb000; font-size:.7em; letter-spacing:1px;">⇄ ' + TYPE[suggere][0].toUpperCase() + ' ?</span>'; }
+    function duelResume(d, suggere) {
+        var coul = { up: '#2fe07a', dn: '#ff4d4d', fl: '#4DA3FF' }[d.sens];
+        var l2 = d.ecart == null ? '<span style="color:#888; font-size:.78em;">notre puissance n\'est pas en lice</span>' : '<b style="color:' + coul + '; font-size:.85em;">' + (d.ecart >= 0 ? '+' + fmt(d.ecart) + ' pts d\'avance' : '−' + fmt(-d.ecart) + ' pts de retard') + '</b>';
+        return '<span style="display:flex; flex-direction:column; align-items:flex-end; line-height:1.3;"><span style="color:' + COUL_PUIS[0] + '; font-size:.78em; letter-spacing:1px;">DISPUTÉ</span>' + l2 + (suggere ? pilule(suggere) : '') + '</span>';
+    }
     function nomCampagne(id) { var c = (window.cacheCampagnes || []).filter(function (x) { return String(x.id) === String(id); })[0]; return c ? c.nom : null; }
 
     var API = {
@@ -59,6 +88,13 @@
                     legendeTitre: 'État du système observé par un pilote de l\'escadron (journal de jeu)', clic: 'edteamCampagnesPP.ouvrir(' + m.id + ')', titre: 'Rejoignez une puissance (Powerplay) pour participer à cette mission',
                     infoE: gris ? '' : (c ? E.resume(c) : observe), infoM: merites,
                     texte: '<b>' + esc(String(m.systeme).toUpperCase()) + '</b>' + (m.etat && m.etat.controlling ? ' <em>· ' + esc(m.etat.controlling.toUpperCase()) + '</em>' : '') };
+                var duel = !gris ? duelDe(m) : null, sugL = !gris && estCmd() ? typeSuggere(m) : null;
+                if (duel) {
+                    var vieuxD = m.etat.observe_le && (Date.now() - new Date(m.etat.observe_le).getTime()) / 3600000 > 24;
+                    ligne.infoE = duelResume(duel, sugL); ligne.sig = { sens: duel.sens, pale: !!vieuxD }; ligne.jauge = duelBarre(duel);
+                } else if (sugL) {
+                    ligne.infoE = '<span style="display:flex; flex-direction:column; align-items:flex-end; line-height:1.3;">' + (typeof ligne.infoE === 'string' ? ligne.infoE : '') + pilule(sugL) + '</span>';
+                }
                 ligne.info = ligne.infoE + ligne.infoM;
                 if (c) { ligne.sig = { sens: c.sens, pale: c.pale }; ligne.jauge = E.barre(c, false); }
                 return ligne;
@@ -162,15 +198,35 @@
                 + '<div style="color:' + (vieux ? '#ffb000' : '#9ab') + '; font-size:.8em; margin-top:8px;">Relevé ' + age(etat.observe_le) + (etat.observe_par ? ' par CMDR ' + esc(String(etat.observe_par).toUpperCase()) : '') + (vieux ? ' · ancien' : '') + '</div></div></div>' : '';
             // systeme INOCCUPE ou en conquete : progression de chaque puissance en lice (PowerplayConflictProgress du journal, fraction de 0 a 1, plugin 2.57)
             var maPuis = (moi().puissance_nom || '').toLowerCase();
-            var blocConf = conf.length ? '<div class="bgs-sec" style="margin-top:14px;">PROGRESSION DES PUISSANCES EN LICE <span style="color:#777; letter-spacing:0;">· relevée dans le journal du jeu · 100 % = seuil de conflit (120 000 pts de contrôle)</span></div><div style="margin-top:8px;">' + conf.map(function (c) {
-                    var pct = Math.max(0, Math.min(100, Number(c.v) * 100)), depasse = Number(c.v) >= 1, mienne = String(c.p).toLowerCase() === maPuis;
-                    return '<div style="display:flex; align-items:center; gap:10px; margin:0 0 7px;">' + (E ? E.portrait(c.p, 28, mienne ? ce : '#444') : '') + '<span style="flex:0 0 150px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:' + (mienne ? '#fff' : '#bbb') + '; font-size:.88em;">' + (mienne ? '★ <b>' + esc(c.p) + '</b>' : esc(c.p)) + '</span>'
-                        + '<span style="flex:1; height:8px; background:#161616; border:1px solid #2a2a2a;"><span style="display:block; height:100%; width:' + pct.toFixed(1) + '%; background:' + (mienne ? PPC : '#6a6a6a') + ';"></span></span><b style="flex:0 0 ' + (depasse ? 92 : 52) + 'px; text-align:right; color:' + (mienne ? '#fff' : '#bbb') + '; font-size:.9em;">' + (depasse ? fmt(Math.round(Number(c.v) * 120000)) + ' pts' : pct.toFixed(1).replace('.', ',') + ' %') + '</b></div>';
-                }).join('') + '</div>' : '';
-            var blocEtat = etat ? entete
+            // rendu des puissances en lice : celles qui ont depasse le seuil de conflit (progression >= 1) comme dans l'ecran du jeu (portrait, rang, score de controle, barre) ; les autres en lignes compactes
+            var fortes = conf.filter(function (c) { return Number(c.v) >= 1; }), faibles = conf.filter(function (c) { return Number(c.v) < 1; });
+            var SEUIL = 120000, echelle = fortes.length ? Math.max(1, Math.round(Number(fortes[0].v) * SEUIL / 0.94)) : 1, posSeuil = Math.min(100, SEUIL / echelle * 100);
+            var cartesFortes = fortes.map(function (c, i) {
+                var score = Math.round(Number(c.v) * SEUIL), pc = Math.max(2, Math.min(100, score / echelle * 100)), col = i === 0 ? '#ffa31a' : i === 1 ? '#19aaff' : '#8f9aa6', rang = i === 0 ? '1er' : (i + 1) + 'e', mienne = String(c.p).toLowerCase() === maPuis;
+                var portr = E ? E.portrait(c.p, 96, col) : '';
+                var badge = i === 0 ? '<span style="position:absolute; top:0; left:0; width:0; height:0; border-top:34px solid ' + col + '; border-right:34px solid transparent;"></span><span style="position:absolute; top:1px; left:3px; color:#000; font-size:.95em; font-weight:bold; line-height:1;">✹</span>' : '';
+                return '<div style="display:flex; gap:14px; margin:0 0 16px;"><div style="position:relative; flex:none; width:96px; height:96px;">' + portr + badge + '</div>'
+                    + '<div style="flex:1; min-width:0;"><div style="color:#8f9aa6; font-size:.78em; margin-bottom:2px;">' + rang + '</div>'
+                    + '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;"><span style="color:' + col + '; font-weight:bold; letter-spacing:2px; font-size:1.02em;">' + (mienne ? '★ ' : '') + esc(String(c.p).toUpperCase()) + '</span>'
+                    + '<span style="font-size:.8em; letter-spacing:1px; color:' + col + ';">SCORE DE CONTRÔLE <b style="color:#fff; font-size:1.18em; letter-spacing:0;">' + fmt(score) + '</b></span></div>'
+                    + '<div style="position:relative; height:13px; margin-top:7px; border:1px solid #4a525a; background:#0c0f12;"><span style="display:block; height:100%; width:' + pc.toFixed(1) + '%; background:' + col + ';"></span>'
+                    + '<span style="position:absolute; top:-3px; bottom:-3px; left:' + posSeuil.toFixed(1) + '%; border-left:2px dotted ' + col + ';"></span></div>'
+                    + '<div style="position:relative; height:22px; font-size:.7em; color:#9aa4ad;"><span style="position:absolute; left:' + posSeuil.toFixed(1) + '%; transform:translateX(-50%); white-space:nowrap; color:' + col + ';">⚔ seuil de conflit · ' + fmt(SEUIL) + '</span></div></div></div>';
+            }).join('');
+            var lignesFaibles = faibles.map(function (c) {
+                var pct = Math.max(0, Math.min(100, Number(c.v) * 100)), mienne = String(c.p).toLowerCase() === maPuis;
+                return '<div style="display:flex; align-items:center; gap:10px; margin:0 0 7px;">' + (E ? E.portrait(c.p, 28, mienne ? ce : '#444') : '') + '<span style="flex:0 0 150px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:' + (mienne ? '#fff' : '#bbb') + '; font-size:.88em;">' + (mienne ? '★ <b>' + esc(c.p) + '</b>' : esc(c.p)) + '</span>'
+                    + '<span style="flex:1; height:8px; background:#161616; border:1px solid #2a2a2a;"><span style="display:block; height:100%; width:' + pct.toFixed(1) + '%; background:' + (mienne ? PPC : '#6a6a6a') + ';"></span></span><b style="flex:0 0 52px; text-align:right; color:' + (mienne ? '#fff' : '#bbb') + '; font-size:.9em;">' + pct.toFixed(1).replace('.', ',') + ' %</b></div>';
+            }).join('');
+            var blocConf = conf.length ? (fortes.length ? '<div class="bgs-sec" style="margin-top:14px;">PUISSANCES EN CONFLIT <span style="color:#777; letter-spacing:0;">· score de contrôle relevé dans le journal du jeu</span></div><div style="margin-top:12px;">' + cartesFortes + '</div>' : '')
+                + (faibles.length ? '<div class="bgs-sec" style="margin-top:' + (fortes.length ? 4 : 14) + 'px;">' + (fortes.length ? 'AUTRES PUISSANCES EN LICE' : 'PROGRESSION DES PUISSANCES EN LICE') + ' <span style="color:#777; letter-spacing:0;">· 100 % = seuil de conflit (' + fmt(SEUIL) + ' pts de contrôle)</span></div><div style="margin-top:8px;">' + lignesFaibles + '</div>' : '') : '';
+            var sug = estCmd() && !mobile ? typeSuggere(m) : null, duelM = duelDe(m);
+            var bandeauBascule = sug ? '<div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:0 0 14px; padding:10px 14px; border:1px solid #ffb000; background:rgba(255,176,0,.08);"><span style="flex:1; min-width:200px; color:#ddd; font-size:.88em; line-height:1.5;">L\'état du système a changé : il est maintenant <b style="color:#fff;">' + esc((duelM ? 'disputé' : (ETAT[etat.etat] || etat.etat || '')).toLowerCase()) + '</b>. La mission « ' + esc(TYPE[m.type_pp][0]) + ' » ne correspond plus.</span><button class="ini-btn" onclick="edteamCampagnesPP.basculer(' + m.id + ', \'' + sug + '\')">PASSER EN ' + TYPE[sug][0].toUpperCase() + '</button></div>' : '';
+            var bilanDuel = duelM ? '<div style="margin:2px 0 6px; color:#aaa; font-size:.88em; line-height:1.6;">' + (duelM.ecart == null ? 'Notre puissance n\'est pas parmi les puissances en conflit.' : duelM.ecart >= 0 ? 'Notre puissance mène : <b style="color:#2fe07a;">+' + fmt(duelM.ecart) + ' pts</b> d\'avance sur ' + esc(duelM.autre) + '.' : 'Notre puissance est derrière : il manque <b style="color:#ff4d4d;">' + fmt(-duelM.ecart) + ' pts</b> pour passer devant ' + esc(duelM.autre) + '.') + ' <span style="color:#777;">Scores relevés au dernier passage d\'un pilote.</span></div>' : '';
+            var blocEtat = etat ? bandeauBascule + entete
                     + (calc ? E.panneau(calc, m, ctx) : '<div style="color:#aaa; font-size:.92em; line-height:1.6; margin-bottom:6px;">' + (pc != null ? 'Progression observée : ' + pc + ' %. ' : (conf.length ? '' : 'Progression pas encore relevée pour ce système : elle le sera dès qu\'un pilote (plugin à jour) y passera. '))
                         + (etat.renf != null ? 'Renforcement du cycle : <b style="color:#fff;">' + fmt(etat.renf) + '</b> pts · sape : <b style="color:#fff;">' + fmt(etat.sape) + '</b> pts.' : '') + '</div>' + blocConf)
-                    + (courbe ? '<div class="bgs-sec" style="margin-top:18px;">ÉVOLUTION OBSERVÉE <span style="color:#777; letter-spacing:0;">· position dans la zone d\'état à chaque passage d\'un pilote de l\'escadron</span></div>' + courbe : '')
+                    + bilanDuel + (courbe ? '<div class="bgs-sec" style="margin-top:18px;">ÉVOLUTION OBSERVÉE <span style="color:#777; letter-spacing:0;">· position dans la zone d\'état à chaque passage d\'un pilote de l\'escadron</span></div>' + courbe : '')
                     + ((etat.powers || []).length ? '<div class="bgs-sec" style="margin-top:14px;">PUISSANCES EN PRÉSENCE</div><div style="font-size:.88em; line-height:1.6; color:#bbb; margin-top:6px;">' + etat.powers.map(function (p) { var ctl = p === etat.controlling; return '<span style="display:inline-flex; align-items:center; gap:7px; margin:0 14px 6px 0; white-space:nowrap;">' + (E ? E.portrait(p, 28, ctl ? ce : '#444') : '') + (ctl ? '★ <b style="color:#fff;">' + esc(p) + '</b>' : esc(p)) + '</span>'; }).join('') + '</div>' : '')
                 : '<div style="color:#999; font-size:.92em; line-height:1.6; padding:14px 4px;">Ce système n\'a pas encore été observé : son état sera relevé dès qu\'un pilote de l\'escadron y passera.</div>';
             var peutCloturer = estCmd() || (estIni && String(m.auteur_id) === String(moi().user_id));
@@ -203,6 +259,18 @@
             var m = trouver(id); if (!m) return;
             window.edteamCampagnes.ouvrirEditionMission({ titre: 'MODIFIER LA MISSION POWERPLAY · ' + String(m.systeme).toUpperCase(), sous: 'Le système ne change pas : pour un autre système, créez une nouvelle mission.', types: TYPE, type: m.type_pp, briefing: m.briefing, plafondActif: true, plafond: m.plafond_cp,
                 enregistrer: async function (type, briefing, plafond) { var args = { p_id: Number(id), p_type: type, p_briefing: briefing || null }; if (plafond != null || m.plafond_cp != null) args.p_plafond_cp = plafond; var r = await db().rpc('modifier_mission_pp', args); return r.error ? (r.error.message || 'Échec.') : null; } });
+        },
+        // basculer le type de la mission selon l'etat releve du systeme (commandement) : RENFORCEMENT <-> ACQUISITION ; consigne et plafond conserves, merites deja comptes inchanges
+        basculer: async function (id, type) {
+            var m = trouver(id); if (!m || !TYPE[type]) return;
+            var ok = await demanderConfirmation('PASSER EN ' + TYPE[type][0].toUpperCase() + ' ?', 'Le système est maintenant ' + (type === 'ACQUISITION' ? 'inoccupé ou disputé' : 'contrôlé par votre puissance') + ' : la mission « ' + esc(TYPE[m.type_pp] ? TYPE[m.type_pp][0] : m.type_pp) + ' » devient « ' + TYPE[type][0] + ' ». Les <strong>mérites déjà comptés restent</strong>, la consigne aussi.', '#FFB000');
+            if (!ok) return;
+            var args = { p_id: Number(id), p_type: type, p_briefing: m.briefing || null }; if (m.plafond_cp != null) args.p_plafond_cp = m.plafond_cp;
+            var r = await db().rpc('modifier_mission_pp', args);
+            if (r.error) { console.error(r.error); alert(r.error.message || 'Échec du changement de type.'); return; }
+            if (typeof sonSucces === 'function') sonSucces();
+            var mo = document.getElementById('modal-ordre-resultat'); if (mo) mo.style.display = 'none';
+            if (window.edteamCampagnes) await window.edteamCampagnes.rafraichir();
         },
         // supprimer une mission Powerplay (commandement) : les merites deja releves restent en soutien libre
         supprimer: async function (id) {
