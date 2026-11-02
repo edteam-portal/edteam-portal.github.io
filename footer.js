@@ -17,7 +17,7 @@
     var CSS = ''
         + '.ft-edteam{font-family:"Share Tech Mono",monospace;color:#666;text-align:center;letter-spacing:1px;box-sizing:border-box}'
         + '.ft-edteam .ft-ligne{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:.72rem}'
-        + '.ft-edteam .ft-legal{font-size:.6rem;letter-spacing:1px;color:#555;margin-top:2px;line-height:1.3}'
+        + '.ft-edteam .ft-legal{font-size:.6rem;letter-spacing:1px;color:#555;margin-top:14px;line-height:1.3}'
         + '.ft-btn{display:inline-flex;align-items:center;gap:6px;cursor:pointer;text-decoration:none;font-family:inherit;font-size:1em;font-weight:bold;letter-spacing:1.5px;padding:3px 10px;border-radius:3px;transition:.2s;line-height:1.3}'
         + '.ft-discord{color:#fff;background:#5865F2;border:1px solid #5865F2;box-shadow:0 0 10px rgba(88,101,242,.45)}'
         + '.ft-discord:hover{background:#6f7bf7;box-shadow:0 0 16px rgba(88,101,242,.8)}'
@@ -43,11 +43,10 @@
         /* presentation : pied de page en fin de page */
         + '.ft-flux{background:#000;padding:50px 20px}'
         + '.ft-flux .ft-ligne{font-size:.9rem;letter-spacing:3px;gap:16px}'
-        + '.ft-flux .ft-legal{font-size:.75rem;margin-top:12px}'
+        + '.ft-flux .ft-legal{font-size:.75rem;margin-top:18px}'
         + '.ft-flux.ft-auth{background:transparent;padding:22px 16px 14px;width:100%;margin-top:auto}'
         + '.ft-auth .ft-ligne{font-size:.75rem;letter-spacing:2px;gap:10px}'
-        + '.ft-auth .ft-legal{font-size:.62rem;margin-top:8px}'
-        + '@media (max-width:1100px){.ft-fixe .ft-titre{display:none}}'
+        + '.ft-auth .ft-legal{font-size:.62rem;margin-top:14px}'
         /* fenetre du compagnon mobile */
         + '.ft-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center;z-index:6000;padding:15px;box-sizing:border-box}'
         + '.ft-modal{position:relative;max-width:440px;width:100%;background:rgba(5,8,12,.98);border:1px solid var(--ed-blue,#00F0FF);box-shadow:0 0 40px rgba(0,240,255,.2);padding:26px 28px;border-radius:4px;color:#ccc;font-family:"Share Tech Mono",monospace;text-align:center;box-sizing:border-box;max-height:92vh;overflow-y:auto}'
@@ -93,16 +92,27 @@
     function appInstallee() { try { return !!((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true); } catch (e) { return false; } }
     function sonsJeuOn() { try { return localStorage.getItem(CLE_SONS_JEU) !== 'off'; } catch (e) { return true; } }
     function majBoutonSonsJeu() {
-        var txt = !appInstallee() ? '🎧 SONS DU JEU : APPLICATION REQUISE' : (sonsJeuOn() ? '🎧 SONS DU JEU : ACTIVÉS' : '🎧 SONS DU JEU : DÉSACTIVÉS');
-        var tip = !appInstallee() ? 'Les sons du jeu (ambiance de cabine, annonces, éliminations…) se jouent sur toutes les pages dans l’application EDTEAM installée. Cliquer pour voir comment l’installer.' : 'Sons du jeu sur toutes les pages (passagers, soute, ventes, saut, éliminations). Cliquer pour activer ou couper.';
-        document.querySelectorAll('[data-sonsjeu-toggle]').forEach(function (b) { b.textContent = txt; b.title = tip; b.classList.toggle('ft-sj-off', !appInstallee() || !sonsJeuOn()); });
+        var inst = appInstallee();
+        var txt = !inst ? '📲 INSTALLER' : (sonsJeuOn() ? '🎧 ACTIVÉS' : '🎧 DÉSACTIVÉS');
+        var tip = !inst ? 'Installer EDTEAM comme application : les sons du jeu (ambiance de cabine, annonces, éliminations…) se jouent sur toutes les pages, sans clic.' : 'Sons du jeu sur toutes les pages (passagers, soute, ventes, saut, éliminations). Cliquer pour activer ou couper.';
+        document.querySelectorAll('[data-sonsjeu-toggle]').forEach(function (b) { b.textContent = txt; b.title = tip; b.classList.toggle('ft-sj-off', !inst || !sonsJeuOn()); });
+        document.querySelectorAll('[data-sonsjeu-ligne]').forEach(function (l) { l.style.display = /tableau-de-bord/i.test(location.pathname) ? 'none' : 'flex'; });
     }
+    window.edteamMajSonsJeu = majBoutonSonsJeu;
+    // installation en un clic quand le navigateur la propose (Chrome, Edge) : on garde l'evenement pour le declencher depuis nos boutons
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__edteamInstall = e; });
+    window.addEventListener('appinstalled', function () { window.__edteamInstall = null; majBoutonSonsJeu(); });
     function chargerSonsJeu(cb) {
         if (window.EdteamSonJeu) { if (cb) cb(); return; }
         var s = document.createElement('script'); s.src = 'son-jeu.js?v=1'; s.onload = function () { if (cb) cb(); }; document.head.appendChild(s);
     }
     function fermerSonsJeu() { var o = document.getElementById('ft-sonsjeu-overlay'); if (o) o.style.display = 'none'; }
     window.edteamSonsJeuBasculer = function () {
+        if (!appInstallee() && window.__edteamInstall) {
+            var ev = window.__edteamInstall; window.__edteamInstall = null;
+            try { ev.prompt(); } catch (e) { /* le navigateur refuse : les explications s'afficheront au prochain clic */ }
+            return;
+        }
         if (!appInstallee()) {
             var o = document.getElementById('ft-sonsjeu-overlay');
             if (!o) {
@@ -140,7 +150,7 @@
     window.edteamOuvrirAide = function (section) {
         if (window.edteamAide) { window.edteamAide.ouvrir(section); return; }
         var s = document.createElement('script');
-        s.src = 'aide.js?v=55';
+        s.src = 'aide.js?v=56';
         s.onload = function () { if (window.edteamAide) window.edteamAide.ouvrir(section); };
         document.head.appendChild(s);
     };
@@ -229,17 +239,12 @@
         }
         function contenuPied(visiteur) { return ''
             + '<div class="ft-ligne">'
-            +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
             +   '<button type="button" class="ft-btn" translate="no" onclick="edteamEnglish()" title="How to read this site in English" style="color:#00F0FF;border:1px solid rgba(0,240,255,.5);background:rgba(0,240,255,.06)">🌐 ENGLISH</button>'
-            +   (visiteur ? '' : '<a class="ft-btn ft-aide" href="manuel.html" style="text-decoration:none">MANUEL</a>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
-            +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
-            +   '<button type="button" class="ft-btn ft-son" data-son-toggle></button>'
-            +   (visiteur || /tableau-de-bord/i.test(location.pathname) ? '' : '<button type="button" class="ft-btn ft-sonsjeu" data-sonsjeu-toggle onclick="edteamSonsJeuBasculer()"></button>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-mobile" onclick="edteamOuvrirMobile()">' + SVG_TEL + 'COMPAGNON MOBILE</button>')
             + '</div>'
-            + '<div class="ft-legal">© 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.<br>Projet de fan, sans lien officiel avec Frontier Developments. Portraits des Powers : assets borrowed from Elite Dangerous, with permission of Frontier Developments plc.</div>'; }
+            + '<div class="ft-legal"><span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span> — © 2026 EDTEAM — Tous droits réservés. Toute reproduction ou réutilisation du code sans autorisation est interdite.</div>'; }
         pied.innerHTML = contenuPied(visiteur);
         // Page de connexion et sas de securite (qg.html) : meme pied de page que la presentation (version visiteur)
         ['footer-auth', 'footer-sas'].forEach(function (id) {
@@ -249,6 +254,24 @@
 
         if (window.edteamSon) window.edteamSon.majUI();
         majBoutonSonsJeu(); autoSonsJeu();
+        // Invitation unique a installer l'application (PC, dans le navigateur) : une seule fois, jamais si l'utilisateur la ferme
+        try {
+            if (!visiteur && dansApp() && !appInstallee() && !/tableau-de-bord/i.test(location.pathname) && !/Android|iPhone|iPad|Mobi/i.test(navigator.userAgent) && window.innerWidth >= 900 && !localStorage.getItem('edteam_app_invit')) {
+                setTimeout(function () {
+                    if (appInstallee() || document.querySelector('.ft-astuce') || localStorage.getItem('edteam_app_invit')) return;
+                    localStorage.setItem('edteam_app_invit', String(Date.now()));
+                    var c = el('div', { class: 'ft-astuce ft-haut', role: 'status' },
+                        '<b>INSTALLEZ EDTEAM COMME APPLICATION</b><br>Les sons du jeu (cabine, annonces, voix) se jouent sur toutes les pages, sans clic, et le site s’ouvre dans sa propre fenêtre.'
+                        + '<div class="ft-acts"><button type="button" class="ft-voir">INSTALLER</button><button type="button" class="ft-non">PLUS TARD</button></div>');
+                    function retirer() { c.classList.remove('ft-vu'); setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 500); }
+                    c.querySelector('.ft-voir').addEventListener('click', function () { retirer(); window.edteamSonsJeuBasculer(); });
+                    c.querySelector('.ft-non').addEventListener('click', retirer);
+                    document.body.appendChild(c);
+                    setTimeout(function () { c.classList.add('ft-vu'); }, 30);
+                    setTimeout(retirer, 25000);
+                }, 12000);
+            }
+        } catch (e) { /* stockage indisponible : pas d'invitation */ }
         // Lien direct depuis Discord : qg.html?nouveautes=1 (l'ancien index.html?nouveautes=1 est renvoye ici par la racine) ouvre le panneau des nouveautes
         if (!visiteur && /[?&]nouveautes(=|&|$)/.test(location.search)) setTimeout(function () { window.edteamOuvrirNouveautes(); }, 800);
         if (dansApp()) charger(urlDonnees(), function () { window.edteamMajPointNouveautes(); });
