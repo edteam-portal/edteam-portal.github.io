@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-manuel-reference", date: "2026-11-02T22:15:35Z", type: "AMELIORE",
+        titre: "Manuel : la Référence remise à jour",
+        texte: "Les chapitres détaillés du manuel sont réécrits avec les captures actuelles : quartier général, tableau de bord, hangar, BGS, Powerplay (états du jeu, système disputé, mérites), colonisation, budget, escadron (surveillance, titres, Fleet Carriers), Frères d’armes, téléphone et rôle de l’Amiral.",
+        important: false
+    },
+    {
         id: "2026-11-manuel-apprentissage", date: "2026-11-02T21:21:32Z", type: "NOUVEAU",
         titre: "Le manuel devient un parcours d’apprentissage",
         texte: "Le manuel s’ouvre maintenant sur des leçons courtes, dans l’ordre : une image et une phrase par pas (quartier général, tableau de bord, directives, Powerplay, colonisation, application et sons, téléphone, anglais, et pour l’Amiral les campagnes et la surveillance des systèmes). Une recherche et une rubrique « Je veux… » mènent droit à la bonne leçon. Les chapitres détaillés restent dessous, en « Référence ».",
