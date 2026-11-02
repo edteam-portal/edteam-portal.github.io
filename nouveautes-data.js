@@ -5,6 +5,13 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-pp-disputes-merites", date: "2026-11-02T17:45:48Z", type: "CORRIGE",
+        titre: "Powerplay : systèmes disputés et mérites comptés par système",
+        texte: "Un système en conquête où deux puissances ont dépassé le seuil de conflit s’affiche maintenant « Disputé », avec le score de contrôle de chaque puissance comme dans le jeu. Les gros gains de mérites (plus de 100 000 d’un coup, par exemple une grosse vente) ne sont plus perdus, et les mérites gagnés dans le système d’une mission Powerplay lui sont rattachés, quel que soit leur type. Les mérites déjà relevés dans ces systèmes ont été rattachés.",
+        important: true,
+        action: "Mettez à jour le plugin EDMC (version 2.58) et relancez EDMC : il relit alors vos journaux une fois pour retrouver les gains manquants."
+    },
+    {
         id: "2026-11-titres-qg-anecdotes", date: "2026-11-01T23:00:00Z", type: "AMELIORE",
         titre: "Les titres de spécialiste en vue au QG, les anecdotes dans EDNEWS",
         texte: "Le QG affiche maintenant « Les titres de l’escadron » à la place de l’anecdote : les huit médailles avec le visage de leur titulaire (cliquez sur une médaille pour la voir en grand, avec le titulaire, son score et le pilote qui le suit). Le mur de la page BGS fait grossir la médaille au survol de la carte, et les cartes des pilotes montrent les titres en plus grand avec un cadre de la couleur du titre autour de la photo. Les anecdotes de l’escadron ne sont plus un bloc du QG : la petite carte qui s’ouvre en bas à droite reste, et leur liste est dans le kiosque EDNEWS, à côté des éditions ; une anecdote s’y lit dans le même cadre que les éditions, avec les flèches pour passer à la suivante.",
