@@ -362,7 +362,7 @@
                 + (r.second_nom ? '<div class="mt-sec">Suit : <b>' + esc(String(r.second_nom).toUpperCase()) + '</b>, ' + esc(formater(t.unite, r.second_valeur)) + ' (retard de ' + esc(formater(t.unite, Math.max(0, r.valeur - r.second_valeur))) + ')</div>' : '');
         }
         const f = document.createElement('div'); f.id = 'mt-fond';
-        f.innerHTML = '<div class="mt-cadre" style="--tc:' + t.couleur + ';"><div class="mt-boite"><span class="mt-x" data-mt-x>X</span>'
+        f.innerHTML = '<div class="mt-cadre" style="--tc:' + t.couleur + ';"><span class="mt-x" data-mt-x>X</span><div class="mt-boite">'
             + '<div class="mt-sc" style="width:' + taille + 'px;height:' + taille + 'px;"><div class="mt-med">' + window.forgerMedailleSVG(t.code, t.couleur, !r) + '</div></div>'
             + '<div class="mt-txt"><div class="mt-nom">' + esc(t.nom) + '</div><div class="mt-sous">' + esc(t.sous) + '</div>'
             + '<div class="mt-desc">' + esc(t.desc) + '</div><div class="mt-mes">Mesuré en : ' + esc(t.mesure) + '. Cumul total depuis le début des relevés.</div>'
@@ -426,9 +426,9 @@
         .tb-av.vide { border-style: dashed; border-color: #444; background: transparent; } .tb-cell.vacant .tb-pil b { color: #667; font-weight: normal; } .tb-cell.vacant .tb-nom { color: #667; }
         .titres-grille.avec-photos .titre-fantome { display: none; }
         #mt-fond { position: fixed; inset: 0; z-index: 99990; background: rgba(2,3,5,.9); display: flex; align-items: center; justify-content: center; padding: clamp(8px, 2.5vw, 28px); backdrop-filter: blur(3px); }
-        #mt-fond .mt-cadre { --tc: #FFD24A; display: flex; width: min(980px, 100%); max-height: 100%; padding: 1px; box-sizing: border-box; background: linear-gradient(135deg, var(--tc), color-mix(in srgb, var(--tc) 35%, #05070a) 55%, var(--tc)); clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px)); filter: drop-shadow(0 0 28px color-mix(in srgb, var(--tc) 30%, transparent)); }
+        #mt-fond .mt-cadre { --tc: #FFD24A; position: relative; display: flex; width: min(980px, 100%); max-height: 100%; padding: 1px; box-sizing: border-box; background: linear-gradient(135deg, var(--tc), color-mix(in srgb, var(--tc) 35%, #05070a) 55%, var(--tc)); clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px)); filter: drop-shadow(0 0 28px color-mix(in srgb, var(--tc) 30%, transparent)); }
         #mt-fond .mt-boite { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 22px 36px; width: 100%; min-height: 0; overflow-y: auto; padding: clamp(18px, 3vw, 34px); box-sizing: border-box; background: radial-gradient(ellipse at 28% 30%, color-mix(in srgb, var(--tc) 16%, #0b0f14), #05070a 72%); clip-path: polygon(0 0, calc(100% - 23px) 0, 100% 23px, 100% 100%, 23px 100%, 0 calc(100% - 23px)); color: #d5dce2; }
-        #mt-fond .mt-x { position: absolute; top: 10px; right: 30px; cursor: pointer; color: var(--tc); font-weight: bold; letter-spacing: 2px; padding: 4px 8px; }
+        #mt-fond .mt-x { position: absolute; z-index: 5; top: 4px; right: 26px; cursor: pointer; color: var(--tc); font-weight: bold; letter-spacing: 2px; padding: 12px 16px; font-size: 1.1em; touch-action: manipulation; }
         #mt-fond .mt-sc { perspective: 1400px; flex: none; display: flex; align-items: center; justify-content: center; }
         #mt-fond .mt-med { width: 100%; height: 100%; animation: mtTourne 7s ease-in-out infinite; filter: drop-shadow(0 0 22px color-mix(in srgb, var(--tc) 40%, transparent)); }
         #mt-fond .mt-sc:hover .mt-med { animation-play-state: paused; }

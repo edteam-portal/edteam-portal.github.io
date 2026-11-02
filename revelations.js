@@ -475,7 +475,7 @@
             css();
             if (etat.file.length) {
                 var liste = etat.file.splice(0).sort(function (a, b) { return PRIO[a.type] - PRIO[b.type]; });
-                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=19');
+                if (liste.some(function (it) { return it.type === 'dist' || it.type === 'espion'; }) && typeof window.titreMeta !== 'function') await chargerScript('medailles.js?v=20');
                 if (liste.some(function (it) { return it.type === 'plaque'; }) && typeof window.forgerRubanSVG !== 'function') await chargerScript('rubans.js?v=2');
                 await chaine(liste);
             }

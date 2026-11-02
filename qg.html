@@ -2881,7 +2881,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
         async function chargerTitresQG(profil) {
             const box = document.getElementById('qg-titres'); if (!box || !profil || !profil.escadron_id || profil.escadron_id === 'INDEPENDANT') return;
             try {
-                if (!window.chargerTitresSpecialistes) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'medailles.js?v=19'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+                if (!window.chargerTitresSpecialistes) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'medailles.js?v=20'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
                 const data = await window.chargerTitresSpecialistes(profil.escadron_id);
                 if (!data || !Object.keys(data).length) { box.style.display = 'none'; return; }
                 const sig = JSON.stringify(data); if (box.dataset.sig === sig) return; box.dataset.sig = sig;
