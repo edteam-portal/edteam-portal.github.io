@@ -80,6 +80,7 @@
 .sf-pil{display:flex;align-items:center;gap:8px}.sf-pil .ph{width:var(--t,26px);height:var(--t,26px)}
 .sf-pil small{display:block;color:#7d8a92;font-size:.72em;letter-spacing:1px}
 .sf-inc{color:#6f7d85}
+.sf-bar button.reg{margin-left:auto;border-color:#FFB000;color:#FFB000}.sf-bar button.reg:hover{background:rgba(255,176,0,.12);color:#fff}.sf-regl{background:transparent;border:1px solid #3a474d;color:#aab7bd;font:inherit;font-size:1em;letter-spacing:1.5px;padding:2px 10px;cursor:pointer}.sf-regl:hover,.sf-regl.on{border-color:#FFB000;color:#fff}.sf-rgs{display:flex;flex-direction:column;gap:12px}.sf-rg{display:flex;align-items:center;justify-content:space-between;gap:16px;color:#cfd8dc;font-size:.9em}.sf-rg small{display:block;color:#7d8a92;font-size:.8em;margin-top:2px}.sf-rg input{width:90px;flex:none;background:#0b1013;border:1px solid #3a474d;color:#fff;padding:6px 8px;font:inherit}.sf-rgb{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}.sf-rgm{color:#ffb000;font-size:.82em}
 .sf-leg{display:flex;gap:6px 22px;flex-wrap:wrap;margin:10px 0 0;font-size:.72em;letter-spacing:1px;color:#8b97a0}.sf-leg i{display:inline-block;width:3px;height:12px;margin-right:7px;vertical-align:-2px}.sf-leg .sf-c{margin:0 6px 0 0;cursor:default}
 .sf-c{display:inline-block;margin-left:8px;min-width:18px;text-align:center;padding:0 5px;border:1px solid #FF4FD8;color:#FF4FD8;background:rgba(255,79,216,.12);font-size:.72em;letter-spacing:0;font-weight:bold;vertical-align:1px;cursor:help}
 .sf-ref{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px;font-size:.72em;letter-spacing:1.5px;color:#7d8a92}
@@ -390,7 +391,7 @@
         { // bandeau de filtres : les principaux sur une ligne, les autres derriere « + FILTRES » (reste ouvert si l'un d'eux est actif)
             const dispo = FILTRES.filter(f => !((f[0] === "surveilles" || f[0] === "alertes") && !SURV)), ouvert = etat.plus || PRINCIPAUX.indexOf(etat.f) < 0;
             const bt = f => '<button type="button" data-f="' + f[0] + '" class="' + (etat.f === f[0] ? "on" : "") + (f[0] === "alertes" && DATA.s.some(r => { const v = survDe(r); return v && alertes(v).niv === 2; }) ? " rouge" : "") + '">' + f[1] + "<i>" + DATA.s.filter(f[2]).length + "</i></button>";
-            el.querySelector(".sf-bar").innerHTML = '<div class="sf-bar1">' + dispo.filter(f => PRINCIPAUX.indexOf(f[0]) >= 0).map(bt).join("") + '<button type="button" class="plus" data-plus="1">' + (ouvert ? "− MOINS DE FILTRES" : "+ FILTRES") + "</button></div>"
+            el.querySelector(".sf-bar").innerHTML = '<div class="sf-bar1">' + dispo.filter(f => PRINCIPAUX.indexOf(f[0]) >= 0).map(bt).join("") + '<button type="button" class="plus" data-plus="1">' + (ouvert ? "− MOINS DE FILTRES" : "+ FILTRES") + "</button>" + (SURV && peutRegler() ? '<button type="button" class="reg" data-regl="1" title="Choisir les seuils des alertes de l’escadron">⚙ RÉGLER LES ALERTES</button>' : "") + "</div>"
                 + (ouvert ? '<div class="sf-bar2">' + dispo.filter(f => PRINCIPAUX.indexOf(f[0]) < 0).map(bt).join("") + "</div>" : "");
         }
         el.querySelector(".sf-n").textContent = l.length + " système" + (l.length > 1 ? "s" : "");
@@ -480,6 +481,40 @@
     }
 
     // ---- montage ----
+    // ---- LEGENDE + REGLAGE DES ALERTES (SQL 210) : l'Amiral et le Directeur choisissent les seuils de leur escadron ----
+    const peutRegler = () => { const p = window.profilCommandant || {}; return !!(p.est_amiral || p.est_directeur); };
+    function legende() { return '<div class="sf-leg"><span><i style="background:#00FF66"></i> colonie dont l’architecte est un membre de l’escadron</span><span><i style="background:#00F0FF"></i> cible (directive ou campagne active, système non contrôlé)</span><span><i style="background:#8b97a0"></i> colonie non contrôlée</span><span><b class="sf-c">C</b> campagne en cours</span>' + (SURV ? '<span><b style="color:#B07CFF">◉</b> surveillé par l’état-major</span><span><i style="background:#FF4D4D"></i> clignote : guerre, élection, faction à moins de ' + String(Number((SURV.reglages || {}).surv_depart_clign_pct) || 2.5).replace('.', ',') + ' %, donnée de plus de ' + 2 * (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span><span><i style="background:#FFB000"></i> clignote : baisse d’influence, faction à moins de ' + String(Number((SURV.reglages || {}).surv_depart_pct) || 3).replace('.', ',') + ' %, donnée de plus de ' + (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span>' : '') + '</div>'; }
+    const REG_DEF = { age_surv_h: 12, age_surv_alerte_h: 6, surv_baisse_pts: 1, surv_depart_pct: 3, surv_depart_clign_pct: 2.5 };
+    function ouvrirReglages(el) {
+        const reg = (SURV && SURV.reglages) || {}, val = k => (Number(reg[k]) || REG_DEF[k]);
+        const ch = (k, lib, aide, min, max, pas) => '<label class="sf-rg" for="sf-rg-' + k + '"><span>' + lib + '<small>' + aide + '</small></span><input type="number" id="sf-rg-' + k + '" min="' + min + '" max="' + max + '" step="' + pas + '" value="' + val(k) + '"></label>';
+        const html = '<div class="sf-sec"><div class="sf-rgs">'
+            + ch("age_surv_h", "Donnée trop ancienne (heures)", "ORANGE qui clignote au-delà de cette limite, ROUGE à 2 fois cette limite.", 1, 720, 1)
+            + ch("age_surv_alerte_h", "Donnée trop ancienne si le système est en alerte (heures)", "Pour un système en guerre, en élection, en baisse ou dont la faction part. Pas plus que la limite ci-dessus.", 1, 720, 1)
+            + ch("surv_baisse_pts", "Baisse d’influence à signaler (points en 24 h)", "ORANGE quand notre faction perd au moins ce nombre de points.", 0.1, 50, "any")
+            + ch("surv_depart_pct", "Faction sur le départ : ORANGE sous (%)", "Influence d’une faction en baisse ou en retraite.", 0.5, 50, "any")
+            + ch("surv_depart_clign_pct", "Faction sur le départ : ROUGE sous (%)", "Doit rester inférieur ou égal au seuil orange.", 0.1, 50, "any")
+            + '</div><div class="sf-rgb"><button type="button" class="sf-regl on" data-rg-ok="1">ENREGISTRER</button><button type="button" class="sf-regl" data-rg-def="1">VALEURS PAR DÉFAUT</button><span class="sf-rgm" data-rg-msg="1"></span></div></div>';
+        modale({ petit: "SURVEILLANCE · ESCADRON", titre: "Seuils des alertes", sections: html, apres: v => {
+            const nb = k => Number((v.querySelector("#sf-rg-" + k) || {}).value), msg = v.querySelector("[data-rg-msg]");
+            v.querySelector("[data-rg-def]").onclick = () => { Object.keys(REG_DEF).forEach(k => { const i = v.querySelector("#sf-rg-" + k); if (i) i.value = REG_DEF[k]; }); if (msg) msg.textContent = "Valeurs par défaut remises : enregistrez pour les appliquer."; };
+            v.querySelector("[data-rg-ok]").onclick = async () => {
+                const a = nb("age_surv_h"), ar = nb("age_surv_alerte_h"), b = nb("surv_baisse_pts"), d = nb("surv_depart_pct"), dc = nb("surv_depart_clign_pct"), non = t => { if (msg) msg.textContent = t; };
+                if (!(a >= 1 && a <= 720) || !(ar >= 1 && ar <= 720)) return non("Les âges doivent être compris entre 1 et 720 heures.");
+                if (ar > a) return non("L’âge en alerte ne peut pas dépasser l’âge limite normal.");
+                if (!(b >= 0.1 && b <= 50)) return non("La baisse d’influence doit être comprise entre 0,1 et 50 points.");
+                if (!(d >= 0.5 && d <= 50)) return non("Le seuil orange doit être compris entre 0,5 et 50 %.");
+                if (!(dc >= 0.1 && dc <= d)) return non("Le seuil rouge doit être compris entre 0,1 et le seuil orange.");
+                non("Enregistrement…");
+                const res = await window.supabaseApp.rpc("surveillance_reglages_ecrire", { p_actif: reg.surv_actif !== false, p_age: a, p_age_alerte: ar, p_baisse: b, p_depart: d, p_depart_clign: dc });
+                if (res.error) return non(res.error.message || "Refusé.");
+                if (typeof sonSucces === "function") sonSucces();
+                await chargerSurv(true); DATA = preparer(BRUT); dessiner(el);
+                const l = el.querySelector(".sf-leg"); if (l) l.outerHTML = legende();
+                fermer();
+            };
+        } });
+    }
     async function monter(el) {
         style(); if (!el) return;
         el.className = "sf bloc cy"; el.style.padding = "14px 18px";
@@ -493,7 +528,7 @@
             el.innerHTML = '<div class="sf-h"><h2>Systèmes de ' + E(d.faction) + '</h2><em>où nous sommes, qui a colonisé quoi</em><span class="sf-n"></span></div>'
                 + '<div class="sf-bar"></div>'
                 + '<div class="sf-outils"><input type="search" placeholder="Rechercher un système ou un architecte…" aria-label="Rechercher" autocomplete="off" spellcheck="false"><div class="sf-ref"></div><span class="sf-vue"></span><select class="sf-tri" aria-label="Trier" style="display:none"><option value="nom">TRI : NOM</option><option value="alerte">TRI : ALERTES D’ABORD</option><option value="infl">TRI : INFLUENCE</option><option value="dist">TRI : DISTANCE</option><option value="nbf">TRI : FACTIONS</option></select><button type="button" class="sf-addbtn" data-addbtn="1" style="display:none">◉ SURVEILLER UN SYSTÈME</button></div><div class="sf-add" style="display:none"></div><div class="sf-cadre"></div>'
-                + '<div class="sf-leg"><span><i style="background:#00FF66"></i> colonie dont l’architecte est un membre de l’escadron</span><span><i style="background:#00F0FF"></i> cible (directive ou campagne active, système non contrôlé)</span><span><i style="background:#8b97a0"></i> colonie non contrôlée</span><span><b class="sf-c">C</b> campagne en cours</span>' + (SURV ? '<span><b style="color:#B07CFF">◉</b> surveillé par l’état-major</span><span><i style="background:#FF4D4D"></i> clignote : guerre, élection, faction à moins de ' + String(Number((SURV.reglages || {}).surv_depart_clign_pct) || 2.5).replace('.', ',') + ' %, donnée de plus de ' + 2 * (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span><span><i style="background:#FFB000"></i> clignote : baisse d’influence, faction à moins de ' + String(Number((SURV.reglages || {}).surv_depart_pct) || 3).replace('.', ',') + ' %, donnée de plus de ' + (Number((SURV.reglages || {}).age_surv_h) || 12) + ' h</span>' : '') + '</div>'
+                + legende()
                 + '<div class="sf-note">Clic sur une ligne : la fiche du système. <b>D’où viennent les chiffres ?</b> La liste des systèmes, le nombre de factions et la puissance : <b>Spansh</b>, chaque nuit' + (d.maj ? " (dernière mise à jour " + ilYaH((Date.now() - new Date(d.maj).getTime()) / 3600000) + ")" : "") + '. L’influence et les états de notre faction : les <b>relevés des pilotes</b> (le plugin les envoie à l’arrivée dans un système surveillé ou visé par une directive : le plus frais), <b>EDSM</b> (deux fois par jour pour ces mêmes systèmes) et, pour tous les autres systèmes, <b>Spansh</b> (mention « Spansh », environ 24 h de retard) ; la valeur la plus récente gagne. La fiche interroge aussi EDSM en direct. <b>Flèche</b> : évolution de notre influence depuis le dernier tick (fond pâle « 48 h » : aucune mesure depuis le tick). L’architecte n’est connu que si le plugin d’un pilote a relevé la revendication.</div>';
             el.querySelector(".sf-bar").addEventListener("click", e => {
                 if (e.target.closest("[data-plus]")) { etat.plus = !(etat.plus || PRINCIPAUX.indexOf(etat.f) < 0); if (!etat.plus && PRINCIPAUX.indexOf(etat.f) < 0) etat.f = "controles"; dessiner(el); return; }
@@ -503,6 +538,7 @@
             el.querySelector(".sf-tri").addEventListener("change", e => { etat.tri = e.target.value; etat.sens = etat.tri === "infl" ? -1 : 1; etat.nb = 48; dessiner(el); });
             { const re = () => { if (DATA) dessiner(el); }; window.addEventListener("edteam-vue", re); if (window.matchMedia) { const mq = window.matchMedia("(max-width: 1600px)"); if (mq.addEventListener) mq.addEventListener("change", re); else if (mq.addListener) mq.addListener(re); } }
             el.addEventListener("click", e => {
+                if (e.target.closest("[data-regl]")) { ouvrirReglages(el); return; }
                 const ab = e.target.closest("[data-addbtn]"); if (ab) { etat.add = !etat.add; majAjout(el); const i = el.querySelector(".sf-add input"); if (etat.add && i) i.focus(); return; }
                 const oe = e.target.closest("[data-oeil]"); if (oe) { e.stopPropagation(); basculer(DATA.s[+oe.dataset.oeil], el); return; }
                 const th = e.target.closest("th[data-t]"); if (th) { const t = th.dataset.t; etat.sens = etat.tri === t ? -etat.sens : 1; etat.tri = t; dessiner(el); return; }

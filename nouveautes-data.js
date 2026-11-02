@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-seuils-alertes-amiral", date: "2026-11-02T18:45:40Z", type: "NOUVEAU",
+        titre: "Les seuils des alertes de la liste des systèmes se règlent",
+        texte: "L’Amiral (et le Directeur) peut choisir les seuils qui font clignoter les alertes de la page Escadron : âge à partir duquel une donnée est trop ancienne, baisse d’influence à signaler, seuils orange et rouge d’une faction sur le départ. Le bouton « Régler les alertes » est dans la barre de filtres de l’onglet Systèmes ; la légende se met à jour avec vos valeurs.",
+        important: false
+    },
+    {
         id: "2026-11-pp-conquete-disputee", date: "2026-11-02T18:12:14Z", type: "AMELIORE",
         titre: "Powerplay : les systèmes disputés comme dans le jeu",
         texte: "La fenêtre d’une mission Powerplay sur un système disputé reprend l’écran du jeu : un portrait par puissance en conflit, son rang, son score de contrôle et sa barre, avec le seuil de conflit. Dans la liste, la ligne affiche DISPUTÉ, une barre de duel et l’avance (ou le retard) de votre puissance, avec le fond vert, rouge ou bleu habituel. Quand l’état du système change (exploité, inoccupé, disputé), l’Amiral et les officiers se voient proposer de passer la mission de Renforcement à Acquisition, ou l’inverse.",
