@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-english-help", date: "2026-11-02T19:12:32Z", type: "NOUVEAU",
+        titre: "English readers : how to translate the site",
+        texte: "Un bouton « ENGLISH » (pied de page sur ordinateur, réglages sur mobile) explique en anglais comment traduire le site avec le navigateur, avec un petit glossaire des termes du jeu. Les noms de systèmes ne sont plus traduits par le navigateur : le clic pour copier fonctionne toujours.",
+        important: false
+    },
+    {
         id: "2026-11-seuils-alertes-amiral", date: "2026-11-02T18:45:40Z", type: "NOUVEAU",
         titre: "Les seuils des alertes de la liste des systèmes se règlent",
         texte: "L’Amiral (et le Directeur) peut choisir les seuils qui font clignoter les alertes de la page Escadron : âge à partir duquel une donnée est trop ancienne, baisse d’influence à signaler, seuils orange et rouge d’une faction sur le départ. Le bouton « Régler les alertes » est dans la barre de filtres de l’onglet Systèmes ; la légende se met à jour avec vos valeurs.",

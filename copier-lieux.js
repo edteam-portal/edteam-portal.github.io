@@ -111,7 +111,7 @@
         var frag = document.createDocumentFragment(), pos = 0;
         tr.forEach(function (x) {
             if (x.debut > pos) frag.appendChild(document.createTextNode(t.slice(pos, x.debut)));
-            var s = document.createElement('span'); s.className = 'edteam-lieu'; s.setAttribute('data-lieu', x.nom); s.title = 'Cliquer pour copier : ' + x.nom; s.textContent = t.slice(x.debut, x.fin);
+            var s = document.createElement('span'); s.className = 'edteam-lieu'; s.setAttribute('translate', 'no'); s.setAttribute('data-lieu', x.nom); s.title = 'Cliquer pour copier : ' + x.nom; s.textContent = t.slice(x.debut, x.fin);
             frag.appendChild(s); pos = x.fin;
         });
         if (pos < t.length) frag.appendChild(document.createTextNode(t.slice(pos)));
@@ -181,7 +181,7 @@
         ajouter: ajouter, copier: copier, scanner: scanner,
         connus: function () { return noms.size; },
         // pour un affichage fabrique a la main : EdteamCopie.lieu('Veroandi') ou EdteamCopie.lieu('Veroandi', 'VEROANDI')
-        lieu: function (nom, aff) { var n = String(nom == null ? '' : nom); if (!n) return ''; var e = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }; return '<span class="edteam-lieu" data-lieu="' + e(n) + '" title="Cliquer pour copier : ' + e(n) + '">' + e(aff == null ? n : aff) + '</span>'; }
+        lieu: function (nom, aff) { var n = String(nom == null ? '' : nom); if (!n) return ''; var e = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }; return '<span class="edteam-lieu" translate="no" data-lieu="' + e(n) + '" title="Cliquer pour copier : ' + e(n) + '">' + e(aff == null ? n : aff) + '</span>'; }
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 })();

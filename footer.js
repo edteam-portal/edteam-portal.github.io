@@ -133,6 +133,10 @@
         try { if (appInstallee() && sonsJeuOn() && !/tableau-de-bord|presentation|mobile\.html/i.test(location.pathname) && dansApp()) chargerSonsJeu(); } catch (e) { /* stockage indisponible */ }
     }
     // L'aide (FAQ) est chargee a la premiere ouverture seulement : aide.js
+    window.edteamEnglish = function () {
+        if (window.edteamEnglishOuvrir) { window.edteamEnglishOuvrir(); return; }
+        var s = document.createElement('script'); s.src = 'english.js?v=1'; s.onload = function () { if (window.edteamEnglishOuvrir) window.edteamEnglishOuvrir(); }; document.head.appendChild(s);
+    };
     window.edteamOuvrirAide = function (section) {
         if (window.edteamAide) { window.edteamAide.ouvrir(section); return; }
         var s = document.createElement('script');
@@ -227,6 +231,7 @@
             + '<div class="ft-ligne">'
             +   '<span class="ft-titre">SYS.EDTEAM // APPLICATION DE FAN POUR ELITE DANGEROUS</span>'
             +   '<a class="ft-btn ft-discord" href="' + DISCORD_URL + '" target="_blank" rel="noopener">' + SVG_DISCORD + 'REJOINDRE LE DISCORD</a>'
+            +   '<button type="button" class="ft-btn" translate="no" onclick="edteamEnglish()" title="How to read this site in English" style="color:#00F0FF;border:1px solid rgba(0,240,255,.5);background:rgba(0,240,255,.06)">🌐 ENGLISH</button>'
             +   (visiteur ? '' : '<a class="ft-btn ft-aide" href="manuel.html" style="text-decoration:none">MANUEL</a>')
             +   (visiteur ? '' : '<button type="button" class="ft-btn ft-aide" onclick="edteamOuvrirAide()">' + SVG_AIDE + 'AIDE / FAQ</button>')
             +   '<button type="button" class="ft-btn" onclick="if(window.EdAnalytics)EdAnalytics.reouvrir()" title="Mesure d\'audience : accepter ou refuser" style="opacity:.75">COOKIES</button>'
