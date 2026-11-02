@@ -10,7 +10,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3">
-    <link rel="stylesheet" href="manuel.css?v=2">
+    <link rel="stylesheet" href="manuel.css?v=11">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="shared-utils.js?v=7"></script>
@@ -57,10 +57,20 @@
                 <button type="button" data-p="membre">MEMBRE</button>
                 <button type="button" data-p="amiral">AMIRAL</button>
             </div>
-            <h2>CHAPITRES</h2>
-            <ol>
-                <li><a href="#bienvenue">Bienvenue</a></li>
-                <li><a href="#premiers-pas">Premiers pas</a></li>
+            <input type="search" id="rech" class="rech" placeholder="Chercher dans le manuel…" aria-label="Chercher dans le manuel" autocomplete="off" spellcheck="false">
+            <div id="rech-res" hidden></div>
+            <h2>APPRENDRE</h2>
+            <ol id="parcours" class="parcours">
+                <li><a href="#module-qg">Mon quartier général</a></li>
+                <li><a href="#module-tableau">Mon tableau de bord en jeu</a></li>
+                <li><a href="#module-escadron">Mon escadron et les directives</a></li>
+                <li><a href="#module-pp">Mon Powerplay</a></li>
+                <li><a href="#module-colo">Construire</a></li>
+                <li><a href="#module-espace">Mon espace</a></li>
+                <li><a href="#module-amiral">Pour l'Amiral</a></li>
+            </ol>
+            <h2>RÉFÉRENCE</h2>
+            <ol id="chapitres">
                 <li><a href="#qg">Le quartier général</a></li>
                 <li><a href="#tableau-de-bord">Le tableau de bord en jeu</a></li>
                 <li><a href="#bgs">BGS et campagnes</a></li>
@@ -82,103 +92,288 @@
                 <p class="accroche">À quoi sert chaque page, comment s'en servir, et pourquoi. Dix minutes de lecture évitent des heures de tâtonnements. Chaque chapitre est court, avec une image : lisez dans l'ordre, ou sautez au chapitre qui vous intéresse.</p>
             </div>
 
-            <!-- ============ 1. BIENVENUE ============ -->
-            <section class="chap" id="bienvenue" data-p="solo membre amiral">
-                <header><span class="num">01</span><h2>BIENVENUE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
-                <p class="pourquoi">Savoir ce qu'est SYS.EDTEAM, ce que vous pouvez en tirer, et par où commencer.</p>
-
-                <p><b>SYS.EDTEAM</b> est un outil gratuit, fait par un fan pour les pilotes d'<b>Elite Dangerous</b>. Il lit le journal de votre jeu grâce à <b>EDMC</b>, un petit programme que beaucoup de pilotes utilisent déjà, et en fait <b>un tableau de bord</b> sur le site et sur votre téléphone : vos missions, votre commerce, votre colonisation, votre budget, votre Powerplay, et, si vous êtes dans un escadron, le travail collectif sur le BGS.</p>
-                <p><b>Vous n'avez rien à saisir à la main.</b> Une fois le plugin installé, tout se remplit tout seul pendant que vous jouez.</p>
-
-                <h3>TROIS FAÇONS DE L'UTILISER</h3>
-                <div class="cartes">
-                    <div class="carte solo"><h4>SOLITAIRE</h4>
-                        <p>Vous jouez seul, ou votre escadron n'est pas (encore) sur EDTEAM.</p>
-                        <p>Vous avez : le quartier général, le tableau de bord en jeu, la colonisation, le budget, le hangar et le compagnon mobile. Un Amiral peut aussi vous <b>inviter à une campagne</b>.</p></div>
-                    <div class="carte membre"><h4>MEMBRE D'UN ESCADRON</h4>
-                        <p>Votre escadron est inscrit et <b>validé</b>.</p>
-                        <p>En plus : le fil de l'escadron, les pages <b>Escadron</b> et <b>Engagement</b> (les campagnes BGS), les distinctions, le Pilier de la semaine.</p></div>
-                    <div class="carte amiral"><h4>AMIRAL</h4>
-                        <p>Vous dirigez l'escadron.</p>
-                        <p>En plus : créer les campagnes et les directives, <b>inviter</b> des pilotes ou des escadrons alliés, envoyer des messages à l'escadron.</p></div>
+            <div class="jeveux">
+                <h2>JE VEUX…</h2>
+                <div class="grille">
+                    <a href="#lecon-qg" data-p="solo membre amiral"><b>Lire mon quartier général</b><small>leçon · tous</small></a>
+                    <a href="#lecon-commerce" data-p="solo membre amiral"><b>Voir ce que je transporte et où le vendre</b><small>leçon · tous</small></a>
+                    <a href="#lecon-missions" data-p="solo membre amiral"><b>Suivre mes missions</b><small>leçon · tous</small></a>
+                    <a href="#lecon-engagement" data-p="membre amiral"><b>Savoir quoi jouer pour mon escadron</b><small>leçons · membre</small></a>
+                    <a href="#lecon-pp" data-p="solo membre amiral"><b>Suivre une mission Powerplay et mes mérites</b><small>3 min · tous</small></a>
+                    <a href="#lecon-dispute" data-p="solo membre amiral"><b>Comprendre un système «&nbsp;disputé&nbsp;»</b><small>Powerplay · tous</small></a>
+                    <a href="#lecon-reperage" data-p="membre amiral"><b>Mettre un système à jour pour l’escadron</b><small>leçon · membre</small></a>
+                    <a href="#lecon-bascule" data-p="amiral" class="amiral"><b>Changer le type d’une mission Powerplay</b><small>Amiral · officiers</small></a>
+                    <a href="#lecon-colo" data-p="solo membre amiral"><b>Livrer pour un chantier de colonisation</b><small>leçon · tous</small></a>
+                    <a href="#lecon-appli" data-p="solo membre amiral"><b>Installer l’application et avoir les sons du jeu</b><small>leçon · PC</small></a>
+                    <a href="#lecon-anglais" data-p="solo membre amiral"><b>Lire le site en anglais</b><small>leçon · tous</small></a>
+                    <a href="#lecon-telephone" data-p="solo membre amiral"><b>Utiliser mon téléphone</b><small>leçon · tous</small></a>
+                    <a href="#lecon-campagne" data-p="amiral" class="amiral"><b>Lancer ma première campagne</b><small>leçon · Amiral</small></a>
+                    <a href="#lecon-surv" data-p="amiral" class="amiral"><b>Surveiller des systèmes et régler les alertes</b><small>leçon · Amiral</small></a>
+                    <a href="#depannage" data-p="solo membre amiral"><b>Régler un problème</b><small>dépannage · tous</small></a>
                 </div>
-                <p class="glossaire"><b>Validé, ça veut dire quoi ?</b> Un escadron doit être validé par l'équipe EDTEAM avant d'ouvrir les pages Escadron et Engagement. En attendant, ses pilotes sont traités comme des solitaires : rien n'est perdu, tout s'ouvre dès la validation.</p>
+                <p class="glossaire" style="margin-top:14px">Une question précise ? Utilisez la <b>recherche</b> en haut du sommaire (sur téléphone : bouton « SOMMAIRE DU MANUEL »). Manuel mis à jour le 2 novembre 2026.</p>
+            </div>
 
-                <h3>LE PARCOURS CONSEILLÉ, EN 5 MINUTES</h3>
-                <ol class="etapes">
-                    <li><b>Créez votre compte</b> sur le site (adresse e-mail, mot de passe), puis cliquez sur le lien reçu par e-mail.</li>
-                    <li><b>Installez EDMC et le plugin EDTEAM</b> en suivant les 4 étapes de l'écran « Activez votre liaison » (chapitre suivant).</li>
-                    <li><b>Lancez Elite Dangerous</b> depuis le bureau Windows : votre nom de commandant arrive sur le site, votre quartier général s'ouvre.</li>
-                    <li><b>Jouez normalement.</b> Revenez sur le site quand vous voulez : tout est à jour.</li>
-                </ol>
-                <p class="astuce">Vous n'êtes pas devant votre PC ? Le site s'ouvre aussi sur téléphone, avec une version adaptée : le « compagnon mobile ».</p>
-                <div class="suite"><span></span><a href="#premiers-pas">Chapitre suivant : Premiers pas ›</a></div>
+                                    <!-- ============ APPRENDRE ============ -->
+            <div class="partie" id="apprendre">
+                <h2>APPRENDRE <small>pas à pas, dans l'ordre</small></h2>
+                <p class="chapo-partie">Des leçons courtes : un objectif, 3 ou 4 pas, une image par pas.</p>
+            </div>
+            <section class="chap module" id="module-qg" data-p="solo membre amiral">
+                <header><span class="num">M1</span><h2>MON QUARTIER GÉNÉRAL</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+
+                <section class="lecon" id="lecon-qg" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON</span><h3>Lire mon quartier général</h3></header>
+                    <p class="but">C'est la page d'accueil de l'application : en un coup d'œil, où en sont votre puissance, votre faction et votre escadron.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>En haut de l'écran, <b>vos rangs</b> : votre puissance, vos points BGS et votre grade.</p></div>
+                        <figure><img src="images/lecon-qg-1.jpg" alt="En-tête : vos rangs" loading="lazy" style="max-width:min(100%,600px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p><b>Ma puissance</b> : votre puissance Powerplay, ses systèmes et sa place sur 12.</p></div>
+                        <figure><img src="images/lecon-qg-2.jpg" alt="Carte Ma puissance" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p><b>Ma faction</b> : la faction de votre escadron. Le bouton <b>EDNEWS</b> ouvre la gazette.</p></div>
+                        <figure><img src="images/lecon-qg-3.jpg" alt="Carte Ma faction" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p><b>Le fil de l'escadron</b> : tout ce qui se passe. Les onglets trient par sujet.</p></div>
+                        <figure><img src="images/lecon-qg-4.jpg" alt="Le fil de l'escadron" loading="lazy"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Revenez ici chaque jour : c'est votre point de départ. Un solitaire voit la même page, sans les blocs réservés à l'escadron.</p>
+                    <p class="suiv"><span></span><a href="#lecon-commerce">Module suivant : Mon tableau de bord en jeu ›</a></p>
+                </section>
             </section>
 
-            <!-- ============ 2. PREMIERS PAS ============ -->
-            <section class="chap" id="premiers-pas" data-p="solo membre amiral">
-                <header><span class="num">02</span><h2>PREMIERS PAS</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
-                <p class="pourquoi">Relier votre jeu au site. À faire une seule fois, environ 5 minutes.</p>
+            <section class="chap module" id="module-tableau" data-p="solo membre amiral">
+                <header><span class="num">M2</span><h2>MON TABLEAU DE BORD EN JEU</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
 
-                <h3>CRÉER SON COMPTE</h3>
-                <ol class="etapes">
-                    <li>Sur la page d'accueil, cliquez sur <b>[ CRÉER UN COMPTE ]</b>.</li>
-                    <li>Saisissez votre <b>adresse e-mail</b> et un <b>mot de passe</b> d'au moins 8 caractères, confirmez-le.</li>
-                    <li>Ouvrez l'e-mail reçu (regardez les courriers indésirables) et cliquez sur le lien de confirmation.</li>
-                    <li>Connectez-vous : l'écran <b>« Activez votre liaison »</b> s'affiche.</li>
-                </ol>
+                <section class="lecon" id="lecon-commerce" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 1 / 2</span><h3>Voir ce que je transporte et où le vendre</h3></header>
+                    <p class="but">Le tableau de bord est un second écran : il se remplit tout seul pendant que vous jouez.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p><b>Jouez normalement.</b> Votre système, votre station et votre vaisseau s'affichent, avec « EN DIRECT ».</p></div>
+                        <figure><img src="images/lecon-td_1.jpg" alt="Tableau de bord : en-tête et onglets" loading="lazy"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Onglet <b>Commerce</b> : votre vaisseau en hologramme, avec votre soute dedans.</p></div>
+                        <figure><img src="images/lecon-td_2.jpg" alt="Onglet Commerce : vaisseau et soute" loading="lazy"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Une caisse = <b>5 tonnes</b>. Une couleur par marchandise : survolez une caisse pour la voir.</p></div>
+                        <figure><img src="images/lecon-td_3.jpg" alt="La baie de soute agrandie" loading="lazy" style="max-width:min(100%,700px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>Cliquez sur <b>« Vendre ce que je transporte »</b> : EDTEAM cherche pour vous où vendre.</p></div>
+                        <figure><img src="images/lecon-td_4.jpg" alt="Bouton Vendre ce que je transporte" loading="lazy" style="max-width:min(100%,420px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Seul le <b>bénéfice</b> compte : il s'affiche à côté du montant de chaque vente. Quand vous quittez le jeu, la dernière session reste affichée.</p>
+                    <p class="suiv"><span></span><a href="#lecon-missions">Leçon suivante : Suivre mes missions ›</a></p>
+                </section>
 
-                <h3>ACTIVER SA LIAISON : LES 4 ÉTAPES, DANS L'ORDRE</h3>
-                <p>Cet écran vous guide. Une barre de progression en haut montre où vous en êtes, et vous pouvez revenir en arrière à tout moment. Votre avancement est mémorisé : si vous fermez la page, vous reprenez où vous étiez.</p>
-
-                <p><b>Étape 1 · Installer EDMC.</b> EDMC (E:D Market Connector) lit le journal du jeu et l'envoie aux outils communautaires. Téléchargez-le depuis le bouton de l'écran, installez-le, lancez-le et connectez-y votre compte Frontier. C'est lui qui affichera votre nom de commandant quand le jeu tourne.</p>
-                <div class="duo"><figure class="vue"><div class="cadre"><img src="images/sas-edmc-fenetre.png" alt="Fenêtre d'EDMC" loading="lazy"></div><figcaption>EDMC lancé. Le nom affiché ici est un exemple.</figcaption></figure></div>
-
-                <p><b>Étape 2 · Ajouter le plugin.</b> Le plugin permet à EDMC de parler à EDTEAM.</p>
-                <ol class="etapes">
-                    <li>Téléchargez le plugin avec le bouton vert de l'écran (le fichier <b>SYS_EDTEAM.zip</b>).</li>
-                    <li>Dans EDMC : <b>Fichier › Paramètres</b>, puis l'onglet <b>Plugins</b>.</li>
-                    <li>Cliquez sur <b>Open Plugins Folder</b> : le dossier des plugins s'ouvre.</li>
-                    <li>Décompressez-y le dossier <b>SYS_EDTEAM</b>.</li>
-                    <li><b>Fermez et relancez complètement EDMC.</b> Le plugin apparaît alors dans la liste.</li>
-                </ol>
-                <div class="duo">
-                    <figure class="vue"><div class="cadre"><img src="images/sas-edmc-menu.png" alt="Menu Fichier d'EDMC : Paramètres" loading="lazy"></div><figcaption>Fichier › Paramètres</figcaption></figure>
-                    <figure class="vue"><div class="cadre"><img src="images/sas-edmc-plugins.png" alt="Onglet Plugins d'EDMC" loading="lazy"></div><figcaption>Onglet Plugins : le dossier, puis la liste</figcaption></figure>
-                </div>
-
-                <p><b>Étape 3 · Coller votre clé.</b> La clé dit à EDTEAM que le jeu qui envoie des données est bien le vôtre. Elle s'affiche sur l'écran : un clic dessus la copie.</p>
-                <ol class="etapes">
-                    <li>Dans EDMC, ouvrez <b>Fichier › Paramètres</b>, puis l'onglet <b>SYS.EDTEAM</b>. S'il est caché, utilisez les flèches <b>‹ ›</b> à droite des onglets.</li>
-                    <li>Collez la clé dans le champ <b>Clé d'Accès</b>.</li>
-                    <li>Cliquez sur <b>OK</b>.</li>
-                </ol>
-                <div class="duo"><figure class="vue"><div class="cadre"><img src="images/sas-edmc-cle.png" alt="Onglet SYS.EDTEAM d'EDMC : Clé d'Accès" loading="lazy"></div><figcaption>La clé de cette image est un exemple : la vôtre s'affiche sur le site.</figcaption></figure></div>
-                <p class="attention">Votre clé est personnelle. Ne la communiquez à personne, ne la publiez jamais sur Discord.</p>
-
-                <p><b>Étape 4 · Redémarrer Elite Dangerous.</b> Le plugin ne lit votre nom de commandant qu'au <b>démarrage du jeu</b>.</p>
-                <ol class="etapes">
-                    <li><b>Fermez complètement</b> Elite Dangerous s'il est ouvert.</li>
-                    <li>Vérifiez qu'<b>EDMC est ouvert</b>.</li>
-                    <li>Relancez le jeu <b>depuis le bureau Windows</b> (raccourci ou lanceur).</li>
-                    <li>Entrez dans votre vaisseau (Open, Groupe privé ou Solo) : quelques secondes plus tard, <b>votre nom s'affiche sur le site</b>.</li>
-                </ol>
-                <p class="attention">Un simple retour au menu du jeu, ou se déconnecter puis se reconnecter dans le jeu, ne suffit pas. Il faut quitter le jeu complètement, puis le relancer depuis le bureau Windows.</p>
-
-                <h3>APRÈS LA LIAISON</h3>
-                <ul class="points">
-                    <li><b>Vous jouez seul</b> (ou votre escadron n'est pas sur EDTEAM) : le site vous accrédite comme <b>pilote indépendant</b>, un clic suffit.</li>
-                    <li><b>Vous êtes dans un escadron déjà inscrit</b> : demandez son <b>code d'invitation</b> à votre Amiral ou à un officier, et saisissez-le à cet endroit.</li>
-                    <li><b>Vous êtes l'Amiral d'un escadron qui n'est pas encore sur EDTEAM</b> : laissez le champ du code vide. Votre escadron est créé, puis soumis à validation.</li>
-                </ul>
-                <p class="astuce">Rien n'arrive après une minute ? Vérifiez dans l'ordre : EDMC est ouvert · SYS_EDTEAM figure dans l'onglet Plugins · la clé est bien collée · le jeu a été relancé depuis le bureau.</p>
-                <div class="suite"><a href="#bienvenue">‹ Bienvenue</a><a href="#qg">Chapitre suivant : Le quartier général ›</a></div>
+                <section class="lecon" id="lecon-missions" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 2 / 2</span><h3>Suivre mes missions</h3></header>
+                    <p class="but">L'onglet Missions classe vos missions en cours dans l'ordre le plus court, pour éviter les allers-retours.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p>Ouvrez l'onglet <b>Missions</b> : en cours, terminées, à encaisser, prochaine échéance.</p></div>
+                        <figure><img src="images/lecon-tm_1.jpg" alt="Onglet Missions : le résumé" loading="lazy"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Le <b>parcours</b> montre où vous êtes et dans quel ordre aller aux systèmes.</p></div>
+                        <figure><img src="images/lecon-tm_2.jpg" alt="Le parcours des missions" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p><b>Dépliez une mission</b> : faction, destination, récompense, rendement par heure.</p></div>
+                        <figure><img src="images/lecon-tm_3.jpg" alt="Détail d'une mission" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>À droite, basculez entre la <b>vue vaisseau</b> (soute) et la <b>vue carte</b>.</p></div>
+                        <figure><img src="images/lecon-tm_4.jpg" alt="Vue vaisseau et vue carte" loading="lazy" style="max-width:min(100%,760px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Relancer le jeu ne fait pas perdre les détails de vos missions en cours.</p>
+                    <p class="suiv"><a href="#lecon-commerce">‹ Leçon précédente</a><a href="#lecon-engagement">Module suivant : Mon escadron et les directives ›</a></p>
+                </section>
             </section>
+
+            <section class="chap module" id="module-escadron" data-p="membre amiral">
+                <header><span class="num">M3</span><h2>MON ESCADRON ET LES DIRECTIVES</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+
+                <section class="lecon" id="lecon-engagement" data-p="membre amiral">
+                    <header><span class="nl">LEÇON 1 / 3</span><h3>Lire la page Engagement</h3></header>
+                    <p class="but">L'Amiral choisit où jouer ; la page Engagement vous montre, d'un coup d'œil, où l'aide est utile.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p>Les <b>campagnes</b> de l'escadron sont classées par priorité. Chaque ligne est une <b>directive</b>.</p></div>
+                        <figure><img src="images/lecon-eg_1.jpg" alt="Une campagne et ses directives" loading="lazy" style="max-width:min(100%,760px)"></figure></div>
+                    <div class="pas large"><div class="t"><i>2</i><p>La <b>couleur</b> montre ce que l'influence a fait depuis le dernier tick : <b>vert</b> dans le sens voulu, <b>rouge</b> à contre-sens (l'aide est utile), <b>bleu</b> inchangé.</p></div>
+                        <figure><img src="images/lecon-eg_2.jpg" alt="Les couleurs des lignes" loading="lazy" style="max-width:min(100%,760px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>À droite, vos <b>pastilles</b> : une par activité qui compte pour la directive.</p></div>
+                        <figure><img src="images/lecon-eg_3.jpg" alt="Les pastilles d'activité" loading="lazy" style="max-width:min(100%,340px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p><b>Cliquez sur une directive</b> : la fenêtre explique où vous en êtes et où agir.</p></div>
+                        <figure><img src="images/lecon-dh_1.jpg" alt="La fenêtre d'une directive" loading="lazy" style="max-width:min(100%,600px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Aucune obligation, aucun quota : les pastilles montrent ce que vous avez déjà fait. Le jeu juge au tick.</p>
+                    <p class="suiv"><span></span><a href="#lecon-directive">Leçon suivante : Faire avancer une directive ›</a></p>
+                </section>
+
+                <section class="lecon" id="lecon-directive" data-p="membre amiral">
+                    <header><span class="nl">LEÇON 2 / 3</span><h3>Faire avancer une directive de hausse</h3></header>
+                    <p class="but">Une hausse fait monter une faction. Vous jouez normalement : EDTEAM compte vos actions et vous dit où agir.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Ouvrez la directive. Sous <b>« Ton quota du tick »</b> : une ligne par activité (logistique, économie, sécurité, science).</p></div>
+                        <figure><img src="images/lecon-dh_2.jpg" alt="Le quota du tick" loading="lazy" style="max-width:min(100%,700px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Cliquez sur <b>« Où vendre ? »</b> (ou « Où rendre les bons ? ») : EDTEAM cherche pour vous la meilleure route.</p></div>
+                        <figure><img src="images/lecon-dh_3.jpg" alt="Bouton Où vendre" loading="lazy" style="max-width:min(100%,200px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Jouez : la barre de l'activité <b>se remplit toute seule</b>.</p></div>
+                        <figure><img src="images/lecon-dh_4.jpg" alt="Une barre d'activité pleine" loading="lazy" style="max-width:min(100%,700px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>Le <b>✓ « plein effet atteint »</b> dit que cette activité a donné le maximum pour ce tick.</p></div>
+                        <div class="illu"><span class="gros">✓ plein effet atteint</span>Le surplus compte pour votre rang BGS.</div></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Au-delà du plein effet, le jeu fait de moins en moins bouger l'influence : changez d'activité. Le résultat se lit au prochain tick.</p>
+                    <p class="suiv"><a href="#lecon-engagement">‹ Leçon précédente</a><a href="#lecon-reperage">Leçon suivante : Mettre un système à jour ›</a></p>
+                </section>
+
+                <section class="lecon" id="lecon-reperage" data-p="membre amiral">
+                    <header><span class="nl">LEÇON 3 / 3</span><h3>Mettre un système à jour</h3></header>
+                    <p class="but">Un saut dans un système dont la donnée est trop vieille la met à jour pour tout l'escadron, et vous rapporte <b>1 point BGS</b>.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Sur la page <b>Engagement</b>, cliquez sur <b>« Systèmes à repérer »</b>.</p></div>
+                        <figure><img src="images/lecon-reperage-1.jpg" alt="Bouton Systèmes à repérer" loading="lazy" style="max-width:min(100%,300px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Cliquez sur un système de la liste. <b>Son nom est copié.</b></p></div>
+                        <figure><img src="images/lecon-reperage-2.jpg" alt="Liste des systèmes à repérer" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Dans le jeu, <b>collez le nom</b> dans la carte galactique et lancez le saut.</p></div>
+                        <div class="illu"><span class="gros"><kbd>Ctrl</kbd> + <kbd>V</kbd></span>dans la recherche de la carte galactique, puis <b>Saut</b></div></div>
+                    <div class="pas"><div class="t"><i>4</i><p>À l'arrivée, c'est fini : <b>le plugin envoie le relevé tout seul.</b></p></div>
+                        <div class="illu plug"><small>FENÊTRE D'EDMC</small><span>&gt;_ REPÉRAGE : KARNARKI RELEVÉ POUR L'ESCADRON (+1 POINT BGS)</span></div></div>
+                    <p class="bilan"><b>FAIT</b> &nbsp;Le système quitte la liste jusqu'à ce que sa donnée vieillisse de nouveau.</p>
+                    <p class="suiv"><a href="#lecon-directive">‹ Leçon précédente</a><a href="#lecon-pp">Module suivant : Mon Powerplay ›</a></p>
+                </section>
+            </section>
+
+            <section class="chap module" id="module-pp" data-p="solo membre amiral">
+                <header><span class="num">M4</span><h2>MON POWERPLAY</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+
+                <section class="lecon" id="lecon-pp" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 1 / 3</span><h3>Suivre une mission Powerplay et mes mérites</h3></header>
+                    <p class="but">Une mission Powerplay vous dit où jouer pour votre puissance, et combien l'escadron y a apporté.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Dans la campagne, les missions Powerplay sont les lignes <b>« PP #… »</b>. Cliquez sur l'une d'elles.</p></div>
+                        <figure><img src="images/lecon-pp-liste.jpg" alt="Une campagne avec ses missions Powerplay" loading="lazy" style="max-width:min(100%,760px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p><b>Ce que l'escadron a apporté</b> : les mérites depuis le début, ce cycle, et <b>votre part</b>.</p></div>
+                        <figure><img src="images/lecon-pp-1b.jpg" alt="Mérites de l'escadron et ta part" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p><b>D'où viennent les mérites</b> (commerce, missions, livraisons…) et qui a participé.</p></div>
+                        <figure><img src="images/lecon-pp-1c.jpg" alt="Origine des mérites et participants" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>À droite, <b>l'état du système dans le jeu</b>, avec l'heure du dernier relevé.</p></div>
+                        <figure><img src="images/lecon-pp-1d.jpg" alt="État du système dans le jeu" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Vos mérites sont comptés au <b>système où vous êtes</b> quand vous les gagnez. L'état affiché date du dernier <b>passage d'un pilote</b> : sautez dans le système pour le rafraîchir. Sans puissance, ces missions restent grisées.</p>
+                    <p class="suiv"><a href="#lecon-directive">‹ Leçon précédente</a><a href="#lecon-dispute">Leçon suivante : Comprendre un système disputé ›</a></p>
+                </section>
+
+                <section class="lecon" id="lecon-dispute" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 2 / 3</span><h3>Comprendre un système disputé</h3></header>
+                    <p class="but">Quand plusieurs puissances convoitent un système inoccupé, il devient « disputé » : chacune a un score de contrôle.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p>Dans la liste, la ligne affiche <b>DISPUTÉ</b>, une barre de duel et l'<b>avance</b> ou le retard de votre puissance.</p></div>
+                        <figure><img src="images/lecon-pp-ligne.jpg" alt="Ligne d'une mission disputée" loading="lazy" style="max-width:min(100%,900px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Ouvrez la mission : l'état est <b>DISPUTÉ</b>, avec les puissances qui ont dépassé le seuil de conflit.</p></div>
+                        <figure><img src="images/lecon-pp-2b.jpg" alt="État disputé" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Chaque puissance a son <b>rang</b> et son <b>score de contrôle</b> : ce sont les chiffres de l'écran du jeu.</p></div>
+                        <figure><img src="images/lecon-pp-2c.jpg" alt="Scores de contrôle" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>La phrase du bas dit si <b>votre puissance mène</b> ou est derrière, et de combien.</p></div>
+                        <figure><img src="images/lecon-pp-2d.jpg" alt="Avance de notre puissance" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Le seuil de conflit est de <b>120 000 points de contrôle</b>. Le verdict se joue au <b>tick du jeudi, 07:00 UTC</b>. Les scores viennent du dernier passage d'un pilote.</p>
+                    <p class="suiv"><a href="#lecon-pp">‹ Leçon précédente</a><a href="#lecon-bascule">Pour l'Amiral : Changer le type d'une mission ›</a></p>
+                </section>
+
+                <section class="lecon amiral" id="lecon-bascule" data-p="amiral">
+                    <header><span class="nl">LEÇON 3 / 3</span><h3>Changer le type d'une mission Powerplay</h3></header>
+                    <p class="but">Quand l'état d'un système change, le type de la mission peut ne plus convenir. Vous le changez en un clic.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p>Un petit <b>⇄ ACQUISITION ?</b> (ou ⇄ Renforcement ?) apparaît sur la ligne de la mission.</p></div>
+                        <figure><img src="images/lecon-pp-ligne-a.jpg" alt="Ligne avec la proposition de changement" loading="lazy" style="max-width:min(100%,900px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Ouvrez la mission : un <b>bandeau orange</b> explique le changement.</p></div>
+                        <figure><img src="images/lecon-pp-3a.jpg" alt="Bandeau de changement de type" loading="lazy" style="max-width:min(100%,700px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Cliquez <b>« Passer en Acquisition »</b> (ou en Renforcement), puis confirmez.</p></div>
+                        <div class="illu"><span class="gros">PASSER EN ACQUISITION</span>Les mérites déjà comptés et la consigne restent.</div></div>
+                    <p class="bilan"><b>LA RÈGLE</b> &nbsp;Exploité, Consolidé ou Défendu par notre puissance : <b>Renforcement</b>. Inoccupé ou Disputé : <b>Acquisition</b>. Les missions de Sape ne sont jamais touchées. Rien ne change tout seul.</p>
+                    <p class="suiv"><a href="#lecon-dispute">‹ Leçon précédente</a><a href="#lecon-colo">Module suivant : Construire ›</a></p>
+                </section>
+            </section>
+
+            <section class="chap module" id="module-colo" data-p="solo membre amiral">
+                <header><span class="num">M5</span><h2>CONSTRUIRE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+
+                <section class="lecon" id="lecon-colo" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 1 / 1</span><h3>Livrer pour un chantier de colonisation</h3></header>
+                    <p class="but">La page Colonisation montre où en sont les chantiers de l'escadron et ce qu'il faut y apporter, sans tableur.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p>Ouvrez <b>Colonisation</b> : systèmes, chantiers en cours, tonnes livrées ce cycle.</p></div>
+                        <figure><img src="images/lecon-co_1.jpg" alt="Colonisation : les chiffres" loading="lazy" style="max-width:min(100%,760px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p><b>« À apporter en priorité »</b> : les marchandises qui manquent le plus.</p></div>
+                        <figure><img src="images/lecon-co_2.jpg" alt="À apporter en priorité" loading="lazy" style="max-width:min(100%,520px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Sur la carte, <b>cliquez sur un système en chantier</b> : ses besoins s'affichent.</p></div>
+                        <figure><img src="images/lecon-co_3.jpg" alt="La carte de l'escadron" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>Dans le jeu, <b>chargez, puis livrez</b> au chantier. Votre livraison apparaît <b>dans la minute</b>.</p></div>
+                        <div class="illu"><span class="gros">Chargez › Livrez</span>Chaque livraison rapporte des points de rang BGS.</div></div>
+                    <p class="bilan att"><b>ATTENTION</b> &nbsp;Un chantier n'apparaît qu'après avoir été consulté ou alimenté par un pilote dont le plugin est à jour : il peut être en retard sur le jeu.</p>
+                    <p class="suiv"><span></span><a href="#lecon-appli">Module suivant : Mon espace ›</a></p>
+                </section>
+            </section>
+
+            <section class="chap module" id="module-espace" data-p="solo membre amiral">
+                <header><span class="num">M6</span><h2>MON ESPACE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+
+                <section class="lecon" id="lecon-appli" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 1 / 3</span><h3>Installer l'application et avoir les sons du jeu</h3></header>
+                    <p class="but">Dans l'application installée, les sons du jeu (cabine, annonces, voix) se jouent sur toutes les pages, sans clic.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Dans le menu, en bas à gauche, ouvrez <b>Gestion du compte</b> (l'engrenage).</p></div>
+                        <figure><img src="images/lecon-gc_0.jpg" alt="Le bas du menu : Gestion du compte" loading="lazy" style="max-width:min(100%,70px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Sur la ligne <b>« Application PC »</b>, cliquez <b>Installer</b> et confirmez.</p></div>
+                        <figure><img src="images/lecon-gc_1.jpg" alt="Gestion du compte : Application PC" loading="lazy" style="max-width:min(100%,460px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p><b>Lancez EDTEAM</b> depuis son icône : le site s'ouvre dans sa propre fenêtre.</p></div>
+                        <div class="illu"><span class="gros">EDTEAM</span>Bureau ou menu Démarrer. Dans l'application, la même ligne dit <b>ACTIVÉS</b> ou <b>DÉSACTIVÉS</b> : un clic coupe ou remet les sons du jeu.</div></div>
+                    <p class="bilan att"><b>NAVIGATEUR</b> &nbsp;Chrome et Edge installent en un clic. Sur Firefox ou Safari, le bouton ouvre des explications. Sur téléphone : « Ajouter à l'écran d'accueil ».</p>
+                    <p class="suiv"><span></span><a href="#lecon-anglais">Leçon suivante : Lire le site en anglais ›</a></p>
+                </section>
+
+                <section class="lecon" id="lecon-anglais" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 2 / 3</span><h3>Lire le site en anglais</h3></header>
+                    <p class="but">Le site est écrit en français. Votre navigateur peut le traduire.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Cliquez sur <b>« ENGLISH »</b> dans le pied de page (sur téléphone : Réglages, ligne <b>English</b>).</p></div>
+                        <figure><img src="images/lecon-pied.jpg" alt="Le bouton English du pied de page" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Suivez la <b>petite carte</b> : clic droit sur la page, puis <b>« Traduire en anglais »</b>.</p></div>
+                        <figure><img src="images/lecon-en-1.jpg" alt="La carte d'aide en anglais" loading="lazy" style="max-width:min(100%,420px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Les noms de systèmes ne sont <b>pas traduits</b> : cliquer dessus les copie tels que le jeu les attend.</p></div>
+                        <div class="illu"><span class="gros">Veroandi</span>Un clic copie le nom exact.</div></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;La gazette et les anecdotes de l'escadron restent en français : la traduction du navigateur les couvre aussi.</p>
+                    <p class="suiv"><a href="#lecon-appli">‹ Leçon précédente</a><a href="#lecon-telephone">Leçon suivante : Mon téléphone ›</a></p>
+                </section>
+
+                <section class="lecon" id="lecon-telephone" data-p="solo membre amiral">
+                    <header><span class="nl">LEÇON 3 / 3</span><h3>Mon téléphone</h3></header>
+                    <p class="but">Garder son escadron et ses chiffres dans la poche, quand vous n'êtes pas devant votre PC.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Ouvrez le site sur votre téléphone : la <b>version adaptée</b> s'ouvre toute seule.</p></div>
+                        <div class="illu"><span class="gros">📱 compagnon mobile</span>Le bouton « Compagnon mobile » du pied de page y mène.</div></div>
+                    <div class="pas"><div class="t"><i>2</i><p>L'<b>accueil</b> : vos rangs, vos alertes, votre escadron et le fil des actualités.</p></div>
+                        <figure><img src="images/lecon-mo_1.jpg" alt="Accueil du compagnon mobile" loading="lazy" style="max-width:min(100%,300px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p><b>Cinq onglets</b> en bas : Accueil, Engagement, Bâtir, Escadron, Croisés.</p></div>
+                        <figure><img src="images/lecon-mo_2.jpg" alt="Les cinq onglets" loading="lazy" style="max-width:min(100%,390px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Installez-le comme une application (« Ajouter à l'écran d'accueil ») pour avoir aussi les sons du jeu.</p>
+                    <p class="suiv"><a href="#lecon-anglais">‹ Leçon précédente</a><a href="#lecon-campagne">Pour l'Amiral : Lancer ma première campagne ›</a></p>
+                </section>
+            </section>
+
+            <section class="chap module" id="module-amiral" data-p="amiral">
+                <header><span class="num">M7</span><h2>POUR L'AMIRAL</h2><span class="profils"><span class="profil amiral">AMIRAL</span></span></header>
+
+                <section class="lecon amiral" id="lecon-campagne" data-p="amiral">
+                    <header><span class="nl">LEÇON 1 / 2</span><h3>Lancer ma première campagne</h3></header>
+                    <p class="but">Une campagne regroupe des directives sous un même objectif. Seul l'Amiral en crée.</p>
+                    <div class="pas large"><div class="t"><i>1</i><p>Sur la page <b>Engagement</b>, cliquez <b>« + Nouvelle campagne »</b>.</p></div>
+                        <figure><img src="images/lecon-ca_1.jpg" alt="Bouton Nouvelle campagne" loading="lazy" style="max-width:min(100%,730px)"></figure></div>
+                    <div class="pas"><div class="t"><i>2</i><p>Donnez un <b>nom</b>, un <b>type</b> (attaque, défense, maintien, conquête) et une <b>priorité</b>.</p></div>
+                        <figure><img src="images/lecon-ca_2.jpg" alt="Nom, type et priorité" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p><b>Facultatif</b> : un briefing, et des <b>invités</b> (pilotes ou escadrons alliés). Puis <b>« Lancer la campagne »</b>.</p></div>
+                        <figure><img src="images/lecon-ca_3.jpg" alt="Briefing, invités et lancement" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>Dans la campagne, cliquez <b>＋</b> pour ajouter une <b>directive</b> : le système, la faction visée et le type.</p></div>
+                        <div class="illu"><span class="gros">＋ Directive</span>Hausse, baisse, guerre ou élection.</div></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Un invité ne voit que la campagne qui l'invite. Le bouton ✉ de la campagne invite à tout moment, et <b>« Rapport Discord »</b> annonce la campagne à l'escadron.</p>
+                    <p class="suiv"><span></span><a href="#lecon-surv">Leçon suivante : Surveiller des systèmes ›</a></p>
+                </section>
+
+                <section class="lecon amiral" id="lecon-surv" data-p="amiral">
+                    <header><span class="nl">LEÇON 2 / 2</span><h3>Surveiller des systèmes et régler les alertes</h3></header>
+                    <p class="but">L'état-major surveille des systèmes clés ; tous les pilotes voient l'œil et les alertes.</p>
+                    <div class="pas"><div class="t"><i>1</i><p>Page <b>Escadron</b>, onglet <b>Systèmes</b> : cliquez l'<b>œil</b> d'une ligne, ou ajoutez un système <b>par son nom</b>.</p></div>
+                        <figure><img src="images/lecon-su-1.jpg" alt="Surveiller un système" loading="lazy" style="max-width:min(100%,640px)"></figure></div>
+                    <div class="pas large"><div class="t"><i>2</i><p>Le filtre <b>« Surveillés »</b> les rassemble ; <b>« En alerte »</b> montre les plus graves.</p></div>
+                        <figure><img src="images/lecon-su-2.jpg" alt="Les filtres" loading="lazy" style="max-width:min(100%,760px)"></figure></div>
+                    <div class="pas"><div class="t"><i>3</i><p>Une ligne <b>clignote</b> en <b>rouge</b> (guerre, élection, faction presque partie) ou en <b>orange</b> (baisse, donnée vieillissante).</p></div>
+                        <figure><img src="images/lecon-su-3.jpg" alt="Lignes en alerte" loading="lazy" style="max-width:min(100%,700px)"></figure></div>
+                    <div class="pas"><div class="t"><i>4</i><p>Cliquez <b>⚙ Régler les alertes</b> (barre de filtres) : choisissez vos <b>seuils</b>.</p></div>
+                        <figure><img src="images/lecon-su-4.jpg" alt="Réglage des seuils" loading="lazy" style="max-width:min(100%,560px)"></figure></div>
+                    <p class="bilan"><b>RETENEZ</b> &nbsp;Les seuils valent pour <b>votre escadron seulement</b>, et se règlent par l'Amiral et le Directeur. « Valeurs par défaut » remet tout à zéro. Quarante systèmes surveillés au plus.</p>
+                    <p class="suiv"><a href="#lecon-campagne">‹ Leçon précédente</a><a href="#amiral">Pour le détail : chapitre Pour l'Amiral ›</a></p>
+                </section>
+            </section>
+
+            <div class="partie" id="reference">
+                <h2>RÉFÉRENCE <small>pour aller dans le détail</small></h2>
+                <p class="chapo-partie">Les chapitres complets : à lire quand vous voulez comprendre un sujet en profondeur.</p>
+            </div>
 
             <!-- ============ 3. LE QG ============ -->
             <section class="chap" id="qg" data-p="solo membre amiral">
-                <header><span class="num">03</span><h2>LE QUARTIER GÉNÉRAL</h2><span class="profils"><span class="profil tous">TOUS</span><span class="profil membre">ESCADRON : FIL, PILIER, ÉLAN</span></span></header>
+                <header><span class="num">01</span><h2>LE QUARTIER GÉNÉRAL</h2><span class="profils"><span class="profil tous">TOUS</span><span class="profil membre">ESCADRON : FIL, PILIER, ÉLAN</span></span></header>
                 <p class="pourquoi">C'est la page d'accueil de l'application : d'un coup d'œil, où en sont votre puissance, votre faction et votre escadron.</p>
+                <div class="retenir"><ul><li>C’est la page d’accueil : puissance, faction et escadron d’un coup d’œil.</li><li>Le <b>tick</b> est la mise à jour quotidienne de la galaxie : le compte à rebours est en haut de la page.</li><li>Un solitaire voit la même page, sans les blocs réservés à l’escadron.</li></ul></div>
 
                 <p>Voici le quartier général d'un pilote membre d'un escadron. <b>Les noms et les chiffres de cette image sont fictifs.</b> Un pilote solitaire voit la même page sans les blocs réservés à l'escadron (anecdote, Pilier, Élan) : le fil d'actualités occupe alors toute la largeur.</p>
                 <figure class="vue">
@@ -224,12 +419,13 @@
                     <li><b>Le Pilier de la semaine</b> : le pilote qui a rapporté le plus de points BGS pendant la semaine (du jeudi 07:00 UTC au jeudi suivant). Avec ou sans directive de l'Amiral, aucun seuil minimum.</li>
                     <li><b>L'Élan Powerplay</b> : le pilote dont les mérites du cycle ont le plus progressé en proportion de ses mérites de début de cycle. Pour qu'un débutant ne gagne pas grâce à un tout petit gain, le calcul suppose que chacun avait au moins 100 000 mérites au départ.</li>
                 </ul>
-                <div class="suite"><a href="#premiers-pas">‹ Premiers pas</a><a href="#tableau-de-bord">Chapitre suivant : Le tableau de bord en jeu ›</a></div>
+                <div class="suite"><span></span><a href="#tableau-de-bord">Chapitre suivant : Le tableau de bord en jeu ›</a></div>
             </section>
-            <!-- AUTO-DEB : chapitres 4 a 13 generes par _captures/gen_manuel.js -->
+            <!-- ex-AUTO-DEB : chapitres 5 a 14 ; le generateur _captures/gen_manuel.js n'est PLUS la source (ne pas le relancer), on modifie ce fichier directement -->
             <section class="chap" id="tableau-de-bord" data-p="solo membre amiral">
-                <header><span class="num">04</span><h2>LE TABLEAU DE BORD EN JEU</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <header><span class="num">02</span><h2>LE TABLEAU DE BORD EN JEU</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
                 <p class="pourquoi">Un second écran pendant que vous jouez : ce que vous transportez, vos missions, votre minage, vos découvertes et vos combats, en direct.</p>
+                <div class="retenir"><ul><li>Rien à saisir : la page se remplit toute seule tant que le jeu et EDMC tournent.</li><li>Cinq onglets : Commerce, Missions, Minage, Exploration, Combat.</li><li>Quand vous quittez le jeu, la dernière session reste affichée.</li></ul></div>
 <p>Tant que le jeu tourne avec EDMC et le plugin, la page <b>TABLEAU DE BORD</b> se remplit toute seule, sans rien cliquer. Un témoin <b>EN DIRECT</b> indique à quand remonte la dernière mise à jour (quelques secondes). Quand vous quittez le jeu, la dernière session reste affichée.</p>
 <p class="astuce">Posez-le sur une tablette ou un second écran : tout s'actualise de lui-même.</p>
 <h3>COMMERCE : CE QUE JE TRANSPORTE</h3>
@@ -249,7 +445,7 @@
 <figure class="vue"><div class="cadre"><img src="images/manuel-hangar.jpg" alt="La page Mon hangar" loading="lazy"><span class="rep" style="left:7.5%;top:31.5%">1</span><span class="rep" style="left:33%;top:32%">2</span><span class="rep" style="left:51%;top:32%">3</span><span class="rep" style="left:32.5%;top:73%">4</span></div><figcaption>Mon hangar (vaisseaux fictifs).</figcaption></figure>
 <ol class="legende"><li data-n="1"><b>La liste</b> de vos vaisseaux, avec la taille de plateforme (S, M, L), le nombre de modules ingénieurés et ceux de grade 5. Des filtres et une recherche aident à retrouver un vaisseau.</li><li data-n="2"><b>L'hologramme</b> du vaisseau choisi, et ses chiffres.</li><li data-n="3"><b>L'équipement</b> : armement, modules de base et modules optionnels, avec les ingénieurs.</li><li data-n="4"><b>SIMULER SUR EDSY.</b> Ouvre cette configuration dans l'outil EDSY pour tester l'ingénierie.</li></ol>
 <h3>LA SURVEILLANCE DES SYSTÈMES</h3>
-<p>Dans la page <b>ESCADRON</b>, onglet <b>SYSTÈMES</b>, l'Amiral, les officiers et le Directeur surveillent des systèmes stratégiques : un clic sur l'<b>œil</b> d'une ligne, ou l'ajout d'un système <b>par son nom</b> (même hors de notre faction, 40 au plus). Tous les pilotes voient l'œil et les alertes. Une ligne <b>clignote en rouge</b> pour une guerre, une élection ou une donnée de plus de 24 h, <b>en orange</b> pour une baisse d'influence de notre faction ou une donnée de plus de 12 h. Une <b>faction sur le départ</b> (en baisse ou en retraite) fait <b>clignoter la ligne en orange</b> sous 3 % d'influence et <b>en rouge</b> sous 2,5 % (seuils réglables par le Directeur). Le filtre <b>SURVEILLÉS</b> les rassemble, les plus graves en premier. Ce qui n'est pas relevé est écrit « non relevé ».</p>
+<p>Dans la page <b>ESCADRON</b>, onglet <b>SYSTÈMES</b>, l'Amiral, les officiers et le Directeur surveillent des systèmes stratégiques : un clic sur l'<b>œil</b> d'une ligne, ou l'ajout d'un système <b>par son nom</b> (même hors de notre faction, 40 au plus). Tous les pilotes voient l'œil et les alertes. Une ligne <b>clignote en rouge</b> pour une guerre, une élection ou une donnée de plus de 24 h, <b>en orange</b> pour une baisse d'influence de notre faction ou une donnée de plus de 12 h. Une <b>faction sur le départ</b> (en baisse ou en retraite) fait <b>clignoter la ligne en orange</b> sous 3 % d'influence et <b>en rouge</b> sous 2,5 % (seuils réglables par l'Amiral et le Directeur, bouton <b>⚙ RÉGLER LES ALERTES</b> de la barre de filtres). Le filtre <b>SURVEILLÉS</b> les rassemble, les plus graves en premier. Ce qui n'est pas relevé est écrit « non relevé ».</p>
 <p>Un système surveillé dont la donnée vieillit entre dans la liste du <b>repérage</b> : le pilote qui y arrive met le système à jour pour tout l'escadron et gagne 1 point BGS et 1 point ESPION (plugin 2.56 : relancez EDMC deux fois). Le Directeur règle les seuils dans la fenêtre de repérage de la page Engagement.</p>
 
 <h3>L'ALERTE COMBAT</h3>
@@ -260,8 +456,9 @@
             </section>
 
             <section class="chap" id="bgs" data-p="membre amiral">
-                <header><span class="num">05</span><h2>BGS ET CAMPAGNES</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+                <header><span class="num">03</span><h2>BGS ET CAMPAGNES</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
                 <p class="pourquoi">Voir ce que devient la galaxie pour les factions que votre escadron soutient ou combat, et ce que chacun y a fait. Aucun objectif chiffré : c'est le jeu qui juge.</p>
+                <div class="retenir"><ul><li>L’Amiral choisit où jouer ; <b>vous jouez normalement</b> et le plugin rattache vos actions aux directives.</li><li>La couleur d’une ligne = ce que l’influence a fait depuis le dernier tick : <b>vert</b> dans le sens voulu, <b>rouge</b> à contre-sens (l’aide est utile), <b>bleu</b> inchangé.</li><li>Aucun quota, aucune obligation : les pastilles montrent ce que vous avez déjà fait.</li></ul></div>
 <div class="glossaire"><b>BGS</b> (Background Simulation) : la simulation qui fait vivre les factions. Chaque faction a une <b>influence</b> dans chaque système ; elle monte et descend selon les actions des joueurs.<br><b>Tick</b> : la mise à jour quotidienne de la galaxie. C'est là que les résultats tombent.<br><b>Directive</b> : une consigne de l'Amiral sur un système. <b>HAUSSE</b> : faire monter une faction. <b>BAISSE</b> : faire baisser un rival. <b>GUERRE</b> et <b>ÉLECTION</b> : aider une faction dans un conflit.<br><b>Campagne</b> : un objectif d'ensemble qui regroupe des directives (et des missions Powerplay et de colonisation), avec une <b>priorité</b> (critique, haute, normale) et une échéance.</div>
 <h3>LE PRINCIPE</h3>
 <ul class="points"><li><b>L'Amiral choisit où jouer</b> (les directives). <b>Vous jouez normalement</b> : le plugin reconnaît vos missions, vos combats en zone de conflit, vos bons de combat, votre commerce, vos données d'exploration vendues, votre colonisation et vos meurtres (sous une directive de baisse), et les rattache aux directives. Rien à déclarer.</li><li><b>Aucun objectif chiffré, aucun pourcentage d'avancement.</b> Le site ne dit jamais « il vous reste X % à faire ». C'est le <b>résultat réel dans le jeu</b> qui compte : la couleur d'une ligne dit ce qu'a fait l'influence au <b>dernier tick</b>.</li><li><b>Aucune obligation.</b> Rien ne marque « à faire » ou « quota non atteint » : les pastilles montrent ce que <b>vous avez déjà fait</b> depuis le dernier tick, comme un repère.</li></ul>
@@ -293,8 +490,9 @@
             </section>
 
             <section class="chap" id="powerplay" data-p="solo membre amiral">
-                <header><span class="num">06</span><h2>POWERPLAY</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <header><span class="num">04</span><h2>POWERPLAY</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
                 <p class="pourquoi">Suivre votre puissance, vos mérites et votre progression, sans compter à la main.</p>
+                <div class="retenir"><ul><li>Un cycle va du <b>jeudi 07:00 UTC</b> au jeudi suivant.</li><li>Vos mérites sont comptés au <b>système où vous êtes</b> quand vous les gagnez.</li><li>L’état d’un système n’est relevé que quand un pilote y <b>arrive</b> (saut ou localisation).</li></ul></div>
 <p>Le plugin relève vos <b>mérites Powerplay</b> et votre puissance. Le site en déduit votre cycle (du jeudi au jeudi), votre progression et votre place parmi les pilotes alignés du réseau.</p>
 <ul class="points"><li>Au <b>QG</b>, la carte <b>MA PUISSANCE</b> montre votre puissance : ses systèmes (Stronghold, Fortified, Exploited), sa place parmi les 12 puissances et son évolution.</li><li>Dans l'<b>en-tête</b>, la pastille de gauche donne votre puissance et votre rang. Un clic ouvre la fenêtre ci-dessous.</li></ul>
 <figure class="vue"><div class="cadre"><img src="images/manuel-carriere.jpg" alt="Fenêtre Opérations stratégiques galactiques" loading="lazy"><span class="rep" style="left:20%;top:13.3%">1</span><span class="rep" style="left:21.5%;top:22.7%">2</span><span class="rep" style="left:21.5%;top:32.9%">3</span><span class="rep" style="left:20.3%;top:59%">4</span></div><figcaption>La fenêtre Powerplay (pilotes fictifs).</figcaption></figure>
@@ -306,8 +504,9 @@
             </section>
 
             <section class="chap" id="colonisation" data-p="solo membre amiral">
-                <header><span class="num">07</span><h2>COLONISATION</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <header><span class="num">05</span><h2>COLONISATION</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
                 <p class="pourquoi">Savoir où en sont les chantiers de l'escadron et ce qu'il faut y apporter, sans tableur.</p>
+                <div class="retenir"><ul><li>Un chantier n’apparaît qu’après avoir été consulté ou alimenté par un pilote dont le plugin est à jour.</li><li>Vos livraisons s’affichent en moins d’une minute et comptent pour votre rang BGS.</li></ul></div>
 <p>La page <b>COLONISATION</b> suit les chantiers de construction (Orbital Construction Site…) à partir de ce que les plugins ont relevé : chantiers consultés, livraisons, revendications. Vos livraisons apparaissent <b>dans la minute</b>.</p>
 <figure class="vue"><div class="cadre"><img src="images/manuel-colonisation.jpg" alt="La page Colonisation" loading="lazy"><span class="rep" style="left:6%;top:18%">1</span><span class="rep" style="left:60.5%;top:18%">2</span><span class="rep" style="left:6.5%;top:27%">3</span><span class="rep" style="left:6.5%;top:39%">4</span><span class="rep" style="left:63%;top:39%">5</span><span class="rep" style="left:63%;top:78%">6</span></div><figcaption>La page Colonisation (données fictives).</figcaption></figure>
 <ol class="legende"><li data-n="1"><b>Le filtre de pilote.</b> Tous les pilotes, ou un seul : pour voir vos propres chantiers et livraisons.</li><li data-n="2"><b>Les chiffres</b> : systèmes, constructions terminées, chantiers en cours et tonnes livrées ce cycle.</li><li data-n="3"><b>Systèmes sans architecte.</b> Un système colonisé non attribué : le pilote qui l'a fondé peut se déclarer architecte.</li><li data-n="4"><b>La carte de l'escadron</b> : chaque système avec son avancement. Zoom et filtres (en chantier, terminés).</li><li data-n="5"><b>À apporter en priorité</b> : les marchandises qui manquent le plus, tous chantiers confondus.</li><li data-n="6"><b>Les architectes</b> : qui a fondé quoi, et combien de tonnes ont été livrées.</li></ol>
@@ -318,8 +517,9 @@
             </section>
 
             <section class="chap" id="budget" data-p="solo membre amiral">
-                <header><span class="num">08</span><h2>BUDGET PERSONNEL</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <header><span class="num">06</span><h2>BUDGET PERSONNEL</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
                 <p class="pourquoi">Comprendre d'où viennent vos crédits et où ils partent, cycle par cycle. Strictement personnel.</p>
+                <div class="retenir"><ul><li>Visible par <b>vous seul</b>, même de votre Amiral.</li><li>Un cycle va du jeudi 07:00 UTC au jeudi suivant.</li><li>Ce que le plugin ne connaît pas apparaît en « écart non catégorisé » : le total reste juste.</li></ul></div>
 <p>La page <b>BUDGET</b> est <b>visible par vous seul</b>, même de votre Amiral. Elle est construite à partir de ce que le plugin a relevé dans vos journaux de jeu.</p>
 <figure class="vue"><div class="cadre"><img src="images/manuel-budget.jpg" alt="La page Budget" loading="lazy"><span class="rep" style="left:80%;top:13.8%">1</span><span class="rep" style="left:5.8%;top:26.9%">2</span><span class="rep" style="left:6%;top:30.8%">3</span><span class="rep" style="left:6%;top:47.2%">4</span><span class="rep" style="left:6%;top:81%">5</span></div><figcaption>La page Budget (montants fictifs).</figcaption></figure>
 <ol class="legende"><li data-n="1"><b>LIVRE DE COMPTE.</b> Chaque mouvement, avec filtres (revenus, charges, catégorie, texte). Export possible en fichier CSV.</li><li data-n="2"><b>La période</b> : cycle en cours, cycle précédent, 4 derniers cycles, ou tout. Un cycle va du jeudi 07:00 UTC au jeudi suivant.</li><li data-n="3"><b>Les quatre tuiles</b> : revenus, charges, résultat net et solde au dernier relevé, avec la comparaison au cycle d'avant.</li><li data-n="4"><b>La répartition</b> des revenus (commerce, missions, primes, exploration…) et des charges (achats, modules, assurance, carburant…). Un clic ouvre le livre de compte filtré.</li><li data-n="5"><b>Le compte de résultat</b> : produits et charges, avec la période d'avant et la variation.</li></ol>
@@ -328,8 +528,9 @@
             </section>
 
             <section class="chap" id="escadron" data-p="membre amiral">
-                <header><span class="num">09</span><h2>L'ESCADRON</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+                <header><span class="num">07</span><h2>L'ESCADRON</h2><span class="profils"><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
                 <p class="pourquoi">Voir ses camarades, leur activité, leurs titres, et retrouver le code d'invitation.</p>
+                <div class="retenir"><ul><li>Page réservée aux membres d’un escadron <b>validé</b>.</li><li>Le <b>code d’invitation</b> de l’escadron s’y trouve.</li><li>Un titre se perd quand un autre pilote vous dépasse de plus de 2 %.</li></ul></div>
 <p>La page <b>ESCADRON</b> réunit les chiffres de l'escadron et ses pilotes, en cartes. Elle est réservée aux membres d'un escadron validé.</p>
 <figure class="vue"><div class="cadre"><img src="images/manuel-escadron.jpg" alt="La page Escadron" loading="lazy"><span class="rep" style="left:6%;top:10.5%">1</span><span class="rep" style="left:64.7%;top:22.5%">2</span><span class="rep" style="left:5.8%;top:28.4%">3</span><span class="rep" style="left:7%;top:32.5%">4</span><span class="rep" style="left:52.5%;top:49%">5</span><span class="rep" style="left:13.5%;top:52.3%">6</span></div><figcaption>La page Escadron (pilotes fictifs).</figcaption></figure>
 <ol class="legende"><li data-n="1"><b>Les chiffres</b> : pilotes inscrits, points BGS et crédits générés, mérites Powerplay cumulés, colonisation.</li><li data-n="2"><b>Recherche et tri</b> des pilotes.</li><li data-n="3"><b>Les filtres</b> : tous, actifs cette semaine, officiers, avec un titre.</li><li data-n="4"><b>Une carte de pilote</b> : son rôle (pilote, officier, Amiral), ses points BGS, son activité de la semaine, son rang Powerplay et ses distinctions.</li><li data-n="5"><b>+ AJOUTER MA PHOTO.</b> Votre photo de commandant, visible uniquement par votre escadron.</li><li data-n="6"><b>VOIR LA FICHE.</b> Le détail du pilote : titres, distinctions, hangar.</li></ol>
@@ -339,8 +540,9 @@
             </section>
 
             <section class="chap" id="allies" data-p="solo membre amiral">
-                <header><span class="num">10</span><h2>ALLIÉS ET INVITATIONS</h2><span class="profils"><span class="profil solo">SOLITAIRE</span><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
+                <header><span class="num">08</span><h2>ALLIÉS ET INVITATIONS</h2><span class="profils"><span class="profil solo">SOLITAIRE</span><span class="profil membre">MEMBRE D’ESCADRON</span></span></header>
                 <p class="pourquoi">Participer à la campagne d'un autre escadron, sans en faire partie.</p>
+                <div class="retenir"><ul><li>Vous aidez, vous ne commandez pas.</li><li>Un pilote invité ne voit que la campagne qui l’invite.</li><li>Vos actions comptent dans le journal de la campagne, avec une pastille qui vous distingue.</li></ul></div>
 <p>Un Amiral peut <b>inviter</b> un pilote (avec ou sans escadron) ou <b>tout un escadron allié</b> à participer à l'une de ses campagnes. Vous aidez ; vous ne commandez pas.</p>
 <h3>RECEVOIR UNE INVITATION</h3>
 <ol class="etapes"><li>Le bouton <b>ENGAGEMENT</b> du menu <b>clignote</b>, et une fenêtre plein écran s'ouvre avec l'invitation.</li><li>Choisissez <b>ACCEPTER</b>, <b>REFUSER</b> ou <b>PLUS TARD</b>. Si vous choisissez plus tard, cliquez sur le bouton clignotant pour la rouvrir.</li></ol>
@@ -354,8 +556,9 @@
             </section>
 
             <section class="chap" id="telephone" data-p="solo membre amiral">
-                <header><span class="num">11</span><h2>LE TÉLÉPHONE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <header><span class="num">09</span><h2>LE TÉLÉPHONE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
                 <p class="pourquoi">Garder son escadron et ses chiffres dans la poche, quand on n'est pas devant son PC.</p>
+                <div class="retenir"><ul><li>Ouvrez le site sur votre téléphone : la version adaptée s’ouvre seule.</li><li>Cinq onglets : Accueil, Engagement, Bâtir, Escadron, Croisés.</li><li>Les sons du jeu demandent l’application installée.</li></ul></div>
 <p>Ouvrez le site sur votre téléphone : il bascule tout seul vers une version adaptée, le <b>compagnon mobile</b>. Vous pouvez aussi l'installer comme une application depuis le menu de votre navigateur (« Ajouter à l'écran d'accueil »). Le bouton <b>COMPAGNON MOBILE</b> en bas des pages du site y mène.</p>
 <figure class="vue" style="max-width:360px"><div class="cadre"><img src="images/manuel-mobile.jpg" alt="Le compagnon mobile" loading="lazy"><span class="rep" style="left:72%;top:2.6%">1</span><span class="rep" style="left:7%;top:10.7%">2</span><span class="rep" style="left:6%;top:22.5%">3</span><span class="rep" style="left:7%;top:36.7%">4</span><span class="rep" style="left:6%;top:52%">5</span><span class="rep" style="left:50%;top:95%">6</span></div><figcaption>L'accueil du compagnon mobile.</figcaption></figure>
 <ol class="legende"><li data-n="1"><b>La cloche</b> des nouveautés, et le réglage de votre compte.</li><li data-n="2"><b>Les alertes</b> : par exemple un titre menacé par un camarade.</li><li data-n="3"><b>Votre commandant</b> : rang BGS, escadron, progression.</li><li data-n="4"><b>Powerplay, Fédération, Empire</b> : vos rangs d'un coup d'œil.</li><li data-n="5"><b>Le fil de l'escadron</b> : les dernières actualités, avec un aperçu. Un toucher ouvre la fenêtre complète.</li><li data-n="6"><b>Les cinq onglets</b> : Accueil, Engagement (vos campagnes), Bâtir (colonisation), Escadron, Croisés (joueurs croisés).</li></ol>
@@ -364,8 +567,9 @@
             </section>
 
             <section class="chap" id="amiral" data-p="amiral">
-                <header><span class="num">12</span><h2>POUR L'AMIRAL</h2><span class="profils"><span class="profil amiral">AMIRAL</span></span></header>
+                <header><span class="num">10</span><h2>POUR L'AMIRAL</h2><span class="profils"><span class="profil amiral">AMIRAL</span></span></header>
                 <p class="pourquoi">Lancer une campagne, y ranger les directives, inviter des alliés et garder l'escadron informé.</p>
+                <div class="retenir"><ul><li>Une campagne regroupe des directives ; seul l’Amiral en crée.</li><li>Un pilote invité ne voit que la campagne à laquelle il est invité.</li><li>Les seuils des alertes de la liste des systèmes se règlent depuis la page Escadron.</li></ul></div>
 <h3>CRÉER UNE CAMPAGNE</h3>
 <p>Sur la page Engagement, cliquez sur <b>+ NOUVELLE CAMPAGNE</b>. Seul l'Amiral peut en créer.</p>
 <figure class="vue" style="max-width:900px"><div class="cadre"><img src="images/manuel-creation.jpg" alt="Fenêtre Nouvelle campagne" loading="lazy"><span class="rep" style="left:29.5%;top:23.5%">1</span><span class="rep" style="left:29.5%;top:32.4%">2</span><span class="rep" style="left:29.5%;top:42%">3</span><span class="rep" style="left:29.5%;top:49%">4</span><span class="rep" style="left:29.5%;top:58%">5</span><span class="rep" style="left:29.5%;top:71%">6</span></div><figcaption>La fenêtre de création.</figcaption></figure>
@@ -383,7 +587,7 @@
             </section>
 
             <section class="chap" id="depannage" data-p="solo membre amiral">
-                <header><span class="num">13</span><h2>DÉPANNAGE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
+                <header><span class="num">11</span><h2>DÉPANNAGE</h2><span class="profils"><span class="profil tous">TOUS LES PILOTES</span></span></header>
                 <p class="pourquoi">Les petits problèmes les plus fréquents, et comment les régler.</p>
 <div class="plis" style="display:grid;gap:10px;max-width:900px">
 <details class="qr"><summary>Mon nom de commandant n'arrive pas sur le site</summary><div style="padding:0 18px 14px 38px;color:#b4c0c8">Dans l'ordre : EDMC est ouvert · SYS_EDTEAM figure dans l'onglet Plugins · la clé est collée dans l'onglet SYS.EDTEAM · <b>le jeu a été relancé complètement depuis le bureau Windows</b> (se déconnecter puis se reconnecter dans le jeu ne suffit pas). Attendez ensuite quelques secondes après être entré dans votre vaisseau.</div></details>
@@ -431,7 +635,7 @@
             }
         });
     </script>
-    <script src="manuel.js?v=2"></script>
+    <script src="manuel.js?v=6"></script>
     <script src="footer.js?v=59"></script>
 </body>
 </html>

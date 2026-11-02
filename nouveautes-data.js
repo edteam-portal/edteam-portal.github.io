@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-manuel-apprentissage", date: "2026-11-02T21:21:32Z", type: "NOUVEAU",
+        titre: "Le manuel devient un parcours d’apprentissage",
+        texte: "Le manuel s’ouvre maintenant sur des leçons courtes, dans l’ordre : une image et une phrase par pas (quartier général, tableau de bord, directives, Powerplay, colonisation, application et sons, téléphone, anglais, et pour l’Amiral les campagnes et la surveillance des systèmes). Une recherche et une rubrique « Je veux… » mènent droit à la bonne leçon. Les chapitres détaillés restent dessous, en « Référence ».",
+        important: false
+    },
+    {
         id: "2026-11-gazette-portrait", date: "2026-11-02T19:40:37Z", type: "AMELIORE",
         titre: "Gazette : le portrait suit la hauteur de l’article",
         texte: "Dans la une de la gazette, le portrait de la puissance soutenue s’agrandit pour suivre la hauteur de l’article, au lieu de laisser du vide sous les quatre chiffres.",

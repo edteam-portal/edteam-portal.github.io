@@ -92,3 +92,96 @@ h1 em { font-style: normal; color: var(--ed-orange); text-shadow: 0 0 22px var(-
     .rep { width: 22px; height: 22px; line-height: 22px; font-size: .75em; }
 }
 @media (prefers-reduced-motion: reduce) { .manuel-zone { scroll-behavior: auto; } }
+
+/* RECHERCHE (sommaire) */
+.sommaire .rech { width: 100%; box-sizing: border-box; margin: 0 0 16px; padding: 8px 10px; font: inherit; font-size: .82em; letter-spacing: 1px; color: #fff; background: rgba(0,240,255,.05); border: 1px solid #3a444c; }
+.sommaire .rech:focus { outline: none; border-color: var(--ed-blue); }
+#rech-res { display: flex; flex-direction: column; gap: 6px; }
+#rech-res a { display: block; padding: 8px 10px; border-left: 2px solid var(--ed-blue); background: rgba(0,240,255,.04); text-decoration: none; }
+#rech-res a:hover { background: rgba(0,240,255,.1); }
+#rech-res a b { display: block; color: #fff; font-size: .85em; }
+#rech-res a small { color: var(--ed-orange); letter-spacing: 2px; font-size: .68em; }
+#rech-res a span { display: block; margin-top: 3px; color: #8d9ca7; font-size: .74em; line-height: 1.4; }
+#rech-res .rien { color: #8d9ca7; font-size: .82em; }
+
+/* « JE VEUX… » : raccourcis vers les tutos */
+.jeveux { margin: 0 0 44px; }
+.jeveux h2 { font-weight: normal; letter-spacing: 4px; font-size: 1.05em; color: var(--ed-orange); margin: 0 0 12px; }
+.jeveux .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; max-width: 1100px; }
+.jeveux a { display: flex; flex-direction: column; gap: 3px; padding: 11px 14px; text-decoration: none; border: 1px solid rgba(0,240,255,.3); border-left: 3px solid var(--ed-blue); background: rgba(3,10,14,.8); transition: .15s; }
+.jeveux a:hover { background: rgba(0,240,255,.08); border-color: var(--ed-blue); }
+.jeveux a b { color: #fff; font-size: .92em; letter-spacing: 1px; }
+.jeveux a small { color: #7d8d99; font-size: .75em; letter-spacing: 1px; }
+.jeveux a.amiral { border-left-color: var(--or); border-color: rgba(255,210,63,.35); }
+.jeveux a[hidden] { display: none; }
+
+/* A RETENIR + MINI-SOMMAIRE de chapitre */
+.retenir { margin: 0 0 18px; padding: 12px 18px; max-width: 860px; border: 1px solid rgba(255,210,63,.4); border-left: 4px solid var(--or); background: rgba(255,210,63,.05); }
+.retenir::before { content: "À RETENIR"; display: block; color: var(--or); letter-spacing: 3px; font-size: .78em; margin-bottom: 6px; }
+.retenir ul { list-style: none; margin: 0; }
+.retenir li { position: relative; padding: 2px 0 2px 18px; color: #d6dde2; font-size: .93em; }
+.retenir li::before { content: "•"; position: absolute; left: 2px; color: var(--or); }
+.mini { margin: 0 0 22px; max-width: 860px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; font-size: .82em; }
+.mini b { color: #6f7f8b; letter-spacing: 3px; font-size: .85em; font-weight: normal; }
+.mini a { text-decoration: none; color: var(--ed-blue); border-bottom: 1px dotted rgba(0,240,255,.4); }
+.mini a:hover { color: #fff; }
+
+/* TUTOS */
+.tuto { margin: 0 0 26px; padding: 16px 20px 6px; max-width: 900px; border: 1px solid rgba(0,240,255,.28); border-left: 4px solid var(--ed-blue); background: rgba(3,10,14,.85); }
+.tuto.amiral { border-color: rgba(255,210,63,.35); border-left-color: var(--or); }
+.tuto[hidden] { display: none; }
+.tuto > header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 8px; }
+.tuto h3 { margin: 0; font-weight: normal; letter-spacing: 2px; font-size: 1.08em; color: #fff; }
+.tuto .duree { color: var(--ed-orange); font-size: .72em; letter-spacing: 2px; border: 1px solid rgba(255,113,0,.5); padding: 0 8px; }
+.tuto .avant { margin: 0 0 6px; color: #8d9ca7; font-size: .88em; }
+.tuto .avant b { color: #b4c0c8; }
+.tuto .voir, .tuto .sinon { margin: 6px 0 10px; padding: 9px 14px; font-size: .9em; border-left: 3px solid; }
+.tuto .voir { border-color: var(--vert); background: rgba(0,255,102,.06); color: #c6e8d3; }
+.tuto .sinon { border-color: var(--ed-orange); background: rgba(255,113,0,.07); color: #f1dccb; }
+.tuto .voir b, .tuto .sinon b { letter-spacing: 2px; font-size: .85em; }
+.tuto .voir b { color: var(--vert); } .tuto .sinon b { color: var(--ed-orange); }
+.tuto .plus { margin: 0 0 12px; font-size: .82em; color: #6f7f8b; }
+.tuto .etapes li b { color: #fff; }
+
+@media (max-width: 1000px) { .jeveux .grille { grid-template-columns: 1fr; } }
+
+/* LECONS (manuel d'apprentissage) : un objectif, 3-4 pas, une image par pas, une phrase par pas */
+.lecon { margin: 0 0 34px; padding: 18px 22px 8px; max-width: 980px; border: 1px solid rgba(0,240,255,.3); border-top: 3px solid var(--ed-blue); background: rgba(3,10,14,.9); }
+.lecon.amiral { border-top-color: var(--or); border-color: rgba(255,210,63,.3); }
+.lecon > header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
+.lecon .nl { color: var(--ed-orange); letter-spacing: 3px; font-size: .78em; }
+.lecon h3 { margin: 0; font-weight: normal; letter-spacing: 2px; font-size: 1.25em; color: #fff; }
+.lecon .but { margin: 4px 0 16px; color: #c5d3dc; font-size: 1em; }
+.lecon .pas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 8px 26px; align-items: center; padding: 16px 0; border-top: 1px dashed rgba(255,255,255,.14); }
+.lecon .pas .t { display: flex; gap: 14px; align-items: flex-start; font-size: 1.05em; color: #e4ebef; line-height: 1.5; }
+.lecon .pas .t > i { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--ed-blue); color: var(--ed-blue); background: rgba(0,240,255,.08); display: flex; align-items: center; justify-content: center; font-style: normal; font-size: .95em; }
+.lecon .pas .t p { margin: 4px 0 0; max-width: none; color: #e4ebef; }
+.lecon .pas figure, .lecon .pas .illu { margin: 0; }
+.lecon .pas img { display: block; max-width: 100%; height: auto; border: 1px solid rgba(255,113,0,.45); box-shadow: 0 6px 24px rgba(0,0,0,.6); }
+.lecon .illu { padding: 18px 20px; border: 1px dashed rgba(0,240,255,.4); background: rgba(0,240,255,.04); color: #c5d3dc; text-align: center; font-size: .92em; line-height: 1.7; }
+.lecon .illu kbd { display: inline-block; min-width: 38px; padding: 4px 10px; margin: 0 3px; border: 1px solid #6f7f8b; border-bottom-width: 3px; border-radius: 4px; background: #11181d; color: #fff; font: inherit; font-size: 1.1em; }
+.lecon .illu .gros { display: block; margin-bottom: 4px; font-size: 1.15em; color: #fff; letter-spacing: 1px; }
+.lecon .illu.plug { text-align: left; border-style: solid; border-color: rgba(0,255,102,.45); background: rgba(0,255,102,.05); }
+.lecon .illu.plug small { display: block; color: #6f7f8b; letter-spacing: 2px; font-size: .75em; margin-bottom: 4px; }
+.lecon .illu.plug span { color: var(--vert); letter-spacing: 1px; }
+.lecon .bilan { margin: 4px 0 10px; padding: 10px 14px; border-left: 3px solid var(--vert); background: rgba(0,255,102,.06); color: #c6e8d3; font-size: .95em; }
+.lecon .bilan b { color: var(--vert); letter-spacing: 2px; font-size: .85em; }
+@media (max-width: 1000px) { .lecon .pas { grid-template-columns: 1fr; } }
+
+/* PARTIES (Apprendre / Reference) + modules */
+.partie { margin: 6px 0 22px; padding-top: 18px; border-top: 2px solid var(--ed-orange); max-width: 1100px; }
+.partie h2 { font-weight: normal; letter-spacing: 6px; font-size: 1.5em; color: #fff; margin-bottom: 4px; }
+.partie h2 small { font-size: .5em; letter-spacing: 3px; color: #7d8d99; margin-left: 12px; }
+.partie .chapo-partie { color: #b4c0c8; margin: 4px 0 0; }
+.chap.module { margin-bottom: 40px; }
+.chap.module > header .num { font-size: 2.2em; }
+.lecon .suiv { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 4px 0 12px; font-size: .9em; letter-spacing: 1px; }
+.lecon .bilan.att { border-color: var(--ed-orange); background: rgba(255,113,0,.08); color: #f1dccb; }
+.lecon .bilan.att b { color: var(--ed-orange); }
+.lecon .bilan.sinon { border-color: var(--ed-orange); background: rgba(255,113,0,.07); color: #f1dccb; }
+.lecon .bilan.sinon b { color: var(--ed-orange); }
+.sommaire ol.parcours { counter-reset: mod; }
+.sommaire ol.parcours li { counter-increment: mod; }
+.sommaire ol.parcours li a::before { content: "M" counter(mod); }
+.lecon .pas.large { grid-template-columns: 1fr; gap: 12px; }
+.lecon .pas.large figure { justify-self: start; max-width: 100%; }
