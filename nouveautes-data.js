@@ -5,6 +5,24 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-bgs-economie-rechargement", date: "2026-11-03T17:15:11Z", type: "AMELIORE",
+        titre: "Page BGS : moins de rechargements en arrière-plan",
+        texte: "La page BGS ne se recharge plus toute seule quand son onglet est caché ou après 30 minutes sans action. Elle se met à jour dès que vous revenez.",
+        important: false
+    },
+    {
+        id: "2026-11-manuel-escadron-onglets", date: "2026-11-03T16:55:02Z", type: "AMELIORE",
+        titre: "Manuel : les onglets de la page Escadron en images",
+        texte: "Le chapitre « L’escadron » montre maintenant les onglets Fleet Carriers, Membres et Frères d’armes avec une capture chacun, et la description de Frères d’armes est corrigée.",
+        important: false
+    },
+    {
+        id: "2026-11-verdict-tick-dispute", date: "2026-11-03T16:52:15Z", type: "AMELIORE",
+        titre: "Système disputé : le verdict au tick",
+        texte: "La fenêtre d’un système disputé indique maintenant quand tombe le verdict de la conquête : le jeudi à 07:00 UTC, avec le temps restant.",
+        important: false
+    },
+    {
         id: "2026-11-manuel-reference", date: "2026-11-02T22:15:35Z", type: "AMELIORE",
         titre: "Manuel : la Référence remise à jour",
         texte: "Les chapitres détaillés du manuel sont réécrits avec les captures actuelles : quartier général, tableau de bord, hangar, BGS, Powerplay (états du jeu, système disputé, mérites), colonisation, budget, escadron (surveillance, titres, Fleet Carriers), Frères d’armes, téléphone et rôle de l’Amiral.",

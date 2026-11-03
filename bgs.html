@@ -35,7 +35,7 @@
     <script src="bgs-participants.js?v=2"></script>
     <script src="pp-etat.js?v=5"></script>
     <script src="carte-campagnes.js?v=49"></script>
-    <script src="campagnes-pp.js?v=27"></script>
+    <script src="campagnes-pp.js?v=28"></script>
     <script src="campagnes-col.js?v=7"></script>
 
     <style>
@@ -2284,10 +2284,24 @@
                     // Retour sur la page (tablette : minuteries gelees quand l'ecran s'eteint ou l'appli passe en arriere-plan) : on rafraichit si le dernier affichage a plus d'une minute
                     document.addEventListener('visibilitychange', () => {
                         if (document.hidden || Date.now() - (window.bgsDernierAff || 0) < 60000) return;
+                        window.bgsDerniereAction = Date.now();
                         const t = document.getElementById('bgs-tab-ordres');
                         if (t && t.style.display !== 'none') afficherOrdresBGS();
                     });
+                    // Economie d'egress (03/11) : ce rechargement (~22 appels) representait ~60 % des requetes. Il ne tourne plus onglet cache,
+                    // ni apres 30 min sans aucune action du pilote ; des qu'il reprend la main (clic, touche, defilement) la page se met a jour si elle a plus d'une minute.
+                    window.bgsDerniereAction = Date.now();
+                    const bgsAction = () => {
+                        const inactif = Date.now() - window.bgsDerniereAction > 1800000;
+                        window.bgsDerniereAction = Date.now();
+                        if (inactif && !document.hidden && Date.now() - (window.bgsDernierAff || 0) > 60000) {
+                            const t = document.getElementById('bgs-tab-ordres');
+                            if (t && t.style.display !== 'none') afficherOrdresBGS();
+                        }
+                    };
+                    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => document.addEventListener(ev, bgsAction, { passive: true }));
                     setInterval(() => {
+                        if (document.hidden || Date.now() - window.bgsDerniereAction > 1800000) return;
                         if (document.getElementById('bgs-tab-ordres').style.display !== 'none') {
                             afficherOrdresBGS();
                         }
