@@ -97,6 +97,13 @@
         apresAcces();
     }
 
+    async function changerDerogation(uid, accorder, b) {
+        b.disabled = true;
+        const r = await rpc('definir_derogation', { target_user_id: uid, p_valeur: accorder });
+        if (r.error || r.data === 'INCONNU') alert('Impossible de modifier la dérogation pour le moment.');
+        apresAcces();
+    }
+
     // ---------- PILOTES ----------
     function filtre() {
         const q = D.q.trim().toUpperCase();
@@ -108,13 +115,14 @@
         const fermeture = p.dossier && p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' && !p.amiral_valide && !p.est_amiral ? '<div class="dm-sub" style="color:#FF7100">escadron fermé : Amiral non validé</div>' : '';
         const valider = p.dossier && !p.est_approuve ? '<div style="margin-top:10px;text-align:right">' + fermeture + '<button type="button" class="dm-btn ok" data-ouvrir="' + E(p.user_id) + '">VALIDER L’ACCÈS</button></div>' : '';
         const retirerBtn = p.est_approuve && p.user_id !== moi ? '<button type="button" class="dm-btn or" data-retacc="' + E(p.user_id) + '" data-nom="' + E(String(p.cmdr_nom || '')) + '" style="margin-left:8px">RETIRER L’ACCÈS</button>' : '';
+        const derogBtn = p.federale !== true && p.user_id !== moi ? '<button type="button" class="dm-btn" style="border-color:#00F0FF;color:#00F0FF;margin-left:8px" data-derog="' + E(p.user_id) + '" data-val="' + (p.derogation ? '0' : '1') + '">' + (p.derogation ? 'RETIRER LA DÉROGATION' : 'ACCORDER UNE DÉROGATION') + '</button>' : '';
         const puis = p.puissance ? '<span class="' + (p.federale === true ? 'dm-v' : (p.derogation ? 'dm-gr' : 'dm-r')) + '">' + E(p.puissance) + (p.federale === true ? '' : (p.derogation ? ' · dérogation' : ' · HORS FÉDÉRATION')) + '</span><span>·</span>' : '';
         const ver = !p.plugin_version ? '<span class="' + (p.est_approuve ? 'dm-r' : 'dm-gr') + '">plugin —</span>' : (cmpVer(p.plugin_version, ref) >= 0 ? '<span class="dm-v">plugin ' + E(p.plugin_version) + '</span>' : '<span class="dm-o">plugin ' + E(p.plugin_version) + ' (en retard)</span>');
         const diag = DIAG.map(([t, k, c]) => { const e = etatCase(p, k); const cl = e === 'n' ? (c ? 'dm-r' : 'dm-gr') : e === 'o' ? 'dm-o' : 'dm-v'; return '<span><em style="font-style:normal">' + t + '</em><b class="' + cl + '">' + (e === 'n' ? '—' : E(ilYa(p[k]))) + '</b></span>'; }).join('');
         return '<div class="dm-c' + (ouv ? ' ouv' : '') + '" style="--k:' + S[1] + '" data-u="' + E(p.user_id) + '"><div class="dm-l1"><span class="dm-av">' + E(initiales(p)) + '</span><div class="dm-nom">CMDR ' + E(String(p.cmdr_nom || '—').toUpperCase()) + '<div class="dm-sub">' + E(nomEsc(p)) + ' · ' + ROLES[role(p)] + '</div></div><span class="dm-tag" style="--t:' + S[1] + '">' + S[0] + '</span></div>'
             + '<div class="dm-l2"><span>activité ' + E(ilYa(p.derniere_activite)) + '</span><span>·</span>' + puis + ver + (sus ? '<span class="dm-tag" style="--t:#ffb000">SUSPECT</span>' : arr ? '<span class="dm-tag" style="--t:#ff6a6a">ARRÊTÉ</span>' : '') + '</div>'
             + valider + '<div class="dm-det"><div>Inscrit le ' + E(dateCourte(p.cree_le)) + ' · dernière connexion ' + E(ilYa(p.derniere_connexion)) + '</div><div class="dm-g">' + diag + '</div>'
-            + '<div style="margin-top:9px"><button type="button" class="dm-btn" data-photo="' + E(p.user_id) + '"' + (p.chemin ? '' : ' disabled') + '>PHOTO' + (p.chemin ? '' : ' (AUCUNE)') + '</button>' + retirerBtn + '</div></div></div>';
+            + '<div style="margin-top:9px"><button type="button" class="dm-btn" data-photo="' + E(p.user_id) + '"' + (p.chemin ? '' : ' disabled') + '>PHOTO' + (p.chemin ? '' : ' (AUCUNE)') + '</button>' + retirerBtn + derogBtn + '</div></div></div>';
     }
     function dessinerPilotes(garder) {
         const z = document.getElementById('dm-corps'); if (!D.liste) return;
@@ -123,7 +131,11 @@
         const nNouv = D.liste.filter(p => Date.now() - Date.parse(p.cree_le) < 7 * JOUR).length, nSans = D.liste.filter(p => !p.chemin).length;
         const att = p => !p.est_approuve && p.dossier, l = filtre().sort((a, b) => (att(b) ? 1 : 0) - (att(a) ? 1 : 0) || (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0)), ref = versionRef();
         const pu = (on, d, txt) => '<span class="dm-p' + (on ? ' on' : '') + '" data-f="' + d + '">' + txt + '</span>';
-        z.innerHTML = '<div class="dm-f"><input type="search" id="dm-q" placeholder="Rechercher un pilote…" value="' + E(D.q) + '"><select id="dm-esc"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + E(k) + '"' + (D.esc === k ? ' selected' : '') + '>' + E(k) + '</option>').join('') + '</select></div>'
+        const moi = (window.profilCommandant && window.profilCommandant.user_id) || '';
+        const hors = D.liste.filter(p => p.est_approuve && p.federale === false && !p.derogation && p.user_id !== moi), nAtt = D.liste.filter(p => !p.est_approuve && p.dossier).length;
+        const bandeaux = (nAtt ? '<div class="dm-c" style="--k:#00FF66"><b style="color:#00FF66;letter-spacing:2px;font-size:.8em">' + nAtt + ' PILOTE' + (nAtt > 1 ? 'S' : '') + ' ATTENDENT LEUR ACCÈS</b><div class="dm-sub">Ils sont en haut de la liste : touchez VALIDER L’ACCÈS.</div></div>' : '')
+            + (hors.length ? '<div class="dm-c" style="--k:#FF7100"><b style="color:#FF7100;letter-spacing:2px;font-size:.8em">' + hors.length + ' PILOTE' + (hors.length > 1 ? 'S' : '') + ' HORS FÉDÉRATION</b><div class="dm-sub">' + hors.map(p => 'CMDR ' + E(String(p.cmdr_nom || '—').toUpperCase()) + ' (' + E(p.puissance) + ')').join(', ') + '. Touchez leur carte : RETIRER L’ACCÈS ou ACCORDER UNE DÉROGATION.</div></div>' : '');
+        z.innerHTML = bandeaux + '<div class="dm-f"><input type="search" id="dm-q" placeholder="Rechercher un pilote…" value="' + E(D.q) + '"><select id="dm-esc"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + E(k) + '"' + (D.esc === k ? ' selected' : '') + '>' + E(k) + '</option>').join('') + '</select></div>'
             + '<div class="dm-f">' + pu(!D.statut && !D.sansPhoto && !D.nouv, 'tous', 'TOUS (' + D.liste.length + ')') + Object.keys(STATUTS).map(k => pu(D.statut === k, 's:' + k, STATUTS[k][0] + ' (' + (cnt[k] || 0) + ')')).join('') + pu(D.nouv, 'nouv', 'NOUVEAUX 7 J (' + nNouv + ')') + pu(D.sansPhoto, 'sansphoto', 'SANS PHOTO (' + nSans + ')') + '</div>'
             + '<div class="dm-sub" style="margin:0 2px 8px">' + l.length + ' pilote' + (l.length > 1 ? 's' : '') + ' · touchez une carte pour le diagnostic</div>'
             + (l.map(p => carte(p, ref)).join('') || '<div class="dm-vide">Aucun pilote ne correspond à ces filtres.</div>');
@@ -196,6 +208,7 @@
             const tab = t.closest('.tabs button'); if (tab) return onglet(tab.dataset.o);
             const bo = t.closest('button[data-ouvrir]'); if (bo) return ouvrirAcces(bo.dataset.ouvrir, bo);
             const br = t.closest('button[data-retacc]'); if (br) return retirerAcces(br.dataset.retacc, br.dataset.nom, br);
+            const bd = t.closest('button[data-derog]'); if (bd) return changerDerogation(bd.dataset.derog, bd.dataset.val === '1', bd);
             const ph = t.closest('button[data-photo]'); if (ph) return voirPhoto(ph.dataset.photo);
             const pf = t.closest('[data-f]');
             if (pf) { const f = pf.dataset.f; if (f === 'tous') { D.statut = ''; D.sansPhoto = false; D.nouv = false; } else if (f === 'nouv') D.nouv = !D.nouv; else if (f === 'sansphoto') D.sansPhoto = !D.sansPhoto; else if (f.indexOf('s:') === 0) { const s = f.slice(2); D.statut = D.statut === s ? '' : s; } return dessinerPilotes(); }
