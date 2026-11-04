@@ -16,7 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="copier-lieux.js?v=3"></script>
-    <script src="shared-utils.js?v=7"></script>
+    <script src="shared-utils.js?v=8"></script>
+    <script src="antirobot.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=21"></script>
     <script src="annonce.js?v=33"></script>
@@ -1271,9 +1272,10 @@
             if (!email || !password) return;
             msg.style.display = 'block'; msg.style.color = "var(--ed-orange)"; msg.innerText = "> VÉRIFICATION...";
 
-            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
+            const ar = window.edteamAntiRobot ? await window.edteamAntiRobot.options() : {};
+            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password, options: ar });
             if (error) {
-                msg.style.color = "var(--ed-red)"; msg.innerText = "Accès refusé : " + error.message;
+                msg.style.color = "var(--ed-red)"; msg.innerText = "Accès refusé : " + ((window.edteamAntiRobot && window.edteamAntiRobot.message(error)) || error.message);
             } else {
                 verifierProfilMobile(data.user);
             }
@@ -1524,7 +1526,7 @@
         function ouvrirDirecteurMobile() {
             xEl('modal-reglages').style.display = 'none';
             if (window.directeurMobile) { window.directeurMobile.ouvrir(); return; }
-            chargerScriptMobile('directeur-mobile.js?v=1', () => { if (window.directeurMobile) window.directeurMobile.ouvrir(); });
+            chargerScriptMobile('directeur-mobile.js?v=3', () => { if (window.directeurMobile) window.directeurMobile.ouvrir(); });
         }
 
         // JOUEURS CROISES : le fichier (croises-mobile.js) n'est charge qu'a la premiere ouverture de l'onglet ; une seule lecture serveur, mise en memoire 5 minutes

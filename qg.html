@@ -40,7 +40,8 @@
     </script>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=7"></script>
+    <script src="shared-utils.js?v=8"></script>
+    <script src="antirobot.js?v=1"></script>
     <script src="puissances.js?v=2"></script>
     <script src="joueurs-croises.js?v=17"></script>
     <script src="qgsuivi.js?v=41"></script>
@@ -51,7 +52,7 @@
     <script src="journal-edition.js?v=2"></script>
     <script src="gazette-journal.js?v=4"></script>
     <script src="copier-lieux.js?v=3"></script>
-    <script src="navigation.js?v=76"></script>
+    <script src="navigation.js?v=77"></script>
     <script src="invitations.js?v=21"></script>
     <script src="sas.js?v=1"></script>
 
@@ -323,6 +324,26 @@
             <a href="index.html" style="color: #888; font-size: 0.8em; text-decoration: underline; letter-spacing: 1px;">[ DÉCOUVRIR SYS.EDTEAM ]</a>
         </div>
         <footer id="footer-auth"></footer>
+    </div>
+
+    <!-- SALLE D'ATTENTE : dossier envoye, acces pas encore ouvert par le Directeur (page legere : aucune boucle, aucun temps reel) -->
+    <div id="attente-screen" class="failsafe-overlay" style="display: none; z-index: 10006; background-color: var(--ed-bg); flex-direction: column; justify-content: center; align-items: center; overflow-y: auto;">
+        <div class="failsafe-content" style="width: 100%; box-sizing: border-box; max-width: 620px; border-color: var(--ed-orange); box-shadow: 0 0 40px rgba(255, 113, 0, 0.15); animation: none; padding: 30px 34px; text-align: center;">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 60px; width: 60px; filter: drop-shadow(0 0 10px var(--ed-orange-glow)); margin: 0 auto 10px auto; display: block;">
+                <polygon points="48,15 15,35 30,50 10,70 48,85 48,65 30,55 48,40" fill="#00F0FF" />
+                <polygon points="52,15 85,35 70,50 90,70 52,85 52,65 70,55 52,40" fill="#FF7100" />
+                <polygon points="50,45 42,55 50,65 58,55" fill="#FFFFFF" opacity="0.9" />
+            </svg>
+            <h2 class="sas-titre" style="color: var(--ed-orange);">DOSSIER REÇU</h2>
+            <p id="attente-pilote" style="color: #00FF66; letter-spacing: 2px; margin: 6px 0 14px 0;"></p>
+            <p style="color: #ccc; line-height: 1.6; margin: 0 0 8px 0;">Votre accès est en attente de validation par le Directeur.</p>
+            <p style="color: #ccc; line-height: 1.6; margin: 0 0 18px 0;">Vous recevrez un <b>e-mail</b> dès qu'il sera ouvert. Vous pouvez fermer cette page : elle n'est pas nécessaire pour être prévenu.</p>
+            <p id="attente-etat" style="color: #889; font-size: .85em; margin: 0 0 18px 0;">Cette page vérifie toute seule toutes les 5 minutes.</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="fs-auth-btn" style="margin: 0; padding: 8px 18px;" onclick="verifierAttente(true)">VÉRIFIER MAINTENANT</button>
+                <button type="button" class="fs-auth-btn" style="margin: 0; padding: 8px 18px; border-color: #666; color: #aaa;" onclick="deconnexion()">SE DÉCONNECTER</button>
+            </div>
+        </div>
     </div>
 
     <!-- NOUVEAU SAS DE SÉCURITÉ (STYLE MINISITE) -->
@@ -1329,8 +1350,9 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             if (!email || !password) { msg.style.color = "var(--ed-orange)"; msg.innerText = "> Saisissez votre e-mail et votre mot de passe."; return; }
             msg.style.color = "var(--ed-orange)"; msg.innerText = "> VÉRIFICATION...";
 
-            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
-            if (error) { msg.style.color = "red"; msg.innerText = "> ERREUR : " + error.message; }
+            const ar = window.edteamAntiRobot ? await window.edteamAntiRobot.options() : {};
+            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password, options: ar });
+            if (error) { msg.style.color = "red"; msg.innerText = "> ERREUR : " + ((window.edteamAntiRobot && window.edteamAntiRobot.message(error)) || error.message); }
             else { verifierApprobation(data.user); }
         }
 
@@ -1348,7 +1370,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             msg.style.color = "var(--ed-blue)";
             msg.innerText = "> CRÉATION DU COMPTE...";
 
-            const { data, error } = await supabaseApp.auth.signUp({ email, password });
+            const ar = window.edteamAntiRobot ? await window.edteamAntiRobot.options() : {};
+            const { data, error } = await supabaseApp.auth.signUp({ email, password, options: ar });
 
             if (error) {
                 // Si l'erreur vient du fait que le compte existe deja
@@ -1357,7 +1380,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     msg.innerText = "> COMPTE DÉTECTÉ. REPRISE DE LA PROCÉDURE...";
 
                     // On connecte le pilote automatiquement avec les identifiants saisis
-                    const { data: loginData, error: loginError } = await supabaseApp.auth.signInWithPassword({ email, password });
+                    const ar2 = window.edteamAntiRobot ? await window.edteamAntiRobot.options() : {};
+                    const { data: loginData, error: loginError } = await supabaseApp.auth.signInWithPassword({ email, password, options: ar2 });
 
                     if (loginError) {
                         msg.style.color = "red";
@@ -1369,7 +1393,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 } else {
                     // Autre erreur (mot de passe refuse par le serveur, e-mail invalide...)
                     msg.style.color = "red";
-                    msg.innerText = "> ERREUR : " + error.message;
+                    msg.innerText = "> ERREUR : " + ((window.edteamAntiRobot && window.edteamAntiRobot.message(error)) || error.message);
                 }
             } else {
                 // Nouveau compte cree avec succes
@@ -1422,7 +1446,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             // escadron enregistre mais pas encore valide par le Directeur (masquerEscadronEnAttente, shared-utils.js) : pas de champ de code, un simple message
             if (profil.escadron_attente) {
                 zone.innerHTML = '<div class="bloc cy"><h2>ESCADRON EN ATTENTE <em>validation</em></h2>'
-                    + '<span style="color: #ccc; line-height: 1.55;">Votre escadron <b style="color: #fff;">' + escapeHtml(String(profil.escadron_attente).toUpperCase()) + '</b> n\'est pas encore validé : les pages Escadron et BGS s\'ouvriront dès qu\'il le sera.</span></div>';
+                    + '<span style="color: #ccc; line-height: 1.55;">Votre escadron <b style="color: #fff;">' + escapeHtml(String(profil.escadron_attente).toUpperCase()) + '</b> n\'est pas encore ouvert : il s\'ouvre quand son Amiral a reçu son accès. Les pages Escadron et BGS s\'ouvriront alors pour vous.</span></div>';
                 zone.style.display = 'block';
                 return;
             }
@@ -1464,6 +1488,31 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             }
             btn.disabled = false;
         }
+
+        // SALLE D'ATTENTE : une seule petite requete toutes les 5 minutes, onglet visible seulement ; a l'ouverture de l'acces la page se recharge
+        let attenteUserId = null, attenteTimer = null, attenteEnCours = false;
+        function planifierAttente() {
+            clearTimeout(attenteTimer);
+            attenteTimer = setTimeout(() => { if (document.hidden) { planifierAttente(); } else { verifierAttente(false); } }, 5 * 60 * 1000);
+        }
+        window.verifierAttente = async function (manuel) {
+            if (!attenteUserId || attenteEnCours) return;
+            attenteEnCours = true;
+            const etat = document.getElementById('attente-etat');
+            try {
+                if (manuel && typeof sonClic === 'function') sonClic();
+                const { data, error } = await supabaseApp.from('profils').select('est_approuve').eq('user_id', attenteUserId).single();
+                if (!error && data && data.est_approuve) {
+                    try { sessionStorage.removeItem('edteam_profil_cache_' + attenteUserId); } catch (e) { /* rien */ }
+                    window.location.reload();
+                    return;
+                }
+                if (etat) etat.innerText = error ? 'Vérification impossible pour le moment, nouvel essai dans quelques minutes.' : 'Pas encore ouvert (vérifié à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + ').';
+            } catch (e) { /* nouvel essai au prochain passage */ }
+            attenteEnCours = false;
+            planifierAttente();
+        };
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && attenteUserId) planifierAttente(); });
 
         async function verifierApprobation(user) {
             const msg = document.getElementById('auth-msg');
@@ -1583,6 +1632,17 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 // signifie plus "en attente d'un admin", juste une tentative précédente
                 // non finalisée).
                 document.getElementById('auth-screen').style.display = 'none';
+
+                // DOSSIER DEJA ENVOYE (SQL 211) : le pilote attend que le Directeur ouvre son acces -> salle d'attente, pas de SAS ni de boucle
+                if (data.dossier_soumis_le) {
+                    attenteUserId = user.id;
+                    const elP = document.getElementById('attente-pilote');
+                    if (elP) elP.innerText = data.cmdr_nom ? 'CMDR ' + String(data.cmdr_nom).toUpperCase() : '';
+                    document.getElementById('attente-screen').style.display = 'flex';
+                    planifierAttente();
+                    return;
+                }
+
                 document.getElementById('sas-screen').style.display = 'flex';
                 document.getElementById('sas-api-key').innerText = data.cle_api;
                 if (typeof window.sasInitEtapes === 'function') window.sasInitEtapes(user.id);   // parcours en 4 etapes (sas.js)
@@ -1926,15 +1986,15 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
             try {
                 // On récupère TOUS les profils non approuvés (pour correspondre au badge)
-                const { data, error } = await supabaseApp.from('profils').select('user_id, cmdr_nom, escadron_id').eq('est_approuve', false);
+                const { data, error } = await supabaseApp.from('profils').select('user_id, cmdr_nom, escadron_id, dossier_soumis_le').eq('est_approuve', false);
                 if (error) throw error;
 
                 if (data && data.length > 0) {
                     let html = '';
                     data.forEach(p => {
                         
-                        if (p.cmdr_nom) {
-                            // CAS 1 : LE DOSSIER EST COMPLET (Le pilote a transmis ses infos)
+                        if (p.cmdr_nom && p.dossier_soumis_le) {
+                            // CAS 1 : LE DOSSIER EST COMPLET (Le pilote a transmis ses infos et attend son acces)
                             const nomAffichage = `CMDR ${escapeHtml(p.cmdr_nom.toUpperCase())}`;
                             const squadAffichage = p.escadron_id ? `[ Escadron: ${escapeHtml(p.escadron_id)} ]` : `[ Pilote Indépendant ]`;
 

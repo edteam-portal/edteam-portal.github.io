@@ -1,5 +1,5 @@
 // ESPACE DIRECTEUR sur le MOBILE (reserve au Directeur, la base le verifie aussi) : les trois onglets de la page PC « Trombinoscope » adaptes au telephone.
-//   ESCADRONS : validation des escadrons (escadrons_validation / valider_escadron, SQL 170)
+//   ACCES (SQL 211) : integre a l'onglet PILOTES (valider / retirer l'acces, pilote par pilote)
 //   PILOTES   : tous les comptes en cartes (pilotes_directeur, SQL 175-177) : filtres, statut, plugin, diagnostic au toucher, photo et retrait de la photo
 //   USAGE     : le reseau est-il utilise ? (calcule sur l'appareil a partir de la MEME liste : aucune requete de plus)
 // Charge A LA DEMANDE depuis le bouton « Espace Directeur » des Reglages. Une seule lecture de la liste des pilotes, gardee 2 minutes dans la session.
@@ -10,8 +10,8 @@
     const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const client = () => (typeof supabaseApp !== 'undefined' ? supabaseApp : window.supabaseApp || null);
     const JOUR = 86400e3, TTL = 120000;
-    const D = { liste: null, onglet: 'esc', q: '', esc: '', statut: '', nouv: false, sansPhoto: false, ouvert: '' };
-    const STATUTS = { ACTIF: ['ACTIF 7 J', '#2fe07a'], DORMANT: ['DORMANT', '#ffb000'], JAMAIS: ['JAMAIS DE DONNÉE', '#ff6a6a'], EMAIL: ['E-MAIL NON CONFIRMÉ', '#8b97a0'], ATTENTE: ['EN ATTENTE', '#00F0FF'] };
+    const D = { liste: null, onglet: 'pil', q: '', esc: '', statut: '', nouv: false, sansPhoto: false, ouvert: '' };
+    const STATUTS = { ACTIF: ['ACTIF 7 J', '#2fe07a'], DORMANT: ['DORMANT', '#ffb000'], JAMAIS: ['JAMAIS DE DONNÉE', '#ff6a6a'], EMAIL: ['E-MAIL NON CONFIRMÉ', '#8b97a0'], ATTENTE: ['ACCÈS À VALIDER', '#00FF66'], SAS: ['DANS LE SAS', '#00F0FF'] };
     const ROLES = { amiral: 'AMIRAL', officier: 'OFFICIER', pilote: 'PILOTE' };
     const DIAG = [['BGS', 'd_bgs', 1], ['COLONISATION', 'd_colo', 0], ['BUDGET', 'd_budget', 1], ['POWERPLAY', 'd_pp', 1], ['FIL', 'd_journal', 0], ['HANGAR', 'd_hangar', 1], ['COMBAT', 'd_combat', 0]];
 
@@ -20,7 +20,7 @@
     const initiales = p => String(p.cmdr_nom || '?').replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || '?';
     function statut(p) {
         if (!p.email_confirme) return 'EMAIL';
-        if (!p.est_approuve) return 'ATTENTE';
+        if (!p.est_approuve) return p.dossier ? 'ATTENTE' : 'SAS';
         if (!p.derniere_activite) return 'JAMAIS';
         return Date.now() - Date.parse(p.derniere_activite) < 7 * JOUR ? 'ACTIF' : 'DORMANT';
     }
@@ -67,31 +67,32 @@
     function cle() { const c = client(); const u = (window.profilCommandant && window.profilCommandant.user_id) || (typeof profilCommandant !== 'undefined' && profilCommandant && profilCommandant.user_id) || ''; return 'edteam_dm_pilotes_' + u; }
     async function charger(force) {
         if (!force) { try { const c = JSON.parse(sessionStorage.getItem(cle()) || 'null'); if (c && Date.now() - c.ts < TTL) { D.liste = c.d; return D.liste; } } catch (e) { /* memoire illisible */ } }
-        const r = await rpc('pilotes_directeur');
+        const [r, ac] = await Promise.all([rpc('pilotes_directeur'), rpc('pilotes_acces')]);
         if (r.error) throw r.error;
         D.liste = r.data || [];
+        // ACCES (SQL 211) : dossier envoye = le pilote attend l'ouverture de son acces (sinon il est encore dans le SAS)
+        const att = {}; ((ac.data && ac.data.attente) || []).forEach(a => { att[a.user_id] = a; });
+        D.liste.forEach(p => { const a = att[p.user_id]; p.dossier = !!a; p.amiral_valide = a ? !!a.amiral_valide : false; });
         try { sessionStorage.setItem(cle(), JSON.stringify({ ts: Date.now(), d: D.liste })); } catch (e) { /* stockage plein */ }
         return D.liste;
     }
 
     // ---------- ESCADRONS ----------
-    async function dessinerEscadrons() {
-        const z = document.getElementById('dm-corps'); z.innerHTML = '<div class="dm-vide">Chargement…</div>';
-        const r = await rpc('escadrons_validation');
-        if (r.error || !Array.isArray(r.data)) { z.innerHTML = '<div class="dm-vide">Impossible de lire les escadrons pour le moment.</div>'; return; }
-        const attente = r.data.filter(e => !e.valide).length;
-        z.innerHTML = '<div class="dm-h" style="margin-top:6px">ESCADRONS · ' + (attente ? attente + ' À VALIDER' : 'TOUS VALIDÉS') + '</div>' + (r.data.map(e => {
-            const nom = E(String(e.escadron || '')), n = Number(e.pilotes) || 0, k = e.valide ? '#00FF66' : '#FF7100';
-            return '<div class="dm-c" style="--k:' + k + '"><div class="dm-l1"><div class="dm-nom">' + nom + '<div class="dm-sub">Amiral : ' + E(e.amiral || '—') + ' · ' + n + ' pilote' + (n > 1 ? 's' : '') + '</div></div><span class="dm-tag" style="--t:' + k + '">' + (e.valide ? 'VALIDÉ' : 'EN ATTENTE') + '</span></div>'
-                + '<div style="margin-top:10px;text-align:right"><button type="button" class="dm-btn ' + (e.valide ? 'or' : 'ok') + '" data-esc="' + nom + '" data-val="' + (e.valide ? '0' : '1') + '">' + (e.valide ? 'RETIRER LA VALIDATION' : 'VALIDER') + '</button></div></div>';
-        }).join('') || '<div class="dm-vide">Aucun escadron enregistré.</div>');
-    }
-    async function valider(nom, val, b) {
-        if (!val && !confirm('Retirer la validation de ' + nom + ' ?\n\nSes pilotes perdent l’accès aux pages Escadron et BGS.')) return;
+    // ---------- ACCES (SQL 211) : boutons des cartes PILOTES ----------
+    function oublierAcces() { try { Object.keys(sessionStorage).filter(k => k.indexOf('edteam_dm_pilotes_') === 0 || k.indexOf('edteam_effectifs_') === 0).forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* rien */ } }
+    async function apresAcces() { oublierAcces(); try { await charger(true); } catch (e) { /* liste gardee */ } dessinerPilotes(); }
+    async function ouvrirAcces(uid, b) {
         b.disabled = true;
-        const r = await rpc('valider_escadron', { p_escadron: nom, p_valide: val });
-        if (r.error) alert('Impossible de modifier la validation pour le moment.');
-        dessinerEscadrons();
+        const r = await rpc('approuver_utilisateur', { target_user_id: uid });
+        if (r.error) alert('Validation refusée par le serveur (dossier incomplet ?).');
+        apresAcces();
+    }
+    async function retirerAcces(uid, nom, b) {
+        if (!confirm('Retirer l’accès de CMDR ' + String(nom).toUpperCase() + ' ?\n\nIl repasse en attente : le plugin cesse d’envoyer ses données.')) return;
+        b.disabled = true;
+        const r = await rpc('retirer_acces', { target_user_id: uid });
+        if (r.error || r.data === 'REFUSE') alert(r.data === 'REFUSE' ? 'Ce compte ne peut pas être retiré.' : 'Impossible de retirer l’accès pour le moment.');
+        apresAcces();
     }
 
     // ---------- PILOTES ----------
@@ -101,20 +102,23 @@
             && (!D.nouv || Date.now() - Date.parse(p.cree_le) < 7 * JOUR) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
     }
     function carte(p, ref) {
-        const st = statut(p), S = STATUTS[st], sus = suspect(p), arr = arrete(p), ouv = D.ouvert === p.user_id;
+        const st = statut(p), S = STATUTS[st], sus = suspect(p), arr = arrete(p), ouv = D.ouvert === p.user_id, moi = (window.profilCommandant && window.profilCommandant.user_id) || '';
+        const fermeture = p.dossier && p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' && !p.amiral_valide && !p.est_amiral ? '<div class="dm-sub" style="color:#FF7100">escadron fermé : Amiral non validé</div>' : '';
+        const valider = p.dossier && !p.est_approuve ? '<div style="margin-top:10px;text-align:right">' + fermeture + '<button type="button" class="dm-btn ok" data-ouvrir="' + E(p.user_id) + '">VALIDER L’ACCÈS</button></div>' : '';
+        const retirerBtn = p.est_approuve && p.user_id !== moi ? '<button type="button" class="dm-btn or" data-retacc="' + E(p.user_id) + '" data-nom="' + E(String(p.cmdr_nom || '')) + '" style="margin-left:8px">RETIRER L’ACCÈS</button>' : '';
         const ver = !p.plugin_version ? '<span class="' + (p.est_approuve ? 'dm-r' : 'dm-gr') + '">plugin —</span>' : (cmpVer(p.plugin_version, ref) >= 0 ? '<span class="dm-v">plugin ' + E(p.plugin_version) + '</span>' : '<span class="dm-o">plugin ' + E(p.plugin_version) + ' (en retard)</span>');
         const diag = DIAG.map(([t, k, c]) => { const e = etatCase(p, k); const cl = e === 'n' ? (c ? 'dm-r' : 'dm-gr') : e === 'o' ? 'dm-o' : 'dm-v'; return '<span><em style="font-style:normal">' + t + '</em><b class="' + cl + '">' + (e === 'n' ? '—' : E(ilYa(p[k]))) + '</b></span>'; }).join('');
         return '<div class="dm-c' + (ouv ? ' ouv' : '') + '" style="--k:' + S[1] + '" data-u="' + E(p.user_id) + '"><div class="dm-l1"><span class="dm-av">' + E(initiales(p)) + '</span><div class="dm-nom">CMDR ' + E(String(p.cmdr_nom || '—').toUpperCase()) + '<div class="dm-sub">' + E(nomEsc(p)) + ' · ' + ROLES[role(p)] + '</div></div><span class="dm-tag" style="--t:' + S[1] + '">' + S[0] + '</span></div>'
             + '<div class="dm-l2"><span>activité ' + E(ilYa(p.derniere_activite)) + '</span><span>·</span>' + ver + (sus ? '<span class="dm-tag" style="--t:#ffb000">SUSPECT</span>' : arr ? '<span class="dm-tag" style="--t:#ff6a6a">ARRÊTÉ</span>' : '') + '</div>'
-            + '<div class="dm-det"><div>Inscrit le ' + E(dateCourte(p.cree_le)) + ' · dernière connexion ' + E(ilYa(p.derniere_connexion)) + '</div><div class="dm-g">' + diag + '</div>'
-            + '<div style="margin-top:9px"><button type="button" class="dm-btn" data-photo="' + E(p.user_id) + '"' + (p.chemin ? '' : ' disabled') + '>PHOTO' + (p.chemin ? '' : ' (AUCUNE)') + '</button></div></div></div>';
+            + valider + '<div class="dm-det"><div>Inscrit le ' + E(dateCourte(p.cree_le)) + ' · dernière connexion ' + E(ilYa(p.derniere_connexion)) + '</div><div class="dm-g">' + diag + '</div>'
+            + '<div style="margin-top:9px"><button type="button" class="dm-btn" data-photo="' + E(p.user_id) + '"' + (p.chemin ? '' : ' disabled') + '>PHOTO' + (p.chemin ? '' : ' (AUCUNE)') + '</button>' + retirerBtn + '</div></div></div>';
     }
     function dessinerPilotes(garder) {
         const z = document.getElementById('dm-corps'); if (!D.liste) return;
         const escs = [...new Set(D.liste.map(nomEsc))].sort();
         const cnt = {}; D.liste.forEach(p => { const s = statut(p); cnt[s] = (cnt[s] || 0) + 1; });
         const nNouv = D.liste.filter(p => Date.now() - Date.parse(p.cree_le) < 7 * JOUR).length, nSans = D.liste.filter(p => !p.chemin).length;
-        const l = filtre().sort((a, b) => (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0)), ref = versionRef();
+        const att = p => !p.est_approuve && p.dossier, l = filtre().sort((a, b) => (att(b) ? 1 : 0) - (att(a) ? 1 : 0) || (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0)), ref = versionRef();
         const pu = (on, d, txt) => '<span class="dm-p' + (on ? ' on' : '') + '" data-f="' + d + '">' + txt + '</span>';
         z.innerHTML = '<div class="dm-f"><input type="search" id="dm-q" placeholder="Rechercher un pilote…" value="' + E(D.q) + '"><select id="dm-esc"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + E(k) + '"' + (D.esc === k ? ' selected' : '') + '>' + E(k) + '</option>').join('') + '</select></div>'
             + '<div class="dm-f">' + pu(!D.statut && !D.sansPhoto && !D.nouv, 'tous', 'TOUS (' + D.liste.length + ')') + Object.keys(STATUTS).map(k => pu(D.statut === k, 's:' + k, STATUTS[k][0] + ' (' + (cnt[k] || 0) + ')')).join('') + pu(D.nouv, 'nouv', 'NOUVEAUX 7 J (' + nNouv + ')') + pu(D.sansPhoto, 'sansphoto', 'SANS PHOTO (' + nSans + ')') + '</div>'
@@ -171,7 +175,6 @@
         D.onglet = nom;
         document.querySelectorAll('#dm-ov .tabs button').forEach(b => b.classList.toggle('on', b.dataset.o === nom));
         const z = document.getElementById('dm-corps'); z.scrollTop = 0;
-        if (nom === 'esc') return dessinerEscadrons();
         z.innerHTML = '<div class="dm-vide">Chargement…</div>';
         try { await charger(false); } catch (e) { z.innerHTML = '<div class="dm-vide">Impossible de lire les pilotes pour le moment (script SQL 175 lancé ?).</div>'; return; }
         if (nom === 'pil') dessinerPilotes(); else dessinerUsage();
@@ -182,13 +185,14 @@
         if (!moi || !moi.est_directeur) return;     // reserve au Directeur (la base le verifie aussi)
         css(); M.fermer();
         const o = document.createElement('div'); o.id = 'dm-ov';
-        o.innerHTML = '<div class="top"><b>ESPACE DIRECTEUR</b><span class="x" data-fermer>✕</span></div><div class="tabs"><button data-o="esc">ESCADRONS</button><button data-o="pil">PILOTES</button><button data-o="usage">USAGE</button></div><div id="dm-corps"></div>';
+        o.innerHTML = '<div class="top"><b>ESPACE DIRECTEUR</b><span class="x" data-fermer>✕</span></div><div class="tabs"><button data-o="pil">PILOTES</button><button data-o="usage">USAGE</button></div><div id="dm-corps"></div>';
         document.body.appendChild(o);
         o.addEventListener('click', e => {
             const t = e.target;
             if (t.closest('[data-fermer]')) return M.fermer();
             const tab = t.closest('.tabs button'); if (tab) return onglet(tab.dataset.o);
-            const bv = t.closest('button[data-esc]'); if (bv) return valider(bv.dataset.esc, bv.dataset.val === '1', bv);
+            const bo = t.closest('button[data-ouvrir]'); if (bo) return ouvrirAcces(bo.dataset.ouvrir, bo);
+            const br = t.closest('button[data-retacc]'); if (br) return retirerAcces(br.dataset.retacc, br.dataset.nom, br);
             const ph = t.closest('button[data-photo]'); if (ph) return voirPhoto(ph.dataset.photo);
             const pf = t.closest('[data-f]');
             if (pf) { const f = pf.dataset.f; if (f === 'tous') { D.statut = ''; D.sansPhoto = false; D.nouv = false; } else if (f === 'nouv') D.nouv = !D.nouv; else if (f === 'sansphoto') D.sansPhoto = !D.sansPhoto; else if (f.indexOf('s:') === 0) { const s = f.slice(2); D.statut = D.statut === s ? '' : s; } return dessinerPilotes(); }

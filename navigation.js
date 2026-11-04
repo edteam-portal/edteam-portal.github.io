@@ -176,6 +176,13 @@ function injecterArchitectureGlobale() {
             </div>
             <div id="header-tick"></div>
             <div style="display: flex; align-items: center; justify-content: flex-end; flex: none; padding-right: 5px; gap: 8px;">
+                    <div id="header-acces" onclick="if(typeof sonClic==='function')sonClic(); window.location.href='trombinoscope.html'" onmouseenter="if(typeof sonHover==='function')sonHover()"
+                        style="display: none; align-items: center; gap: 7px; font-size: 0.8em; letter-spacing: 1px; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.55); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box; animation: accesPulse 2.4s ease-in-out infinite;"
+                        title="Des pilotes ont terminé le SAS et attendent l'ouverture de leur accès. Cliquez pour les valider.">
+                        <span id="acces-pt" style="width: 8px; height: 8px; border-radius: 50%; background: #00FF66; box-shadow: 0 0 8px #00FF66;"></span>
+                        <span id="acces-nb" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">0</span>
+                        <span style="color:#9fe9bd; font-size:0.7em; font-weight: bold;">ACCÈS À VALIDER</span>
+                    </div>
                     <div id="header-inscriptions" onclick="ouvrirInscriptionsEnCours()"
                         style="display: none; align-items: center; gap: 6px; font-size: 0.8em; letter-spacing: 1px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
                         title="Inscriptions en cours : comptes créés mais pas encore finalisés au sas (visible du Directeur seulement). Cliquez pour le détail.">
@@ -724,23 +731,43 @@ window.actualiserBadgeAmiraute = async function() {
             if (!force && brut) { const c = JSON.parse(brut); if (Date.now() - c.t < 3 * 60 * 1000) return c.l; }
         } catch (e) { /* stockage indisponible : on interroge la base */ }
         if (typeof supabaseApp === 'undefined') return null;
-        const { data, error } = await supabaseApp.from('profils').select('user_id, created_at, cmdr_nom')
+        const { data, error } = await supabaseApp.from('profils').select('user_id, created_at, cmdr_nom, dossier_soumis_le')
             .or('est_approuve.is.null,est_approuve.eq.false').order('created_at', { ascending: true });
         if (error) return null;
         const l = data || [];
         try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), l: l })); } catch (e) { /* rien */ }
         return l;
     }
+    // ACCES A VALIDER (SQL 211) : pilotes qui ont termine le SAS et attendent que le Directeur ouvre leur acces ; INSCRIPTIONS EN COURS = ceux qui n'ont pas encore fini le SAS
+    function css() {
+        if (document.getElementById('acces-css')) return;
+        const s = document.createElement('style'); s.id = 'acces-css';
+        s.textContent = '@keyframes accesPulse { 0%, 100% { box-shadow: 0 0 0 rgba(0,255,102,0); } 50% { box-shadow: 0 0 14px rgba(0,255,102,.55); } }'
+            + '#header-acces:hover { background: rgba(0,255,102,.16) !important; }'
+            + '@media (prefers-reduced-motion: reduce) { #header-acces { animation: none !important; } }';
+        document.head.appendChild(s);
+    }
     window.actualiserInscriptionsEnCours = async function (force) {
-        const boite = document.getElementById('header-inscriptions');
+        const boite = document.getElementById('header-inscriptions'), acces = document.getElementById('header-acces');
         if (!boite) return;
-        if (typeof profilCommandant === 'undefined' || !profilCommandant || !profilCommandant.est_directeur) { boite.style.display = 'none'; return; }
-        const l = await lister(force);
-        if (!l) return;
-        boite.style.display = 'flex';
+        if (typeof profilCommandant === 'undefined' || !profilCommandant || !profilCommandant.est_directeur) { boite.style.display = 'none'; if (acces) acces.style.display = 'none'; return; }
+        css();
+        const tous = await lister(force);
+        if (!tous) return;
+        const l = tous.filter(p => !p.dossier_soumis_le), att = tous.filter(p => p.dossier_soumis_le);
+        boite.style.display = l.length ? 'flex' : 'none';
         document.getElementById('insc-nb').innerText = l.length;
         const sEl = document.getElementById('insc-s'); if (sEl) sEl.innerText = l.length > 1 ? 'S' : '';
+        if (acces) {
+            acces.style.display = att.length ? 'flex' : 'none';
+            document.getElementById('acces-nb').innerText = att.length;
+            const noms = att.slice(0, 5).map(p => 'CMDR ' + String(p.cmdr_nom || '?').toUpperCase()).join(', ') + (att.length > 5 ? '…' : '');
+            acces.title = (att.length > 1 ? att.length + ' pilotes ont terminé' : '1 pilote a terminé') + ' le SAS et attendent l\'ouverture de leur accès : ' + noms + '. Cliquez pour les valider.';
+        }
     };
+    // le Directeur laisse souvent un onglet ouvert : on remet le compte a jour toutes les 5 minutes, onglet visible seulement (une toute petite requete)
+    setInterval(() => { if (!document.hidden && document.getElementById('header-acces')) window.actualiserInscriptionsEnCours(true); }, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && document.getElementById('header-acces')) window.actualiserInscriptionsEnCours(); });
     window.ouvrirInscriptionsEnCours = async function () {
         if (typeof sonClic === 'function') sonClic();
         let ov = document.getElementById('modal-inscriptions');
@@ -753,7 +780,7 @@ window.actualiserBadgeAmiraute = async function() {
         }
         ov.innerHTML = '<div class="bloc" style="width:100%;max-width:680px;max-height:88vh;overflow-y:auto;"><h2>INSCRIPTIONS EN COURS <em>comptes créés, pas encore finalisés au sas</em></h2><div style="color:#888;">Chargement…</div></div>';
         ov.style.display = 'flex';
-        const l = await lister(true);
+        const tousL = await lister(true), l = tousL ? tousL.filter(p => !p.dossier_soumis_le) : null;
         window.actualiserInscriptionsEnCours();
         let h = '<div style="position:absolute;top:10px;right:16px;color:var(--ed-orange);cursor:pointer;font-weight:bold;font-size:1.2em;" onclick="document.getElementById(\'modal-inscriptions\').style.display=\'none\'">X</div>';
         h += '<h2>INSCRIPTIONS EN COURS <em>comptes créés, pas encore finalisés au sas</em></h2>';
@@ -878,7 +905,8 @@ window.recupererMotDePasse = async function() {
     }
 
     try {
-        const { error } = await supabaseApp.auth.resetPasswordForEmail(emailInput, { redirectTo: window.location.href });
+        const ar = window.edteamAntiRobot ? await window.edteamAntiRobot.options({ redirectTo: window.location.href }) : { redirectTo: window.location.href };
+        const { error } = await supabaseApp.auth.resetPasswordForEmail(emailInput, ar);
         if (error) throw error;
 
         if (typeof window.afficherAlerte === 'function') {

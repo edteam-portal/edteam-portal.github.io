@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-acces-par-pilote", date: "2026-11-04T18:39:36Z", type: "AMELIORE",
+        titre: "Nouveaux pilotes : accès ouvert par le Directeur",
+        texte: "Un nouveau pilote termine le SAS, puis attend que le Directeur ouvre son accès. Les pilotes déjà inscrits ne changent rien. Un escadron s’ouvre dès que son Amiral a reçu son accès.",
+        important: false
+    },
+    {
         id: "2026-11-bgs-economie-rechargement", date: "2026-11-03T17:15:11Z", type: "AMELIORE",
         titre: "Page BGS : moins de rechargements en arrière-plan",
         texte: "La page BGS ne se recharge plus toute seule quand son onglet est caché ou après 30 minutes sans action. Elle se met à jour dès que vous revenez.",

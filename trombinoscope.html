@@ -15,11 +15,12 @@
     <link rel="stylesheet" href="style.css?v=3">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=7"></script>
+    <script src="shared-utils.js?v=8"></script>
+    <script src="antirobot.js?v=1"></script>
     <script src="son.js?v=2"></script>
     <script src="photos.js?v=2"></script>
     <script src="copier-lieux.js?v=3"></script>
-    <script src="navigation.js?v=76"></script>
+    <script src="navigation.js?v=77"></script>
     <script src="invitations.js?v=21"></script>
 
     <style>
@@ -185,7 +186,7 @@
         const supabaseApp = window.supabaseApp;
         let profilCommandant = null;
         const ST = { courant: -1, vue: [] };
-        const P = { diag: false, liste: [], esc: '', q: '', statut: '', sansPhoto: false, nouv: false, chargement: null };
+        const P = { liste: [], esc: '', q: '', chargement: null, tri: { k: '', sens: 1, attente: true }, triDiag: { k: '', sens: 1, diag: true } };
         const esc = escapeHtml;
         const CLE = 'edteam_pilotes_v1';
         const ROLES = { amiral: 'Amiral', officier: 'Officier BGS', pilote: 'Pilote' };
@@ -219,11 +220,11 @@
         // ---------------------------------------------------------------
         //  ONGLET PILOTES : tous les comptes, un tableau SANS image (la photo n'est telechargee qu'a l'ouverture de la fenetre AVATAR)
         // ---------------------------------------------------------------
-        const STATUTS = { ACTIF: ['ACTIF 7 J', 'v'], DORMANT: ['DORMANT', 'd'], JAMAIS: ['JAMAIS DE DONNÉE', 'j'], EMAIL: ['E-MAIL NON CONFIRMÉ', 'e'], ATTENTE: ['EN ATTENTE', 'a'] };
+        const STATUTS = { ACTIF: ['ACTIF 7 J', 'v'], DORMANT: ['DORMANT', 'd'], JAMAIS: ['JAMAIS DE DONNÉE', 'j'], EMAIL: ['E-MAIL NON CONFIRMÉ', 'e'], ATTENTE: ['ACCÈS À VALIDER', 'a'], SAS: ['DANS LE SAS', 'j'] };
         const JOUR = 86400e3;
         function statut(p) {
             if (!p.email_confirme) return 'EMAIL';
-            if (!p.est_approuve) return 'ATTENTE';
+            if (!p.est_approuve) return p.dossier ? 'ATTENTE' : 'SAS';
             if (!p.derniere_activite) return 'JAMAIS';
             return Date.now() - Date.parse(p.derniere_activite) < 7 * JOUR ? 'ACTIF' : 'DORMANT';
         }
@@ -235,8 +236,7 @@
         function initiales(p) { return String(p.cmdr_nom || '?').replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || '?'; }
         function vuePilotes() {
             const q = P.q.trim().toUpperCase();
-            return P.liste.filter(p => (!P.esc || nomEsc(p) === P.esc) && (!P.statut || statut(p) === P.statut) && (!P.sansPhoto || !p.chemin)
-                && (!P.nouv || Date.now() - Date.parse(p.cree_le) < 7 * JOUR) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
+            return P.liste.filter(p => (!P.esc || nomEsc(p) === P.esc) && (!q || String(p.cmdr_nom || '').toUpperCase().includes(q)));
         }
         // VERSION DU PLUGIN (script SQL 177) : reference = la plus haute version vue chez les pilotes. Vert = a jour, orange = en retard, rouge « — » = n'a jamais signale sa version (plugin d'avant 2.51 : pas encore redemarre apres la mise a jour).
         const cmpVer = (a, b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
@@ -252,40 +252,79 @@
         const etatCase = (p, k) => !p[k] ? 'n' : (Date.now() - Date.parse(p[k]) > 14 * JOUR ? 'o' : 'v');
         const suspect = p => p.est_approuve && p.derniere_activite && Date.now() - Date.parse(p.derniere_activite) < 14 * JOUR && DIAG.some(([, k, c]) => c && etatCase(p, k) === 'n');
         const arrete = p => p.est_approuve && (!p.derniere_activite || Date.now() - Date.parse(p.derniere_activite) >= 14 * JOUR);
-        function tableDiagnostic(l) {
-            if (l.length && !('d_bgs' in l[0])) return '<div class="tb-vide">Le diagnostic demande le script SQL 176 (pas encore lancé).</div>';
-            const ref = versionRef();
-            const ordre = p => suspect(p) ? 0 : arrete(p) ? 1 : 2;
-            const lignes = l.filter(p => p.est_approuve).sort((a, b) => ordre(a) - ordre(b) || (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0)).map(p => {
+        // TRI PAR COLONNE (clic sur un titre : 1er clic = sens naturel, 2e clic = sens inverse). Sans tri choisi : pilotes a valider en haut, puis derniere activite.
+        const ORDRE_STATUT = ['ATTENTE', 'SAS', 'EMAIL', 'ACTIF', 'DORMANT', 'JAMAIS'];
+        const TRI_TEXTE = ['nom', 'esc', 'role', 'statut', 'plugin', 'acces', 'diag'];
+        const CLES_TRI = {
+            nom: p => String(p.cmdr_nom || '').toUpperCase(), esc: p => nomEsc(p), role: p => ({ amiral: 0, officier: 1, pilote: 2 })[role(p)],
+            insc: p => Date.parse(p.cree_le) || 0, act: p => Date.parse(p.derniere_activite) || 0, conn: p => Date.parse(p.derniere_connexion) || 0,
+            statut: p => ORDRE_STATUT.indexOf(statut(p)), plugin: p => p.plugin_version || '0',
+            acces: p => (!p.est_approuve && p.dossier) ? 0 : (p.est_approuve ? 1 : 2), diag: p => suspect(p) ? 0 : (arrete(p) ? 1 : 2)
+        };
+        DIAG.forEach(([, k]) => { CLES_TRI[k] = p => Date.parse(p[k]) || 0; });
+        function trierListe(l, T) {
+            const attendre = p => (!p.est_approuve && p.dossier) ? 0 : 1, parAct = (a, b) => (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0);
+            if (!T.k) return l.slice().sort((a, b) => (T.attente ? attendre(a) - attendre(b) : (T.diag ? CLES_TRI.diag(a) - CLES_TRI.diag(b) : 0)) || parAct(a, b));
+            const f = CLES_TRI[T.k];
+            return l.slice().sort((a, b) => {
+                const x = f(a), y = f(b);
+                const c = T.k === 'plugin' ? cmpVer(x, y) : (typeof x === 'string' ? x.localeCompare(y, 'fr') : x - y);
+                return (c * T.sens) || parAct(a, b);
+            });
+        }
+        function enteteTri(T, fn, k, lib) {
+            const on = T.k === k;
+            return '<th data-tri="' + k + '" class="' + (on ? 'tri' : '') + '" onclick="' + fn + '(\'' + k + '\')" title="Trier par cette colonne">' + lib + (on ? (T.sens > 0 ? ' ▲' : ' ▼') : '') + '</th>';
+        }
+        function changerTri(T, k) { if (T.k === k) T.sens = -T.sens; else { T.k = k; T.sens = TRI_TEXTE.indexOf(k) >= 0 ? 1 : -1; } }
+        function trierPilotes(k) { changerTri(P.tri, k); dessinerPilotes(); }
+        function trierDiag(k) { changerTri(P.triDiag, k); dessinerDiagnostic(); }
+
+        // ONGLET DIAGNOSTIC : une case par fonction (date de la derniere donnee recue). Rouge = jamais recue, orange = plus de 14 j.
+        function dessinerDiagnostic() {
+            const zone = document.getElementById('tb-diag'); if (!zone) return;
+            const base = P.liste.filter(p => p.est_approuve);
+            if (base.length && !('d_bgs' in base[0])) { zone.innerHTML = '<div class="tb-vide">Le diagnostic demande le script SQL 176 (pas encore lancé).</div>'; return; }
+            const ref = versionRef(), nSus = base.filter(suspect).length;
+            const lignes = trierListe(base, P.triDiag).map(p => {
                 const cases = DIAG.map(([, k, c]) => { const e = etatCase(p, k); return '<td class="pl-c ' + (e === 'n' ? (c ? 'r' : 'g') : e === 'o' ? 'o' : 'v') + '">' + (e === 'n' ? '—' : esc(ilYa(p[k]))) + '</td>'; }).join('') + celluleVersion(p, ref);
                 const v = suspect(p) ? '<span class="pl-s j">SUSPECT</span>' : arrete(p) ? '<span class="pl-s d">ARRÊTÉ</span>' : '<span class="pl-s v">OK</span>';
                 return '<tr><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td>' + cases + '<td>' + v + '</td></tr>';
-            }).join('') || '<tr><td colspan="11" class="tb-vide">Aucun pilote approuvé ne correspond.</td></tr>';
-            return '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th>' + DIAG.map(([t]) => '<th>' + t + '</th>').join('') + '<th>PLUGIN</th><th>DIAGNOSTIC</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
+            }).join('') || '<tr><td colspan="11" class="tb-vide">Aucun pilote approuvé.</td></tr>';
+            zone.innerHTML = '<div class="tb-tete"><h2>&gt; DIAGNOSTIC <small>PILOTES APPROUVÉS · ' + nSus + ' SUSPECT' + (nSus > 1 ? 'S' : '') + '</small></h2></div>'
+                + '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr>' + enteteTri(P.triDiag, 'trierDiag', 'nom', 'CMDR') + enteteTri(P.triDiag, 'trierDiag', 'esc', 'ESCADRON')
+                + DIAG.map(([t, k]) => enteteTri(P.triDiag, 'trierDiag', k, t)).join('') + enteteTri(P.triDiag, 'trierDiag', 'plugin', 'PLUGIN') + enteteTri(P.triDiag, 'trierDiag', 'diag', 'DIAGNOSTIC') + '</tr></thead><tbody>' + lignes + '</tbody></table></div>'
                 + '<div class="rp-note">Chaque case = date de la dernière donnée reçue pour cette fonction. <b style="color:#FF3333">—</b> rouge : jamais reçue alors que le pilote envoie d\'autres données (bug possible ou ancienne version du plugin). Orange : plus de 14 jours. « Suspect » = au moins une fonction courante (BGS, budget, Powerplay, hangar) jamais remontée ; « Arrêté » = plus aucune donnée depuis 14 jours (ne joue plus, ou plugin éteint). Colonisation, fil et combat dépendent de ce que le pilote fait : jamais en rouge. Colonne PLUGIN : version signalée par le plugin (vert = à jour, orange = en retard, rouge « — » = jamais signalée : ancien plugin, ou EDMC pas redémarré depuis la mise à jour). Un pilote qui n\'a simplement pas joué à une fonction n\'est pas forcément un bug.</div>';
         }
         function dessinerPilotes(garderSaisie) {
             const zone = document.getElementById('tb-pilotes'); if (!zone) return;
             const escs = [...new Set(P.liste.map(nomEsc))].sort();
-            const cnt = {}; P.liste.forEach(p => { const s = statut(p); cnt[s] = (cnt[s] || 0) + 1; });
-            const nNouv = P.liste.filter(p => Date.now() - Date.parse(p.cree_le) < 7 * JOUR).length, nSans = P.liste.filter(p => !p.chemin).length;
-            const l = vuePilotes().sort((a, b) => (Date.parse(b.derniere_activite) || 0) - (Date.parse(a.derniere_activite) || 0));
-            const puce = (on, clic, txt) => '<span class="tb-puce' + (on ? ' on' : '') + '" onclick="' + clic + '">' + txt + '</span>';
+            const aValider = p => !p.est_approuve && p.dossier;
+            const l = trierListe(vuePilotes(), P.tri);
             const ref = versionRef();
+            const moi = (window.profilCommandant && window.profilCommandant.user_id) || '';
+            const nAtt = P.liste.filter(aValider).length;
+            // colonne ACCES : valider (pilote qui attend), retirer (pilote valide) ; le pilote encore dans le SAS n'a rien a valider
+            const celluleAcces = p => {
+                if (aValider(p)) return '<label class="pl-ch"><input type="checkbox" data-sel="' + esc(p.user_id) + '"> </label><button class="tb-btn pl-bt" style="border-color:#00FF66;color:#00FF66;font-weight:bold;" data-ouvrir="' + esc(p.user_id) + '">VALIDER</button>'
+                    + (p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' && !p.amiral_valide && !p.est_amiral ? '<div style="color:#FF7100;font-size:.7em;margin-top:3px;">escadron fermé : Amiral non validé</div>' : '') + (p.retire ? '<div style="color:#889;font-size:.7em;">accès retiré</div>' : '');
+                if (p.est_approuve && p.user_id !== moi) return '<button class="tb-btn pl-bt" style="border-color:#FF7100;color:#FF7100;opacity:.85;" data-retirer="' + esc(p.user_id) + '" data-nom="' + esc(String(p.cmdr_nom || '')) + '">RETIRER L\'ACCÈS</button>';
+                return '<span style="color:#667;">—</span>';
+            };
             const lignes = l.map(p => {
                 const s = STATUTS[statut(p)];
-                return '<tr><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ROLES[role(p)]) + '</td><td>' + esc(dateFr(p.cree_le).slice(0, 5)) + '</td><td>'
-                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td>' + celluleVersion(p, ref) + '<td>'
+                return '<tr' + (aValider(p) ? ' style="background:rgba(0,255,102,.06);"' : '') + '><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ROLES[role(p)]) + '</td><td>' + esc(dateFr(p.cree_le).slice(0, 5)) + '</td><td>'
+                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td>' + celluleVersion(p, ref) + '<td>' + celluleAcces(p) + '</td><td>'
                     + '<button class="tb-btn pl-bt" ' + (p.chemin ? 'onclick="ouvrirAvatar(\'' + esc(p.user_id) + '\')"' : 'disabled') + '>AVATAR' + (p.chemin ? '' : ' (AUCUN)') + '</button></td></tr>';
-            }).join('') || '<tr><td colspan="9" class="tb-vide">Aucun pilote ne correspond à ces filtres.</td></tr>';
-            zone.innerHTML = '<div class="tb-tete"><h2>&gt; PILOTES <small>VUE DU DIRECTEUR · TOUS LES ESCADRONS</small></h2><div class="tb-outils">'
+            }).join('') || '<tr><td colspan="10" class="tb-vide">Aucun pilote ne correspond.</td></tr>';
+            const bandeau = nAtt ? '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;border-left:3px solid #00FF66;background:rgba(0,255,102,.07);"><b style="color:#00FF66;letter-spacing:2px;">' + nAtt + ' PILOTE' + (nAtt > 1 ? 'S' : '') + ' ATTENDENT L\'OUVERTURE DE LEUR ACCÈS</b><button class="tb-btn pl-bt" style="border-color:#00FF66;color:#00FF66;font-weight:bold;" data-tout="1">VALIDER LA SÉLECTION</button><span style="color:#889;font-size:.8em;">Cochez plusieurs pilotes, ou validez-les un par un.</span></div>' : '';
+            const T = P.tri, e = (k, lib) => enteteTri(T, 'trierPilotes', k, lib);
+            zone.innerHTML = '<div class="tb-tete"><h2>&gt; PILOTES <small>' + P.liste.length + ' COMPTES · CLIQUEZ SUR UN TITRE POUR TRIER</small></h2><div class="tb-outils">'
                 + '<input type="search" id="tb-q" placeholder="Rechercher un pilote…" style="width: 210px;" value="' + esc(P.q) + '" oninput="P.q = this.value; dessinerPilotes(true)">'
                 + '<select onchange="P.esc = this.value; dessinerPilotes()"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + esc(k) + '"' + (P.esc === k ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select></div></div>'
-                + '<div class="tb-puces">' + puce(!P.diag, 'P.diag = false; dessinerPilotes()', 'VUE : LISTE') + puce(P.diag, 'P.diag = true; dessinerPilotes()', 'VUE : DIAGNOSTIC (' + P.liste.filter(suspect).length + ' suspect' + (P.liste.filter(suspect).length > 1 ? 's' : '') + ')') + '<span style="width: 14px;"></span>' + puce(!P.statut && !P.sansPhoto && !P.nouv, 'P.statut = \'\'; P.sansPhoto = false; P.nouv = false; dessinerPilotes()', 'TOUS (' + P.liste.length + ')')
-                + Object.keys(STATUTS).map(k => puce(P.statut === k, 'P.statut = P.statut === \'' + k + '\' ? \'\' : \'' + k + '\'; dessinerPilotes()', STATUTS[k][0] + ' (' + (cnt[k] || 0) + ')')).join('')
-                + puce(P.nouv, 'P.nouv = !P.nouv; dessinerPilotes()', 'NOUVEAUX 7 J (' + nNouv + ')') + puce(P.sansPhoto, 'P.sansPhoto = !P.sansPhoto; dessinerPilotes()', 'SANS PHOTO (' + nSans + ')') + '</div>'
-                + (P.diag ? tableDiagnostic(l) : '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr><th>CMDR</th><th>ESCADRON</th><th>RÔLE</th><th>INSCRIPTION</th><th>DERNIÈRE ACTIVITÉ</th><th>DERNIÈRE CONNEXION</th><th>STATUT</th><th>PLUGIN</th><th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>')
-                + (P.diag ? '' : '<div class="rp-note">« Activité » = dernières données envoyées (BGS, colonisation, budget, Powerplay, fil). « Connexion » = dernière ouverture de session par mot de passe (sous-estimée). Le bouton AVATAR ouvre la photo du pilote pour la contrôler et la retirer si elle n\'est pas adaptée.</div>');
+                + bandeau
+                + '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr>' + e('nom', 'CMDR') + e('esc', 'ESCADRON') + e('role', 'RÔLE') + e('insc', 'INSCRIPTION') + e('act', 'DERNIÈRE ACTIVITÉ') + e('conn', 'DERNIÈRE CONNEXION') + e('statut', 'STATUT') + e('plugin', 'PLUGIN') + e('acces', 'ACCÈS') + '<th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
+                + '<div class="rp-note">« Activité » = dernières données envoyées (BGS, colonisation, budget, Powerplay, fil). « Connexion » = dernière ouverture de session par mot de passe (sous-estimée). « Accès à valider » = dossier envoyé, le pilote attend ; « Dans le SAS » = inscrit qui n\'a pas fini son parcours (à ne pas valider). Un escadron s\'ouvre tout seul quand son Amiral est validé. Le bouton AVATAR ouvre la photo du pilote pour la contrôler et la retirer si elle n\'est pas adaptée.</div>';
             if (garderSaisie) { const el = document.getElementById('tb-q'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
         }
         // fenetre AVATAR : la photo du pilote (les fleches passent au pilote suivant qui a une photo)
@@ -327,24 +366,30 @@
         // ---------------------------------------------------------------
         async function donneesPilotes() {
             if (P.chargement) return P.chargement;
-            P.chargement = (async () => { const l = await charger(false); l.forEach(p => { p.maj_le = p.photo_le; }); P.liste = l; })();
+            P.chargement = (async () => {
+                const [l, ac] = await Promise.all([charger(false), supabaseApp.rpc('pilotes_acces')]);
+                // ACCES (SQL 211) : les pilotes qui ont envoye leur dossier et attendent l'ouverture de leur acces (les autres non approuves sont encore dans le SAS)
+                const att = {}; ((ac.data && ac.data.attente) || []).forEach(a => { att[a.user_id] = a; });
+                l.forEach(p => { p.maj_le = p.photo_le; const a = att[p.user_id]; p.dossier = !!a; p.amiral_valide = a ? !!a.amiral_valide : false; p.retire = a ? !!a.retire : false; });
+                P.liste = l;
+            })();
             try { await P.chargement; } finally { P.chargement = null; }
         }
         const OUVERT = {};
+        function redessiner(nom) { if (nom === 'pil') dessinerPilotes(); else if (nom === 'diag') dessinerDiagnostic(); else dessinerUsagePilotes(); }
         async function ouvrirOnglet(nom) {
             document.querySelectorAll('.tb-onglet').forEach(e => e.classList.toggle('a', e.dataset.o === nom));
             document.querySelectorAll('.tb-pane').forEach(e => { e.style.display = e.id === 'pane-' + nom ? 'block' : 'none'; });
             try { sessionStorage.setItem('edteam_pilotes_onglet', nom); } catch (e) {}
-            if (nom === 'esc') return;
-            if (OUVERT[nom]) { if (nom === 'pil') dessinerPilotes(); else dessinerUsagePilotes(); return; }
+            if (OUVERT[nom]) { redessiner(nom); return; }
             OUVERT[nom] = true;
             try {
                 if (nom === 'usage') chargerRapport().then(l => { RP.lignes = l; dessinerRapport(false); }).catch(e => { console.error('Erreur rapport :', e); dessinerRapport(true); });
                 await donneesPilotes();
-                if (nom === 'pil') dessinerPilotes(); else dessinerUsagePilotes();
+                redessiner(nom);
             } catch (e) {
                 OUVERT[nom] = false; console.error('Erreur pilotes :', e);
-                document.getElementById(nom === 'pil' ? 'tb-pilotes' : 'tb-usage-pilotes').innerHTML = '<div class="tb-vide">Impossible de lire les pilotes pour le moment (le script SQL 175 est-il lancé ?).<br>Réessayez dans quelques instants.</div>';
+                document.getElementById(nom === 'pil' ? 'tb-pilotes' : nom === 'diag' ? 'tb-diag' : 'tb-usage-pilotes').innerHTML = '<div class="tb-vide">Impossible de lire les pilotes pour le moment (le script SQL 175 est-il lancé ?).<br>Réessayez dans quelques instants.</div>';
             }
         }
 
@@ -590,32 +635,37 @@
         // ---------------------------------------------------------------
         //  ESCADRONS A VALIDER (SQL 170) : un escadron enregistre n'ouvre les pages Escadron et BGS a ses pilotes qu'une fois valide ici
         // ---------------------------------------------------------------
-        async function chargerValidationEscadrons() {
-            const z = document.getElementById('tb-validation'); if (!z) return;
-            const { data, error } = await supabaseApp.rpc('escadrons_validation');
-            if (error || !Array.isArray(data) || !data.length) { z.innerHTML = ''; return; }   // fonction absente (script pas lance) ou aucun escadron : rien a afficher
-            const attente = data.filter(e => !e.valide).length;
-            let h = '<div class="bloc cy" style="margin-bottom: 16px;"><h2>ESCADRONS <em>' + (attente ? attente + ' à valider' : 'tous validés') + '</em></h2><div style="display: grid; gap: 8px;">';
-            data.forEach(e => {
-                const nom = escapeHtml(String(e.escadron || ''));
-                const bouton = e.valide
-                    ? '<button type="button" data-esc="' + nom + '" data-val="0" style="background: transparent; border: 1px solid #FF7100; color: #FF7100; padding: 6px 14px; font-family: inherit; letter-spacing: 1.5px; cursor: pointer; opacity: .7;">RETIRER</button>'
-                    : '<button type="button" data-esc="' + nom + '" data-val="1" style="background: rgba(0,255,102,.1); border: 1px solid #00FF66; color: #00FF66; padding: 6px 14px; font-family: inherit; letter-spacing: 1.5px; font-weight: bold; cursor: pointer;">VALIDER</button>';
-                h += '<div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 12px; border-left: 3px solid ' + (e.valide ? '#00FF66' : '#FF7100') + '; background: rgba(255,255,255,.03);">'
-                    + '<b style="color: #fff; letter-spacing: 2px;">' + nom + '</b>'
-                    + '<span style="color: #889; font-size: .85em;">Amiral : ' + escapeHtml(String(e.amiral || '—')) + ' · ' + (Number(e.pilotes) || 0) + ' pilote' + ((Number(e.pilotes) || 0) > 1 ? 's' : '') + '</span>'
-                    + '<span style="margin-left: auto; display: flex; align-items: center; gap: 12px;"><span style="font-size: .75em; letter-spacing: 2px; color: ' + (e.valide ? '#00FF66' : '#FF7100') + ';">' + (e.valide ? 'VALIDÉ' : 'EN ATTENTE') + '</span>' + bouton + '</span></div>';
-            });
-            z.innerHTML = h + '</div></div>';
+        // ACCES DES PILOTES (SQL 211) : boutons de la colonne ACCES du tableau PILOTES ; le Directeur ouvre l'acces pilote par pilote (un escadron s'ouvre quand son Amiral est valide)
+        function oublierMemoiresAcces() { try { Object.keys(sessionStorage).filter(k => k.indexOf('edteam_effectifs_') === 0 || k.indexOf('edteam_dm_pilotes_') === 0 || k.indexOf('edteam_inscriptions') === 0 || k === CLE).forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* rien */ } }
+        async function rechargerPilotes() {
+            oublierMemoiresAcces();
+            if (typeof window.actualiserInscriptionsEnCours === 'function') window.actualiserInscriptionsEnCours(true);
+            try { await donneesPilotes(); dessinerPilotes(); if (OUVERT.diag) dessinerDiagnostic(); if (OUVERT.usage) dessinerUsagePilotes(); } catch (e) { console.error('Erreur rechargement :', e); }
+        }
+        async function ouvrirAcces(ids) {
+            let echecs = 0;
+            for (const id of ids) {
+                const { error } = await supabaseApp.rpc('approuver_utilisateur', { target_user_id: id });
+                if (error) { echecs++; console.error('Validation :', error); }
+            }
+            if (echecs) alert(echecs + ' validation(s) refusée(s) par le serveur (dossier incomplet ?).');
+            await rechargerPilotes();
         }
         document.addEventListener('click', async e => {
-            const b = e.target.closest && e.target.closest('#tb-validation button[data-esc]'); if (!b) return;
-            const nom = b.dataset.esc, valider = b.dataset.val === '1';
-            if (!valider && !confirm('Retirer la validation de ' + nom + ' ?\n\nSes pilotes perdent l\'accès aux pages Escadron et BGS.')) return;
-            b.disabled = true;
-            try { const { error } = await supabaseApp.rpc('valider_escadron', { p_escadron: nom, p_valide: valider }); if (error) throw error; }
-            catch (x) { console.error('Erreur validation :', x); alert('Impossible de modifier la validation pour le moment.'); }
-            chargerValidationEscadrons();
+            const z = e.target.closest && e.target.closest('#tb-pilotes'); if (!z) return;
+            const un = e.target.closest('button[data-ouvrir]'), tout = e.target.closest('button[data-tout]'), ret = e.target.closest('button[data-retirer]');
+            if (un) { un.disabled = true; await ouvrirAcces([un.dataset.ouvrir]); }
+            else if (tout) {
+                const ids = Array.from(z.querySelectorAll('input[data-sel]:checked')).map(c => c.dataset.sel);
+                if (!ids.length) { alert('Cochez au moins un pilote.'); return; }
+                tout.disabled = true; await ouvrirAcces(ids);
+            } else if (ret) {
+                if (!confirm('Retirer l\'accès de CMDR ' + (ret.dataset.nom || '').toUpperCase() + ' ?\n\nIl repasse en attente : le plugin cesse d\'envoyer ses données et les pages du site se ferment.')) return;
+                ret.disabled = true;
+                const { data, error } = await supabaseApp.rpc('retirer_acces', { target_user_id: ret.dataset.retirer });
+                if (error || data === 'REFUSE') alert(data === 'REFUSE' ? 'Ce compte ne peut pas être retiré.' : 'Impossible de retirer l\'accès pour le moment.');
+                await rechargerPilotes();
+            }
         });
 
         // ---------------------------------------------------------------
@@ -634,12 +684,13 @@
             const mainUi = document.getElementById('main-ui');
             if (mainUi) { mainUi.style.display = 'flex'; mainUi.style.opacity = '1'; }
             if (typeof window.demarrerSystemLoop === 'function') window.demarrerSystemLoop();
-            document.getElementById('display-area').innerHTML = '<div class="tb-onglets"><span class="tb-onglet a" data-o="esc" onclick="ouvrirOnglet(\'esc\')">ESCADRONS</span><span class="tb-onglet" data-o="pil" onclick="ouvrirOnglet(\'pil\')">PILOTES</span><span class="tb-onglet" data-o="usage" onclick="ouvrirOnglet(\'usage\')">USAGE</span></div>'
-                + '<div class="tb-pane" id="pane-esc"><div id="tb-validation"></div></div><div class="tb-pane" id="pane-pil" style="display:none"><div id="tb-pilotes"><div class="tb-vide">&gt; CHARGEMENT…</div></div></div>'
+            document.getElementById('display-area').innerHTML = '<div class="tb-onglets"><span class="tb-onglet a" data-o="pil" onclick="ouvrirOnglet(\'pil\')">PILOTES</span><span class="tb-onglet" data-o="diag" onclick="ouvrirOnglet(\'diag\')">DIAGNOSTIC</span><span class="tb-onglet" data-o="usage" onclick="ouvrirOnglet(\'usage\')">USAGE</span></div>'
+                + '<div class="tb-pane" id="pane-pil"><div id="tb-pilotes"><div class="tb-vide">&gt; CHARGEMENT…</div></div></div>'
+                + '<div class="tb-pane" id="pane-diag" style="display:none"><div id="tb-diag"><div class="tb-vide">&gt; CHARGEMENT…</div></div></div>'
                 + '<div class="tb-pane" id="pane-usage" style="display:none"><div id="tb-usage-pilotes"></div><div id="tb-rapport"></div><div class="rp-tip" id="rp-tip"></div></div>';
-            chargerValidationEscadrons().catch(e => console.error('Erreur validation des escadrons :', e));
-            let o = 'esc'; try { o = sessionStorage.getItem('edteam_pilotes_onglet') || 'esc'; } catch (e) {}
-            if (o !== 'esc') ouvrirOnglet(o);
+            let o = 'pil'; try { o = sessionStorage.getItem('edteam_pilotes_onglet') || 'pil'; } catch (e) {}
+            if (o !== 'pil' && o !== 'diag' && o !== 'usage') o = 'pil';
+            ouvrirOnglet(o);
         });
     </script>
 

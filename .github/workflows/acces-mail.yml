@@ -1,0 +1,35 @@
+name: E-mails d'accès ouvert
+
+# Toutes les 10 minutes, envoie l'e-mail « votre accès est ouvert » aux pilotes que le Directeur vient de valider (SQL 213).
+# Lancement manuel possible depuis l'onglet Actions (bouton « Run workflow »).
+# Prérequis : trois secrets du dépôt (Settings > Secrets and variables > Actions) :
+#   ACCES_MAIL_SECRET   le secret affiché à la fin du script SQL 213
+#   GMAIL_USER          l'adresse Gmail du portail
+#   GMAIL_APP_PASSWORD  son mot de passe d'application (16 caractères)
+# Sans l'un d'eux, la tâche ne fait rien (et n'échoue pas).
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: acces-mail
+  cancel-in-progress: false
+
+jobs:
+  envoyer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+      - name: Envoyer les e-mails en attente
+        run: python3 scripts/acces_mail.py
+        env:
+          ACCES_MAIL_SECRET: ${{ secrets.ACCES_MAIL_SECRET }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
