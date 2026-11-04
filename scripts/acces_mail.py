@@ -39,7 +39,7 @@ def message(expediteur, destinataire, cmdr):
     salut = "Commandant " + nom if nom else "Commandant"
     texte = (
         "Bonjour " + salut + ",\n\n"
-        "Le Directeur vient d'ouvrir votre accès à SYS.EDTEAM.\n\n"
+        "L'administrateur vient d'ouvrir votre accès à SYS.EDTEAM.\n\n"
         "Reconnectez-vous sur " + SITE + " avec votre adresse e-mail et votre mot de passe.\n"
         "Votre plugin EDMC reprend l'envoi de vos données tout seul, sous cinq minutes au plus.\n\n"
         "Si vous êtes membre d'un escadron, les pages Escadron et BGS s'ouvrent dès que l'Amiral de votre escadron a lui aussi reçu son accès.\n\n"
@@ -56,7 +56,7 @@ def message(expediteur, destinataire, cmdr):
         '<span style="font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:2px; color:#9a9a9a;">PORTAIL DES COMMANDANTS</span></td></tr>'
         '<tr><td style="padding:30px 28px 8px 28px; font-family:Arial, Helvetica, sans-serif; color:#222222;">'
         '<h1 style="margin:0 0 16px 0; font-size:20px; line-height:1.3; color:#111111;">Votre accès est ouvert, ' + html.escape(salut) + '</h1>'
-        '<p style="margin:0 0 22px 0; font-size:15px; line-height:1.6;">Le Directeur vient d\'ouvrir votre accès à SYS.EDTEAM. Reconnectez-vous avec votre adresse e-mail et votre mot de passe.</p></td></tr>'
+        '<p style="margin:0 0 22px 0; font-size:15px; line-height:1.6;">L\'administrateur vient d\'ouvrir votre accès à SYS.EDTEAM. Reconnectez-vous avec votre adresse e-mail et votre mot de passe.</p></td></tr>'
         '<tr><td align="center" style="padding:4px 28px 22px 28px;">'
         '<a href="' + SITE + '" style="display:inline-block; background-color:#ff7100; color:#1a0f00; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:bold; letter-spacing:1px; text-decoration:none; padding:14px 30px; border-radius:4px;">OUVRIR SYS.EDTEAM</a></td></tr>'
         '<tr><td style="padding:0 28px 8px 28px; font-family:Arial, Helvetica, sans-serif; color:#222222;">'

@@ -459,7 +459,7 @@
                     etapes: [
                         { n: '1', t: 'ÉCRIRE', d: 'Tapez votre message en bas, puis <b>ENVOYER</b> (ou la touche Entrée). Pas de lien, pas d’image.' },
                         { n: '2', t: 'RÉPONDRE', d: '<b>RÉPONDRE</b> sous un message : la citation s’affiche. Un <b>👍</b> pour approuver en un clic.' },
-                        { n: '3', t: 'MODÉRATION', d: 'Vous supprimez vos messages. L’Amiral de l’escadron hôte et le Directeur peuvent supprimer ceux des autres.' }
+                        { n: '3', t: 'MODÉRATION', d: 'Vous supprimez vos messages. L’Amiral de l’escadron hôte et l’administrateur peuvent supprimer ceux des autres.' }
                     ],
                     avis: 'Exemple dessiné avec des noms fictifs.'
                 },
@@ -604,7 +604,7 @@
                     visuelHtml: anvSv1,
                     colonnes: 3,
                     etapes: [
-                        { n: '◉', t: 'UN CLIC SUR L’ŒIL', d: 'Pour l’Amiral, les officiers et le Directeur. Les autres voient, sans modifier.' },
+                        { n: '◉', t: 'UN CLIC SUR L’ŒIL', d: 'Pour l’Amiral, les officiers et l’administrateur. Les autres voient, sans modifier.' },
                         { n: '+', t: 'OU PAR SON NOM', d: 'Le nom est vérifié (EDSM). Contrôlé ou non par notre faction : peu importe. 40 systèmes au plus.' },
                         { n: '▤', t: 'UN FILTRE', d: '« SURVEILLÉS » les rassemble, les plus graves en premier.' }
                     ],
@@ -625,13 +625,13 @@
                 {
                     titre: 'ET ILS ENTRENT DANS LE REPÉRAGE',
                     sous: 'Passez-y : +1 point ESPION',
-                    intro: 'Un système surveillé dont la donnée vieillit rejoint la <b>liste de repérage</b>. Un pilote qui y <b>arrive</b> la met à jour pour tout l’escadron et gagne <b>1 point BGS et 1 point ESPION</b>. Les seuils sont réglés par le <b>Directeur</b>.',
+                    intro: 'Un système surveillé dont la donnée vieillit rejoint la <b>liste de repérage</b>. Un pilote qui y <b>arrive</b> la met à jour pour tout l’escadron et gagne <b>1 point BGS et 1 point ESPION</b>. Les seuils sont réglés par l’<b>administrateur</b>.',
                     visuelHtml: anvSv3,
                     colonnes: 3,
                     etapes: [
                         { n: '1', t: 'LE SYSTÈME VIEILLIT', d: 'Au-delà de l’âge limite (12 h), ou 6 h s’il est en alerte.' },
                         { n: '2', t: 'VOUS PASSEZ', d: 'Le plugin envoie les influences vues dans le jeu : le système repart au vert.' },
-                        { n: '3', t: 'LE DIRECTEUR RÈGLE', d: 'Fenêtre de repérage de la page Engagement : âges, seuils de baisse et de départ.' }
+                        { n: '3', t: 'L’ADMINISTRATEUR RÈGLE', d: 'Fenêtre de repérage de la page Engagement : âges, seuils de baisse et de départ.' }
                     ],
                     avis: '<b>Plugin SYS.EDTEAM 2.56</b> : il se met à jour tout seul, <b>relancez EDMC deux fois</b> pour que vos passages comptent dans les systèmes surveillés.'
                 }

@@ -61,7 +61,7 @@
         var D = await donnees(false); if (!el.isConnected) return;
         if (!D) { el.innerHTML = ''; return; }
         var actif = D.r.actif !== false, n = D.fl.items.length;
-        if (!actif) { el.innerHTML = U.estDirecteur() ? '<button type="button" class="rm-chip ok" data-rm="ouvrir"><span><b style="color:#aaa;">⚠ REPÉRAGE DÉSACTIVÉ</b><small>réglage du directeur · voir le détail</small></span><span class="rm-chev">›</span></button>' : ''; brancher(el); return; }
+        if (!actif) { el.innerHTML = U.estDirecteur() ? '<button type="button" class="rm-chip ok" data-rm="ouvrir"><span><b style="color:#aaa;">⚠ REPÉRAGE DÉSACTIVÉ</b><small>réglage de l’administrateur · voir le détail</small></span><span class="rm-chev">›</span></button>' : ''; brancher(el); return; }
         await U.photos(); if (!el.isConnected) return;
         el.innerHTML = '<button type="button" class="rm-chip' + (n ? '' : ' ok') + '" data-rm="ouvrir" aria-label="Mission de repérage"><span class="rm-logo-w">' + U.logo(46) + '<i class="rm-mail">' + ENV + '</i></span>'
             + '<span><b>' + (n ? n + ' SYSTÈME' + (n > 1 ? 'S' : '') + ' À REPÉRER' : 'TOUT EST À JOUR') + '</b><small>OPÉRATION ESPIONNAGE · MESSAGE D’EDTEAM</small></span><span class="rm-chev">›</span></button>';
@@ -125,7 +125,7 @@
         var inactif = r.actif === false;
         var h = '<div class="rm-tete"><div><h3>ROUTE DE REPÉRAGE</h3><small>' + (p && p.systeme ? 'depuis ta position : ' + U.E(U.nom(p.systeme)) : 'position inconnue (plugin non lancé)') + ' · ' + rt.etapes.length + ' système' + (rt.etapes.length > 1 ? 's' : '') + (rt.total ? ' · ' + Math.round(rt.total) + ' al' : '') + '</small></div><button type="button" class="rm-x" aria-label="Fermer">✕</button></div>';
         h += '<div class="rm-corps">';
-        if (inactif) h += '<div class="rm-off">⚠ REPÉRAGE DÉSACTIVÉ pour l’escadron : la liste est vide et aucun point n’est donné. ' + (dir ? 'Réactivez-le depuis la version PC (réglages du directeur).' : 'Seul le directeur peut le réactiver.') + '</div>';
+        if (inactif) h += '<div class="rm-off">⚠ REPÉRAGE DÉSACTIVÉ pour l’escadron : la liste est vide et aucun point n’est donné. ' + (dir ? 'Réactivez-le depuis la version PC (réglages de l’administrateur).' : 'Seul l’administrateur peut le réactiver.') + '</div>';
         // avancement + compteur personnel
         h += '<div class="rm-carte"><div style="display:flex; align-items:baseline; gap:12px;"><span class="rm-gros' + (items.length ? '' : ' ok') + '">' + (items.length ? items.length : '✓') + '</span><span class="rm-leg">' + (items.length ? 'À REPÉRER' : 'TOUT EST À JOUR') + '</span></div>'
             + '<div class="rm-barre"><i style="width:' + pct + '%"></i></div><div class="rm-note">' + (faits.length ? faits.length + ' repéré' + (faits.length > 1 ? 's' : '') + ' depuis le dernier tick sur ' + total : 'Aucun repérage depuis le dernier tick') + (ign.length ? ' · ' + ign.length + ' écarté' + (ign.length > 1 ? 's' : '') + ' par l’Amiral' : '') + '</div>'
@@ -155,13 +155,13 @@
                 h += '<div class="rm-lg fait"><span>' + U.avatar(U.nom(x.par || '?'), 36) + '</span><div class="rm-nm rm-fait-nm"><b>' + U.E(x.s) + '</b><small>repéré par ' + (x.par ? 'CMDR ' + U.E(U.nom(x.par)) : 'un pilote') + ' · ' + U.depuis(x.vu) + '</small></div><span class="rm-tampon">REPÉRÉ</span></div>';
             });
         } else {
-            if (!nIgn) h += '<div class="rm-note" style="text-align:center; padding:18px 0;">Aucun système écarté. Le bouton ⊘ d’une ligne (Amiral et directeur) écarte un système des repérages ; il reste consultable ici.</div>';
+            if (!nIgn) h += '<div class="rm-note" style="text-align:center; padding:18px 0;">Aucun système écarté. Le bouton ⊘ d’une ligne (Amiral et administrateur) écarte un système des repérages ; il reste consultable ici.</div>';
             ign.forEach(function (i) {
                 h += '<div class="rm-lg" style="--c:#5a4a2a; grid-template-columns:minmax(0,1fr) auto;"><div class="rm-nm"><b>' + U.E(i.s) + '</b><small>écarté par ' + (i.par ? 'CMDR ' + U.E(U.nom(i.par)) : 'l’Amiral') + ' ' + U.depuis(i.le) + (i.note ? ' · ' + U.E(i.note) : '') + (i.m && i.m.length ? ' · encore concerné : ' + i.m.map(function (m) { return (U.MOTIFS[m] || [m])[0].toLowerCase(); }).join(', ') : ' · plus concerné actuellement') + '</small></div>' + (amiral ? '<button type="button" class="rm-btn" data-rm-rein="' + U.E(i.s) + '">REMETTRE</button>' : '') + '</div>';
             });
         }
         // reglages (lecture seule)
-        h += '<div class="rm-note">Modes : ' + [r.bgs_actif !== false ? 'BGS (directive ' + (r.age_directive_h || 24) + ' h · expansion ' + (r.age_expansion_h || 24) + ' h)' : '', r.pp_actif !== false ? 'POWERPLAY (conquête ' + (r.age_conquete_h || 48) + ' h dès ' + (r.seuil_conquete_pct || 25) + ' %)' : ''].filter(Boolean).join(' · ') + '. Rayon : ' + (r.rayon_max_al || 500) + ' al. ' + (dir ? 'Réglages : version PC.' : 'Seul le directeur modifie ces réglages.') + ' Un clic sur une ligne copie le nom du système ; arrivez-y en jeu, un saut suffit.</div>';
+        h += '<div class="rm-note">Modes : ' + [r.bgs_actif !== false ? 'BGS (directive ' + (r.age_directive_h || 24) + ' h · expansion ' + (r.age_expansion_h || 24) + ' h)' : '', r.pp_actif !== false ? 'POWERPLAY (conquête ' + (r.age_conquete_h || 48) + ' h dès ' + (r.seuil_conquete_pct || 25) + ' %)' : ''].filter(Boolean).join(' · ') + '. Rayon : ' + (r.rayon_max_al || 500) + ' al. ' + (dir ? 'Réglages : version PC.' : 'Seul l’administrateur modifie ces réglages.') + ' Un clic sur une ligne copie le nom du système ; arrivez-y en jeu, un saut suffit.</div>';
         h += '</div>';
         if (S.onglet === 'rep' && rt.etapes[0]) h += '<div class="rm-prochain"><div><span><small>PROCHAIN SAUT</small><b>' + U.E(rt.etapes[0].s) + '</b></span><button type="button" class="rm-btn" data-rm-copie="' + U.E(rt.etapes[0].s) + '">COPIER</button></div></div>';
         return h;

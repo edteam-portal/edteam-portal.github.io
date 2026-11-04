@@ -185,7 +185,7 @@ function injecterArchitectureGlobale() {
                     </div>
                     <div id="header-inscriptions" onclick="ouvrirInscriptionsEnCours()"
                         style="display: none; align-items: center; gap: 6px; font-size: 0.8em; letter-spacing: 1px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
-                        title="Inscriptions en cours : comptes créés mais pas encore finalisés au sas (visible du Directeur seulement). Cliquez pour le détail.">
+                        title="Inscriptions en cours : comptes créés mais pas encore finalisés au sas (visible de l’administrateur seulement). Cliquez pour le détail.">
                         <span id="insc-nb" style="color: #FF7100; font-size: 1.15em; font-weight: bold;">--</span>
                         <span style="color:#888; font-size:0.7em; font-weight: bold;">INSCRIPTION<span id="insc-s">S</span> EN COURS</span>
                     </div>

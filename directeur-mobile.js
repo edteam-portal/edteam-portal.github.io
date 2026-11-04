@@ -182,10 +182,10 @@
     M.fermer = function () { const o = document.getElementById('dm-ov'); if (o) o.remove(); const f = document.getElementById('dm-photo'); if (f) f.style.display = 'none'; };
     M.ouvrir = function () {
         const moi = window.profilCommandant || (typeof profilCommandant !== 'undefined' ? profilCommandant : null);
-        if (!moi || !moi.est_directeur) return;     // reserve au Directeur (la base le verifie aussi)
+        if (!moi || !moi.est_directeur) return;     // reserve à l’administrateur (la base le verifie aussi)
         css(); M.fermer();
         const o = document.createElement('div'); o.id = 'dm-ov';
-        o.innerHTML = '<div class="top"><b>ESPACE DIRECTEUR</b><span class="x" data-fermer>✕</span></div><div class="tabs"><button data-o="pil">PILOTES</button><button data-o="usage">USAGE</button></div><div id="dm-corps"></div>';
+        o.innerHTML = '<div class="top"><b>ESPACE ADMINISTRATEUR</b><span class="x" data-fermer>✕</span></div><div class="tabs"><button data-o="pil">PILOTES</button><button data-o="usage">USAGE</button></div><div id="dm-corps"></div>';
         document.body.appendChild(o);
         o.addEventListener('click', e => {
             const t = e.target;

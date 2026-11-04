@@ -1103,7 +1103,7 @@
                 </div>
             </div>
             <div class="xc click xlink" id="m-row-fa" style="display: none; border-color: #D4A24C;" onclick="ouvrirFaMobile()"><span class="e">🏅</span><span style="font-size: 0.85em;">Frères d’armes<br><span class="xmut" style="font-size: 0.8em;" id="m-row-fa-sous">médaille et diplômes</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
-            <div class="xc click xlink" id="m-row-directeur" style="display: none; border-color: var(--ed-blue);" onclick="ouvrirDirecteurMobile()"><span class="e">🛰️</span><span style="font-size: 0.85em;">Espace Directeur<br><span class="xmut" style="font-size: 0.8em;">escadrons à valider · pilotes · usage</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
+            <div class="xc click xlink" id="m-row-directeur" style="display: none; border-color: var(--ed-blue);" onclick="ouvrirDirecteurMobile()"><span class="e">🛰️</span><span style="font-size: 0.85em;">Espace administrateur<br><span class="xmut" style="font-size: 0.8em;">escadrons à valider · pilotes · usage</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="document.getElementById('modal-reglages').style.display='none'; ouvrirAideMobile()"><span class="e">❓</span><span style="font-size: 0.85em;">Aide et questions fréquentes</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" translate="no" onclick="document.getElementById('modal-reglages').style.display='none'; ouvrirEnglishMobile()"><span class="e">🌐</span><span style="font-size: 0.85em;">English<br><span class="xmut" style="font-size: 0.8em;">how to read this site in English</span></span><span class="chev" style="color: var(--ed-orange);">›</span></div>
             <div class="xc click xlink" onclick="window.open('https://discord.gg/max5W9FreN', '_blank')"><span class="e">🎧</span><span style="font-size: 0.85em;">Rejoindre le Discord</span><span class="chev" style="color: var(--ed-orange);">›</span></div>
@@ -1565,7 +1565,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_reglages');
             xEl('modal-reglages').style.display = 'flex';
-            { const rd = xEl('m-row-directeur'); if (rd) rd.style.display = (profilCommandant && profilCommandant.est_directeur) ? 'flex' : 'none'; }   // reserve au Directeur
+            { const rd = xEl('m-row-directeur'); if (rd) rd.style.display = (profilCommandant && profilCommandant.est_directeur) ? 'flex' : 'none'; }   // reserve à l’administrateur
             if (typeof majPhotoMobile === 'function') majPhotoMobile();
             if (typeof majOptionAnecdotesMobile === 'function') majOptionAnecdotesMobile();
         }
@@ -1599,7 +1599,7 @@
                 if (elGrade) {
                     let txtGrade = 'PILOTE', colGrade = 'var(--ed-orange)';
                     if (p.est_amiral) { txtGrade = 'AMIRAL'; colGrade = 'var(--ed-red)'; }
-                    else if (p.est_directeur) { txtGrade = 'DIRECTEUR'; colGrade = 'var(--ed-blue)'; }
+                    else if (p.est_directeur) { txtGrade = 'ADMINISTRATEUR'; colGrade = 'var(--ed-blue)'; }
                     else if (p.est_officier) { txtGrade = 'OFFICIER BGS'; colGrade = 'var(--ed-green)'; }
                     elGrade.innerText = txtGrade;
                     elGrade.style.color = colGrade;

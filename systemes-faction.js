@@ -227,7 +227,7 @@
     // Une lecture serveur (surveillance_lire, quelques Ko), gardee 10 minutes dans l'onglet, relue apres chaque ajout / retrait. Sans le SQL 193 : aucune surveillance, le tableau marche comme avant.
     const CLE_SURV = "edteam_surv_v1", DUREE_SURV = 600000;
     const OEIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
-    const REFUS = { droits: "Réservé à l’Amiral, aux officiers et au Directeur.", plafond: "40 systèmes surveillés au maximum : retirez-en un d’abord.", nom: "Nom de système invalide.", acces: "Action impossible pour ce compte.", connexion: "Reconnectez-vous." };
+    const REFUS = { droits: "Réservé à l’Amiral, aux officiers et à l’administrateur.", plafond: "40 systèmes surveillés au maximum : retirez-en un d’abord.", nom: "Nom de système invalide.", acces: "Action impossible pour ce compte.", connexion: "Reconnectez-vous." };
     async function chargerSurv(force) {
         SURV = null;
         try {

@@ -154,7 +154,7 @@
             + '<div class="dsc-cmp" id="dsc-cmp"><div id="dsc-repb"></div><div class="dsc-sai"><input type="text" id="dsc-in" maxlength="280" autocomplete="off" placeholder="Écrire à toute la campagne…" onkeydown="if(event.key===\'Enter\'){edteamDiscussion.envoyer();}" oninput="edteamDiscussion.compter()"><button type="button" id="dsc-ok" onclick="edteamDiscussion.envoyer()">ENVOYER</button></div>'
             + '<div class="dsc-n"><span id="dsc-msg"></span><span id="dsc-cpt">0 / 280</span></div></div>'
             + '<div class="dsc-n" id="dsc-ro" style="display:none;">Campagne terminée : lecture seule. Les messages sont supprimés 30 jours après la fin de la campagne.</div>'
-            + '<div class="dsc-n"><span>Messages courts, sans lien. L\'auteur, l\'Amiral de l\'escadron hôte et le Directeur peuvent supprimer un message.</span></div></div>';
+            + '<div class="dsc-n"><span>Messages courts, sans lien. L\'auteur, l\'Amiral de l\'escadron hôte et l’administrateur peuvent supprimer un message.</span></div></div>';
         document.body.appendChild(v);
         document.documentElement.style.overflow = "hidden"; document.addEventListener("keydown", touche);
         charger(true);

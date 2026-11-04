@@ -6,8 +6,8 @@
 window.EDTEAM_NOUVEAUTES = [
     {
         id: "2026-11-acces-par-pilote", date: "2026-11-04T18:39:36Z", type: "AMELIORE",
-        titre: "Nouveaux pilotes : accès ouvert par le Directeur",
-        texte: "Un nouveau pilote termine le SAS, puis attend que le Directeur ouvre son accès. Les pilotes déjà inscrits ne changent rien. Un escadron s’ouvre dès que son Amiral a reçu son accès.",
+        titre: "Nouveaux pilotes : accès ouvert par l’administrateur",
+        texte: "Un nouveau pilote termine le SAS, puis attend que l’administrateur ouvre son accès. Les pilotes déjà inscrits ne changent rien. Un escadron s’ouvre dès que son Amiral a reçu son accès.",
         important: false
     },
     {
@@ -61,7 +61,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: "2026-11-seuils-alertes-amiral", date: "2026-11-02T18:45:40Z", type: "NOUVEAU",
         titre: "Les seuils des alertes de la liste des systèmes se règlent",
-        texte: "L’Amiral (et le Directeur) peut choisir les seuils qui font clignoter les alertes de la page Escadron : âge à partir duquel une donnée est trop ancienne, baisse d’influence à signaler, seuils orange et rouge d’une faction sur le départ. Le bouton « Régler les alertes » est dans la barre de filtres de l’onglet Systèmes ; la légende se met à jour avec vos valeurs.",
+        texte: "L’Amiral (et l’administrateur) peut choisir les seuils qui font clignoter les alertes de la page Escadron : âge à partir duquel une donnée est trop ancienne, baisse d’influence à signaler, seuils orange et rouge d’une faction sur le départ. Le bouton « Régler les alertes » est dans la barre de filtres de l’onglet Systèmes ; la légende se met à jour avec vos valeurs.",
         important: false
     },
     {
@@ -115,8 +115,8 @@ window.EDTEAM_NOUVEAUTES = [
     },
     {
         id: "2026-11-mobile-corrections-directeur", date: "2026-11-01T16:30:00Z", type: "CORRIGE",
-        titre: "Mobile : noms lisibles sur petit écran, bouton du son réparé, Espace Directeur",
-        texte: "Sur téléphone : dans la fenêtre d’une mission Powerplay, le nom de chaque commandant n’est plus coupé (les mérites passent dessous quand l’écran est étroit) ; dans BÂTIR, le total à livrer reste sur une seule ligne ; dans l’onglet Fleet Carriers de ESCADRON, la mention « Escadron et amis » passe à la ligne au lieu d’écraser le nom du pilote ; le bouton du son des Réglages fonctionne de nouveau. Le Directeur dispose en plus d’un Espace Directeur dans les Réglages (validation des escadrons, liste des pilotes avec diagnostic, usage).",
+        titre: "Mobile : noms lisibles sur petit écran, bouton du son réparé, Espace administrateur",
+        texte: "Sur téléphone : dans la fenêtre d’une mission Powerplay, le nom de chaque commandant n’est plus coupé (les mérites passent dessous quand l’écran est étroit) ; dans BÂTIR, le total à livrer reste sur une seule ligne ; dans l’onglet Fleet Carriers de ESCADRON, la mention « Escadron et amis » passe à la ligne au lieu d’écraser le nom du pilote ; le bouton du son des Réglages fonctionne de nouveau. L’administrateur dispose en plus d’un Espace administrateur dans les Réglages (validation des escadrons, liste des pilotes avec diagnostic, usage).",
         important: false
     },
     {
@@ -140,7 +140,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: "2026-10-surveillance-depart-seuils", date: "2026-10-31T18:29:42Z", type: "AMELIORE",
         titre: "Surveillance : l’alerte « faction sur le départ » avec deux seuils",
-        texte: "Dans l’onglet SYSTÈMES, une faction qui perd de l’influence (ou en retraite) dans un système surveillé clignote maintenant en orange quand son influence descend sous 3 %, puis en rouge sous 2,5 %. Le Directeur règle les deux seuils dans la fenêtre du repérage (page BGS).",
+        texte: "Dans l’onglet SYSTÈMES, une faction qui perd de l’influence (ou en retraite) dans un système surveillé clignote maintenant en orange quand son influence descend sous 3 %, puis en rouge sous 2,5 %. L’administrateur règle les deux seuils dans la fenêtre du repérage (page BGS).",
         important: false
     },
     {
@@ -178,13 +178,13 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: "2026-10-surveillance-reperage", date: "2026-10-31T15:06:10Z", type: "AMELIORE",
         titre: "Repérage : les systèmes surveillés entrent dans la liste",
-        texte: "Un système surveillé par l’état-major dont la donnée vieillit (12 h par défaut, 6 h s’il est en alerte) rejoint la liste du repérage, avec la pastille « Surveillance » : un pilote qui y arrive la met à jour pour tout l’escadron et gagne 1 point BGS et 1 point ESPION. Dans la fenêtre de repérage, le Directeur règle la surveillance : activation, âge limite, âge en alerte, seuil de baisse d’influence et seuil de départ d’une faction.",
+        texte: "Un système surveillé par l’état-major dont la donnée vieillit (12 h par défaut, 6 h s’il est en alerte) rejoint la liste du repérage, avec la pastille « Surveillance » : un pilote qui y arrive la met à jour pour tout l’escadron et gagne 1 point BGS et 1 point ESPION. Dans la fenêtre de repérage, l’administrateur règle la surveillance : activation, âge limite, âge en alerte, seuil de baisse d’influence et seuil de départ d’une faction.",
         important: false
     },
     {
         id: "2026-10-surveillance-systemes", date: "2026-10-31T15:06:00Z", type: "NOUVEAU",
         titre: "Surveillance des systèmes stratégiques",
-        texte: "Dans la page Escadron, onglet SYSTÈMES, l’Amiral, les officiers et le Directeur peuvent surveiller des systèmes : un clic sur l’œil d’une ligne, ou l’ajout d’un système par son nom, même hors de notre faction. Tous les pilotes voient l’œil et les alertes. Un système surveillé clignote en rouge (guerre, élection, faction sur le départ, donnée de plus de 24 h) ou en orange (baisse d’influence, donnée de plus de 12 h). Un filtre « Surveillés » les rassemble, les plus graves en premier ; la fiche d’un système indique qui l’a mis sous surveillance. Ce qui n’est pas relevé est écrit « non relevé ». 40 systèmes au plus.",
+        texte: "Dans la page Escadron, onglet SYSTÈMES, l’Amiral, les officiers et l’administrateur peuvent surveiller des systèmes : un clic sur l’œil d’une ligne, ou l’ajout d’un système par son nom, même hors de notre faction. Tous les pilotes voient l’œil et les alertes. Un système surveillé clignote en rouge (guerre, élection, faction sur le départ, donnée de plus de 24 h) ou en orange (baisse d’influence, donnée de plus de 12 h). Un filtre « Surveillés » les rassemble, les plus graves en premier ; la fiche d’un système indique qui l’a mis sous surveillance. Ce qui n’est pas relevé est écrit « non relevé ». 40 systèmes au plus.",
         important: true,
         action: "Ouvrez Escadron > Systèmes pour voir les systèmes surveillés"
     },
@@ -209,7 +209,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: "2026-10-escadron-entete", date: "2026-10-31T12:45:10Z", type: "AMELIORE",
         titre: "Page Escadron : en-tête simplifié",
-        texte: "En haut de la page Escadron, les quatre cartes de chiffres (pilotes inscrits, BGS, Powerplay, colonisation) disparaissent. Pour l’Amiral et le Directeur, le code d’invitation et le réglage des initiatives des pilotes sont côte à côte, sur une seule ligne. Le réglage des initiatives devient trois boutons toujours visibles (Libre, Sur validation, Désactivé) : l’explication de chacun s’affiche au survol, plus besoin de déplier.",
+        texte: "En haut de la page Escadron, les quatre cartes de chiffres (pilotes inscrits, BGS, Powerplay, colonisation) disparaissent. Pour l’Amiral et l’administrateur, le code d’invitation et le réglage des initiatives des pilotes sont côte à côte, sur une seule ligne. Le réglage des initiatives devient trois boutons toujours visibles (Libre, Sur validation, Désactivé) : l’explication de chacun s’affiche au survol, plus besoin de déplier.",
         important: false
     },
     {
@@ -598,7 +598,7 @@ window.EDTEAM_NOUVEAUTES = [
     {
         id: '2026-10-mission-reperage', date: '2026-10-22T22:01:18Z', type: 'NOUVEAU',
         titre: 'Mission de repérage : les pilotes mettent les données à jour',
-        texte: 'Sur la page Engagement, un bouton « N systèmes à repérer » (à droite de CARTE GALACTIQUE) ouvre la route de repérage et le message d’EDTEAM. La liste réunit les systèmes dont la donnée est trop vieille : directives, menaces d’expansion rivale et conquêtes Powerplay ennemies. Il suffit d’y arriver en jeu, sans s’y poser : le plugin envoie ce que voit votre jeu, le système sort de la liste pour tout l’escadron et vous gagnez 1 point BGS. La route est triée pour le temps de vol (chemin le plus court depuis votre position). Le directeur règle les âges limites, le seuil de conquête, le rayon et les modes BGS / Powerplay ; l’Amiral et le directeur peuvent écarter un système de la liste (et le remettre à tout moment).',
+        texte: 'Sur la page Engagement, un bouton « N systèmes à repérer » (à droite de CARTE GALACTIQUE) ouvre la route de repérage et le message d’EDTEAM. La liste réunit les systèmes dont la donnée est trop vieille : directives, menaces d’expansion rivale et conquêtes Powerplay ennemies. Il suffit d’y arriver en jeu, sans s’y poser : le plugin envoie ce que voit votre jeu, le système sort de la liste pour tout l’escadron et vous gagnez 1 point BGS. La route est triée pour le temps de vol (chemin le plus court depuis votre position). L’administrateur règle les âges limites, le seuil de conquête, le rayon et les modes BGS / Powerplay ; l’Amiral et l’administrateur peuvent écarter un système de la liste (et le remettre à tout moment).',
         important: false,
         action: 'Plugin 2.43 : il se met à jour tout seul au démarrage d’EDMC, relancez EDMC une fois.'
     },
