@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-qg-titres-escadron-neuf", date: "2026-11-04T19:33:11Z", type: "CORRIGE",
+        titre: "QG : les titres de l’escadron toujours affichés",
+        texte: "Dans un escadron qui n’a encore aucun titre, le bandeau « Les titres de l’escadron » apparaît avec ses 8 médailles vacantes, et le fil de l’escadron garde la même hauteur que dans les autres escadrons.",
+        important: false
+    },
+    {
         id: "2026-11-acces-par-pilote", date: "2026-11-04T18:39:36Z", type: "AMELIORE",
         titre: "Nouveaux pilotes : accès ouvert par l’administrateur",
         texte: "Un nouveau pilote termine le SAS, puis attend que l’administrateur ouvre son accès. Les pilotes déjà inscrits ne changent rien. Un escadron s’ouvre dès que son Amiral a reçu son accès.",

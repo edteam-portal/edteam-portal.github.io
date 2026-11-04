@@ -2943,11 +2943,13 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             try {
                 if (!window.chargerTitresSpecialistes) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'medailles.js?v=20'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
                 const data = await window.chargerTitresSpecialistes(profil.escadron_id);
-                if (!data || !Object.keys(data).length) { box.style.display = 'none'; return; }
+                // data = null : lecture impossible (table absente, refus) -> on masque ; data = {} : escadron neuf sans aucun effort -> on garde le bandeau avec ses 8 medailles VACANTES (meme mise en page, le fil garde sa hauteur)
+                if (!data) { box.style.display = 'none'; return; }
                 const sig = JSON.stringify(data); if (box.dataset.sig === sig) return; box.dataset.sig = sig;
                 box.innerHTML = window.htmlBandeauTitres(data, profil.user_id);
                 box.style.display = 'block';
                 if (typeof window.brancherTitresSpecialistes === 'function') window.brancherTitresSpecialistes(box);
+                ajusterHauteurFil();
             } catch (e) { box.style.display = 'none'; }
         }
         async function chargerDistinctionsQG(profil) {
