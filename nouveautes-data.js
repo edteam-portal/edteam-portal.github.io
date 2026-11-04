@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-acces-federation", date: "2026-11-04T20:31:21Z", type: "AMELIORE",
+        titre: "Accès réservé aux pilotes de la Fédération",
+        texte: "Pour l’instant, les nouveaux pilotes doivent être engagés auprès d’une puissance Powerplay de la Fédération pour envoyer leur dossier. Les pilotes déjà inscrits ne changent rien.",
+        important: false
+    },
+    {
         id: "2026-11-qg-titres-escadron-neuf", date: "2026-11-04T19:33:11Z", type: "CORRIGE",
         titre: "QG : les titres de l’escadron toujours affichés",
         texte: "Dans un escadron qui n’a encore aucun titre, le bandeau « Les titres de l’escadron » apparaît avec ses 8 médailles vacantes, et le fil de l’escadron garde la même hauteur que dans les autres escadrons.",

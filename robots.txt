@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# URL actuelle : GitHub Pages. À mettre à jour si un nom de domaine personnalisé est choisi
-Sitemap: https://edteam-portal.github.io/sitemap.xml
+# Site semi-prive (acces sur validation) : les pages portent un « noindex ». Pas de plan de site pour l'instant.

@@ -72,7 +72,9 @@
         D.liste = r.data || [];
         // ACCES (SQL 211) : dossier envoye = le pilote attend l'ouverture de son acces (sinon il est encore dans le SAS)
         const att = {}; ((ac.data && ac.data.attente) || []).forEach(a => { att[a.user_id] = a; });
-        D.liste.forEach(p => { const a = att[p.user_id]; p.dossier = !!a; p.amiral_valide = a ? !!a.amiral_valide : false; });
+        const info = {}; ['attente', 'valides', 'sas'].forEach(k => ((ac.data && ac.data[k]) || []).forEach(a => { info[a.user_id] = a; }));      // puissance Powerplay et derogation (SQL 216)
+        D.liste.forEach(p => { const a = att[p.user_id], i = info[p.user_id]; p.dossier = !!a; p.amiral_valide = a ? !!a.amiral_valide : false;
+            p.puissance = i ? (i.puissance || null) : null; p.federale = (i && typeof i.federale === 'boolean') ? i.federale : null; p.derogation = i ? !!i.derogation : false; });
         try { sessionStorage.setItem(cle(), JSON.stringify({ ts: Date.now(), d: D.liste })); } catch (e) { /* stockage plein */ }
         return D.liste;
     }
@@ -106,10 +108,11 @@
         const fermeture = p.dossier && p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' && !p.amiral_valide && !p.est_amiral ? '<div class="dm-sub" style="color:#FF7100">escadron fermé : Amiral non validé</div>' : '';
         const valider = p.dossier && !p.est_approuve ? '<div style="margin-top:10px;text-align:right">' + fermeture + '<button type="button" class="dm-btn ok" data-ouvrir="' + E(p.user_id) + '">VALIDER L’ACCÈS</button></div>' : '';
         const retirerBtn = p.est_approuve && p.user_id !== moi ? '<button type="button" class="dm-btn or" data-retacc="' + E(p.user_id) + '" data-nom="' + E(String(p.cmdr_nom || '')) + '" style="margin-left:8px">RETIRER L’ACCÈS</button>' : '';
+        const puis = p.puissance ? '<span class="' + (p.federale === true ? 'dm-v' : (p.derogation ? 'dm-gr' : 'dm-r')) + '">' + E(p.puissance) + (p.federale === true ? '' : (p.derogation ? ' · dérogation' : ' · HORS FÉDÉRATION')) + '</span><span>·</span>' : '';
         const ver = !p.plugin_version ? '<span class="' + (p.est_approuve ? 'dm-r' : 'dm-gr') + '">plugin —</span>' : (cmpVer(p.plugin_version, ref) >= 0 ? '<span class="dm-v">plugin ' + E(p.plugin_version) + '</span>' : '<span class="dm-o">plugin ' + E(p.plugin_version) + ' (en retard)</span>');
         const diag = DIAG.map(([t, k, c]) => { const e = etatCase(p, k); const cl = e === 'n' ? (c ? 'dm-r' : 'dm-gr') : e === 'o' ? 'dm-o' : 'dm-v'; return '<span><em style="font-style:normal">' + t + '</em><b class="' + cl + '">' + (e === 'n' ? '—' : E(ilYa(p[k]))) + '</b></span>'; }).join('');
         return '<div class="dm-c' + (ouv ? ' ouv' : '') + '" style="--k:' + S[1] + '" data-u="' + E(p.user_id) + '"><div class="dm-l1"><span class="dm-av">' + E(initiales(p)) + '</span><div class="dm-nom">CMDR ' + E(String(p.cmdr_nom || '—').toUpperCase()) + '<div class="dm-sub">' + E(nomEsc(p)) + ' · ' + ROLES[role(p)] + '</div></div><span class="dm-tag" style="--t:' + S[1] + '">' + S[0] + '</span></div>'
-            + '<div class="dm-l2"><span>activité ' + E(ilYa(p.derniere_activite)) + '</span><span>·</span>' + ver + (sus ? '<span class="dm-tag" style="--t:#ffb000">SUSPECT</span>' : arr ? '<span class="dm-tag" style="--t:#ff6a6a">ARRÊTÉ</span>' : '') + '</div>'
+            + '<div class="dm-l2"><span>activité ' + E(ilYa(p.derniere_activite)) + '</span><span>·</span>' + puis + ver + (sus ? '<span class="dm-tag" style="--t:#ffb000">SUSPECT</span>' : arr ? '<span class="dm-tag" style="--t:#ff6a6a">ARRÊTÉ</span>' : '') + '</div>'
             + valider + '<div class="dm-det"><div>Inscrit le ' + E(dateCourte(p.cree_le)) + ' · dernière connexion ' + E(ilYa(p.derniere_connexion)) + '</div><div class="dm-g">' + diag + '</div>'
             + '<div style="margin-top:9px"><button type="button" class="dm-btn" data-photo="' + E(p.user_id) + '"' + (p.chemin ? '' : ' disabled') + '>PHOTO' + (p.chemin ? '' : ' (AUCUNE)') + '</button>' + retirerBtn + '</div></div></div>';
     }

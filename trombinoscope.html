@@ -15,12 +15,12 @@
     <link rel="stylesheet" href="style.css?v=3">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=8"></script>
+    <script src="shared-utils.js?v=9"></script>
     <script src="antirobot.js?v=1"></script>
     <script src="son.js?v=2"></script>
     <script src="photos.js?v=2"></script>
     <script src="copier-lieux.js?v=3"></script>
-    <script src="navigation.js?v=77"></script>
+    <script src="navigation.js?v=78"></script>
     <script src="invitations.js?v=21"></script>
 
     <style>
@@ -254,11 +254,11 @@
         const arrete = p => p.est_approuve && (!p.derniere_activite || Date.now() - Date.parse(p.derniere_activite) >= 14 * JOUR);
         // TRI PAR COLONNE (clic sur un titre : 1er clic = sens naturel, 2e clic = sens inverse). Sans tri choisi : pilotes a valider en haut, puis derniere activite.
         const ORDRE_STATUT = ['ATTENTE', 'SAS', 'EMAIL', 'ACTIF', 'DORMANT', 'JAMAIS'];
-        const TRI_TEXTE = ['nom', 'esc', 'role', 'statut', 'plugin', 'acces', 'diag'];
+        const TRI_TEXTE = ['nom', 'esc', 'role', 'statut', 'plugin', 'puiss', 'acces', 'diag'];
         const CLES_TRI = {
             nom: p => String(p.cmdr_nom || '').toUpperCase(), esc: p => nomEsc(p), role: p => ({ amiral: 0, officier: 1, pilote: 2 })[role(p)],
             insc: p => Date.parse(p.cree_le) || 0, act: p => Date.parse(p.derniere_activite) || 0, conn: p => Date.parse(p.derniere_connexion) || 0,
-            statut: p => ORDRE_STATUT.indexOf(statut(p)), plugin: p => p.plugin_version || '0',
+            puiss: p => (p.federale === true ? 0 : (p.federale === false ? (p.derogation ? 1 : 2) : 3)), statut: p => ORDRE_STATUT.indexOf(statut(p)), plugin: p => p.plugin_version || '0',
             acces: p => (!p.est_approuve && p.dossier) ? 0 : (p.est_approuve ? 1 : 2), diag: p => suspect(p) ? 0 : (arrete(p) ? 1 : 2)
         };
         DIAG.forEach(([, k]) => { CLES_TRI[k] = p => Date.parse(p[k]) || 0; });
@@ -300,31 +300,47 @@
             const zone = document.getElementById('tb-pilotes'); if (!zone) return;
             const escs = [...new Set(P.liste.map(nomEsc))].sort();
             const aValider = p => !p.est_approuve && p.dossier;
+            const moi = (window.profilCommandant && window.profilCommandant.user_id) || '';
+            const horsFed = p => p.est_approuve && p.federale === false && !p.derogation && p.user_id !== moi;      // valide, puissance CONNUE et hors Federation, sans derogation
             const l = trierListe(vuePilotes(), P.tri);
             const ref = versionRef();
-            const moi = (window.profilCommandant && window.profilCommandant.user_id) || '';
-            const nAtt = P.liste.filter(aValider).length;
-            // colonne ACCES : valider (pilote qui attend), retirer (pilote valide) ; le pilote encore dans le SAS n'a rien a valider
+            const nAtt = P.liste.filter(aValider).length, hors = P.liste.filter(horsFed);
+            const bouton = 'class="tb-btn pl-bt" style="';
+            // colonne ACCES : valider (pilote qui attend), retirer (pilote valide), derogation « Federation » (tout pilote dont la puissance n'est pas federale ou pas connue)
             const celluleAcces = p => {
-                if (aValider(p)) return '<label class="pl-ch"><input type="checkbox" data-sel="' + esc(p.user_id) + '"> </label><button class="tb-btn pl-bt" style="border-color:#00FF66;color:#00FF66;font-weight:bold;" data-ouvrir="' + esc(p.user_id) + '">VALIDER</button>'
-                    + (p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' && !p.amiral_valide && !p.est_amiral ? '<div style="color:#FF7100;font-size:.7em;margin-top:3px;">escadron fermé : Amiral non validé</div>' : '') + (p.retire ? '<div style="color:#889;font-size:.7em;">accès retiré</div>' : '');
-                if (p.est_approuve && p.user_id !== moi) return '<button class="tb-btn pl-bt" style="border-color:#FF7100;color:#FF7100;opacity:.85;" data-retirer="' + esc(p.user_id) + '" data-nom="' + esc(String(p.cmdr_nom || '')) + '">RETIRER L\'ACCÈS</button>';
-                return '<span style="color:#667;">—</span>';
+                let h = '';
+                if (aValider(p)) {
+                    h += '<label class="pl-ch"><input type="checkbox" data-sel="' + esc(p.user_id) + '"> </label><button ' + bouton + 'border-color:#00FF66;color:#00FF66;font-weight:bold;" data-ouvrir="' + esc(p.user_id) + '">VALIDER</button>'
+                        + (p.escadron_id && String(p.escadron_id).toUpperCase() !== 'INDEPENDANT' && !p.amiral_valide && !p.est_amiral ? '<div style="color:#FF7100;font-size:.7em;margin-top:3px;">escadron fermé : Amiral non validé</div>' : '') + (p.retire ? '<div style="color:#889;font-size:.7em;">accès retiré</div>' : '');
+                } else if (p.est_approuve && p.user_id !== moi) {
+                    h += '<button ' + bouton + 'border-color:#FF7100;color:#FF7100;opacity:.85;" data-retirer="' + esc(p.user_id) + '" data-nom="' + esc(String(p.cmdr_nom || '')) + '">RETIRER L\'ACCÈS</button>';
+                }
+                if (p.federale !== true && p.user_id !== moi) {
+                    h += '<div style="margin-top:' + (h ? 4 : 0) + 'px;"><button ' + bouton + 'border-color:#00F0FF;color:#00F0FF;font-size:.72em;" data-derog="' + esc(p.user_id) + '" data-val="' + (p.derogation ? '0' : '1') + '" title="' + (p.derogation ? 'Retirer l\'exception : le pilote redevient soumis à la règle Fédération.' : 'Autoriser ce pilote malgré sa puissance (allié, invité, test…).') + '">' + (p.derogation ? 'RETIRER LA DÉROGATION' : 'ACCORDER UNE DÉROGATION') + '</button></div>';
+                }
+                return h || '<span style="color:#667;">—</span>';
+            };
+            const cellulePuissance = p => {
+                const etat = p.federale === true ? '<span class="pl-s v">FÉDÉRATION</span>' : (p.derogation ? '<span class="pl-s a">DÉROGATION</span>' : (p.federale === false ? '<span class="pl-s j">HORS FÉDÉRATION</span>' : ''));
+                if (!p.puissance) return '<td style="color:#8a96a0;">inconnue' + (etat ? '<div style="margin-top:3px;">' + etat + '</div>' : '') + '</td>';
+                return '<td>' + esc(p.puissance) + '<div style="margin-top:3px;">' + etat + '</div></td>';
             };
             const lignes = l.map(p => {
                 const s = STATUTS[statut(p)];
-                return '<tr' + (aValider(p) ? ' style="background:rgba(0,255,102,.06);"' : '') + '><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ROLES[role(p)]) + '</td><td>' + esc(dateFr(p.cree_le).slice(0, 5)) + '</td><td>'
-                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td>' + celluleVersion(p, ref) + '<td>' + celluleAcces(p) + '</td><td>'
+                const fond = aValider(p) ? ' style="background:rgba(0,255,102,.06);"' : (horsFed(p) ? ' style="background:rgba(255,51,51,.07);"' : '');
+                return '<tr' + fond + '><td><span class="pl-av">' + esc(initiales(p)) + '</span>CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + '</td><td>' + esc(nomEsc(p)) + '</td><td>' + esc(ROLES[role(p)]) + '</td><td>' + esc(dateFr(p.cree_le).slice(0, 5)) + '</td><td>'
+                    + esc(ilYa(p.derniere_activite)) + '</td><td>' + esc(ilYa(p.derniere_connexion)) + '</td><td><span class="pl-s ' + s[1] + '">' + s[0] + '</span></td>' + celluleVersion(p, ref) + cellulePuissance(p) + '<td>' + celluleAcces(p) + '</td><td>'
                     + '<button class="tb-btn pl-bt" ' + (p.chemin ? 'onclick="ouvrirAvatar(\'' + esc(p.user_id) + '\')"' : 'disabled') + '>AVATAR' + (p.chemin ? '' : ' (AUCUN)') + '</button></td></tr>';
-            }).join('') || '<tr><td colspan="10" class="tb-vide">Aucun pilote ne correspond.</td></tr>';
-            const bandeau = nAtt ? '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;border-left:3px solid #00FF66;background:rgba(0,255,102,.07);"><b style="color:#00FF66;letter-spacing:2px;">' + nAtt + ' PILOTE' + (nAtt > 1 ? 'S' : '') + ' ATTENDENT L\'OUVERTURE DE LEUR ACCÈS</b><button class="tb-btn pl-bt" style="border-color:#00FF66;color:#00FF66;font-weight:bold;" data-tout="1">VALIDER LA SÉLECTION</button><span style="color:#889;font-size:.8em;">Cochez plusieurs pilotes, ou validez-les un par un.</span></div>' : '';
+            }).join('') || '<tr><td colspan="11" class="tb-vide">Aucun pilote ne correspond.</td></tr>';
+            const bandeau = nAtt ? '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;border-left:3px solid #00FF66;background:rgba(0,255,102,.07);"><b style="color:#00FF66;letter-spacing:2px;">' + nAtt + ' PILOTE' + (nAtt > 1 ? 'S' : '') + ' ATTENDENT L\'OUVERTURE DE LEUR ACCÈS</b><button ' + bouton + 'border-color:#00FF66;color:#00FF66;font-weight:bold;" data-tout="1">VALIDER LA SÉLECTION</button><span style="color:#889;font-size:.8em;">Cochez plusieurs pilotes, ou validez-les un par un.</span></div>' : '';
+            const bandeauHors = hors.length ? '<div style="margin:0 0 12px;padding:9px 12px;border-left:3px solid #FF7100;background:rgba(255,113,0,.08);"><b style="color:#FF7100;letter-spacing:2px;">' + hors.length + ' PILOTE' + (hors.length > 1 ? 'S' : '') + ' HORS FÉDÉRATION</b> <span style="color:#c5ced5;">: ' + hors.map(p => 'CMDR ' + esc(String(p.cmdr_nom || '—').toUpperCase()) + ' (' + esc(p.puissance) + ')').join(', ') + '</span><div style="color:#889;font-size:.8em;margin-top:4px;">L\'accès est réservé aux pilotes de la Fédération. Retirez leur accès, ou accordez une dérogation (colonne ACCÈS).</div></div>' : '';
             const T = P.tri, e = (k, lib) => enteteTri(T, 'trierPilotes', k, lib);
             zone.innerHTML = '<div class="tb-tete"><h2>&gt; PILOTES <small>' + P.liste.length + ' COMPTES · CLIQUEZ SUR UN TITRE POUR TRIER</small></h2><div class="tb-outils">'
                 + '<input type="search" id="tb-q" placeholder="Rechercher un pilote…" style="width: 210px;" value="' + esc(P.q) + '" oninput="P.q = this.value; dessinerPilotes(true)">'
                 + '<select onchange="P.esc = this.value; dessinerPilotes()"><option value="">Tous les escadrons</option>' + escs.map(k => '<option value="' + esc(k) + '"' + (P.esc === k ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select></div></div>'
-                + bandeau
-                + '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr>' + e('nom', 'CMDR') + e('esc', 'ESCADRON') + e('role', 'RÔLE') + e('insc', 'INSCRIPTION') + e('act', 'DERNIÈRE ACTIVITÉ') + e('conn', 'DERNIÈRE CONNEXION') + e('statut', 'STATUT') + e('plugin', 'PLUGIN') + e('acces', 'ACCÈS') + '<th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
-                + '<div class="rp-note">« Activité » = dernières données envoyées (BGS, colonisation, budget, Powerplay, fil). « Connexion » = dernière ouverture de session par mot de passe (sous-estimée). « Accès à valider » = dossier envoyé, le pilote attend ; « Dans le SAS » = inscrit qui n\'a pas fini son parcours (à ne pas valider). Un escadron s\'ouvre tout seul quand son Amiral est validé. Le bouton AVATAR ouvre la photo du pilote pour la contrôler et la retirer si elle n\'est pas adaptée.</div>';
+                + bandeauHors + bandeau
+                + '<div class="rp-scroll" style="max-height: none;"><table class="rp-table pl-table"><thead><tr>' + e('nom', 'CMDR') + e('esc', 'ESCADRON') + e('role', 'RÔLE') + e('insc', 'INSCRIPTION') + e('act', 'DERNIÈRE ACTIVITÉ') + e('conn', 'DERNIÈRE CONNEXION') + e('statut', 'STATUT') + e('plugin', 'PLUGIN') + e('puiss', 'PUISSANCE') + e('acces', 'ACCÈS') + '<th>MODÉRATION</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
+                + '<div class="rp-note">« Activité » = dernières données envoyées (BGS, colonisation, budget, Powerplay, fil). « Connexion » = dernière ouverture de session par mot de passe (sous-estimée). « Accès à valider » = dossier envoyé, le pilote attend ; « Dans le SAS » = inscrit qui n\'a pas fini son parcours (à ne pas valider). Un escadron s\'ouvre tout seul quand son Amiral est validé. <b>Puissance</b> : l\'application est réservée aux pilotes de la Fédération (Felicia Winters, Jerome Archer) ; un pilote d\'une autre puissance est refusé au SAS, sauf <b>dérogation</b> que vous accordez ici. Un pilote déjà validé qui quitte la Fédération n\'est pas retiré tout seul : vous êtes prévenu (Discord, pastille orange, bandeau ci-dessus). Le bouton AVATAR ouvre la photo du pilote pour la contrôler et la retirer si elle n\'est pas adaptée.</div>';
             if (garderSaisie) { const el = document.getElementById('tb-q'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
         }
         // fenetre AVATAR : la photo du pilote (les fleches passent au pilote suivant qui a une photo)
@@ -370,7 +386,9 @@
                 const [l, ac] = await Promise.all([charger(false), supabaseApp.rpc('pilotes_acces')]);
                 // ACCES (SQL 211) : les pilotes qui ont envoye leur dossier et attendent l'ouverture de leur acces (les autres non approuves sont encore dans le SAS)
                 const att = {}; ((ac.data && ac.data.attente) || []).forEach(a => { att[a.user_id] = a; });
-                l.forEach(p => { p.maj_le = p.photo_le; const a = att[p.user_id]; p.dossier = !!a; p.amiral_valide = a ? !!a.amiral_valide : false; p.retire = a ? !!a.retire : false; });
+                const info = {}; ['attente', 'valides', 'sas'].forEach(k => ((ac.data && ac.data[k]) || []).forEach(a => { info[a.user_id] = a; }));      // puissance Powerplay et derogation (SQL 216)
+                l.forEach(p => { p.maj_le = p.photo_le; const a = att[p.user_id], i = info[p.user_id]; p.dossier = !!a; p.amiral_valide = a ? !!a.amiral_valide : false; p.retire = a ? !!a.retire : false;
+                    p.puissance = i ? (i.puissance || null) : null; p.federale = (i && typeof i.federale === 'boolean') ? i.federale : null; p.derogation = i ? !!i.derogation : false; });
                 P.liste = l;
             })();
             try { await P.chargement; } finally { P.chargement = null; }
@@ -636,7 +654,7 @@
         //  ESCADRONS A VALIDER (SQL 170) : un escadron enregistre n'ouvre les pages Escadron et BGS a ses pilotes qu'une fois valide ici
         // ---------------------------------------------------------------
         // ACCES DES PILOTES (SQL 211) : boutons de la colonne ACCES du tableau PILOTES ; le Directeur ouvre l'acces pilote par pilote (un escadron s'ouvre quand son Amiral est valide)
-        function oublierMemoiresAcces() { try { Object.keys(sessionStorage).filter(k => k.indexOf('edteam_effectifs_') === 0 || k.indexOf('edteam_dm_pilotes_') === 0 || k.indexOf('edteam_inscriptions') === 0 || k === CLE).forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* rien */ } }
+        function oublierMemoiresAcces() { try { Object.keys(sessionStorage).filter(k => k.indexOf('edteam_effectifs_') === 0 || k.indexOf('edteam_dm_pilotes_') === 0 || k.indexOf('edteam_inscriptions') === 0 || k === CLE || k === 'edteam_fed_cache').forEach(k => sessionStorage.removeItem(k)); } catch (e) { /* rien */ } }
         async function rechargerPilotes() {
             oublierMemoiresAcces();
             if (typeof window.actualiserInscriptionsEnCours === 'function') window.actualiserInscriptionsEnCours(true);
@@ -653,9 +671,14 @@
         }
         document.addEventListener('click', async e => {
             const z = e.target.closest && e.target.closest('#tb-pilotes'); if (!z) return;
-            const un = e.target.closest('button[data-ouvrir]'), tout = e.target.closest('button[data-tout]'), ret = e.target.closest('button[data-retirer]');
+            const un = e.target.closest('button[data-ouvrir]'), tout = e.target.closest('button[data-tout]'), ret = e.target.closest('button[data-retirer]'), der = e.target.closest('button[data-derog]');
             if (un) { un.disabled = true; await ouvrirAcces([un.dataset.ouvrir]); }
-            else if (tout) {
+            else if (der) {
+                der.disabled = true;
+                const { data, error } = await supabaseApp.rpc('definir_derogation', { target_user_id: der.dataset.derog, p_valeur: der.dataset.val === '1' });
+                if (error || data === 'INCONNU') alert('Impossible de modifier la dérogation pour le moment (le script SQL 216 est-il lancé ?).');
+                await rechargerPilotes();
+            } else if (tout) {
                 const ids = Array.from(z.querySelectorAll('input[data-sel]:checked')).map(c => c.dataset.sel);
                 if (!ids.length) { alert('Cochez au moins un pilote.'); return; }
                 tout.disabled = true; await ouvrirAcces(ids);

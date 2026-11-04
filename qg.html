@@ -40,7 +40,7 @@
     </script>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared-utils.js?v=8"></script>
+    <script src="shared-utils.js?v=9"></script>
     <script src="antirobot.js?v=1"></script>
     <script src="puissances.js?v=2"></script>
     <script src="joueurs-croises.js?v=17"></script>
@@ -52,7 +52,7 @@
     <script src="journal-edition.js?v=2"></script>
     <script src="gazette-journal.js?v=4"></script>
     <script src="copier-lieux.js?v=3"></script>
-    <script src="navigation.js?v=77"></script>
+    <script src="navigation.js?v=78"></script>
     <script src="invitations.js?v=21"></script>
     <script src="sas.js?v=1"></script>
 
@@ -338,6 +338,7 @@
             <p id="attente-pilote" style="color: #00FF66; letter-spacing: 2px; margin: 6px 0 14px 0;"></p>
             <p style="color: #ccc; line-height: 1.6; margin: 0 0 8px 0;">Votre accès est en attente de validation par l'administrateur.</p>
             <p style="color: #ccc; line-height: 1.6; margin: 0 0 18px 0;">Vous recevrez un <b>e-mail</b> dès qu'il sera ouvert. Vous pouvez fermer cette page : elle n'est pas nécessaire pour être prévenu.</p>
+            <div id="attente-motif" style="display: none; margin: 0 0 18px 0; padding: 12px 14px; border: 1px solid #FF7100; border-left: 4px solid #FF7100; background: rgba(255,113,0,0.08); color: #ddd; line-height: 1.55; text-align: left; font-size: 0.95em;"></div>
             <p id="attente-etat" style="color: #889; font-size: .85em; margin: 0 0 18px 0;">Cette page vérifie toute seule toutes les 5 minutes.</p>
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                 <button type="button" class="fs-auth-btn" style="margin: 0; padding: 8px 18px;" onclick="verifierAttente(true)">VÉRIFIER MAINTENANT</button>
@@ -423,7 +424,8 @@
                 <!-- SIGNAL : ce que le site a lu du jeu -->
                 <div class="sas-signal">
                     <div class="sas-l"><span>NOM DE COMMANDANT</span><span id="sas-cmdr-name" style="color: #FF3333; font-weight: bold;">EN ATTENTE DU JEU...</span></div>
-                    <div class="sas-l" style="margin-bottom: 14px;"><span>ESCADRON DÉTECTÉ</span><span id="sas-squad-name" style="color: #FF3333; font-weight: bold;">EN ATTENTE DU JEU...</span></div>
+                    <div class="sas-l"><span>ESCADRON DÉTECTÉ</span><span id="sas-squad-name" style="color: #FF3333; font-weight: bold;">EN ATTENTE DU JEU...</span></div>
+                    <div class="sas-l" style="margin-bottom: 14px;" title="L’application est réservée aux pilotes engagés auprès d’une puissance Powerplay de la Fédération."><span>PUISSANCE POWERPLAY</span><span id="sas-puissance" style="color: #FF7100; font-weight: bold;">EN ATTENTE DU JEU...</span></div>
 
                     <!-- CODE D'INVITATION : visible seulement si le jeu annonce un escadron. Vérifié par le serveur (aucun code = seul l'Amiral peut inscrire un nouvel escadron) -->
                     <div id="sas-code-zone" style="display: none; margin: 0 0 22px 0; text-align: left;">
@@ -1495,13 +1497,27 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             clearTimeout(attenteTimer);
             attenteTimer = setTimeout(() => { if (document.hidden) { planifierAttente(); } else { verifierAttente(false); } }, 5 * 60 * 1000);
         }
+        // MOTIF D'ATTENTE : un pilote qui attend sans savoir pourquoi ne peut rien faire. On l'informe si sa puissance n'est pas federale (sans derogation) ou si son acces a ete retire.
+        function majMotifAttente(p) {
+            const z = document.getElementById('attente-motif'); if (!z) return;
+            const nom = String((p && p.puissance_nom) || '').trim();
+            const fed = !!(window.EdteamPuissances && nom && window.EdteamPuissances.camp(nom) === 'F');
+            let h = '';
+            if (p && p.acces_retire_le) h = '<b>ACCÈS SUSPENDU.</b> L’administrateur a retiré votre accès. Contactez-le sur le Discord pour en connaître la raison.';
+            else if (p && !p.derogation_federation && !fed) h = '<b>PUISSANCE NON FÉDÉRALE.</b> ' + (nom ? 'Votre puissance Powerplay (' + escapeHtml(nom) + ') n’est pas rattachée à la Fédération' : 'Aucune puissance Powerplay n’est détectée sur votre compte') + ' : l’accès est réservé aux pilotes de la Fédération. Contactez l’administrateur sur le Discord pour une exception.';
+            z.innerHTML = h ? h + '<br>' + LIEN_DISCORD_SAS : '';
+            z.style.display = h ? 'block' : 'none';
+        }
         window.verifierAttente = async function (manuel) {
             if (!attenteUserId || attenteEnCours) return;
             attenteEnCours = true;
             const etat = document.getElementById('attente-etat');
             try {
                 if (manuel && typeof sonClic === 'function') sonClic();
-                const { data, error } = await supabaseApp.from('profils').select('est_approuve').eq('user_id', attenteUserId).single();
+                let r = await supabaseApp.from('profils').select('est_approuve, puissance_nom, derogation_federation, acces_retire_le').eq('user_id', attenteUserId).single();
+                if (r.error) r = await supabaseApp.from('profils').select('est_approuve').eq('user_id', attenteUserId).single();      // colonnes absentes (script SQL 216 pas lance)
+                const { data, error } = r;
+                if (!error && data && !data.est_approuve) majMotifAttente(data);
                 if (!error && data && data.est_approuve) {
                     try { sessionStorage.removeItem('edteam_profil_cache_' + attenteUserId); } catch (e) { /* rien */ }
                     window.location.reload();
@@ -1639,6 +1655,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                     const elP = document.getElementById('attente-pilote');
                     if (elP) elP.innerText = data.cmdr_nom ? 'CMDR ' + String(data.cmdr_nom).toUpperCase() : '';
                     document.getElementById('attente-screen').style.display = 'flex';
+                    majMotifAttente(data);
                     planifierAttente();
                     return;
                 }
@@ -2341,6 +2358,27 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
             document.getElementById(pageId).style.display = 'block';
         }
 
+        // PUISSANCE POWERPLAY (SQL 216) : l'application est reservee aux pilotes de la Federation. Le serveur decide ; l'affichage previent le pilote avant qu'il certifie.
+        let sasPuisTs = 0;
+        function sasAfficherPuissance(nom, derog) {
+            const el = document.getElementById('sas-puissance'); if (!el) return;
+            const n = String(nom || '').trim();
+            const camp = (window.EdteamPuissances && n) ? window.EdteamPuissances.camp(n) : '';
+            if (!n) { el.innerText = derog ? 'AUCUNE · DÉROGATION ACCORDÉE' : 'PAS ENCORE DÉTECTÉE'; el.style.color = derog ? 'var(--ed-blue)' : '#FF7100'; }
+            else if (camp === 'F') { el.innerText = n.toUpperCase() + ' · FÉDÉRATION'; el.style.color = '#00FF66'; }
+            else if (derog) { el.innerText = n.toUpperCase() + ' · DÉROGATION ACCORDÉE'; el.style.color = 'var(--ed-blue)'; }
+            else { el.innerText = n.toUpperCase() + ' · HORS FÉDÉRATION'; el.style.color = '#FF3333'; }
+        }
+        async function sasMajPuissance(userId, force) {
+            if (!force && Date.now() - sasPuisTs < 20000) return;      // une toute petite lecture, au plus toutes les 20 s
+            sasPuisTs = Date.now();
+            try {
+                let r = await supabaseApp.from('profils').select('puissance_nom, derogation_federation').eq('user_id', userId).single();
+                if (r.error) r = await supabaseApp.from('profils').select('puissance_nom').eq('user_id', userId).single();      // script SQL 216 pas encore lance
+                if (r.data) sasAfficherPuissance(r.data.puissance_nom, r.data.derogation_federation);
+            } catch (e) { /* l'affichage se remettra a jour au passage suivant */ }
+        }
+
         let isSasLooping = false;
         async function sasLoop(userId) {
             if(isSasLooping) return;
@@ -2365,6 +2403,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 const elCmdr = document.getElementById('sas-cmdr-name');
                 const elSquad = document.getElementById('sas-squad-name');
                 const btn = document.getElementById('btn-sas-demande');
+                await sasMajPuissance(userId);
 
                 if (nomCmdr) { elCmdr.innerText = nomCmdr.toUpperCase(); elCmdr.style.color = "#00FF66"; }
                 const estIndependant = !squadInfo || !squadInfo.nom || !!window.sasForcerIndependant;
@@ -2506,6 +2545,12 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                         + '<br><button type="button" class="fs-auth-btn" style="margin: 10px 0 0 0; padding: 8px;" onclick="window.sasForcerIndependant = true; document.getElementById(\'sas-code-zone\').style.display = \'none\'; messageSas(\'\'); soumettreDossier();">CONTINUER EN INDÉPENDANT</button>', '#FF7100');
                 } else if (reponse === 'ESCADRON_SIMILAIRE') {
                     messageSas('<b style="color: #FF7100;">NOM D\'ESCADRON TROP PROCHE.</b> Un escadron au nom presque identique est déjà inscrit sur EDTEAM. Si c\'est bien le vôtre, rejoignez le Discord et prévenez l\'administrateur.<br>' + LIEN_DISCORD_SAS, '#FF7100');
+                } else if (reponse === 'PUISSANCE_INCONNUE') {
+                    sasMajPuissance(user.id, true);
+                    messageSas('<b style="color: #FF7100;">AUCUNE PUISSANCE POWERPLAY DÉTECTÉE.</b> L’application est réservée aux pilotes de la Fédération. Engagez-vous auprès d’une puissance fédérale en jeu (Felicia Winters ou Jerome Archer), relancez le jeu avec EDMC, attendez une minute, puis réessayez.', '#FF7100');
+                } else if (reponse === 'PUISSANCE_NON_FEDERALE') {
+                    sasMajPuissance(user.id, true);
+                    messageSas('<b>ACCÈS RÉSERVÉ À LA FÉDÉRATION.</b> Votre puissance Powerplay n’est pas rattachée à la Fédération. Pour l’instant, l’application est réservée aux pilotes engagés auprès de Felicia Winters ou de Jerome Archer. Pour une exception, contactez l’administrateur sur le Discord.<br>' + LIEN_DISCORD_SAS);
                 } else if (reponse === 'ESCADRON_INVALIDE') {
                     messageSas('<b>NOM D\'ESCADRON ILLISIBLE.</b> Relancez le jeu avec le plugin actif, puis réessayez.');
                 } else if (reponse === 'NOM_DEJA_PRIS') {

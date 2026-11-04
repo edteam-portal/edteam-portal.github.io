@@ -183,6 +183,13 @@ function injecterArchitectureGlobale() {
                         <span id="acces-nb" style="color: #00FF66; font-size: 1.15em; font-weight: bold;">0</span>
                         <span style="color:#9fe9bd; font-size:0.7em; font-weight: bold;">ACCÈS À VALIDER</span>
                     </div>
+                    <div id="header-federation" onclick="if(typeof sonClic==='function')sonClic(); window.location.href='trombinoscope.html'" onmouseenter="if(typeof sonHover==='function')sonHover()"
+                        style="display: none; align-items: center; gap: 7px; font-size: 0.8em; letter-spacing: 1px; background: rgba(255, 113, 0, 0.08); border: 1px solid rgba(255, 113, 0, 0.6); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box; animation: fedPulse 2.4s ease-in-out infinite;"
+                        title="Des pilotes validés ne sont plus engagés auprès d'une puissance de la Fédération.">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #FF7100; box-shadow: 0 0 8px #FF7100;"></span>
+                        <span id="fed-nb" style="color: #FF7100; font-size: 1.15em; font-weight: bold;">0</span>
+                        <span style="color:#ffc08a; font-size:0.7em; font-weight: bold;">HORS FÉDÉRATION</span>
+                    </div>
                     <div id="header-inscriptions" onclick="ouvrirInscriptionsEnCours()"
                         style="display: none; align-items: center; gap: 6px; font-size: 0.8em; letter-spacing: 1px; background: rgba(255, 113, 0, 0.05); border: 1px solid rgba(255, 113, 0, 0.4); border-radius: 4px; padding: 6px 10px; cursor: pointer; white-space: nowrap; box-sizing: border-box;"
                         title="Inscriptions en cours : comptes créés mais pas encore finalisés au sas (visible de l’administrateur seulement). Cliquez pour le détail.">
@@ -744,14 +751,34 @@ window.actualiserBadgeAmiraute = async function() {
         const s = document.createElement('style'); s.id = 'acces-css';
         s.textContent = '@keyframes accesPulse { 0%, 100% { box-shadow: 0 0 0 rgba(0,255,102,0); } 50% { box-shadow: 0 0 14px rgba(0,255,102,.55); } }'
             + '#header-acces:hover { background: rgba(0,255,102,.16) !important; }'
-            + '@media (prefers-reduced-motion: reduce) { #header-acces { animation: none !important; } }';
+            + '@keyframes fedPulse { 0%, 100% { box-shadow: 0 0 0 rgba(255,113,0,0); } 50% { box-shadow: 0 0 14px rgba(255,113,0,.55); } }'
+            + '#header-federation:hover { background: rgba(255,113,0,.16) !important; }'
+            + '@media (prefers-reduced-motion: reduce) { #header-acces, #header-federation { animation: none !important; } }';
         document.head.appendChild(s);
+    }
+    // PILOTES HORS FEDERATION (SQL 216) : l'acces est reserve aux pilotes d'une puissance de la Federation ; un pilote valide qui la quitte n'est pas retire tout seul, l'administrateur est prevenu ici
+    async function majPastilleFederation(force) {
+        const fe = document.getElementById('header-federation'); if (!fe) return;
+        let L = null;
+        try { const brut = sessionStorage.getItem('edteam_fed_cache'); if (!force && brut) { const c = JSON.parse(brut); if (Date.now() - c.t < 3 * 60 * 1000) L = c.l; } } catch (e) { /* stockage indisponible */ }
+        if (!L) {
+            try {
+                const r = await supabaseApp.rpc('federation_alertes');
+                if (r.error || !Array.isArray(r.data)) { fe.style.display = 'none'; return; }       // fonction absente (script SQL 216 pas lance) : rien a afficher
+                L = r.data;
+                try { sessionStorage.setItem('edteam_fed_cache', JSON.stringify({ t: Date.now(), l: L })); } catch (e) { /* rien */ }
+            } catch (e) { fe.style.display = 'none'; return; }
+        }
+        fe.style.display = L.length ? 'flex' : 'none';
+        const nb = document.getElementById('fed-nb'); if (nb) nb.innerText = L.length;
+        fe.title = L.length ? (L.length > 1 ? L.length + ' pilotes validés ne sont' : '1 pilote validé n\'est') + ' plus engagé' + (L.length > 1 ? 's' : '') + ' auprès d\'une puissance de la Fédération : ' + L.slice(0, 5).map(p => 'CMDR ' + String(p.cmdr_nom || '?').toUpperCase() + ' (' + (p.puissance || '?') + ')').join(', ') + (L.length > 5 ? '…' : '') + '. Cliquez pour retirer leur accès ou accorder une dérogation.' : '';
     }
     window.actualiserInscriptionsEnCours = async function (force) {
         const boite = document.getElementById('header-inscriptions'), acces = document.getElementById('header-acces');
         if (!boite) return;
-        if (typeof profilCommandant === 'undefined' || !profilCommandant || !profilCommandant.est_directeur) { boite.style.display = 'none'; if (acces) acces.style.display = 'none'; return; }
+        if (typeof profilCommandant === 'undefined' || !profilCommandant || !profilCommandant.est_directeur) { boite.style.display = 'none'; if (acces) acces.style.display = 'none'; const fe0 = document.getElementById('header-federation'); if (fe0) fe0.style.display = 'none'; return; }
         css();
+        majPastilleFederation(force);
         const tous = await lister(force);
         if (!tous) return;
         const l = tous.filter(p => !p.dossier_soumis_le), att = tous.filter(p => p.dossier_soumis_le);
