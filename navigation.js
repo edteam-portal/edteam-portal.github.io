@@ -717,7 +717,7 @@ window.actualiserBadgeAmiraute = async function() {
 
 // ==========================================
 // INSCRIPTIONS EN COURS (Directeur seulement) : comptes crees mais pas finalises au sas
-// Le nettoyage automatique (script SQL 55) supprime chaque nuit ceux de plus de 7 jours sans aucune donnee du plugin.
+// Le nettoyage automatique (script SQL 55) supprime (toutes les heures) ceux de plus de 48 h sans aucune donnee du plugin.
 // ==========================================
 (function () {
     const CLE = 'edteam_inscriptions_cache';
@@ -814,16 +814,16 @@ window.actualiserBadgeAmiraute = async function() {
         if (!l) h += '<div style="color:#FF3333;">Impossible de lire la liste pour le moment.</div>';
         else if (!l.length) h += '<div style="color:#666;font-style:italic;text-align:center;padding:18px;">Aucune inscription en cours.</div>';
         else {
-            h += '<div style="color:#888;font-size:.85em;margin-bottom:10px;line-height:1.5;">Du plus ancien au plus récent. Un compte jamais finalisé, sans aucune donnée du plugin, est supprimé automatiquement chaque nuit après 7 jours.</div>';
+            h += '<div style="color:#888;font-size:.85em;margin-bottom:10px;line-height:1.5;">Du plus ancien au plus récent. Un compte jamais finalisé, sans aucune donnée du plugin, est supprimé automatiquement au bout de 48 heures (contrôle toutes les heures).</div>';
             h += '<table style="width:100%;border-collapse:collapse;font-size:.9em;"><thead><tr style="color:#888;text-align:left;border-bottom:1px solid #444;"><th style="padding:6px 8px;">INSCRIT LE</th><th style="padding:6px 8px;">DEPUIS</th><th style="padding:6px 8px;">NOM DÉTECTÉ</th><th style="padding:6px 8px;">NETTOYAGE</th></tr></thead><tbody>';
             const maintenant = Date.now();
             l.forEach(p => {
-                const d = new Date(p.created_at), age = maintenant - d.getTime(), fin = new Date(d.getTime() + 7 * 86400000);
+                const d = new Date(p.created_at), age = maintenant - d.getTime(), fin = new Date(d.getTime() + 48 * 3600000);
                 const reste = fin.getTime() - maintenant;
                 h += '<tr style="border-bottom:1px solid rgba(255,255,255,.07);"><td style="padding:7px 8px;color:#ddd;">' + dateFr(d) + '</td>'
                     + '<td style="padding:7px 8px;color:#FF7100;font-weight:bold;">' + duree(age) + '</td>'
                     + '<td style="padding:7px 8px;color:' + (p.cmdr_nom ? '#00FF66' : '#666') + ';">' + (p.cmdr_nom ? 'CMDR ' + echapper(String(p.cmdr_nom).toUpperCase()) : 'pas encore') + '</td>'
-                    + '<td style="padding:7px 8px;color:#888;">' + (reste > 0 ? 'le ' + jourFr(fin) + ' (dans ' + duree(reste) + ')' : 'cette nuit (sauf données du plugin)') + '</td></tr>';
+                    + '<td style="padding:7px 8px;color:#888;">' + (reste > 0 ? 'à partir du ' + dateFr(fin) + ' (dans ' + duree(reste) + ')' : 'au prochain passage (sauf données du plugin)') + '</td></tr>';
             });
             h += '</tbody></table>';
         }
