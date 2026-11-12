@@ -30,7 +30,7 @@
             + '<ul style="margin:0 0 14px;padding-left:20px;color:#b7c2c8;">'
             + li("Automatic translation is approximate. Some Elite terms may look odd: see the short list below.")
             + li("System and station names stay as they are, and clicking a system name copies it exactly as the game expects.")
-            + li("The Gazette and the squadron anecdotes are written in French: use the browser translation for them too.")
+            + li("The Gazette is written in French: use the browser translation for it too.")
             + "</ul>"
             + '<div style="color:#FFB000;letter-spacing:1px;font-size:.8rem;margin:0 0 6px;">WORDS YOU MAY SEE</div>'
             + '<div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.82rem;margin:0 0 14px;">' + GLOSS.map(function (g) { return '<b style="color:#fff;">' + g[0] + '</b><span>' + g[1] + "</span>"; }).join("") + "</div>"

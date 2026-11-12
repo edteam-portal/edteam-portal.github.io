@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-anecdotes-retirees", date: "2026-11-12T12:00:00Z", type: "AMELIORE",
+        titre: "Les anecdotes de l’escadron sont retirées",
+        texte: "Cette fonction ne donnait pas de bons résultats : les anecdotes n’apparaissent plus (kiosque EDNEWS, fenêtre de nouveauté) et la case « Apparaître dans les anecdotes » disparaît de la gestion du compte et des réglages mobiles.",
+        important: false
+    },
+    {
         id: "2026-11-acces-federation", date: "2026-11-04T20:31:21Z", type: "AMELIORE",
         titre: "Accès réservé aux pilotes de la Fédération",
         texte: "Pour l’instant, les nouveaux pilotes doivent être engagés auprès d’une puissance Powerplay de la Fédération pour envoyer leur dossier. Les pilotes déjà inscrits ne changent rien.",

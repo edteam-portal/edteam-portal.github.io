@@ -233,11 +233,6 @@ function injecterArchitectureGlobale() {
                         <div data-sonsjeu-ligne style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px dashed #1c5560;"><span style="color: #ccc; font-size: 0.85em; line-height: 1.4;">Application PC<br><span style="color: #777; font-size: 0.82em;">sons du jeu sur toutes les pages</span></span><button type="button" data-sonsjeu-toggle onclick="if(window.edteamSonsJeuBasculer)edteamSonsJeuBasculer()" style="background: transparent; border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 5px 12px; font-family: inherit; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; white-space: nowrap;"></button></div>
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px dashed #1c5560;"><span style="color: #ccc; font-size: 0.85em;">Mesure d'audience (cookies)</span><button type="button" onclick="fermerModal('modal-gestion-compte'); if(window.EdAnalytics)EdAnalytics.reouvrir()" style="background: transparent; border: 1px solid var(--ed-blue); color: var(--ed-blue); padding: 5px 12px; font-family: inherit; font-size: 0.78em; letter-spacing: 1px; cursor: pointer; white-space: nowrap;">CHOISIR</button></div>
                     </div>
-                    <div id="bloc-anecdotes-compte" style="display: none; background: rgba(255, 113, 0, 0.04); padding: 15px; border: 1px dashed var(--ed-orange); border-radius: 4px;">
-                        <label style="color: var(--ed-orange); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">ANECDOTES DE L'ESCADRON :</label>
-                        <label style="display: flex; align-items: center; gap: 10px; color: #ccc; font-size: 0.9em; cursor: pointer;"><input type="checkbox" id="anecdotes-option" onchange="changerOptionAnecdotes(this)" style="width: 16px; height: 16px;"> Apparaître dans les anecdotes</label>
-                        <div id="anecdotes-msg" style="color: #777; font-size: 0.72em; margin-top: 8px; line-height: 1.5;">Une courte histoire écrite par une IA, 3 à 4 fois par semaine, à partir d'un fait réel de la semaine d'un pilote actif. Décocher vous retire du choix et efface celles déjà écrites sur vous.</div>
-                    </div>
                     <div style="background: rgba(0, 240, 255, 0.05); padding: 15px; border: 1px solid var(--ed-blue); border-radius: 4px;">
                         <label style="color: var(--ed-blue); font-size: 0.8em; font-weight: bold; letter-spacing: 1px; display: block; margin-bottom: 8px;">CLÉ DE LIAISON EDMC :</label>
                         <div style="text-align: center; margin: 6px 0 8px; overflow: hidden;"><strong id="api-key-display" style="display: inline-block; max-width: 100%; color: var(--ed-orange); font-size: 1.15em; cursor: pointer; letter-spacing: 1px; white-space: nowrap;" onclick="copierNav(this.innerText, this, event)" title="Cliquer pour copier">[ CHARGEMENT DE LA CLÉ... ]</strong></div>
@@ -581,7 +576,6 @@ window.ouvrirModal = function(id, e) {
     const modal = document.getElementById(id);
     if (modal) modal.style.display = 'flex';
     if (id === 'modal-gestion-compte' && typeof window.majBlocPhotoCompte === 'function') window.majBlocPhotoCompte();
-    if (id === 'modal-gestion-compte' && typeof window.majOptionAnecdotesCompte === 'function') window.majOptionAnecdotesCompte();
     if (id === 'modal-gestion-compte' && typeof window.majQuitterEscadronCompte === 'function') window.majQuitterEscadronCompte();
     if (id === 'modal-gestion-compte' && typeof window.ajusterCleEdmc === 'function') window.ajusterCleEdmc();
 };
@@ -600,7 +594,6 @@ window.majBlocPhotoCompte = async function() {
     if (b) b.textContent = a ? '✎ CHANGER' : '+ AJOUTER';
     if (r) r.style.display = a ? '' : 'none';
 };
-// ---- Option « apparaitre dans les anecdotes » (SQL 60) : le bloc n'est affiche que si la fonction existe cote base ----
 // la cle EDMC tient sur UNE seule ligne : la police se reduit pour s'adapter a la largeur disponible (et se reajuste si la fenetre change de taille)
 window.ajusterCleEdmc = function() {
     const k = document.getElementById('api-key-display'); if (!k || !k.parentNode) return;
@@ -630,24 +623,6 @@ window.quitterEscadron = async function() {
     } catch (e) {
         if (typeof window.afficherAlerte === 'function') window.afficherAlerte("ERREUR", "Impossible de quitter l'escadron pour le moment.", "#FF3333");
         else alert("Impossible de quitter l'escadron pour le moment.");
-    }
-};
-window.majOptionAnecdotesCompte = async function() {
-    const bloc = document.getElementById('bloc-anecdotes-compte'), c = document.getElementById('anecdotes-option');
-    if (!bloc || !c || typeof supabaseApp === 'undefined') return;
-    try { const r = await supabaseApp.rpc('mon_option_anecdotes'); if (r.error) throw r.error; c.checked = r.data !== false; bloc.style.display = 'block'; }
-    catch (e) { bloc.style.display = 'none'; }
-};
-window.changerOptionAnecdotes = async function(c) {
-    const msg = document.getElementById('anecdotes-msg');
-    try {
-        const r = await supabaseApp.rpc('definir_option_anecdotes', { p_actif: c.checked });
-        if (r.error) throw r.error;
-        if (window.EDTEAMAnecdotes) window.EDTEAMAnecdotes.invalider();
-        if (msg) { msg.style.color = '#00FF66'; msg.textContent = c.checked ? 'Vous pouvez apparaître dans les anecdotes.' : 'Vous n\'apparaîtrez plus dans les anecdotes.'; }
-    } catch (e) {
-        console.error('Anecdotes :', e); c.checked = !c.checked;
-        if (msg) { msg.style.color = '#FF6a6a'; msg.textContent = 'Le réglage n\'a pas pu être enregistré.'; }
     }
 };
 window.envoyerPhotoCompte = async function(input) {

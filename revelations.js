@@ -119,16 +119,7 @@
             .sort(function (a, b) { return String(a.date_cloture || '').localeCompare(String(b.date_cloture || '')) || (Number(a.rang) || 99) - (Number(b.rang) || 99); })
             .forEach(function (q) { items.push({ type: 'plaque', id: 'q:' + clePlaque(q), cle: clePlaque(q), x: q, p: p }); });
     }
-    async function lireAnecdote() {
-        var c = cacheLire('edteam_anecdote_v1', 1800000);
-        if (c) return c.d;
-        try {
-            var r = await db().rpc('anecdote_du_jour');
-            if (r.error) throw r.error;
-            cacheEcrire('edteam_anecdote_v1', { d: r.data || null });
-            return r.data || null;
-        } catch (e) { return null; }
-    }
+    async function lireAnecdote() { return null; }   // anecdotes supprimees (12/11) : plus aucune lecture
 
     async function globales(p, force) {
         if (!aEscadron(p) || !db()) return;

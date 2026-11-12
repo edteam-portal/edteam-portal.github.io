@@ -21,7 +21,7 @@
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=21"></script>
     <script src="annonce.js?v=33"></script>
-    <script src="revelations.js?v=13"></script>
+    <script src="revelations.js?v=14"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
     <script src="campagnes-mobile.js?v=27"></script>
@@ -30,7 +30,7 @@
     <script src="conflit-modale.js?v=3"></script>
     <script src="journal-fil.js?v=19"></script>
     <script src="journal-edition.js?v=2"></script>
-    <script src="gazette-journal.js?v=4"></script>
+    <script src="gazette-journal.js?v=5"></script>
     <script src="trafic-info.js?v=2"></script>
     <script src="utile-bgs.js?v=10"></script>
     <script src="bgs-ticks.js?v=8"></script>
@@ -38,7 +38,6 @@
     <script src="pp-etat.js?v=5"></script>
     <script src="campagnes-pp.js?v=28"></script>
     <script src="engagement-mobile.js?v=1"></script>
-    <script src="anecdotes.js?v=5"></script>
     <script src="qgsuivi.js?v=41"></script>
     <script src="son.js?v=2"></script>
     <script src="colonisation-types.js?v=2"></script>
@@ -1084,12 +1083,6 @@
                 <span class="xbig" style="font-size: 1.1em; letter-spacing: 3px; color: #cfc7bb;">RÉGLAGES</span>
                 <span style="color: #888; cursor: pointer; font-size: 1.2em; padding: 4px 8px;" onclick="document.getElementById('modal-reglages').style.display='none'">✕</span>
             </div>
-            <div id="m-anec-bloc" class="xc" style="padding: 12px 14px;">
-                <div class="xk" style="color: var(--ed-orange); margin-bottom: 8px;">Anecdotes de l'escadron</div>
-                <div class="xmut" style="font-size: 0.7em; line-height: 1.5; margin-bottom: 10px;">Autoriser l'escadron à raconter des anecdotes sur moi : un fait réel de ma semaine, habillé en histoire. Décocher efface celles déjà écrites sur moi.</div>
-                <label style="display: flex; align-items: center; gap: 10px; font-size: 0.85em; color: #ccc; cursor: pointer;"><input type="checkbox" id="m-anec-opt" onchange="changerOptionAnecdotesMobile(this)" style="width: 18px; height: 18px;"> Apparaître dans les anecdotes</label>
-                <div id="m-anec-msg" class="xmut" style="font-size: 0.62em; margin-top: 6px; min-height: 1em;"></div>
-            </div>
             <div id="m-photo-bloc" class="xc" style="padding: 12px 14px;">
                 <div class="xk" style="color: var(--ed-orange); margin-bottom: 10px;">Ma photo de commandant</div>
                 <div style="display: flex; align-items: center; gap: 14px;">
@@ -1350,21 +1343,6 @@
             document.getElementById('m-photo-btn').textContent = a ? '✎ CHANGER' : '+ AJOUTER';
             document.getElementById('m-photo-retirer').style.display = a ? 'inline-block' : 'none';
         }
-        async function majOptionAnecdotesMobile() {
-            const c = document.getElementById('m-anec-opt'), bloc = document.getElementById('m-anec-bloc');
-            if (!c || !bloc) return;
-            try { const r = await supabaseApp.rpc('mon_option_anecdotes'); if (r.error) throw r.error; c.checked = r.data !== false; bloc.style.display = ''; }
-            catch (e) { bloc.style.display = 'none'; }   // SQL 60 pas encore lance : le bloc n'apparait pas
-        }
-        window.changerOptionAnecdotesMobile = async function (c) {
-            const msg = document.getElementById('m-anec-msg');
-            try {
-                const r = await supabaseApp.rpc('definir_option_anecdotes', { p_actif: c.checked });
-                if (r.error) throw r.error;
-                if (window.EDTEAMAnecdotes) window.EDTEAMAnecdotes.invalider();
-                msg.textContent = c.checked ? 'Vous pouvez apparaître dans les anecdotes.' : 'Vous n’apparaîtrez plus dans les anecdotes.';
-            } catch (e) { console.error(e); c.checked = !c.checked; msg.textContent = 'Le réglage n’a pas pu être enregistré.'; }
-        };
         window.envoyerPhotoMobile = async function (input) {
             const f = input && input.files && input.files[0];
             if (!f) return;
@@ -1567,7 +1545,6 @@
             xEl('modal-reglages').style.display = 'flex';
             { const rd = xEl('m-row-directeur'); if (rd) rd.style.display = (profilCommandant && profilCommandant.est_directeur) ? 'flex' : 'none'; }   // reserve à l’administrateur
             if (typeof majPhotoMobile === 'function') majPhotoMobile();
-            if (typeof majOptionAnecdotesMobile === 'function') majOptionAnecdotesMobile();
         }
 
         // Pastille d'une sous-vue : rouge quand il y a du nouveau
