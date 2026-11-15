@@ -94,6 +94,13 @@ function injecterArchitectureGlobale() {
             </div>
             <span class="nav-text">ENGAGEMENT</span>
         </a>
+        <a href="campagnes-publiques.html" id="nav-link-campagnes-pub" class="nav-link ${page === 'campagnes-publiques.html' ? 'active' : ''}" style="display: ${indep ? 'flex' : 'none'};" onmouseenter="if(typeof sonHover==='function') sonHover()">
+            <div class="nav-icon" style="position: relative;">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="1.5" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22.5" y2="12"></line></svg>
+                <span id="badge-campagnes-pub" style="display: none; position: absolute; top: -8px; right: -12px; background: #FFD700; color: #000; border-radius: 10px; padding: 1px 5px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 8px #FFD700; z-index: 99;"></span>
+            </div>
+            <span class="nav-text">CAMPAGNES</span>
+        </a>
         <a href="colonisation.html" id="nav-link-colonisation" class="nav-link ${page === 'colonisation.html' ? 'active' : ''}" style="display: flex;" onmouseenter="if(typeof sonHover==='function') sonHover()">
             <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="16" r="5.5"></circle><ellipse cx="11" cy="16" rx="9.5" ry="2.6" transform="rotate(-18 11 16)"></ellipse><line x1="11" y1="10.5" x2="11" y2="3"></line><path d="M11 3l8 2.5-8 2.5"></path></svg></div>
             <span class="nav-text">COLONISATION</span>
@@ -331,6 +338,27 @@ window.actualiserHeader = function(profilData) {
             ['edteam_acces_escadron', 'edteam_acces_bgs'].forEach(k => { try { localStorage.setItem(k, 'false'); } catch (e) {} });
             ['nav-link-escadron', 'nav-bgs-factions'].forEach(id => { const lien = document.getElementById(id); if (lien) lien.style.display = 'none'; });
         }
+        // CAMPAGNES (campagnes-publiques.html, SQL 220) : l'espace du pilote sans escadron ; jamais pour un pilote d'escadron
+        try {
+            const lc = document.getElementById('nav-link-campagnes-pub'); if (lc) lc.style.display = independant ? 'flex' : 'none';
+            if (independant && window.supabaseApp && lc) {
+                const poserPas = n => { const b = document.getElementById('badge-campagnes-pub'); if (b) { b.textContent = n > 0 ? String(n) : ''; b.style.display = n > 0 ? 'inline-block' : 'none'; } };
+                // le lien CLIGNOTE tant qu'un message de l'Amiral attend, ou qu'une campagne publique ouverte n'a pas encore ete vue (liste gardee 5 min, une seule requete)
+                if (!document.getElementById('cpb-clg-css')) { const sc = document.createElement('style'); sc.id = 'cpb-clg-css'; sc.textContent = '@keyframes cpbClg { 0%,100% { box-shadow: 0 0 0 rgba(0,255,102,0); background-color: rgba(0,255,102,.08); } 50% { box-shadow: 0 0 18px #00FF66, inset 0 0 10px rgba(0,255,102,.5); background-color: rgba(0,255,102,.3); } } .cpb-clg { animation: cpbClg 1.5s infinite; } @media (prefers-reduced-motion: reduce) { .cpb-clg { animation: none; box-shadow: 0 0 12px #00FF66; } }'; document.head.appendChild(sc); }
+                let nPas = 0, nNouv = false;
+                const clignoter = () => lc.classList.toggle('cpb-clg', nPas > 0 || nNouv);
+                const uidCp = (profilData && profilData.user_id) || '';
+                const evaluerNouvelles = ids => { let vues = []; try { vues = JSON.parse(localStorage.getItem('edteam_cpb_vues_' + uidCp) || '[]'); } catch (e) { /* memoire illisible */ } nNouv = ids.some(i => vues.indexOf(i) < 0); clignoter(); };
+                let c = null; try { c = JSON.parse(sessionStorage.getItem('edteam_cpb_pas') || 'null'); } catch (e) { /* memoire illisible */ }
+                if (c && Date.now() - c.ts < 60000) { nPas = c.n; poserPas(c.n); clignoter(); }
+                else window.supabaseApp.rpc('demandes_pastilles').then(r => { const n = (r && r.data && Number(r.data.pilote)) || 0; try { sessionStorage.setItem('edteam_cpb_pas', JSON.stringify({ ts: Date.now(), n: n })); } catch (e) { /* stockage plein */ } nPas = n; poserPas(n); clignoter(); }, () => {});
+                if (page !== 'campagnes-publiques.html') {
+                    let l = null; try { l = JSON.parse(sessionStorage.getItem('edteam_cpb_liste') || 'null'); } catch (e) { /* memoire illisible */ }
+                    if (l && Date.now() - l.ts < 300000) evaluerNouvelles(l.ids);
+                    else window.supabaseApp.rpc('campagnes_publiques').then(r => { const ids = (Array.isArray(r && r.data) ? r.data : []).filter(x => !x.participe && !(x.ma_demande && x.ma_demande.etat) && (x.pris || 0) < (x.places || 1)).map(x => x.id); try { sessionStorage.setItem('edteam_cpb_liste', JSON.stringify({ ts: Date.now(), ids: ids })); } catch (e) { /* stockage plein */ } evaluerNouvelles(ids); }, () => {});
+                }
+            }
+        } catch (e) { /* le lien CAMPAGNES ne doit jamais gener le menu */ }
     }
 
     // --- PASTILLES DE RANG (Powerplay, BGS, Federation, Auxiliaires) : tout est dans le profil, aucune requete ---
@@ -347,7 +375,7 @@ window.actualiserHeader = function(profilData) {
             else if (!window.__revelChargement) {
                 window.__revelChargement = true;
                 const sRev = document.createElement('script');
-                sRev.src = 'revelations.js?v=13';
+                sRev.src = 'revelations.js?v=15';
                 sRev.onload = lancerRev;
                 document.head.appendChild(sRev);
             }

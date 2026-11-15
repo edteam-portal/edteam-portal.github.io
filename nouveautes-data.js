@@ -5,6 +5,12 @@
 //          important (true = petite carte discrete a l'ouverture du QG), action (texte "action requise", facultatif).
 window.EDTEAM_NOUVEAUTES = [
     {
+        id: "2026-11-campagnes-publiques", date: "2026-11-15T12:00:00Z", type: "NOUVEAU",
+        titre: "Campagnes publiques : recrutez, ou rejoignez, hors de votre escadron",
+        texte: "Un Amiral peut rendre une campagne publique (étape « Visibilité » de sa création) : seule une fiche courte est montrée (titre, une phrase, places, langue, type), jamais les systèmes ni le briefing. Les pilotes de la Fédération, avec ou sans escadron, la voient dans « Campagnes publiques » (bouton de la page Engagement, ou menu CAMPAGNES pour un pilote sans escadron) et demandent à la rejoindre par un court message. L’Amiral décide après avoir échangé avec le pilote ; accepté, le pilote participe comme un invité, et peut être retiré à tout moment. Une annonce plein écran prévient d’une nouvelle campagne ouverte. Aussi sur téléphone.",
+        important: false
+    },
+    {
         id: "2026-11-anecdotes-retirees", date: "2026-11-12T12:00:00Z", type: "AMELIORE",
         titre: "Les anecdotes de l’escadron sont retirées",
         texte: "Cette fonction ne donnait pas de bons résultats : les anecdotes n’apparaissent plus (kiosque EDNEWS, fenêtre de nouveauté) et la case « Apparaître dans les anecdotes » disparaît de la gestion du compte et des réglages mobiles.",

@@ -10,7 +10,7 @@
     var PREFIXE = 'edteam_revel_vu_';
     var JOURS_TITRES = 7, JOURS_ANECDOTE = 2;
     var PAUSE_FOND = 3600000;
-    var BLOQUANTS = ['edteam-annonce', 'an-voile', 'gz-popup'];
+    var BLOQUANTS = ['edteam-annonce', 'an-voile', 'gz-popup', 'cpb-annonce'];
 
     // Rangs personnels. `table` = nom dans window.EDTEAM_RANGS (ou opts.rangs sur mobile).
     var CERCLE = '#DDE6F0';

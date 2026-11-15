@@ -101,6 +101,17 @@
             '.camp-actions { display:flex; gap:6px; margin-left:4px; margin-left:0; width:var(--wa); flex:none; justify-content:flex-end; }',
             '@media (max-width:900px) { .camp-ligne { grid-template-columns:max-content minmax(0,1fr) 14px auto; gap:8px; } .camp-info { display:none !important; } .camp-carte { padding:12px 12px 6px; } }',
             '#modal-campagne .cmd-pills { display:flex; gap:8px; flex-wrap:wrap; }',
+            // fenetre de creation en PAYSAGE : deux colonnes (identite + visibilite | fiche publique + invites) ; une seule zone defile ; une colonne sur tablette portrait / petit ecran
+            '#modal-campagne .modal-content { max-width:1120px !important; width:min(96vw,1120px) !important; max-height:94vh; overflow:hidden; }',
+            '#modal-campagne .cmd-entete { padding:16px 26px 10px; }',
+            '#modal-campagne .cmd-corps { grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); overflow-y:auto; min-height:0; align-items:start; scrollbar-width:thin; scrollbar-color:#FF4FD8 #0b0b0b; }',
+            '#modal-campagne .cmd-col { overflow:visible; padding:16px 26px 8px; } #modal-campagne .cmd-etape { margin-bottom:16px; }',
+            '#modal-campagne .cmd-col + .cmd-col { align-self:stretch; border-left:1px dashed rgba(255,79,216,.35); }',
+            '#modal-campagne .cmd-pied { padding:12px 26px 14px; }',
+            '@media (max-width:900px) { #modal-campagne .cmd-corps { grid-template-columns:minmax(0,1fr); } #modal-campagne .cmd-col + .cmd-col { border-left:0; border-top:1px dashed rgba(255,79,216,.35); } #modal-campagne .cmd-col { padding:14px 18px 6px; } }',
+            '@media (max-height:760px) { #modal-campagne .cmd-etape { margin-bottom:12px; } #modal-campagne .cmd-entete .cmd-sous { display:none; } }',
+            // repere « campagne publique » dans la liste des campagnes : petit globe vert dans l'en-tete (peu de place : une icone, le detail au survol)
+            '.camp-pub { flex:none; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; margin-left:8px; border:1px solid #00FF66; border-radius:50%; background:rgba(0,255,102,.12); box-shadow:0 0 8px rgba(0,255,102,.45); vertical-align:middle; } .camp-pub svg { width:13px; height:13px; fill:none; stroke:#00FF66; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }',
             '#btn-campagne-ok { background:rgba(255,51,51,.1); border:1px solid #FF3333; color:#FF3333; padding:12px; width:100%; font-family:"Share Tech Mono",monospace; font-size:1.05em; letter-spacing:3px; cursor:pointer; transition:.2s; text-transform:uppercase; font-weight:bold; }',
             '#btn-campagne-ok:hover { background:#FF3333; color:#000; box-shadow:0 0 20px #FF3333; }',
             '#btn-edm-ok { background:rgba(0,240,255,.1); border:1px solid #00F0FF; color:#00F0FF; padding:12px; width:100%; font-family:"Share Tech Mono",monospace; font-size:1.05em; letter-spacing:3px; cursor:pointer; transition:.2s; text-transform:uppercase; font-weight:bold; }',
@@ -117,6 +128,7 @@
 
     // Une ligne par mission. Chaque mission : { tag, couleur, texte (html), pct, barre (texte), veille, clic (js) }
     // bouton d'action en icone (modifier, cloturer, supprimer, ajouter) : titre au survol
+    var SV_PUBLIC = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18"/><path d="M12 3c-3 3.2-3 14.8 0 18"/></svg>';
     var SV_BRIEFING = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4h3l7 4V6L6 10H3z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
     var SV_JOURNAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 8h6M9 12h6M9 16h4"/><path d="M3 7h2M3 12h2M3 17h2"/></svg>';
     // bouton « Discussions » : la pastille (nombre de messages) et le clignotement des non lus sont poses par campagne-discussion.js
@@ -327,7 +339,7 @@
                 + (amiral ? ic('Modifier la campagne', '✎', 'edteamCampagnes.ouvrir(' + c.id + ')') + ic('Clôturer la campagne et ses missions', '📦', 'edteamCampagnes.cloturer(' + c.id + ')') + ic('Supprimer la campagne (seulement si elle est vide)', '🗑', 'edteamCampagnes.supprimer(' + c.id + ')', true) : '') + '</span>';
             return (alliee && !window.EDTEAM_INVITE && ci === camps.findIndex(estAlliee) ? '<div class="camp-titre" style="color:#3ec9ff; border-bottom-color:rgba(62,201,255,.4); margin-top:10px;">&gt; CAMPAGNES ALLIÉES <small>invité par un autre escadron · vous participez, sans les commander</small></div>' : '')
                 + '<div class="bloc camp-carte' + (alliee ? ' camp-alliee' : '') + (repliees.indexOf(String(c.id)) >= 0 ? ' repliee' : '') + '" id="camp-' + c.id + '" style="--wa:' + (cmd ? '116px' : '0px') + '; --bdc:' + col + 'bf; --accent:' + col + '; --teinte:' + col + '12; --lueur:' + col + '14; border:1px solid ' + col + '99; box-shadow: inset 4px 0 0 ' + col + ', 0 0 18px ' + col + '18;">'
-                + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + (sansPct ? 'none' : fond(col, av)) + '; --c:' + col + ';">' + (sansPct ? '' : neon(col, av, vAv)) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + pctTxt(col, mesurees.length && !sansPct ? av : null, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
+                + '<div class="camp-tete"' + (amiral && !c.synthetique ? ' draggable="true" data-cid="' + c.id + '"' : '') + ' onclick="edteamCampagnes.basculer(\'' + c.id + '\')" style="cursor:pointer; background:' + (sansPct ? 'none' : fond(col, av)) + '; --c:' + col + ';">' + (sansPct ? '' : neon(col, av, vAv)) + (amiral && !c.synthetique ? '<span class="camp-grip" title="Glisser pour réorganiser les campagnes">⋮⋮</span>' : '') + '<button type="button" class="camp-pli" title="Replier / déplier la campagne" >▾</button>' + '<span class="camp-type" style="color:' + col + ';">' + (LIB[c.type_campagne] || esc(c.type_campagne)) + '</span><span class="camp-nom">' + esc(c.nom) + bulle + '</span>' + (c.visibilite === 'FEDERATION' ? '<span class="camp-pub" title="Campagne publique : ouverte aux pilotes de la Fédération (ils demandent, vous décidez)">' + SV_PUBLIC + '</span>' : '') + pctTxt(col, mesurees.length && !sansPct ? av : null, 'Moyenne des missions de la campagne. La lueur néon à gauche : votre participation.') + '<span style="flex:1;"></span>'
                 + '<span class="camp-h-g">' + pastille('PRIORITÉ ' + pr[0], pr[1]) + '</span>'
                 + '<span class="camp-h-i"><em>' + info + '</em>' + (tagParts || '') + '</span><span class="camp-h-c"></span>'
                 + '<span class="camp-actions">' + actions + '</span></div>'
@@ -462,15 +474,15 @@
             + '<div class="modal-content ini-fenetre" onclick="event.stopPropagation()" style="max-width:640px; width:95%;">'
             + '<div class="modal-close" onclick="fermerModal(\'modal-campagne\')">X</div>'
             + '<div class="cmd-entete"><div class="cmd-titre" id="camp-titre">&gt; NOUVELLE CAMPAGNE</div><div class="cmd-sous">Un objectif d\'ensemble : les directives (et bientôt les missions Powerplay et de colonisation) s\'y rangent.</div></div>'
-            + '<div class="cmd-col">'
+            + '<div class="cmd-corps cmd-camp"><div class="cmd-col">'
             + '<div class="cmd-etape"><div class="cmd-etape-titre"><span class="cmd-num">1</span>NOM</div><input type="text" id="camp-nom" class="search-input cmd-champ" maxlength="60" placeholder="Ex : OPÉRATION AMATERASU" autocomplete="off" data-lpignore="true" style="text-transform:uppercase;"></div>'
             + '<div class="cmd-etape"><div class="cmd-etape-titre"><span class="cmd-num">2</span>TYPE</div><div class="cmd-pills" id="camp-types"></div><div class="cmd-aide" id="camp-type-aide"></div></div>'
             + '<div class="cmd-etape"><div class="cmd-etape-titre"><span class="cmd-num">3</span>PRIORITÉ</div><div class="cmd-pills" id="camp-prios"></div></div>'
             + '<div class="cmd-etape"><div class="cmd-etape-titre"><span class="cmd-num">4</span>ÉCHÉANCE <em>facultatif</em></div><input type="date" id="camp-echeance" class="search-input cmd-champ"></div>'
             + '<div class="cmd-etape"><div class="cmd-etape-titre"><span class="cmd-num">5</span>BRIEFING <em>facultatif</em></div><textarea id="camp-briefing" class="search-input cmd-champ" placeholder="Contexte et consignes pour toute la campagne…" autocomplete="off" style="height:74px; resize:vertical;"></textarea></div>'
-            + '<div class="cmd-etape" id="camp-etape-invites"><div class="cmd-etape-titre"><span class="cmd-num">6</span>INVITÉS <em>facultatif</em></div><input type="text" id="camp-inv-q" class="search-input cmd-champ" maxlength="40" placeholder="Rechercher un pilote ou un escadron inscrit sur EDTEAM…" autocomplete="off" data-lpignore="true" oninput="edteamCampagnes.chercherInvites(this.value)"><div id="camp-inv-res"></div><div id="camp-inv-liste"></div></div>'
+            + (window.edteamPublic ? window.edteamPublic.etapeHtml(6) : '') + '</div><div class="cmd-col">' + (window.edteamPublic ? window.edteamPublic.ficheHtml() : '') + '<div class="cmd-etape" id="camp-etape-invites"><div class="cmd-etape-titre"><span class="cmd-num">7</span>INVITÉS <em>facultatif</em></div><input type="text" id="camp-inv-q" class="search-input cmd-champ" maxlength="40" placeholder="Rechercher un pilote ou un escadron inscrit sur EDTEAM…" autocomplete="off" data-lpignore="true" oninput="edteamCampagnes.chercherInvites(this.value)"><div id="camp-inv-res"></div><div id="camp-inv-liste"></div></div>'
             + '<div class="cmd-aide" id="camp-erreur" style="color:#FF3333;"></div>'
-            + '</div><div class="cmd-pied"><button id="btn-campagne-ok" onclick="edteamCampagnes.enregistrer()" onmouseenter="if(typeof sonHover===\'function\') sonHover()">ENREGISTRER LA CAMPAGNE</button></div></div></div>'
+            + '</div></div><div class="cmd-pied"><button id="btn-campagne-ok" onclick="edteamCampagnes.enregistrer()" onmouseenter="if(typeof sonHover===\'function\') sonHover()">ENREGISTRER LA CAMPAGNE</button></div></div></div>'
             + '<div class="modal-overlay" id="modal-camp-briefing" onclick="fermerModal(\'modal-camp-briefing\', event)" style="z-index:5300;">'
             + '<div class="modal-content ini-fenetre" onclick="event.stopPropagation()" style="max-width:560px; width:95%;">'
             + '<div class="modal-close" onclick="fermerModal(\'modal-camp-briefing\')">X</div>'
@@ -623,7 +635,7 @@
         journal: function (id) { if (window.edteamDiscussion) window.edteamDiscussion.journalVu(id); if (typeof window.ouvrirJournalCampagne === 'function') window.ouvrirJournalCampagne(id); },
         inviter: function (id) { this.ouvrir(id); var q = document.getElementById('camp-inv-q'); if (q) setTimeout(function () { q.focus(); q.scrollIntoView({ block: 'center' }); }, 150); },
         chercherInvites: chercherInvites, ajouterInvite: ajouterInvite, retirerInvite: retirerInvite, basculerAide: basculerAide,
-        choisir: function (genre, v) { if (typeof sonClic === 'function') sonClic(); if (genre === 'type') typeChoisi = v; else prioChoisie = v; dessinerChoix(); },
+        choisir: function (genre, v) { if (typeof sonClic === 'function') sonClic(); if (genre === 'type') typeChoisi = v; else prioChoisie = v; dessinerChoix(); if (window.edteamPublic) window.edteamPublic.majApercu(); },
         ouvrir: function (id) {
             if (typeof sonClic === 'function') sonClic();
             injecterModales(); css();
@@ -638,6 +650,7 @@
             document.getElementById('btn-campagne-ok').innerText = c ? 'ENREGISTRER LES MODIFICATIONS' : 'LANCER LA CAMPAGNE';
             dessinerChoix();
             initInvites(c);
+            if (window.edteamPublic) window.edteamPublic.init(c);
             if (typeof ouvrirModal === 'function') ouvrirModal('modal-campagne'); else document.getElementById('modal-campagne').style.display = 'flex';
         },
         enregistrer: async function () {
@@ -645,6 +658,7 @@
             var btn = document.getElementById('btn-campagne-ok'), err = document.getElementById('camp-erreur');
             var nom = document.getElementById('camp-nom').value.trim().toUpperCase();
             if (nom.length < 2) { err.textContent = 'Donnez un nom à la campagne (2 caractères au moins).'; return; }
+            var errFiche = window.edteamPublic ? window.edteamPublic.valider() : ''; if (errFiche) { err.textContent = errFiche; return; }
             var ech = document.getElementById('camp-echeance').value || null, brief = document.getElementById('camp-briefing').value.trim() || null;
             btn.style.pointerEvents = 'none'; var ancien = btn.innerText; btn.innerText = 'TRANSMISSION…';
             var r = campEdition
@@ -654,6 +668,8 @@
             if (r.error) { console.error(r.error); err.textContent = r.error.message || 'Échec.'; btn.innerText = ancien; return; }
             if (typeof sonSucces === 'function') sonSucces();
             btn.innerText = ancien;
+            var etaitPublique = !!(campagneEditee() && campagneEditee().visibilite === 'FEDERATION');
+            if (window.edteamPublic) { var errVis = await window.edteamPublic.appliquer(campEdition || Number(r.data), etaitPublique); if (errVis) alert('La campagne est enregistrée, mais : ' + errVis); }
             if (!campEdition && r.data && invites.length) await envoyerInvites(Number(r.data));
             fermerModal('modal-campagne');
             await this.rafraichir();

@@ -20,15 +20,15 @@
     <script src="antirobot.js?v=1"></script>
     <script src="photos.js?v=2"></script>
     <script src="invitations.js?v=21"></script>
-    <script src="annonce.js?v=33"></script>
-    <script src="revelations.js?v=14"></script>
+    <script src="annonce.js?v=34"></script>
+    <script src="revelations.js?v=15"></script>
     <script src="initiatives-mode.js?v=1"></script>
     <script src="campagne-discussion.js?v=2"></script>
     <script src="campagnes-mobile.js?v=27"></script>
     <script src="quotas-jour.js?v=18"></script>
     <script src="conflit-evenements.js?v=9"></script>
     <script src="conflit-modale.js?v=3"></script>
-    <script src="journal-fil.js?v=19"></script>
+    <script src="journal-fil.js?v=21"></script>
     <script src="journal-edition.js?v=2"></script>
     <script src="gazette-journal.js?v=5"></script>
     <script src="trafic-info.js?v=2"></script>
@@ -496,6 +496,12 @@
         .vmob .vi { white-space: nowrap; text-align: right; }
         .ibtn { background: transparent; border: 1px solid #FF4FD8; color: #FF4FD8; padding: 6px 12px; font-family: inherit; font-size: 0.72em; font-weight: bold; letter-spacing: 1px; border-radius: 6px; }
         .ibtn.g { border-color: #666; color: #aaa; }
+        .ibtn.cpm { border-color: #00FF66; color: #00FF66; }
+        .m-cp-pas { font-style: normal; background: #FFD700; color: #000; border-radius: 9px; padding: 0 6px; font-size: .9em; margin-left: 6px; font-weight: bold; box-shadow: 0 0 8px rgba(255,215,0,.6); }
+        .nav-tab-btn .m-cp-pas { position: absolute; top: 4px; right: 18%; margin: 0; font-size: .62em; }
+        @keyframes cpbClg { 0%,100% { box-shadow: 0 0 0 rgba(0,255,102,0); background-color: rgba(0,255,102,.08); } 50% { box-shadow: 0 0 16px #00FF66, inset 0 0 8px rgba(0,255,102,.5); background-color: rgba(0,255,102,.3); } }
+        .cpb-clg { animation: cpbClg 1.5s infinite; }
+        @media (prefers-reduced-motion: reduce) { .cpb-clg { animation: none; box-shadow: 0 0 10px #00FF66; } }
         .ipill { flex: 1; background: transparent; border: 1px solid #555; color: #aaa; padding: 9px 6px; font-family: inherit; font-size: 0.72em; font-weight: bold; letter-spacing: 1px; border-radius: 6px; }
         .ipill.actif.h { border-color: #00FF66; color: #00FF66; background: rgba(0,255,102,0.12); } .ipill.actif.b { border-color: #FF3333; color: #FF3333; background: rgba(255,51,51,0.12); } .ipill.actif.g { border-color: #FF7100; color: #FF7100; background: rgba(255,113,0,0.12); } .ipill.actif.e { border-color: #00F0FF; color: #00F0FF; background: rgba(0,240,255,0.12); }
         .ichamp { width: 100%; box-sizing: border-box; background: #000; border: 1px solid rgba(255,79,216,0.55); color: #fff; padding: 10px; font-family: inherit; font-size: 16px; border-radius: 6px; }
@@ -729,7 +735,7 @@
                 </div>
 
                 <div id="x-bgs-dir" style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: flex; justify-content: flex-end;"><button class="ibtn" id="m-ini-btn" onclick="xOuvrirInitiative()">+ LANCER UNE INITIATIVE</button></div>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;"><button class="ibtn cpm" id="m-cp-btn" onclick="ouvrirCampPubMobile()">CAMPAGNES PUBLIQUES<i class="m-cp-pas" style="display: none;"></i></button><button class="ibtn" id="m-ini-btn" onclick="xOuvrirInitiative()">+ LANCER UNE INITIATIVE</button></div>
                     <div id="m-reperage"></div>
                     <div id="m-propositions" style="display: flex; flex-direction: column; gap: 12px;"></div>
                     <div id="m-ordres-container" style="display: flex; flex-direction: column; gap: 12px;">
@@ -839,6 +845,10 @@
             <button id="nav-btn-escadron" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('escadron')">
                 <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3.5 3.5 0 0 1 0 7M22 20c0-2.6-1.7-4.6-4-5.5"></path></svg>
                 <span>ESCADRON</span>
+            </button>
+            <button id="nav-btn-camppub" class="nav-tab-btn" style="display: none; position: relative;" onclick="ouvrirCampPubMobile()">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="1.5" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22.5" y2="12"></line></svg>
+                <span>CAMPAGNES</span><i class="m-cp-pas" style="display: none;"></i>
             </button>
             <button id="nav-btn-croises" class="nav-tab-btn" style="display: none;" onclick="switchMobileTab('croises')">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"></circle><circle cx="12" cy="12" r="2.6"></circle><path d="M12 1.5v5M12 17.5v5M1.5 12h5M17.5 12h5"></path></svg>
@@ -1329,6 +1339,35 @@
             } catch (e) { console.error('Invitations (mobile) :', e); }
         }
         // bouton ENGAGEMENT visible pour un pilote sans escadron qui a une invitation (acceptee ou en attente)
+        // CAMPAGNES PUBLIQUES (SQL 220-224) : le panneau plein ecran de campagnes-publiques.js (charge a la premiere utilisation) ; ici seulement l'ouverture, la pastille et le clignotement
+        function ouvrirCampPubMobile() {
+            if (typeof sonClic === 'function') sonClic();
+            const go = () => { if (window.edteamPublic) window.edteamPublic.ouvrirListe(); };
+            if (window.edteamPublic) go(); else chargerScriptMobile('campagnes-publiques.js?v=3', go);
+        }
+        async function xMajCampPub() {
+            try {
+                if (!profilCommandant || !supabaseApp) return;
+                const membre = xEstMembre(), nb = xEl('nav-btn-camppub');
+                if (nb) nb.style.display = membre ? 'none' : 'flex';
+                let n = 0, c = null; try { c = JSON.parse(sessionStorage.getItem('edteam_cpb_pas') || 'null'); } catch (e) { /* memoire illisible */ }
+                if (c && Date.now() - c.ts < 60000) n = c.n;
+                else { const r = await supabaseApp.rpc('demandes_pastilles'); n = (r && r.data) ? ((Number(r.data.pilote) || 0) + (membre ? (Number(r.data.amiral) || 0) : 0)) : 0; try { sessionStorage.setItem('edteam_cpb_pas', JSON.stringify({ ts: Date.now(), n: n })); } catch (e) { /* stockage plein */ } }
+                document.querySelectorAll('.m-cp-pas').forEach(e => { e.textContent = n ? String(n) : ''; e.style.display = n ? 'inline-block' : 'none'; });
+                [xEl('nav-btn-camppub'), xEl('m-cp-btn')].forEach(b => { if (b) b.classList.toggle('cpb-clg', n > 0); });   // clignote tant qu'un message attend
+            } catch (e) { /* jamais bloquant */ }
+        }
+        // annonce plein ecran d'une nouvelle campagne publique : seulement si le fil contient une ligne CAMPAGNE OUVERTE recente (aucune requete de plus sinon)
+        function xAnnonceCampPub(lignes) {
+            try {
+                if (window.__cpbAnnonce) return;
+                const limite = Date.now() - 7 * 86400000;
+                if (!(lignes || []).some(l => l && String(l.type_action || '').indexOf('CAMPAGNE OUVERTE') >= 0 && new Date(l.created_at || 0).getTime() >= limite)) return;
+                window.__cpbAnnonce = true;
+                const go = () => { if (window.edteamPublic) window.edteamPublic.annoncerDepuis(lignes); };
+                setTimeout(() => { if (window.edteamPublic) go(); else chargerScriptMobile('campagnes-publiques.js?v=3', go); }, 2500);
+            } catch (e) { /* jamais bloquant */ }
+        }
         function xInvVisible() { const I = window.edteamInvitations; return !!(window.EDTEAM_INVITE || (!xEstMembre() && I && I.enAttente && I.enAttente() > 0)); }
 
         // ---- Photo de commandant (Reglages) : le travail est dans photos.js ----
@@ -1606,6 +1645,7 @@
                 const navBgs = xEl('nav-btn-bgs'); if (navBgs) navBgs.style.display = (xAccesBgs() || xInvVisible()) ? 'flex' : 'none';
                 const navEsc = xEl('nav-btn-escadron'); if (navEsc) navEsc.style.display = xEstMembre() ? 'flex' : 'none';
                 const navCro = xEl('nav-btn-croises'); if (navCro) navCro.style.display = xEstMembre() ? 'flex' : 'none';
+                xMajCampPub();
             } catch (error) {
                 console.error('SYS.EDTEAM MOBILE : Erreur de rendu de l\'accueil ->', error);
             }
@@ -3002,6 +3042,7 @@
                 filMobileTs = Date.now();
                 if (!data || !data.length) { cont.style.display = 'none'; return; }
                 filMobileLignes = data;
+                xAnnonceCampPub(data);
                 if (!cont.getAttribute('data-fil-ok')) {
                     cont.setAttribute('data-fil-ok', '1');
                     // en capture : un toucher sur une ligne ou un bouton de l'apercu ouvre la fenetre au lieu d'agir
@@ -4169,7 +4210,7 @@
             sonClic();
             suivreEvenementMobile('ouvrir_aide');
             if (window.edteamAide) { window.edteamAide.ouvrir(); return; }
-            chargerScriptMobile('aide.js?v=48', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
+            chargerScriptMobile('aide.js?v=57', () => { if (window.edteamAide) window.edteamAide.ouvrir(); });
         }
 
         function ouvrirNouveautesMobile() {

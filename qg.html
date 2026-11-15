@@ -47,11 +47,12 @@
     <script src="qgsuivi.js?v=41"></script>
     <script src="son.js?v=2"></script>
     <script src="photos.js?v=2"></script>
-    <script src="journal-fil.js?v=19"></script>
+    <script src="journal-fil.js?v=21"></script>
     <script src="journal-edition.js?v=2"></script>
     <script src="gazette-journal.js?v=5"></script>
     <script src="copier-lieux.js?v=3"></script>
-    <script src="navigation.js?v=80"></script>
+    <script src="campagnes-publiques.js?v=3"></script>
+    <script src="navigation.js?v=82"></script>
     <script src="invitations.js?v=21"></script>
     <script src="sas.js?v=1"></script>
 
@@ -2713,6 +2714,8 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
                 try { if (window.EDTEAMPhotos && window.EDTEAMPhotos.charger) window.EDTEAMPhotos.charger().then(() => { if (window.EdteamFil) window.EdteamFil.rendre(); }); } catch (e) { /* initiales */ }
             }
             window.EdteamFil.donner(window.journalDataCache, avecReactions === true);
+            // nouvelle campagne publique : annonce plein ecran, une seule fois par campagne (campagnes-publiques.js)
+            try { if (window.edteamPublic && window.edteamPublic.annoncerDepuis && !window.__cpbAnnonce) { window.__cpbAnnonce = true; setTimeout(() => window.edteamPublic.annoncerDepuis(window.journalDataCache), 2500); } } catch (e) { /* jamais bloquant */ }
         };
 
         // l'ancienne pagination n'existe plus (le fil se charge par paquets) ; la fonction reste pour les anciens appels
@@ -3023,7 +3026,7 @@ Invente un titre grandiose. La PREMIÈRE ligne doit être le titre brut (sans HT
 
     </script>
 
-    <script src="annonce.js?v=33"></script>
-    <script src="footer.js?v=59"></script>
+    <script src="annonce.js?v=34"></script>
+    <script src="footer.js?v=60"></script>
 </body>
 </html>

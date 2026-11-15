@@ -693,6 +693,59 @@
                 if (typeof escVue === 'function' && typeof switchMobileTab === 'function') { switchMobileTab('escadron'); escVue('fa'); }
                 else window.location.href = 'escadron.html#fa';
             }
+        },
+        {
+            id: 'campagnes-publiques-2026-11',
+            couleur: '#00FF66',
+            etiquette: '★ NOUVELLE FONCTION MAJEURE',
+            titre: 'CAMPAGNES PUBLIQUES : AGISSEZ ENSEMBLE, MÊME SANS ÉCHANGER VOS CODES',
+            escadron: false,
+            pages: [
+                {
+                    titre: 'UNE CAMPAGNE OUVERTE À TOUTE LA FÉDÉRATION',
+                    sous: 'Recrutez des renforts, ou rejoignez une opération',
+                    intro: 'Jusqu’ici, une campagne restait entre les murs de son escadron. <b>Désormais, un Amiral peut l’ouvrir à toute la Fédération.</b> Les pilotes de tous les escadrons, <b>et les pilotes sans escadron</b>, la découvrent et demandent à la rejoindre.',
+                    visuelHtml: anvCp1,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '1', t: 'L’AMIRAL PUBLIE', d: 'À la création, étape <b>VISIBILITÉ</b> : choisissez <b>FÉDÉRATION</b> et remplissez une fiche courte.' },
+                        { n: '2', t: 'LES PILOTES DÉCOUVRENT', d: 'Une <b>annonce plein écran</b> prévient chacun, puis la campagne rejoint la liste <b>CAMPAGNES PUBLIQUES</b>.' },
+                        { n: '3', t: 'ILS DEMANDENT', d: 'Un petit mot suffit : pas de dossier à remplir, pas de CV. On se présente en discutant.' }
+                    ],
+                    avis: 'Exemple dessiné avec des noms fictifs.'
+                },
+                {
+                    titre: 'D’ABORD ON DISCUTE, ENSUITE L’AMIRAL DÉCIDE',
+                    sous: 'Un échange simple, entre un pilote et l’Amiral',
+                    intro: 'Chaque demande ouvre <b>une conversation</b> entre le pilote et l’Amiral de la campagne. Quand l’Amiral est convaincu, il <b>accepte</b> : le pilote participe alors comme un invité, avec ses missions, le journal et la discussion de la campagne.',
+                    visuelHtml: anvCp2,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '✉', t: 'LE DIALOGUE', d: 'Chacun écrit à son tour. Le bouton <b>CAMPAGNES PUBLIQUES</b> et le menu <b>clignotent</b> quand un message vous attend.' },
+                        { n: '✓', t: 'L’AMIRAL TRANCHE', d: 'Lui seul accepte ou refuse. L’Amiral de votre escadron est simplement <b>informé</b> : à vous d’en parler avec lui.' },
+                        { n: '★', t: 'VOS FRÈRES D’ARMES', d: 'Chaque campagne où vous agissez compte pour votre médaille <b>FRÈRES D’ARMES</b>, et l’Amiral peut vous remercier par un diplôme.' }
+                    ]
+                },
+                {
+                    titre: 'L’AMIRAL GARDE LA MAIN, LE SECRET RESTE SECRET',
+                    sous: 'Ce que tout le monde voit, et ce qui reste à l’escadron',
+                    intro: 'Seule la <b>fiche publique</b> est visible : jamais les systèmes, les factions ni le briefing. L’Amiral lit chaque demande, et <b>peut retirer un pilote à tout moment</b>. Repasser la campagne en privé la fait disparaître de la liste.',
+                    visuelHtml: anvCp3,
+                    colonnes: 3,
+                    etapes: [
+                        { n: '⌕', t: 'OÙ LA TROUVER', d: 'Page <b>ENGAGEMENT</b> : bouton <b>CAMPAGNES PUBLIQUES</b>. Sans escadron : menu <b>CAMPAGNES</b>. Sur téléphone, onglet <b>CAMPAGNES</b> ou onglet ENGAGEMENT.' },
+                        { n: '◎', t: 'UNE FICHE, PAS DE SECRET', d: 'Titre public, une phrase, places, langue, créneau, type de campagne et natures de missions. <b>Rien de stratégique.</b>' },
+                        { n: '⚑', t: 'ESPIONS ET INDÉSIRABLES', d: 'L’Amiral décide qui entre, dialogue avant d’accepter, et retire sans préavis si un doute apparaît.' }
+                    ]
+                }
+            ],
+            cta: 'DÉCOUVRIR LES CAMPAGNES PUBLIQUES',
+            aide: 'Page ENGAGEMENT · bouton CAMPAGNES PUBLIQUES · menu CAMPAGNES (pilote sans escadron) · onglet CAMPAGNES (mobile)',
+            action: function () {
+                var p = window.profilCommandant || {}, e = String(p.escadron_id || '').trim().toUpperCase(), solo = !e || e === 'INDEPENDANT';
+                if (typeof ouvrirCampPubMobile === 'function') { ouvrirCampPubMobile(); return; }
+                window.location.href = solo ? 'campagnes-publiques.html' : 'bgs.html';
+            }
         }
     ];
 
@@ -848,6 +901,44 @@
         var M = window.EdteamMedaille; if (!M) return '';
         return FAA_CSS + '<div class="faa"><div class="faa-echelle">' + [[5, 'BRONZE', '1 à 29'], [34, 'ARGENT', 'dès 30'], [62, 'OR', 'dès 50'], [120, 'DIAMANT', 'dès 100']].map(function (x) {
             return '<figure>' + M.svg(x[0], 104, false) + '<figcaption><b>' + x[1] + '</b>' + x[2] + ' campagnes</figcaption></figure>'; }).join('') + '</div></div>';
+    }
+
+    // ---- annonce « campagnes publiques » : trois visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----
+    var CPA_CSS = '<style>#edteam-annonce .cpa{max-width:680px;margin:14px auto 0;text-align:left;font-family:inherit}'
+        + '#edteam-annonce .cpa-c{--c:#FF3333;position:relative;border:1px solid #FF333388;border-left:4px solid var(--c);background:linear-gradient(180deg,rgba(255,51,51,.1),rgba(6,8,10,.95) 70%);padding:12px 14px 10px;box-shadow:0 0 24px rgba(255,51,51,.15)}'
+        + '#edteam-annonce .cpa-t{display:flex;justify-content:space-between;font-size:.68em;letter-spacing:2px;color:var(--c)}#edteam-annonce .cpa-t span+span{color:#8d8478}'
+        + '#edteam-annonce .cpa-b{display:flex;gap:14px;align-items:center;margin-top:8px}#edteam-annonce .cpa-id{position:relative;flex:none;width:64px;height:64px}'
+        + '#edteam-annonce .cpa-lg{width:64px;height:64px;border-radius:50%;border:2px solid var(--c);display:grid;place-items:center;color:var(--c);letter-spacing:1px;background:radial-gradient(circle at 35% 30%,#1b2a33,#080d10);box-shadow:0 0 14px rgba(255,51,51,.4)}'
+        + '#edteam-annonce .cpa-av{position:absolute;right:-8px;bottom:-6px;width:28px;height:28px;border-radius:50%;border:2px solid #FF3333;background:#240808;color:#ff7b7b;display:grid;place-items:center;font-size:.62em}'
+        + '#edteam-annonce .cpa-x{min-width:0}#edteam-annonce .cpa-x h4{margin:0 0 4px;color:#fff;font-weight:normal;font-size:1.05em;letter-spacing:1px}'
+        + '#edteam-annonce .cpa-h{font-size:.76em;color:#b9b0a3}#edteam-annonce .cpa-h em{font-style:normal;border:1px solid #00F0FF;color:#00F0FF;padding:0 5px;margin-right:6px;font-size:.85em}'
+        + '#edteam-annonce .cpa-x p{margin:6px 0;font-size:.8em;line-height:1.5;color:#d8d0c2}'
+        + '#edteam-annonce .cpa-m{display:flex;gap:5px;flex-wrap:wrap}#edteam-annonce .cpa-m span{border:1px solid #4a3d22;color:#cdbf9f;font-size:.66em;padding:1px 7px}'
+        + '#edteam-annonce .cpa-p{display:flex;align-items:center;gap:3px;margin-top:7px;font-size:.72em;color:#b8ad9c}#edteam-annonce .cpa-p i{width:12px;height:6px;background:#2c2012}#edteam-annonce .cpa-p i.o{background:var(--c);box-shadow:0 0 5px var(--c)}#edteam-annonce .cpa-p b{font-weight:normal;margin-left:6px}'
+        + '#edteam-annonce .cpa-f{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12);font-size:.72em;letter-spacing:2px}#edteam-annonce .cpa-f .ok{color:#00FF66}'
+        + '#edteam-annonce .cpa-f .bt{border:1px solid #00FF66;color:#00FF66;padding:5px 16px;background:rgba(0,255,102,.1);animation:cpaP 1.6s ease-in-out infinite}@keyframes cpaP{50%{box-shadow:0 0 16px rgba(0,255,102,.7)}}'
+        + '#edteam-annonce .cpa-d{display:flex;flex-direction:column;gap:9px;border:1px solid #00FF6655;background:rgba(0,255,102,.04);padding:14px}'
+        + '#edteam-annonce .cpa-d div{max-width:78%;padding:8px 12px;font-size:.8em;line-height:1.5;color:#e6dfd2}#edteam-annonce .cpa-d small{display:block;color:#8d8478;font-size:.74em;margin-top:3px}'
+        + '#edteam-annonce .cpa-d .e{align-self:flex-start;border:1px solid rgba(0,255,102,.4);background:rgba(0,255,102,.06)}#edteam-annonce .cpa-d .m{align-self:flex-end;border:1px solid rgba(0,240,255,.4);background:rgba(0,240,255,.06)}'
+        + '#edteam-annonce .cpa-d .ac{align-self:center;display:flex;gap:10px;max-width:none;padding:0}#edteam-annonce .cpa-d .ac span{font-size:.7em;letter-spacing:2px;padding:6px 16px;border:1px solid}#edteam-annonce .cpa-d .ac .r{color:#FF3333}#edteam-annonce .cpa-d .ac .v{color:#00FF66;background:rgba(0,255,102,.12);box-shadow:0 0 14px rgba(0,255,102,.4)}'
+        + '#edteam-annonce .cpa-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}#edteam-annonce .cpa-2>div{border:1px solid;padding:12px 14px}#edteam-annonce .cpa-2 b{display:block;font-size:.74em;letter-spacing:3px;margin-bottom:7px;font-weight:normal}'
+        + '#edteam-annonce .cpa-2 ul{margin:0;padding:0;list-style:none;font-size:.8em;line-height:1.75;color:#d8d0c2}#edteam-annonce .cpa-2 .o{border-color:#00FF6666;background:rgba(0,255,102,.05)}#edteam-annonce .cpa-2 .o b{color:#00FF66}#edteam-annonce .cpa-2 .n{border-color:#FF333366;background:rgba(255,51,51,.05)}#edteam-annonce .cpa-2 .n b{color:#FF3333}'
+        + '@media (max-width:620px){#edteam-annonce .cpa-2{grid-template-columns:1fr}#edteam-annonce .cpa-d div{max-width:94%}}</style>';
+    function anvCp1() {
+        return CPA_CSS + '<div class="cpa"><div class="cpa-c"><div class="cpa-t"><span>ATTAQUE</span><span>IL Y A 2 H</span></div><div class="cpa-b"><div class="cpa-id"><div class="cpa-lg">AS</div><div class="cpa-av">VE</div></div>'
+            + '<div class="cpa-x"><h4>Opération Brise-Glace — renforts</h4><div class="cpa-h"><em>AURORE S</em>AURORE SQUADRON · Amiral Vega</div><p>On cherche des pilotes de soutien, tous vaisseaux, pour une série de missions courtes.</p>'
+            + '<div class="cpa-m"><span>BGS</span><span>POWERPLAY</span><span>FRANÇAIS</span><span>SOIRÉE FR</span></div><div class="cpa-p"><i class="o"></i><i></i><i></i><i></i><i></i><i></i><b>1 / 6 places</b></div></div></div>'
+            + '<div class="cpa-f"><span class="ok">● OUVERTE</span><span class="bt">DEMANDER</span></div></div></div>';
+    }
+    function anvCp2() {
+        return CPA_CSS + '<div class="cpa"><div class="cpa-d"><div class="m">Bonjour Vega ! Je joue surtout le soir et cette opération me tente. Je peux commencer ce week-end.<small>NOVA RIVEN · 20:14</small></div>'
+            + '<div class="e">Salut Nova, bienvenue ! Tu joues sur quelle plateforme ? On a besoin de transport et de soutien.<small>VEGA · AMIRAL · 20:31</small></div>'
+            + '<div class="m">PC. Plutôt transport pour l’instant, mais le combat léger m’intéresse.<small>NOVA RIVEN · 20:38</small></div>'
+            + '<div class="ac"><span class="r">REFUSER</span><span class="v">ACCEPTER</span></div></div></div>';
+    }
+    function anvCp3() {
+        return CPA_CSS + '<div class="cpa"><div class="cpa-2"><div class="o"><b>✓ CE QUI EST PUBLIC</b><ul><li>Titre public et une phrase</li><li>Type : attaque, défense, maintien…</li><li>BGS · Powerplay · colonisation</li><li>Places, langue, créneau</li><li>L’escadron et l’Amiral hôte</li></ul></div>'
+            + '<div class="n"><b>✕ JAMAIS MONTRÉ</b><ul><li>Les systèmes ciblés</li><li>Les factions et les cibles</li><li>Le briefing</li><li>Le vrai nom de la campagne</li><li>La vie interne de l’escadron</li></ul></div></div></div>';
     }
 
     // ---- annonce « EDTEAM News » : trois visuels dessines en HTML (noms fictifs, aucune donnee reelle) ----

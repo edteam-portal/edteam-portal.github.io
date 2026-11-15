@@ -20,6 +20,8 @@
     // ------------------------------------------------------------------------------------------------------------
     function categorie(l) {
         var t = String(l.type_action || "").toUpperCase(), c = String(l.couleur || "");
+        if (t.indexOf("CAMPAGNE OUVERTE") >= 0) return { k: "co", f: "esc", nom: "CAMPAGNE OUVERTE", ic: "◎", col: "#00FF66", maj: 1 };
+        if (t.indexOf("CAMPAGNE PUBLIQUE") >= 0) return { k: "cp", f: "esc", nom: "CAMPAGNE PUBLIQUE", ic: "◎", col: "#00FF66", maj: 1 };
         if (t.indexOf("FRÈRES D") >= 0) return { k: "fa", f: "dist", nom: "FRÈRES D’ARMES", ic: "✦", col: "#3ec9ff", maj: 1 };
         if (t.indexOf("TITRE SPÉCIALISTE") >= 0) return { k: "ti", f: "dist", nom: "TITRE DE SPÉCIALISTE", ic: "★", col: "#C9D1DB", maj: 1 };
         if (t.indexOf("RANG BGS") >= 0) return { k: "rg", f: "dist", nom: "RANG BGS", ic: "▲", col: "#FFD24A", maj: 1 };
@@ -45,6 +47,8 @@
     // TAMPONS des lignes de directives / campagnes (page BGS) : NOUVELLE, MODIFIEE, CLOTUREE, ANNULEE
     function tampon(l, c) {
         if (c.k === "fa") return { t: "REMERCIEMENTS", c: c.col };
+        if (c.k === "cp") return { t: "INFORMATION", c: c.col };
+        if (c.k === "co") return { t: "RECRUTE", c: c.col };
         if (c.f !== "bgs") return null;
         var t = String(l.type_action || "").toUpperCase();
         if (t.indexOf("ANNULÉE") >= 0 || t.indexOf("SUPPRIMÉE") >= 0) return { t: "ANNULÉE", c: c.col };         // le tampon prend toujours la couleur de la bande verticale de la carte
@@ -91,6 +95,9 @@
             var sc = statutDe(m[1]);
             return { tit: "Nouveau joueur croisé : <b>" + esc(m[1]) + "</b>", sb: esc(m[2]) + " · " + esc(m[3]) + " · relevé par <b>" + esc(m[4]) + "</b>" + (sc && sc.why ? " · " + esc(sc.why) : ""), av: "", stamp: sc, cr: m[1] };
         }
+        if (c.k === "co") { var indep = false; try { indep = localStorage.getItem("edteam_independant") === "true"; } catch (e) { /* stockage indisponible */ }
+            return { tit: esc(d).replace(/(« [^»]+ »)/, "<b>$1</b>"), sb: indep ? "Ouverte à toute la Fédération · demandez à participer depuis le menu CAMPAGNES" : "Ouverte à toute la Fédération · demandes depuis Engagement, bouton CAMPAGNES PUBLIQUES", av: "", nom: "" }; }
+        if (c.k === "cp") return { tit: esc(d).replace(/(CMDR [^«]+?)(?= participe)/, "<b>$1</b>"), sb: "Information seule · l’Amiral de la campagne décide, la discussion se tient hors d’EDTEAM", av: "", nom: "" };
         if (c.k === "fa") return { tit: esc(d).replace(/(CMDR [^,«.]+?)(?= et | a | ont | pour|,)/g, "<b>$1</b>"), sb: "Frères d’armes · médaille et diplômes dans la Carrière", av: "", nom: "" };
         var par = String(l.cmdr_nom || ""), sys = par.toUpperCase() === "SYS.EDTEAM" || !par;
         var av = (c.maj || c.f === "bgs") && !sys;       // lignes de directives et de campagnes : l'avatar du pilote qui les a faites
